@@ -1,0 +1,532 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Publish.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    ============================================================
+                                        Publish
+ 
+    The main publish entry point.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    
+    <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
+    <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
+
+    <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
+    <RenamePublishedHost Condition=" '$(RenamePublishedHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</RenamePublishedHost>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ResolvedFileToPublish>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </ResolvedFileToPublish>
+  </ItemDefinitionGroup>
+
+  <Target Name="Publish"
+          DependsOnTargets="Build;
+                            PrepareForPublish;
+                            ComputeAndCopyFilesToPublishDirectory;
+                            GeneratePublishDependencyFile;
+                            GeneratePublishRuntimeConfigurationFile" />
+
+  <!--
+    ============================================================
+                                        PrepareForPublish
+
+    Prepare the prerequisites for publishing.
+    ============================================================
+    -->
+  <Target Name="PrepareForPublish">
+
+    <PropertyGroup>
+      <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
+      <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(PublishDir)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        ComputeAndCopyFilesToPublishDirectory
+
+    Computes the list of all files to copy to the publish directory and then publishes them.
+    ============================================================
+    -->
+  <Target Name="ComputeAndCopyFilesToPublishDirectory"
+          DependsOnTargets="ComputeFilesToPublish;
+                            CopyFilesToPublishDirectory" />
+
+  <!--
+    ============================================================
+                                        CopyFilesToPublishDirectory
+
+    Copy all build outputs, satellites and other necessary files to the publish directory.
+    ============================================================
+    -->
+  <Target Name="CopyFilesToPublishDirectory"
+          DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
+                            _CopyResolvedFilesToPublishAlways" />
+
+  <!--
+    ============================================================
+                                        _CopyResolvedFilesToPublishPreserveNewest
+
+    Copy _ResolvedFileToPublishPreserveNewest items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedFilesToPublishPreserveNewest"
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes"
+          Inputs="@(_ResolvedFileToPublishPreserveNewest)"
+          Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
+
+    <!--
+        Not using SkipUnchangedFiles="true" because the application may want to change
+        one of these files and not have an incremental build replace it.
+        -->
+    <Copy SourceFiles = "@(_ResolvedFileToPublishPreserveNewest)"
+          DestinationFiles="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CopyResolvedFilesToPublishAlways
+
+    Copy _ResolvedFileToPublishAlways items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedFilesToPublishAlways"
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes">
+
+    <!--
+        Not using SkipUnchangedFiles="true" because the application may want to change
+        one of these files and not have an incremental build replace it.
+        -->
+    <Copy SourceFiles = "@(_ResolvedFileToPublishAlways)"
+          DestinationFiles="@(_ResolvedFileToPublishAlways->'$(PublishDir)%(RelativePath)')"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeResolvedFilesToPublishTypes
+
+    Splits ResolvedFileToPublish items into 'PreserveNewest' and 'Always' buckets.
+    ============================================================
+    -->
+  <Target Name="_ComputeResolvedFilesToPublishTypes">
+    <ItemGroup>
+      <_ResolvedFileToPublishPreserveNewest Include="@(ResolvedFileToPublish)"
+                                             Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='PreserveNewest'" />
+
+      <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
+                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
+    </ItemGroup>
+  </Target>
+
+
+  <!--
+    ============================================================
+                                        ComputeFilesToPublish
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="ComputeFilesToPublish"
+          DependsOnTargets="_ComputeNetPublishAssets;
+                            _ComputeCopyToPublishDirectoryItems">
+
+    <PropertyGroup>
+      <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
+      <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Copy the build product (.dll or .exe). -->
+      <ResolvedFileToPublish Include="@(IntermediateAssembly)"
+                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+        <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFileToPublish>
+      
+      <!-- Copy the app.config (if any) -->
+      <ResolvedFileToPublish Include="@(AppConfigWithTargetPath)"
+                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+        <RelativePath>@(AppConfigWithTargetPath->'%(TargetPath)')</RelativePath>
+      </ResolvedFileToPublish>
+
+      <!-- Copy the debug information file (.pdb), if any -->
+      <ResolvedFileToPublish Include="@(_DebugSymbolsIntermediatePath)"
+                              Condition="'$(_DebugSymbolsProduced)'=='true' and '$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+        <RelativePath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFileToPublish>
+
+      <!-- Copy satellite assemblies. -->
+      <ResolvedFileToPublish Include="@(IntermediateSatelliteAssembliesWithTargetPath)">
+        <RelativePath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\%(Filename)%(Extension)</RelativePath>
+      </ResolvedFileToPublish>
+
+      <!-- Copy all the assemblies -->
+      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
+        <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="_ComputeNetPublishAssets"
+          DependsOnTargets="RunResolvePublishAssemblies">
+    <!-- TODO get the content files -->
+    <!-- TODO perform any preprocess transforms on the files -->
+
+    <ItemGroup>
+      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)" Exclude="@(ResolvedAssembliesToPublish)">
+        <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
+      </ResolvedAssembliesToPublish>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                     RunResolvePublishAssemblies
+
+    Gets the assemblies to be copied to the publish directory
+    ============================================================
+    -->
+  <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="RunResolvePublishAssemblies"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+                            _DefaultMicrosoftNETPlatformLibrary">
+
+    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
+                              AssetsFilePath="$(ProjectAssetsFile)"
+                              TargetFramework="$(TargetFrameworkMoniker)"
+                              RuntimeIdentifier="$(RuntimeIdentifier)"
+                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
+
+      <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
+
+    </ResolvePublishAssemblies>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeCopyToPublishDirectoryItems
+    ============================================================
+    -->
+  <Target Name="_ComputeCopyToPublishDirectoryItems"
+          DependsOnTargets="GetCopyToPublishDirectoryItems">
+
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectoryAlways)">
+        <RelativePath>%(_SourceItemsToCopyToPublishDirectoryAlways.TargetPath)</RelativePath>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+
+      <ResolvedFileToPublish Include="@(_SourceItemsToCopyToPublishDirectory)">
+        <RelativePath>%(_SourceItemsToCopyToPublishDirectory.TargetPath)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        GetCopyToPublishDirectoryItems
+
+    Get all project items that may need to be transferred to the publish directory.
+    This includes baggage items from transitively referenced projects. It would appear
+    that this target computes full transitive closure of content items for all referenced
+    projects; however that is not the case. It only collects the content items from its
+    immediate children and not children of children. 
+    
+    See comment on GetCopyToOutputDirectoryItems, from which this logic was taken.
+    ============================================================
+    -->
+  <Target Name="GetCopyToPublishDirectoryItems"
+          Returns="@(AllPublishItemsFullPathWithTargetPath)"
+          KeepDuplicateOutputs=" '$(MSBuildDisableGetCopyToPublishDirectoryItemsOptimization)' == '' "
+          DependsOnTargets="AssignTargetPaths;
+                            DefaultCopyToPublishDirectoryMetadata;
+                            _SplitProjectReferencesByFileExistence;
+                            _GetProjectReferenceTargetFrameworkProperties">
+
+
+    <!-- In the general case, clients need very little of the metadata which is generated by invoking this target on this project and its children.  For those
+         cases, we can immediately discard the unwanted metadata, reducing memory usage, particularly in very large and interconnected systems of projects.
+         However, if some client does require the original functionality, it is sufficient to set MSBuildDisableGetCopyToPublishDirectoryItemsOptimization to
+         a non-empty value and the original behavior will be restored. -->
+    <PropertyGroup Condition=" '$(MSBuildDisableGetCopyToPublishDirectoryItemsOptimization)' == '' ">
+      <_GCTPDIKeepDuplicates>false</_GCTPDIKeepDuplicates>
+      <_GCTPDIKeepMetadata>CopyToPublishDirectory;TargetPath</_GCTPDIKeepMetadata>
+    </PropertyGroup>
+
+    <!-- Get items from child projects first. -->
+    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
+             Targets="GetCopyToPublishDirectoryItems"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+             Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToPublishDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false'"
+             ContinueOnError="$(ContinueOnError)"
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+
+      <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectPublishItemsWithTargetPath"/>
+
+    </MSBuild>
+
+    <!-- Target outputs must be full paths because they will be consumed by a different project. -->
+    <ItemGroup>
+      <_SourceItemsToCopyToPublishDirectoryAlways KeepDuplicates=" '$(_GCTPDIKeepDuplicates)' != 'false' "
+                                                  KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                                  Include="@(_AllChildProjectPublishItemsWithTargetPath->'%(FullPath)')"
+                                                  Condition="'%(_AllChildProjectPublishItemsWithTargetPath.CopyToPublishDirectory)'=='Always'"/>
+
+      <_SourceItemsToCopyToPublishDirectory KeepDuplicates=" '$(_GCTPDIKeepDuplicates)' != 'false' "
+                                            KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                            Include="@(_AllChildProjectPublishItemsWithTargetPath->'%(FullPath)')"
+                                            Condition="'%(_AllChildProjectPublishItemsWithTargetPath.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
+    <ItemGroup>
+      <_AllChildProjectPublishItemsWithTargetPath Remove="@(_AllChildProjectPublishItemsWithTargetPath)"/>
+    </ItemGroup>
+
+    <!-- Get items from this project last so that they will be copied last. -->
+    <ItemGroup>
+      <_SourceItemsToCopyToPublishDirectoryAlways KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                                  Include="@(ContentWithTargetPath->'%(FullPath)')"
+                                                  Condition="'%(ContentWithTargetPath.CopyToPublishDirectory)'=='Always'"/>
+      <_SourceItemsToCopyToPublishDirectory KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                            Include="@(ContentWithTargetPath->'%(FullPath)')"
+                                            Condition="'%(ContentWithTargetPath.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_SourceItemsToCopyToPublishDirectoryAlways KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                                  Include="@(EmbeddedResource->'%(FullPath)')"
+                                                  Condition="'%(EmbeddedResource.CopyToPublishDirectory)'=='Always'"/>
+      <_SourceItemsToCopyToPublishDirectory KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                            Include="@(EmbeddedResource->'%(FullPath)')"
+                                            Condition="'%(EmbeddedResource.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_CompileItemsToPublish Include="@(Compile->'%(FullPath)')"
+                              Condition="'%(Compile.CopyToPublishDirectory)'=='Always' or '%(Compile.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <AssignTargetPath Files="@(_CompileItemsToPublish)" RootFolder="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="AssignedFiles" ItemName="_CompileItemsToPublishWithTargetPath" />
+    </AssignTargetPath>
+
+    <ItemGroup>
+      <_SourceItemsToCopyToPublishDirectoryAlways KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                                  Include="@(_CompileItemsToPublishWithTargetPath)"
+                                                  Condition="'%(_CompileItemsToPublishWithTargetPath.CopyToPublishDirectory)'=='Always'"/>
+      <_SourceItemsToCopyToPublishDirectory KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                           Include="@(_CompileItemsToPublishWithTargetPath)"
+                                           Condition="'%(_CompileItemsToPublishWithTargetPath.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_SourceItemsToCopyToPublishDirectoryAlways KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                                  Include="@(_NoneWithTargetPath->'%(FullPath)')"
+                                                  Condition="'%(_NoneWithTargetPath.CopyToPublishDirectory)'=='Always'"/>
+      <_SourceItemsToCopyToPublishDirectory KeepMetadata="$(_GCTPDIKeepMetadata)"
+                                            Include="@(_NoneWithTargetPath->'%(FullPath)')"
+                                            Condition="'%(_NoneWithTargetPath.CopyToPublishDirectory)'=='PreserveNewest'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AllPublishItemsFullPathWithTargetPath Include="@(_SourceItemsToCopyToPublishDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToPublishDirectory->'%(FullPath)')"/>
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        DefaultCopyToPublishDirectoryMetadata
+
+    If CopyToPublishDirectory isn't set on these items, the value should be taken from CopyToOutputDirectory.
+    This way, projects can just set "CopyToOutputDirectory = Always/PreserveNewest" and by default the item will be copied
+    to both the build output and publish directories.
+    ============================================================
+    -->
+  <Target Name="DefaultCopyToPublishDirectoryMetadata"
+          DependsOnTargets="AssignTargetPaths"
+          Condition=" '$(DefaultCopyToPublishDirectoryMetadata)' == 'true' ">
+
+    <ItemGroup>
+      <ContentWithTargetPath Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always' and '%(ContentWithTargetPath.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </ContentWithTargetPath>
+      <ContentWithTargetPath Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' and '%(ContentWithTargetPath.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ContentWithTargetPath>
+
+      <EmbeddedResource Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always' and '%(EmbeddedResource.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </EmbeddedResource>
+      <EmbeddedResource Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest' and '%(EmbeddedResource.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </EmbeddedResource>
+
+      <Compile Condition="'%(Compile.CopyToOutputDirectory)'=='Always' and '%(Compile.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </Compile>
+      <Compile Condition="'%(Compile.CopyToOutputDirectory)'=='PreserveNewest' and '%(Compile.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Compile>
+
+      <_NoneWithTargetPath Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' and '%(_NoneWithTargetPath.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      </_NoneWithTargetPath>
+      <_NoneWithTargetPath Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' and '%(_NoneWithTargetPath.CopyToPublishDirectory)' == ''">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </_NoneWithTargetPath>
+
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        GeneratePublishDependencyFile
+
+    Generates the $(project).deps.json file for a published app
+    ============================================================
+    -->
+  <Target Name="GeneratePublishDependencyFile"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+                            _DefaultMicrosoftNETPlatformLibrary"
+          Condition="'$(GenerateDependencyFile)' == 'true'">
+
+    <PropertyGroup>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+    </PropertyGroup>
+
+    <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
+                      AssetsFilePath="$(ProjectAssetsFile)"
+                      DepsFilePath="$(PublishDepsFilePath)"
+                      TargetFramework="$(TargetFrameworkMoniker)"
+                      AssemblyName="$(AssemblyName)"
+                      AssemblyExtension="$(TargetExt)"
+                      AssemblyVersion="$(Version)"
+                      AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
+                      ReferencePaths="@(ReferencePath)"
+                      ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
+                      RuntimeIdentifier="$(RuntimeIdentifier)"
+                      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                      CompilerOptions="@(DependencyFileCompilerOptions)"
+                      PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        ComputePrivateAssetsPackageReferences
+
+    Builds up the @(PrivateAssetsPackageReference) item by looking for @(PackageReference) items with 
+    <PrivateAssets> metadata.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <ComputePrivateAssetsPackageReferences Condition="'$(ComputePrivateAssetsPackageReferences)' == ''">true</ComputePrivateAssetsPackageReferences>
+  </PropertyGroup>
+
+  <Target Name="ComputePrivateAssetsPackageReferences"
+          Condition="'$(ComputePrivateAssetsPackageReferences)' == 'true'">
+
+    <ItemGroup>
+      <PrivateAssetsPackageReference Include="@(PackageReference)"
+                                     Condition="'%(PackageReference.PrivateAssets)' == 'All'" />
+    </ItemGroup>
+
+  </Target>
+
+
+  <!--
+    ============================================================
+                                        GeneratePublishRuntimeConfigurationFile
+
+    Generates the $(project).runtimeconfig.json file for a published app
+    ============================================================
+    -->
+
+  <Target Name="GeneratePublishRuntimeConfigurationFile"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
+          Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
+
+    <PropertyGroup>
+      <PublishRuntimeConfigFilePath Condition=" '$(PublishRuntimeConfigFilePath)' == '' ">$(PublishDir)$(ProjectRuntimeConfigFileName)</PublishRuntimeConfigFilePath>
+    </PropertyGroup>
+
+    <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
+                                       TargetFramework="$(TargetFrameworkMoniker)"
+                                       RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
+                                       RuntimeIdentifier="$(RuntimeIdentifier)"
+                                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                                       UserRuntimeConfig="$(UserRuntimeConfig)"
+                                       HostConfigurationOptions="@(RuntimeHostConfigurationOption)" />
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        RenamePublishedHost
+
+    Renames the dotnet native host to match the application's name.
+    ============================================================
+    -->
+
+  <Target Name="RenamePublishedHost"
+          AfterTargets="ComputeFilesToPublish"
+          BeforeTargets="CopyFilesToPublishDirectory"
+          Condition="'$(RenamePublishedHost)' == 'true'">
+
+    <ItemGroup>
+
+      <ResolvedFileToPublish Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
+        <RelativePath>$(AssemblyName)%(ResolvedFileToPublish.Extension)</RelativePath>
+      </ResolvedFileToPublish>
+
+    </ItemGroup>
+
+  </Target>
+
+</Project>

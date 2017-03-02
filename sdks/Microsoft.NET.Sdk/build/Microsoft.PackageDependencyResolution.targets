@@ -1,0 +1,485 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.PackageDependencyResolution.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    *************************************
+    1. INPUT PROPERTIES
+    - That configure the PackageDependency targets
+    *************************************
+    -->
+
+  <!-- General Properties -->
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!-- Project Assets File -->
+  <PropertyGroup>
+    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">$(BaseIntermediateOutputPath)/project.assets.json</ProjectAssetsFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Ensure $(ProjectAssetsFile) is a full path -->
+    <ProjectAssetsFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectAssetsFile)))' != 'true'">$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(ProjectAssetsFile)'))))</ProjectAssetsFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ResolvePackageDependenciesForBuild Condition="'$(ResolvePackageDependenciesForBuild)' == ''">true</ResolvePackageDependenciesForBuild>
+    <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
+
+    <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
+    <ProduceOnlyPreprocessorFilesInBuildTask Condition="'$(ProduceOnlyPreprocessorFilesInBuildTask)' == ''">true</ProduceOnlyPreprocessorFilesInBuildTask>
+
+    <UseTargetPlatformAsNuGetTargetMoniker Condition="'$(UseTargetPlatformAsNuGetTargetMoniker)' == '' AND '$(TargetFrameworkMoniker)' == '.NETCore,Version=v5.0'">true</UseTargetPlatformAsNuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' != 'true'">$(TargetFrameworkMoniker)</NuGetTargetMoniker>
+  </PropertyGroup>
+
+  <!-- Target Moniker + RID-->
+  <PropertyGroup Condition="'$(_NugetTargetMonikerAndRID)' == ''">
+    <_NugetTargetMonikerAndRID Condition="'$(RuntimeIdentifier)' == ''">$(NuGetTargetMoniker)</_NugetTargetMonikerAndRID>
+    <_NugetTargetMonikerAndRID Condition="'$(RuntimeIdentifier)' != ''">$(NuGetTargetMoniker)/$(RuntimeIdentifier)</_NugetTargetMonikerAndRID>
+  </PropertyGroup>
+
+  <!--
+    *************************************
+    2. EXTERNAL PROPERTIES and ITEMS
+    - Override or add to external targets
+    *************************************
+    -->
+
+  <PropertyGroup>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      ResolvePackageDependenciesForBuild;
+    </ResolveAssemblyReferencesDependsOn>
+
+    <PrepareResourcesDependsOn>
+      ResolvePackageDependenciesForBuild;
+      $(PrepareResourcesDependsOn)
+    </PrepareResourcesDependsOn>
+  </PropertyGroup>
+
+  <!-- List of targets that emit Dependency DiagnosticMessages items -->
+  <PropertyGroup>
+    <EmitsDependencyDiagnosticMessages>
+      RunResolvePackageDependencies;
+      $(EmitsDependencyDiagnosticMessages)
+    </EmitsDependencyDiagnosticMessages>
+  </PropertyGroup>
+
+  <!-- Common tokens used in preprocessed content files -->
+  <ItemGroup>
+    <PreprocessorValue Include="rootnamespace">
+      <Value>$(RootNamespace)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="assemblyname">
+      <Value>$(AssemblyName)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="fullpath">
+      <Value>$(MSBuildProjectDirectory)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="outputfilename">
+      <Value>$(TargetFileName)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="filename">
+      <Value>$(MSBuildProjectFile)</Value>
+    </PreprocessorValue>
+    <PreprocessorValue Include="@(NuGetPreprocessorValue)" Exclude="@(PreprocessorValue)" />
+  </ItemGroup>
+
+  <!--
+    *************************************
+    3. BUILD TARGETS
+    - Override the Depends-On properties, or the individual targets
+    *************************************
+    -->
+
+  <!--
+    ============================================================
+                     ResolvePackageDependenciesForBuild
+
+    Populate items for build. This is triggered before target 
+    "AssignProjectConfiguration" to ensure ProjectReference items
+    are populated before ResolveProjectReferences is run.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <ResolvePackageDependenciesForBuildDependsOn>
+      ResolveLockFileReferences;
+      ResolveLockFileAnalyzers;
+      ResolveLockFileCopyLocalProjectDeps;
+      IncludeTransitiveProjectReferences;
+    </ResolvePackageDependenciesForBuildDependsOn>
+  </PropertyGroup>
+  <Target Name="ResolvePackageDependenciesForBuild"
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          BeforeTargets="AssignProjectConfiguration"
+          DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
+
+  <!--
+    *************************************
+    4. Package Dependency TASK and TARGETS
+    - Raise the lock file to MSBuild Items and create derived items
+    *************************************
+    -->
+
+  <!--
+    ============================================================
+                     RunResolvePackageDependencies
+
+    Generate Definitions and Dependencies based on ResolvePackageDependencies task
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.ResolvePackageDependencies"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- The condition on this target causes it to be skipped during design-time builds if
+        the restore operation hasn't run yet.  This is to avoid displaying an error in
+        the Visual Studio error list when a project is created before NuGet restore has
+        run and created the assets file. -->
+  <Target Name="RunResolvePackageDependencies"
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+    <ResolvePackageDependencies
+      ProjectPath="$(MSBuildProjectFullPath)"
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ProjectLanguage="$(Language)"
+      ContinueOnError="ErrorAndContinue">
+
+      <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
+      <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />
+      <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
+      <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
+      <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
+      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
+    </ResolvePackageDependencies>
+
+  </Target>
+
+  <!--
+    ============================================================
+                     ResolvePackageDependenciesDesignTime
+
+    Aggregate the dependencies produced by ResolvePackageDependencies to a form
+    that's consumable by an IDE to display package dependencies.
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.PreprocessPackageDependenciesDesignTime"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="ResolvePackageDependenciesDesignTime"
+          Returns="@(_DependenciesDesignTime)"
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;$(EmitsDependencyDiagnosticMessages)">
+
+    <PreprocessPackageDependenciesDesignTime
+          TargetDefinitions="@(TargetDefinitions)"
+          PackageDefinitions="@(PackageDefinitions)"
+          FileDefinitions="@(FileDefinitions)"
+          PackageDependencies="@(PackageDependencies)"
+          FileDependencies="@(FileDependencies)"
+          DefaultImplicitPackages="$(DefaultImplicitPackages)"
+          InputDiagnosticMessages="@(DiagnosticMessages)">
+
+      <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
+    </PreprocessPackageDependenciesDesignTime>
+  </Target>
+    
+  <!--
+    ============================================================
+                     CollectSDKReferencesDesignTime
+
+    Aggregates the sdk specified as project items and implicit
+    packages references.
+    ============================================================
+    -->
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.CollectResolvedSDKReferencesDesignTime"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="CollectSDKReferencesDesignTime"
+          Returns="@(_SDKReference)"
+          DependsOnTargets="ResolvePackageDependenciesDesignTime">
+
+    <CollectResolvedSDKReferencesDesignTime
+          ResolvedSdkReferences="@(SdkReference)"
+          DependenciesDesignTime="@(_DependenciesDesignTime)">
+
+      <Output TaskParameter="ResolvedSDKReferencesDesignTime" ItemName="_SDKReference" />
+
+    </CollectResolvedSDKReferencesDesignTime>
+  </Target>
+          
+  <!--
+    ============================================================
+                     CollectResolvedSDKReferencesDesignTime
+
+    Aggregates the sdk specified as project items and implicit
+    packages produced by ResolvePackageDependencies.
+    ============================================================
+    -->
+
+  <Target Name="CollectResolvedSDKReferencesDesignTime"
+          Returns="@(_ResolvedSDKReference)"
+          DependsOnTargets="ResolveSDKReferencesDesignTime;ResolvePackageDependenciesDesignTime">
+
+    <CollectResolvedSDKReferencesDesignTime
+          ResolvedSdkReferences="@(ResolvedSdkReference)"
+          DependenciesDesignTime="@(_DependenciesDesignTime)">
+
+      <Output TaskParameter="ResolvedSDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
+    </CollectResolvedSDKReferencesDesignTime>
+  </Target>
+  
+  <!--
+    ============================================================
+                     RunProduceContentAssets
+
+    Process content assets by handling preprocessing tokens where necessary, and 
+    produce copy local items, content items grouped by "build action" and file writes
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.ProduceContentAssets"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="RunProduceContentAssets"
+          Returns="_ContentCopyLocalItems;FileWrites"
+          DependsOnTargets="_ComputeActiveTFMFileDependencies">
+    <ItemGroup>
+      <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
+      <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
+      <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
+    </ItemGroup>
+
+    <ProduceContentAssets
+      ContentFileDefinitions="@(_ContentFileDefs)"
+      ContentFileDependencies="@(_ContentFileDeps)"
+      ContentPreprocessorValues="@(PreprocessorValue)"
+      ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
+      ProduceOnlyPreprocessorFiles="$(ProduceOnlyPreprocessorFilesInBuildTask)"
+      ProjectLanguage="$(Language)">
+
+      <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
+      <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
+      <Output TaskParameter="FileWrites" ItemName="FileWrites" />
+    </ProduceContentAssets>
+
+    <!-- The items in _ProcessedContentItems need to go into the appropriately-named item group, 
+         but the names depend upon the items themselves. Split it apart. -->
+    <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
+      <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
+    </CreateItem>
+  </Target>
+
+  <!--
+    ============================================================
+    HELPERS: Get Package and File Dependencies matching active TFM and RID
+    ============================================================
+    -->
+
+  <Target Name="_ComputeActiveTFMPackageDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMPackageDependencies">
+    <ItemGroup>
+      <_ActiveTFMPackageDependencies Include="@(PackageDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeActiveTFMFileDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMFileDependencies">
+    <ItemGroup>
+      <_ActiveTFMFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeTFMOnlyFileDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_TFMOnlyFileDependencies">
+    <ItemGroup>
+      <_TFMOnlyFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)'))" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+    Reference Targets: For populating References based on lock file
+    - _ComputeLockFileReferences
+    - _ComputeLockFileFrameworks
+    - ResolveLockFileReferences
+    ============================================================
+    -->
+
+  <Target Name="_ComputeLockFileReferences"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
+          Returns="ResolvedCompileFileDefinitions">
+    <ItemGroup>
+      <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
+
+      <!-- Get corresponding file definitions -->
+      <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
+      <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
+
+      <ResolvedCompileFileDefinitions Include="%(_CompileFileDefinitions.ResolvedPath)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </ResolvedCompileFileDefinitions>
+
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeLockFileFrameworks"
+          Condition="'$(DisableLockFileFrameworks)' != 'true'"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
+          Returns="ResolvedFrameworkAssemblies">
+    <ItemGroup>
+      <_FrameworkAssemblies Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
+
+      <ResolvedFrameworkAssemblies Include="%(_FrameworkAssemblies.FrameworkAssembly)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>true</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </ResolvedFrameworkAssemblies>
+
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveLockFileReferences"
+          DependsOnTargets="_ComputeLockFileReferences;_ComputeLockFileFrameworks">
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <Reference Include="@(ResolvedCompileFileDefinitions)" />
+      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+
+      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
+           consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
+           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
+           including all computed references. -->
+      <Reference Remove="%(ResolvedCompileFileDefinitions.FileName)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+    ProjectReference Targets: Include transitive project references before 
+                              ResolveProjectReferences is called
+    - _ComputeTransitiveProjectReferences
+    - IncludeTransitiveProjectReferences
+    ============================================================
+    -->
+
+  <Target Name="_ComputeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeActiveTFMPackageDependencies"
+          Returns="_TransitiveProjectReferences">
+    <ItemGroup>
+      <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
+
+      <!-- Get corresponding package definitions -->
+      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
+      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
+      
+      <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
+        <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
+      </_TransitiveProjectReferences>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeTransitiveProjectReferences" >
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <ProjectReference Include="@(_TransitiveProjectReferences)" />
+    </ItemGroup>
+  </Target>
+  
+  <!--
+    ============================================================
+    Analyzer Targets: For populating Analyzers based on lock file
+    - _ComputeLockFileAnalyzers
+    - ResolveLockFileAnalyzers
+    ============================================================
+    -->
+
+  <Target Name="_ComputeLockFileAnalyzers"
+        DependsOnTargets="RunResolvePackageDependencies"
+        Returns="ResolvedAnalyzers">
+    <ItemGroup>
+      <AnalyzerFiles Include="@(FileDefinitions->WithMetadataValue('Analyzer', 'true'))" />
+      <ResolvedAnalyzers Include="%(AnalyzerFiles.ResolvedPath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveLockFileAnalyzers"
+          DependsOnTargets="_ComputeLockFileAnalyzers">
+    <ItemGroup>
+
+      <!-- Add the analyzers we computed -->
+      <Analyzer Include="@(ResolvedAnalyzers)" />
+
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+    CopyLocal Targets: For populating CopyLocal based on lock file
+    - _ComputeLockFileCopyLocal
+    - ResolveLockFileCopyLocalProjectDeps
+    ============================================================
+    -->
+
+  <Target Name="_ComputeLockFileCopyLocal"
+        DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets"
+        Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
+    <ItemGroup>
+      <!--NativeLibrary-->
+      <_NativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
+      <__NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_NativeFileItems)" />
+      <_NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__NativeCopyLocalItems)" />
+      <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
+
+      <!--RuntimeAssembly-->
+      <_RuntimeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
+      <__RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_RuntimeFileItems)" />
+      <_RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__RuntimeCopyLocalItems)" />
+      <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
+
+      <!--ResourceAssembly-->
+      <_ResourceFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
+      <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
+      <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
+      <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />
+
+      <!-- ALL -->
+      <AllCopyLocalItems Include="@(NativeCopyLocalItems);@(RuntimeCopyLocalItems);@(ResourceCopyLocalItems);@(_ContentCopyLocalItems)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </AllCopyLocalItems>
+
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveLockFileCopyLocalProjectDeps"
+          Condition="'$(CopyLocalLockFileAssemblies)' == 'true'"
+          DependsOnTargets="_ComputeLockFileCopyLocal">
+
+    <!-- Add the copy local items -->
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>

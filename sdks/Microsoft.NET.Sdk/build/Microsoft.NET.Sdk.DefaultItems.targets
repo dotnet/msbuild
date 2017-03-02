@@ -1,0 +1,215 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.DefaultItems.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+   <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
+   <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
+  </PropertyGroup>
+
+  <PropertyGroup>    
+    <!-- Set DefaultItemExcludes property for items that should be excluded from the default Compile, etc items.
+         This is in the .targets because it needs to come after the final BaseOutputPath has been evaluated. -->
+    
+    <!-- bin folder, by default -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseOutputPath)/**</DefaultItemExcludes>
+    <!-- obj folder, by default -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseIntermediateOutputPath)/**</DefaultItemExcludes>
+
+    <!-- Various files that should generally always be ignored -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.user</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.*proj</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.sln</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.vssscc</DefaultItemExcludes>
+    
+    <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
+         relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
+         that are in the project folder. -->
+    <DefaultExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
+
+    <!-- TODO: Verify why this was originally added and whether we really need it -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);packages/**</DefaultItemExcludes>
+    
+  </PropertyGroup>
+
+  <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
+       The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
+       in the project file. -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+  </PropertyGroup>
+  
+  <!--  
+    Determine the NetCoreImplicitPackageVersion and RuntimeFrameworkVersion when targeting .NET Core
+    
+    When targeting .NET Core, the TargetFramework is generally used to specify which version of the runtime to use.
+    
+    In order to target a specific patch version, or to float the version number (2.0-*), the RuntimeFrameworkVersion
+    property can be used.
+    
+    The framework version that is written to the runtimeconfig.json file is based on the actual resolved package version
+    of Microsoft.NETCore.App.  This is to allow floating the verion number.
+  
+  -->
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- If targeting .NET Core, and the RuntimeFrameworkVersion is not specified, use the latest patch version of that runtime that we know about.
+    
+      This ensures that if a self-contained app is published where RuntimeFrameworkVersion is not specified, the latest patch
+      version of the runtime (that the SDK knew about when it shipped) will be used.
+      
+      This also will fix an issue where Microsoft.NETCore.App 1.1.0 included a version of the Microsoft.DiaSymReader.Native package
+      that was authored in such a way that Microsoft.DiaSymReader.Native.amd64.dll and Microsoft.DiaSymReader.Native.x86.dll would
+      be copied to the output folder.  Using Microsoft.NETCore.App 1.1.1 fixes this, as it references an updated version of the
+      DiaSymReader package with the issue fixed.  (See https://github.com/dotnet/corefx/issues/14627)
+      
+      Using the latest patch version that the SDK knows about does mean that an update to the SDK could change the version of
+      the runtime that a project targets.  In general, this should be OK.  If a project wants to opt out of this, it can specify
+      the exact version of the runtime to use with the RuntimeFrameworkVersion property.    
+    -->
+    <!-- If targeting netcoreapp1.1, and RuntimeFrameworkVersion is not specified, use version 1.1.1 -->
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.4</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.1</RuntimeFrameworkVersion>
+    
+    <!-- Default to use the version of the framework runtime matching the target framework version-->
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
+  <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    <PropertyGroup>
+      <ImplicitPackageReferenceInformationLink>https://aka.ms/sdkimplicitrefs</ImplicitPackageReferenceInformationLink>
+    </PropertyGroup>
+
+    <CheckForImplicitPackageReferenceOverrides
+        PackageReferenceItems="@(PackageReference)"
+        MoreInformationLink="$(ImplicitPackageReferenceInformationLink)">
+      <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
+    </CheckForImplicitPackageReferenceOverrides>
+
+    <ItemGroup>
+      <!-- Note that the condition here is important, otherwise the Remove will operate based just on item identity and remove all items
+           that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
+      <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
+    </ItemGroup>
+
+  </Target>
+
+  <!-- Running an SDK task before the NuGet restore task causes issues when running on .NET Framework because it causes the
+      .NET Standard NuGet DLLs to be loaded from the SDK path rather than the .NET Framework versions from the NuGet targets
+      path.  To avoid this, we create a separate target to run before NuGet restore which deduplicates the items without
+      causing the SDK tasks to be loaded (but doesn't generate a warning message, because we need to load the tasks for that). -->
+  <PropertyGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true'">
+    <_ImplicitPackageName Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">NETStandard.Library</_ImplicitPackageName>
+    <_ImplicitPackageName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">Microsoft.NETCore.App</_ImplicitPackageName>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(_ImplicitPackageName)' != ''">
+    <!-- Filter PackageReference to items where the ItemSpec matches the implicit package name, and add IsImplicitlyDefined metadata
+         for items that don't have it-->
+    <_ImplicitPackageReferenceCheck
+        Include="@(PackageReference->WithMetadataValue('Identity', '$(_ImplicitPackageName)'))">
+      <IsImplicitlyDefined Condition="'%(IsImplicitlyDefined)' != 'true' ">false</IsImplicitlyDefined>
+    </_ImplicitPackageReferenceCheck>
+
+    <!-- Now filter down to an item with just the implicit reference and another one with just the overriding reference -->
+    <_ImplicitPackageReference Include="@(_ImplicitPackageReferenceCheck->WithMetadataValue('IsImplicitlyDefined', 'true'))"/>
+    <_OverridingPackageReference Include="@(_ImplicitPackageReferenceCheck->WithMetadataValue('IsImplicitlyDefined', 'false'))"/>
+  </ItemGroup>
+
+  <Target Name="CheckForImplicitPackageReferenceOverridesBeforeRestore" BeforeTargets="_GetRestoreProjectStyle">
+    <ItemGroup>
+      <!-- Remove both the implicit and the override item, if there was both an implicit and an override item -->
+      <PackageReference Remove="@(PackageReference->WithMetadataValue('Identity', '$(_ImplicitPackageName)'))"
+                        Condition="'@(_ImplicitPackageReference)' != '' And '@(_OverridingPackageReference)' != ''"
+                      />
+
+      <!-- Add the override item back -->
+      <PackageReference Include="@(_OverridingPackageReference)"
+                        Condition="'@(_ImplicitPackageReference)' != '' And '@(_OverridingPackageReference)' != ''" />
+    </ItemGroup>
+  </Target>
+
+  <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CoreCompile">
+
+    <PropertyGroup>
+      <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
+
+      <!-- For the design-time build, we will continue on error and remove the duplicate items.
+           This is because otherwise there won't be any references to pass to the compiler, leading to design-time
+           compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
+           be easy to miss the duplicate items error which is the real source of the problem. -->
+      <CheckForDuplicateItemsContinueOnError>false</CheckForDuplicateItemsContinueOnError>
+      <CheckForDuplicateItemsContinueOnError Condition="'$(DesignTimeBuild)' == 'true'">ErrorAndContinue</CheckForDuplicateItemsContinueOnError>
+    </PropertyGroup>
+
+    <CheckForDuplicateItems
+      Items="@(Compile)"
+      ItemName="Compile"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultCompileItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultCompileItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedCompileItems" />
+    </CheckForDuplicateItems>
+
+    <CheckForDuplicateItems
+      Items="@(EmbeddedResource)"
+      ItemName="EmbeddedResource"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultEmbeddedResourceItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultEmbeddedResourceItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedEmbeddedResourceItems" />
+    </CheckForDuplicateItems>
+    
+    <!-- Default content items are enabled by the Web SDK, not the .NET SDK, but we check it here for simplicity -->
+    <CheckForDuplicateItems
+      Items="@(Content)"
+      ItemName="Content"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultContentItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedContentItems" />
+    </CheckForDuplicateItems>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedCompileItems)' != ''">
+      <Compile Remove="@(Compile)" />
+      <Compile Include="@(DeduplicatedCompileItems)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedEmbeddedResourceItems)' != ''">
+      <EmbeddedResource Remove="@(EmbeddedResource)" />
+      <EmbeddedResource Include="@(DeduplicatedEmbeddedResourceItems)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedContentItems)' != ''">
+      <Content Remove="@(Content)" />
+      <Content Include="@(DeduplicatedContentItems)" />
+    </ItemGroup>
+    
+  </Target>
+</Project>
