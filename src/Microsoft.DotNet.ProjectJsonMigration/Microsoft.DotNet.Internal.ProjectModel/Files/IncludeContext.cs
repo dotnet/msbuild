@@ -39,6 +39,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
             CustomRemovePatterns = new List<string>();
             SourceBasePath = sourceBasePath;
             Option = option;
+            RawObject = rawObject;
             var token = rawObject.Value<JToken>(option);
 
             if (token == null)
@@ -117,19 +118,21 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
 
         public List<string> CustomRemovePatterns { get; }
 
-        public List<string> IncludePatterns { get; }
+        public List<string> IncludePatterns { get; protected set; }
 
-        public List<string> ExcludePatterns { get; }
+        public List<string> ExcludePatterns { get; protected set; }
 
-        public List<string> IncludeFiles { get; }
+        public List<string> IncludeFiles { get; protected set; }
 
-        public List<string> ExcludeFiles { get; }
+        public List<string> ExcludeFiles { get; protected set; }
 
-        public List<string> BuiltInsInclude { get; }
+        public List<string> BuiltInsInclude { get; protected set; }
 
-        public List<string> BuiltInsExclude { get; }
+        public List<string> BuiltInsExclude { get; protected set; }
 
-        public IDictionary<string, IncludeContext> Mappings { get; }
+        public IDictionary<string, IncludeContext> Mappings { get; protected set; }
+
+        public JObject RawObject { get; }
 
         public override bool Equals(object obj)
         {

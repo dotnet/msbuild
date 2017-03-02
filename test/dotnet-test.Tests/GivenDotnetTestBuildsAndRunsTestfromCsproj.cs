@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput();
+                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput();
+                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp1.0", "VSTestDotNetCore.dll");
+                                   configuration, "netcoreapp1.1", "VSTestDotNetCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(rootPath)
-                                        .ExecuteWithCapturedOutput();
+                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
             result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");

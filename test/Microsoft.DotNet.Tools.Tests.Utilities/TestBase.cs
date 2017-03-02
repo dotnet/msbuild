@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         protected const string DefaultFramework = "netcoreapp1.0";
         protected const string DefaultLibraryFramework = "netstandard1.5";
+        protected const string ConsoleLoggerOutputNormal = "--logger:console;verbosity=normal";
         private TempRoot _temp;
         private static TestAssets s_testAssets;
 

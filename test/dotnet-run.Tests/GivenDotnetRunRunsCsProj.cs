@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
+                .ExecuteWithCapturedOutput("--framework netcoreapp1.1")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!");            
         }
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -o \"{rootPath}\"";
+            string newArgs = $"console -f netcoreapp1.1 -o \"{rootPath}\"";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)

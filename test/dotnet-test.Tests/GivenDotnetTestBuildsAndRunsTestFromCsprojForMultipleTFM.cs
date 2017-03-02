@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var result = new DotnetTestCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .WithRuntime(runtime)
-                .ExecuteWithCapturedOutput();
+                .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             result.StdOut
                 .Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.", "because .NET 4.6 tests will pass")
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput();
+                                       .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             // Verify
             // for target framework net46

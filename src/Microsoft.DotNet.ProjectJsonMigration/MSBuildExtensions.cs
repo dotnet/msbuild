@@ -14,10 +14,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public static IEnumerable<string> GetEncompassedIncludes(this ProjectItemElement item, 
             ProjectItemElement otherItem, TextWriter trace = null)
         {
-            if (otherItem.IsEquivalentToExceptIncludeAndExclude(item, trace) && 
+            if (otherItem.IsEquivalentToExceptIncludeUpdateAndExclude(item, trace) &&
                 new HashSet<string>(otherItem.Excludes()).IsSubsetOf(new HashSet<string>(item.Excludes())))
             {
                 return otherItem.IntersectIncludes(item);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public static IEnumerable<string> GetEncompassedUpdates(this ProjectItemElement item,
+            ProjectItemElement otherItem, TextWriter trace = null)
+        {
+            if (otherItem.IsEquivalentToExceptIncludeUpdateAndExclude(item, trace) &&
+                new HashSet<string>(otherItem.Excludes()).IsSubsetOf(new HashSet<string>(item.Excludes())))
+            {
+                return otherItem.IntersectUpdates(item);
             }
 
             return Enumerable.Empty<string>();
@@ -32,6 +44,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 return false;
             }
 
+            if (item.IntersectUpdates(otherItem).Count() != item.Updates().Count())
+            {
+                trace?.WriteLine(String.Format(LocalizableStrings.UpdatesNotEquivalent, nameof(MSBuildExtensions), nameof(IsEquivalentTo)));
+                return false;
+            }
+
             // Different Excludes
             if (item.IntersectExcludes(otherItem).Count() != item.Excludes().Count())
             {
@@ -39,10 +57,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 return false;
             }
 
-            return item.IsEquivalentToExceptIncludeAndExclude(otherItem, trace);
+            return item.IsEquivalentToExceptIncludeUpdateAndExclude(otherItem, trace);
         }
 
-        public static bool IsEquivalentToExceptIncludeAndExclude(this ProjectItemElement item, ProjectItemElement otherItem, TextWriter trace = null)
+        public static bool IsEquivalentToExceptIncludeUpdateAndExclude(this ProjectItemElement item, ProjectItemElement otherItem, TextWriter trace = null)
         {
             // Different remove
             if (item.Remove != otherItem.Remove)
@@ -119,6 +137,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return SplitSemicolonDelimitedValues(item.Include);
         }
 
+        public static IEnumerable<string> Updates(
+            this ProjectItemElement item)
+        {
+            return SplitSemicolonDelimitedValues(item.Update);
+        }
+
         public static IEnumerable<string> Excludes(
             this ProjectItemElement item)
         {
@@ -141,6 +165,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return item.Includes().Intersect(otherItem.Includes());
         }
 
+        public static IEnumerable<string> IntersectUpdates(this ProjectItemElement item, ProjectItemElement otherItem)
+        {
+            return item.Updates().Intersect(otherItem.Updates());
+        }
+
         public static IEnumerable<string> IntersectExcludes(this ProjectItemElement item, ProjectItemElement otherItem)
         {
             return item.Excludes().Intersect(otherItem.Excludes());
@@ -149,6 +178,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public static void RemoveIncludes(this ProjectItemElement item, IEnumerable<string> includesToRemove)
         {
             item.Include = string.Join(";", item.Includes().Except(includesToRemove));
+        }
+
+        public static void RemoveUpdates(this ProjectItemElement item, IEnumerable<string> updatesToRemove)
+        {
+            item.Update = string.Join(";", item.Updates().Except(updatesToRemove));
         }
 
         public static void UnionIncludes(this ProjectItemElement item, IEnumerable<string> includesToAdd)

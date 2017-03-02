@@ -17,5 +17,13 @@
   },
   "frameworks": {
     "netstandard1.5": {}
+  },
+  "packOptions": {
+      "files": {
+          "include": ["contentitem.txt"],
+          "mappings": {
+              "dir/contentitem.txt": "contentitem.txt"
+          }
+      }
   }
 }

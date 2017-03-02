@@ -31,10 +31,10 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Should().Pass();
 
             var outputDll = testRoot
-                .GetDirectory("bin", configuration, "netcoreapp1.0")
+                .GetDirectory("bin", configuration, "netcoreapp1.1")
                 .GetFile($"{testAppName}.dll");
 
-            var argsForVstest = $"\"{outputDll.FullName}\"";
+            var argsForVstest = $"\"{outputDll.FullName}\" {TestBase.ConsoleLoggerOutputNormal}";
 
             // Call vstest
             var result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);

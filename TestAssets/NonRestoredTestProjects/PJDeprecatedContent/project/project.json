@@ -2,8 +2,8 @@
     "version": "1.0.0-*",
     "content": "*.txt",
     "contentExclude": "ExcludeThis1.txt",
-    "contentFiles": [ "../ContentFile1.txt", "../ContentFile2.txt" ],
-    "contentBuiltIn": [ "../ContentFileBuiltIn1.txt", "../ContentFileBuiltIn2.txt" ],
+    "contentFiles": [ "ContentFile1.txt1", "ContentFile2.txt1" ],
+    "contentBuiltIn": [ "ContentFileBuiltIn1.txt1", "ContentFileBuiltIn2.txt1" ],
     "publishExclude": "ExcludeThis2.txt",
     "buildOptions": {
         "debugType": "portable",

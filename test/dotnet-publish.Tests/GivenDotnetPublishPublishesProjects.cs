@@ -32,11 +32,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp1.0")
+                .Execute("--framework netcoreapp1.1")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.1", "publish", $"{testAppName}.dll");
 
             new TestCommand("dotnet")
                 .ExecuteWithCapturedOutput(outputDll)
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
             new PublishCommand()
-                .WithFramework("netcoreapp1.0")
+                .WithFramework("netcoreapp1.1")
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
                 //Workaround for https://github.com/dotnet/cli/issues/4501
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = testProjectDirectory
-                .GetDirectory("bin", configuration, "netcoreapp1.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
+                .GetDirectory("bin", configuration, "netcoreapp1.1", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
                 .FullName;
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -o \"{rootPath}\"";
+            string newArgs = $"console -f netcoreapp1.1 -o \"{rootPath}\"";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)

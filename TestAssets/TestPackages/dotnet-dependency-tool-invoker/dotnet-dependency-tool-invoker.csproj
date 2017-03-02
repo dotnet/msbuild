@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>dotnet-dependency-tool-invoker</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8;dnxcore50</PackageTargetFallback>
@@ -23,9 +23,6 @@
     </BuiltProjectOutputGroupOutput>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
-    </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
       <Version>$(CLI_NuGet_Version)</Version>
     </PackageReference>
@@ -33,8 +30,4 @@
       <Version>$(SdkNugetVersion)</Version>
     </PackageReference>
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

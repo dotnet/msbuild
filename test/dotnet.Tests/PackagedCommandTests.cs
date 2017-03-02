@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
             
-            const string framework = ".NETCoreApp,Version=v1.0";
+            const string framework = ".NETCoreApp,Version=v1.1";
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
@@ -296,7 +296,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.1")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();
@@ -326,7 +326,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.1")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();
