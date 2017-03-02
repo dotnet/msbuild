@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests
     public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            FrameworkConstants.CommonFrameworks.NetCoreApp11;
+            FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
         private const string TestProjectName = "AppWithToolDependency";
 

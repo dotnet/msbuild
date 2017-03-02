@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GeneratedPackageId>random-name</GeneratedPackageId>
-    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-beta-001509-00</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>

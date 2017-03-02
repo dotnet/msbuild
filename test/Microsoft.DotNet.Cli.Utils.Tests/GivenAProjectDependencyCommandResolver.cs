@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp11
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp11
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp11
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = testInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp11,
+                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20,
                 OutputPath = outputDir.FullName
             };
 
