@@ -251,8 +251,86 @@ namespace Microsoft.Build.UnitTests
                 e => e.File,
                 e => e.LineNumber.ToString(),
                 e => e.Message,
+                e => e.Importance.ToString(),
                 e => e.ProjectFile,
                 e => e.Subcategory);
+        }
+
+        [Fact]
+        public void RoundtripCriticalBuildMessageEventArgs()
+        {
+            var args = new CriticalBuildMessageEventArgs(
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message",
+                "Help",
+                "SenderName",
+                DateTime.Parse("12/12/2015 06:11:56 PM"));
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory);
+        }
+
+        [Fact]
+        public void RoundtripTaskCommandLineEventArgs()
+        {
+            var args = new TaskCommandLineEventArgs(
+                "/bl /noconlog /v:diag",
+                "Csc",
+                MessageImportance.Low,
+                DateTime.Parse("12/12/2015 06:11:56 PM"));
+
+            Roundtrip(args,
+                e => e.CommandLine,
+                e => e.TaskName,
+                e => e.Importance.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory);
+        }
+
+        [Fact]
+        public void ReadingCorruptedStreamThrows()
+        {
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+
+            var args = new BuildStartedEventArgs(
+                "Message",
+                "HelpKeyword",
+                DateTime.Parse("3/1/2017 11:11:56 AM"));
+
+            buildEventArgsWriter.Write(args);
+
+            long length = memoryStream.Length;
+
+            for (long i = length - 1; i >= 0; i--) // try all possible places where a stream might end abruptly
+            {
+                memoryStream.SetLength(i); // pretend that the stream abruptly ends
+                memoryStream.Position = 0;
+
+                var binaryReader = new BinaryReader(memoryStream);
+                var buildEventArgsReader = new BuildEventArgsReader(binaryReader);
+
+                Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
+            }
         }
 
         private string ToString(BuildEventContext context)
