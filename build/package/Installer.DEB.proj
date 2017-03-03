@@ -47,6 +47,10 @@
         DestinationFile="$(DebianConfigJsonFile)"
         ReplacementItems="@(DebianConfigTokenValues)" />
 
+      <Chmod 
+        Glob="$(PackageTool)"
+        Mode="u+x" />
+
       <!-- Build SDK Deb package -->
       <DotNetDebTool ToolPath="$(Stage0Directory)"
                      InputDirectory="$(LayoutDirectory)"
