@@ -60,8 +60,8 @@ get_current_os_name() {
     eval $invocation
 
     local uname=$(uname)
-    if [ ! -z "$osname_override" ]; then
-        echo "$osname_override"
+    if [ "$linux_portable" = true ]; then
+        echo "linux"
         return 0
     elif [ "$uname" = "Darwin" ]; then
         echo "osx"
@@ -587,7 +587,7 @@ azure_feed="https://dotnetcli.azureedge.net/dotnet"
 uncached_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 verbose=false
 shared_runtime=false
-osname_override=
+linux_portable=false
 
 while [ $# -ne 0 ]
 do
@@ -628,9 +628,8 @@ do
             shift
             azure_feed="$1"
             ;;
-        --osname)
-            shift
-            osname_override="$1"
+        --linux-portable|-[Ll]inux[Pp]ortable)
+            linux_portable=true
             ;;
         -?|--?|-h|--help|-[Hh]elp)
             script_name="$(basename $0)"
@@ -656,7 +655,8 @@ do
             echo "  --no-path, -NoPath             Do not set PATH for the current process."
             echo "  --verbose,-Verbose             Display diagnostics information."
             echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
-            echo "  --osname                       Specific OS name to use. Defaults to being computed"
+            echo "  --linux-portable               Installs the Linux portable shared runtime instead of the shared runtime for OS."
+			echo "      -LinuxPortable"
             echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""
             echo "Install Location:"
