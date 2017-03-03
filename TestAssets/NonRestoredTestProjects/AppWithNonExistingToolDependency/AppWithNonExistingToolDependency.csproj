@@ -10,8 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-nonexistingtool">
-      <Version>1.0.0</Version>
+    <DotNetCliToolReference Include="dotnet-nonexistingtool" Version="1.0.0</Version>
     </DotNetCliToolReference>
   </ItemGroup>
 

@@ -5,18 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="dotnet-portable">
-      <Version>1.0.0</Version>
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
+    <PackageReference Include="dotnet-portable" Version="1.0.0</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker">
-      <Version>1.0.0-*</Version>
+    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
 </Project>
