@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-portable" Version="1.0.0" />
     <DotNetCliToolReference Include="dotnet-PreferCliRuntime" Version="1.0.0" />

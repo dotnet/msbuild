@@ -16,6 +16,7 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*</Version>
     </DotNetCliToolReference>

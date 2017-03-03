@@ -8,6 +8,7 @@
     <PackageReference Include="ToolWithOutputName" Version="1.0.0" />
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
   </ItemGroup>

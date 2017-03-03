@@ -8,10 +8,12 @@
     <OutputPath>bin\$(Configuration)</OutputPath>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\shared-build-targets-utils\shared-build-targets-utils.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Build.Framework\Microsoft.DotNet.Cli.Build.Framework.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR" Version="1.0.4" />

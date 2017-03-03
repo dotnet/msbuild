@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="ThisIsNotARealDependencyAndIfSomeoneGoesAndAddsAProjectWithThisNameIWillFindThemAndPunishThem" Version="1.0.0" />
   </ItemGroup>
