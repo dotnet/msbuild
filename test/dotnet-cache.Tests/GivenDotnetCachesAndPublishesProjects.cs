@@ -17,12 +17,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     {
         private static string _tfm = "netcoreapp2.0";
         private static string _frameworkVersion = Microsoft.DotNet.TestFramework.TestAssetInstance.CurrentRuntimeFrameworkVersion;
-
+        private static string _arch = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
         [Fact]
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "NewtonSoftDependentProject";
-            var profileProjectName = "NewtonsoftFilterProfile";
+            var profileProjectName = "NewtonsoftProfile";
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
@@ -55,11 +55,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-           
+            var profilefilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
+
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profileProject)
+                .WithProFileProject(profilefilter)
                 .Execute()
                 .Should().Pass();
 
@@ -76,7 +77,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void AppFailsDueToMissingCache()
         {
             var testAppName = "NewtonSoftDependentProject";
-            var profileProjectName = "NewtonsoftFilterProfile";
+            var profileProjectName = "NewtonsoftProfile";
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
@@ -88,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root.FullName;
-            var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
+            var profileProject = Path.Combine(profileProjectPath, "NewtonsoftFilterProfile.xml");
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
