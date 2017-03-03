@@ -883,6 +883,11 @@ namespace Microsoft.Build.Shared
             return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
         }
 
+        internal static bool IsBinaryLogFilename(string filename)
+        {
+            return (String.Equals(Path.GetExtension(filename), ".binlog", PathComparison));
+        }
+
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
         /// Throws UriFormatException.

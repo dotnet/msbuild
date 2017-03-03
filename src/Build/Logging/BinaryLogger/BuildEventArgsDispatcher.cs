@@ -5,7 +5,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// An implementation of IEventSource that raises appropriate events for a provided BuildEventArgs object.
     /// </summary>
-    internal class EventArgsDispatcher : IEventSource
+    public class EventArgsDispatcher : IEventSource
     {
         /// <summary>
         /// This event is raised for all BuildEventArgs objects after a more type-specific event

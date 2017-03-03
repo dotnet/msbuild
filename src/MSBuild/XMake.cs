@@ -598,26 +598,44 @@ namespace Microsoft.Build.CommandLine
 
                     DateTime t1 = DateTime.Now;
 
+                    // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
+                    // as if a build is happening
+                    if (FileUtilities.IsBinaryLogFilename(projectFile))
+                    {
+                        if (AnySwitchesIncompatibleWithLogReplay(targets, toolsVersion, globalProperties, distributedLoggerRecords))
+                        {
+                            Console.WriteLine();
+                            exitType = ExitType.SwitchError;
+                        }
+                        else
+                        {
+                            ReplayBinaryLog(projectFile, loggers, verbosity);
+                        }
+                    }
+                    else // regular build
+                    {
 #if !STANDALONEBUILD
                     if (Environment.GetEnvironmentVariable("MSBUILDOLDOM") != "1")
 #endif
-                    {
-                        // if everything checks out, and sufficient information is available to start building
-                        if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
+                        {
+                            // if everything checks out, and sufficient information is available to start building
+                            if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
                             cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages))
-                        {
-                            exitType = ExitType.BuildError;
+                            {
+                                exitType = ExitType.BuildError;
+                            }
                         }
-                    }
 #if !STANDALONEBUILD
                     else
                     {
                         exitType = OldOMBuildProject(exitType, projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, needToValidateProject, schemaFile, cpuCount);
                     }
 #endif
+                    } // end of build
+
                     DateTime t2 = DateTime.Now;
 
                     TimeSpan elapsedTime = t2.Subtract(t1);
@@ -3160,6 +3178,39 @@ namespace Microsoft.Build.CommandLine
             }
 
             return logger;
+        }
+
+        private static void ReplayBinaryLog
+        (
+            string binaryLogFilePath,
+            ILogger[] loggers,
+            LoggerVerbosity verbosity
+        )
+        {
+            var replayEventSource = new Logging.BinaryLogReplayEventSource();
+
+            foreach (var logger in loggers)
+            {
+                logger.Initialize(replayEventSource);
+            }
+
+            replayEventSource.Replay(binaryLogFilePath);
+
+            foreach (var logger in loggers)
+            {
+                logger.Shutdown();
+            }
+        }
+
+        private static bool AnySwitchesIncompatibleWithLogReplay
+        (
+            string[] targets,
+            string toolsVersion,
+            Dictionary<string, string> globalProperties,
+            List<DistributedLoggerRecord> distributedLoggerRecords
+        )
+        {
+            return false;
         }
 
         /// <summary>
