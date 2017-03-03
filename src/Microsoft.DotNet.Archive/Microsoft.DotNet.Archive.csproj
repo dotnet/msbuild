@@ -13,7 +13,4 @@
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
     <PackageReference Include="System.Linq.Parallel" Version="4.0.1" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

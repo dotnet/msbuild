@@ -18,7 +18,4 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.1-beta-000933" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

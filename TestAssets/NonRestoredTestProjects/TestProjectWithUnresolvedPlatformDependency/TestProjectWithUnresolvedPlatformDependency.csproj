@@ -7,7 +7,4 @@
   <ItemGroup>
     <PackageReference Include="ThisIsNotARealDependencyAndIfSomeoneGoesAndAddsAProjectWithThisNameIWillFindThemAndPunishThem" Version="1.0.0" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>
