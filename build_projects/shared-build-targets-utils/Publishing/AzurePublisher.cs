@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Build
         private CloudBlobContainer GetDotnetBlobContainer(string connectionString, string containerName)
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-            
+
             return GetDotnetBlobContainer(storageAccount, containerName);
         }
 
@@ -58,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Build
         private CloudBlobContainer GetDotnetBlobContainer(CloudStorageAccount storageAccount, string containerName)
         {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            
+
             return blobClient.GetContainerReference(containerName);
         }
 

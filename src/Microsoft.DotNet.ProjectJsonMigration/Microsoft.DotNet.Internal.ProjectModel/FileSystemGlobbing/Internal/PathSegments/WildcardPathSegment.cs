@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.FileSystemGlobbing.Internal.Pat
 {
     internal class WildcardPathSegment : IPathSegment
     {
-        // It doesn't matter which StringComparison type is used in this MatchAll segment because 
+        // It doesn't matter which StringComparison type is used in this MatchAll segment because
         // all comparing are skipped since there is no content in the segment.
         public static readonly WildcardPathSegment MatchAll = new WildcardPathSegment(
             string.Empty, new List<string>(), string.Empty, StringComparison.OrdinalIgnoreCase);

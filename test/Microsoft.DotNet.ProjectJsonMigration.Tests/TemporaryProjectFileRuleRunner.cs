@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
@@ -49,7 +52,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             if (projectContexts.Count() == 0)
             {
                 projectContexts = new []
-                { 
+                {
                     ProjectContext.Create(testPj, FrameworkConstants.CommonFrameworks.NetCoreApp10)
                 };
             }

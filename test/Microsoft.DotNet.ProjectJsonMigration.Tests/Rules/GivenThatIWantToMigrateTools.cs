@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             string targetVersion)
         {
             var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"" + sourceToolName + "\" : { \"version\": \"" + sourceVersion + "\", \"type\": \"build\" } } }");
-            
+
             var packageRef = mockProj.Items.First(i => i.Include == targetToolName && i.ItemType == "PackageReference");
 
             packageRef.GetMetadataWithName("Version").Value.Should().Be(targetVersion);
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             const string anyVersion = "1.0.0-preview2-final";
             var mockProj = RunPackageDependenciesRuleOnPj("{ \"tools\": { \"" + sourceToolName + "\": \"" + anyVersion + "\" } }");
-            
+
             EmitsToolReferences(mockProj, Tuple.Create(targetToolName, targetVersion));
         }
 

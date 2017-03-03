@@ -12,11 +12,11 @@ namespace Microsoft.DotNet.Configurer
     {
         private ITemporaryDirectory _temporaryDirectory;
 
-        public string NuGetPackagesArchive => 
+        public string NuGetPackagesArchive =>
             Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "nuGetPackagesArchive.lzma"));
 
         public NuGetPackagesArchiver() : this(FileSystemWrapper.Default.Directory)
-        {            
+        {
         }
 
         internal NuGetPackagesArchiver(IDirectory directory)
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Configurer
         }
 
         public string ExtractArchive()
-        {        
+        {
             var progress = new ConsoleProgressReport();
             var archive = new IndexedArchive();
 
@@ -37,6 +37,6 @@ namespace Microsoft.DotNet.Configurer
         public void Dispose()
         {
             _temporaryDirectory.Dispose();
-        }        
+        }
     }
 }

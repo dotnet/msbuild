@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     /// <summary>
     /// Implements a few file name utilities that are needed by the compiler.
     /// In general the compiler is not supposed to understand the format of the paths.
-    /// In rare cases it needs to check if a string is a valid file name or change the extension 
+    /// In rare cases it needs to check if a string is a valid file name or change the extension
     /// (embedded resources, netmodules, output name).
     /// The APIs are intentionally limited to cover just these rare cases. Do not add more APIs.
     /// </summary>
@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         internal const char VolumeSeparatorChar = ':';
 
         /// <summary>
-        /// Returns true if the string represents an unqualified file name. 
+        /// Returns true if the string represents an unqualified file name.
         /// The name may contain any characters but directory and volume separators.
         /// </summary>
         /// <param name="path">Path.</param>
@@ -121,8 +121,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         /// </summary>
         /// <returns>
         /// Equivalent of <see cref="System.IO.Path.ChangeExtension(string, string)"/>
-        /// 
-        /// If <paramref name="path"/> is null, returns null. 
+        ///
+        /// If <paramref name="path"/> is null, returns null.
         /// If path does not end with an extension, the new extension is appended to the path.
         /// If extension is null, equivalent to <see cref="RemoveExtension"/>.
         /// </returns>

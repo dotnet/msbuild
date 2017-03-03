@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +17,13 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
             DebugHelper.HandleDebugSwitch(ref args);
 
             var dotnetParams = new DotnetBaseParams("dotnet-dependency-tool-invoker", "DotNet Dependency Tool Invoker", "Invokes tools declared as NuGet dependencies of a project");
-            
+
             dotnetParams.Parse(args);
-            
+
             if (string.IsNullOrEmpty(dotnetParams.Command))
             {
                 Console.WriteLine("A command name must be provided");
-                
+
                 return 1;
             }
 

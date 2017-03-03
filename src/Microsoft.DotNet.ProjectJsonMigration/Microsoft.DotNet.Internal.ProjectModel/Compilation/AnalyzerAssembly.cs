@@ -11,22 +11,22 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Compilation
         /// The fully-qualified path to the analyzer assembly.
         /// </summary>
         public string AssemblyPath { get; }
-        
+
         /// <summary>
         /// The supported language of the analyzer assembly.
         /// </summary>
         public string AnalyzerLanguage { get; }
-        
+
         /// <summary>
         /// The required framework for hosting the analyzer assembly.
         /// </summary>
         public NuGetFramework RequiredFramework { get; }
-        
+
         /// <summary>
         /// The required runtime for hosting the analyzer assembly.
         /// </summary>
         public string RuntimeIdentifier { get; }
-        
+
         public AnalyzerReference(
             string assembly,
             NuGetFramework framework,

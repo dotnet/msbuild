@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 namespace Microsoft.DotNet.Tools.Migrate
 {
     internal class LocalizableStrings
@@ -7,7 +10,7 @@ namespace Microsoft.DotNet.Tools.Migrate
         public const string AppDescription = "Command used to migrate project.json projects to msbuild";
 
         public const string CmdProjectArgument = "PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR";
-        public const string CmdProjectArgumentDescription = 
+        public const string CmdProjectArgumentDescription =
 @"The path to one of the following:
     - a project.json file to migrate.
     - a global.json file, it will migrate the folders specified in global.json.

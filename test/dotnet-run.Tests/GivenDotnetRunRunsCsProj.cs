@@ -77,45 +77,45 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");            
+                         .And.HaveStdOutContaining("Hello World!");
         }
- 
-        [Fact] 
-        public void ItRunsPortableAppsFromADifferentPathAfterBuilding() 
+
+        [Fact]
+        public void ItRunsPortableAppsFromADifferentPathAfterBuilding()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
- 
-            new BuildCommand() 
-                .WithWorkingDirectory(testInstance.Root) 
-                .Execute() 
-                .Should().Pass(); 
 
-            new RunCommand() 
-                .WithWorkingDirectory(testInstance.Root) 
-                .ExecuteWithCapturedOutput($"--no-build") 
-                .Should().Pass() 
-                         .And.HaveStdOutContaining("Hello World!"); 
-        } 
- 
-        [Fact] 
-        public void ItRunsPortableAppsFromADifferentPathWithoutBuilding() 
-        { 
-            var testAppName = "MSBuildTestApp"; 
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput($"--no-build")
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
+        }
+
+        [Fact]
+        public void ItRunsPortableAppsFromADifferentPathWithoutBuilding()
+        {
+            var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            var projectFile = testInstance.Root.GetFile(testAppName + ".csproj"); 
+            var projectFile = testInstance.Root.GetFile(testAppName + ".csproj");
 
-            new RunCommand() 
-                .WithWorkingDirectory(testInstance.Root.Parent) 
-                .ExecuteWithCapturedOutput($"--project {projectFile.FullName}") 
-                .Should().Pass() 
-                         .And.HaveStdOutContaining("Hello World!"); 
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.Parent)
+                .ExecuteWithCapturedOutput($"--project {projectFile.FullName}")
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
         }
 
         [Fact]

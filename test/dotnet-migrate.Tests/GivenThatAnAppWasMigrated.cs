@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using FluentAssertions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Common;
@@ -100,9 +103,9 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: testProjectName)
                 .WithSourceFiles()
                 .Root;
-            
+
             var backupRoot = testRoot.GetDirectory("backup");
-            
+
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
             new MigrateCommand()
