@@ -12,6 +12,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Clean;
+using Microsoft.DotNet.Tools.Complete;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.Migrate;
@@ -29,6 +30,7 @@ using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using Microsoft.DotNet.Tools.Cache;
 using NuGet.Frameworks;
+using Command = Microsoft.DotNet.Cli.Utils.Command;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -54,6 +56,7 @@ namespace Microsoft.DotNet.Cli
             ["sln"] = SlnCommand.Run,
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
+            ["complete"] = CompleteCommand.Run,
         };
 
         public static int Main(string[] args)
