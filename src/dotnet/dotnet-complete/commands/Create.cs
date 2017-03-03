@@ -53,7 +53,8 @@ namespace Microsoft.DotNet.Tools.Complete
                            o => int.Parse(o.Arguments.Single())));
 
         private static Command Add() =>
-            Command("add", "",
+            Command("add", 
+                    ".NET Add Command",
                     ExactlyOneArgument,
                     Package(),
                     Reference(),
@@ -103,7 +104,8 @@ namespace Microsoft.DotNet.Tools.Complete
                                .WithSuggestionsFrom(_ => new[] { "DEBUG", "RELEASE" })));
 
         private static Command List() =>
-            Command("list", "",
+            Command("list",
+                    ".NET List Command",
                     ExactlyOneArgument
                         .With(name: "PROJECT",
                               description:
@@ -304,7 +306,7 @@ namespace Microsoft.DotNet.Tools.Complete
 
         private static Command Remove() =>
             Command("remove",
-                    "",
+                    ".NET Remove Command",
                     HelpOption(),
                     Command("package",
                             "Command to remove package reference.",
