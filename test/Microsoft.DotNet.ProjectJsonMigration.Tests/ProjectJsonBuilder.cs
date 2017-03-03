@@ -1,4 +1,7 @@
-﻿using Microsoft.DotNet.TestFramework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.DotNet.TestFramework;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -17,7 +20,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private JObject _projectJson;
 
         private bool _baseDefined = false;
-        
+
         public ProjectJsonBuilder(TestAssets testAssets)
         {
             _testAssets = testAssets;
@@ -58,7 +61,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         public ProjectJsonBuilder FromEmptyBase()
-        { 
+        {
             SetBase(new JObject());
             return this;
         }

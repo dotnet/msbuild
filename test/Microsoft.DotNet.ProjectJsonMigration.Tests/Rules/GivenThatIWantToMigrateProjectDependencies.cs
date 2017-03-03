@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.TestFramework;
@@ -303,7 +306,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItMigratesUnqualifiedDependenciesAsProjectReferenceWhenAMatchingProjectIsFound()
         {
             var mockProj = MigrateProject("TestAppWithUnqualifiedDependencies", "ProjectA");
-            var projectReferenceInclude = Path.Combine("..", "ProjectB", "ProjectB.csproj");            
+            var projectReferenceInclude = Path.Combine("..", "ProjectB", "ProjectB.csproj");
 
             var projectReferences = mockProj.Items.Should().ContainSingle(
                 item => item.ItemType == "ProjectReference" && item.Include == projectReferenceInclude);

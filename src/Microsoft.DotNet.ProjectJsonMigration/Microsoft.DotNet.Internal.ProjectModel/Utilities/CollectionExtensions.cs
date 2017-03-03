@@ -1,4 +1,7 @@
-﻿using Microsoft.DotNet.Internal.ProjectModel.Compilation;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.DotNet.Internal.ProjectModel.Compilation;
 using System.Linq;
 
 namespace System.Collections.Generic

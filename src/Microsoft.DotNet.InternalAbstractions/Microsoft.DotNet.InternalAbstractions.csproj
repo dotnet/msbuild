@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
   </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.AppContext" Version="4.1.0" />
     <PackageReference Include="System.Collections" Version="4.0.11" />
