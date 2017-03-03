@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.1-beta-000933" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(DependencyModelVersion)" />
   </ItemGroup>
 
 </Project>
