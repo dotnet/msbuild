@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="ToolWithOutputName" Version="1.0.0</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="ToolWithOutputName" Version="1.0.0" />
   </ItemGroup>
 </Project>
