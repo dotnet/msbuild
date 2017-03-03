@@ -160,9 +160,9 @@
                    WorkingDirectory="$(DotnetDebToolDir)" />
   </Target>
 
-  <Target Name="WriteDotnetDebToolProjectJson"
-          Inputs="$(MSBuildThisFile);$(MSBuildThisFileDirectory)/Installer.DEB.props"
-          Outputs="$(DotnetDebToolDir)/project.json">
+  <Target Name="WriteDotnetDebToolProject"
+          Inputs="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
+          Outputs="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)">
 
     <Copy SourceFiles="$(MSBuildThisFileDirectory)/$(DotnetDebToolConsumerProjectName)"
           DestinationFiles="$(DotnetDebToolDir)/$(DotnetDebToolConsumerProjectName)" />
