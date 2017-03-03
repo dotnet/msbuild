@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions.Json" Version="4.12.0" />
+  </ItemGroup>
+</Project>

@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Build.Tasks
 {
     public class PublishAssembliesResolver
     {
+        private  HashSet<PackageIdentity> _allResolvedPackages = new HashSet<PackageIdentity>();
         private readonly IPackageResolver _packageResolver;
         private IEnumerable<string> _privateAssetPackageIds;
         private bool _preserveCacheLayout;
@@ -30,7 +32,6 @@ namespace Microsoft.NET.Build.Tasks
             _preserveCacheLayout = preserveCacheLayout;
             return this;
         }
-
         public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext)
         {
             List<ResolvedFile> results = new List<ResolvedFile>();
@@ -41,6 +42,8 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     continue;
                 }
+
+                _allResolvedPackages.Add(new PackageIdentity(targetLibrary.Name, targetLibrary.Version));
 
                 string pkgRoot;
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version, out pkgRoot);
@@ -87,6 +90,11 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return results;
+        }
+
+        public IEnumerable<PackageIdentity> GetResolvedPackages()
+        {
+            return _allResolvedPackages;
         }
 
         private IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath, string pkgRoot, AssetType assetType)

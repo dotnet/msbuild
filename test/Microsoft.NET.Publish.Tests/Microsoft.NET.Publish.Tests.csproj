@@ -32,6 +32,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\CacheArtifactParser.cs" Exclude="$(GlobalExclude)" />
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>

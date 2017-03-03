@@ -4,7 +4,9 @@
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Globalization;
 using NuGet.ProjectModel;
+using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -14,6 +16,7 @@ namespace Microsoft.NET.Build.Tasks
     public class ResolvePublishAssemblies : TaskBase
     {
         private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
+        private readonly List<ITaskItem> _packagesResolved = new List<ITaskItem>();
 
         [Required]
         public string ProjectPath { get; set; }
@@ -32,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool PreserveCacheLayout { get; set; }
 
-        public string FilterProjectAssetsFile { get; set; }
+        public string[] FilterProjectFiles { get; set; }
 
         /// <summary>
         /// All the assemblies to publish.
@@ -43,38 +46,63 @@ namespace Microsoft.NET.Build.Tasks
             get { return _assembliesToPublish.ToArray(); }
         }
 
+        [Output]
+        public ITaskItem[] PackagesResolved
+        {
+            get { return _packagesResolved.ToArray(); }
+        }
+
+
         protected override void ExecuteCore()
         {
             var lockFileCache = new LockFileCache(BuildEngine4);
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
+            HashSet<PackageIdentity> packagestoBeFiltered = null;
 
-            LockFile filterLockFile = null;
-            if (!string.IsNullOrEmpty(FilterProjectAssetsFile))
+            if (FilterProjectFiles != null && FilterProjectFiles.Length > 0)
             {
-                filterLockFile = lockFileCache.GetLockFile(FilterProjectAssetsFile);
+                packagestoBeFiltered = new HashSet<PackageIdentity>();
+                foreach (var filterProjectFile in FilterProjectFiles)
+                {
+                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, filterProjectFile));
+                    var packagesSpecified = CacheArtifactParser.Parse(filterProjectFile);
 
+                    foreach (var pkg in packagesSpecified)
+                    {
+                        Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.PackageInfoLog, pkg.Id, pkg.Version));
+                    }
+                    packagestoBeFiltered.UnionWith(packagesSpecified);
+                }
             }
+
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
-                PlatformLibraryName,
-                filterLockFile
-                );
+                PlatformLibraryName);
 
-            IEnumerable<ResolvedFile> resolvedAssemblies =
+            projectContext.PackagesToBeFiltered = packagestoBeFiltered;
+
+            var assemblyResolver =
                 new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
-                    .WithPreserveCacheLayout(PreserveCacheLayout)
-                    .Resolve(projectContext);
+                    .WithPreserveCacheLayout(PreserveCacheLayout);
 
+            IEnumerable<ResolvedFile> resolvedAssemblies = assemblyResolver.Resolve(projectContext);
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
             {
                 TaskItem item = new TaskItem(resolvedAssembly.SourcePath);
                 item.SetMetadata("DestinationSubPath", resolvedAssembly.DestinationSubPath);
                 item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
                 _assembliesToPublish.Add(item);
+            }
+
+            foreach (var resolvedPkg in assemblyResolver.GetResolvedPackages())
+            {
+                TaskItem item = new TaskItem(resolvedPkg.Id);
+                item.SetMetadata("Version", resolvedPkg.Version.ToString());
+                _packagesResolved.Add(item);
             }
         }
     }

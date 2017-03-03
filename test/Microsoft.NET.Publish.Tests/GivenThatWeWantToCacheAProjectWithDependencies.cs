@@ -11,10 +11,41 @@ using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.NET.Build.Tasks;
+using FluentAssertions;
+using NuGet.Versioning;
+using NuGet.Packaging.Core;
+
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToCacheAProjectWithDependencies : SdkTest
     {
+        private static string _libPrefix;
+        private static string _runtimeOs;
+        private static string _runtimeLibOs;
+        private static string _runtimeRid;
+        private static string _testArch;
+        private static string _tfm = "netcoreapp1.0";
+
+        static GivenThatWeWantToCacheAProjectWithDependencies()
+        {
+            _libPrefix = "";
+            _runtimeOs = "win7";
+            _runtimeLibOs = "win";
+            var rid= RuntimeEnvironment.GetRuntimeIdentifier();
+            _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
+            _runtimeRid = "win7-" + _testArch;
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _libPrefix = "lib";
+                _runtimeOs = "unix";
+                _runtimeLibOs = "unix";
+                _runtimeRid = rid;
+            }
+
+        }
+
         [Fact]
         public void compose_dependencies()
         {
@@ -22,44 +53,56 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("SimpleCache")
                 .WithSource();
 
+            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
-            var tfm = "netcoreapp1.0";
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
+
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
-
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
 
-            string libPrefix = "";
-            string runtimeos = "win7";
-            string runtimelibos = "win";
-            string arch = rid.Substring(rid.LastIndexOf("-") + 1);
-            string runtimerid = "win7-" + arch;
-
-            if (! RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libPrefix = "lib";
-                runtimeos = "unix";
-                runtimelibos = "unix";
-                runtimerid = rid;
-            }
-
-           
             List<string> files_on_disk = new List < string > {
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h"
+               "artifact.xml",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
                };
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && arch != "x86")
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+
+            //valid artifact.xml
+           var knownpackage = new HashSet<PackageIdentity>();
+
+            knownpackage.Add(new PackageIdentity("Microsoft.NETCore.Targets", NuGetVersion.Parse("1.2.0-beta-24821-02")));
+            knownpackage.Add(new PackageIdentity("System.Private.Uri", NuGetVersion.Parse("4.4.0-beta-24821-02")));
+            knownpackage.Add(new PackageIdentity("Microsoft.NETCore.CoreDisTools", NuGetVersion.Parse("1.0.1-prerelease-00001")));
+            knownpackage.Add(new PackageIdentity($"runtime.{_runtimeOs}.System.Private.Uri", NuGetVersion.Parse("4.4.0-beta-24821-02")));
+            knownpackage.Add(new PackageIdentity("Microsoft.NETCore.Platforms", NuGetVersion.Parse("1.2.0-beta-24821-02")));
+            knownpackage.Add(new PackageIdentity($"runtime.{_runtimeRid}.Microsoft.NETCore.CoreDisTools", NuGetVersion.Parse("1.0.1-prerelease-00001")));
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
+            {
+                knownpackage.Add(new PackageIdentity("runtime.native.System", NuGetVersion.Parse("4.4.0-beta-24821-02")));
+                knownpackage.Add(new PackageIdentity($"runtime.{_runtimeRid}.runtime.native.System", NuGetVersion.Parse("4.4.0-beta-24821-02")));
+            }
+
+            var artifact = Path.Combine(OutputFolder, "artifact.xml");
+            var packagescomposed = CacheArtifactParser.Parse(artifact);
+
+            packagescomposed.Count.Should().Be(knownpackage.Count);
+
+            foreach(var pkg in packagescomposed)
+            {
+                knownpackage.Should().Contain(elem => elem.Equals(pkg),"package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
+            }
+            
         }
         [Fact]
         public void compose_with_fxfiles()
@@ -69,42 +112,28 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
-            var tfm = "netcoreapp1.0";
+            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
+
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
+
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
                 .Should()
                 .Pass();
 
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
-
-            string libPrefix = "";
-            string runtimeos = "win7";
-            string runtimelibos = "win";
-            string arch = rid.Substring(rid.LastIndexOf("-") + 1);
-            string runtimerid = "win7-" + arch;
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libPrefix = "lib";
-                runtimeos = "unix";
-                runtimelibos = "unix";
-                runtimerid = rid;
-            }
-
-
             List<string> files_on_disk = new List<string> {
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h",
-               $"runtime.{runtimeos}.system.private.uri/4.4.0-beta-24821-02/runtimes/{runtimelibos}/lib/netstandard1.0/System.Private.Uri.dll"
+               "artifact.xml",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
+               $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && arch != "x86")
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
@@ -117,46 +146,29 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
-            var tfm = "netcoreapp1.0";
+            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
+
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
-            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "composedir");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
+
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipOptimization=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipOptimization=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
-                        
-            DirectoryInfo workingDirectory = new DirectoryInfo(WorkingDir);
-            workingDirectory.Should().HaveFile("project.assets.json");
 
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
 
-            string libPrefix = "";
-            string runtimeos = "win7";
-            string runtimelibos = "win";
-            string arch = rid.Substring(rid.LastIndexOf("-") + 1);
-            string runtimerid = "win7-" + arch;
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libPrefix = "lib";
-                runtimeos = "unix";
-                runtimelibos = "unix";
-                runtimerid = rid;
-            }
-
-
             List<string> files_on_disk = new List<string> {
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h",
-               $"runtime.{runtimeos}.system.private.uri/4.4.0-beta-24821-02/runtimes/{runtimelibos}/lib/netstandard1.0/System.Private.Uri.dll"
+               "artifact.xml",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
+               $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && arch != "x86")
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
 
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
@@ -169,39 +181,70 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("UnmanagedCache")
                 .WithSource();
 
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
-            string libPrefix = "";
-            string arch = rid.Substring(rid.LastIndexOf("-") + 1);
-            string runtimerid = "win7-" + arch;
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libPrefix = "lib";
-                runtimerid = rid;
-            }
-
             ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
-           
-            var tfm = "netcoreapp1.0";
+
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={runtimerid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
 
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
 
-           
-
-
             List<string> files_on_disk = new List<string> {
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h"
+               "artifact.xml",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
                };
 
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+        }
 
+        [Fact]
+        public void compose_multifile()
+        {
+            TestAsset simpleDependenciesAsset = _testAssetsManager
+                .CopyTestAsset("ProfileLists")
+                .WithSource();
 
+            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+
+            var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
+            var additonalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
+            var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertions.xml");
+
+            cacheCommand
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true")
+                .Should()
+                .Pass();
+            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+
+            List<string> files_on_disk = new List<string> {
+               "artifact.xml",
+               @"newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
+               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               };
+
+            cacheDirectory.Should().HaveFiles(files_on_disk);
+
+            var knownpackage = new HashSet<PackageIdentity>();
+
+            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")));
+            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")));
+            knownpackage.Add(new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0")));
+
+            var artifact = Path.Combine(OutputFolder, "artifact.xml");
+            var packagescomposed = CacheArtifactParser.Parse(artifact);
+
+            packagescomposed.Count.Should().BeGreaterThan(0);
+
+            foreach (var pkg in knownpackage)
+            {
+                packagescomposed.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
+            }
         }
     }
 }

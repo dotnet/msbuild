@@ -124,12 +124,13 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .Restore();
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("NewtonsoftFilterProfile");
-            string filterProjFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.csproj");
+            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("FilterProfiles");
+            string filterProjFile1 = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
+            string filterProjFile2 = Path.Combine(filterProjDir, "NewtonsoftMultipleVersions.xml");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute($"/p:FilterProjFile={filterProjFile}")
+                .Execute( $"/p:FilterProjectFiles={filterProjFile1}%3b{filterProjFile2}")
                 .Should()
                 .Pass();
 
@@ -160,13 +161,13 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .Restore("", $"/p:RuntimeIdentifier={rid}");
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("NewtonsoftFilterProfile");
-            string filterProjFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.csproj");
+            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("FilterProfiles");
+            string filterProjFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
             
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:FilterProjFile={filterProjFile}")
+                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:FilterProjectFiles={filterProjFile}")
                 .Should()
                 .Pass();
 
