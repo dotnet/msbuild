@@ -279,6 +279,7 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
             projectToolsCommandResolver.GenerateDepsJsonFile(
                 lockFile,
+                s_toolPackageFramework,
                 depsJsonFile,
                 new SingleProjectInfo("dotnet-portable", "1.0.0", Enumerable.Empty<ResourceAssemblyInfo>()));
 

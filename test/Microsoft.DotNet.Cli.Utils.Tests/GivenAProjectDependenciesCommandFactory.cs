@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Should().Pass();
 
             var factory = new ProjectDependenciesCommandFactory(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp20,
                 configuration,
                 null,
                 null,

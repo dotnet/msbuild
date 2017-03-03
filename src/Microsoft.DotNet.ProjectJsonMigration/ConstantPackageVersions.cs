@@ -7,8 +7,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public const string AspNetToolsVersion = "1.0.0";
         public const string AspNet110ToolsVersion = "1.1.0";
-        public const string AspNetLTSPackagesVersion = "1.0.2";
-        public const string EntityFrameworkLTSPackagesVersion = "1.0.2";
+        public const string AspNetLTSPackagesVersion = "1.0.3";
+        public const string EntityFrameworkLTSPackagesVersion = "1.0.3";
         public const string TestSdkPackageVersion = "15.0.0-preview-20170106-08";
         public const string XUnitPackageVersion = "2.2.0-beta5-build3474";
         public const string XUnitRunnerPackageVersion = "2.2.0-beta5-build1225";

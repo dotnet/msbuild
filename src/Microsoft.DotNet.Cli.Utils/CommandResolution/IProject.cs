@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -21,6 +22,8 @@ namespace Microsoft.DotNet.Cli.Utils
         string RuntimeConfigJsonPath { get; }
 
         string FullOutputPath { get; }
+
+        NuGetFramework DotnetCliToolTargetFramework { get; }
 
         Dictionary<string, string> EnvironmentVariables { get; }
     }

@@ -112,8 +112,8 @@
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs">
-      <GenerateNuGetPackagesArchiveVersion ToolPath="$(OutputDirectory)">
-        <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
+      <GenerateNuGetPackagesArchiveVersion ToolPath="$(OutputDirectory)" SDKVersion="$(CLI_NETSDK_Version)">
+        <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion" />
       </GenerateNuGetPackagesArchiveVersion>
       <PropertyGroup>
         <NugetPackagesArchiveName>nuGetPackagesArchive.$(NuGetPackagesArchiveVersion).lzma</NugetPackagesArchiveName>

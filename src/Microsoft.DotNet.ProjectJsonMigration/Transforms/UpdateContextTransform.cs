@@ -16,10 +16,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     itemName,
                     includeContext => string.Empty,
                     includeContext => FormatGlobPatternsForMsbuild(includeContext.ExcludeFiles, includeContext.SourceBasePath),
-                    includeContext => FormatGlobPatternsForMsbuild(includeContext.IncludeFiles, includeContext.SourceBasePath),
+                    includeContext => FormatGlobPatternsForMsbuild(
+                        includeContext.IncludeFiles.OrEmptyIfNull().Where(
+                            pattern => !ExcludePatternRule(pattern)), includeContext.SourceBasePath),
                     includeContext => includeContext != null
                         && includeContext.IncludeFiles != null
-                        && includeContext.IncludeFiles.Count > 0);
+                        && includeContext.IncludeFiles.Where(
+                            pattern => !ExcludePatternRule(pattern)).Count() > 0);
 
         protected override Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
             (itemName) => new AddItemTransform<IncludeContext>(
@@ -39,24 +42,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                                          .Union(includeContext.BuiltInsInclude.OrEmptyIfNull())
                                          .Union(includeContext.CustomIncludePatterns.OrEmptyIfNull());
 
-                    return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
+                    return FormatGlobPatternsForMsbuild(
+                        fullIncludeSet.Where(pattern => !ExcludePatternRule(pattern)),
+                        includeContext.SourceBasePath);
                 },
                 includeContext =>
                 {
-                    return includeContext != null &&
-                        (
-                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Count > 0)
-                            ||
-                            (includeContext.BuiltInsInclude != null && includeContext.BuiltInsInclude.Count > 0)
-                            ||
-                            (includeContext.CustomIncludePatterns != null && includeContext.CustomIncludePatterns.Count > 0)
-                        );
+                    return includeContext != null &&includeContext.IncludePatterns.OrEmptyIfNull()
+                                         .Union(includeContext.BuiltInsInclude.OrEmptyIfNull())
+                                         .Union(includeContext.CustomIncludePatterns.OrEmptyIfNull())
+                                         .Where(pattern => !ExcludePatternRule(pattern)).Count() > 0;
                 });
 
         public UpdateContextTransform(
             string itemName,
             bool transformMappings = true,
-            Func<IncludeContext, bool> condition = null) : base(itemName, transformMappings, condition)
+            Func<IncludeContext, bool> condition = null,
+            Func<string, bool> excludePatternsRule = null) : base(
+                itemName,
+                transformMappings,
+                condition,
+                excludePatternsRule: excludePatternsRule)
         {
         }
     }

@@ -57,9 +57,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     packOptions => !string.IsNullOrEmpty(packOptions.RepositoryUrl));
 
         private IncludeContextTransform PackFilesTransform =>
-            new IncludeContextTransform("Content", transformMappings: true)
+            new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("Pack", "true")
                 .WithMappingsToTransform(_mappingsToTransfrom);
+
+        private IncludeContextTransform DoNotPackFilesTransform =>
+            new UpdateContextTransform(
+                "None",
+                transformMappings: true,
+                excludePatternsRule: pattern => ProjectFilesCollection.DefaultBuiltInExcludePatterns.Contains(pattern))
+            .WithMetadata("Pack", "false");
 
         private Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> _mappingsToTransfrom =>
             (addItemTransform, targetPath) =>
@@ -115,7 +122,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private void TransformPackFiles(PackOptions packOptions, ProjectItemGroupElement itemGroup)
         {
-            var transformResult = PackFilesTransform.Transform(packOptions.PackInclude);
+            ExecuteTransformation(PackFilesTransform, packOptions.PackInclude, itemGroup);
+
+            if (packOptions.PackInclude != null)
+            {
+                ExecuteTransformation(
+                    DoNotPackFilesTransform,
+                    new ExcludeContext(
+                        packOptions.PackInclude.SourceBasePath,
+                        packOptions.PackInclude.Option,
+                        packOptions.PackInclude.RawObject,
+                        packOptions.PackInclude.BuiltInsInclude?.ToArray(),
+                        packOptions.PackInclude.BuiltInsExclude?.ToArray()),
+                    itemGroup);
+            }
+        }
+
+        private void ExecuteTransformation(
+            IncludeContextTransform transform,
+            IncludeContext includeContext,
+            ProjectItemGroupElement itemGroup)
+        {
+            var transformResult = transform.Transform(includeContext);
 
             if (transformResult != null && transformResult.Any())
             {

@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
             
-            const string framework = ".NETCoreApp,Version=v1.0";
+            const string framework = ".NETCoreApp,Version=v2.0";
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)

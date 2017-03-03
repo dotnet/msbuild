@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp1.0")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.0")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!");
         }

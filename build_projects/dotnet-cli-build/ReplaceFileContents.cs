@@ -9,7 +9,12 @@ using Microsoft.Build.Framework;
 namespace Microsoft.DotNet.Cli.Build
 {
     /// <summary>
-    /// Reads contents of an input file, and searches for each ReplacementPattern passed in. 
+    /// Reads contents of an input file, and searches for each replacement passed in.
+    /// 
+    /// When ReplacementItems is matched, it will replace the Include/ItemSpec with the corresponding
+    /// ReplacementString metadata value. This can be useful if the ReplacementString is a value that
+    /// cannot be represented by ITaskItem.ItemSpec (like string.Empty).
+    /// 
     /// When a ReplacementPattern is matched it will replace it with the string of the corresponding (by index) 
     /// item in ReplacementStrings.
     /// 
@@ -27,14 +32,23 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string DestinationFile { get; set; }
 
-        [Required]
+        public ITaskItem[] ReplacementItems { get; set; }
+
         public ITaskItem[] ReplacementPatterns { get; set; }
 
-        [Required]
         public ITaskItem[] ReplacementStrings { get; set; }
 
         public override bool Execute()
         {
+            if (ReplacementItems == null && ReplacementPatterns == null && ReplacementStrings == null)
+            {
+                throw new Exception($"ReplaceFileContents was called with no replacement values. Either pass ReplacementItems or ReplacementPatterns/ReplacementStrings properties.");
+            }
+
+            ReplacementItems = ReplacementItems ?? Array.Empty<ITaskItem>();
+            ReplacementPatterns = ReplacementPatterns ?? Array.Empty<ITaskItem>();
+            ReplacementStrings = ReplacementStrings ?? Array.Empty<ITaskItem>();
+
             if (ReplacementPatterns.Length != ReplacementStrings.Length)
             {
                 throw new Exception($"Expected {nameof(ReplacementPatterns)}  (length {ReplacementPatterns.Length}) and {nameof(ReplacementStrings)} (length {ReplacementStrings.Length}) to have the same length.");
@@ -56,6 +70,14 @@ namespace Microsoft.DotNet.Cli.Build
         public string ReplacePatterns(string inputFileText)
         {
             var outText = inputFileText;
+
+            foreach (var replacementItem in ReplacementItems)
+            {
+                var replacementPattern = replacementItem.ItemSpec;
+                var replacementString = replacementItem.GetMetadata("ReplacementString");
+
+                outText = outText.Replace(replacementPattern, replacementString);
+            }
 
             for (int i=0; i<ReplacementPatterns.Length; ++i)
             {

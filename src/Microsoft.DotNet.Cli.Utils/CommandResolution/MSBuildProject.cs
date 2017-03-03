@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class MSBuildProject : IProject
     {
+        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
+
         private Project _project;
 
         private string _projectRoot;
@@ -59,6 +61,25 @@ namespace Microsoft.DotNet.Cli.Utils
                 return _projectRoot;
             }
         }
+
+        public NuGetFramework DotnetCliToolTargetFramework
+        {
+            get
+            {
+                var frameworkString = _project
+                    .AllEvaluatedProperties
+                    .FirstOrDefault(p => p.Name.Equals("DotnetCliToolTargetFramework"))
+                    ?.EvaluatedValue;
+
+                if (string.IsNullOrEmpty(frameworkString))
+                {
+                    return s_toolPackageFramework;
+                }
+
+                return NuGetFramework.Parse(frameworkString);
+            }
+        }
+
 
         public Dictionary<string, string> EnvironmentVariables
         {

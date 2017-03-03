@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     var values = line.Split(',');
                     var packageName = values[0];
                     var ltsVersion = values[1];
+                    var ftsVersion = values[2];
 
                     if (HasVersion(ltsVersion))
                     {
@@ -36,6 +37,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                             {
                                 Name = packageName,
                                 Version = ltsVersion
+                            });
+                    }
+
+                    if(HasVersion(ftsVersion))
+                    {
+                        var version = HasVersion(ltsVersion) ? $"({ltsVersion},{ftsVersion})" : $"[,{ftsVersion})";
+                        projectDependenciesPackages.Add(
+                            new PackageDependencyInfo
+                            {
+                                Name = packageName,
+                                Version = version
+                            },
+                            new PackageDependencyInfo
+                            {
+                                Name = packageName,
+                                Version = ftsVersion
                             });
                     }
                 }

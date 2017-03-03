@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-beta-001509-00</RuntimeFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-deb-tool" Version="2.0.0-*" />
+  </ItemGroup>
+</Project>

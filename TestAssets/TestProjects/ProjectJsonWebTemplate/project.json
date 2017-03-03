@@ -97,7 +97,8 @@
       "wwwroot",
       "**/*.cshtml",
       "appsettings.json",
-      "web.config"
+      "web.config",
+      "README.md"
     ]
   },
 

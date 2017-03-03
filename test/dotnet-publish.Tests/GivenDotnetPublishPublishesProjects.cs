@@ -32,11 +32,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp1.0")
+                .Execute("--framework netcoreapp2.0")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.0", "publish", $"{testAppName}.dll");
 
             new TestCommand("dotnet")
                 .ExecuteWithCapturedOutput(outputDll)
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
             new PublishCommand()
-                .WithFramework("netcoreapp1.0")
+                .WithFramework("netcoreapp2.0")
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
                 //Workaround for https://github.com/dotnet/cli/issues/4501
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = testProjectDirectory
-                .GetDirectory("bin", configuration, "netcoreapp1.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
+                .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
                 .FullName;
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -414,7 +414,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Should().NotContain(
                 i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
-            mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which.Value.Should().Be("1.1.0");
+            mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which.Value.Should().Be("1.1.1");
         }
 
         [Fact]
@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().NotContain(
                 i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
             var runtimeFrameworkVersion = mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which;
-            runtimeFrameworkVersion.Value.Should().Be("1.1.0");
+            runtimeFrameworkVersion.Value.Should().Be("1.1.1");
             runtimeFrameworkVersion.Condition.Should().Contain("netcoreapp1.0");
         }
 
@@ -457,7 +457,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().NotContain(
                 i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
             var runtimeFrameworkVersion = mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which;
-            runtimeFrameworkVersion.Value.Should().Be("1.1.0");
+            runtimeFrameworkVersion.Value.Should().Be("1.1.1");
             runtimeFrameworkVersion.Condition.Should().BeEmpty();
         }
 
