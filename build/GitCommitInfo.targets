@@ -1,13 +1,14 @@
 <Project ToolsVersion="15.0">
-  <Target Name="WriteGitCommitInfoProps"
-          DependsOnTargets="BuildDotnetCliBuildFramework">
-    <GetCommitCount>
-      <Output TaskParameter="CommitCount" PropertyName="GitInfoCommitCount" />
-    </GetCommitCount>
+  <Target Name="WriteGitCommitInfoProps">
+    <Exec Command="git rev-list --count HEAD" 
+          ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitCount" />
+    </Exec>
 
-    <GetCommitHash>
-      <Output TaskParameter="CommitHash" PropertyName="GitInfoCommitHash" />
-    </GetCommitHash>
+    <Exec Command="git rev-parse HEAD" 
+          ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitHash" />
+    </Exec>
 
     <PropertyGroup>
       <ShouldOverWriteThePropsFile 
