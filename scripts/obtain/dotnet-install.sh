@@ -656,7 +656,7 @@ do
             echo "  --verbose,-Verbose             Display diagnostics information."
             echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
             echo "  --linux-portable               Installs the Linux portable .NET Tools instead of a distro-specific version."
-			echo "      -LinuxPortable"
+            echo "      -LinuxPortable"
             echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""
             echo "Install Location:"
