@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp1.0", "VSTestDotNetCore.dll");
+                                   configuration, "netcoreapp2.0", "VSTestDotNetCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
