@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-portable" Version="1.0.0</Version>
-    </DotNetCliToolReference>
-    <DotNetCliToolReference Include="dotnet-prefercliruntime" Version="1.0.0</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-portable" Version="1.0.0" />
+    <DotNetCliToolReference Include="dotnet-prefercliruntime" Version="1.0.0" />
   </ItemGroup>
 </Project>
