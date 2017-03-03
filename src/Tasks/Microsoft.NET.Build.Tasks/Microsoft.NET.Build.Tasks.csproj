@@ -15,6 +15,7 @@
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DefineConstants>$(DefineConstants);PRODUCT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <OutDir>$(OutDir)net46\</OutDir>
@@ -87,6 +88,8 @@
     <Compile Include="FileGroup.cs" />
     <Compile Include="MetadataKeys.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
+    <Compile Include="RemoveDuplicatePackageReferences.cs" />
+    <Compile Include="CacheArtifactParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net46'">

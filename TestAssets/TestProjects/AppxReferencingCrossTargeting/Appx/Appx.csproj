@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../CrossTargeted/CrossTargeted.csproj" />
+  </ItemGroup>
+ 
+  <!--
+    Mimic enough of Microsoft.AppxPackage.targets to get regression coverage
+    for the scenario without OS or VS workload dependencies. One important
+    distinction between this mock implementation and the real implementation
+    is that we never continue on error here, which allows the correspodning
+    unit test to check for successful binding to GetPackagingOutputs as simply
+    build pass vs. fail.
+  -->
+  <Target Name="GetPackagingOutputsOfProjectReferences" 
+          AfterTargets="Build"
+          DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
+    <MSBuild
+      Projects="@(ProjectReferenceWithConfiguration)"
+      Targets="GetPackagingOutputs"
+      BuildInParallel="$(BuildInParallel)"
+      Properties="%(ProjectReferenceWithConfiguration.SetConfiguration); %(ProjectReferenceWithConfiguration.SetPlatform)"
+      Condition="'@(ProjectReferenceWithConfiguration)' != ''
+                 and '%(ProjectReferenceWithConfiguration.BuildReference)' == 'true' 
+                 and '%(ProjectReferenceWithConfiguration.ReferenceOutputAssembly)' == 'true'">
+      <Output TaskParameter="TargetOutputs" ItemName="_PackagingOutputsFromOtherProjects" />
+    </MSBuild>
+  </Target>
+</Project>

@@ -201,5 +201,21 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
 
         }
+
+        [Fact]
+        public void An_appx_app_can_reference_a_cross_targeted_library()
+        {
+            var asset = _testAssetsManager
+                .CopyTestAsset("AppxReferencingCrossTargeting")
+                .WithSource()
+                .Restore("Appx");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(asset.TestRoot, "Appx"));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

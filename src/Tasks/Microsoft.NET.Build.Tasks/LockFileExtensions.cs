@@ -16,8 +16,7 @@ namespace Microsoft.NET.Build.Tasks
             this LockFile lockFile,
             NuGetFramework framework,
             string runtime,
-            string platformLibraryName,
-            LockFile filterlockFile = null)
+            string platformLibraryName)
         {
             if (lockFile == null)
             {
@@ -29,12 +28,6 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
-            LockFileTarget filterlockFileTarget = null;
-
-            if (filterlockFile != null)
-            {
-                filterlockFileTarget = filterlockFile.GetTarget(framework, runtime);
-            }
 
             if (lockFileTarget == null)
             {
@@ -46,7 +39,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
             }
 
-            return new ProjectContext(lockFile, lockFileTarget, platformLibraryName, filterlockFileTarget);
+            return new ProjectContext(lockFile, lockFileTarget, platformLibraryName);
         }
 
         public static LockFileTargetLibrary GetLibrary(this LockFileTarget lockFileTarget, string libraryName)

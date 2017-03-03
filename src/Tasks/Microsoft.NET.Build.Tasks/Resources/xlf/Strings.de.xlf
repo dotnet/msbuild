@@ -150,7 +150,7 @@
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">Die angegebene Abhängigkeit war "{0}", das Ende war jedoch "{1}".</target>
+        <target state="translated">Angegeben war Abhängigkeit "{0}", die tatsächliche Abhängigkeit war aber "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1008">
