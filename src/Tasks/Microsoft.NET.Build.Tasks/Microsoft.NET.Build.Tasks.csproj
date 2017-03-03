@@ -10,10 +10,11 @@
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <OutDir>$(OutDir)net46\</OutDir>
@@ -28,9 +29,11 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Framework">
       <Version>$(MsBuildPackagesVersion)</Version>
+      <ExcludeAssets>Runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(MsBuildPackagesVersion)</Version>
+      <ExcludeAssets>Runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
@@ -173,5 +176,13 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
+  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
+  <Target Name="FilterCopyLocal" DependsOnTargets="RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
+    <ItemGroup>
+      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
+      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
+    </ItemGroup>
+  </Target>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
 </Project>
