@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesBasicPackageReference()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : ""1.0.0-preview"",
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesTypeBuildToPrivateAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesSuppressParentArrayToPrivateAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesSuppressParentStringToPrivateAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesIncludeExcludeArraysToIncludeAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesIncludeStringToIncludeAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesIncludeExcludeOverlappingStringsToIncludeAssets()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
                         ""APackage"" : {
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItMigratesTools()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""tools"": {
                         ""APackage"" : ""1.0.0-preview"",
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var importPropertyName = "PackageTargetFallback";
 
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""frameworks"": {
                         ""netcoreapp1.0"" : {
@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""net451"" : {
                             ""imports"": ""netstandard1.3""
                         }
-                    }                    
+                    }
                 }");
 
             var imports = mockProj.Properties.Where(p => p.Name == importPropertyName);
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var importPropertyName = "PackageTargetFallback";
 
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""frameworks"": {
                         ""netcoreapp1.0"" : {
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItAutoAddDesktopReferencesDuringMigrate()
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""frameworks"": {
                         ""net35"" : {},

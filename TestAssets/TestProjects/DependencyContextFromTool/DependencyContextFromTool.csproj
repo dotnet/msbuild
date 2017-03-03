@@ -8,18 +8,11 @@
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>2.0.0-beta-001509-00</Version>
-    </PackageReference>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0-beta-001509-00" />
   </ItemGroup>
+
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-context-test">
-      <Version>1.0.0-*</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-dependency-context-test" Version="1.0.0-*" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
 </Project>

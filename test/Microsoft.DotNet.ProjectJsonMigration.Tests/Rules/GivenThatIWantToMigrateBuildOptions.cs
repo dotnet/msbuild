@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -34,7 +37,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Count(i => i.ItemType.Equals("Compile", StringComparison.Ordinal))
                 .Should().Be(1);
-            mockProj.Items.Count(i => 
+            mockProj.Items.Count(i =>
                 i.ItemType.Equals("Compile", StringComparison.Ordinal) &&
                 i.Remove.Equals("node_modules"))
                 .Should().Be(1);
@@ -483,7 +486,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingGroupIncludeExcludePopulatesAppropriateProjectItemElement(
             string group,
             string itemName,
-            int expectedNumberOfCompileItems, 
+            int expectedNumberOfCompileItems,
             string expectedRootFiles)
         {
             var testDirectory = Temp.CreateDirectory().Path;

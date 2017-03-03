@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <AssemblyName>Msbuild.Tests.Utilities</AssemblyName>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj" />
@@ -15,6 +16,7 @@
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />

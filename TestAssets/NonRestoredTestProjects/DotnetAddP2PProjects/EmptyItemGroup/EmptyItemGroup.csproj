@@ -5,10 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>2.0.0-beta-001509-00</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0-beta-001509-00" />
   </ItemGroup>
+
   <ItemGroup>
     <!-- Existing but empty item group - do not remove -->
   </ItemGroup>

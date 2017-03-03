@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
@@ -27,44 +27,18 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj">
-      <FromP2P>true</FromP2P>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk">
-      <Version>15.0.0-preview-20161024-02</Version>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio">
-      <Version>2.2.0-beta4-build1194</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.Versioning">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.Packaging">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.Frameworks">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.ProjectModel">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="moq.netcore">
-      <Version>4.4.0-beta8</Version>
-    </PackageReference>
-    <PackageReference Include="xunit">
-      <Version>2.2.0-beta4-build3444</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>$(PlatformAbstractionsVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Runtime">
-      <Version>$(CLI_MSBuild_Version)</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161024-02" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
+    <PackageReference Include="NuGet.Versioning" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="moq.netcore" Version="4.4.0-beta8" />
+    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuild_Version)" />
   </ItemGroup>
 </Project>

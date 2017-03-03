@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="$(GeneratedPackageId)">
-      <Version>1.0.0</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="$(GeneratedPackageId)" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

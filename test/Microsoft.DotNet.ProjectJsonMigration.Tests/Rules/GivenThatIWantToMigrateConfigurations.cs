@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -485,7 +488,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             configIncludeContentItem6.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem6.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
         }
-        
+
         [Fact]
         public void ConfigurationBuildOptionsWhichHaveMappingsOverlappingWithIncludesInRootBuildoptionsHasRemove()
         {
@@ -627,7 +630,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 item => item.ConditionChain().Count() > 0
                     && item.Update == "root");
             configIncludeEncompassedItem.Should().BeNull();
-            
+
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0
                     && item.Update == "src");
@@ -663,7 +666,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private ProjectRootElement RunConfigurationsAndBuildOptionsRuleOnPj(string s, string testDirectory = null)
         {
             return RunRulesOnPj(
-                s, 
+                s,
                 new IMigrationRule[]
                 {
                     new MigrateBuildOptionsRule(),

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -47,7 +50,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 return null;
             }
-            
+
             var commandPath = GetCommandFilePath(nugetPackagesRoot, toolLibrary, toolAssembly);
 
             if (!File.Exists(commandPath))
@@ -61,9 +64,9 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return CreateCommandSpecWrappingWithMuxerIfDll(
-                commandPath, 
-                commandArguments, 
-                depsFilePath, 
+                commandPath,
+                commandArguments,
+                depsFilePath,
                 commandResolutionStrategy,
                 nugetPackagesRoot,
                 runtimeConfigPath);
@@ -85,8 +88,8 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec CreateCommandSpecWrappingWithMuxerIfDll(
-            string commandPath, 
-            IEnumerable<string> commandArguments, 
+            string commandPath,
+            IEnumerable<string> commandArguments,
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
@@ -97,20 +100,20 @@ namespace Microsoft.DotNet.Cli.Utils
             if (commandExtension == FileNameSuffixes.DotNet.DynamicLib)
             {
                 return CreatePackageCommandSpecUsingMuxer(
-                    commandPath, 
-                    commandArguments, 
-                    depsFilePath, 
+                    commandPath,
+                    commandArguments,
+                    depsFilePath,
                     commandResolutionStrategy,
                     nugetPackagesRoot,
                     runtimeConfigPath);
             }
-            
+
             return CreateCommandSpec(commandPath, commandArguments, commandResolutionStrategy);
         }
 
         private CommandSpec CreatePackageCommandSpecUsingMuxer(
-            string commandPath, 
-            IEnumerable<string> commandArguments, 
+            string commandPath,
+            IEnumerable<string> commandArguments,
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
@@ -134,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 arguments.Add("--runtimeconfig");
                 arguments.Add(runtimeConfigPath);
             }
-            
+
             if (depsFilePath != null)
             {
                 arguments.Add("--depsfile");
@@ -156,7 +159,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private CommandSpec CreateCommandSpec(
-            string commandPath, 
+            string commandPath,
             IEnumerable<string> commandArguments,
             CommandResolutionStrategy commandResolutionStrategy)
         {

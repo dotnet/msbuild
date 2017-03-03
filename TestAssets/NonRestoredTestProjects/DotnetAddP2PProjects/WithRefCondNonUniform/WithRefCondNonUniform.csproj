@@ -1,12 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net451;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>2.0.0-beta-001509-00</Version>
-    </PackageReference>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0-beta-001509-00" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <SomeItemCausingThisGroupToNotBeUniform Include="foo" />

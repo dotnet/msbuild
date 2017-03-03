@@ -1,4 +1,7 @@
-﻿namespace Microsoft.DotNet.Tools.Cache
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Microsoft.DotNet.Tools.Cache
 {
     internal class LocalizableStrings
     {
@@ -21,7 +24,7 @@
         public const string OutputOption = "OUTPUT_DIR";
 
         public const string OutputOptionDescription = "Output directory in which to cache the given assemblies.";
-    
+
         public const string FrameworkVersionOption = "FrameworkVersion";
 
         public const string FrameworkVersionOptionDescription = "The Microsoft.NETCore.App package version that will be used to run the assemblies.";

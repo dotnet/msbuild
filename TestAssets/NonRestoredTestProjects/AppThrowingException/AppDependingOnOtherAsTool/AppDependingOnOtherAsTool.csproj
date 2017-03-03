@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-throwingtool">
-      <Version>1.0.0</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-throwingtool" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

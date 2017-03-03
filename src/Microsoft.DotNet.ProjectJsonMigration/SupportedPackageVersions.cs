@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             get
             {
-                return !string.IsNullOrEmpty(Name) && 
+                return !string.IsNullOrEmpty(Name) &&
                     (Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase) ||
                      Name.Equals("NETStandard.Library", StringComparison.OrdinalIgnoreCase));
             }

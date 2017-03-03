@@ -13,39 +13,19 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library">
-      <Version>1.6.0</Version>
-    </PackageReference>
+    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
   </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.AppContext">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Collections">
-      <Version>4.0.11</Version>
-    </PackageReference>
-    <PackageReference Include="System.IO">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.IO.FileSystem">
-      <Version>4.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reflection.TypeExtensions">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.Extensions">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.InteropServices">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation">
-      <Version>4.0.0</Version>
-    </PackageReference>
+    <PackageReference Include="System.AppContext" Version="4.1.0" />
+    <PackageReference Include="System.Collections" Version="4.0.11" />
+    <PackageReference Include="System.IO" Version="4.1.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.0.1" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.0.0" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

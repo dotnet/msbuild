@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     // For example we need to be able to work with invalid paths or paths containing wildcards
     internal static class PathUtilities
     {
-        // We consider '/' a directory separator on Unix like systems. 
+        // We consider '/' a directory separator on Unix like systems.
         // On Windows both / and \ are equally accepted.
         internal static readonly char DirectorySeparatorChar = IsUnixLikePlatform ? '/' : '\\';
         internal static readonly char AltDirectorySeparatorChar = '/';
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         /// </summary>
         /// <remarks>
         /// Unlike <see cref="System.IO.Path.GetDirectoryName"/> it
-        ///     doesn't check for invalid path characters, 
+        ///     doesn't check for invalid path characters,
         ///     doesn't strip any trailing directory separators (TODO: tomat),
         ///     doesn't recognize UNC structure \\computer-name\share\directory-name\file-name (TODO: tomat).
         /// </remarks>
@@ -295,9 +295,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         /// <param name="root">Absolute root path.</param>
         /// <param name="relativePath">Relative path.</param>
         /// <returns>
-        /// An absolute combined path, or null if <paramref name="relativePath"/> is 
-        /// absolute (e.g. "C:\abc", "\\machine\share\abc"), 
-        /// relative to the current root (e.g. "\abc"), 
+        /// An absolute combined path, or null if <paramref name="relativePath"/> is
+        /// absolute (e.g. "C:\abc", "\\machine\share\abc"),
+        /// relative to the current root (e.g. "\abc"),
         /// or relative to a drive directory (e.g. "C:abc\def").
         /// </returns>
         /// <seealso cref="CombinePossiblyRelativeAndRelativePaths"/>

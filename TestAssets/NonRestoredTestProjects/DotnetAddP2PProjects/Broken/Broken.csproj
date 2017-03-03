@@ -3,6 +3,7 @@
     <OutputType>Library</OutputType>
     <TargetFrameworks>net451;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />

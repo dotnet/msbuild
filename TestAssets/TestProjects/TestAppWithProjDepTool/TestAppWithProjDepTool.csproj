@@ -6,15 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotnet-portable">
-      <Version>1.0.0</Version>
+    <PackageReference Include="dotnet-portable" Version="1.0.0" >
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker">
-      <Version>1.0.0-*</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
   </ItemGroup>
 </Project>

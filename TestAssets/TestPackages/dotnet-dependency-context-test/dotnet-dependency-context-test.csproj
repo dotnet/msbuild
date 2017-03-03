@@ -16,15 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel">
-      <Version>$(DependencyModelVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.1-beta-000933" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

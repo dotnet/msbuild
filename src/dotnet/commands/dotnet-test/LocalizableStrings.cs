@@ -1,4 +1,7 @@
-﻿namespace Microsoft.DotNet.Tools.Test
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Microsoft.DotNet.Tools.Test
 {
     internal class LocalizableStrings
     {
@@ -31,7 +34,7 @@
 
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
-        public const string CmdLoggerDescription = @"Specify a logger for test results. 
+        public const string CmdLoggerDescription = @"Specify a logger for test results.
                                         Example: --logger ""trx[;LogFileName=<Defaults to unique file name>]""";
 
         public const string CmdConfiguration = "CONFIGURATION";

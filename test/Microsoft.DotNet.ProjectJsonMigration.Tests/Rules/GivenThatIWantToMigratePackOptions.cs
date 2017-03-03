@@ -21,10 +21,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""summary"": ""Some not important summary""
-                    }                    
+                    }
                 }");
-            
-            EmitsOnlyAlwaysEmittedPackOptionsProperties(mockProj);            
+
+            EmitsOnlyAlwaysEmittedPackOptionsProperties(mockProj);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""owner"": ""Some not important owner""
-                    }                    
+                    }
                 }");
 
             EmitsOnlyAlwaysEmittedPackOptionsProperties(mockProj);
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""tags"": []
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageTags").Should().Be(0);
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""tags"": [""hyperscale"", ""cats""]
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageTags").Should().Be(1);
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""releaseNotes"": ""Some release notes value.""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageReleaseNotes").Should().Be(1);
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""iconUrl"": ""http://www.mylibrary.gov/favicon.ico""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageIconUrl").Should().Be(1);
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""projectUrl"": ""http://www.url.to.library.com""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageProjectUrl").Should().Be(1);
@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""licenseUrl"": ""http://www.url.to.library.com/licence""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageLicenseUrl").Should().Be(1);
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""requireLicenseAcceptance"": ""true""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageRequireLicenseAcceptance").Should().Be(1);
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 {
                     ""packOptions"": {
                         ""requireLicenseAcceptance"": ""false""
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "PackageRequireLicenseAcceptance").Should().Be(1);
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""repository"": {
                             ""type"": ""git""
                         }
-                    }                    
+                    }
                 }");
 
             mockProj.Properties.Count(p => p.Name == "RepositoryType").Should().Be(1);
@@ -319,8 +319,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             var expectedPackagePath = string.Join(
-                ";", 
-                new [] {                    
+                ";",
+                new [] {
                     Path.Combine("different", "path"),
                     Path.Combine("other", "path")
                 });
@@ -349,6 +349,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             project.Properties.Count().Should().Be(1);
             project.Properties.All(p => p.Name == "PackageRequireLicenseAcceptance").Should().BeTrue();
-        }   
+        }
     }
 }
