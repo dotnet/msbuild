@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackagingBuildBasePath>$(CompilationDirectory)/forPackaging</PackagingBuildBasePath>
-    <NupkgOutputDirectory>$(PackagesDirectory)</NupkgOutputDirectory>
   </PropertyGroup>
 
   <Target Name="SetupProjectsToPack"
@@ -16,11 +15,10 @@
   </Target>
 
   <Target Name="GenerateNugetPackages"
-          DependsOnTargets="Init; SetupProjectsToPack"
-          Condition=" '$(OS)' == 'Windows_NT' ">
+          DependsOnTargets="Init; SetupProjectsToPack">
 
     <DotNetPack NoBuild="True"
-                Output="$(NupkgOutputDirectory)"
+                Output="$(PackagesDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="$(VersionSuffix)"
@@ -28,8 +26,7 @@
   </Target>
 
   <Target Name="BuildProjectsForNuGetPackages"
-          DependsOnTargets="Init; SetupProjectsToPack"
-          Condition=" '$(OS)' == 'Windows_NT' ">
+          DependsOnTargets="Init; SetupProjectsToPack">
 
     <MakeDir Directories="$(PackagingBuildBasePath)" />
 

@@ -30,6 +30,8 @@
                        Channel="$(Channel)"
                        CommitHash="$(CommitHash)" />
 
-    <UpdateVersionsRepo BranchName="$(BranchName)" />
+    <UpdateVersionsRepo BranchName="$(BranchName)"
+                        PackagesDirectory="$(PackagesDirectory)"
+                        GitHubPassword="$(GITHUB_PASSWORD)" />
   </Target>
 </Project>
