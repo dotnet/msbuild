@@ -1,6 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.props" />
   <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <ProjectGuid>{98883ACD-BE3A-4533-953D-1BE25981BA02}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
