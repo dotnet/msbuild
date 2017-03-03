@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
-    public class UnitTest1
+    public class PrecedenceSelectionTests
     {
         [Theory]
         [InlineData("MvcNoAuthTest.json", "mvc")]
@@ -28,9 +28,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [InlineData("MvcFramework20Test.json", "mvc -f netcoreapp2.0")]
         [InlineData("MvcIndAuthTest.json", "mvc -au individual -f netcoreapp2.0")]
         [InlineData("MvcFramework20Test.json", "mvc -au individual -f netcoreapp2.0")]
-        public void Test1(string script, string args)
+        public void MvcCorrectlyDisambiguatesPrecedenceTest(string script, string args)
         {
-            string codebase = typeof(UnitTest1).GetTypeInfo().Assembly.CodeBase;
+            string codebase = typeof(PrecedenceSelectionTests).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
