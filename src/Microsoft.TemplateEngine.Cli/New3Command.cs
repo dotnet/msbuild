@@ -98,11 +98,10 @@ namespace Microsoft.TemplateEngine.Cli
 
         private static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
         {
-            Func<IFilteredTemplateInfo, string> groupIdentitySelector = (x) => x.Info.GroupIdentity;
-            return templateList.AllAreTheSame(groupIdentitySelector, StringComparer.OrdinalIgnoreCase);
+            return templateList.AllAreTheSame((x) => x.Info.GroupIdentity, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static IFilteredTemplateInfo HighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<IFilteredTemplateInfo> templateList)
+        private static IFilteredTemplateInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<IFilteredTemplateInfo> templateList)
         {
             if (!AreAllTemplatesSameGroupIdentity(templateList))
             {
@@ -205,7 +204,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     IReadOnlyList<IFilteredTemplateInfo> matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo.Where(x => x.IsParameterMatch).ToList();
 
-                    if (!matchesAfterParameterChecks.Any())
+                    if (matchesAfterParameterChecks.Count == 0)
                     {   // no param matches, continue additional matching with the list from before param checking.
                         matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo;
                     }
@@ -384,8 +383,18 @@ namespace Microsoft.TemplateEngine.Cli
 
         private string GetLanguageMismatchErrorMessage(string inputLanguage)
         {
+            string inputFlagForm;
+            if (_app.RemainingArguments.Contains("-lang"))
+            {
+                inputFlagForm = "-lang";
+            }
+            else
+            {
+                inputFlagForm = "--language";
+            }
+
             string invalidLanguageErrorText = LocalizableStrings.InvalidTemplateParameterValues;
-            invalidLanguageErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, "-lang", inputLanguage, "--language");
+            invalidLanguageErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFlagForm, inputLanguage, "language");
             return invalidLanguageErrorText;
         }
 
@@ -428,7 +437,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IEnumerable<ITemplateInfo> templateList;
 
-                if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Any())
+                if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Count > 0)
                 {
                     templateList = UnambiguousTemplateGroupToUse.Select(x => x.Info);
                 }
@@ -461,7 +470,7 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (IGrouping<string, ITemplateInfo> grouping in grouped)
             {
                 List<string> languageForDisplay = new List<string>();
-                HashSet<string> uniqueLanguages = new HashSet<string>();
+                HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (ITemplateInfo info in grouping)
                 {
@@ -469,7 +478,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         foreach (string lang in languageTag.ChoicesAndDescriptions.Keys)
                         {
-                            if (!uniqueLanguages.Contains(lang))
+                            if (!uniqueLanguages.Add(lang))
                             {
                                 if (string.IsNullOrEmpty(Language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
                                 {
@@ -478,10 +487,7 @@ namespace Microsoft.TemplateEngine.Cli
                                 else
                                 {
                                     languageForDisplay.Add(lang);
-                                    uniqueLanguages.Add(lang);
                                 }
-
-                                uniqueLanguages.Add(lang);
                             }
                         }
                     }
@@ -655,7 +661,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!anyValid)
             {
-                IFilteredTemplateInfo highestPrecedenceTemplate = HighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
+                IFilteredTemplateInfo highestPrecedenceTemplate = FindHighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
 
                 if (highestPrecedenceTemplate != null)
                 {
@@ -669,7 +675,7 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-        private CreationResultStatus SingularGroupDisplayTemplateHelp()
+        private CreationResultStatus DisplayTemplateHelpForSingularGroup()
         {
             bool anyArgsErrors = false;
             ShowUsageHelp();
@@ -720,12 +726,12 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (IsHelpFlagSpecified)
             {
-                return SingularGroupDisplayTemplateHelp();
+                return DisplayTemplateHelpForSingularGroup();
             }
 
             bool argsError = false;
             string commandParseFailureMessage = null;
-            IFilteredTemplateInfo highestPrecedenceTemplate = HighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
+            IFilteredTemplateInfo highestPrecedenceTemplate = FindHighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
             try
             {
                 ParseTemplateArgs(highestPrecedenceTemplate.Info);
