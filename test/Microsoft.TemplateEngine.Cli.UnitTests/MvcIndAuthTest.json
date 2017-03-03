@@ -1,0 +1,42 @@
+﻿[
+  {
+    "kind": "dir_exists",
+    "path": "Data"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Models"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Services"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Data/Migrations"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Models/AccountViewModels"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Models/ManageViewModels"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Views/Account"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Views/Home"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Views/Manage"
+  },
+  {
+    "kind": "dir_exists",
+    "path": "Views/Shared"
+  }
+]
