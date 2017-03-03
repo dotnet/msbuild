@@ -10,7 +10,8 @@ namespace Microsoft.Build.Logging
     /// Provides a method to read a binary log file (*.binlog) and replay all stored BuildEventArgs
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
-    public class BinaryLogReplayEventSource : EventArgsDispatcher
+    /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
+    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher
     {
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
@@ -18,56 +19,44 @@ namespace Microsoft.Build.Logging
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         public void Replay(string sourceFilePath)
         {
-            using (var stream = new FileStream(sourceFilePath, FileMode.Open))
+            try
             {
-                var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
-                var binaryReader = new BinaryReader(gzipStream);
-
-                int fileFormatVersion = binaryReader.ReadInt32();
-
-                // the log file is written using a newer version of file format
-                // that we don't know how to read
-                if (fileFormatVersion > BinaryLogger.FileFormatVersion)
+                using (var stream = new FileStream(sourceFilePath, FileMode.Open))
                 {
-                    var text = ResourceUtilities.FormatResourceString("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
-                    throw new NotSupportedException(text);
-                }
+                    var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
+                    var binaryReader = new BinaryReader(gzipStream);
 
-                var reader = new BuildEventArgsReader(binaryReader);
-                while (true)
-                {
-                    BuildEventArgs instance = null;
+                    int fileFormatVersion = binaryReader.ReadInt32();
 
-                    try
+                    // the log file is written using a newer version of file format
+                    // that we don't know how to read
+                    if (fileFormatVersion > BinaryLogger.FileFormatVersion)
                     {
+                        var text = ResourceUtilities.FormatResourceString("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                        throw new NotSupportedException(text);
+                    }
+
+                    var reader = new BuildEventArgsReader(binaryReader);
+                    while (true)
+                    {
+                        BuildEventArgs instance = null;
+
                         instance = reader.Read();
-                    }
-                    catch (Exception ex)
-                    {
-                        string code;
-                        string helpKeyword;
-                        var text = ResourceUtilities.FormatResourceString(out code, out helpKeyword, "InvalidLogFileFormat", ex.Message);
-                        var message = new BuildErrorEventArgs(
-                            subcategory: "",
-                            code: code,
-                            file: sourceFilePath,
-                            lineNumber: 0,
-                            columnNumber: 0,
-                            endLineNumber: 0,
-                            endColumnNumber: 0,
-                            message: text,
-                            helpKeyword: helpKeyword,
-                            senderName: "MSBuild");
-                        Dispatch(message);
-                    }
+                        if (instance == null)
+                        {
+                            break;
+                        }
 
-                    if (instance == null)
-                    {
-                        break;
+                        Dispatch(instance);
                     }
-
-                    Dispatch(instance);
                 }
+            }
+            catch (Exception ex)
+            {
+                string code;
+                string helpKeyword;
+                var text = ResourceUtilities.FormatResourceString(out code, out helpKeyword, "InvalidLogFileFormat", ex.Message);
+                throw new InvalidDataException(text);
             }
         }
     }

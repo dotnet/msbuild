@@ -602,15 +602,7 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        if (AnySwitchesIncompatibleWithLogReplay(targets, toolsVersion, globalProperties, distributedLoggerRecords))
-                        {
-                            Console.WriteLine();
-                            exitType = ExitType.SwitchError;
-                        }
-                        else
-                        {
-                            ReplayBinaryLog(projectFile, loggers, verbosity);
-                        }
+                        ReplayBinaryLog(projectFile, loggers);
                     }
                     else // regular build
                     {
@@ -3183,9 +3175,7 @@ namespace Microsoft.Build.CommandLine
         private static void ReplayBinaryLog
         (
             string binaryLogFilePath,
-            ILogger[] loggers,
-            LoggerVerbosity verbosity
-        )
+            ILogger[] loggers)
         {
             var replayEventSource = new Logging.BinaryLogReplayEventSource();
 
@@ -3194,23 +3184,19 @@ namespace Microsoft.Build.CommandLine
                 logger.Initialize(replayEventSource);
             }
 
-            replayEventSource.Replay(binaryLogFilePath);
+            try
+            {
+                replayEventSource.Replay(binaryLogFilePath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             foreach (var logger in loggers)
             {
                 logger.Shutdown();
             }
-        }
-
-        private static bool AnySwitchesIncompatibleWithLogReplay
-        (
-            string[] targets,
-            string toolsVersion,
-            Dictionary<string, string> globalProperties,
-            List<DistributedLoggerRecord> distributedLoggerRecords
-        )
-        {
-            return false;
         }
 
         /// <summary>

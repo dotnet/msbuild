@@ -5,6 +5,9 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// An implementation of IEventSource that raises appropriate events for a provided BuildEventArgs object.
     /// </summary>
+    /// <remarks>This class is public because BinaryLogReplayEventSource is a derived class.
+    /// This is abstracted into its own class because it's a useful single-purpose helper that
+    /// can be used independently as a generic implementation of IEventSource.</remarks>
     public class EventArgsDispatcher : IEventSource
     {
         /// <summary>
