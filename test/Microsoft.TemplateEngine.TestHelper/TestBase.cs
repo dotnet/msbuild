@@ -27,13 +27,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         
         private static string GetTemplateEngineDirectory()
         {
-            string envValue = Environment.GetEnvironmentVariable("%USERPROFILE%");
-            if (!string.IsNullOrWhiteSpace(envValue))
-            {
-                return Environment.ExpandEnvironmentVariables("%USERPROFILE%/.templateengine");
-            }
-
-            return Environment.ExpandEnvironmentVariables("$HOME/.templateengine");
+            return Path.Combine(Directory.GetCurrentDirectory(), ".templateengine");
         }
 
         protected static void RunAndVerify(string originalValue, string expectedValue, IProcessor processor, int bufferSize, bool? changeOverride = null)
