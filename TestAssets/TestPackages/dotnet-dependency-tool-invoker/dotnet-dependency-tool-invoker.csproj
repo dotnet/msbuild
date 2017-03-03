@@ -8,6 +8,7 @@
     <OutputType>Exe</OutputType>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8;dnxcore50</PackageTargetFallback>
     <VersionSuffix></VersionSuffix>
+    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,9 +24,6 @@
     </BuiltProjectOutputGroupOutput>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
-    </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
       <Version>$(CLI_NuGet_Version)</Version>
     </PackageReference>
