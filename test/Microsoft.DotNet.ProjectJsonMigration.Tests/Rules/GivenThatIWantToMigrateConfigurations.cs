@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -185,7 +188,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             // 2 for Configuration BuildOptions (1 Remove, 1 Include)
             contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(2);
-            
+
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0 && !string.IsNullOrEmpty(item.Include));
             var configRemoveContentItem = contentItems.First(
@@ -235,11 +238,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
 
             var configIncludeContentItem = contentItems.First(
-                item => item.ConditionChain().Count() > 0 
+                item => item.ConditionChain().Count() > 0
                     && item.Include.Contains("root"));
 
             var configIncludeContentItem2 = contentItems.First(
-                item => item.ConditionChain().Count() > 0 
+                item => item.ConditionChain().Count() > 0
                     && item.Include.Contains(@"src\file1.cs"));
 
             var configRemoveContentItem = contentItems.First(
@@ -346,7 +349,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0
                     && item.Include == "root");
-            
+
             var configIncludeContentItem2 = contentItems.First(
                 item => item.ConditionChain().Count() > 0
                     && item.Include == "src");
@@ -380,7 +383,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
         }
-        
+
         [Fact]
         public void ConfigurationBuildOptionsWhichHaveMappingsOverlappingWithIncludesInRootBuildoptionsHasRemove()
         {
@@ -413,7 +416,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
 
             contentItems.Count().Should().Be(4);
-            
+
             var rootBuildOptionsContentItems = contentItems.Where(i => i.ConditionChain().Count() == 0).ToList();
             rootBuildOptionsContentItems.Count().Should().Be(2);
             foreach (var buildOptionContentItem in rootBuildOptionsContentItems)
@@ -494,7 +497,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 item => item.ConditionChain().Count() > 0
                     && item.Include == "root");
             configIncludeEncompassedItem.Should().BeNull();
-            
+
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0
                     && item.Include == "src");
@@ -534,7 +537,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private ProjectRootElement RunConfigurationsAndBuildOptionsRuleOnPj(string s, string testDirectory = null)
         {
             return RunRulesOnPj(
-                s, 
+                s,
                 new IMigrationRule[]
                 {
                     new MigrateBuildOptionsRule(),

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
@@ -42,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Utils
             string buildBasePath)
         {
             var projectFactory = new ProjectFactory(_environment);
-			
+
             var project = projectFactory.GetProject(
                 projectDirectory,
                 framework,
@@ -66,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return _environment.GetCommandPathFromRootPath(buildOutputPath, commandName);
         }
-        
+
         internal override CommandResolutionStrategy GetCommandResolutionStrategy()
         {
             return CommandResolutionStrategy.OutputPath;

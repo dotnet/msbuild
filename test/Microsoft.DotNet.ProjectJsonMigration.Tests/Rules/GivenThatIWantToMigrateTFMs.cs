@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -32,8 +35,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                new[] { projectContext }, 
-                mockProj, 
+                new[] { projectContext },
+                mockProj,
                 mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
@@ -56,9 +59,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
@@ -81,9 +84,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
@@ -106,9 +109,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
@@ -133,9 +136,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var migrationSettings =
                 MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
@@ -157,9 +160,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var migrationSettings =
                 MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
@@ -187,9 +190,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             // Run BuildOptionsRule
             var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
-                projectContexts, 
-                mockProj, 
-                mockProj.AddItemGroup(), 
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
 
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);

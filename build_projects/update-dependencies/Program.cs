@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Scripts
                     disabledPackages: Enumerable.Empty<string>()));
             DependencyUpdateResults updateResults = DependencyUpdateUtils.Update(updaters, dependencyBuildInfos);
 
-            if (updateResults.ChangesDetected() && !onlyUpdate)
+            if (!onlyUpdate && updateResults.ChangesDetected())
             {
                 GitHubAuth gitHubAuth = new GitHubAuth(s_config.Password, s_config.UserName, s_config.Email);
                 GitHubProject origin = new GitHubProject(s_config.GitHubProject, s_config.UserName);

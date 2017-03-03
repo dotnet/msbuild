@@ -9,17 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-context-test">
-      <Version>1.0.0-*</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-dependency-context-test" Version="1.0.0-*" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
 </Project>

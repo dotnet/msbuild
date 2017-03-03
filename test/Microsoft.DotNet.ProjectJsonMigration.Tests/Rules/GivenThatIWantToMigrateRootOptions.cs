@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Properties.First(p => p.Name == "Authors").Value.Should().Be(
                 "Some author;Some other author");
         }
-        
+
         private ProjectRootElement RunPropertiesRuleOnPj(string project, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;

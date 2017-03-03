@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var mockProj = RunPropertiesRuleOnPj(@"
                 {
-                    ""userSecretsId"": ""XYZ""             
+                    ""userSecretsId"": ""XYZ""
                 }");
 
             mockProj.Properties.Count(p => p.Name == "UserSecretsId").Should().Be(1);
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var mockProj = RunPropertiesRuleOnPj(@"
                 {
-                    ""userSecretsId"": """"             
+                    ""userSecretsId"": """"
                 }");
 
             mockProj.Properties.Count(p => p.Name == "UserSecretsId").Should().Be(0);

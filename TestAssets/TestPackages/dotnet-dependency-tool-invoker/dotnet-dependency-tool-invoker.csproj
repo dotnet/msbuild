@@ -17,24 +17,17 @@
   <ItemGroup>
     <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs;..\..\..\src\dotnet\CommonLocalizableStrings.cs;" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
+
   <ItemGroup>
     <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
     </BuiltProjectOutputGroupOutput>
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.Frameworks">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils">
-      <Version>$(SdkNugetVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.4" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(SdkNugetVersion)" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

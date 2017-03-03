@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Common
 
             EnsureDirectoryExists(directory);
         }
-        
+
         public static void EnsureDirectoryExists(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tools.Common
         }
 
         /// <summary>
-        /// Returns path2 relative to path1, with Path.DirectorySeparatorChar as separator but ignoring directory 
+        /// Returns path2 relative to path1, with Path.DirectorySeparatorChar as separator but ignoring directory
         /// traversals.
         /// </summary>
         public static string GetRelativePathIgnoringDirectoryTraversals(string path1, string path2)

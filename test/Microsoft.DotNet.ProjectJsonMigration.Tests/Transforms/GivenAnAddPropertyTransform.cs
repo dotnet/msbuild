@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using System;
 using System.Collections.Generic;
@@ -55,8 +58,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var propertyValue = "Value1";
 
             var propertyTransform = new AddPropertyTransform<string>(
-                propertyName, 
-                propertyValue, 
+                propertyName,
+                propertyValue,
                 t => true);
             var property = propertyTransform.Transform(null);
             property.Should().NotBeNull();

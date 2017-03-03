@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
     <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
@@ -9,7 +9,7 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.1-beta-000933" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
@@ -20,9 +20,11 @@
     <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(CLI_MSBuild_Version)" />
   </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
   </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
     <Reference Include="System.Xml" />

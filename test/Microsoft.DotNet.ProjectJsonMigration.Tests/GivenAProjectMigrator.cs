@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -113,7 +116,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItHasErrorWhenMigratingAProjectJsonWithoutAFrameworks()
         {
             var testInstance = TestAssets.Get(
-                    "NonRestoredTestProjects", 
+                    "NonRestoredTestProjects",
                     "TestLibraryWithProjectFileWithoutFrameworks")
                 .CreateInstance()
                 .WithSourceFiles();

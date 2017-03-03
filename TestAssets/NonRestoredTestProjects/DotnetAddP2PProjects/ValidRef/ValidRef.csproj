@@ -4,8 +4,6 @@
     <TargetFrameworks>net451;netcoreapp1.0;netstandard1.4</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
   </ItemGroup>
 </Project>

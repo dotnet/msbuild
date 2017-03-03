@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Utilities
 
             EnsureDirectoryExists(directory);
         }
-        
+
         public static void EnsureDirectoryExists(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))

@@ -5,11 +5,11 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    internal class MigrationException : Exception 
-    { 
+    internal class MigrationException : Exception
+    {
         public MigrationError Error { get; }
-        public MigrationException(MigrationError error, string message) : base(message) 
-        { 
+        public MigrationException(MigrationError error, string message) : base(message)
+        {
             Error = error;
         }
     }

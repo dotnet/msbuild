@@ -41,8 +41,8 @@ namespace Msbuild.Tests.Utilities
         }
 
         public static int NumberOfProjectReferencesWithIncludeAndConditionContaining(
-            this ProjectRootElement root, 
-            string includePattern, 
+            this ProjectRootElement root,
+            string includePattern,
             string patternInCondition)
         {
             return root.ItemsWithIncludeAndConditionContaining(

@@ -31,7 +31,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerrun-as-current-user.sh",
-        "args": "-t --rm --sig-proxy=true --name $(Build.BuildId) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CHANNEL -e CONNECTION_STRING -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e DOTNET_BUILD_SKIP_CROSSGEN -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD -e ARTIFACT_STORAGE_KEY -e ARTIFACT_STORAGE_ACCOUNT -e ARTIFACT_STORAGE_CONTAINER -e CHECKSUM_STORAGE_KEY -e CHECKSUM_STORAGE_ACCOUNT -e CHECKSUM_STORAGE_CONTAINER chcosta/dotnetcore:rhel7_prereqs /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
+        "args": "-t --rm --sig-proxy=true --name $(Build.BuildId) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CHANNEL -e CONNECTION_STRING -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e DOTNET_BUILD_SKIP_CROSSGEN -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD -e ARTIFACT_STORAGE_KEY -e ARTIFACT_STORAGE_ACCOUNT -e ARTIFACT_STORAGE_CONTAINER -e CHECKSUM_STORAGE_KEY -e CHECKSUM_STORAGE_ACCOUNT -e CHECKSUM_STORAGE_CONTAINER microsoft/dotnet-buildtools-prereqs:rhel7_prereqs /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
