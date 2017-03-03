@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     ValueName = part.Substring(1, part.Length - 5);
                 }
                 else
-                { 
+                {
                     throw new ArgumentException(String.Format(LocalizableStrings.InvalidTemplateError, nameof(template)));
                 }
             }

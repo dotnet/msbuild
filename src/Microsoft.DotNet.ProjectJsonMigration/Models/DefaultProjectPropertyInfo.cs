@@ -14,4 +14,4 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Models
     }
 }
 
-        
+

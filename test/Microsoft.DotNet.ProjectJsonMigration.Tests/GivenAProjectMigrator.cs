@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItHasErrorWhenMigratingAProjectJsonWithoutAFrameworks()
         {
             var testInstance = TestAssets.Get(
-                    "NonRestoredTestProjects", 
+                    "NonRestoredTestProjects",
                     "TestLibraryWithProjectFileWithoutFrameworks")
                 .CreateInstance()
                 .WithSourceFiles();

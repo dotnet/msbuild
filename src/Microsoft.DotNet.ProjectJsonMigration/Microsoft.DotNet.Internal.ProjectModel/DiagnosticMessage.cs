@@ -40,9 +40,9 @@ namespace Microsoft.DotNet.Internal.ProjectModel
                     source: source)
         { }
 
-        public DiagnosticMessage(string errorCode, string message, string formattedMessage, string filePath, 
+        public DiagnosticMessage(string errorCode, string message, string formattedMessage, string filePath,
                                  DiagnosticMessageSeverity severity, int startLine, int startColumn, int endLine, int endColumn)
-            : this(errorCode, 
+            : this(errorCode,
                    message,
                    formattedMessage,
                    filePath,

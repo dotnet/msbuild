@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
-        }        
+        }
 
         [Fact]
         public void UsingDotnetForTheFirstTimeSucceeds()

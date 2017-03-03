@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             if (projectContexts.Count() == 0)
             {
                 projectContexts = new []
-                { 
+                {
                     ProjectContext.Create(testPj, FrameworkConstants.CommonFrameworks.NetCoreApp10)
                 };
             }
