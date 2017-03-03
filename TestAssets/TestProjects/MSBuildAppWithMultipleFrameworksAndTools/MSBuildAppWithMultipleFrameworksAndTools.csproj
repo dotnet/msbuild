@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="dotnet-desktop-and-portable" Version="1.0.0-*" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0-beta-001509-00" />
   </ItemGroup>
 
