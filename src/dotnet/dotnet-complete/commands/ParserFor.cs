@@ -9,18 +9,18 @@ using System.Net.Http;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Common;
 using Newtonsoft.Json.Linq;
 using static Microsoft.DotNet.Cli.CommandLine.Accept;
 using static Microsoft.DotNet.Cli.CommandLine.Create;
 using Command = Microsoft.DotNet.Cli.CommandLine.Command;
 
-namespace Microsoft.DotNet.Tools.Complete
+namespace Microsoft.DotNet.Tools
 {
-    public static class Create
+    public static class ParserFor
     {
-        public static Command DotnetCommand() =>
-            Command("dotnet",
-                    ".NET Command Line Tools (2.0.0-alpha-alpha-004866)",
+        private static readonly Command _dotnetCommand =  Command("dotnet",
+                    ".NET Command Line Tools",
                     NoArguments,
                     New(),
                     Restore(),
@@ -41,7 +41,45 @@ namespace Microsoft.DotNet.Tools.Complete
                     Complete(),
                     HelpOption(),
                     Option("--info", ""),
-                    VerbosityOption());
+                    VerbosityOption(),
+                    Option("-d", ""));
+
+        public static Command DotnetCommand { get; } = _dotnetCommand;
+
+        private static Command Add() =>
+            Command("add", 
+                    ".NET Add Command",
+                    ExactlyOneArgument.DefaultToCurrentDirectory(),
+                    Command("package",
+                            ".NET Add Package reference Command",
+                            ExactlyOneArgument
+                                .WithSuggestionsFrom(QueryNuGet),
+                            HelpOption(),
+                            Option("-v|--version",
+                                   "Version for the package to be added.",
+                                   ExactlyOneArgument
+                                       .With(name: "VERSION")),
+                            Option("-f|--framework",
+                                   "Add reference only when targetting a specific framework",
+                                   ExactlyOneArgument
+                                       .With(name: "FRAMEWORK")),
+                            Option("-n|--no-restore ",
+                                   "Add reference without performing restore preview and compatibility check."),
+                            Option("-s|--source",
+                                   "Use specific NuGet package sources to use during the restore."),
+                            Option("--package-directory",
+                                   "Restore the packages to this Directory .",
+                                   ExactlyOneArgument
+                                       .With(name: "PACKAGE_DIRECTORY"))),
+                    Command("reference",
+                            "Command to add project to project reference",
+                            OneOrMoreArguments,
+                            HelpOption(),
+                            Option("-f|--framework",
+                                   "Add reference only when targetting a specific framework",
+                                   AnyOneOf(TargetFrameworksFromProjectFile)
+                                       .With(name: "FRAMEWORK"))),
+                    HelpOption());
 
         private static Command Complete() =>
             Command("complete", "",
@@ -51,14 +89,6 @@ namespace Microsoft.DotNet.Tools.Complete
                            ExactlyOneArgument
                                .With(name: "command"),
                            o => int.Parse(o.Arguments.Single())));
-
-        private static Command Add() =>
-            Command("add", 
-                    ".NET Add Command",
-                    ExactlyOneArgument,
-                    Package(),
-                    Reference(),
-                    HelpOption());
 
         private static Command Build() =>
             Command("build",
@@ -73,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Complete
                            AnyOneOf(TargetFrameworksFromProjectFile)),
                     Option("-r|--runtime",
                            "Target runtime to build for. The default is to build a portable application.",
-                           WithSuggestionsFrom(_ => RunTimesFromProjectFile())),
+                           AnyOneOf(RunTimesFromProjectFile)),
                     Option("-c|--configuration",
                            "Configuration to use for building the project. Default for most projects is  \"Debug\".",
                            ExactlyOneArgument
@@ -106,10 +136,11 @@ namespace Microsoft.DotNet.Tools.Complete
         private static Command List() =>
             Command("list",
                     ".NET List Command",
-                    ExactlyOneArgument
+                    ZeroOrOneArgument
                         .With(name: "PROJECT",
                               description:
-                              "The project file to operate on. If a file is not specified, the command will search the current directory for one."),
+                              "The project file to operate on. If a file is not specified, the command will search the current directory for one.")
+                    .DefaultToCurrentDirectory(),
                     HelpOption(),
                     Command("reference", "Command to list project to project references",
                             ExactlyOneArgument
@@ -252,31 +283,7 @@ namespace Microsoft.DotNet.Tools.Complete
                                .With(name: "VERSION_SUFFIX")),
                     Option("-s|--serviceable",
                            "Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing."),
-                    VerbosityOption()
-            );
-
-        private static Command Package() =>
-            Command("package",
-                    ".NET Add Package reference Command",
-                    ExactlyOneArgument
-                        .WithSuggestionsFrom(QueryNuGet),
-                    HelpOption(),
-                    Option("-v|--version",
-                           "Version for the package to be added.",
-                           ExactlyOneArgument
-                               .With(name: "VERSION")),
-                    Option("-f|--framework",
-                           "Add reference only when targetting a specific framework",
-                           ExactlyOneArgument
-                               .With(name: "FRAMEWORK")),
-                    Option("-n|--no-restore ",
-                           "Add reference without performing restore preview and compatibility check."),
-                    Option("-s|--source",
-                           "Use specific NuGet package sources to use during the restore."),
-                    Option("--package-directory",
-                           "Restore the packages to this Directory .",
-                           ExactlyOneArgument
-                               .With(name: "PACKAGE_DIRECTORY")));
+                    VerbosityOption());
 
         private static Command Publish() =>
             Command("publish",
@@ -289,7 +296,7 @@ namespace Microsoft.DotNet.Tools.Complete
                                .With(name: "FRAMEWORK")),
                     Option("-r|--runtime",
                            "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
-                           ExactlyOneArgument
+                           AnyOneOf(RunTimesFromProjectFile)
                                .With(name: "RUNTIME_IDENTIFIER")),
                     Option("-o|--output",
                            "Output directory in which to place the published artifacts.",
@@ -307,31 +314,21 @@ namespace Microsoft.DotNet.Tools.Complete
         private static Command Remove() =>
             Command("remove",
                     ".NET Remove Command",
+                    ZeroOrOneArgument
+                        .With(name: "PROJECT")
+                        .DefaultToCurrentDirectory(),
                     HelpOption(),
                     Command("package",
                             "Command to remove package reference.",
                             HelpOption()),
                     Command("reference",
                             "Command to remove project to project reference",
-                            WithSuggestionsFrom(_ => ProjectReferencesFromProjectFile()),
+                            AnyOneOf(ProjectReferencesFromProjectFile),
                             HelpOption(),
                             Option("-f|--framework",
                                    "Remove reference only when targetting a specific framework",
                                    ExactlyOneArgument
                                        .With(name: "FRAMEWORK"))));
-
-        private static Command Reference() =>
-            Command("reference",
-                    "Command to add project to project reference",
-                    OneOrMoreArguments,
-                    HelpOption(),
-                    Option("-f|--framework",
-                           "Add reference only when targetting a specific framework",
-                           ExactlyOneArgument
-                               .WithSuggestionsFrom(
-                                   _ => TargetFrameworksFromProjectFile().ToArray())
-                        //       .With(name: "FRAMEWORK")
-                    ));
 
         private static Command Restore() =>
             Command("restore",
@@ -343,7 +340,7 @@ namespace Microsoft.DotNet.Tools.Complete
                                .With(name: "SOURCE")),
                     Option("-r|--runtime",
                            "Target runtime to restore packages for.",
-                           WithSuggestionsFrom(_ => RunTimesFromProjectFile())
+                           AnyOneOf(RunTimesFromProjectFile)
                                .With(name: "RUNTIME_IDENTIFIER")),
                     Option("--packages",
                            "Directory to install packages in.",
@@ -381,6 +378,7 @@ namespace Microsoft.DotNet.Tools.Complete
         private static Command Sln() =>
             Command("sln",
                     ".NET modify solution file command",
+
                     HelpOption(),
                     Command("add",
                             ".NET Add project(s) to a solution file Command",
@@ -441,6 +439,9 @@ namespace Microsoft.DotNet.Tools.Complete
                            "Do not build project before testing."),
                     VerbosityOption());
 
+        private static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
+            rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+
         private static Option HelpOption() =>
             Option("-h|--help",
                    "Show help information",
@@ -454,21 +455,6 @@ namespace Microsoft.DotNet.Tools.Complete
                             "m[inimal]",
                             "n[ormal]",
                             "d[etailed]"));
-
-        public static string[] KnownRuntimes =
-        {
-            "win10-x86",
-            "win10-x64",
-            "win10-arm64",
-            "osx.10.11-x64",
-            "centos.7-x64",
-            "debian.8-x64",
-            "linuxmint.17-x64",
-            "opensuse.13.2-x64",
-            "rhel.7.2-x64",
-            "ubuntu.14.04-x64",
-            "ubuntu.16.04-x64",
-        };
 
         private static IEnumerable<string> QueryNuGet(string match)
         {

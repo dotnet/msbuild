@@ -7,14 +7,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Command = Microsoft.DotNet.Cli.CommandLine.Command;
 
 namespace Microsoft.DotNet.Tools.Complete
 {
     public class CompleteCommand
     {
-        private static readonly Command dotnetCommand = Create.DotnetCommand();
-
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -22,7 +19,11 @@ namespace Microsoft.DotNet.Tools.Complete
             var log = new StringBuilder();
             log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
 
-            var result = dotnetCommand["complete"].Parse(args);
+            // get the parser for the current subcommand
+            var completeCommandParser = ParserFor.DotnetCommand["complete"];
+
+            // parse the arguments
+            var result = completeCommandParser.Parse(args);
 
             log.AppendLine("diagram (1): " + result.Diagram());
 
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Complete
                 }
             }
 
-            var result = dotnetCommand.Parse(input);
+            var result = ParserFor.DotnetCommand.Parse(input);
 
             log.AppendLine("diagram (2): " + result.Diagram());
 
