@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LinkWithFilename()
         {
-            // From Link.exe 
+            // From Link.exe
             // Note that this is impossible to distinguish from a tool error without
             // actually looking at the disk to see if the given file is there.
             ValidateFileNameError(@"foo.cpp : fatal error LNK1106: invalid file or disk full: cannot seek to 0x5361", @"foo.cpp", CanonicalError.Parts.Category.Error, "LNK1106", "invalid file or disk full: cannot seek to 0x5361");
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            // This one actually falls under the (line-line) category. I'm not going to tweak the regex for this incorrect input just so we can 
+            // This one actually falls under the (line-line) category. I'm not going to tweak the regex for this incorrect input just so we can
             // pretend -3 == 0, and just leaving it here for completeness
             ValidateFileNameMultiLineColumnError("Main.cs(-3):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, 3, CanonicalError.Parts.numberNotSpecified,
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", 1, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            // Similarly to the previous odd case, this really falls under (line,col-col). Included for completeness, even if results are 
+            // Similarly to the previous odd case, this really falls under (line,col-col). Included for completeness, even if results are
             // not intuitive
             ValidateFileNameMultiLineColumnError("Main.cs(,-2):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, 2,
@@ -302,7 +302,39 @@ namespace Microsoft.Build.UnitTests
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
         }
 
-        #region Support functions.        
+        [Fact]
+        public void ClangGccError()
+        {
+            CanonicalError.Parts errorParts = CanonicalError.Parse(
+                "err.cpp:6:3: error: use of undeclared identifier 'force_an_error'");
+
+            Assert.NotNull(errorParts);
+            AssertEqual(errorParts.origin, "err.cpp");
+            AssertEqual(errorParts.category, CanonicalError.Parts.Category.Error);
+            Assert.StartsWith("G", errorParts.code);
+            AssertEqual(errorParts.code.Length, 9);
+            AssertEqual(errorParts.text, "use of undeclared identifier 'force_an_error'");
+            AssertEqual(errorParts.line, 6);
+            AssertEqual(errorParts.column, 3);
+            AssertEqual(errorParts.endLine, CanonicalError.Parts.numberNotSpecified);
+            AssertEqual(errorParts.endColumn, CanonicalError.Parts.numberNotSpecified);
+        }
+
+        [Fact]
+        public void ClangGccErrorWithEmptyText()
+        {
+            ValidateFileNameMultiLineColumnError(
+                "tests\\Tests\\Syntax.hs:1:1: error:",
+                "tests\\Tests\\Syntax.hs",
+                1, 1,
+                CanonicalError.Parts.numberNotSpecified,
+                CanonicalError.Parts.numberNotSpecified,
+                CanonicalError.Parts.Category.Error,
+                "G00000000",
+                string.Empty);
+        }
+
+        #region Support functions.
         private static void AssertEqual(string str1, string str2)
         {
             if (str1 != str2)
@@ -390,8 +422,3 @@ namespace Microsoft.Build.UnitTests
     }
     #endregion
 }
-
-
-
-
-
