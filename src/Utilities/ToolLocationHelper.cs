@@ -970,7 +970,6 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    string targetSdkPath = matchingSdk.Path;
                     string extensionSdkPath = null;
 
                     if (matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
@@ -985,7 +984,19 @@ namespace Microsoft.Build.Utilities
                         if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)
                         {
                             // We don't want to attempt to gather ApiContract references if the framework isn't explicitly marked as Framework/Platform
-                            extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, targetSdkPath);
+                            string platformKey = TargetPlatformSDK.GetSdkKey(targetSdkIdentifier, targetSdkVersion);
+                            PlatformManifest manifest;
+                            if (TryGetPlatformManifest(matchingSdk, platformKey, out manifest))
+                            {
+                                if (manifest.VersionedContent)
+                                {
+                                    extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, matchingSdk.Path, manifest.PlatformVersion);
+                                }
+                                else
+                                {
+                                    extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, matchingSdk.Path);
+                                }
+                            }
                         }
                     }
                     else
