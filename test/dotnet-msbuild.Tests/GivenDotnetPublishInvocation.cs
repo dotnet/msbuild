@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-c", "<configuration>" }, "/p:Configuration=<configuration>")]
         [InlineData(new string[] { "--configuration", "<configuration>" }, "/p:Configuration=<configuration>")]
         [InlineData(new string[] { "--version-suffix", "<version-suffix>" }, "/p:VersionSuffix=<version-suffix>")]
-        [InlineData(new string[] { "--filter", "<filter>" }, "/p:FilterProjFile=<filter>")]
+        [InlineData(new string[] { "--filter", "<filter>" }, "/p:FilterProjectFiles=<filter>")]
         [InlineData(new string[] { "-v", "<verbosity>" }, "/verbosity:<verbosity>")]
         [InlineData(new string[] { "--verbosity", "<verbosity>" }, "/verbosity:<verbosity>")]
         [InlineData(new string[] { "<project>" }, "<project>")]

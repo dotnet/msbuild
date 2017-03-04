@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 if (!string.IsNullOrEmpty(filterProjOption.Value()))
                 {
-                    msbuildArgs.Add($"/p:FilterProjFile={filterProjOption.Value()}");
+                    msbuildArgs.Add($"/p:FilterProjectFiles={filterProjOption.Value()}");
                 }
 
                 if (!string.IsNullOrEmpty(verbosityOption.Value()))
