@@ -30,5 +30,6 @@
     led to an error. This is tracked as NuGet issue : https://github.com/NuGet/Home/issues/4213 -->
     <PackageReference Include="Microsoft.Build.Framework" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-  </ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
+ </ItemGroup>
 </Project>

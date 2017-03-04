@@ -17,4 +17,9 @@
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
   </PropertyGroup>
+
+  <!-- infrastructure and test only dependencies -->
+  <PropertyGroup>
+    <VersionToolsVersion>1.0.27-prerelease-01402-01</VersionToolsVersion>
+  </PropertyGroup>
 </Project>
