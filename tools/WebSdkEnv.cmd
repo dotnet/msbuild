@@ -28,11 +28,11 @@ if exist "%WebSdkProgramFiles%\Microsoft Visual Studio\VS15Preview\MSBuild\15.0\
 
 set "WebSdkRoot=%~dp0"
 set "WebSdkRoot=%WebSdkRoot:~0,-7%"
-set "WebSdkBin=%WebSdkRoot%\bin"
-set "WebSdkIntermediate=%WebSdkRoot%\obj"
-set "WebSdkReferences=%WebSdkRoot%\references"
-set "WebSdkSource=%WebSdkRoot%\src"
-set "WebSdkTools=%WebSdkRoot%\tools"
+set "WebSdkBin=%WebSdkRoot%\bin\"
+set "WebSdkIntermediate=%WebSdkRoot%\obj\"
+set "WebSdkReferences=%WebSdkRoot%\references\"
+set "WebSdkSource=%WebSdkRoot%\src\"
+set "WebSdkTools=%WebSdkRoot%\tools\"
 
 set "PATH=%PATH%;%WebSdkMSBuildPath%"
 set "PATH=%PATH%;%WebSdkTools%"
