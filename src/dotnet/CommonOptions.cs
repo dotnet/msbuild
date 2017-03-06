@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.Cli
         public static Option VerbosityOption() =>
             Create.Option("-v|--verbosity",
                           "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]",
-                          Accept.AnyOneOf("quiet",
-                                          "minimal",
-                                          "normal",
-                                          "detailed"));
+                          Accept.AnyOneOf("q", "quiet",
+                                          "m", "minimal",
+                                          "n", "normal",
+                                          "d", "detailed"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
