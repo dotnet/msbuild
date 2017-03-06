@@ -127,8 +127,6 @@ namespace Microsoft.DotNet.Cli
             telemetryClient.TrackEvent(command, null, null);
 
             int exitCode;
-            // Func<string[], int> builtIn;
-            // if (s_builtIns.TryGetValue(command, out builtIn))
             BuiltInCommandMetadata builtIn;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out builtIn))
             {
