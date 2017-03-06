@@ -45,6 +45,8 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+
             var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
@@ -58,7 +60,8 @@ namespace Microsoft.NET.Build.Tests
                 $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
             });
 
-            Command.Create(Path.Combine(outputDirectory.FullName, selfContainedExecutable), new string[] { })
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()

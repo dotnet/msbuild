@@ -67,6 +67,8 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeIdentifier: rid);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
+            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
+
             var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
 
             publishDirectory.Should().HaveFiles(new[] {
@@ -82,7 +84,8 @@ namespace Microsoft.NET.Publish.Tests
                 $"System.Private.CoreLib.dll",
             });
 
-            Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
