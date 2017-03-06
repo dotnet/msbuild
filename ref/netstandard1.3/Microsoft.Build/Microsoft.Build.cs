@@ -1335,7 +1335,7 @@ namespace Microsoft.Build.Logging
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
     }
-    public partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
+    public sealed partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
     {
         public BinaryLogReplayEventSource() { }
         public void Replay(string sourceFilePath) { }
