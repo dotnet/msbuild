@@ -17,20 +17,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default configuration and platform to Debug|AnyCPU--> 
   <PropertyGroup>
+    <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
+    <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
-
-  <!--
-    Ensure VS sees two default configurations: Debug|AnyCPU and Release|AnyCPU
-
-    This is temporary until we have designed and implemented a new configuration management scheme,
-    which is tracked by https://github.com/dotnet/sdk/issues/350. In the meantime, one consequence of
-    defining these defaults here with the old inference-from-usage scheme here is that the user cannot
-    remove or rename them.
-  -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
