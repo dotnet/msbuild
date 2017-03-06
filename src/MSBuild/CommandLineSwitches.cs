@@ -104,6 +104,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             WarningsAsErrors,
             WarningsAsMessages,
+            BinaryLogger,
             NumberOfParameterizedSwitches
         }
 
@@ -211,34 +212,34 @@ namespace Microsoft.Build.CommandLine
         // WARNING: keep this map in the same order as the ParameterlessSwitch enumeration
         private static readonly ParameterlessSwitchInfo[] s_parameterlessSwitchesMap =
         {
-            //-------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                        Switch Id                             Dup Error  Light up key
-            //-------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                ParameterlessSwitch.Help,                  null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                ParameterlessSwitch.Version,               null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "nologo" },                        ParameterlessSwitch.NoLogo,                null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },   ParameterlessSwitch.NoAutoResponse,        null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },   ParameterlessSwitch.NoConsoleLogger,       null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },              ParameterlessSwitch.FileLogger,            null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },            ParameterlessSwitch.FileLogger1,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },            ParameterlessSwitch.FileLogger2,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },            ParameterlessSwitch.FileLogger3,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },            ParameterlessSwitch.FileLogger4,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },            ParameterlessSwitch.FileLogger5,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },            ParameterlessSwitch.FileLogger6,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null, null    ),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null, null    ),
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                ParameterlessSwitch.Help,                  null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                ParameterlessSwitch.Version,               null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "nologo" },                        ParameterlessSwitch.NoLogo,                null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },   ParameterlessSwitch.NoAutoResponse,        null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },   ParameterlessSwitch.NoConsoleLogger,       null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },              ParameterlessSwitch.FileLogger,            null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },            ParameterlessSwitch.FileLogger1,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },            ParameterlessSwitch.FileLogger2,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },            ParameterlessSwitch.FileLogger3,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },            ParameterlessSwitch.FileLogger4,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },            ParameterlessSwitch.FileLogger5,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },            ParameterlessSwitch.FileLogger6,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null, null              ),
+            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null, null              ),
 #if (!STANDALONEBUILD)
-            new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null, null    ),
+            new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null, null              ),
 #endif
-            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null    ),
+            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null, null              ),
 #if FEATURE_MSBUILD_DEBUGGER
-            new ParameterlessSwitchInfo(  new string[] { "debug", "d" },         ParameterlessSwitch.Debugger,                         null, "DebuggerEnabled"),
+            new ParameterlessSwitchInfo(  new string[] { "debug", "d" },                    ParameterlessSwitch.Debugger,              null, "DebuggerEnabled" ),
 #endif
-            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null   ),
+            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null , null             ),
 #if DEBUG
-            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null   ),
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null , null             ),
 #endif
         };
 
@@ -246,9 +247,9 @@ namespace Microsoft.Build.CommandLine
         // WARNING: keep this map in the same order as the ParameterizedSwitch enumeration
         private static readonly ParameterizedSwitchInfo[] s_parameterizedSwitchesMap =
         {
-            //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error           Unquote?    Empty?
-            //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             new ParameterizedSwitchInfo(  new string[] { null },                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false  ),
@@ -281,8 +282,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true,   false  ),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true  ),
-            new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false ),
+            new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true   ),
+            new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>
@@ -366,7 +368,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterizedSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Compare(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterizedSwitch = switchInfo.parameterizedSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;

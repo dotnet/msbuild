@@ -1,6 +1,5 @@
 ﻿{
   "dependencies": {
-    "System.Threading.Tasks.Dataflow": "4.6.0",
     "xunit": "2.1.0",
     "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
     "xunit.core": "2.1.0",
@@ -9,7 +8,8 @@
   },
   "frameworks": {
     "net46": {
-      "Microsoft.Net.Compilers": "2.0.0-beta3"
+      "Microsoft.Net.Compilers": "2.0.0-beta3",
+      "System.Threading.Tasks.Dataflow": "4.5.24.0"
     },
     "netstandard1.3": {
       "dependencies": {
@@ -22,6 +22,7 @@
         "System.Diagnostics.FileVersionInfo": "4.0.0",
         "System.Diagnostics.Process": "4.1.0",
         "System.Diagnostics.TraceSource": "4.0.0",
+        "System.Threading.Tasks.Dataflow": "4.6.0.0",
         "System.Threading.Thread": "4.0.0",
         "System.Threading.ThreadPool": "4.0.10",
         "System.Xml.XmlDocument": "4.0.1",

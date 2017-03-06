@@ -242,8 +242,8 @@
 
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
     
-    <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update dependencies in our nuspecs-->
-    <NuSpecTfm>.NETStandard$(TargetFrameworkVersion.TrimStart('v'));.NETFramework4.6</NuSpecTfm>
+    <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update corefx dependencies-->
+    <NuSpecTfm>.NETStandard$(TargetFrameworkVersion.TrimStart('v'))</NuSpecTfm>
 
   </PropertyGroup>
 

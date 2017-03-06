@@ -620,6 +620,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_30_BinaryLoggerSwitch" UESanitized="false" Visibility="Public">
+    <value>  /binaryLogger[:output.binlog]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: /bl)
+
+                     Examples:
+                       /bl
+                       /bl:output.binlog
+                       /bl:..\..\custom.binlog
+                       /binaryLogger
+    </value>
+    <comment>
+      LOCALIZATION: The following should not be localized:
+      1) "msbuild" 
+      2) the string "binlog" that describes the file extension
+      3) all switch names and their short forms e.g. /bl, /binlog and /binaryLogger
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>

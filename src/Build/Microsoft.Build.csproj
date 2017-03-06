@@ -545,6 +545,14 @@
     <Compile Include="Logging\BaseConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
+    <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
+    <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
+    <Compile Include="Logging\BinaryLogger\BuildEventArgsDispatcher.cs" />
+    <Compile Include="Logging\BinaryLogger\BuildEventArgsFieldFlags.cs" />
+    <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
+    <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
+    <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
     <Compile Include="Logging\ConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
