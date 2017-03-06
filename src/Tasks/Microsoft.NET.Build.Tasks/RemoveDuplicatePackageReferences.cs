@@ -19,14 +19,14 @@ namespace Microsoft.NET.Build.Tasks
         private readonly List<ITaskItem> _packageList = new List<ITaskItem>();
 
         [Required]
-        public ITaskItem[] InputPackageRefernces { get; set; }
+        public ITaskItem[] InputPackageReferences { get; set; }
 
         /// <summary>
         /// Unique package references
         /// </summary>
 
         [Output]
-        public ITaskItem[] UniquePackageRefernces
+        public ITaskItem[] UniquePackageReferences
         {
             get { return _packageList.ToArray(); }
         }
@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             var packageSet = new HashSet<PackageIdentity>();
 
-            foreach(var pkg in InputPackageRefernces)
+            foreach(var pkg in InputPackageReferences)
             {
                 var pkgName = pkg.ItemSpec;
                 var pkgVersion = NuGetVersion.Parse(pkg.GetMetadata("Version"));

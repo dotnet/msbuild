@@ -120,8 +120,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _CopyResolvedOptimizedFiles">
 
     <RemoveDuplicatePackageReferences
-         InputPackageRefernces="@(AllResolvedPackagesPublished)">
-      <Output TaskParameter="UniquePackageRefernces"  ItemName="AllResolvedPackagesPublishedAfterFilter"/>
+         InputPackageReferences="@(AllResolvedPackagesPublished)">
+      <Output TaskParameter="UniquePackageReferences"  ItemName="AllResolvedPackagesPublishedAfterFilter"/>
     </RemoveDuplicatePackageReferences>
     
     <ItemGroup>

@@ -42,15 +42,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             // execute task
             var task = new RemoveDuplicatePackageReferences()
             {
-                InputPackageRefernces = GetPackageRefItems(knownpackage)
+                InputPackageReferences = GetPackageRefItems(knownpackage)
 
             };
             task.Execute().Should().BeTrue();
 
-            task.UniquePackageRefernces.Count().Should().Be(packagelistWithoutDups.Count());
+            task.UniquePackageReferences.Count().Should().Be(packagelistWithoutDups.Count());
 
             var uniquePackages = new List<PackageIdentity>();
-            foreach (var item in task.UniquePackageRefernces)
+            foreach (var item in task.UniquePackageReferences)
             {
                 var pkgName = item.ItemSpec;
                 var pkgVersion = NuGetVersion.Parse(item.GetMetadata("Version"));
