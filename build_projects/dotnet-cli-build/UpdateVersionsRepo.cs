@@ -4,6 +4,7 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.VersionTools.Automation;
+using System.IO;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
             GitHubAuth auth = new GitHubAuth(GitHubPassword);
             GitHubVersionsRepoUpdater repoUpdater = new GitHubVersionsRepoUpdater(auth);
             repoUpdater.UpdateBuildInfoAsync(
-                new [] { PackagesDirectory }, 
+                Directory.GetFiles(PackagesDirectory, "*.nupkg"),
                 versionsRepoPath).Wait();
 
             return true;
