@@ -69,15 +69,6 @@ namespace Microsoft.NET.Publish.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
 
-            //  Workaround for https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", new[] { "755", selfContainedExecutableFullPath })
-                    .Execute()
-                    .Should()
-                    .Pass();
-            }
-
             var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
 
             publishDirectory.Should().HaveFiles(new[] {
@@ -94,6 +85,7 @@ namespace Microsoft.NET.Publish.Tests
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()

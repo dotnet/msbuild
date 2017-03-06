@@ -52,16 +52,8 @@ namespace Microsoft.NET.Build.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-            //  Workaround for https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", new[] { "755", selfContainedExecutableFullPath })
-                    .Execute()
-                    .Should()
-                    .Pass();
-            }
-
             Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
