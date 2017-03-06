@@ -10,6 +10,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using System.IO;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -49,7 +50,18 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
-            Command.Create(Path.Combine(outputDirectory.FullName, selfContainedExecutable), new string[] { })
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+
+            //  Workaround for https://github.com/NuGet/Home/issues/4424
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Command.Create("chmod", new[] { "755", selfContainedExecutableFullPath })
+                    .Execute()
+                    .Should()
+                    .Pass();
+            }
+
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .CaptureStdOut()
                 .Execute()
                 .Should()

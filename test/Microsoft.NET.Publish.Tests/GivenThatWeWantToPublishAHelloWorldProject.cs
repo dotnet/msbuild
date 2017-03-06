@@ -67,6 +67,17 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeIdentifier: rid);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
+            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
+
+            //  Workaround for https://github.com/NuGet/Home/issues/4424
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Command.Create("chmod", new[] { "755", selfContainedExecutableFullPath })
+                    .Execute()
+                    .Should()
+                    .Pass();
+            }
+
             var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
 
             publishDirectory.Should().HaveFiles(new[] {
@@ -82,7 +93,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"System.Private.CoreLib.dll",
             });
 
-            Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .CaptureStdOut()
                 .Execute()
                 .Should()
