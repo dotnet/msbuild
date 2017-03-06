@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -24,59 +21,42 @@ namespace Microsoft.DotNet.Cli
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication command = new CommandLineApplication(throwOnUnexpectedArg: true)
+            var result = Parser.DotnetCommand[CommandName]
+                                  .Parse(args);
+
+            Reporter.Verbose.WriteLine(result.Diagram());
+
+            var command = result[CommandName];
+
+            if (command.HasOption("help"))
             {
-                Name = $"dotnet {CommandName}",
-                FullName = FullCommandNameLocalized,
-            };
-
-            command.HelpOption("-h|--help");
-
-            command.Argument(ArgumentName, ArgumentDescriptionLocalized);
-
-            foreach (var subCommandCreator in SubCommands)
-            {
-                var subCommand = subCommandCreator();
-                command.AddCommand(subCommand);
-
-                subCommand.OnExecute(() => {
-                    try
-                    {
-                        if (!command.Arguments.Any())
-                        {
-                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, ArgumentDescriptionLocalized);
-                        }
-
-                        var projectOrDirectory = command.Arguments.First().Value;
-                        if (string.IsNullOrEmpty(projectOrDirectory))
-                        {
-                            projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                        }
-
-                        return subCommand.Run(projectOrDirectory);
-                    }
-                    catch (GracefulException e)
-                    {
-                        Reporter.Error.WriteLine(e.Message.Red());
-                        subCommand.ShowHelp();
-                        return 1;
-                    }
-                });
+                result.ShowHelp();
+                return 0;
             }
+
+            if (result.Errors.Any())
+            {
+                Reporter.Error.WriteLine(result.Errors.First().Message.Red());
+                return 1;
+            }
+
+            var subCommand = SubCommands
+                .Select(c => c())
+                .FirstOrDefault(c => c.Name == command.AppliedOptions.First().Name);
+
+            var fileOrDirectory = command.AppliedOptions
+                                         .First()
+                                         .Arguments
+                                         .FirstOrDefault();
 
             try
             {
-                return command.Execute(args);
+                return subCommand.Run(fileOrDirectory);
             }
             catch (GracefulException e)
             {
                 Reporter.Error.WriteLine(e.Message.Red());
-                command.ShowHelp();
-                return 1;
-            }
-            catch (CommandParsingException e)
-            {
-                Reporter.Error.WriteLine(e.Message.Red());
+                subCommand.ShowHelp();
                 return 1;
             }
         }

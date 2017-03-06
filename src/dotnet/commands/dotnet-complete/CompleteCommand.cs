@@ -8,7 +8,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Tools.Complete
+namespace Microsoft.DotNet.Cli
 {
     public class CompleteCommand
     {
@@ -16,24 +16,22 @@ namespace Microsoft.DotNet.Tools.Complete
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var log = new StringBuilder();
-            log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
-
             // get the parser for the current subcommand
-            var completeCommandParser = ParserFor.DotnetCommand["complete"];
+            var completeCommandParser = Parser.DotnetCommand["complete"];
 
             // parse the arguments
             var result = completeCommandParser.Parse(args);
 
-            log.AppendLine("diagram (1): " + result.Diagram());
-
             var complete = result["complete"];
 
-            var suggestions = Suggestions(complete, log);
+            var suggestions = Suggestions(complete);
 
-            log.AppendLine($"suggestions: {Environment.NewLine}{string.Join(Environment.NewLine, suggestions)}");
-
+#if DEBUG
+            var log = new StringBuilder();
+            log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
+            log.AppendLine("diagram: " + result.Diagram());
             File.WriteAllText("parse.log", log.ToString());
+#endif
 
             foreach (var suggestion in suggestions)
             {
@@ -43,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Complete
             return 0;
         }
 
-        private static string[] Suggestions(AppliedOption complete, StringBuilder log)
+        private static string[] Suggestions(AppliedOption complete)
         {
             var input = complete.Arguments.SingleOrDefault() ?? "";
 
@@ -58,9 +56,7 @@ namespace Microsoft.DotNet.Tools.Complete
                 }
             }
 
-            var result = ParserFor.DotnetCommand.Parse(input);
-
-            log.AppendLine("diagram (2): " + result.Diagram());
+            var result = Parser.DotnetCommand.Parse(input);
 
             return result.Suggestions()
                          .ToArray();
