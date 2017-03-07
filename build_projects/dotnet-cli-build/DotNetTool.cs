@@ -71,7 +71,11 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string GenerateCommandLineCommands()
         {
-            return $"{Command} {Args}";
+            var commandLineCommands = $"{Command} {Args}";
+
+            LogToolCommand($"[DotNetTool] {commandLineCommands}");
+
+            return commandLineCommands;
         }
 
         protected override void LogToolCommand(string message)
