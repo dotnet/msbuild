@@ -11,8 +11,10 @@
     </Exec>
 
     <PropertyGroup>
+      <GitInfoCommitCount>$(GitInfoCommitCount.PadLeft(6,'0'))</GitInfoCommitCount>
+      
       <ShouldOverWriteThePropsFile 
-        Condition=" '$(CommitCount)' != '$(GitInfoCommitCount)' Or 
+        Condition=" 'ForceStringComparison$(CommitCount)' != 'ForceStringComparison$(GitInfoCommitCount)' Or 
                     '$(CommitHash)' != '$(GitInfoCommitHash)' ">true</ShouldOverWriteThePropsFile>
 
       <GitCommitInfoPropsContent>
@@ -29,5 +31,6 @@
                       Lines="$(GitCommitInfoPropsContent)"
                       Condition=" '$(ShouldOverwriteThePropsFile)' == 'true' "
                       Overwrite="true" />
+
   </Target>
 </Project>

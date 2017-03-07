@@ -1,6 +1,6 @@
 <Project ToolsVersion="14.0">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core 2.0.0 - SDK Alpha</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core 2.0.0 - SDK Preview 1</SdkBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core 2.0.0 - Runtime</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core 2.0.0 - Host</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core 2.0.0 - Host FX Resolver</HostFxrBrandName>
