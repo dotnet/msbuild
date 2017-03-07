@@ -8,6 +8,7 @@
     <IntermediateOutputPath>..\..\..\obj\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
     <OutputPath>..\..\..\bin\Release\</OutputPath>
     <IntermediateOutputPath>..\..\..\obj\Release\</IntermediateOutputPath>
   </PropertyGroup>
