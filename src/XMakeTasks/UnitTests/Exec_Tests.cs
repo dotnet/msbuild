@@ -240,6 +240,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -266,6 +274,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -293,6 +309,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -319,6 +343,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
