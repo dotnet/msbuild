@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli
                 UseShellExecute = false
             };
 
-            Reporter.Verbose.WriteLine($"[Forwarding] {processInfo.FileName} {processInfo.Arguments}");
+            Reporter.Output.WriteLine($"[Forwarding] {processInfo.FileName} {processInfo.Arguments}");
 
             if (_environmentVariables != null)
             {

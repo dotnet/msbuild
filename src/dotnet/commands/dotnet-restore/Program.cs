@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -21,9 +22,13 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var parser = Parser.DotnetCommand["restore"];
+            var parser = new Cli.CommandLine.Parser(
+                delimiters: Array.Empty<char>(),
+                options: Parser.DotnetCommand["restore"]);
 
             var result = parser.Parse(args);
+
+            Reporter.Verbose.WriteLine(result.Diagram());
 
             var restore = result["restore"];
 

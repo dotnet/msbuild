@@ -8,9 +8,10 @@ namespace Microsoft.DotNet.Cli
     internal static class RestoreCommandParser
     {
         public static Command Restore() =>
-            Create.Command("restore",
+            Create.Command(
+                "restore",
                 ".NET dependency restorer",
-                Accept.OneOrMoreArguments,
+                Accept.ExactlyOneArgument,
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-s|--source",

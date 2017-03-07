@@ -16,6 +16,8 @@
     <TemplateEngineTemplate2_0Version>1.0.0-beta1-20170209-117</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
+    <CliCommandLineParserVersion>0.1.0-alpha-74</CliCommandLineParserVersion>
+    
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
