@@ -351,6 +351,9 @@
 
   <PropertyGroup>
     <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
+
+    <!-- Useful for tests that need OS information as a constant -->
+    <DefineConstants Condition="'$(OS)'=='Windows_NT'">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
