@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using System.Diagnostics;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Cache
 {
@@ -31,9 +32,9 @@ namespace Microsoft.DotNet.Tools.Cache
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandOption projectArgument = app.Option(
+            CommandOption projectArguments = app.Option(
                 $"-e|--entries <{LocalizableStrings.ProjectEntries}>", LocalizableStrings.ProjectEntryDescription,
-                CommandOptionType.SingleValue);
+                CommandOptionType.MultipleValue);
 
             CommandOption frameworkOption = app.Option(
                 $"-f|--framework <{LocalizableStrings.FrameworkOption}>", LocalizableStrings.FrameworkOptionDescription,
@@ -70,13 +71,19 @@ namespace Microsoft.DotNet.Tools.Cache
             {
                 msbuildArgs = new List<string>();
 
-                if (string.IsNullOrEmpty(projectArgument.Value()))
+                if (!projectArguments.HasValue())
                 {
                     throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
                 }
 
                 msbuildArgs.Add("/t:ComposeCache");
-                msbuildArgs.Add(projectArgument.Value());
+                msbuildArgs.Add(projectArguments.Values[0]);
+                var _additionalProjectsargs = projectArguments.Values.Skip(1);
+
+                if (_additionalProjectsargs.Count() > 0)
+                {
+                    msbuildArgs.Add($"/p:AdditionalProjects={string.Join("%3B", _additionalProjectsargs)}");
+                }
 
                 if (!string.IsNullOrEmpty(frameworkOption.Value()))
                 {
@@ -106,12 +113,12 @@ namespace Microsoft.DotNet.Tools.Cache
 
                 if (skipOptimizationOption.HasValue())
                 {
-                    msbuildArgs.Add($"/p:SkipOptimization={skipOptimizationOption.HasValue()}");
+                    msbuildArgs.Add($"/p:SkipOptimization=true");
                 }
 
                 if (preserveWorkingDir.HasValue())
                 {
-                    msbuildArgs.Add($"/p:PreserveComposeWorkingDir={preserveWorkingDir.HasValue()}");
+                    msbuildArgs.Add($"/p:PreserveComposeWorkingDir=true");
                 }
 
                 if (!string.IsNullOrEmpty(verbosityOption.Value()))
