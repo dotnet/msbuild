@@ -561,7 +561,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!String.IsNullOrEmpty(timerOutputFilename))
                     {
-                        AppendOutputFile(timerOutputFilename, elapsedTime.Milliseconds);
+                        AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
                 }
                 else
