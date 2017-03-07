@@ -14,28 +14,34 @@ namespace Microsoft.DotNet.Cli
     {
         public static int Run(string[] args)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
-            // get the parser for the current subcommand
-            var completeCommandParser = Parser.DotnetCommand["complete"];
-
-            // parse the arguments
-            var result = completeCommandParser.Parse(args);
-
-            var complete = result["complete"];
-
-            var suggestions = Suggestions(complete);
-
-#if DEBUG
-            var log = new StringBuilder();
-            log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
-            log.AppendLine("diagram: " + result.Diagram());
-            File.WriteAllText("parse.log", log.ToString());
-#endif
-
-            foreach (var suggestion in suggestions)
+            try
             {
-                Console.WriteLine(suggestion);
+                DebugHelper.HandleDebugSwitch(ref args);
+
+                // get the parser for the current subcommand
+                var parser = Parser.DotnetCommand["complete"];
+
+                // parse the arguments
+                var result = parser.Parse(args);
+
+                var complete = result["complete"];
+
+                var suggestions = Suggestions(complete);
+
+                var log = new StringBuilder();
+                log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
+                log.AppendLine("diagram: " + result.Diagram());
+                File.WriteAllText("parse.log", log.ToString());
+
+                foreach (var suggestion in suggestions)
+                {
+                    Console.WriteLine(suggestion);
+                }
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText("dotnet completion exception.log", e.ToString());
+                throw;
             }
 
             return 0;
