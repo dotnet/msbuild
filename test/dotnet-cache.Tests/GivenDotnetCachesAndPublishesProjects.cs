@@ -33,10 +33,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "localAssemblyCache");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
-            var profileProjectPath = TestAssets.Get(profileProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root.FullName;
+            var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
             var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
 
             new RestoreCommand()
@@ -55,12 +52,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var profilefilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
+            var profileFilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
 
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profilefilter)
+                .WithProFileProject(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -85,11 +82,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .UseCurrentRuntimeFrameworkVersion();
 
             var testProjectDirectory = testInstance.Root.ToString();
-            var profileProjectPath = TestAssets.Get(profileProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root.FullName;
-            var profileProject = Path.Combine(profileProjectPath, "NewtonsoftFilterProfile.xml");
+            var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
+            var profileFilter = Path.Combine(profileProjectPath, "NewtonsoftFilterProfile.xml");
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -101,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profileProject)
+                .WithProFileProject(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -111,6 +105,66 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Fail()
                 .And.HaveStdErrContaining("assembly specified in the dependencies manifest was not found -- package: 'newtonsoft.json',");
+        }
+
+        [Fact]
+        public void ItPublishesAnAppWithMultipleProfiles()
+        {
+            var testAppName = "MultiDependentProject";
+            var profileProjectName = "NewtonsoftProfile";
+            var profileProjectName1 = "FluentProfile";
+
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .UseCurrentRuntimeFrameworkVersion();
+
+            var testProjectDirectory = testInstance.Root.ToString();
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var localAssemblyCache = Path.Combine(testProjectDirectory, "lAC");
+            var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
+
+            var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
+            var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
+            var profileFilter = Path.Combine(profileProjectPath, "NewtonsoftFilterProfile.xml");
+
+            var profileProjectPath1 = TestAssets.Get(profileProjectName1).Root.FullName; 
+            var profileProject1 = Path.Combine(profileProjectPath1, $"{profileProjectName1}.xml");
+            var profileFilter1 = Path.Combine(profileProjectPath1, "FluentFilterProfile.xml");
+
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            new CacheCommand()
+                .WithEntries(profileProject)
+                .WithEntries(profileProject1)
+                .WithFramework(_tfm)
+                .WithRuntime(rid)
+                .WithOutput(localAssemblyCache)
+                .WithRuntimeFrameworkVersion(_frameworkVersion)
+                .WithIntermediateWorkingDirectory(intermediateWorkingDirectory)
+                .Execute($"--preserve-working-dir")
+                .Should().Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new PublishCommand()
+                .WithFramework(_tfm)
+                .WithWorkingDirectory(testProjectDirectory)
+                .WithProFileProject(profileFilter)
+                .WithProFileProject(profileFilter1)
+                .Execute()
+                .Should().Pass();
+
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
+
+            new TestCommand("dotnet")
+                .WithEnvironmentVariable("DOTNET_SHARED_PACKAGES", localAssemblyCache)
+                .ExecuteWithCapturedOutput(outputDll)
+                .Should().Pass()
+                .And.HaveStdOutContaining("{}");
         }
     }
 }

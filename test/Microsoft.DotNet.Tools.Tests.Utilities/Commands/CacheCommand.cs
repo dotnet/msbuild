@@ -3,12 +3,13 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class CacheCommand : TestCommand
     {
-        private string _profileProject;
+        private List<string> _profileProject = new List<string>();
         private string _framework;
         private string _output;
         private string _runtime;
@@ -22,7 +23,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public CacheCommand WithEntries(string profileProject)
         {
-            _profileProject = profileProject;
+            _profileProject.Add($"--entries {profileProject}");
+
             return this;
         }
         public CacheCommand WithFramework(string framework)
@@ -83,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 FrameworkVersionOption);
         }
 
-        private string ProfileProjectOption => string.IsNullOrEmpty(_profileProject) ? "" : $"--entries {_profileProject}";
+        private string ProfileProjectOption =>  string.Join(" ", _profileProject) ;
 
         private string FrameworkOption => string.IsNullOrEmpty(_framework) ? "" : $"-f {_framework}";
 

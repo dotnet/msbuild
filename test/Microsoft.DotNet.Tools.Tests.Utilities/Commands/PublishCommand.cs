@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -11,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _framework;
         private string _output;
         private string _runtime;
-        private string _profileproj;
+        private List<string> _profileFilterProject = new List<string>();
 
         public PublishCommand()
             : base("dotnet")
@@ -43,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public PublishCommand WithProFileProject(string profileproj)
         {
-            _profileproj = profileproj;
+            _profileFilterProject.Add( $" --filter {profileproj}");
             return this;
         }
 
@@ -74,6 +75,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string RuntimeOption => string.IsNullOrEmpty(_runtime) ? "" : $"-r {_runtime}";
 
-        private string ProfileProjOption => string.IsNullOrEmpty(_profileproj) ? "" : $"--filter {_profileproj}";
+        private string ProfileProjOption => string.Join(" ", _profileFilterProject);
     }
 }
