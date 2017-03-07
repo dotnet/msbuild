@@ -11,6 +11,9 @@
     </Exec>
 
     <PropertyGroup>
+      <GitInfoCommitCount>000000$(GitInfoCommitCount)</GitInfoCommitCount>
+      <GitInfoCommitCount>$(GitInfoCommitCount.Substring($(GitInfoCommitCount.get_Length())) - 6)</GitInfoCommitCount>
+      
       <ShouldOverWriteThePropsFile 
         Condition=" '$(CommitCount)' != '$(GitInfoCommitCount)' Or 
                     '$(CommitHash)' != '$(GitInfoCommitHash)' ">true</ShouldOverWriteThePropsFile>
