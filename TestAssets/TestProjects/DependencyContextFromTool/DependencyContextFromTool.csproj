@@ -1,4 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
     <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
@@ -9,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0-beta-001509-00" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
   </ItemGroup>
 
   <ItemGroup>
