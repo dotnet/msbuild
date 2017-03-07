@@ -104,7 +104,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ProjectDirectory="$(MSBuildProjectDirectory)"
       EFPublishDirectory="$(_EFPublishDirectory)"
       EFSQLScriptsFolderName="$(EFSQLScriptsFolderName)"
-      EFMigrations="@(EFMigrations)">
+      EFMigrations="@(EFMigrations)"
+      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)">
       <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
     </GenerateEFSQLScripts>
   </Target>
