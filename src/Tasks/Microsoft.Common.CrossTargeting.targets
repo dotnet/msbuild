@@ -12,6 +12,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <BuildInParallel Condition="'$(BuildInParallel)' == ''">true</BuildInParallel>
     <ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore\*.targets"
@@ -22,6 +23,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />
+      <_InnerBuildProjects Include="$(MSBuildProjectFile)">
+        <AdditionalProperties>TargetFramework=%(_TargetFramework.Identity)</AdditionalProperties>
+      </_InnerBuildProjects>
     </ItemGroup>
   </Target>
 
@@ -45,10 +49,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           DependsOnTargets="_ComputeTargetFrameworkItems"
           Returns="@(InnerOutput)">
     <!-- If this logic is changed, also update Clean -->
-    <MSBuild Projects="$(MSBuildProjectFile)"
-             Condition="'$(TargetFrameworks)' != '' "
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'@(_InnerBuildProjects)' != '' "
              Targets="$(InnerTargets)"
-             Properties="TargetFramework=%(_TargetFramework.Identity)">
+             BuildInParallel="$(BuildInParallel)">
       <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
@@ -96,10 +100,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="Clean"
           DependsOnTargets="_ComputeTargetFrameworkItems">
     <!-- If this logic is changed, also update DispatchToInnerBuilds -->
-    <MSBuild Projects="$(MSBuildProjectFile)"
-             Condition="'$(TargetFrameworks)' != '' "
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'@(_InnerBuildProjects)' != '' "
              Targets="Clean"
-             Properties="TargetFramework=%(_TargetFramework.Identity)" />
+             BuildInParallel="$(BuildInParallel)" />
   </Target>
 
   <!--
