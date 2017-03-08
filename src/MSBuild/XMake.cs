@@ -2632,7 +2632,7 @@ namespace Microsoft.Build.CommandLine
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
-            ProcessBinaryLogger(binaryLoggerParameters, loggers);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             if (verbosity == LoggerVerbosity.Diagnostic)
             {
@@ -2719,7 +2719,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, ArrayList loggers)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, ArrayList loggers, ref LoggerVerbosity verbosity)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -2730,6 +2730,11 @@ namespace Microsoft.Build.CommandLine
 
             BinaryLogger logger = new BinaryLogger();
             logger.Parameters = outputLogFilePath;
+
+            // If we have a binary logger, force verbosity to diagnostic.
+            // The only place where verbosity is used downstream is to determine whether to log task inputs.
+            // Since we always want task inputs for a binary logger, set it to diagnostic.
+            verbosity = LoggerVerbosity.Diagnostic;
 
             loggers.Add(logger);
         }
