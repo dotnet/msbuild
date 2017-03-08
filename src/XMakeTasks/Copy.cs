@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using System.Linq;
 
 namespace Microsoft.Build.Tasks
 {
@@ -414,6 +415,32 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            if (_destinationFiles != null)
+            {
+                var sameDestinationFiles = _destinationFiles.GroupBy(x => x.ItemSpec).Where(g => g.Count() > 1);
+
+                if (sameDestinationFiles.Any())
+                {
+                    foreach (var item in sameDestinationFiles)
+                    {
+                        string logSource = "";
+                        var sameItemsList = item.ToList();
+
+                        for (int i = 0; i < sameItemsList.Count(); i++)
+                        {
+                            var originalPath = sameItemsList[i].GetMetadata("CopiedFrom");
+                            logSource += '"' + originalPath;
+
+                            logSource += i != sameItemsList.Count - 1 ? "\"," : "\"";
+                        }
+
+                        string logDestination = '"' + item.Key + '"';
+                        Log.LogErrorFromResources("Copy.SameDestinationPath", logSource, logDestination);
+                    }
+                    return false;
+                }
+            }
+
             bool success = true;
 
             // Environment variable stomps on user-requested value if it's set. 
@@ -556,6 +583,11 @@ namespace Microsoft.Build.Tasks
                     // Copy meta-data from source to destinationFolder.
                     _sourceFiles[i].CopyMetadataTo(_destinationFiles[i]);
                 }
+            }
+
+            for (int i = 0; i < _sourceFiles.Length; ++i)
+            {
+                _destinationFiles[i].SetMetadata("CopiedFrom", _sourceFiles[i].ItemSpec);
             }
 
             return true;
