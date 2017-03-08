@@ -229,3 +229,4 @@ Tools/
 
 # Visual Studio Code
 .vscode/
+/src/MSBuild.plog
