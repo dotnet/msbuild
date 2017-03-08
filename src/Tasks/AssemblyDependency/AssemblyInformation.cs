@@ -602,10 +602,15 @@ namespace Microsoft.Build.Tasks
                     var assemblyName = new AssemblyName();
                     assemblyName.Name = metadataReader.GetString(entry.Name);
                     assemblyName.Version = entry.Version;
+                    var cultureString = metadataReader.GetString(entry.Culture);
                     if (!NativeMethodsShared.IsMono)
                     {
                         // set_CultureName throws NotImplementedException on Mono
-                        assemblyName.CultureName = metadataReader.GetString(entry.Culture);
+                        assemblyName.CultureName = cultureString;
+                    }
+                    else if (cultureString != null)
+                    {
+                        assemblyName.CultureInfo = new CultureInfo(cultureString);
                     }
                     var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
                     if (publicKeyOrToken != null)
