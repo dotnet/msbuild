@@ -951,6 +951,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="extensionSdkMoniker">The moniker is the Name/Version string. Example: "Windows Desktop, Version=10.0.0.1"</param>
         /// <param name="targetSdkIdentifier">The target SDK name.</param>
         /// <param name="targetSdkVersion">The target SDK version.</param>
+        /// <param name="targetPlatformIdentifier">The target platform name.</param>
+        /// <param name="targetPlatformVersion">The target platform version.</param>
         /// <param name="diskRoots">The disk roots used to gather installed SDKs.</param>
         /// <param name="extensionDiskRoots">The disk roots used to gather installed extension SDKs.</param>
         /// <param name="registryRoot">The registry root used to gather installed extension SDKs.</param>
@@ -959,6 +961,8 @@ namespace Microsoft.Build.Utilities
                 string extensionSdkMoniker,
                 string targetSdkIdentifier,
                 string targetSdkVersion,
+                string targetPlatformIdentifier,
+                string targetPlatformVersion,
                 string diskRoots,
                 string extensionDiskRoots,
                 string registryRoot
@@ -1003,7 +1007,7 @@ namespace Microsoft.Build.Utilities
                         if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)
                         {
                             // We don't want to attempt to gather ApiContract references if the framework isn't explicitly marked as Framework/Platform
-                            string platformKey = TargetPlatformSDK.GetSdkKey(targetSdkIdentifier, targetSdkVersion);
+                            string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
                             PlatformManifest manifest;
                             if (TryGetPlatformManifest(matchingSdk, platformKey, out manifest) && manifest != null && manifest.VersionedContent)
                             {
@@ -1493,7 +1497,7 @@ namespace Microsoft.Build.Utilities
         /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
         /// object that matches.  
         /// </summary>
-        private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
+        public static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
 
