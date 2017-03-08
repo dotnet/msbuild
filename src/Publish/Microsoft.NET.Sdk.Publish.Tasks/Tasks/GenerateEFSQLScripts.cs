@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -16,6 +16,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         [Required]
         public ITaskItem[] EFMigrations { get; set; }
         public string EFSQLScriptsFolderName { get; set; }
+        public string EFMigrationsAdditionalArgs { get; set; }
         [Output]
         public ITaskItem[] EFSQLScripts { get; set; }
 
@@ -65,15 +66,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
         }
 
+        private object _sync = new object();
+        private Process _runningProcess;
+        private int _processExitCode;
+        private StringBuilder _standardOut = new StringBuilder();
+        private StringBuilder _standardError = new StringBuilder();
+
         private bool GenerateSQLScript(string sqlFileFullPath, string dbContextName, bool isLoggingEnabled = true)
         {
             string previousValue = Environment.GetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE");
             Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true");
-            ProcessStartInfo psi = new ProcessStartInfo("dotnet", string.Format("ef migrations script --idempotent --output \"{0}\" --context {1}", sqlFileFullPath, dbContextName))
+            ProcessStartInfo psi = new ProcessStartInfo("dotnet", string.Format("ef migrations script --idempotent --output \"{0}\" --context {1} {2}", sqlFileFullPath, dbContextName, EFMigrationsAdditionalArgs))
             {
                 WorkingDirectory = ProjectDirectory,
                 CreateNoWindow = true,
-                RedirectStandardOutput = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false
             };
 
@@ -85,9 +93,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 {
                     Log.LogMessage(MessageImportance.High, string.Format("Executing command: {0} {1}", psi.FileName, psi.Arguments));
                 }
-                proc = Process.Start(psi);
+
+                proc = new Process();
+                proc.StartInfo = psi;
+                proc.EnableRaisingEvents = true;
+                proc.OutputDataReceived += Proc_OutputDataReceived;
+                proc.ErrorDataReceived += Proc_ErrorDataReceived;
+                proc.Exited += Proc_Exited;
+                proc.Start();
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+                _runningProcess = proc;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 if (isLoggingEnabled)
                 {
@@ -103,16 +121,62 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", previousValue);
-            if (!isProcessExited || proc == null || proc.ExitCode != 0)
+            if (!isProcessExited || _processExitCode != 0)
             {
                 if (isLoggingEnabled)
                 {
-                    Log.LogMessage(MessageImportance.High, $"Entity framework SQL Script generation failed");
+                    Log.LogMessage(MessageImportance.High, _standardOut.ToString());
+                    Log.LogError($"Entity framework SQL Script generation failed");
                 }
                 return false;
             }
 
             return true;
+        }
+
+        private void Proc_Exited(object sender, EventArgs e)
+        {
+            if (_runningProcess != null)
+            {
+                try
+                {
+                    _processExitCode = _runningProcess.ExitCode;
+                    _runningProcess.Exited -= Proc_Exited;
+                    _runningProcess.ErrorDataReceived -= Proc_ErrorDataReceived;
+                    _runningProcess.OutputDataReceived -= Proc_OutputDataReceived;
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    _runningProcess.Dispose();
+                    _runningProcess = null;
+                }
+            }
+
+        }
+
+        private void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null)
+            {
+                lock (_sync)
+                {
+                    _standardError.AppendLine(e.Data);
+                }
+            }
+        }
+
+        private void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null)
+            {
+                lock (_sync)
+                {
+                    _standardOut.AppendLine(e.Data);
+                }
+            }
         }
     }
 }
