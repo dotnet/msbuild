@@ -22,10 +22,6 @@
       
       <GitInfoCommitHash>%(GitInfoCommitHashLines.Identity)</GitInfoCommitHash>
 
-      <ShouldOverWriteThePropsFile 
-        Condition=" 'ForceStringComparison$(CommitCount)' != 'ForceStringComparison$(GitInfoCommitCount)' Or 
-                    '$(CommitHash)' != '$(GitInfoCommitHash)' ">true</ShouldOverWriteThePropsFile>
-
       <GitCommitInfoPropsContent>
 &lt;Project ToolsVersion=&quot;15.0&quot;&gt;
     &lt;PropertyGroup&gt;
@@ -34,12 +30,19 @@
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;
       </GitCommitInfoPropsContent>
+
+      <ExistingGitCommitInfoProps Condition=" Exists('$(GitCommitInfoProps)') ">
+        $([System.IO.File]::ReadAllText($(GitCommitInfoProps)))
+      </ExistingGitCommitInfoProps>
+
+      <ShouldOverwriteGitCommitInfoPropsFile>false</ShouldOverwriteGitCommitInfoPropsFile>
+      <ShouldOverwriteGitCommitInfoPropsFile
+        Condition=" '$(ExistingGitCommitInfoProps.Trim())' != '$(GitCommitInfoPropsContent.Trim())' ">true</ShouldOverwriteGitCommitInfoPropsFile>
     </PropertyGroup>
 
     <WriteLinesToFile File="$(GitCommitInfoProps)"
                       Lines="$(GitCommitInfoPropsContent)"
-                      Condition=" '$(ShouldOverwriteThePropsFile)' == 'true' "
+                      Condition=" '$(ShouldOverwriteGitCommitInfoPropsFile)' == 'true' "
                       Overwrite="true" />
-
   </Target>
 </Project>

@@ -2,10 +2,9 @@
   <Target Name="WriteHostInfoProps"
           Condition=" !Exists('$(HostInfoProps)') "
           DependsOnTargets="BuildDotnetCliBuildFramework">
-    <!-- Current Runtime Information -->
+
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="HostRid" />
-      <Output TaskParameter="Architecture" PropertyName="HostArchitecture" />
       <Output TaskParameter="OSName" PropertyName="HostOSName" />
     </GetCurrentRuntimeInformation>
 
@@ -13,9 +12,8 @@
       <HostInfoPropsContent>
 &lt;Project ToolsVersion=&quot;15.0&quot;&gt;
     &lt;PropertyGroup&gt;
-        &lt;Rid&gt;$(HostRid)&lt;/Rid&gt;
-        &lt;Architecture&gt;$(HostArchitecture)&lt;/Architecture&gt;
-        &lt;OSName&gt;$(HostOSName)&lt;/OSName&gt;
+        &lt;HostRid&gt;$(HostRid)&lt;/HostRid&gt;
+        &lt;HostOSName&gt;$(HostOSName)&lt;/HostOSName&gt;
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;
       </HostInfoPropsContent>
