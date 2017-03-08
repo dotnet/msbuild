@@ -278,11 +278,8 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        if (!isQuotedTransform && functionCapture == null)
-                        {
-                            i = restartPoint;
-                            transformOrFunctionFound = false;
-                        }
+                        i = restartPoint;
+                        transformOrFunctionFound = false;
                     }
 
                     if (!transformOrFunctionFound)
@@ -411,11 +408,8 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        if (!isQuotedTransform && functionCapture == null)
-                        {
-                            i = restartPoint;
-                            transformOrFunctionFound = false;
-                        }
+                        i = restartPoint;
+                        transformOrFunctionFound = false;
                     }
 
                     if (!transformOrFunctionFound)
