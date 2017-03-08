@@ -99,11 +99,11 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        #region Test Support
-
         public ProduceContentAssets()
         {
         }
+
+        #region Test Support
 
         internal ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()

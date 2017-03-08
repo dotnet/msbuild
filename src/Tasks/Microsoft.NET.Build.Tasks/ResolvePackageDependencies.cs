@@ -114,11 +114,11 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        #region Test Support
-
         public ResolvePackageDependencies()
         {
         }
+
+        #region Test Support
 
         internal ResolvePackageDependencies(LockFile lockFile, IPackageResolver packageResolver)
             : this()
