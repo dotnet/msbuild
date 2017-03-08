@@ -52,6 +52,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         /// Absolute path to the Solution file.
         /// </summary>
         public string SolutionPath { get; set; }
+        /// <summary>
+        /// Native executable extension
+        /// </summary>
+        public string ExecutableExtension { get; set; }
 
         public override bool Execute()
         {
@@ -80,7 +84,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable, ExecutableExtension);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);
