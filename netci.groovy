@@ -50,7 +50,7 @@ def project = GithubProject
 
                         skipTestsWhenResultsNotFound = false
                     }
-                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-rc')
+                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-0'')
 
                     break;
                 case 'OSX':
