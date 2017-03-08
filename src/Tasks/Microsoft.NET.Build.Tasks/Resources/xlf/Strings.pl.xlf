@@ -188,6 +188,41 @@
         <target state="translated">Odwołanie do pakietu dla „{0}” zostało uwzględnione w projekcie. Ten pakiet jest jawnie przywoływany przez zestaw .NET SDK i zwykle nie ma potrzeby tworzenia odwołania do niego z projektu. Aby uzyskać więcej informacji, zobacz {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IncorrectPackageRoot">
+        <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
+        <target state="new">Package Root {0} was incorrectly given for Resolved library {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MultipleFilesResolved">
+        <source>More than one file found for {0}</source>
+        <target state="new">More than one file found for {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FolderAlreadyExists">
+        <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
+        <target state="new">Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IncorrectFilterFormat">
+        <source>The filter profile {0} provided is of not the correct format</source>
+        <target state="new">The filter profile {0} provided is of not the correct format</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ParsingFiles">
+        <source>Parsing the Files : '{0}'</source>
+        <target state="new">Parsing the Files : '{0}'</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PackageInfoLog">
+        <source>Package Name='{0}', Version='{1}' was parsed</source>
+        <target state="new">Package Name='{0}', Version='{1}' was parsed</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierWasNotSpecified">
+        <source>Specify a RuntimeIdentifier</source>
+        <target state="new">Specify a RuntimeIdentifier</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
