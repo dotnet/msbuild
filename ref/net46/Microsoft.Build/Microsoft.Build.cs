@@ -1358,6 +1358,11 @@ namespace Microsoft.Build.Logging
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
     }
+    public sealed partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
+    {
+        public BinaryLogReplayEventSource() { }
+        public void Replay(string sourceFilePath) { }
+    }
     public delegate void ColorResetter();
     public delegate void ColorSetter(System.ConsoleColor color);
     public partial class ConfigurableForwardingLogger : Microsoft.Build.Framework.IForwardingLogger, Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
@@ -1409,6 +1414,25 @@ namespace Microsoft.Build.Logging
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount) { }
         public void Shutdown() { }
+    }
+    public partial class EventArgsDispatcher : Microsoft.Build.Framework.IEventSource
+    {
+        public EventArgsDispatcher() { }
+        public event Microsoft.Build.Framework.AnyEventHandler AnyEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildFinishedEventHandler BuildFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildStartedEventHandler BuildStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.CustomBuildEventHandler CustomEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildErrorEventHandler ErrorRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildMessageEventHandler MessageRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.ProjectFinishedEventHandler ProjectFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.ProjectStartedEventHandler ProjectStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildStatusEventHandler StatusEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.TargetFinishedEventHandler TargetFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.TargetStartedEventHandler TargetStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.TaskFinishedEventHandler TaskFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.TaskStartedEventHandler TaskStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildWarningEventHandler WarningRaised { add { } remove { } }
+        public void Dispatch(Microsoft.Build.Framework.BuildEventArgs buildEvent) { }
     }
     public partial class FileLogger : Microsoft.Build.Logging.ConsoleLogger
     {
