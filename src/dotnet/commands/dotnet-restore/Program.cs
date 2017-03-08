@@ -22,9 +22,7 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var parser = new Cli.CommandLine.Parser(
-                delimiters: Array.Empty<char>(),
-                options: Parser.DotnetCommand["restore"]);
+            var parser = Parser.Instance["dotnet"];
 
             var result = parser.Parse(args);
 
@@ -40,8 +38,9 @@ namespace Microsoft.DotNet.Tools.Restore
             };
 
             msbuildArgs.AddRange(restore.ArgsToBeForwarded());
-            msbuildArgs.AddRange(restore.Arguments);
 
+            msbuildArgs.AddRange(restore.Arguments);
+            
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }
 

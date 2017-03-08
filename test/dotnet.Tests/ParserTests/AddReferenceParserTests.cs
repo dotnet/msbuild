@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void AddReferenceHasDefaultArgumentSetToCurrentDirectory()
         {
-            var command = Parser.DotnetCommand;
+            var command = Parser.Instance;
 
             var result = command.Parse("dotnet add reference my.csproj");
 
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void AddReferenceWithoutArgumentResultsInAnError()
         {
-            var command = Parser.DotnetCommand;
+            var command = Parser.Instance;
 
             var result = command.Parse("dotnet add reference");
 

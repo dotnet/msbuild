@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "restore",
                 ".NET dependency restorer",
-                Accept.ExactlyOneArgument,
+                Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-s|--source",
