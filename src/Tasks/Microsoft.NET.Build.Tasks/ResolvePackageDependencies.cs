@@ -120,7 +120,7 @@ namespace Microsoft.NET.Build.Tasks
         {
         }
 
-        public ResolvePackageDependencies(LockFile lockFile, IPackageResolver packageResolver)
+        internal ResolvePackageDependencies(LockFile lockFile, IPackageResolver packageResolver)
             : this()
         {
             _lockFile = lockFile;

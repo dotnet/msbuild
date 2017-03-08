@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tasks
         {
         }
 
-        public ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
+        internal ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()
         {
             _assetPreprocessor = assetPreprocessor;
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Resource for reading, processing and writing content assets
         /// </summary>
-        public IContentAssetPreprocessor AssetPreprocessor
+        internal IContentAssetPreprocessor AssetPreprocessor
         {
             get
             {

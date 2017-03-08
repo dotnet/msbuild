@@ -10,7 +10,7 @@ using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public static class LockFileExtensions
+    internal static class LockFileExtensions
     {
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile,

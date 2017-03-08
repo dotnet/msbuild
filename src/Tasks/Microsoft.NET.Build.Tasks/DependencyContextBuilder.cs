@@ -15,7 +15,7 @@ using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class DependencyContextBuilder
+    internal class DependencyContextBuilder
     {
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;

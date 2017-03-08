@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class ReferenceInfo
+    internal class ReferenceInfo
     {
         public string Name { get; }
         public string Version { get; }
