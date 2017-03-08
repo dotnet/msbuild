@@ -10,9 +10,7 @@ using System.Xml.Linq;
 using NuGet.Versioning;
 using NuGet.Packaging.Core;
 
-#if PRODUCT
 using Microsoft.Build.Framework;
-#endif
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -26,12 +24,12 @@ namespace Microsoft.NET.Build.Tasks
             var listofPackages = new HashSet<PackageIdentity>();
             var doc = XDocument.Load(filterFile);
             var rootName = doc.Root.Name;
-#if PRODUCT
+
             if (!rootName.LocalName.Equals("CacheArtifacts"))
             {
                 throw new BuildErrorException(Strings.IncorrectFilterFormat, filterFile);
             }
-#endif
+
             var ns = rootName.Namespace;
 
             foreach (var pkginfo in doc.Root.Elements(ns + "Package"))
