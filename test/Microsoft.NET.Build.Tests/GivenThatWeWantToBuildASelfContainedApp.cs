@@ -3,7 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;

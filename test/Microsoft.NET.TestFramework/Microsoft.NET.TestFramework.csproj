@@ -50,14 +50,10 @@
     <ItemGroup>
       <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
         <Version>$(DotNetCliUtilsVersion)</Version>
-        <TFM>netstandard1.6</TFM>
+        <TFM>netstandard1.5</TFM>
       </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.ProjectModel">
-        <Version>1.0.0-rc3-003121</Version>
-        <TFM>netstandard1.6</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.InternalAbstractions">
-        <Version>1.0.0</Version>
+      <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
+        <Version>$(PlatformAbstractionsVersion)</Version>
         <TFM>netstandard1.3</TFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly>
