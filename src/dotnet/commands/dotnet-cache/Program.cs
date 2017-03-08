@@ -73,16 +73,16 @@ namespace Microsoft.DotNet.Tools.Cache
 
                 if (!projectArguments.HasValue())
                 {
-                    throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
+                    throw new InvalidOperationException(LocalizableStrings.SpecifyEntries).DisplayAsError();
                 }
 
                 msbuildArgs.Add("/t:ComposeCache");
                 msbuildArgs.Add(projectArguments.Values[0]);
-                var _additionalProjectsargs = projectArguments.Values.Skip(1);
+                var additionalProjectsargs = projectArguments.Values.Skip(1);
 
-                if (_additionalProjectsargs.Count() > 0)
+                if (additionalProjectsargs.Count() > 0)
                 {
-                    msbuildArgs.Add($"/p:AdditionalProjects={string.Join("%3B", _additionalProjectsargs)}");
+                    msbuildArgs.Add($"/p:AdditionalProjects={string.Join("%3B", additionalProjectsargs)}");
                 }
 
                 if (!string.IsNullOrEmpty(frameworkOption.Value()))
