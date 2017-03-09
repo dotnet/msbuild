@@ -11,6 +11,7 @@
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Verbosity="normal"
                    Configuration="$(Configuration)"
                    ProjectPath="$(RootProject)" />
   </Target>
