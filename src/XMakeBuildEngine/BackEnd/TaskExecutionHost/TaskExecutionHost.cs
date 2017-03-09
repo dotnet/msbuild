@@ -124,9 +124,9 @@ namespace Microsoft.Build.BackEnd
         private bool _continueOnError;
 
         /// <summary>
-        /// Set to true if the execution has been cancelled.
+        /// Set to true if the execution has been canceled.
         /// </summary>
-        private bool _cancelled;
+        private bool _canceled;
 
         /// <summary>
         /// Event which is signalled when a task is not executing.  Used for cancellation.
@@ -603,7 +603,7 @@ namespace Microsoft.Build.BackEnd
             // and Execute may not even have been called yet.
             _taskExecutionIdle.Reset();
 
-            if (_cancelled)
+            if (_canceled)
             {
                 _taskExecutionIdle.Set();
                 return false;
@@ -664,8 +664,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void Cancel()
         {
-            // This will prevent the current and any future tasks from running on this TaskExecutionHost, because we don't reset the cancelled flag.
-            _cancelled = true;
+            // This will prevent the current and any future tasks from running on this TaskExecutionHost, because we don't reset the canceled flag.
+            _canceled = true;
 
             ITask currentInstance = _taskInstance;
             ICancelableTask cancellableTask = null;

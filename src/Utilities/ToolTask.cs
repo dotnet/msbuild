@@ -161,7 +161,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Used to signal when a tool has been cancelled.
+        /// Used to signal when a tool has been canceled.
         /// </summary>
         protected ManualResetEvent ToolCanceled
         {
