@@ -2302,6 +2302,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        ReferenceExtensions="$(ExpandSDKAllowedReferenceExtensions)"
        TargetSDKIdentifier="$(SDKIdentifier)"
        TargetSDKVersion="$(SDKVersion)"
+       TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
+       TargetPlatformVersion="$(TargetPlatformVersion)"
        LogRedistFilesList="$(GetSDKReferenceFilesLogRedistFilesList)"
        LogRedistConflictWithinSDKAsWarning ="$(GetSDKReferenceFilesLogRedistConflictsWithinSDKAsWarning)"
        LogRedistConflictBetweenSDKsAsWarning ="$(GetSDKReferenceFilesLogRedistConflictsBetweenSDKsAsWarning)"

@@ -204,6 +204,24 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// The targetted platform identifier.
+        /// </summary>
+        public string TargetPlatformIdentifier
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The targeted platform version.
+        /// </summary>
+        public string TargetPlatformVersion
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Resolved reference items.
         /// </summary>
         [Output]
@@ -766,6 +784,8 @@ namespace Microsoft.Build.Tasks
                     sdk.GetMetadata(GetInstalledSDKLocations.SDKNameMetadataName),
                     TargetSDKIdentifier,
                     TargetSDKVersion,
+                    TargetPlatformIdentifier,
+                    TargetPlatformVersion,
                     sdk.GetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName),
                     sdk.GetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName),
                     sdk.GetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName));
