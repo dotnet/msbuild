@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.MSBuild;
 using System.Diagnostics;
 using System;
 using Microsoft.DotNet.Cli;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -20,96 +21,34 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Name = "dotnet build";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
-            app.HandleRemainingArguments = true;
-            app.HelpOption("-h|--help");
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
+            var msbuildArgs = new List<string>();
 
-            CommandOption outputOption = app.Option($"-o|--output <{LocalizableStrings.OutputOptionName}>", LocalizableStrings.OutputOptionDescription, CommandOptionType.SingleValue);
-            CommandOption frameworkOption = app.Option($"-f|--framework <{LocalizableStrings.FrameworkOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
-            CommandOption runtimeOption = app.Option(
-                $"-r|--runtime <{LocalizableStrings.RuntimeOptionName}>", LocalizableStrings.RuntimeOptionDescription,
-                CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option($"-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.ConfigurationOptionDescription, CommandOptionType.SingleValue);
-            CommandOption versionSuffixOption = app.Option($"--version-suffix <{LocalizableStrings.VersionSuffixOptionName}>", LocalizableStrings.VersionSuffixOptionDescription, CommandOptionType.SingleValue);
+            var parser = Parser.Instance;
 
-            CommandOption noIncrementalOption = app.Option("--no-incremental", LocalizableStrings.NoIncrementialOptionDescription, CommandOptionType.NoValue);
-            CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
+            var result = parser.ParseFrom("dotnet build", args);
 
-            List<string> msbuildArgs = null;
-            app.OnExecute(() =>
+            Reporter.Output.WriteLine(result.Diagram());
+
+            result.ShowHelpIfRequested();
+
+            var appliedBuildOptions = result["dotnet"]["build"];
+
+            if (result.HasOption("--no-incremental"))
             {
-                // this delayed initialization is here intentionally
-                // this code will not get run in some cases (i.e. --help)
-                msbuildArgs = new List<string>();
-
-                if (!string.IsNullOrEmpty(projectArgument.Value))
-                {
-                    msbuildArgs.Add(projectArgument.Value);
-                }
-
-                if (noIncrementalOption.HasValue())
-                {
-                    msbuildArgs.Add("/t:Rebuild");
-                }
-                else
-                {
-                    msbuildArgs.Add("/t:Build");
-                }
-
-                if (outputOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:OutputPath={outputOption.Value()}");
-                }
-
-                if (frameworkOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
-                }
-
-                if (runtimeOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
-                }
-
-                if (configurationOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:Configuration={configurationOption.Value()}");
-                }
-
-                if (versionSuffixOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:VersionSuffix={versionSuffixOption.Value()}");
-                }
-
-                if (noDependenciesOption.HasValue())
-                {
-                    msbuildArgs.Add("/p:BuildProjectReferences=false");
-                }
-
-                if (verbosityOption.HasValue())
-                {
-                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
-                }
-
-                msbuildArgs.Add($"/clp:Summary");
-
-                msbuildArgs.AddRange(app.RemainingArguments);
-
-                return 0;
-            });
-
-            int exitCode = app.Execute(args);
-            if (msbuildArgs == null)
-            {
-                throw new CommandCreationException(exitCode);
+                msbuildArgs.Add("/t:Rebuild");
             }
+            else
+            {
+                msbuildArgs.Add("/t:Build");
+            }
+
+            msbuildArgs.Add($"/clp:Summary");
+
+            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
+
+            msbuildArgs.AddRange(appliedBuildOptions.Arguments);
 
             return new BuildCommand(msbuildArgs, msbuildPath);
         }
