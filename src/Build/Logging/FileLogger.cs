@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Text;
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -28,7 +29,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public FileLogger() : base(LoggerVerbosity.Normal)
+        public FileLogger()
+            : base(
+                LoggerVerbosity.Normal,
+                write: null, // Overwritten below
+                colorSet: BaseConsoleLogger.DontSetColor,
+                colorReset: BaseConsoleLogger.DontResetColor)
         {
             this.WriteHandler = new WriteHandler(Write);
         }
