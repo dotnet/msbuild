@@ -951,6 +951,36 @@ namespace Microsoft.Build.Utilities
         /// <param name="extensionSdkMoniker">The moniker is the Name/Version string. Example: "Windows Desktop, Version=10.0.0.1"</param>
         /// <param name="targetSdkIdentifier">The target SDK name.</param>
         /// <param name="targetSdkVersion">The target SDK version.</param>
+        /// <param name="diskRoots">The disk roots used to gather installed SDKs.</param>
+        /// <param name="extensionDiskRoots">The disk roots used to gather installed extension SDKs.</param>
+        /// <param name="registryRoot">The registry root used to gather installed extension SDKs.</param>
+        public static string[] GetPlatformOrFrameworkExtensionSdkReferences
+            (
+                string extensionSdkMoniker,
+                string targetSdkIdentifier,
+                string targetSdkVersion,
+                string diskRoots,
+                string extensionDiskRoots,
+                string registryRoot
+            )
+        {
+            return GetPlatformOrFrameworkExtensionSdkReferences(
+                extensionSdkMoniker,
+                targetSdkIdentifier,
+                targetSdkVersion,
+                null,
+                null,
+                diskRoots,
+                extensionDiskRoots,
+                registryRoot);
+        }
+
+        /// <summary>
+        /// Gathers the specified extension SDK references for the given target SDK
+        /// </summary>
+        /// <param name="extensionSdkMoniker">The moniker is the Name/Version string. Example: "Windows Desktop, Version=10.0.0.1"</param>
+        /// <param name="targetSdkIdentifier">The target SDK name.</param>
+        /// <param name="targetSdkVersion">The target SDK version.</param>
         /// <param name="targetPlatformIdentifier">The target platform name.</param>
         /// <param name="targetPlatformVersion">The target platform version.</param>
         /// <param name="diskRoots">The disk roots used to gather installed SDKs.</param>
