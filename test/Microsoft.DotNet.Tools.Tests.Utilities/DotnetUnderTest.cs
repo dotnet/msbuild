@@ -18,9 +18,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 {
                     _pathToDotnetUnderTest = new Muxer().MuxerPath;
                 }
-
-                Console.WriteLine($"Executing tests against {_pathToDotnetUnderTest}");
-
+                
                 return _pathToDotnetUnderTest;
             }
         }
