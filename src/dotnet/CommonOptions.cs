@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Common;
 
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.Cli
                           "m", "minimal",
                           "n", "normal",
                           "d", "detailed")
-                      .ForwardAs("/verbosity:{0}"));
+                      .ForwardAs(o => $"/verbosity:{o.Arguments.Single()}"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));

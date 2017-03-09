@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 
 namespace Microsoft.DotNet.Cli
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Cli
                     "Directory to install packages in.",
                     Accept.ExactlyOneArgument
                           .With(name: "PACKAGES_DIRECTORY")
-                          .ForwardAs("/p:RestorePackagesPath={0}")),
+                          .ForwardAs(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--disable-parallel",
                     "Disables restoring multiple projects in parallel.",
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Cli
                     "The NuGet configuration file to use.",
                     Accept.ExactlyOneArgument
                           .With(name: "FILE")
-                          .ForwardAs("/p:RestoreConfigFile={0}")),
+                          .ForwardAs(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-cache",
                     "Do not cache packages and http requests.",

@@ -7,11 +7,14 @@ namespace Microsoft.DotNet.Cli
 {
     public static class ArgumentForwardingExtensions
     {
+        public static ArgumentsRule Forward(
+            this ArgumentsRule rule) =>
+            rule.MaterializeAs(o => new ForwardedArgument(o.Arguments.SingleOrDefault()));
+
         public static ArgumentsRule ForwardAs(
             this ArgumentsRule rule,
             string template) =>
-            rule.MaterializeAs(o =>
-                new ForwardedArgument(string.Format(template, o.Arguments.Single())));
+            rule.MaterializeAs(o => new ForwardedArgument(template));
 
         public static ArgumentsRule ForwardAs(
             this ArgumentsRule rule,

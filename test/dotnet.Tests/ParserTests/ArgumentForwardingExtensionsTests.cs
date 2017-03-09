@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
@@ -13,28 +14,31 @@ namespace Microsoft.DotNet.Tests.ParserTests
     public class ArgumentForwardingExtensionsTests
     {
         [Fact]
-        public void An_outgoing_command_line_can_be_generated_based_on_a_parse_result()
+        public void AnOutgoingCommandLineCanBeGeneratedBasedOnAParseResult()
         {
             var command = Command("the-command", "",
-                Option("-o|--one", "",
-                    ZeroOrOneArgument.ForwardAs("/i:{0}")),
-                Option("-t|--two", "",
-                    ZeroOrOneArgument.ForwardAs("/s:{0}")));
+                                  Option("-o|--one", "",
+                                         ZeroOrOneArgument
+                                             .ForwardAs(o => $"/i:{o.Arguments.Single()}")),
+                                  Option("-t|--two", "",
+                                         NoArguments
+                                             .ForwardAs("/s:true")));
 
-            var result = command.Parse("the-command -t argument-two-value -o 123");
+            var result = command.Parse("the-command -t -o 123");
 
             result["the-command"]
                 .OptionValuesToBeForwarded()
                 .Should()
-                .BeEquivalentTo("/i:123", "/s:argument-two-value");
+                .BeEquivalentTo("/i:123", "/s:true");
         }
 
         [Fact]
         public void MultipleArgumentsCanBeJoinedWhenForwarding()
         {
             var command = Command("the-command", "",
-                Option("-x", "",
-                    ZeroOrMoreArguments.ForwardAs(o => $"/x:{string.Join("&", o.Arguments)}")));
+                                  Option("-x", "",
+                                         ZeroOrMoreArguments
+                                             .ForwardAs(o => $"/x:{string.Join("&", o.Arguments)}")));
 
             var result = command.Parse("the-command -x one -x two");
 
@@ -42,6 +46,22 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 .OptionValuesToBeForwarded()
                 .Should()
                 .BeEquivalentTo("/x:one&two");
+        }
+
+        [Fact]
+        public void AnArgumentCanBeForwardedAsIs()
+        {
+            var command = Command("the-command", "",
+                                  Option("-x", "",
+                                         ZeroOrMoreArguments
+                                             .Forward()));
+
+            var result = command.Parse("the-command -x one");
+
+            result["the-command"]
+                .OptionValuesToBeForwarded()
+                .Should()
+                .BeEquivalentTo("one");
         }
     }
 }

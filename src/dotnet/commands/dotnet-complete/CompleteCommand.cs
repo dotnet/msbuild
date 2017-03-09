@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                 // parse the arguments
                 var result = parser.ParseFrom("dotnet complete", args);
 
-                var complete = result["complete"];
+                var complete = result["dotnet"]["complete"];
 
                 var suggestions = Suggestions(complete);
 
