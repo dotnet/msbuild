@@ -35,7 +35,7 @@ while [[ $# > 0 ]]; do
             args=( "${args[@]/$1}" )
             args=( "${args[@]/$2}" )
             shift
-            ;;        
+            ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--platform <PLATFORM>] [--help]"
             echo ""
@@ -55,17 +55,26 @@ done
 
 # $args array may have empty elements in it.
 # The easiest way to remove them is to cast to string and back to array.
-# This will actually break quoted arguments, arguments like 
+# This will actually break quoted arguments, arguments like
 # -test "hello world" will be broken into three arguments instead of two, as it should.
 temp="${args[@]}"
 args=($temp)
 
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/packages"
+export NUGET_HTTP_CACHE_PATH="$REPOROOT/packages"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_cli
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
+
+# NuGet depends on HOME and it may not be set. Until it's fixed, we just patch a value in
+if [ -z "$HOME" ]; then
+    export HOME="$REPOROOT/.home"
+
+    [ ! -d "$HOME" ] || rm -Rf $HOME
+    mkdir -p $HOME
+fi
 
 # Install a stage 0
 DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"

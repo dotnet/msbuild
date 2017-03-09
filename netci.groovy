@@ -10,7 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def osList = ['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04']
+def osList = ['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04', 'Ubuntu16.04', 'OSX10.12']
 def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
