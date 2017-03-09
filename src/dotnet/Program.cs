@@ -84,6 +84,12 @@ namespace Microsoft.DotNet.Cli
 
                 return 1;
             }
+            catch (Exception e) when (!e.ShouldBeDisplayedAsError())
+            {
+                Reporter.Output.WriteLine(e.ToString().Red().Bold());
+
+                return 1;
+            }
             finally
             {
                 if (PerfTrace.Enabled)

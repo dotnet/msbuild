@@ -23,13 +23,15 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            Reporter.Output.WriteLine(string.Join(" ", args));
+
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet restore", args);
 
-            Reporter.Verbose.WriteLine(result.Diagram());
+            Reporter.Output.WriteLine(result.Diagram());
 
-            var restore = result["restore"];
+            var restore = result["dotnet"]["restore"];
 
             var msbuildArgs = new List<string>
             {
@@ -38,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 "/ConsoleLoggerParameters:Verbosity=Minimal"
             };
 
-            msbuildArgs.AddRange(restore.ArgsToBeForwarded());
+            msbuildArgs.AddRange(restore.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(restore.Arguments);
             

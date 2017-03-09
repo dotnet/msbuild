@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result = command.Parse("the-command -t argument-two-value -o 123");
 
             result["the-command"]
-                .ArgsToBeForwarded()
+                .OptionValuesToBeForwarded()
                 .Should()
                 .BeEquivalentTo("/i:123", "/s:argument-two-value");
         }
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result = command.Parse("the-command -x one -x two");
 
             result["the-command"]
-                .ArgsToBeForwarded()
+                .OptionValuesToBeForwarded()
                 .Should()
                 .BeEquivalentTo("/x:one&two");
         }

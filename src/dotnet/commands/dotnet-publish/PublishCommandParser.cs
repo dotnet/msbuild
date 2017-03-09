@@ -14,12 +14,12 @@ namespace Microsoft.DotNet.Cli
                            CommonOptions.HelpOption(),
                            Create.Option("-f|--framework",
                                          "Target framework to publish for. The target framework has to be specified in the project file.",
-                                         Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
+                                         Accept.WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
                                                .With(name: "FRAMEWORK")
                                                .ForwardAs("/p:TargetFramework={0}")),
                            Create.Option("-r|--runtime",
                                          "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
-                                         Accept.AnyOneOf(Suggest.RunTimesFromProjectFile)
+                                         Accept.WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                                                .With(name: "RUNTIME_IDENTIFIER")
                                                .ForwardAs("/p:RuntimeIdentifier={0}")),
                            Create.Option("-o|--output",

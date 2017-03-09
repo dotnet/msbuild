@@ -32,7 +32,6 @@ namespace Microsoft.DotNet.Cli
                                     CompleteCommandParser.Complete(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
-                                    CommonOptions.VerbosityOption(),
                                     Create.Option("-d", "")));
     }
 }

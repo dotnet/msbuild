@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-v|--verbosity",
                 "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]",
-                Accept.AnyOneOf("q", "quiet",
+                Accept.AnyOneOf(
+                          "q", "quiet",
                           "m", "minimal",
                           "n", "normal",
                           "d", "detailed")

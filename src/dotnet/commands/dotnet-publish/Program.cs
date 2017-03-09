@@ -8,7 +8,7 @@ using Microsoft.DotNet.Tools.MSBuild;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
-    public partial class PublishCommand : MSBuildForwardingApp
+    public class PublishCommand : MSBuildForwardingApp
     {
         private PublishCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
             : base(msbuildArgs, msbuildPath)
@@ -27,11 +27,11 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.Add("/t:Publish");
 
-            var appliedPublishOption = result.AppliedOptions["publish"];
+            var appliedPublishOption = result["dotnet"]["publish"];
+
+            msbuildArgs.AddRange(appliedPublishOption.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);
-
-            msbuildArgs.AddRange(appliedPublishOption.ArgsToBeForwarded());
 
             return new PublishCommand(msbuildArgs, msbuildPath);
         }

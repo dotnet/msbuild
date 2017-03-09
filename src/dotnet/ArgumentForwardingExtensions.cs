@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
             rule.MaterializeAs(o =>
                 new ForwardedArgument(format(o)));
 
-        public static IEnumerable<string> ArgsToBeForwarded(
+        public static IEnumerable<string> OptionValuesToBeForwarded(
             this AppliedOption command) =>
             command.AppliedOptions
                    .Select(o => o.Value())
