@@ -7,6 +7,8 @@
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
     <NuGetVersion>4.3.0-beta1-2342</NuGetVersion>
+    <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
+    <NewtonsoftJsonSideBySideVersion>6.0.4</NewtonsoftJsonSideBySideVersion>
   </PropertyGroup>
 
   <!-- Dependencies from test projects -->
@@ -15,8 +17,6 @@
     <xunitVersion>2.1.0</xunitVersion>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NewtonsoftJsonOnNetFrameworkVersion>6.0.4</NewtonsoftJsonOnNetFrameworkVersion>
     <DotNetCliUtilsVersion>1.0.1</DotNetCliUtilsVersion>
   </PropertyGroup>
   
