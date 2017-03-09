@@ -3,6 +3,7 @@
   "classifications": ["Common", "Library"],
   "name": "Class library",
   "groupIdentity": "Microsoft.Common.Library",
+  "precedence": "100",
   "identity": "Microsoft.Common.Library.CSharp",
   "shortName": "classlib",
   "tags": {

@@ -3,6 +3,7 @@
   "classifications": ["Web", "WebAPI"],
   "name": "ASP.NET Core Web API",
   "groupIdentity": "Microsoft.Web.WebApi",
+  "precedence": "100",
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",
   "tags": {

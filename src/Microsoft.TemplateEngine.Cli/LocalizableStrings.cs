@@ -11,6 +11,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string ParameterNamePrefixError = "Parameter names must start with -- or -.";
 
+        public const string MultipleArgsSpecifiedError = "Template name is the only allowed argument. Invalid argument: [{0}].";
+
         public const string ParameterReuseError = "Parameter name {0} cannot be used for multiple purposes.";
 
         public const string MultipleValuesSpecifiedForSingleValuedParameter = "Multiple values specified for single value parameter: {0}.";
@@ -65,11 +67,20 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string MissingRequiredParameter = "Mandatory parameter {0} missing for template {1}.";
 
-        public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template {1}.";
+        public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template [{1}].";
+
+        public const string InvalidTemplateParameterValues = "Error: Invalid parameter(s):";
+
+        public const string InvalidParameterDetail = @"  {0} {1}
+    '{1}' is not a valid value for {0} ({2}).";
 
         public const string GettingReady = "Getting ready...";
 
         public const string InvalidInputSwitch = "Invalid input switch:";
+
+        public const string ArgsFileNotFound = "The specified extra args file does not exist: [{0}].";
+
+        public const string ArgsFileWrongFormat = "Extra args file [{0}] is not formatted properly.";
 
         public const string CheckingForUpdates = "Checking for updates for {0}...";
 
@@ -129,9 +140,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string NoTemplatesMatchName = "No templates matched the input template name: [{0}].";
 
-        public const string ItemTemplateNotInProjectContext = "[{0}] is an item template. By default, it's only created in a target location containing a project. Force creation with the -all flag.";
-
-        public const string ProjectTemplateInProjectContext = "[{0}] is a project template. By default, it's not created in a target location containing a project. Force creation with the -all flag.";
+        public const string TemplateNotValidGivenTheSpecifiedFilter = "[{0}] matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.";
 
         public const string GenericPlaceholderTemplateContextError = "[{0}] cannot be created in the target location.";
 
@@ -154,5 +163,9 @@ namespace Microsoft.TemplateEngine.Cli
         public const string RerunCommandAndPassForceToCreateAnyway = "Rerun the command and pass --force to accept and create.";
 
         public const string ForcesTemplateCreation = "Forces content to be generated even if it would change existing files.";
+
+        public const string ShowsFilteredTemplates = "Shows a subset of the available templates. Valid values are \"project\", \"item\" or \"other\".";
+
+        public const string RunHelpForInformationAboutAcceptedParameters = "Run dotnet {0} --help for usage information.";
     }
 }

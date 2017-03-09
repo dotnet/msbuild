@@ -3,6 +3,7 @@
   "classifications": ["Web", "MVC"],
   "name": "ASP.NET Core Web App",
   "groupIdentity": "Microsoft.Web.Mvc",
+  "precedence": "100",
   "identity": "Microsoft.Web.Mvc.CSharp",
   "shortName": "mvc",
   "tags": {

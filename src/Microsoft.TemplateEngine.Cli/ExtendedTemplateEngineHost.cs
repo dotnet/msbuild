@@ -24,7 +24,6 @@ namespace Microsoft.TemplateEngine.Cli
         public string Locale => _baseHost.Locale;
 
         public void UpdateLocale(string newLocale) => _baseHost.UpdateLocale(newLocale);
-        
 
         public string HostIdentifier => _baseHost.HostIdentifier;
 

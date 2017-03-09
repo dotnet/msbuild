@@ -1,0 +1,11 @@
+﻿[
+  {
+    "kind": "file_contains",
+    "path": "temp.csproj",
+    "text": "<TargetFramework>netcoreapp2.0</TargetFramework>"
+  },
+  {
+    "kind": "file_exists",
+    "path": "NuGet.config"
+  }
+]

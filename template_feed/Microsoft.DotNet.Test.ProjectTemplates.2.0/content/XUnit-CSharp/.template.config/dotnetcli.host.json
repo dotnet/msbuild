@@ -7,6 +7,10 @@
       "longName": "runtime-framework-version",
       "shortName": "fv",
       "isHidden": "true"
+    },
+    "EnablePack": {
+      "shortName": "p",
+      "longName": "enable-pack"
     }
   }
 }

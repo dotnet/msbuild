@@ -6,6 +6,7 @@
     "type": "item"
   },
   "groupIdentity": "ItemNugetConfig",
+  "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
   "shortName": "nugetconfig",
   "sourceName": "Nuget",

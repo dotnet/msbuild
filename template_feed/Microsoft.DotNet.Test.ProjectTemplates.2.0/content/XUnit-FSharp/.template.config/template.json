@@ -3,7 +3,8 @@
   "classifications": ["Test", "xUnit"],
   "name": "xUnit Test Project",
   "groupIdentity": "Microsoft.Test.xUnit",
-  "identity": "Microsoft.Test.xUnit.FSharp",
+  "precedence": "200",
+  "identity": "Microsoft.Test.xUnit.FSharp.2.0",
   "shortName": "xunit",
   "tags": {
     "language": "F#",
@@ -34,6 +35,12 @@
       ],
       "replaces": "netcoreapp2.0",
       "defaultValue": "netcoreapp2.0"
+    },
+    "EnablePack": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
     }
   },
   "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ]

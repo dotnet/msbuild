@@ -3,7 +3,8 @@
   "classifications": ["Common", "Library"],
   "name": "Class library",
   "groupIdentity": "Microsoft.Common.Library",
-  "identity": "Microsoft.Common.Library.FSharp",
+  "precedence": "200",
+  "identity": "Microsoft.Common.Library.FSharp.2.0",
   "shortName": "classlib",
   "tags": {
     "language": "F#",

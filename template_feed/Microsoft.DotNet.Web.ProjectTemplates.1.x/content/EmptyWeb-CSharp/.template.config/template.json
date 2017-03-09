@@ -3,6 +3,7 @@
   "classifications": ["Web", "Empty"],
   "name": "ASP.NET Core Empty",
   "groupIdentity": "Microsoft.Web.Empty",
+  "precedence": "100",
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",
   "tags": {

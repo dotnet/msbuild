@@ -3,6 +3,7 @@
   "classifications": ["Test", "MSTest"],
   "name": "Unit Test Project",
   "groupIdentity": "Microsoft.Test.MSTest",
+  "precedence": "100",
   "identity": "Microsoft.Test.MSTest.CSharp",
   "shortName": "mstest",
   "tags": {
@@ -31,6 +32,12 @@
         }
       ],
       "defaultValue": "netcoreapp1.1"
+    },
+    "EnablePack": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
     }
   },
   "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ]

@@ -6,6 +6,7 @@
     "type": "item"
   },
   "groupIdentity": "ItemWebConfig",
+  "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Web.Config",
   "shortName": "webconfig",
   "sourceName": "WebConfig",
