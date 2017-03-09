@@ -30,21 +30,31 @@ namespace Microsoft.NET.Publish.Tests
 
         static GivenThatWeWantToCacheAProjectWithDependencies()
         {
-            _libPrefix = "";
-            _runtimeOs = "win7";
-            _runtimeLibOs = "win";
-            var rid= RuntimeEnvironment.GetRuntimeIdentifier();
-            _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
-            _runtimeRid = "win7-" + _testArch;
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _libPrefix = "";
+                _runtimeOs = "win7";
+                _runtimeLibOs = "win";
+                _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
+                _runtimeRid = "win7-" + _testArch;
+            }
+            else
             {
                 _libPrefix = "lib";
                 _runtimeOs = "unix";
                 _runtimeLibOs = "unix";
-                _runtimeRid = rid;
-            }
 
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // microsoft.netcore.coredistools only has assets for osx.10.10
+                    _runtimeRid = "osx.10.10-x64";
+                }
+                else
+                {
+                    _runtimeRid = rid;                    
+                }
+            }
         }
 
         [Fact]
