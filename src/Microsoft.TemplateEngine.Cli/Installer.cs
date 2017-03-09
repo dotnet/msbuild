@@ -17,11 +17,11 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly Paths _paths;
         private readonly TemplateCache _templateCache;
 
-        public Installer(IEngineEnvironmentSettings environmentSettings)
+        public Installer(IEngineEnvironmentSettings environmentSettings, TemplateCache templateCache)
         {
             _environmentSettings = environmentSettings;
             _paths = new Paths(environmentSettings);
-            _templateCache = new TemplateCache(_environmentSettings);
+            _templateCache = templateCache;
         }
 
         public void InstallPackages(IEnumerable<string> installationRequests)
@@ -50,6 +50,8 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 InstallRemotePackages(packages);
             }
+
+            _environmentSettings.SettingsLoader.Save();
         }
 
         private void InstallRemotePackages(List<Package> packages)
@@ -140,8 +142,6 @@ namespace Microsoft.TemplateEngine.Cli
                     _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                 }
             }
-
-            _templateCache.WriteTemplateCaches();
         }
     }
 }
