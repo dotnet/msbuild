@@ -955,24 +955,24 @@ namespace Microsoft.Build.Utilities
         /// <param name="extensionDiskRoots">The disk roots used to gather installed extension SDKs.</param>
         /// <param name="registryRoot">The registry root used to gather installed extension SDKs.</param>
         public static string[] GetPlatformOrFrameworkExtensionSdkReferences
-            (
-                string extensionSdkMoniker,
-                string targetSdkIdentifier,
-                string targetSdkVersion,
-                string diskRoots,
-                string extensionDiskRoots,
-                string registryRoot
-            )
+        (
+            string extensionSdkMoniker,
+            string targetSdkIdentifier,
+            string targetSdkVersion,
+            string diskRoots,
+            string extensionDiskRoots,
+            string registryRoot
+        )
         {
             return GetPlatformOrFrameworkExtensionSdkReferences(
                 extensionSdkMoniker,
                 targetSdkIdentifier,
                 targetSdkVersion,
-                null,
-                null,
                 diskRoots,
                 extensionDiskRoots,
-                registryRoot);
+                registryRoot,
+                targetPlatformIdentifier: null,
+                targetPlatformVersion: null);
         }
 
         /// <summary>
@@ -991,11 +991,11 @@ namespace Microsoft.Build.Utilities
                 string extensionSdkMoniker,
                 string targetSdkIdentifier,
                 string targetSdkVersion,
-                string targetPlatformIdentifier,
-                string targetPlatformVersion,
                 string diskRoots,
                 string extensionDiskRoots,
-                string registryRoot
+                string registryRoot,
+                string targetPlatformIdentifier,
+                string targetPlatformVersion
             )
         {
 

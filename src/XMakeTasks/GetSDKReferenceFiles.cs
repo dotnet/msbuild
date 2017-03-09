@@ -784,11 +784,11 @@ namespace Microsoft.Build.Tasks
                     sdk.GetMetadata(GetInstalledSDKLocations.SDKNameMetadataName),
                     TargetSDKIdentifier,
                     TargetSDKVersion,
-                    TargetPlatformIdentifier,
-                    TargetPlatformVersion,
                     sdk.GetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName),
                     sdk.GetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName),
-                    sdk.GetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName));
+                    sdk.GetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName),
+                    TargetPlatformIdentifier,
+                    TargetPlatformVersion);
             }
 
             return manifestReferencePaths;
