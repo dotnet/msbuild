@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var result = parser.ParseFrom("dotnet restore", args);
 
-            result.ShowHelpIfRequested();
-
             Reporter.Output.WriteLine(result.Diagram());
+
+            result.ShowHelpIfRequested();
 
             var restore = result["dotnet"]["restore"];
 

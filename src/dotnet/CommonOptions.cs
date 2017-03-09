@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Cli
                           "q", "quiet",
                           "m", "minimal",
                           "n", "normal",
-                          "d", "detailed")
+                          "d", "detailed",
+                          "diag", "diagnostic")
                       .ForwardAs(o => $"/verbosity:{o.Arguments.Single()}"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>

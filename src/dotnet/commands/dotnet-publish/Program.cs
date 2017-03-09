@@ -3,8 +3,10 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -24,6 +26,8 @@ namespace Microsoft.DotNet.Tools.Publish
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet publish", args);
+
+            Reporter.Output.WriteLine(result.Diagram());
 
             result.ShowHelpIfRequested();
 
