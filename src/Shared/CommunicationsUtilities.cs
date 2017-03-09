@@ -612,7 +612,7 @@ namespace Microsoft.Build.Internal
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, args);
                         long now = DateTime.UtcNow.Ticks;
-                        float millisecondsSinceLastLog = (float)((now - s_lastLoggedTicks) / 10000L);
+                        float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
                         s_lastLoggedTicks = now;
                         file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
                     }
