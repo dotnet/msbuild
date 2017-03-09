@@ -3,7 +3,7 @@
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public enum DependencyType
+    internal enum DependencyType
     {
         Unknown,
         Target,

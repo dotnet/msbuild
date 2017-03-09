@@ -15,7 +15,6 @@
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <DefineConstants>$(DefineConstants);PRODUCT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <OutDir>$(OutDir)net46\</OutDir>

@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class ResourceAssemblyInfo
+    internal class ResourceAssemblyInfo
     {
         public string Culture { get; }
         public string RelativePath { get; }

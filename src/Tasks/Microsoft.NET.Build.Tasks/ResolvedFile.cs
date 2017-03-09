@@ -5,7 +5,7 @@ using System.IO;
 using System;
 namespace Microsoft.NET.Build.Tasks
 {
-    public enum AssetType
+    internal enum AssetType
     {
         None,
         Runtime,
@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tasks
         Resources
     }
 
-    public class ResolvedFile
+    internal class ResolvedFile
     {
         public string SourcePath { get; }
 

@@ -99,13 +99,13 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        #region Test Support
-
         public ProduceContentAssets()
         {
         }
 
-        public ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
+        #region Test Support
+
+        internal ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()
         {
             _assetPreprocessor = assetPreprocessor;
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Resource for reading, processing and writing content assets
         /// </summary>
-        public IContentAssetPreprocessor AssetPreprocessor
+        internal IContentAssetPreprocessor AssetPreprocessor
         {
             get
             {

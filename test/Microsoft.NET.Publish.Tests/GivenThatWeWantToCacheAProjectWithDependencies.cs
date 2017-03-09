@@ -3,6 +3,8 @@
 
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -11,7 +13,6 @@ using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.NET.Build.Tasks;
 using FluentAssertions;
 using NuGet.Versioning;
 using NuGet.Packaging.Core;
@@ -94,7 +95,7 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
-            var packagescomposed = CacheArtifactParser.Parse(artifact);
+            HashSet<PackageIdentity> packagescomposed = ParseCacheArtifacts(artifact);
 
             packagescomposed.Count.Should().Be(knownpackage.Count);
 
@@ -237,7 +238,7 @@ namespace Microsoft.NET.Publish.Tests
             knownpackage.Add(new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0")));
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
-            var packagescomposed = CacheArtifactParser.Parse(artifact);
+            var packagescomposed = ParseCacheArtifacts(artifact);
 
             packagescomposed.Count.Should().BeGreaterThan(0);
 
@@ -245,6 +246,15 @@ namespace Microsoft.NET.Publish.Tests
             {
                 packagescomposed.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
             }
+        }
+
+        private static HashSet<PackageIdentity> ParseCacheArtifacts(string path)
+        {
+            return new HashSet<PackageIdentity>(
+                from element in XDocument.Load(path).Root.Elements("Package")
+                select new PackageIdentity(
+                    element.Attribute("Id").Value,
+                    NuGetVersion.Parse(element.Attribute("Version").Value)));
         }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class SingleProjectInfo
+    internal class SingleProjectInfo
     {
         public string ProjectPath { get; }
         public string Name { get; }

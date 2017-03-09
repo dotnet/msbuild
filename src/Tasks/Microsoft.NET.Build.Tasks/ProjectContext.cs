@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class ProjectContext
+    internal class ProjectContext
     {
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
