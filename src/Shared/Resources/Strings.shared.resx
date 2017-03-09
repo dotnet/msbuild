@@ -89,6 +89,10 @@
     <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
     <comment>{StrBegin="MSB4103: "}</comment>
   </data>
+  <data name="InvalidLogFileFormat" UESanitized="false" Visibility="Public">
+    <value>MSB4233: There was an exception while reading the log file: {0}</value>
+    <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
+  </data>
   <data name="MissingProject" UESanitized="false" Visibility="Private_OM">
     <value>MSBuild is expecting a valid "{0}" object.</value>
   </data>

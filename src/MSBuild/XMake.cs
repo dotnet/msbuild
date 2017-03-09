@@ -3195,7 +3195,8 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                var message = ResourceUtilities.FormatResourceString("InvalidLogFileFormat", ex.Message);
+                Console.WriteLine(message);
             }
 
             foreach (var logger in loggers)
