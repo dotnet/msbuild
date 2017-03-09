@@ -80,12 +80,6 @@ if "%SYNC_XLF%"=="true" (
     set SYNC_XLF_ARGUMENT="/p:SyncXlf=true"
 )
 
-:: Full Framework MSBuild does not have the new built-in property MSBuildRuntimeType
-set RUNTIMETYPE_ARGUMENT=
-if "%TARGET%"=="Full" (
-    set RUNTIMETYPE_ARGUMENT="/p:MSBuildRuntimeType=Full"
-)
-
 :: Restore build tools
 call %~dp0init-tools.cmd
 

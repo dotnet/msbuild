@@ -159,8 +159,8 @@ namespace Microsoft.Build.UnitTests
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
 
-            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", "UnionMetadata");
-            Assert.False(returnValue.Contains("10.0.10586.0"));
+            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14393.0", "10.0.14393.0", "UnionMetadata");
+            Assert.False(returnValue.Contains("10.0.14393.0"));
             Assert.Equal(Path.Combine(sdkRootPath, "UnionMetadata"), returnValue);
         }
 
@@ -911,7 +911,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
@@ -1083,7 +1083,7 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"

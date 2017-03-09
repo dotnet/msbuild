@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -459,7 +460,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
-                Toolset source = p.GetToolset("14.0");
+                Toolset source = p.GetToolset("15.0");
                 Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
                 p.AddToolset(potato);
 

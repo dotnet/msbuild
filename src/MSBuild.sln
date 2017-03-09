@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Framework", "Framework\Microsoft.Build.Framework.csproj", "{571F09DB-A81A-4444-945C-6F7B530054CD}"
 EndProject
@@ -73,6 +73,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPacka
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deprecated", "Deprecated", "{64606C1B-CF86-49CA-8050-B66E7D5C7CB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlFileLogger", "..\Samples\XmlFileLogger\XmlFileLogger.csproj", "{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -855,6 +857,48 @@ Global
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.ActiveCfg = Debug|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x64.Build.0 = Debug|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.ActiveCfg = Debug|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug|x86.Build.0 = Debug|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.ActiveCfg = Debug-MONO|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|Any CPU.Build.0 = Debug-MONO|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.ActiveCfg = Debug-MONO|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x64.Build.0 = Debug-MONO|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.ActiveCfg = Debug-MONO|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-MONO|x86.Build.0 = Debug-MONO|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|Any CPU.Build.0 = Debug-NetCore|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Port-Progress|x86.Build.0 = Port-Progress|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.ActiveCfg = Release|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x64.Build.0 = Release|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.ActiveCfg = Release|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release|x86.Build.0 = Release|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.ActiveCfg = Release-MONO|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|Any CPU.Build.0 = Release-MONO|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.ActiveCfg = Release-MONO|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x64.Build.0 = Release-MONO|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.ActiveCfg = Release-MONO|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-MONO|x86.Build.0 = Release-MONO|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.ActiveCfg = Release-NetCore|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|Any CPU.Build.0 = Release-NetCore|Any CPU
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.ActiveCfg = Release-NetCore|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x64.Build.0 = Release-NetCore|x64
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.ActiveCfg = Release-NetCore|x86
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81}.Release-NetCore|x86.Build.0 = Release-NetCore|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -867,5 +911,6 @@ Global
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 		{D21C4BF9-E131-4ACB-8960-794797F19A39} = {64606C1B-CF86-49CA-8050-B66E7D5C7CB8}
 		{5274C277-F122-4A44-B7A0-00A1B3F39803} = {64606C1B-CF86-49CA-8050-B66E7D5C7CB8}
+		{7D8BA0AA-B715-4646-A2F8-844DB2F15C81} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 	EndGlobalSection
 EndGlobal

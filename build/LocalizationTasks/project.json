@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "fmdev.XliffParser": "0.5.1",
-    "fmdev.ResX": "0.1.1"
+    "fmdev.ResX": "0.1.1",
+    "Microsoft.Build.Framework": "14.3.0",
+    "Microsoft.Build.Utilities.Core": "14.3.0"
   },
   "frameworks": {
     "net46": { }
