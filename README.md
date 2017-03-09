@@ -24,18 +24,20 @@ Full-framework-only build from `master` (deprecated):
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ## Building
-### Building MSBuild with VS 2015
-For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2017 RC, but you will encounter issues building with the provided scripts.
+### Building MSBuild with Visual Studio 2017
+For the full supported experience, you will need to have Visual Studio 2017.
 
-To get started on **Visual Studio 2015**:
+To get started on **Visual Studio 2017**:
 
-1. [Install Visual Studio 2015](http://www.visualstudio.com/en-us/downloads/visual-studio-2015-downloads-vs).  Select the following optional components:
-  - _Microsoft Web Developer Tools_
-  - _Universal Windows App Development Tools_
-    - _Tools and Windows SDK 10.0.10240_
+1. [Install Visual Studio 2017](https://www.visualstudio.com/vs/).  Select the following Workloads:
+  - _.NET desktop development_
+  - _Desktop development with C++_
+    - Optional, build warnings may occur without it.
+  - _.NET Core cross-platform development_
+    - Otional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
 3. Build the code using the `cibuild.cmd` script.
-5. Open src/MSBuild.sln solution in Visual Studio 2015.
+5. Open src/MSBuild.sln solution in Visual Studio 2017.
 
 ### Building MSBuild in Unix (Mac & Linux)
 MSBuild's xplat branch allows MSBuild to be run on Unix Systems. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
