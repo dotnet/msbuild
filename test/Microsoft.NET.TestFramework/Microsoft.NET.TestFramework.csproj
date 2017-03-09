@@ -52,6 +52,10 @@
         <Version>$(DotNetCliUtilsVersion)</Version>
         <TFM>netstandard1.5</TFM>
       </CopyLocalAssembly>
+      <CopyLocalAssembly Include="Microsoft.Build">
+        <Version>$(MSBuildPackagesVersion)</Version>
+        <TFM>netstandard1.5</TFM>
+      </CopyLocalAssembly>
       <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
         <Version>$(PlatformAbstractionsVersion)</Version>
         <TFM>netstandard1.3</TFM>
