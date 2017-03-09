@@ -150,6 +150,18 @@
           AfterTargets="Publish">
   </Target>
 
+  <Target Name="RetargetVSTestConsole"
+          AfterTargets="Publish">
+    <PropertyGroup>
+      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
+    </PropertyGroup>
+    <ReplaceFileContents
+      InputFile="$(VSTestRuntimeConfigPath)"
+      DestinationFile="$(VSTestRuntimeConfigPath)"
+      ReplacementPatterns="1.0.0"
+      ReplacementStrings="$(CLI_SharedFrameworkVersion)" />
+  </Target>
+
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
           AfterTargets="PublishMSBuildExtensions">

@@ -4,6 +4,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net451;netcoreapp2.0</TargetFrameworks>
+    <DotnetCliToolTargetFramework>netcoreapp2.0</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
