@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.NET.TestFramework
 {

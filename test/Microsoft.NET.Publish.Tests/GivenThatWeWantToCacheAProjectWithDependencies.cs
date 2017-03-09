@@ -12,7 +12,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using FluentAssertions;
 using NuGet.Versioning;
 using NuGet.Packaging.Core;

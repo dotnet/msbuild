@@ -3,7 +3,7 @@
   <!-- This file is imported by all projects at the beginning of the project files -->
 
   <PropertyGroup>
-    <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
+    <MsBuildPackagesVersion>15.1.548</MsBuildPackagesVersion>
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
     <NuGetVersion>4.3.0-beta1-2342</NuGetVersion>
@@ -13,11 +13,11 @@
   <PropertyGroup>
     <MicrosoftNETCoreApp20Version>2.0.0-beta-001509-00</MicrosoftNETCoreApp20Version>
     <xunitVersion>2.1.0</xunitVersion>
-    <FluentAssertionsVersion>4.0.0</FluentAssertionsVersion>
-    <FluentAssertionsJsonVersion>4.12.0</FluentAssertionsJsonVersion>
+    <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
+    <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <NewtonsoftJsonOnNetFrameworkVersion>6.0.4</NewtonsoftJsonOnNetFrameworkVersion>
-    <DotNetCliUtilsVersion>1.0.0-preview2-003121</DotNetCliUtilsVersion>
+    <DotNetCliUtilsVersion>1.0.1</DotNetCliUtilsVersion>
   </PropertyGroup>
   
 </Project>

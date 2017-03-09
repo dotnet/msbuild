@@ -44,13 +44,17 @@
       <CopyLocalAssembly Include="xunit.runner.utility.dotnet">
         <RelativePath>xunit.runner.utility\$(XUnitVersion)\lib\dotnet\xunit.runner.utility.dotnet.dll</RelativePath>
       </CopyLocalAssembly>
+      <CopyLocalAssembly Include="fluentassertions">
+        <RelativePath>fluentassertions\$(FluentAssertionsVersion)\lib\netstandard1.3\FluentAssertions.dll</RelativePath>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="fluentassertions.core">
+        <RelativePath>fluentassertions\$(FluentAssertionsVersion)\lib\netstandard1.3\FluentAssertions.Core.dll</RelativePath>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly Include="fluentassertions.json">
+        <RelativePath>fluentassertions.json\$(FluentAssertionsJsonVersion)\lib\netstandard1.3\FluentAssertions.Json.dll</RelativePath>
+      </CopyLocalAssembly>
 
       <TestCopyLocalAssembly Include="$(NuGet_Packages)\%(CopyLocalAssembly.RelativePath)" />
-
-      <FluentAssertionsPackage Include="fluentassertions" />
-      <FluentAssertionsPackage Include="fluentassertions.json" />
-
-      <TestCopyLocalAssembly Include="$(NuGet_Packages)\%(FluentAssertionsPackage.Identity)\4.12.0\lib\netstandard1.3\*.dll" />
     </ItemGroup>
 
     <Copy SourceFiles="%(TestCopyLocalAssembly.FullPath)" DestinationFolder="$(OutDir)" />
