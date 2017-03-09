@@ -48,11 +48,17 @@ if ($Verbosity -eq 'diagnostic') {
 }
 
 # Install a stage 0
-$DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1"
+$DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1"
 Invoke-WebRequest $DOTNET_INSTALL_SCRIPT_URL -OutFile "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1"
 
 & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version $DotnetCLIVersion $dotnetInstallVerbosity
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+
+if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.1.1"))
+{
+    & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Channel "Release/1.1.0" -Version 1.1.1 -SharedRuntime
+    if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+}
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"

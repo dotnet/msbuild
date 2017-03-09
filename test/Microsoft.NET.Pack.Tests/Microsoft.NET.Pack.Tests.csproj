@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{588516D7-96AD-4447-A1EB-244D737A3C87}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>

@@ -54,6 +54,8 @@
         <!-- Non-shipping binaries are simply signed with the Roslyn internal key. -->
         <Otherwise>
           <PropertyGroup>
+            <!-- Public sign on non-Windows as full signing isn't currently supported (https://github.com/dotnet/roslyn/issues/8210) -->
+            <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
             <AssemblyOriginatorKeyFile>$(BuildDirPath)Strong Name Keys\RoslynInternalKey.Private.snk</AssemblyOriginatorKeyFile>
             <DelaySign>false</DelaySign>
             <PublicKey>$(RoslynInternalKey)</PublicKey>

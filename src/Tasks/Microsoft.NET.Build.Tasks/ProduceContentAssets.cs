@@ -99,13 +99,13 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        #region Test Support
-
         public ProduceContentAssets()
         {
         }
 
-        public ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
+        #region Test Support
+
+        internal ProduceContentAssets(IContentAssetPreprocessor assetPreprocessor)
             : this()
         {
             _assetPreprocessor = assetPreprocessor;
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// Resource for reading, processing and writing content assets
         /// </summary>
-        public IContentAssetPreprocessor AssetPreprocessor
+        internal IContentAssetPreprocessor AssetPreprocessor
         {
             get
             {
@@ -228,6 +228,13 @@ namespace Microsoft.NET.Build.Tasks
             string pathToFinalAsset = resolvedPath;
             string ppOutputPath = contentFile.GetMetadata(PPOutputPathKey);
             string parentPackage = contentFile.GetMetadata(MetadataKeys.ParentPackage);
+            string[] parts = parentPackage?.Split('/');
+            if (parts == null || parts.Length != 2)
+            {
+                throw new BuildErrorException(Strings.ContentFileDoesNotContainExpectedParentPackageInformation, contentFile.ItemSpec);
+            }
+            string packageName = parts[0];
+            string packageVersion = parts[1];
 
             if (!string.IsNullOrEmpty(ppOutputPath))
             {
@@ -235,14 +242,9 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     throw new BuildErrorException(Strings.ContentPreproccessorParameterRequired, nameof(ProduceContentAssets), nameof(ContentPreprocessorOutputDirectory));
                 }
-                string [] parts = parentPackage?.Split('/');
-                if (parts == null)
-                {
-                    throw new BuildErrorException(Strings.ContentFileDoesNotContainExpectedParentPackageInformation, contentFile.ItemSpec);
-                }
 
                 // We need the preprocessed output, so let's run the preprocessor here
-                string relativeOutputPath = Path.Combine(parts[0], parts[1], ppOutputPath);
+                string relativeOutputPath = Path.Combine(packageName, packageVersion, ppOutputPath);
                 if (AssetPreprocessor.Process(resolvedPath, relativeOutputPath, out pathToFinalAsset))
                 {
                     _fileWrites.Add(new TaskItem(pathToFinalAsset));
@@ -259,6 +261,8 @@ namespace Microsoft.NET.Build.Tasks
                     var item = new TaskItem(pathToFinalAsset);
                     item.SetMetadata("TargetPath", outputPath);
                     item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
+                    item.SetMetadata(MetadataKeys.PackageName, packageName);
+                    item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
 
                     _copyLocalItems.Add(item);
                 }
@@ -274,6 +278,8 @@ namespace Microsoft.NET.Build.Tasks
             {
                 var item = new TaskItem(pathToFinalAsset);
                 item.SetMetadata(MetadataKeys.ParentPackage, parentPackage);
+                item.SetMetadata(MetadataKeys.PackageName, packageName);
+                item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
 
                 // We'll put additional metadata on the item so we can convert it back to the real item group in our targets
                 item.SetMetadata("ProcessedItemType", buildAction);

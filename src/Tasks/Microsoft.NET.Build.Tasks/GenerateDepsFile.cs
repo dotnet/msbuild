@@ -78,6 +78,9 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> frameworkReferences =
                 ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
 
+            IEnumerable<ReferenceInfo> directReferences =
+                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths);
+
             Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
                 ReferencePaths,
                 ReferenceSatellitePaths);
@@ -91,6 +94,7 @@ namespace Microsoft.NET.Build.Tasks
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithFrameworkReferences(frameworkReferences)
+                .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithPrivateAssets(privateAssets)
                 .WithCompilationOptions(compilationOptions)

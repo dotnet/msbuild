@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}</ProjectGuid>
@@ -9,7 +9,7 @@
     <RootNamespace>Microsoft.NET.Build.Tasks.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks.UnitTests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
@@ -58,6 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="TestLockFiles.cs" />
+    <Compile Include="GivenARemoveDuplicatePackageReferences.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="all.asset.types.portable.deps.json">
@@ -79,6 +80,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LockFiles\dotnet.new.project.lock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="simple.dependencies.directReference.deps.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="simple.dependencies.compilerOptions.deps.json">

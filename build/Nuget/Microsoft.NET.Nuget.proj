@@ -1,16 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
 
   <PropertyGroup>
     <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
     <OutDir>$(OutDir)Raw\</OutDir>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <PackProjectInputFile>$(MSbuildProjectFullPath)</PackProjectInputFile>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <NuSpec Include="Microsoft.NET.Sdk.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
-      <NuGetArguments>-version "$(Version)"</NuGetArguments>
       <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
     </NuSpec>
 
@@ -22,32 +28,26 @@
     <PackageAssets Include="$(OutDir)**\*.*" Exclude="*.log" />
   </ItemGroup>
 
-  <Target Name="Build"
+    <!-- This project is being used as a wrapper project for packing with the nuspec.
+         https://github.com/NuGet/Home/wiki/Adding-nuget-pack-as-a-msbuild-target#packing-using-a-nuspec
+    -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <NuspecFile>Microsoft.NET.Sdk.nuspec</NuspecFile>
+    <NuspecBasePath>$(RootOutDir)</NuspecBasePath>
+    <NuspecProperties>version=$(Version)</NuspecProperties>
+    <PackageOutputPath>$(NuGetOutDir)</PackageOutputPath>
+  </PropertyGroup>  
+  
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
+  <Target Name="Build" 
           DependsOnTargets="LogOutput;
                             InvalidateNuGetCache;
                             @(NuSpec->'%(LayoutTargetName)')"
           Inputs="@(NuSpec);@(PackageAssets)"
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
-
-    <PropertyGroup>
-      <NuGetExeVersion>3.4.4</NuGetExeVersion>
-      <NuGetTool>$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)\nuget.exe</NuGetTool>
-      <NuGetDownloadUrl>https://dist.nuget.org/win-x86-commandline/v$(NuGetExeVersion)/NuGet.exe</NuGetDownloadUrl>
-      <NuGetDownloadCommand>powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetTool)')"</NuGetDownloadCommand>
-    </PropertyGroup>
-
-    <MakeDir Directories="$(NuGetOutDir)" />
-
-    <MakeDir Directories="$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)"
-             Condition="'$(OS)' == 'Windows_NT'"/>
-
-    <Exec
-      Condition="!Exists('$(NuGetTool)') And '$(OS)' == 'Windows_NT'"
-      Command="$(NuGetDownloadCommand)"
-      />
-
-    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(RootOutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
-          Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <!-- Invalidate the packages that we are building from the cache every time we build a new one.

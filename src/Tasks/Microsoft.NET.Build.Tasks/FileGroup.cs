@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Values for File Group Metadata corresponding to the groups in a target library
     /// </summary>
-    public enum FileGroup
+    internal enum FileGroup
     {
         CompileTimeAssembly,
         RuntimeAssembly,
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         FrameworkAssembly
     }
 
-    public static class FileGroupExtensions
+    internal static class FileGroupExtensions
     {
         private static readonly IDictionary<string, string> _emptyProperties = new Dictionary<string, string>();
 

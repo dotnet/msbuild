@@ -3,13 +3,14 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using System.IO;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -49,7 +50,10 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
-            Command.Create(Path.Combine(outputDirectory.FullName, selfContainedExecutable), new string[] { })
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
+
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()

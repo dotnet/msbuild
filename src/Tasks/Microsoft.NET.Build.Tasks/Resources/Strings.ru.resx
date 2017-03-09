@@ -228,4 +228,25 @@
   <data name="PackageReferenceOverrideWarning" xml:space="preserve">
     <value>PackageReference для "{0}" был включен в проект. На этот пакет неявно указывает пакет .NET SDK и обычно не нужно ссылаться на него из проекта. Дополнительные сведения: {1}</value>
   </data>
+  <data name="IncorrectPackageRoot" xml:space="preserve">
+    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+  </data>
+  <data name="MultipleFilesResolved" xml:space="preserve">
+    <value>More than one file found for {0}</value>
+  </data>
+  <data name="FolderAlreadyExists" xml:space="preserve">
+    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+  </data>
+  <data name="IncorrectFilterFormat" xml:space="preserve">
+    <value>The filter profile {0} provided is of not the correct format</value>
+  </data>
+  <data name="ParsingFiles" xml:space="preserve">
+    <value>Parsing the Files : '{0}'</value>
+  </data>
+  <data name="PackageInfoLog" xml:space="preserve">
+    <value>Package Name='{0}', Version='{1}' was parsed</value>
+  </data>
+  <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
+    <value>Specify a RuntimeIdentifier</value>
+  </data>
 </root>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+ 
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{A33548A0-F3B0-40C3-8C4D-AD2F00596CD6}</ProjectGuid>
@@ -50,14 +50,14 @@
     <ItemGroup>
       <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
         <Version>$(DotNetCliUtilsVersion)</Version>
-        <TFM>netstandard1.6</TFM>
+        <TFM>netstandard1.5</TFM>
       </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.ProjectModel">
-        <Version>1.0.0-rc3-003121</Version>
-        <TFM>netstandard1.6</TFM>
+      <CopyLocalAssembly Include="Microsoft.Build">
+        <Version>$(MSBuildPackagesVersion)</Version>
+        <TFM>netstandard1.5</TFM>
       </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.InternalAbstractions">
-        <Version>1.0.0</Version>
+      <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
+        <Version>$(PlatformAbstractionsVersion)</Version>
         <TFM>netstandard1.3</TFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly>

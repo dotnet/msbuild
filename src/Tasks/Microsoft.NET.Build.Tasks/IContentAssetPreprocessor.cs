@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Resource for reading, processing and writing content assets
     /// </summary>
-    public interface IContentAssetPreprocessor
+    internal interface IContentAssetPreprocessor
     {
         /// <summary>
         /// Configure the preprocessor with a base outputDirectory and the tokens/value 

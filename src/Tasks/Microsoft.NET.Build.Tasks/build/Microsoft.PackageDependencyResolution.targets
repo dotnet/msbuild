@@ -331,10 +331,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
       <_CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(__CompileFileDefinitions)" />
 
-      <ResolvedCompileFileDefinitions Include="%(_CompileFileDefinitions.ResolvedPath)">
+      <ResolvedCompileFileDefinitions Include="@(_CompileFileDefinitions->'%(ResolvedPath)')">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
       </ResolvedCompileFileDefinitions>
 
     </ItemGroup>
@@ -347,10 +349,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_FrameworkAssemblies Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
 
-      <ResolvedFrameworkAssemblies Include="%(_FrameworkAssemblies.FrameworkAssembly)">
+      <ResolvedFrameworkAssemblies Include="@(_FrameworkAssemblies->'%(FrameworkAssembly)')">
         <Private>false</Private>
         <NuGetIsFrameworkReference>true</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
       </ResolvedFrameworkAssemblies>
 
     </ItemGroup>
@@ -462,10 +466,22 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />
 
       <!-- ALL -->
-      <AllCopyLocalItems Include="@(NativeCopyLocalItems);@(RuntimeCopyLocalItems);@(ResourceCopyLocalItems);@(_ContentCopyLocalItems)">
+      <_AllCopyLocalItems Include="@(_NativeCopyLocalItems);@(_RuntimeCopyLocalItems);@(_ResourceCopyLocalItems)" />
+
+      <AllCopyLocalItems Include="@(_AllCopyLocalItems->'%(ResolvedPath)')">
         <Private>false</Private>
         <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
+      </AllCopyLocalItems>
+
+      <AllCopyLocalItems Include="@(_ContentCopyLocalItems)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
       </AllCopyLocalItems>
 
     </ItemGroup>

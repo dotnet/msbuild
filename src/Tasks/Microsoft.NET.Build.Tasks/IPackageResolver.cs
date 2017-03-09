@@ -5,7 +5,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public interface IPackageResolver
+    internal interface IPackageResolver
     {
         string GetPackageDirectory(string packageId, NuGetVersion version);
         string GetPackageDirectory(string packageId, NuGetVersion version, out string packageRoot);

@@ -5,7 +5,6 @@
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <ProjectRootDir>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\</ProjectRootDir>
   </PropertyGroup>
-  <Import Project="$(ProjectRootDir)Common.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

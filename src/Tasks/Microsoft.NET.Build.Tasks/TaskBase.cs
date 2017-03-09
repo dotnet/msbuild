@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private readonly DiagnosticsHelper _diagnostics;
 
-        public DiagnosticsHelper Diagnostics
+        internal DiagnosticsHelper Diagnostics
         {
             get { return _diagnostics; }
         }

@@ -6,15 +6,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.ProjectModel;
+using NuGet.Packaging.Core;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class ProjectContext
+    internal class ProjectContext
     {
         private readonly LockFile _lockFile;
-        private readonly LockFileTarget _filterlockFileTarget;
         private readonly LockFileTarget _lockFileTarget;
         private readonly string _platformLibraryName;
+        internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
 
         public bool IsPortable { get; }
         public LockFileTargetLibrary PlatformLibrary { get; }
@@ -22,10 +25,9 @@ namespace Microsoft.NET.Build.Tasks
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, string platformLibraryName, LockFileTarget filterlockFileTarget = null)
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, string platformLibraryName)
         {
             _lockFile = lockFile;
-            _filterlockFileTarget = filterlockFileTarget;
             _lockFileTarget = lockFileTarget;
             _platformLibraryName = platformLibraryName;
 
@@ -56,12 +58,25 @@ namespace Microsoft.NET.Build.Tasks
                 allExclusionList.UnionWith(privateAssetsExclusionList);
             }
 
-            if(_filterlockFileTarget != null)
+            if(PackagesToBeFiltered != null)
             {
-                IEnumerable<LockFileTargetLibrary> filterLibraries = _filterlockFileTarget.Libraries;
-                Dictionary<string, LockFileTargetLibrary> filterLookup = filterLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
+                var filterLookup = new Dictionary<string, HashSet<PackageIdentity>>(StringComparer.OrdinalIgnoreCase);
+                foreach (var pkg in PackagesToBeFiltered)
+                {
+                    HashSet<PackageIdentity> packageinfos;
+                    if (filterLookup.TryGetValue(pkg.Id, out packageinfos))
+                    {
+                        packageinfos.Add(pkg);
+                    }
+                    else
+                    {
+                        packageinfos = new HashSet<PackageIdentity>();
+                        packageinfos.Add(pkg);
+                        filterLookup.Add(pkg.Id, packageinfos);
+                    }
+                }
 
-                allExclusionList.UnionWith(GetIntersection(filterLookup, libraryLookup));
+                allExclusionList.UnionWith(GetPackagesToBeFiltered(filterLookup, libraryLookup));
             }
 
             return runtimeLibraries.Filter(allExclusionList).ToArray();
@@ -181,31 +196,26 @@ namespace Microsoft.NET.Build.Tasks
 
             return privateAssetsToExclude;
         }
-        private static HashSet<string> GetIntersection(
-          IDictionary<string, LockFileTargetLibrary> collection1,
-          IDictionary<string, LockFileTargetLibrary> collection2)
+        private static HashSet<string> GetPackagesToBeFiltered(
+          IDictionary<string, HashSet<PackageIdentity>> packagesToBeFiltered,
+          IDictionary<string, LockFileTargetLibrary> packagesToBePublished)
         {
-            var exclusionList = new HashSet<string>();
-            var iterated = collection1;
-            var lookup = collection2;
-
-            if (collection1.Count > collection2.Count)
+            var exclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            foreach (var entry in packagesToBePublished)
             {
-                iterated = collection2;
-                lookup = collection1;
-            }
-            foreach (var entry in iterated)
-            {
+                HashSet<PackageIdentity> librarySet;
 
-                LockFileTargetLibrary library;
-
-                if (lookup.TryGetValue(entry.Key, out library))
+                if (packagesToBeFiltered.TryGetValue(entry.Key, out librarySet))
                 {
                     LockFileTargetLibrary dependency = entry.Value;
-
-                    if (library.Version.Equals(dependency.Version))
+                    foreach (var library in librarySet)
                     {
-                        exclusionList.Add(entry.Key);
+                        if (dependency.Version.Equals(library.Version))
+                        {
+                            exclusionList.Add(entry.Key);
+                            break;
+                        }
                     }
                 }
             }
