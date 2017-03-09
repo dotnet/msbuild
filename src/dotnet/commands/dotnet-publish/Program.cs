@@ -1,12 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -21,100 +19,19 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Name = "dotnet publish";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleRemainingArguments = true;
-            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
-            app.HelpOption("-h|--help");
+            var msbuildArgs = new List<string>();
 
-            CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgument}>",
-                LocalizableStrings.ProjectArgDescription);
+            var parser = Parser.Instance;
 
-            CommandOption frameworkOption = app.Option(
-                $"-f|--framework <{LocalizableStrings.FrameworkOption}>", LocalizableStrings.FrameworkOptionDescription,
-                CommandOptionType.SingleValue);
+            var result = parser.ParseFrom("dotnet publish", args);
 
-            CommandOption runtimeOption = app.Option(
-                $"-r|--runtime <{LocalizableStrings.RuntimeOption}>", LocalizableStrings.RuntimeOptionDescription,
-                CommandOptionType.SingleValue);
+            msbuildArgs.Add("/t:Publish");
 
-            CommandOption outputOption = app.Option(
-                $"-o|--output <{LocalizableStrings.OutputOption}>", LocalizableStrings.OutputOptionDescription,
-                CommandOptionType.SingleValue);
+            var appliedPublishOption = result.AppliedOptions["publish"];
 
-            CommandOption configurationOption = app.Option(
-                $"-c|--configuration <{LocalizableStrings.ConfigurationOption}>", LocalizableStrings.ConfigurationOptionDescription,
-                CommandOptionType.SingleValue);
+            msbuildArgs.AddRange(appliedPublishOption.Arguments);
 
-            CommandOption versionSuffixOption = app.Option(
-               $"--version-suffix <{LocalizableStrings.VersionSuffixOption}>", LocalizableStrings.VersionSuffixOptionDescription,
-                CommandOptionType.SingleValue);
-
-            CommandOption filterProjOption = app.Option(
-               $"--filter <{LocalizableStrings.FilterProjOption}>", LocalizableStrings.FilterProjOptionDescription,
-                CommandOptionType.SingleValue);
-
-            CommandOption verbosityOption = AddVerbosityOption(app);
-
-            List<string> msbuildArgs = null;
-            app.OnExecute(() =>
-            {
-                msbuildArgs = new List<string>();
-
-                msbuildArgs.Add("/t:Publish");
-
-                if (!string.IsNullOrEmpty(projectArgument.Value))
-                {
-                    msbuildArgs.Add(projectArgument.Value);
-                }
-
-                if (!string.IsNullOrEmpty(frameworkOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(runtimeOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(outputOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:PublishDir={outputOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(configurationOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:Configuration={configurationOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(versionSuffixOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:VersionSuffix={versionSuffixOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(filterProjOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:FilterProjectFiles={filterProjOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(verbosityOption.Value()))
-                {
-                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
-                }
-
-                msbuildArgs.AddRange(app.RemainingArguments);
-
-                return 0;
-            });
-
-            int exitCode = app.Execute(args);
-            if (msbuildArgs == null)
-            {
-                throw new CommandCreationException(exitCode);
-            }
+            msbuildArgs.AddRange(appliedPublishOption.ArgsToBeForwarded());
 
             return new PublishCommand(msbuildArgs, msbuildPath);
         }

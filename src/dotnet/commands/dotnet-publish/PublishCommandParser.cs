@@ -10,27 +10,36 @@ namespace Microsoft.DotNet.Cli
         public static Command Publish() =>
             Create.Command("publish",
                            ".NET Publisher",
-                           Accept.ExactlyOneArgument,
+                           Accept.ZeroOrMoreArguments,
                            CommonOptions.HelpOption(),
                            Create.Option("-f|--framework",
                                          "Target framework to publish for. The target framework has to be specified in the project file.",
                                          Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
-                                               .With(name: "FRAMEWORK")),
+                                               .With(name: "FRAMEWORK")
+                                               .ForwardAs("/p:TargetFramework={0}")),
                            Create.Option("-r|--runtime",
                                          "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
                                          Accept.AnyOneOf(Suggest.RunTimesFromProjectFile)
-                                               .With(name: "RUNTIME_IDENTIFIER")),
+                                               .With(name: "RUNTIME_IDENTIFIER")
+                                               .ForwardAs("/p:RuntimeIdentifier={0}")),
                            Create.Option("-o|--output",
                                          "Output directory in which to place the published artifacts.",
                                          Accept.ExactlyOneArgument
-                                               .With(name: "OUTPUT_DIR")),
+                                               .With(name: "OUTPUT_DIR")
+                                               .ForwardAs("/p:PublishDir={0}")),
                            Create.Option("-c|--configuration", "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
                                          Accept.ExactlyOneArgument
                                                .With(name: "CONFIGURATION")
-                                               .WithSuggestionsFrom("DEBUG", "RELEASE")),
+                                               .WithSuggestionsFrom("DEBUG", "RELEASE")
+                                               .ForwardAs("/p:Configuration={0}")),
                            Create.Option("--version-suffix", "Defines the value for the $(VersionSuffix) property in the project.",
                                          Accept.ExactlyOneArgument
-                                               .With(name: "VERSION_SUFFIX")),
+                                               .With(name: "VERSION_SUFFIX")
+                                               .ForwardAs("/p:VersionSuffix={0}")),
+                           Create.Option("--filter", "The XML file that contains the list of packages to be excluded from publish step.",
+                                         Accept.ExactlyOneArgument
+                                               .With(name: "PROFILE_XML")
+                                               .ForwardAs("/p:FilterProjectFiles={0}")),
                            CommonOptions.VerbosityOption());
     }
 }
