@@ -68,7 +68,7 @@ export NUGET_HTTP_CACHE_PATH="$REPOROOT/packages"
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_cli
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
+# NuGet depends on HOME and it may not be set. Until it's fixed, we just patch a value in
 if [ -z "$HOME" ]; then
     export HOME="$REPOROOT/.home"
 
