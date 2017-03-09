@@ -467,10 +467,6 @@
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
   </data>
-  <data name="InvalidLogFileFormat" UESanitized="false" Visibility="Public">
-    <value>MSB4233: There was an exception while reading the log file: {0}</value>
-    <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
-  </data>
   <data name="InvalidPropertyNameInToolset" UESanitized="false" Visibility="Private_OM">
     <value>MSB4147: The property "{0}" at "{1}" is invalid. {2}</value>
     <comment>{StrBegin="MSB4147: "}</comment>
