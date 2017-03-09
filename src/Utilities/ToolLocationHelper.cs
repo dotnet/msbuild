@@ -993,6 +993,7 @@ namespace Microsoft.Build.Utilities
                 else
                 {
                     string targetSdkPath = matchingSdk.Path;
+                    string platformVersion = GetPlatformVersion(matchingSdk, targetPlatformIdentifier, targetPlatformVersion);
                     string extensionSdkPath = null;
 
                     if (matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)
@@ -1007,16 +1008,7 @@ namespace Microsoft.Build.Utilities
                         if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)
                         {
                             // We don't want to attempt to gather ApiContract references if the framework isn't explicitly marked as Framework/Platform
-                            string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
-                            PlatformManifest manifest;
-                            if (TryGetPlatformManifest(matchingSdk, platformKey, out manifest) && manifest != null && manifest.VersionedContent)
-                            {
-                                extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, matchingSdk.Path, manifest.PlatformVersion);
-                            }
-                            else
-                            {
-                                extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, matchingSdk.Path);
-                            }
+                           extensionSdkReferences = GetApiContractReferences(extensionSdk.ApiContracts, targetSdkPath, platformVersion);
                         }
                     }
                     else
@@ -1027,6 +1019,27 @@ namespace Microsoft.Build.Utilities
 
                 s_cachedExtensionSdkReferences.Add(cacheKey, extensionSdkReferences);
                 return extensionSdkReferences;
+            }
+        }
+
+        /// <summary>
+        /// Get platform version string which is used to generate versioned path
+        /// </summary>
+        /// <param name="targetSdk">The target SDK</param>
+        /// <param name="targetPlatformIdentifier">The target platform name.</param>
+        /// <param name="targetPlatformVersion">The target platform version.</param>
+        /// <returns>Return the version string if the platform is versioned, otherwise return empty string</returns>
+        private static string GetPlatformVersion(TargetPlatformSDK targetSdk, string targetPlatformIdentifier, string targetPlatformVersion)
+        {
+            string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
+            PlatformManifest manifest;
+            if (TryGetPlatformManifest(targetSdk, platformKey, out manifest) && manifest != null && manifest.VersionedContent)
+            {
+                return manifest.PlatformVersion;
+            }
+            else
+            {
+                return string.Empty;
             }
         }
 
@@ -1293,7 +1306,7 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
         {
-            var targetPlatform = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
+            var targetPlatform = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
 
             if (targetPlatform != null && targetPlatform.Path != null)
             {
@@ -1507,10 +1520,16 @@ namespace Microsoft.Build.Utilities
                 sdkDiskRoots = diskRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
             }
 
+            string[] sdkmultiPlatformDiskRoots = null;
+            if (!String.IsNullOrEmpty(multiPlatformDiskRoots))
+            {
+                sdkmultiPlatformDiskRoots = multiPlatformDiskRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             Version platformVersion;
             if (Version.TryParse(targetPlatformVersion, out platformVersion))
             {
-                return GetMatchingPlatformSDK(targetPlatformIdentifier, platformVersion, sdkDiskRoots, registryRoot);
+                return GetMatchingPlatformSDK(targetPlatformIdentifier, platformVersion, sdkDiskRoots, sdkmultiPlatformDiskRoots, registryRoot);
             }
 
             return null;
@@ -1520,18 +1539,18 @@ namespace Microsoft.Build.Utilities
         /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
         /// object that matches.
         /// </summary>
-        private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
+        private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string[] multiPlatformDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, "targetPlatformIdentifier");
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
 
-            IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, null, registryRoot);
+            IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, multiPlatformDiskRoots, registryRoot);
 
             TargetPlatformSDK matchingSdk = targetPlatforms
                 .Where<TargetPlatformSDK>(
                     platform =>
                     (
-                        String.Equals(platform.TargetPlatformIdentifier, targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
+                    String.Equals(platform.TargetPlatformIdentifier, targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                         && Version.Equals(platform.TargetPlatformVersion, targetPlatformVersion))
                     ).FirstOrDefault();
 
