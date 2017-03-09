@@ -8,7 +8,7 @@
       <PackageFile Include="$(OutDir)build\**\*.*" Folder="build" />
       <PackageFile Include="$(OutDir)buildCrossTargeting\**\*.*" Folder="buildCrossTargeting" />
       <PackageFile Include="$(OutDir)sdk\**\*.*" Folder="Sdk" />
-      <PackageFile Include="$(NuGet_Packages)\newtonsoft.json\6.0.4\lib\net45\Newtonsoft.Json.dll" Folder="tools\net46\Newtonsoft.Json.6.0.4" />
+      <PackageFile Include="$(NuGet_Packages)\newtonsoft.json\$(NewtonsoftJsonOnNetFrameworkVersion)\lib\net45\Newtonsoft.Json.dll" Folder="tools\net46\Newtonsoft.Json.6.0.4" Condition="'$(OS)' == 'Windows_NT'" />
     </ItemGroup>
 
     <Copy SourceFiles="@(PackageFile)" 
