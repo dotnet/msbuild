@@ -1550,7 +1550,7 @@ namespace Microsoft.Build.Utilities
                 .Where<TargetPlatformSDK>(
                     platform =>
                     (
-                    String.Equals(platform.TargetPlatformIdentifier, targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
+                        String.Equals(platform.TargetPlatformIdentifier, targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                         && Version.Equals(platform.TargetPlatformVersion, targetPlatformVersion))
                     ).FirstOrDefault();
 
