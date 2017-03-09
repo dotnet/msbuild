@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
@@ -22,9 +23,9 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var parser = Parser.Instance["dotnet"];
+            var parser = Parser.Instance;
 
-            var result = parser.Parse(args);
+            var result = parser.ParseFrom("dotnet restore", args);
 
             Reporter.Verbose.WriteLine(result.Diagram());
 

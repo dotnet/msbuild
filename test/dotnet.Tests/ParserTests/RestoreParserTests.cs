@@ -22,9 +22,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
-            var parser = Parser.Instance["dotnet"];
+            var parser = Parser.Instance["dotnet"]["restore"];
 
-            var result = parser.Parse(@"restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
+            var result = parser.Parse(@".\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
             output.WriteLine(result.Diagram());
 
@@ -37,9 +37,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsNotSpecified()
         {
-            var parser = Parser.Instance["dotnet"];
+            var parser = Parser.Instance["dotnet"]["restore"];
 
-            var result = parser.Parse(@"restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
+            var result = parser.Parse(@"--packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
             output.WriteLine(result.Diagram());
 

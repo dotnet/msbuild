@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.Cli
                 DebugHelper.HandleDebugSwitch(ref args);
 
                 // get the parser for the current subcommand
-                var parser = Parser.Instance["dotnet"]["complete"];
+                var parser = Parser.Instance;
 
                 // parse the arguments
-                var result = parser.Parse(args);
+                var result = parser.ParseFrom("dotnet complete", args);
 
                 var complete = result["complete"];
 

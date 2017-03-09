@@ -12,10 +12,10 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "complete", "",
                 Accept.ExactlyOneArgument
-                      .With(name: "path")
-                      .MaterializeAs(o => int.Parse(o.Arguments.Single())),
+                      .With(name: "path"),
                 Create.Option("--position", "",
-                    Accept.ExactlyOneArgument
-                          .With(name: "command")));
+                              Accept.ExactlyOneArgument
+                                    .With(name: "command")
+                                    .MaterializeAs(o => int.Parse(o.Arguments.Single()))));
     }
 }
