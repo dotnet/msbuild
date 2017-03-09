@@ -437,7 +437,6 @@ namespace Microsoft.Build.Utilities
         public static string GetDotNetFrameworkVersionFolderPrefix(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) { throw null; }
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion) { throw null; }
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion, string[] sdkRoots) { throw null; }
-        public static Microsoft.Build.Utilities.TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot) { throw null; }
         public static string GetPathToBuildTools(string toolsVersion) { throw null; }
         public static string GetPathToBuildTools(string toolsVersion, Microsoft.Build.Utilities.DotNetFrameworkArchitecture architecture) { throw null; }
         public static string GetPathToBuildToolsFile(string fileName, string toolsVersion) { throw null; }

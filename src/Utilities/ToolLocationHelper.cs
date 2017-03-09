@@ -1510,7 +1510,7 @@ namespace Microsoft.Build.Utilities
         /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
         /// object that matches.  
         /// </summary>
-        public static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
+        private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
 
