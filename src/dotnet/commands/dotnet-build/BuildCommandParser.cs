@@ -12,8 +12,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "build",
                 ".NET Builder",
-                Accept.ZeroOrOneArgument
-                      .Forward(),
+                Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
