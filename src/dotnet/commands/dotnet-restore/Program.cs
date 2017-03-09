@@ -29,6 +29,8 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var result = parser.ParseFrom("dotnet restore", args);
 
+            result.ShowHelpIfRequested();
+
             Reporter.Output.WriteLine(result.Diagram());
 
             var restore = result["dotnet"]["restore"];
@@ -60,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Restore
             {
                 return e.ExitCode;
             }
-
+            
             return cmd.Execute();
         }
     }

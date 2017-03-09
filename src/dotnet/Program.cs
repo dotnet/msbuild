@@ -77,6 +77,11 @@ namespace Microsoft.DotNet.Cli
                     return ProcessArgs(args);
                 }
             }
+            catch (HelpException e)
+            {
+                Reporter.Output.Write(e.Message);
+                return e.IsError ? 1 : 0;
+            }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
                 Reporter.Error.WriteLine(CommandContext.IsVerbose() ? 
