@@ -777,6 +777,8 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
+            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "EvaluationStarted", projectFile);
+
 #if MSBUILDENABLEVSPROFILING 
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
             DataCollection.CommentMarkProfile(8816, endPass0);
@@ -929,6 +931,8 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
+            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "EvaluationFinished", projectFile);
+
 #if FEATURE_MSBUILD_DEBUGGER
             return _projectLevelLocalsForBuild;
 #else
@@ -1013,7 +1017,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, sdkName));
-                    
+
                     implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, sdkName));
                 }
             }
@@ -1627,7 +1631,7 @@ namespace Microsoft.Build.Evaluation
 
             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
 
-            // If we are goign to set a property to a value other than null or empty we need to check to see if it has been used
+            // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
             // during evaluation.
             if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
             {
@@ -1649,12 +1653,35 @@ namespace Microsoft.Build.Evaluation
 
             P property = _data.SetProperty(propertyElement, evaluatedValue, predecessor);
 
+            if (predecessor != null)
+            {
+                LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
+            }
+
 #if FEATURE_MSBUILD_DEBUGGER
             if (DebuggerManager.DebuggingEnabled)
             {
                 DebuggerManager.LeaveState(propertyElement.Location);
             }
 #endif
+        }
+
+        private void LogPropertyReassignment(P predecessor, P property, string location)
+        {
+            string newValue = property.EvaluatedValue;
+            string oldValue = predecessor.EvaluatedValue;
+
+            if (newValue != oldValue)
+            {
+                _loggingService.LogComment(
+                    _buildEventContext,
+                    MessageImportance.Low,
+                    "PropertyReassignment",
+                    property.Name,
+                    newValue,
+                    oldValue,
+                    location);
+            }
         }
 
         private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
@@ -2290,7 +2317,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     project = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, importElement.Sdk, "Sdk", project);
                 }
-                
+
 
                 var newExpandedImportPath = project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
@@ -2351,7 +2378,7 @@ namespace Microsoft.Build.Evaluation
         /// requests can be satisfied without re-parsing it.
         /// </summary>
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
-                                            out List<ProjectRootElement> projects, bool throwOnFileNotExistsError=true)
+                                            out List<ProjectRootElement> projects, bool throwOnFileNotExistsError = true)
         {
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties, _projectRootElementCache))
             {
@@ -2490,7 +2517,7 @@ namespace Microsoft.Build.Evaluation
                             importFileUnescaped,
                             new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
                                 _data.GlobalPropertiesDictionary,
-                                instance => ((IProperty) instance).EvaluatedValueEscaped),
+                                instance => ((IProperty)instance).EvaluatedValueEscaped),
                             _data.ExplicitToolsVersion,
                             _loggingService,
                             _projectRootElementCache,
@@ -2768,7 +2795,7 @@ namespace Microsoft.Build.Evaluation
         private static string StringifyList(IList<string> strings)
         {
             var sb = new StringBuilder();
-            for (int i = 0; i < strings.Count - 1; i ++)
+            for (int i = 0; i < strings.Count - 1; i++)
             {
                 if (i > 0)
                 {

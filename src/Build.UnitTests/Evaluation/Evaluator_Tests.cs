@@ -662,6 +662,55 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Log when a property is being assigned a new value.
+        /// </summary>
+        [Fact]
+        public void LogPropertyAssignments()
+        {
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+                                <Project xmlns='msbuildnamespace'>
+                                     <PropertyGroup>
+                                         <Prop>OldValue</Prop>
+                                         <Prop>NewValue</Prop>
+                                     </PropertyGroup>
+
+                                  <Target Name=""Test""/>
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            bool originalValue = BuildParameters.WarnOnUninitializedProperty;
+            try
+            {
+                BuildParameters.WarnOnUninitializedProperty = true;
+                Directory.CreateDirectory(targetDirectory);
+                File.WriteAllText(testTargetPath, testtargets);
+
+                MockLogger logger = new MockLogger();
+                logger.Verbosity = LoggerVerbosity.Diagnostic;
+                ProjectCollection pc = new ProjectCollection();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(testTargetPath);
+
+                bool result = project.Build();
+                Assert.Equal(true, result);
+                logger.AssertLogContains("Evaluation started");
+                logger.AssertLogContains("Property reassignment");
+                logger.AssertLogContains("Evaluation finished");
+                logger.AssertLogContains("Prop");
+                logger.AssertLogContains("OldValue");
+                logger.AssertLogContains("NewValue");
+            }
+            finally
+            {
+                BuildParameters.WarnOnUninitializedProperty = originalValue;
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
+            }
+        }
+
+        /// <summary>
         /// If we use a property twice make sure we warn and dont crash due to the dictionary which is holding the used but uninitialized variables..
         /// </summary>
         [Fact]
