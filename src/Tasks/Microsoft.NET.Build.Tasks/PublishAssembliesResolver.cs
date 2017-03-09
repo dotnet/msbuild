@@ -10,7 +10,7 @@ using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class PublishAssembliesResolver
+    internal class PublishAssembliesResolver
     {
         private  HashSet<PackageIdentity> _allResolvedPackages = new HashSet<PackageIdentity>();
         private readonly IPackageResolver _packageResolver;

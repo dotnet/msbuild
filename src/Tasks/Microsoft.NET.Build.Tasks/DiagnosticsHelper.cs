@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Writes diagnostic messages to the task log and creates diagnostic task items 
     /// that can be returned from a task
     /// </summary>
-    public sealed class DiagnosticsHelper
+    internal sealed class DiagnosticsHelper
     {
         private readonly List<ITaskItem> _diagnosticMessages = new List<ITaskItem>();
         private readonly TaskLoggingHelper _log;

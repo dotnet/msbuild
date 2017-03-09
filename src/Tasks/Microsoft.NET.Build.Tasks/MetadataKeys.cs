@@ -3,7 +3,7 @@
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public static class MetadataKeys
+    internal static class MetadataKeys
     {
         // General Metadata
         public const string Name = "Name";

@@ -6,7 +6,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Specifies the severity of Diagnostic Messages
     /// </summary>
-    public enum DiagnosticMessageSeverity
+    internal enum DiagnosticMessageSeverity
     {
         Info,
         Warning,
