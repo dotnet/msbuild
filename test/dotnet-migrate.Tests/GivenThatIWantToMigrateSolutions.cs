@@ -235,6 +235,25 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Should().Pass();
         }
 
+        [Fact]
+        public void WhenXprojNameIsDifferentThanDirNameItGetsRemovedFromSln()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithXprojNameDifferentThanDirName")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"migrate")
+                .Should().Pass();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory.FullName, "FolderHasDifferentName.sln"));
+            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects[0].FilePath.Should().Be("PJAppWithXprojNameDifferentThanDirName.csproj");
+        }
+
         private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var projectDirectory = TestAssets
