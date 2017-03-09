@@ -226,6 +226,7 @@ namespace Microsoft.Build.Internal
                         if (ExceptionHandling.NotExpectedRegistryException(ex))
                             throw;
 
+                        _attemptedToOpenRegistryKey = true;
                         throw new RegistryException(ex.Message, Name, ex);
                     }
                     finally
