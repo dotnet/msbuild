@@ -9,14 +9,16 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public abstract class DotNetMSBuildTool : DotNetTool
     {
-        public int MaxCpuCount {get; set;} = 0;
+        public int MaxCpuCount { get; set; } = 0;
 
-        protected override string Args 
-        { 
+        public string Verbosity { get; set; }
+
+        protected override string Args
+        {
             get
             {
-                return $"{GetMaxCpuCountArg()}";
-            } 
+                return $"{GetVerbosityArg()} {GetMaxCpuCountArg()}";
+            }
         }
 
         private string GetMaxCpuCountArg()
@@ -24,6 +26,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (MaxCpuCount > 0)
             {
                 return $"/m:{MaxCpuCount}";
+            }
+
+            return null;
+        }
+
+        private string GetVerbosityArg()
+        {
+            if (!string.IsNullOrEmpty(Verbosity))
+            {
+                return $"--verbosity:{Verbosity}";
             }
 
             return null;
