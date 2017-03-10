@@ -147,6 +147,9 @@ export VSTEST_TRACE_BUILD=1
 
 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 toolsLocalPath="$REPOROOT/build_tools"
+if [ ! -z $BOOTSTRAP_INSTALL_DIR]; then
+  toolsLocalPath = $BOOTSTRAP_INSTALL_DIR
+fi
 bootStrapperPath="$toolsLocalPath/bootstrap.sh"
 dotnetInstallPath="$toolsLocalPath/dotnet-install.sh"
 if [ ! -f $bootStrapperPath ]; then
