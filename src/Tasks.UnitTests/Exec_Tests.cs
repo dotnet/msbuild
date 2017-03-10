@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand1()
         {
-            string directoryWithAmpersand = "foo&bar";
+            string directoryWithAmpersand = "nospace&nospace";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand2()
         {
-            string directoryWithAmpersand = "foo &bar";
+            string directoryWithAmpersand = "space &nospace";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand3()
         {
-            string directoryWithAmpersand = "foo& bar";
+            string directoryWithAmpersand = "nospace& space";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand4()
         {
-            string directoryWithAmpersand = "foo & bar";
+            string directoryWithAmpersand = "space & space";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
