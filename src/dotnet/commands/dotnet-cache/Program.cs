@@ -22,8 +22,6 @@ namespace Microsoft.DotNet.Tools.Cache
 
         public static CacheCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
             var msbuildArgs = new List<string>();
 
             var parser = Parser.Instance;
