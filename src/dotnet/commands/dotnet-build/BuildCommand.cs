@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.Tools.Build
             DebugHelper.HandleDebugSwitch(ref args);
 
             BuildCommand cmd;
+            
             try
             {
                 cmd = FromArgs(args);
