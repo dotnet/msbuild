@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
 using System.Diagnostics;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -19,8 +20,6 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public static PackCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>();
-
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet pack", args);
