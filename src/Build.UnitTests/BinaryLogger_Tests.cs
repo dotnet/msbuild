@@ -33,7 +33,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 var binaryLogger = new BinaryLogger();
-                var logFilePath = "BinaryLoggerTest.binlog";
+
+                // with this file name, the file will be archived as as build artifact so we can inspect it later
+                var logFilePath = "Microsoft.Temp.UnitTests.dll_TestBinaryLoggerRoundtrip.binlog";
                 binaryLogger.Parameters = logFilePath;
 
                 var mockLogger1 = new MockLogger();
@@ -51,7 +53,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (File.Exists(logFilePath))
                 {
-                    File.Delete(logFilePath);
+                    //File.Delete(logFilePath);
                 }
 
                 Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
