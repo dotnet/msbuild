@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.Cli
         public static Command Clean() =>
             Create.Command(
                 "clean",
-                ".NET Clean Command",
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 Create.Option("-o|--output", 
-                              "Directory in which the build outputs have been placed.",
+                              LocalizableStrings.CmdOutputDirDescription,
                               Accept.ExactlyOneArgument
-                        .With(name: "OUTPUT_DIR")
+                        .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.ConfigurationOption(),

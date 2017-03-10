@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,22 +12,25 @@ namespace Microsoft.DotNet.Cli
         public static Command Publish() =>
             Create.Command(
                 "publish",
-                ".NET Publisher",
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
-                Create.Option("-o|--output",
-                              "Output directory in which to place the published artifacts.",
-                              Accept.ExactlyOneArgument
-                                    .With(name: "OUTPUT_DIR")
-                                    .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                Create.Option(
+                    "-o|--output",
+                    LocalizableStrings.OutputOptionDescription,
+                    Accept.ExactlyOneArgument
+                        .With(name: LocalizableStrings.OutputOption)
+                        .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
-                Create.Option("--filter", "The XML file that contains the list of packages to be excluded from publish step.",
-                              Accept.ExactlyOneArgument
-                                    .With(name: "PROFILE_XML")
-                                    .ForwardAs(o => $"/p:FilterProjectFiles={o.Arguments.Single()}")),
+                Create.Option(
+                    "--filter", 
+                    LocalizableStrings.FilterProjOptionDescription,
+                    Accept.ExactlyOneArgument
+                        .With(name: LocalizableStrings.FilterProjOption)
+                        .ForwardAs(o => $"/p:FilterProjectFiles={o.Arguments.Single()}")),
                 CommonOptions.VerbosityOption());
     }
 }

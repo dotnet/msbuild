@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,14 +12,14 @@ namespace Microsoft.DotNet.Cli
         public static Command Build() =>
             Create.Command(
                 "build",
-                ".NET Builder",
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
-                    "Output directory in which to place built artifacts.",
+                    LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument
-                          .With(name: "OUTPUT_DIR")
+                          .With(name: LocalizableStrings.OutputOptionName)
                           .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
@@ -26,10 +27,10 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
-                    "Disables incremental build."),
+                    LocalizableStrings.NoIncrementialOptionDescription),
                 Create.Option(
                     "--no-dependencies",
-                    "Set this flag to ignore project-to-project references and only build the root project",
+                    LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments
                           .ForwardAs("/p:BuildProjectReferences=false")),
                 CommonOptions.VerbosityOption());

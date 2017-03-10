@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
         public static Command Run() =>
             Create.Command(
                 "run",
-                ".NET Run Command",
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments
                     .MaterializeAs(o =>
                     {

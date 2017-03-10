@@ -13,14 +13,6 @@ namespace Microsoft.DotNet.Tools.Cache
 
         public const string ProjectEntryDescription = "The XML file that contains the list of packages to be cached.";
 
-        public const string FrameworkOption = "FRAMEWORK";
-
-        public const string FrameworkOptionDescription = "Target framework for which to cache for.";
-
-        public const string RuntimeOption = "RUNTIME_IDENTIFIER";
-
-        public const string RuntimeOptionDescription = "Target runtime to cache for.";
-
         public const string OutputOption = "OUTPUT_DIR";
 
         public const string OutputOptionDescription = "Output directory in which to cache the given assemblies.";
