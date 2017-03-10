@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli
                             var additionalProjects = string.Join("%3B", o.Arguments.Skip(1));
 
                             return $"{materializedString} /p:AdditionalProjects={additionalProjects}";
-                        }),
+                        })),
                 CommonOptions.FrameworkOption(),
                 Create.Option(
                     "--framework-version",
