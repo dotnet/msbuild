@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli
                 Accept.ExactlyOneArgument
                     .With(name: "CONFIGURATION")
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
-                    .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}")),
+                    .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
