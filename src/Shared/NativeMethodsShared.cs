@@ -880,7 +880,7 @@ namespace Microsoft.Build.Shared
                 {
                     using (SafeFileHandle handle =
                         CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ, IntPtr.Zero, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, IntPtr.Zero))
+                            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, IntPtr.Zero))
                     {
                         if (!handle.IsInvalid)
                         {
@@ -899,6 +899,10 @@ namespace Microsoft.Build.Shared
             else if (File.Exists(fullPath))
             {
                 fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
+            }
+            else if (Directory.Exists(fullPath))
+            {
+                fileModifiedTime = Directory.GetLastWriteTimeUtc(fullPath);
             }
 
             return fileModifiedTime;
@@ -1305,6 +1309,7 @@ namespace Microsoft.Build.Shared
         internal const uint GENERIC_READ = 0x80000000;
         internal const uint FILE_SHARE_READ = 0x1;
         internal const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+        internal const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
         internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
         internal const uint OPEN_EXISTING = 3;
 
