@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Cache
 
         public const string AppDescription = "Caches the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.";
 
-        public const string ProjectEntries = "ProjectEntries";
+        public const string ProjectEntries = "PROJECT_ENTRIES";
 
         public const string ProjectEntryDescription = "The XML file that contains the list of packages to be cached.";
 

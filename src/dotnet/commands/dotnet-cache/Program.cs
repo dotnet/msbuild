@@ -23,112 +23,30 @@ namespace Microsoft.DotNet.Tools.Cache
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Name = "dotnet cache";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.AllowArgumentSeparator = true;
-            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
-            app.HelpOption("-h|--help");
+            var msbuildArgs = new List<string>();
 
-            CommandOption projectArgument = app.Option(
-                $"-e|--entries <{LocalizableStrings.ProjectEntries}>", LocalizableStrings.ProjectEntryDescription,
-                CommandOptionType.SingleValue);
+            var parser = Parser.Instance;
 
-            CommandOption frameworkOption = app.Option(
-                $"-f|--framework <{LocalizableStrings.FrameworkOption}>", LocalizableStrings.FrameworkOptionDescription,
-                CommandOptionType.SingleValue);
+            var result = parser.ParseFrom("dotnet cache", args);
 
-            CommandOption runtimeOption = app.Option(
-                $"-r|--runtime <{LocalizableStrings.RuntimeOption}>", LocalizableStrings.RuntimeOptionDescription,
-                CommandOptionType.SingleValue);
+            Reporter.Output.WriteLine(result.Diagram());
 
-            CommandOption outputOption = app.Option(
-                $"-o|--output <{LocalizableStrings.OutputOption}>", LocalizableStrings.OutputOptionDescription,
-                CommandOptionType.SingleValue);
+            result.ShowHelpIfRequested();
 
-            CommandOption fxOption = app.Option(
-                $"--framework-version <{LocalizableStrings.FrameworkVersionOption}>", LocalizableStrings.FrameworkVersionOptionDescription,
-                CommandOptionType.SingleValue);
+            var appliedBuildOptions = result["dotnet"]["cache"];
 
-            CommandOption skipOptimizationOption = app.Option(
-                $"--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription,
-                CommandOptionType.NoValue);
-
-            CommandOption workingDir = app.Option(
-               $"-w |--working-dir <{LocalizableStrings.IntermediateWorkingDirOption}>", LocalizableStrings.IntermediateWorkingDirOptionDescription,
-               CommandOptionType.SingleValue);
-
-            CommandOption preserveWorkingDir = app.Option(
-               $"--preserve-working-dir", LocalizableStrings.PreserveIntermediateWorkingDirOptionDescription,
-               CommandOptionType.NoValue);
-
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
-
-            List<string> msbuildArgs = null;
-            app.OnExecute(() =>
+            if (!result.HasOption("-e"))
             {
-                msbuildArgs = new List<string>();
-
-                if (string.IsNullOrEmpty(projectArgument.Value()))
-                {
-                    throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
-                }
-
-                msbuildArgs.Add("/t:ComposeCache");
-                msbuildArgs.Add(projectArgument.Value());
-
-                if (!string.IsNullOrEmpty(frameworkOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(runtimeOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(outputOption.Value()))
-                {
-                    var outputPath = Path.GetFullPath(outputOption.Value());
-                    msbuildArgs.Add($"/p:ComposeDir={outputPath}");
-                }
-
-                if (!string.IsNullOrEmpty(fxOption.Value()))
-                {
-                    msbuildArgs.Add($"/p:FX_Version={fxOption.Value()}");
-                }
-
-                if (!string.IsNullOrEmpty(workingDir.Value()))
-                {
-                    msbuildArgs.Add($"/p:ComposeWorkingDir={workingDir.Value()}");
-                }
-
-                if (skipOptimizationOption.HasValue())
-                {
-                    msbuildArgs.Add($"/p:SkipOptimization={skipOptimizationOption.HasValue()}");
-                }
-
-                if (preserveWorkingDir.HasValue())
-                {
-                    msbuildArgs.Add($"/p:PreserveComposeWorkingDir={preserveWorkingDir.HasValue()}");
-                }
-
-                if (!string.IsNullOrEmpty(verbosityOption.Value()))
-                {
-                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
-                }
-
-                msbuildArgs.AddRange(app.RemainingArguments);
-
-                return 0;
-            });
-
-            int exitCode = app.Execute(args);
-            if (msbuildArgs == null)
-            {
-                throw new CommandCreationException(exitCode);
+                throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
             }
+
+            var msbuildArgs = msbuildArgs = new List<string>();
+
+            msbuildArgs.Add("/t:ComposeCache");
+
+            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
+
+            msbuildArgs.AddRange(appliedBuildOptions.Arguments);
 
             return new CacheCommand(msbuildArgs, msbuildPath);
         }
