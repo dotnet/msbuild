@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
         public static Option VerbosityOption() =>
             Create.Option(
                 "-v|--verbosity",
-                "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]",
+                "Set the verbosity level of the command. Allowed values are q[uiet],ï¿½m[inimal],ï¿½n[ormal],ï¿½d[etailed], andï¿½diag[nostic]",
                 Accept.AnyOneOf(
                           "q", "quiet",
                           "m", "minimal",
@@ -25,6 +25,33 @@ namespace Microsoft.DotNet.Cli
                           "d", "detailed",
                           "diag", "diagnostic")
                       .ForwardAs(o => $"/verbosity:{o.Arguments.Single()}"));
+        
+        public static Option FrameworkOption() =>
+            Create.Option(
+                "-f|--framework",
+                "Target framework to publish for. The target framework has to be specified in the project file.",
+                Accept.ExactlyOneArgument
+                    .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
+                    .With(name: "FRAMEWORK")
+                    .ForwardAs(o => $"/p:TargetFramework={o.Arguments.Single()}"));
+        
+        public static Option RuntimeOption() =>
+            Create.Option(
+                "-r|--runtime",
+                "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
+                Accept.ExactlyOneArgument
+                    .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
+                    .With(name: "RUNTIME_IDENTIFIER")
+                    .ForwardAs(o => $"/p:RuntimeIdentifier={o.Arguments.Single()}"));
+                
+        public static Option ConfigurationOption() =>
+            Create.Option(
+                "-c|--configuration", 
+                "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
+                Accept.ExactlyOneArgument
+                    .With(name: "CONFIGURATION")
+                    .WithSuggestionsFrom("DEBUG", "RELEASE")
+                    .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}")),
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));

@@ -20,23 +20,9 @@ namespace Microsoft.DotNet.Cli
                     Accept.ExactlyOneArgument
                           .With(name: "OUTPUT_DIR")
                           .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
-                Create.Option(
-                    "-f|--framework",
-                    "Target framework to build for. The target framework has to be specified in the project file.",
-                    Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
-                          .ForwardAs(o => $"/p:TargetFramework={o.Arguments.Single()}")),
-                Create.Option(
-                    "-r|--runtime",
-                    "Target runtime to build for. The default is to build a portable application.",
-                    Accept.AnyOneOf(Suggest.RunTimesFromProjectFile)
-                          .ForwardAs(o => $"/p:RuntimeIdentifier={o.Arguments.Single()}")),
-                Create.Option(
-                    "-c|--configuration",
-                    "Configuration to use for building the project. Default for most projects is  \"Debug\".",
-                    Accept.ExactlyOneArgument
-                          .With(name: "CONFIGURATION")
-                          .WithSuggestionsFrom("DEBUG", "RELEASE")
-                          .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}")),
+                CommonOptions.FrameworkOption(),
+                CommonOptions.RuntimeOption(),
+                CommonOptions.ConfigurationOption(),
                 Create.Option(
                     "--version-suffix",
                     "Defines the value for the $(VersionSuffix) property in the project",
