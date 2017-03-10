@@ -602,8 +602,9 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 CreationResultStatus installResult = EnterInstallFlow();
 
-                if(installResult == CreationResultStatus.Success)
+                if (installResult == CreationResultStatus.Success)
                 {
+                    _settingsLoader.ReloadTemplates();
                     PerformCoreTemplateQuery();
                     DisplayTemplateList();
                 }
@@ -985,6 +986,7 @@ namespace Microsoft.TemplateEngine.Cli
                 _paths.Delete(_paths.User.AliasesFile);
                 _paths.Delete(_paths.User.SettingsFile);
                 _settingsLoader.UserTemplateCache.DeleteAllLocaleCacheFiles();
+                _settingsLoader.ReloadTemplates();
                 return false;
             }
 
