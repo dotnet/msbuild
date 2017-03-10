@@ -159,7 +159,7 @@
           to our 'bin' folder). When building from MicroBuild (or any installed VS), this value is correct.
       -->
       <EditBinCommand Condition="'$(VSINSTALLDIR)' != ''">call &quot;$(VSINSTALLDIR)\Common7\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
-      <EditBinCommand Condition="'$(VsInstallRoot)' != '' and '$(EditBinCommand)' != ''">call &quot;$(VsInstallRoot)\Common7\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
+      <EditBinCommand Condition="'$(VsInstallRoot)' != '' and '$(EditBinCommand)' == ''">call &quot;$(VsInstallRoot)\Common7\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
     </PropertyGroup>
 
     <Exec Condition="'$(EditBinFlags)'!=''"
