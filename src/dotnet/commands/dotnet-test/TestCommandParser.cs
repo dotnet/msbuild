@@ -10,7 +10,8 @@ namespace Microsoft.DotNet.Cli
         public static Command Test() =>
             Create.Command(
                   "test",
-                  ".NET Test Driver",
+                  LocalizableStrings.AppFullName,
+                  Accept.ZeroOrMoreArguments,
                   CommonOptions.HelpOption(),
                   Create.Option(
                         "-s|--settings",

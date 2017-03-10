@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -39,6 +39,10 @@ namespace Microsoft.DotNet.Tools.Test
             result.ShowHelpIfRequested();
 
             var parsedTest = result["dotnet"]["test"];
+
+            msbuildArgs.AddRange(parsedTest.OptionValuesToBeForwarded());
+
+            msbuildArgs.AddRange(parsedTest.Arguments);
 
             var runSettingsOptions = 
                 result.UnparsedTokens
