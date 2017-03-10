@@ -21,8 +21,6 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
             var msbuildArgs = new List<string>();
 
             var parser = Parser.Instance;
@@ -35,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             var appliedBuildOptions = result["dotnet"]["build"];
 
-            if (result.HasOption("--no-incremental"))
+            if (appliedBuildOptions.HasOption("--no-incremental"))
             {
                 msbuildArgs.Add("/t:Rebuild");
             }
