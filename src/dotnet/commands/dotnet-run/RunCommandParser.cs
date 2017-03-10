@@ -15,16 +15,16 @@ namespace Microsoft.DotNet.Cli
                 "run",
                 ".NET Run Command",
                 Accept.ZeroOrMoreArguments
-                .MaterializeAs(o =>
-                {
-                    return new RunCommand()
+                    .MaterializeAs(o =>
                     {
-                        Configuration = o.ValueOrDefault<string>("--configuration"),
-                        Framework = o.ValueOrDefault<string>("--framework"),
-                        Project = o.ValueOrDefault<string>("--project"),
-                        Args = (IReadOnlyList<string>)o.Arguments
-                    };
-                }),
+                        return new RunCommand()
+                        {
+                            Configuration = o.SingleArgumentOrDefault("--configuration"),
+                            Framework = o.SingleArgumentOrDefault("--framework"),
+                            Project = o.SingleArgumentOrDefault("--project"),
+                            Args = (IReadOnlyList<string>)o.Arguments
+                        };
+                    }),
                 CommonOptions.HelpOption(),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.FrameworkOption(),

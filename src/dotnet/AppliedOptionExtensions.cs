@@ -17,5 +17,14 @@ namespace Microsoft.DotNet.Cli
                 .Select(o => o.Value<T>())
                 .SingleOrDefault();
         }
+
+        public static string SingleArgumentOrDefault(this AppliedOption parseResult, string alias)
+        {
+            return parseResult
+                .AppliedOptions
+                .Where(o => o.HasAlias(alias))
+                .Select(o => o.Arguments.Single())
+                .SingleOrDefault();
+        }
     }
 }
