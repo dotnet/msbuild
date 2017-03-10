@@ -30,12 +30,12 @@ namespace Microsoft.DotNet.Tools.Clean
             result.ShowHelpIfRequested();
 
             var parsedClean = result["dotnet"]["clean"];
+
+            msbuildArgs.AddRange(parsedClean.Arguments);
                 
             msbuildArgs.Add("/t:Clean");
 
             msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
-
-            msbuildArgs.AddRange(parsedClean.Arguments);
 
             return new CleanCommand(msbuildArgs, msbuildPath);
         }
