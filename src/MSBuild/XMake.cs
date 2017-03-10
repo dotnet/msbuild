@@ -602,7 +602,7 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        ReplayBinaryLog(projectFile, loggers);
+                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
                     }
                     else // regular build
                     {
@@ -3180,13 +3180,36 @@ namespace Microsoft.Build.CommandLine
         private static void ReplayBinaryLog
         (
             string binaryLogFilePath,
-            ILogger[] loggers)
+            ILogger[] loggers,
+            IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
+            int cpuCount)
         {
             var replayEventSource = new Logging.BinaryLogReplayEventSource();
 
+            foreach (var distributedLoggerRecord in distributedLoggerRecords)
+            {
+                var nodeLogger = distributedLoggerRecord.CentralLogger as INodeLogger;
+                if (nodeLogger != null)
+                {
+                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                }
+                else
+                {
+                    distributedLoggerRecord.CentralLogger.Initialize(replayEventSource);
+                }
+            }
+
             foreach (var logger in loggers)
             {
-                logger.Initialize(replayEventSource);
+                var nodeLogger = logger as INodeLogger;
+                if (nodeLogger != null)
+                {
+                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                }
+                else
+                {
+                    logger.Initialize(replayEventSource);
+                }
             }
 
             try
@@ -3202,6 +3225,11 @@ namespace Microsoft.Build.CommandLine
             foreach (var logger in loggers)
             {
                 logger.Shutdown();
+            }
+
+            foreach (var distributedLoggerRecord in distributedLoggerRecords)
+            {
+                distributedLoggerRecord.CentralLogger.Shutdown();
             }
         }
 
