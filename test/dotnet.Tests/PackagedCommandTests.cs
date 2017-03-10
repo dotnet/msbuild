@@ -296,7 +296,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.0")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();

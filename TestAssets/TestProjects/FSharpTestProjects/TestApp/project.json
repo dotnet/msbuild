@@ -14,7 +14,7 @@
       "version": "1.0.0-*",
       "target": "project"
     },
-    "Microsoft.NETCore.App": "1.0.1",
+    "Microsoft.NETCore.App": "1.1.0",
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160509"
   },
   "tools": {
@@ -28,7 +28,7 @@
     }
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": "dnxcore50"
     }
   },

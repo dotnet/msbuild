@@ -3,12 +3,13 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>dotnet-dependency-tool-invoker</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8;dnxcore50</PackageTargetFallback>
     <VersionSuffix></VersionSuffix>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
+    <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,6 +29,7 @@
   <ItemGroup>
     <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(SdkNugetVersion)" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

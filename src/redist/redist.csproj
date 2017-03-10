@@ -159,7 +159,7 @@
       InputFile="$(VSTestRuntimeConfigPath)"
       DestinationFile="$(VSTestRuntimeConfigPath)"
       ReplacementPatterns="1.0.0"
-      ReplacementStrings="$(CLI_SharedFrameworkVersion)" />
+      ReplacementStrings="1.1.1" />
   </Target>
 
   <Target Name="CrossgenPublishDir"

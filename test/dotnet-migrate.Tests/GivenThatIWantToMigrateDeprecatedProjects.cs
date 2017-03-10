@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("publish -c Debug")
                  .Should().Pass();
 
-            var outputDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0");
+            var outputDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.1");
             outputDir.Should().Exist()
                 .And.HaveFiles(new[]
                     {
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Migration.Tests
             Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis1.txt")).Should().BeFalse();
             Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis2.txt")).Should().BeFalse();
 
-            var publishDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0", "publish");
+            var publishDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.1", "publish");
             publishDir.Should().Exist()
                 .And.HaveFiles(new[]
                     {
@@ -431,9 +431,9 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
             {
-                // running the app requires netcoreapp1.0
+                // running the app requires netcoreapp1.1
                 return;
             }
 
@@ -489,9 +489,9 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
             {
-                // running the app requires netcoreapp1.0
+                // running the app requires netcoreapp1.1
                 return;
             }
 
@@ -546,9 +546,9 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
             {
-                // running the app requires netcoreapp1.0
+                // running the app requires netcoreapp1.1
                 return;
             }
 
