@@ -339,6 +339,12 @@
   <data name="ErrorWarningMessageNotSupported" UESanitized="false" Visibility="Public">
     <value>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</value>
   </data>
+  <data name="EvaluationStarted" UESanitized="false" Visibility="Public">
+    <value>Evaluation started ("{0}")</value>
+  </data>
+  <data name="EvaluationFinished" UESanitized="false" Visibility="Public">
+    <value>Evaluation finished ("{0}")</value>
+  </data>
   <data name="ExecutingTaskInTaskHost">
     <value>Launching task "{0}" from assembly "{1}" in an external task host with a runtime of "{2}" and a process architecture of "{3}".</value>
   </data>
@@ -739,6 +745,9 @@
   <data name="PropertyNameInRegistryHasZeroLength" UESanitized="false" Visibility="Public">
     <value>MSB4148: The name of a property stored under the registry key "{0}" has zero length.</value>
     <comment>{StrBegin="MSB4148: "}</comment>
+  </data>
+  <data name="PropertyReassignment" UESanitized="false" Visibility="Public">
+    <value>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</value>
   </data>
   <data name="QualifiedMetadataInTransformNotAllowed" UESanitized="false" Visibility="Public">
     <value>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</value>
