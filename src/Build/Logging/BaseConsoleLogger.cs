@@ -978,7 +978,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                     else
                     {
-                        // both reentrant; sort properly to avoid throwing
+                        // both reentrant; sort stably by another field to avoid throwing
                         return string.Compare(p1.ScopeName, p2.ScopeName, StringComparison.Ordinal);
                     }
                 }
