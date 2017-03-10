@@ -61,7 +61,7 @@ You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, 
 In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
 
 > **Note:** please be aware that below installers are the **latest bits**. If you 
-> want to install the latest released versions, please check out the [section above](#download-links).)
+> want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
 | Platform | master<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
