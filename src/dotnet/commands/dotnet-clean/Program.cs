@@ -6,7 +6,7 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
-using System.Diagnostics;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Clean
 {
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Clean
                 
             msbuildArgs.Add("/t:Clean");
 
-            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(parsedClean.Arguments);
 
