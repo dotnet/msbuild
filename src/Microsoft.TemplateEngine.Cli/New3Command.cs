@@ -906,7 +906,7 @@ namespace Microsoft.TemplateEngine.Cli
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(templateInfo);
 
             Reporter.Output.Write($"    dotnet {CommandName} {templateInfo.ShortName}");
-            IEnumerable<ITemplateParameter> allParameterDefinitions = TemplateParametersForTemplate(templateInfo);
+            IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
             IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames);
 
             foreach (ITemplateParameter parameter in filteredParams)
@@ -928,40 +928,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Reporter.Output.WriteLine();
-        }
-
-        private static IEnumerable<ITemplateParameter> TemplateParametersForTemplate(ITemplateInfo templateInfo)
-        {
-            IList<ITemplateParameter> parameters = new List<ITemplateParameter>();
-
-            foreach (KeyValuePair<string, ICacheTag> tagInfo in templateInfo.Tags)
-            {
-                ITemplateParameter param = new TemplateParameter
-                {
-                    Name = tagInfo.Key,
-                    Documentation = tagInfo.Value.Description,
-                    DefaultValue = tagInfo.Value.DefaultValue,
-                    Choices = tagInfo.Value.ChoicesAndDescriptions,
-                    DataType = "choice"
-                };
-
-                parameters.Add(param);
-            }
-
-            foreach (KeyValuePair<string, ICacheParameter> paramInfo in templateInfo.CacheParameters)
-            {
-                ITemplateParameter param = new TemplateParameter
-                {
-                    Name = paramInfo.Key,
-                    Documentation = paramInfo.Value.Description,
-                    DataType = paramInfo.Value.DataType,
-                    DefaultValue = paramInfo.Value.DefaultValue
-                };
-
-                parameters.Add(param);
-            }
-
-            return parameters;
         }
 
         private bool Initialize()
@@ -1128,7 +1094,7 @@ namespace Microsoft.TemplateEngine.Cli
             _app.Reset();
             SetupInternalCommands(_app);
 
-            IEnumerable<ITemplateParameter> parameterDefinitions = TemplateParametersForTemplate(templateInfo);
+            IReadOnlyList<ITemplateParameter> parameterDefinitions = templateInfo.Parameters;
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
 
             IEnumerable<KeyValuePair<string, string>> argParameters = parameterDefinitions
