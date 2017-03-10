@@ -22,10 +22,7 @@ namespace Microsoft.DotNet.Cli
                                     .With(name: "OUTPUT_DIR")
                                     .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
-                Create.Option("--version-suffix", "Defines the value for the $(VersionSuffix) property in the project.",
-                              Accept.ExactlyOneArgument
-                                    .With(name: "VERSION_SUFFIX")
-                                    .ForwardAs(o => $"/p:VersionSuffix={o.Arguments.Single()}")),
+                CommonOptions.VersionSuffixOption(),
                 Create.Option("--filter", "The XML file that contains the list of packages to be excluded from publish step.",
                               Accept.ExactlyOneArgument
                                     .With(name: "PROFILE_XML")

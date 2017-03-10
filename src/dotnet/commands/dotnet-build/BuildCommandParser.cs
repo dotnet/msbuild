@@ -23,12 +23,7 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
-                Create.Option(
-                    "--version-suffix",
-                    "Defines the value for the $(VersionSuffix) property in the project",
-                    Accept.ExactlyOneArgument
-                          .With(name: "VERSION_SUFFIX")
-                          .ForwardAs(o => $"/p:VersionSuffix={o.Arguments.Single()}")),
+                CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
                     "Disables incremental build."),

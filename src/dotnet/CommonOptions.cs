@@ -53,6 +53,14 @@ namespace Microsoft.DotNet.Cli
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
                     .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}"));
 
+        public static Option VersionSuffixOption() =>
+            Create.Option(
+                "--version-suffix",
+                "Defines the value for the $(VersionSuffix) property in the project.",
+                Accept.ExactlyOneArgument
+                    .With(name: "VERSION_SUFFIX")
+                    .ForwardAs(o => $"/p:VersionSuffix={o.Arguments.Single()}"));
+
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
     }
