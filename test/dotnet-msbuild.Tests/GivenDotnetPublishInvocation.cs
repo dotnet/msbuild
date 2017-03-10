@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--framework", "<tfm>" }, "/p:TargetFramework=<tfm>")]
         [InlineData(new string[] { "-r", "<rid>" }, "/p:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "/p:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "-o", "<output>" }, "/p:PublishDir=<publishdir>")]
+        [InlineData(new string[] { "-o", "<publishdir>" }, "/p:PublishDir=<publishdir>")]
         [InlineData(new string[] { "--output", "<publishdir>" }, "/p:PublishDir=<publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "/p:Configuration=<config>")]
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-c", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "/p:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--filter", "<filter>" }, "/p:FilterProjectFiles=<filter>")]
+        [InlineData(new string[] { "--filter", "<filterprojectfiles>" }, "/p:FilterProjectFiles=<filterprojectfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "/verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "/verbosity:minimal")]
         public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)

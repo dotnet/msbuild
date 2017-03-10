@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "/p:VersionSuffix=<versionsuffix>")]
         [InlineData(new string[] { "-s" }, "/p:Serviceable=true")]
         [InlineData(new string[] { "--serviceable" }, "/p:Serviceable=true")]
-        [InlineData(new string[] { "-v", "<diag>" }, "/verbosity:<diag>")]
-        [InlineData(new string[] { "--verbosity", "<diag>" }, "/verbosity:<diag>")]
+        [InlineData(new string[] { "-v", "diag" }, "/verbosity:diag")]
+        [InlineData(new string[] { "--verbosity", "diag" }, "/verbosity:diag")]
         [InlineData(new string[] { "<project>" }, "<project>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
