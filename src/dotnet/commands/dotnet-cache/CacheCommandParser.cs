@@ -3,7 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Tools.Cache;
+using LocalizableStrings = Microsoft.DotNet.Tools.Cache.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {

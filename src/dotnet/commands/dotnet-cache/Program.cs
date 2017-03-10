@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using System.Diagnostics;
 using System;
 using System.IO;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Cache
 {
@@ -39,9 +40,7 @@ namespace Microsoft.DotNet.Tools.Cache
             {
                 throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
             }
-
-            var msbuildArgs = msbuildArgs = new List<string>();
-
+            
             msbuildArgs.Add("/t:ComposeCache");
 
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
