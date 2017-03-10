@@ -44,11 +44,11 @@ namespace Microsoft.DotNet.Tools.Build
                 msbuildArgs.Add("/t:Build");
             }
 
-            msbuildArgs.Add($"/clp:Summary");
-
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedBuildOptions.Arguments);
+
+            msbuildArgs.Add($"/clp:Summary");
 
             return new BuildCommand(msbuildArgs, msbuildPath);
         }
