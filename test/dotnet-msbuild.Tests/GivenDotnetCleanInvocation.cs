@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--framework", "<framework>" }, "/p:TargetFramework=<framework>")]
         [InlineData(new string[] { "-c", "<configuration>" }, "/p:Configuration=<configuration>")]
         [InlineData(new string[] { "--configuration", "<configuration>" }, "/p:Configuration=<configuration>")]
-        [InlineData(new string[] { "-v", "<verbosity>" }, "/verbosity:<verbosity>")]
-        [InlineData(new string[] { "--verbosity", "<verbosity>" }, "/verbosity:<verbosity>")]
+        [InlineData(new string[] { "-v", "diag" }, "/verbosity:diag")]
+        [InlineData(new string[] { "--verbosity", "diag" }, "/verbosity:diag")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
