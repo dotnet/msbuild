@@ -36,11 +36,11 @@ namespace Microsoft.DotNet.Tools.Cache
 
             var appliedBuildOptions = result["dotnet"]["cache"];
 
-            if (!result.HasOption("-e"))
+            if (!appliedBuildOptions.HasOption("-e"))
             {
                 throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
             }
-            
+
             msbuildArgs.Add("/t:ComposeCache");
 
             msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());

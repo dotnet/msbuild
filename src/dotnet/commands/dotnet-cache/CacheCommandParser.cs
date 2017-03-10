@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static Command Cache() =>
             Create.Command(
-                LocalizableStrings.AppFullName,
+                "cache",
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAs(o => $"/p:ComposeDir={o.Arguments.Single()}")),
                 Create.Option(
-                    "-w |--working-dir",
+                    "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
                     Accept.ExactlyOneArgument
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
