@@ -10,10 +10,17 @@
       <Output TaskParameter="ConsoleOutput" PropertyName="GitInfoCommitHash" />
     </Exec>
 
+    <ItemGroup>
+      <GitInfoCommitCountLines Include="$(GitInfoCommitCount)" />
+      <GitInfoCommitHashLines Include="$(GitInfoCommitHash)" />
+    </ItemGroup>
+
     <PropertyGroup>
-      <ShouldOverWriteThePropsFile 
-        Condition=" '$(CommitCount)' != '$(GitInfoCommitCount)' Or 
-                    '$(CommitHash)' != '$(GitInfoCommitHash)' ">true</ShouldOverWriteThePropsFile>
+      <!-- Batching in GitInfoCommitCount and GitInfoCommitHash here ensures that the property contains only the last line of the output -->
+      <GitInfoCommitCount>%(GitInfoCommitCountLines.Identity)</GitInfoCommitCount>
+      <GitInfoCommitCount>$(GitInfoCommitCount.PadLeft(6,'0'))</GitInfoCommitCount>
+      
+      <GitInfoCommitHash>%(GitInfoCommitHashLines.Identity)</GitInfoCommitHash>
 
       <GitCommitInfoPropsContent>
 &lt;Project ToolsVersion=&quot;15.0&quot;&gt;
@@ -23,11 +30,19 @@
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;
       </GitCommitInfoPropsContent>
+
+      <ExistingGitCommitInfoProps Condition=" Exists('$(GitCommitInfoProps)') ">
+        $([System.IO.File]::ReadAllText($(GitCommitInfoProps)))
+      </ExistingGitCommitInfoProps>
+
+      <ShouldOverwriteGitCommitInfoPropsFile>false</ShouldOverwriteGitCommitInfoPropsFile>
+      <ShouldOverwriteGitCommitInfoPropsFile
+        Condition=" '$(ExistingGitCommitInfoProps.Trim())' != '$(GitCommitInfoPropsContent.Trim())' ">true</ShouldOverwriteGitCommitInfoPropsFile>
     </PropertyGroup>
 
     <WriteLinesToFile File="$(GitCommitInfoProps)"
                       Lines="$(GitCommitInfoPropsContent)"
-                      Condition=" '$(ShouldOverwriteThePropsFile)' == 'true' "
+                      Condition=" '$(ShouldOverwriteGitCommitInfoPropsFile)' == 'true' "
                       Overwrite="true" />
   </Target>
 </Project>

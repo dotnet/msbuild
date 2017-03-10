@@ -57,6 +57,7 @@ namespace Microsoft.DotNet.Cli.Build
                 { "osx_x64", false },
                 { "debian_x64", false },
                 { "centos_x64", false },
+                { "linux_x64", false },
             };
 
             if (!badges.ContainsKey(VersionBadgeMoniker))

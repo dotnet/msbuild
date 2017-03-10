@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using System.Diagnostics;
 using System;
 using System.IO;
+using System.Linq;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Cache

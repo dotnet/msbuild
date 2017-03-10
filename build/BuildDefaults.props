@@ -2,7 +2,12 @@
   <PropertyGroup>
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' ">true</IncludeAdditionalSharedFrameworks>
+    <HasAdditionalSharedFramework Condition="'$(Rid)' != 'linux-x64' AND
+                                             '$(Rid)' != 'ubuntu.16.10-x64' AND
+                                             '$(Rid)' != 'fedora.24-x64' AND
+                                             '$(Rid)' != 'opensuse.42.1-x64'">true</HasAdditionalSharedFramework>
+    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' AND '$(HasAdditionalSharedFramework)' == 'true' ">true</IncludeAdditionalSharedFrameworks>
+    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' ">false</IncludeAdditionalSharedFrameworks>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
   </PropertyGroup>

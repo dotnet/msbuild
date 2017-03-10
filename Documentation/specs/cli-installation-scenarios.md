@@ -126,8 +126,8 @@ Below table shows the mapping between the channels, branches and feeds for the D
 | Channel    	| Branch    	| Debian feed 	| Debian package name 	| NuGet version 	| NuGet feed                            	|
 |------------	|-----------	|-------------	|---------------------	|---------------	|---------------------------------------	|
 | Future    	| master    	| Development 	| dotnet-future      	| 1.0.0-dev-*   	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Preview    	| rel/<ver> 	| Development 	| dotnet              	| 1.0.0-beta-*  	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Production 	| production/<ver> 	| Production  	| dotnet              	| 1.0.0         	| https://api.nuget.org/v3/index.json   	|
+| Preview    	| rel/<ver> 	| Development 	| dotnet-dev-<version>              	| 1.0.0-beta-*  	| https://dotnet.myget.org/f/dotnet-cli 	|
+| Production 	| rel/<ver> 	| Production  	| dotnet-dev-<version>              	| 1.0.0         	| https://api.nuget.org/v3/index.json   	|
 
 
 ## Funnels and discovery mechanisms for CLI bits
@@ -203,20 +203,29 @@ The features the script needs to support/have are:
 * Support specifying whether the debug package needs to be downloaded
 * Automatically add the install to $PATH unless --no-path/-NoPath is present
 
+The installation script exists in this repo under `scripts/obtain` path. However, for most users it is reccomended to use the stable version that is hosted on [.NET Core main website](https://dot.net). The direct path to the scripts are:
+
+* https://dot.net/v1/dotnet-install.sh (bash, UNIX)
+* https://dot.net/v1/dotnet-install.ps1 (powershell, Windows)
+
 
 #### Installation script features
 The following arguments are needed for the installation script:
 
-| dotnet-install.sh arg (Linux, OSX) 	| dotnet-install.ps1 arg (Windows) 	| Defaults              	| Description                                                                                                                                                                                                                                   	|
-|--------------------------------------	|------------------------------------	|-----------------------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| --channel                            	| -Channel                           	| "preview"          	| Which channel (i.e. "Future", "preview", "production", "release/1.1.0") to install from.                                                                                                                                                                       	|
-| --version                            	| -Version                           	| global.json or Latest 	| Which version of CLI to install; you need to specify the version as 3-part version (i.e. 1.0.0-13232). If omitted, it will default to the first global.json that contains the sdkVersion property; if that is not present it will use Latest. 	|
-| --install-dir                         | -InstallDir                        	| .dotnet               	| Path to where to install the CLI bundle. The directory is created if it doesn't exist. On Linux/OSX this directory is created in the user home directory (`$HOME`). On Windows, this directory is created in `%LocalAppData%`.                	|
-| --debug                              	| -Debug                             	| false                 	| Whether to use the "fat" packages that contain debugging symbols or not.                                                                                                                                                                      	|
-| --no-path                            	| -NoPath                            	| false                 	| Do not export the installdir to the path for the current session. This makes CLI tools available immediately after install.                                                                                                                   	|
-| --shared-runtime                     	| -SharedRuntime                     	| false                 	| Install just the shared runtime bits, not the entire SDK.                                                                                                                                                                                     	|
+| dotnet-install.sh arg (Linux, OSX) | dotnet-install.ps1 arg (Windows) | Defaults | Description |
+|------------------------------------|----------------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --channel | -Channel | "production" | Which channel (i.e. "Future", "preview", "production", "release/1.1.0") to install from. |
+| --version | -Version | Latest | Which version of CLI to install; you need to specify the version as 3-part version (i.e. 1.0.0-13232). If omitted, it will default to Latest for that channel. |
+| --install-dir | -InstallDir | .dotnet | Path to where to install the CLI bundle. The directory is created if it doesn't exist. On Linux/OSX this directory is created in the user home directory (`$HOME`). On Windows, this directory is created in `%LocalAppData%`. |
+| --debug-symbols | -DebugSymbols | false | Whether to use the "fat" packages that contain debugging symbols or not. |
+| --no-path | -NoPath | false | Do not export the installdir to the path for the current session. This makes CLI tools available immediately after install. |
+| --shared-runtime | -SharedRuntime | false | Install just the shared runtime bits, not the entire SDK. |
+| --architecture | -Architecture | Current OS (`<auto>`) | Architecture to install. The possible values are `<auto>`, `x64` and `x86`. |
+| --dry-run | -DryRun | false | If set, it will not perform the installation but will show, on standard output, what the invocation of the script will do with the options selected.  |
+| --verbose | -Verbose | false | Display diagnostic information. |
+| N/A | -ProxyAddress | "" | If set, the installer will use the specified proxy server for all of its invocations.  |
 
-Note: Powershell arg naming convention is supported on Windows and non-Windows platforms. Non-Windows platforms do additionally support convention specific to their platform.
+> Note: Powershell arg naming convention is supported on Windows and non-Windows platforms. Non-Windows platforms do additionally support convention specific to their platform.
 
 ##### Install the 1.1.0 of the shared runtime
 

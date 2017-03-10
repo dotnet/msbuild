@@ -18,9 +18,18 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-e|--entries",
                     LocalizableStrings.ProjectEntryDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.OneOrMoreArguments
                         .With(name: LocalizableStrings.ProjectEntries)
-                        .Forward()),
+                        .ForwardAs(o => 
+                        {
+                            var materializedString = $"{o.Arguments.First()}";
+
+                            if (o.Arguments.Count() == 1) return materializedString;
+
+                            var additionalProjects = string.Join("%3B", o.Arguments.Skip(1));
+
+                            return $"{materializedString} /p:AdditionalProjects={additionalProjects}";
+                        }),
                 CommonOptions.FrameworkOption(),
                 Create.Option(
                     "--framework-version",

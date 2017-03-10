@@ -44,7 +44,7 @@ export PATH=$DOTNET_INSTALL_DIR:$PATH
 
 # Generate some props files that are imported by update-dependencies
 echo "Generating property files..."
-dotnet msbuild "$REPO_ROOT/build.proj" /p:Architecture=x64 /p:GeneratingPropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+dotnet msbuild "$REPO_ROOT/build.proj" /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
 
 echo "Resotring $PROJECT_PATH..."
 dotnet restore "$PROJECT_PATH"
