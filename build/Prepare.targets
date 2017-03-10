@@ -7,9 +7,17 @@
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
 
   <Target Name="Init"
-          DependsOnTargets="SetTelemetryProfile;
+          DependsOnTargets="PrintBuildInfo;
+                            SetTelemetryProfile;
                             BuildDotnetCliBuildFramework;
                             CheckPrereqs;">
+  </Target>
+
+  <Target Name="PrintBuildInfo">
+    <Message Text="Host info - Rid: $(HostRid), OSName: $(HostOSName)" Importance="High" />
+    <Message Text="Build info - Rid: $(Rid), Architecture: $(Architecture), OSName: $(OSName)" Importance="High" />
+    <Message Text="If you intended to use a different Rid, Architecture, or OSName run the following command to generate your build state:" Importance="High" />
+    <Message Text="dotnet msbuild build.proj /p:Architecture=Architecture /p:Rid=Rid /p:OSName=OSName /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles" Importance="High" />
   </Target>
 
   <Target Name="SetTelemetryProfile"

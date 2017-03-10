@@ -9,7 +9,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug']
+def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -19,6 +19,7 @@ def static getBuildJobName(def configuration, def os, def architecture) {
 platformList.each { platform ->
     // Calculate names
     def (os, architecture, configuration) = platform.tokenize(':')
+    def osUsedForMachineAffinity = os;
 
     // Calculate job name
     def jobName = getBuildJobName(configuration, os, architecture)
@@ -33,6 +34,10 @@ platformList.each { platform ->
     }
     else if (os == 'Ubuntu') {
         buildCommand = "./build.sh --skip-prereqs --configuration ${configuration} --docker ubuntu.14.04 --targets Default"
+    }
+    else if (os == 'Linux') {
+        osUsedForMachineAffinity = 'Ubuntu16.04';
+        buildCommand = "./build.sh --linux-portable --skip-prereqs --configuration ${configuration} --targets Default"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
@@ -53,9 +58,13 @@ platformList.each { platform ->
         }
     }
 
-    Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, 'latest-or-auto')
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-    Utilities.addMSTestResults(newJob, '**/*.trx')
+    // Remove this check once tests work for 2.0. Until that time Linux portable tests will fail so we 
+    // don't run the tests and there won't be any .trx file.
+    if (os != 'Linux') {
+        Utilities.addMSTestResults(newJob, '**/*.trx')
+    }
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
 }
 

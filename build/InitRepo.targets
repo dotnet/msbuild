@@ -3,7 +3,8 @@
           DependsOnTargets="BuildDotnetCliBuildFramework;
                             EnsureGeneratedPropsDirectory;
                             WriteGitCommitInfoProps;
-                            WriteHostInfoProps"/>
+                            WriteHostInfoProps;
+                            WriteBuildInfoProps"/>
 
   <Target Name="EnsureGeneratedPropsDirectory">
     <MakeDir Condition=" !Exists('$(GeneratedPropsDir)') "

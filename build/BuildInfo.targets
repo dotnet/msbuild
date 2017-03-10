@@ -1,0 +1,39 @@
+<Project ToolsVersion="15.0">
+  <Target Name="WriteBuildInfoProps"
+          DependsOnTargets="BuildDotnetCliBuildFramework">
+
+    <GetCurrentRuntimeInformation>
+      <Output TaskParameter="Rid" PropertyName="HostRid" />
+      <Output TaskParameter="OSName" PropertyName="HostOSName" />
+    </GetCurrentRuntimeInformation>
+
+    <PropertyGroup>
+      <Rid Condition=" '$(Rid)' == '' ">$(HostRid)</Rid>
+      <Architecture Condition=" '$(Architecture)' == '' ">x64</Architecture>
+      <OSName Condition=" '$(OSName)' == '' ">$(HostOSName)</OSName>
+
+      <BuildInfoPropsContent>
+&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+    &lt;PropertyGroup&gt;
+        &lt;Rid&gt;$(Rid)&lt;/Rid&gt;
+        &lt;Architecture&gt;$(Architecture)&lt;/Architecture&gt;
+        &lt;OSName&gt;$(OSName)&lt;/OSName&gt;
+    &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </BuildInfoPropsContent>
+
+      <ExistingBuildInfoPropsContent Condition=" Exists('$(BuildInfoProps)') ">
+        $([System.IO.File]::ReadAllText($(BuildInfoProps)))
+      </ExistingBuildInfoPropsContent>
+
+      <ShouldOverwriteBuildInfoPropsFile>false</ShouldOverwriteBuildInfoPropsFile>
+      <ShouldOverwriteBuildInfoPropsFile
+        Condition=" '$(ExistingBuildInfoPropsContent.Trim())' != '$(BuildInfoPropsContent.Trim())' ">true</ShouldOverwriteBuildInfoPropsFile>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(BuildInfoProps)"
+                      Lines="$(BuildInfoPropsContent)"
+                      Condition=" '$(ShouldOverwriteBuildInfoPropsFile)' == 'true' "
+                      Overwrite="true"  />
+  </Target>
+</Project>

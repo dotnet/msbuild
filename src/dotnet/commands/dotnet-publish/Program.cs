@@ -35,6 +35,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var appliedPublishOption = result["dotnet"]["publish"];
 
+            CommandOption filterProjOption = app.Option(
+               $"--filter <{LocalizableStrings.FilterProjOption}>", LocalizableStrings.FilterProjOptionDescription,
+                CommandOptionType.MultipleValue);
             msbuildArgs.AddRange(appliedPublishOption.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);

@@ -44,7 +44,7 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
 # Generate some props files that are imported by update-dependencies
 Write-Host "Generating property files..."
-dotnet msbuild $RepoRoot\build.proj /p:Architecture=$Architecture /p:GeneratingPropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+dotnet msbuild $RepoRoot\build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
 if($LASTEXITCODE -ne 0) { throw "Failed to generate intermidates" }
 
 # Restore the app

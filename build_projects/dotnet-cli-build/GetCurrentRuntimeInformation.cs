@@ -14,15 +14,11 @@ namespace Microsoft.DotNet.Cli.Build
         public string Rid { get; set; }
 
         [Output]
-        public string Architecture { get; set; }
-
-        [Output]
         public string OSName { get; set; }
 
         public override bool Execute()
         {
             Rid = RuntimeEnvironment.GetRuntimeIdentifier();
-            Architecture = RuntimeEnvironment.RuntimeArchitecture;
             OSName = GetOSShortName();
 
             return true;

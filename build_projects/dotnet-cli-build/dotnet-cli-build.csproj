@@ -7,6 +7,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>bin\$(Configuration)</OutputPath>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback>
+
+    <!-- Specify a RID so that the runtime package with crossgen will be restored -->
+    <RuntimeIdentifiers>$(CoreCLRRid)</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,5 +34,9 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
+
+    <!-- This will cause the package with crossgen in it to be restored -->
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
+
  </ItemGroup>
 </Project>
