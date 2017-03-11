@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
         public static Command Pack() =>
             Create.Command(
                 "pack",
-                LocalizableStrings.AppDescription,
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(

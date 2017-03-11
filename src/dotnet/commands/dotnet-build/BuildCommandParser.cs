@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "build",
                 LocalizableStrings.AppFullName,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
