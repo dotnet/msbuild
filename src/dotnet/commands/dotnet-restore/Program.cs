@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
             result.ShowHelpIfRequested();
 
-            var restore = result["dotnet"]["restore"];
+            var parsedRestore = result["dotnet"]["restore"];
 
             var msbuildArgs = new List<string>
             {
@@ -42,9 +42,9 @@ namespace Microsoft.DotNet.Tools.Restore
                 "/ConsoleLoggerParameters:Verbosity=Minimal"
             };
 
-            msbuildArgs.AddRange(restore.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 
-            msbuildArgs.AddRange(restore.Arguments);
+            msbuildArgs.AddRange(parsedRestore.Arguments);
             
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }

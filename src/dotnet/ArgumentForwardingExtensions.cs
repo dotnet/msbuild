@@ -38,7 +38,12 @@ namespace Microsoft.DotNet.Cli
                 _value = value;
             }
 
-            public override string ToString() => _value;
+            public override string ToString() => _value;  
+            
+            public static explicit operator string(ForwardedArgument argument)
+            {
+                return argument.ToString();
+            }
         }
     }
 }

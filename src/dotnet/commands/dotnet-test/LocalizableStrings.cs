@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Tools.Test
         public const string CmdTestAdapterPathDescription = @"Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path <PATH_TO_ADAPTER>";
 
+        public const string CmdTestAdapterPath = "PATH_TO_ADAPTER";
+
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
         public const string CmdLoggerDescription = @"Specify a logger for test results.

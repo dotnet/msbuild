@@ -1,54 +1,94 @@
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.Test.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class TestCommandParser
     {
         public static Command Test() =>
-            Create.Command("test",
-                           ".NET Test Driver",
-                           Create.Option("-h|--help",
-                                         "Show help information"),
-                           Create.Option("-s|--settings",
-                                         "Settings to use when running tests.",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "SETTINGS_FILE")),
-                           Create.Option("-t|--list-tests",
-                                         "Lists discovered tests"),
-                           Create.Option("--filter",
-                                         @"Run tests that match the given expression.
-                                        Examples:
-                                        Run tests with priority set to 1: --filter ""Priority = 1""
-                                        Run a test with the specified full name: --filter ""FullyQualifiedName=Namespace.ClassName.MethodName""
-                                        Run tests that contain the specified name: --filter ""FullyQualifiedName~Namespace.Class""
-                                        More info on filtering support: https://aka.ms/vstest-filtering",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "EXPRESSION")),
-                           Create.Option("-a|--test-adapter-path",
-                                         "Use custom adapters from the given path in the test run.\r\n                          Example: --test-adapter-path <PATH_TO_ADAPTER>"),
-                           Create.Option("-l|--logger",
-                                         "Specify a logger for test results.\r\n                          Example: --logger \"trx[;LogFileName=<Defaults to unique file name>]\"",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "LoggerUri/FriendlyName")),
-                           Create.Option("-c|--configuration", "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "CONFIGURATION")
-                                               .WithSuggestionsFrom("DEBUG", "RELEASE")),
-                           Create.Option("-f|--framework",
-                                         "Looks for test binaries for a specific framework",
-                                         Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
-                                               .With(name: "FRAMEWORK")),
-                           Create.Option("-o|--output",
-                                         "Directory in which to find the binaries to be run",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "OUTPUT_DIR")),
-                           Create.Option("-d|--diag",
-                                         "Enable verbose logs for test platform.\r\n                          Logs are written to the provided file.",
-                                         Accept.ExactlyOneArgument()
-                                               .With(name: "PATH_TO_FILE")),
-                           Create.Option("--no-build",
-                                         "Do not build project before testing."),
-                           CommonOptions.VerbosityOption());
+            Create.Command(
+                  "test",
+                  LocalizableStrings.AppFullName,
+                  Accept.ZeroOrMoreArguments(),
+                  CommonOptions.HelpOption(),
+                  Create.Option(
+                        "-s|--settings",
+                        LocalizableStrings.CmdSettingsDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdSettingsFile)
+                              .ForwardAs(o => $"/p:VSTestSetting={o.Arguments.Single()}")),
+                  Create.Option(
+                        "-t|--list-tests",
+                        LocalizableStrings.CmdListTestsDescription,
+                        Accept.NoArguments()
+                              .ForwardAs(o => "/p:VSTestListTests=true")),
+                  Create.Option(
+                        "--filter",
+                        LocalizableStrings.CmdTestCaseFilterDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdTestCaseFilterExpression)
+                              .ForwardAs(o => $"/p:VSTestTestCaseFilter={o.Arguments.Single()}")),
+                  Create.Option(
+                        "-a|--test-adapter-path",
+                        LocalizableStrings.CmdTestAdapterPathDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdTestAdapterPath)
+                              .ForwardAs(o => $"/p:VSTestTestAdapterPath={o.Arguments.Single()}")),
+                  Create.Option(
+                        "-l|--logger",
+                        LocalizableStrings.CmdLoggerDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdLoggerOption)
+                              .ForwardAs(o => 
+                                    {
+                                          var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments)); 
+                                          
+                                          return $"/p:VSTestLogger={loggersString}";
+                                    })),
+                  CommonOptions.ConfigurationOption(),
+                  CommonOptions.FrameworkOption(),
+                  Create.Option(
+                        "-o|--output",
+                        LocalizableStrings.CmdOutputDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdOutputDir)
+                              .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                  Create.Option(
+                        "-d|--diag",
+                        LocalizableStrings.CmdPathTologFileDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdPathToLogFile)
+                              .ForwardAs(o => $"/p:VSTestDiag={o.Arguments.Single()}")),
+                  Create.Option(
+                        "--no-build",
+                        LocalizableStrings.CmdNoBuildDescription,
+                        Accept.NoArguments()
+                              .ForwardAs(o => "/p:VSTestNoBuild=true")),
+                  CommonOptions.VerbosityOption());
+
+        private static string GetSemiColonEsacpedstring(string arg)
+        {
+            if (arg.IndexOf(";") != -1)
+            {
+                return arg.Replace(";", "%3b");
+            }
+
+            return arg;
+        }
+
+        private static string[] GetSemiColonEscapedArgs(IReadOnlyCollection<string> args)
+        {
+            int counter = 0;
+            string[] array = new string[args.Count];
+
+            foreach (string arg in args)
+            {
+                array[counter++] = GetSemiColonEsacpedstring(arg);
+            }
+
+            return array;
+        }
     }
 }

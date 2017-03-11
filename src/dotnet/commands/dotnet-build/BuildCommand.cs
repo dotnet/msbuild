@@ -6,47 +6,55 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
-using System.Diagnostics;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
-namespace Microsoft.DotNet.Tools.Pack
+namespace Microsoft.DotNet.Tools.Build
 {
-    public class PackCommand : MSBuildForwardingApp
+    public class BuildCommand : MSBuildForwardingApp
     {
-        public PackCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+        public BuildCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
             : base(msbuildArgs, msbuildPath)
         {
         }
 
-        public static PackCommand FromArgs(string[] args, string msbuildPath = null)
+        public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
+            var msbuildArgs = new List<string>();
+
             var parser = Parser.Instance;
 
-            var result = parser.ParseFrom("dotnet pack", args);
+            var result = parser.ParseFrom("dotnet build", args);
 
             Reporter.Output.WriteLine(result.Diagram());
 
             result.ShowHelpIfRequested();
 
-            var parsedPack = result["dotnet"]["pack"];
-          
-            var msbuildArgs = new List<string>()
+            var appliedBuildOptions = result["dotnet"]["build"];
+
+            if (appliedBuildOptions.HasOption("--no-incremental"))
             {
-                    "/t:pack"
-            };
+                msbuildArgs.Add("/t:Rebuild");
+            }
+            else
+            {
+                msbuildArgs.Add("/t:Build");
+            }
 
-            msbuildArgs.AddRange(parsedPack.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
 
-            msbuildArgs.AddRange(parsedPack.Arguments);
+            msbuildArgs.AddRange(appliedBuildOptions.Arguments);
 
-            return new PackCommand(msbuildArgs, msbuildPath);
+            msbuildArgs.Add($"/clp:Summary");
+
+            return new BuildCommand(msbuildArgs, msbuildPath);
         }
 
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            PackCommand cmd;
+            BuildCommand cmd;
+            
             try
             {
                 cmd = FromArgs(args);

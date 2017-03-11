@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,52 +12,52 @@ namespace Microsoft.DotNet.Cli
         public static Command Restore() =>
             Create.Command(
                 "restore",
-                ".NET dependency restorer",
+                LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-s|--source",
-                    "Specifies a NuGet package source to use during the restore.",
+                    LocalizableStrings.CmdSourceOptionDescription,
                     Accept.OneOrMoreArguments()
-                          .With(name: "SOURCE")
+                          .With(name: LocalizableStrings.CmdSourceOption)
                           .ForwardAs(o => $"/p:RestoreSources={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "-r|--runtime",
-                    "Target runtime to restore packages for.",
+                    LocalizableStrings.CmdRuntimeOptionDescription,
                     Accept.OneOrMoreArguments()
                           .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
-                          .With(name: "RUNTIME_IDENTIFIER")
+                          .With(name: LocalizableStrings.CmdRuntimeOption)
                           .ForwardAs(o => $"/p:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--packages",
-                    "Directory to install packages in.",
+                    LocalizableStrings.CmdPackagesOptionDescription,
                     Accept.ExactlyOneArgument()
-                          .With(name: "PACKAGES_DIRECTORY")
+                          .With(name: LocalizableStrings.CmdPackagesOption)
                           .ForwardAs(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--disable-parallel",
-                    "Disables restoring multiple projects in parallel.",
+                    LocalizableStrings.CmdDisableParallelOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreDisableParallel=true")),
                 Create.Option(
                     "--configfile",
-                    "The NuGet configuration file to use.",
+                    LocalizableStrings.CmdConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()
-                          .With(name: "FILE")
+                          .With(name: LocalizableStrings.CmdConfigFileOption)
                           .ForwardAs(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-cache",
-                    "Do not cache packages and http requests.",
+                    LocalizableStrings.CmdNoCacheOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreNoCache=true")),
                 Create.Option(
                     "--ignore-failed-sources",
-                    "Treat package source failures as warnings.",
+                    LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreIgnoreFailedSources=true")),
                 Create.Option(
                     "--no-dependencies",
-                    "Set this flag to ignore project to project references and only restore the root project",
+                    LocalizableStrings.CmdNoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreRecursive=false")),
                 CommonOptions.VerbosityOption());
