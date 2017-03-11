@@ -8,6 +8,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
@@ -92,6 +93,76 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello World!");
+        }
+
+        //Note: Pre Netcoreapp2.0 stanalone activation uses renamed dotnet.exe
+        //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
+        [Fact]
+        public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()
+        {
+            var targetFramework = "netcoreapp2.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "Hello",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
+                RuntimeIdentifier = rid,
+                IsExe = true,
+            };
+            
+
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(""Hello from a netcoreapp2.0.!"");
+    }
+}
+";
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            testProjectInstance.Restore(testProject.Name);
+            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework: targetFramework,
+                runtimeIdentifier: rid);
+            var selfContainedExecutable = $"Hello{Constants.ExeSuffix}";
+
+            string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
+
+            var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
+
+            publishDirectory.Should().HaveFiles(new[] {
+                selfContainedExecutable,
+                "Hello.dll",
+                "Hello.pdb",
+                "Hello.deps.json",
+                "Hello.runtimeconfig.json",
+                $"{libPrefix}coreclr{Constants.DynamicLibSuffix}",
+                $"{libPrefix}hostfxr{Constants.DynamicLibSuffix}",
+                $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"mscorlib.dll",
+                $"System.Private.CoreLib.dll",
+            });
+
+            Command.Create(selfContainedExecutableFullPath, new string[] { })
+                .EnsureExecutable()
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello from a netcoreapp2.0.!");
         }
 
         [Fact]
