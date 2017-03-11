@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             var runSettingsOptions = 
                 result.UnparsedTokens
-                    .Select(t => GetSemiColonEsacpedstring(t));
+                    .Select(GetSemiColonEscapedString);
 
             if (runSettingsOptions.Any())
             {
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Test
             return cmd.Execute();
         }
 
-        private static string GetSemiColonEsacpedstring(string arg)
+        private static string GetSemiColonEscapedString(string arg)
         {
             if (arg.IndexOf(";") != -1)
             {
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             foreach (string arg in args)
             {
-                array[counter++] = GetSemiColonEsacpedstring(arg);
+                array[counter++] = GetSemiColonEscapedString(arg);
             }
 
             return array;
