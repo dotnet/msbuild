@@ -21,7 +21,6 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToCacheAProjectWithDependencies : SdkTest
     {
-        private static string _libPrefix;
         private static string _runtimeOs;
         private static string _runtimeLibOs;
         private static string _runtimeRid;
@@ -33,7 +32,6 @@ namespace Microsoft.NET.Publish.Tests
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                _libPrefix = "";
                 _runtimeOs = "win7";
                 _runtimeLibOs = "win";
                 _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
@@ -41,13 +39,12 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
-                _libPrefix = "lib";
                 _runtimeOs = "unix";
                 _runtimeLibOs = "unix";
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    // microsoft.netcore.coredistools only has assets for osx.10.10
+                    // microsoft.netcore.dotnetapphost  has assets  only for osx.10.10
                     _runtimeRid = "osx.10.10-x64";
                 }
                 else
@@ -77,8 +74,7 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List < string > {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
+               $"runtime.{_runtimeRid}.microsoft.netcore.dotnetapphost/1.2.0-beta-001304-00/runtimes/{_runtimeRid}/native/apphost{Constants.ExeSuffix}",
                };
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
@@ -93,10 +89,10 @@ namespace Microsoft.NET.Publish.Tests
 
             knownpackage.Add(new PackageIdentity("Microsoft.NETCore.Targets", NuGetVersion.Parse("1.2.0-beta-24821-02")));
             knownpackage.Add(new PackageIdentity("System.Private.Uri", NuGetVersion.Parse("4.4.0-beta-24821-02")));
-            knownpackage.Add(new PackageIdentity("Microsoft.NETCore.CoreDisTools", NuGetVersion.Parse("1.0.1-prerelease-00001")));
+            knownpackage.Add(new PackageIdentity("Microsoft.NETCore.DotNetAppHost", NuGetVersion.Parse("1.2.0-beta-001304-00")));
             knownpackage.Add(new PackageIdentity($"runtime.{_runtimeOs}.System.Private.Uri", NuGetVersion.Parse("4.4.0-beta-24821-02")));
             knownpackage.Add(new PackageIdentity("Microsoft.NETCore.Platforms", NuGetVersion.Parse("1.2.0-beta-24821-02")));
-            knownpackage.Add(new PackageIdentity($"runtime.{_runtimeRid}.Microsoft.NETCore.CoreDisTools", NuGetVersion.Parse("1.0.1-prerelease-00001")));
+            knownpackage.Add(new PackageIdentity($"runtime.{_runtimeRid}.Microsoft.NETCore.DotNetAppHost", NuGetVersion.Parse("1.2.0-beta-001304-00")));
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
@@ -115,6 +111,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             
         }
+
         [Fact]
         public void compose_with_fxfiles()
         {
@@ -136,8 +133,7 @@ namespace Microsoft.NET.Publish.Tests
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
+               $"runtime.{_runtimeRid}.microsoft.netcore.dotnetapphost/1.2.0-beta-001304-00/runtimes/{_runtimeRid}/native/apphost{Constants.ExeSuffix}",
                $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
 
@@ -171,8 +167,7 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
+               $"runtime.{_runtimeRid}.microsoft.netcore.dotnetapphost/1.2.0-beta-001304-00/runtimes/{_runtimeRid}/native/apphost{Constants.ExeSuffix}",
                $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
 
@@ -205,8 +200,7 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
+               $"runtime.{_runtimeRid}.microsoft.netcore.dotnetapphost/1.2.0-beta-001304-00/runtimes/{_runtimeRid}/native/apphost{Constants.ExeSuffix}"
                };
 
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);

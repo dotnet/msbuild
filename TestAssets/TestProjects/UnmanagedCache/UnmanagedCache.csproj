@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
     <ItemGroup>
-        <PackageReference Include="Microsoft.NETCore.CoreDisTools" Version="1.0.1-prerelease-00001" />
+        <PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="1.2.0-beta-001304-00" />
   </ItemGroup>
 
 </Project>
