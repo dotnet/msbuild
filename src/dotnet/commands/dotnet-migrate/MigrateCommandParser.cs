@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "migrate",
                 ".NET Migrate Command",
-                Accept.ZeroOrOneArgument
+                Accept.ZeroOrOneArgument()
                     .MaterializeAs(o =>
                     {            
                         return new MigrateCommand(

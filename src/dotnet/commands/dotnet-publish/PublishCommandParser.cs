@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
+                Create.Option(
                     "--filter", 
                     LocalizableStrings.FilterProjOptionDescription,
                               Accept.ExactlyOneArgument()

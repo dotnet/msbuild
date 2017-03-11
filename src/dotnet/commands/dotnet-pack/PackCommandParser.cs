@@ -13,28 +13,32 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "pack",
                 LocalizableStrings.AppDescription,
-                Accept.ZeroOrMoreArguments,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.CmdOutputDirDescription,
-                                         Accept.ExactlyOneArgument()
+                    Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAs(o => $"/p:PackageOutputPath={o.Arguments.Single()}")),
-                Create.Option("--no-build",
-                                LocalizableStrings.CmdNoBuildOptionDescription,
-                                Accept.NoArguments.ForwardAs("/p:NoBuild=true")),
-                Create.Option("--include-symbols",
-                                LocalizableStrings.CmdIncludeSymbolsDescription,
-                                Accept.NoArguments.ForwardAs("/p:IncludeSymbols=true")),
-                Create.Option("--include-source",
-                                LocalizableStrings.CmdIncludeSourceDescription,
-                                Accept.NoArguments.ForwardAs("/p:IncludeSource=true")),
+                Create.Option(
+                    "--no-build",
+                    LocalizableStrings.CmdNoBuildOptionDescription,
+                    Accept.NoArguments().ForwardAs("/p:NoBuild=true")),
+                Create.Option(
+                    "--include-symbols",
+                    LocalizableStrings.CmdIncludeSymbolsDescription,
+                    Accept.NoArguments().ForwardAs("/p:IncludeSymbols=true")),
+                Create.Option(
+                    "--include-source",
+                    LocalizableStrings.CmdIncludeSourceDescription,
+                    Accept.NoArguments().ForwardAs("/p:IncludeSource=true")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
-                Create.Option("-s|--serviceable",
-                              LocalizableStrings.CmdServiceableDescription,
-                              Accept.NoArguments.ForwardAs("/p:Serviceable=true")),
+                Create.Option(
+                    "-s|--serviceable",
+                    LocalizableStrings.CmdServiceableDescription,
+                    Accept.NoArguments().ForwardAs("/p:Serviceable=true")),
                 CommonOptions.VerbosityOption());
     }
 }

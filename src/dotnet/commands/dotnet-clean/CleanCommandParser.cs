@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "clean",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option("-o|--output", 
                               LocalizableStrings.CmdOutputDirDescription,

@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-f|--framework",
                 "Target framework to publish for. The target framework has to be specified in the project file.",
-                Accept.ExactlyOneArgument
+                Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
                     .With(name: "FRAMEWORK")
                     .ForwardAs(o => $"/p:TargetFramework={o.Arguments.Single()}"));
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-r|--runtime",
                 "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
-                Accept.ExactlyOneArgument
+                Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                     .With(name: "RUNTIME_IDENTIFIER")
                     .ForwardAs(o => $"/p:RuntimeIdentifier={o.Arguments.Single()}"));
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-c|--configuration", 
                 "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
-                Accept.ExactlyOneArgument
+                Accept.ExactlyOneArgument()
                     .With(name: "CONFIGURATION")
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
                     .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}"));
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "--version-suffix",
                 "Defines the value for the $(VersionSuffix) property in the project.",
-                Accept.ExactlyOneArgument
+                Accept.ExactlyOneArgument()
                     .With(name: "VERSION_SUFFIX")
                     .ForwardAs(o => $"/p:VersionSuffix={o.Arguments.Single()}"));
 

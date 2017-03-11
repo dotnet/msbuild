@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "cache",
                 LocalizableStrings.AppDescription,
-                Accept.ZeroOrMoreArguments,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-e|--entries",
                     LocalizableStrings.ProjectEntryDescription,
-                    Accept.OneOrMoreArguments
+                    Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.ProjectEntries)
                         .ForwardAs(o => 
                         {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "--framework-version",
                     LocalizableStrings.FrameworkVersionOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FrameworkVersionOption)
                         .ForwardAs(o => $"/p:FX_Version={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(),
@@ -42,24 +42,24 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAs(o => $"/p:ComposeDir={o.Arguments.Single()}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
                         .ForwardAs(o => $"/p:ComposeWorkingDir={o.Arguments.Single()}")),
                 Create.Option(
                     "--preserve-working-dir",
                     LocalizableStrings.PreserveIntermediateWorkingDirOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                         .ForwardAs(o => $"/p:PreserveComposeWorkingDir=true")),
                 Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:SkipOptimization=true")),
                 CommonOptions.VerbosityOption());
     }
