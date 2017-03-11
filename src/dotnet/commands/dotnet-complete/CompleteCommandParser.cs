@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli
                       .With(name: "path"),
                 Create.Option("--position", "",
                               Accept.ExactlyOneArgument
-                                    .With(name: "command")));
+                                    .With(name: "command")
+                                    .MaterializeAs(o => int.Parse(o.Arguments.Single()))));
     }
 }

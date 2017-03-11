@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Sln.Add;
 using Microsoft.DotNet.Tools.Sln.List;
@@ -17,12 +18,13 @@ namespace Microsoft.DotNet.Tools.Sln
         protected override string FullCommandNameLocalized => LocalizableStrings.AppFullName;
         protected override string ArgumentName => Constants.SolutionArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsSolutionDescription;
-        internal override List<Func<DotNetSubCommandBase>> SubCommands =>
-            new List<Func<DotNetSubCommandBase>>
+
+        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                AddProjectToSolutionCommand.Create,
-                ListProjectsInSolutionCommand.Create,
-                RemoveProjectFromSolutionCommand.Create
+                { "add", o => new AddProjectToSolutionCommand(o) },
+                { "list", o => new ListProjectsInSolutionCommand(o) },
+                { "remove", o => new RemoveProjectFromSolutionCommand(o) }
             };
 
         public static int Run(string[] args)

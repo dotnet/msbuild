@@ -1,61 +1,50 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Evaluation;
+using System;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
-using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.NuGet;
-using NuGet.Frameworks;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.DotNet.Tools.Remove.PackageReference
 {
-    internal class RemovePackageReferenceCommand : DotNetSubCommandBase
+    internal class RemovePackageReferenceCommand : CommandBase
     {
+        private readonly AppliedOption _appliedCommand;
+        private readonly string _fileOrDirectory;
 
-        public static DotNetSubCommandBase Create()
+        public RemovePackageReferenceCommand(AppliedOption appliedCommand)
         {
-            var command = new RemovePackageReferenceCommand
+            if (appliedCommand == null)
             {
-                Name = "package",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-                HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
-            };
-
-            command.HelpOption("-h|--help");
-
-            return command;
-        }
-
-        public override int Run(string fileOrDirectory)
-        {
-            if (RemainingArguments.Count != 1)
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            if (_appliedCommand.Arguments.Count != 1)
             {
                 throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
             }
 
+            _appliedCommand = appliedCommand;
+            _fileOrDirectory = appliedCommand.Arguments.Single();
+        }
+
+        public override int Execute()
+        {
             var projectFilePath = string.Empty;
 
-            if (!File.Exists(fileOrDirectory))
+            if (!File.Exists(_fileOrDirectory))
             {
-                projectFilePath = MsbuildProject.GetProjectFileFromDirectory(fileOrDirectory).FullName;
+                projectFilePath = MsbuildProject.GetProjectFileFromDirectory(_fileOrDirectory).FullName;
             }
             else
             {
-                projectFilePath = fileOrDirectory;
+                projectFilePath = _fileOrDirectory;
             }
 
-            var packageToRemove = RemainingArguments.First();
+            var packageToRemove = _appliedCommand.Arguments.Single();
             var result = NuGetCommand.Run(TransformArgs(packageToRemove, projectFilePath));
 
             return result;
@@ -63,7 +52,8 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
 
         private string[] TransformArgs(string packageId, string projectFilePath)
         {
-            return new string[]{
+            return new string[]
+            {
                 "package",
                 "remove",
                 "--package",
