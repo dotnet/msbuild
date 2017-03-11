@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
                            CommonOptions.HelpOption(),
                            Create.Option("-o|--output",
                                          "Directory in which to place built packages.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "OUTPUT_DIR")),
                            Create.Option("--no-build",
                                          "Skip building the project prior to packing. By default, the project will be built."),
@@ -23,13 +23,13 @@ namespace Microsoft.DotNet.Cli
                                          "Include PDBs and source files. Source files go into the src folder in the resulting nuget package"),
                            Create.Option("-c|--configuration",
                                          "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "CONFIGURATION")
                                                .WithSuggestionsFrom("DEBUG",
                                                                     "RELEASE")),
                            Create.Option("--version-suffix",
                                          "Defines the value for the $(VersionSuffix) property in the project.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "VERSION_SUFFIX")),
                            Create.Option("-s|--serviceable",
                                          "Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing."),

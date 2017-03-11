@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
             delimiters: Array.Empty<char>(),
             options: Create.Command("dotnet",
                                     ".NET Command Line Tools",
-                                    Accept.NoArguments,
+                                    Accept.NoArguments(),
                                     NewCommandParser.New(),
                                     RestoreCommandParser.Restore(),
                                     BuildCommandParser.Build(),

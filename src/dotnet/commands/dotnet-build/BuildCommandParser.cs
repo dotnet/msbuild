@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "build",
                 ".NET Builder",
-                Accept.ZeroOrOneArgument
+                Accept.ZeroOrOneArgument()
                       .Forward(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
                     "Output directory in which to place built artifacts.",
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: "OUTPUT_DIR")
                           .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 Create.Option(
@@ -34,14 +34,14 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-c|--configuration",
                     "Configuration to use for building the project. Default for most projects is  \"Debug\".",
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: "CONFIGURATION")
                           .WithSuggestionsFrom("DEBUG", "RELEASE")
                           .ForwardAs(o => $"/p:Configuration={o.Arguments.Single()}")),
                 Create.Option(
                     "--version-suffix",
                     "Defines the value for the $(VersionSuffix) property in the project",
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: "VERSION_SUFFIX")
                           .ForwardAs(o => $"/p:VersionSuffix={o.Arguments.Single()}")),
                 Create.Option(
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "--no-dependencies",
                     "Set this flag to ignore project-to-project references and only build the root project",
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:BuildProjectReferences=false")),
                 CommonOptions.VerbosityOption());
     }

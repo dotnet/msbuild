@@ -18,10 +18,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var command = Command("the-command", "",
                                   Option("-o|--one", "",
-                                         ZeroOrOneArgument
+                                         ZeroOrOneArgument()
                                              .ForwardAs(o => $"/i:{o.Arguments.Single()}")),
                                   Option("-t|--two", "",
-                                         NoArguments
+                                         NoArguments()
                                              .ForwardAs("/s:true")));
 
             var result = command.Parse("the-command -t -o 123");
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var command = Command("the-command", "",
                                   Option("-x", "",
-                                         ZeroOrMoreArguments
+                                         ZeroOrMoreArguments()
                                              .ForwardAs(o => $"/x:{string.Join("&", o.Arguments)}")));
 
             var result = command.Parse("the-command -x one -x two");
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var command = Command("the-command", "",
                                   Option("-x", "",
-                                         ZeroOrMoreArguments
+                                         ZeroOrMoreArguments()
                                              .Forward()));
 
             var result = command.Parse("the-command -x one");

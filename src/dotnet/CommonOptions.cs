@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-h|--help",
                 "Show help information",
-                Accept.NoArguments,
+                Accept.NoArguments(),
                 materialize: o => o.Option.Command().HelpView());
 
         public static Option VerbosityOption() =>

@@ -13,13 +13,13 @@ namespace Microsoft.DotNet.Cli
                            CommonOptions.HelpOption(),
                            Create.Option("-c|--configuration",
                                          @"Configuration to use for building the project. Default for most projects is ""Debug"".",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .WithSuggestionsFrom("DEBUG", "RELEASE")),
                            Create.Option("-f|--framework",
                                          "Build and run the app using the specified framework. The framework has to be specified in the project file.",
                                          Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)),
                            Create.Option("-p|--project",
                                          "The path to the project file to run (defaults to the current directory if there is only one project).",
-                                         Accept.ZeroOrOneArgument));
+                                         Accept.ZeroOrOneArgument()));
     }
 }

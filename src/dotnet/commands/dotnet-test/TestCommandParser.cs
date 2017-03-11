@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
                                          "Show help information"),
                            Create.Option("-s|--settings",
                                          "Settings to use when running tests.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "SETTINGS_FILE")),
                            Create.Option("-t|--list-tests",
                                          "Lists discovered tests"),
@@ -23,16 +23,16 @@ namespace Microsoft.DotNet.Cli
                                         Run a test with the specified full name: --filter ""FullyQualifiedName=Namespace.ClassName.MethodName""
                                         Run tests that contain the specified name: --filter ""FullyQualifiedName~Namespace.Class""
                                         More info on filtering support: https://aka.ms/vstest-filtering",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "EXPRESSION")),
                            Create.Option("-a|--test-adapter-path",
                                          "Use custom adapters from the given path in the test run.\r\n                          Example: --test-adapter-path <PATH_TO_ADAPTER>"),
                            Create.Option("-l|--logger",
                                          "Specify a logger for test results.\r\n                          Example: --logger \"trx[;LogFileName=<Defaults to unique file name>]\"",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "LoggerUri/FriendlyName")),
                            Create.Option("-c|--configuration", "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "CONFIGURATION")
                                                .WithSuggestionsFrom("DEBUG", "RELEASE")),
                            Create.Option("-f|--framework",
@@ -41,11 +41,11 @@ namespace Microsoft.DotNet.Cli
                                                .With(name: "FRAMEWORK")),
                            Create.Option("-o|--output",
                                          "Directory in which to find the binaries to be run",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "OUTPUT_DIR")),
                            Create.Option("-d|--diag",
                                          "Enable verbose logs for test platform.\r\n                          Logs are written to the provided file.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "PATH_TO_FILE")),
                            Create.Option("--no-build",
                                          "Do not build project before testing."),

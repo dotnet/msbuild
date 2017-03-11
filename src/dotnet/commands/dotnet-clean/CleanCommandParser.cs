@@ -12,15 +12,15 @@ namespace Microsoft.DotNet.Cli
                            ".NET Clean Command",
                            CommonOptions.HelpOption(),
                            Create.Option("-o|--output", "Directory in which the build outputs have been placed.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "OUTPUT_DIR")),
                            Create.Option("-f|--framework", "Clean a specific framework.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "FRAMEWORK")
                                                .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())),
                            Create.Option("-c|--configuration",
                                          "Clean a specific configuration.",
-                                         Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                                                .With(name: "CONFIGURATION")
                                                .WithSuggestionsFrom("DEBUG", "RELEASE")));
     }
