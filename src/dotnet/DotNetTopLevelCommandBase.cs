@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -18,60 +15,34 @@ namespace Microsoft.DotNet.Cli
         protected abstract string FullCommandNameLocalized { get; }
         protected abstract string ArgumentName { get; }
         protected abstract string ArgumentDescriptionLocalized { get; }
-        internal abstract List<Func<DotNetSubCommandBase>> SubCommands { get; }
+        internal abstract Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication command = new CommandLineApplication(throwOnUnexpectedArg: true)
-            {
-                Name = $"dotnet {CommandName}",
-                FullName = FullCommandNameLocalized,
-            };
+            var parser = Parser.Instance;
 
-            command.HelpOption("-h|--help");
+            var result = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            command.Argument(ArgumentName, ArgumentDescriptionLocalized);
+            Reporter.Output.WriteLine(result.Diagram());
 
-            foreach (var subCommandCreator in SubCommands)
-            {
-                var subCommand = subCommandCreator();
-                command.AddCommand(subCommand);
+            result.ShowHelpIfRequested();
 
-                subCommand.OnExecute(() => {
-                    try
-                    {
-                        if (!command.Arguments.Any())
-                        {
-                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, ArgumentDescriptionLocalized);
-                        }
+            var subcommandName = result.Command().Name;
 
-                        var projectOrDirectory = command.Arguments.First().Value;
-                        if (string.IsNullOrEmpty(projectOrDirectory))
-                        {
-                            projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                        }
+            var create = SubCommands[subcommandName];
 
-                        return subCommand.Run(projectOrDirectory);
-                    }
-                    catch (GracefulException e)
-                    {
-                        Reporter.Error.WriteLine(e.Message.Red());
-                        subCommand.ShowHelp();
-                        return 1;
-                    }
-                });
-            }
+            var command = create(result["dotnet"][CommandName]);
 
             try
             {
-                return command.Execute(args);
+                return command.Execute();
             }
             catch (GracefulException e)
             {
                 Reporter.Error.WriteLine(e.Message.Red());
-                command.ShowHelp();
+                result.ShowHelp();
                 return 1;
             }
             catch (CommandParsingException e)

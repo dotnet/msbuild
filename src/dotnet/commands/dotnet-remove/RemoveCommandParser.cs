@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli
         public static Command Remove() =>
             Create.Command("remove",
                            ".NET Remove Command",
-                           Accept.ZeroOrOneArgument
+                           Accept.ZeroOrOneArgument()
                                  .With(name: "PROJECT")
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli
                                           CommonOptions.HelpOption(),
                                           Create.Option("-f|--framework",
                                                         "Remove reference only when targetting a specific framework",
-                                                        Accept.ExactlyOneArgument
+                                                        Accept.ExactlyOneArgument()
                                                               .With(name: "FRAMEWORK"))));
     }
 }

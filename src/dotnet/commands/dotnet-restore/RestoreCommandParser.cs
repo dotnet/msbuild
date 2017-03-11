@@ -13,52 +13,52 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "restore",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-s|--source",
                     LocalizableStrings.CmdSourceOptionDescription,
-                    Accept.OneOrMoreArguments
+                    Accept.OneOrMoreArguments()
                           .With(name: LocalizableStrings.CmdSourceOption)
                           .ForwardAs(o => $"/p:RestoreSources={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "-r|--runtime",
                     LocalizableStrings.CmdRuntimeOptionDescription,
-                    Accept.OneOrMoreArguments
+                    Accept.OneOrMoreArguments()
                           .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                           .With(name: LocalizableStrings.CmdRuntimeOption)
                           .ForwardAs(o => $"/p:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--packages",
                     LocalizableStrings.CmdPackagesOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdPackagesOption)
                           .ForwardAs(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--disable-parallel",
                     LocalizableStrings.CmdDisableParallelOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:RestoreDisableParallel=true")),
                 Create.Option(
                     "--configfile",
                     LocalizableStrings.CmdConfigFileOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdConfigFileOption)
                           .ForwardAs(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-cache",
                     LocalizableStrings.CmdNoCacheOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:RestoreNoCache=true")),
                 Create.Option(
                     "--ignore-failed-sources",
                     LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:RestoreIgnoreFailedSources=true")),
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.CmdNoDependenciesOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:RestoreRecursive=false")),
                 CommonOptions.VerbosityOption());
     }

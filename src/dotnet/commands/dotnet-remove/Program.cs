@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Remove.PackageReference;
 using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
@@ -16,11 +17,12 @@ namespace Microsoft.DotNet.Tools.Remove
         protected override string FullCommandNameLocalized => LocalizableStrings.NetRemoveCommand;
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
-        internal override List<Func<DotNetSubCommandBase>> SubCommands =>
-            new List<Func<DotNetSubCommandBase>>
+
+        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                RemoveProjectToProjectReferenceCommand.Create,
-                RemovePackageReferenceCommand.Create
+                { "reference", o => new RemoveProjectToProjectReferenceCommand(o) },
+                { "package", o => new RemovePackageReferenceCommand(o) }
             };
 
         public static int Run(string[] args)

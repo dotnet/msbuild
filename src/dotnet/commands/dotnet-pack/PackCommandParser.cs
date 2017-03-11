@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.CmdOutputDirDescription,
-                    Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAs(o => $"/p:PackageOutputPath={o.Arguments.Single()}")),
                 Create.Option("--no-build",

@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.Cli
                            CommonOptions.HelpOption(),
                            Create.Command("add",
                                           ".NET Add project(s) to a solution file Command",
-                                          Accept.ExactlyOneArgument
+                                          Accept.ExactlyOneArgument()
                                                 .With(name: "SLN_FILE"),
                                           CommonOptions.HelpOption()),
                            Create.Command("list",
                                           "List all projects in the solution.",
-                                          Accept.ExactlyOneArgument
+                                          Accept.ExactlyOneArgument()
                                                 .With(name: "SLN_FILE"),
                                           CommonOptions.HelpOption()),
                            Create.Command("remove",

@@ -10,14 +10,14 @@ namespace Microsoft.DotNet.Cli
         public static Command List() =>
             Create.Command("list",
                            ".NET List Command",
-                           Accept.ZeroOrOneArgument
+                           Accept.ZeroOrOneArgument()
                                  .With(name: "PROJECT",
                                        description:
                                        "The project file to operate on. If a file is not specified, the command will search the current directory for one.")
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
                            Create.Command("reference", "Command to list project to project references",
-                                          Accept.ExactlyOneArgument
+                                          Accept.ExactlyOneArgument()
                                                 .With(name: "PROJECT",
                                                       description:
                                                       "The project file to operate on. If a file is not specified, the command will search the current directory for one."),

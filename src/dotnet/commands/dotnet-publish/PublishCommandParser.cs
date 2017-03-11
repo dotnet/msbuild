@@ -13,22 +13,20 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "publish",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments,
+                Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
-                    Accept.ExactlyOneArgument
+                              Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
-                CommonOptions.VersionSuffixOption(),
-                Create.Option(
                     "--filter", 
                     LocalizableStrings.FilterProjOptionDescription,
-                    Accept.ExactlyOneArgument
+                              Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FilterProjOption)
                         .ForwardAs(o => $"/p:FilterProjectFiles={o.Arguments.Single()}")),
                 CommonOptions.VerbosityOption());

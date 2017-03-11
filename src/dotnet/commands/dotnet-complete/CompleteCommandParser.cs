@@ -11,10 +11,11 @@ namespace Microsoft.DotNet.Cli
         public static Command Complete() =>
             Create.Command(
                 "complete", "",
-                Accept.ExactlyOneArgument
+                Accept.ExactlyOneArgument()
                       .With(name: "path"),
                 Create.Option("--position", "",
-                              Accept.ExactlyOneArgument
-                                    .With(name: "command")));
+                              Accept.ExactlyOneArgument()
+                                    .With(name: "command")
+                                    .MaterializeAs(o => int.Parse(o.Arguments.Single()))));
     }
 }

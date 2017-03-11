@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.HelpOption(),
                 Create.Option("-o|--output", 
                               LocalizableStrings.CmdOutputDirDescription,
-                              Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),

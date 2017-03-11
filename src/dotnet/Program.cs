@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
             ["complete"] = CompleteCommand.Run,
-            ["parse"] = ParseCommand.Run,
+            ["parse"] = ParseCommand.Run
         };
 
         public static int Main(string[] args)

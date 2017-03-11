@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "run",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments
+                Accept.ZeroOrMoreArguments()
                     .MaterializeAs(o =>
                     {
                         return new RunCommand()
@@ -31,6 +31,6 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-p|--project",
                     LocalizableStrings.CommandOptionProjectDescription,
-                    Accept.ExactlyOneArgument));
+                    Accept.ExactlyOneArgument()));
     }
 }

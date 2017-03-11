@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli
                   Create.Option(
                         "-s|--settings",
                         LocalizableStrings.CmdSettingsDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdSettingsFile)
                               .ForwardAs(o => $"/p:VSTestSetting={o.Arguments.Single()}")),
                   Create.Option(
@@ -27,19 +27,19 @@ namespace Microsoft.DotNet.Cli
                   Create.Option(
                         "--filter",
                         LocalizableStrings.CmdTestCaseFilterDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdTestCaseFilterExpression)
                               .ForwardAs(o => $"/p:VSTestTestCaseFilter={o.Arguments.Single()}")),
                   Create.Option(
                         "-a|--test-adapter-path",
                         LocalizableStrings.CmdTestAdapterPathDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdTestAdapterPath)
                               .ForwardAs(o => $"/p:VSTestTestAdapterPath={o.Arguments.Single()}")),
                   Create.Option(
                         "-l|--logger",
                         LocalizableStrings.CmdLoggerDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdLoggerOption)
                               .ForwardAs(o => 
                                     {
@@ -52,13 +52,13 @@ namespace Microsoft.DotNet.Cli
                   Create.Option(
                         "-o|--output",
                         LocalizableStrings.CmdOutputDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdOutputDir)
                               .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                   Create.Option(
                         "-d|--diag",
                         LocalizableStrings.CmdPathTologFileDescription,
-                        Accept.ExactlyOneArgument
+                                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToLogFile)
                               .ForwardAs(o => $"/p:VSTestDiag={o.Arguments.Single()}")),
                   Create.Option(

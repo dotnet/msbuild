@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
             Create.Command("new",
                            "Initialize .NET projects.",
                            Accept
-                               .ExactlyOneArgument
+                               .ExactlyOneArgument()
                                .WithSuggestionsFrom(
                                    "console",
                                    "classlib",

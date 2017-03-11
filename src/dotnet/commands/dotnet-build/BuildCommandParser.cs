@@ -13,12 +13,11 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "build",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments,
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
-                    Accept.ExactlyOneArgument
+                    Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
                           .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
@@ -31,7 +30,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,
-                    Accept.NoArguments
+                    Accept.NoArguments()
                           .ForwardAs("/p:BuildProjectReferences=false")),
                 CommonOptions.VerbosityOption());
     }
