@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Tests
             stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/6006")]
         public void WhenToolAssetsFileIsLockedByNuGetThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
         {
             var testInstance = TestAssets.Get("AppWithToolDependency")
