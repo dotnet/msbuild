@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public AddProjectToSolutionCommand(AppliedOption appliedCommand)
+        public AddProjectToSolutionCommand(AppliedOption appliedCommand, string fileOrDirectory)
         {
             if (appliedCommand == null)
             {
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             }
             _appliedCommand = appliedCommand;
 
-            _fileOrDirectory = appliedCommand.Arguments.Single();
+            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()

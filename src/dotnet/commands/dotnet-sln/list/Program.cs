@@ -15,13 +15,13 @@ namespace Microsoft.DotNet.Tools.Sln.List
     {
         private readonly string _fileOrDirectory;
 
-        public ListProjectsInSolutionCommand(AppliedOption appliedCommand)
+        public ListProjectsInSolutionCommand(AppliedOption appliedCommand, string fileOrDirectory)
         {
             if (appliedCommand == null)
             {
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
-            _fileOrDirectory = appliedCommand.Arguments.Single();
+            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()

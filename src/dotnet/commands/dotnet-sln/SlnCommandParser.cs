@@ -8,20 +8,23 @@ namespace Microsoft.DotNet.Cli
     internal static class SlnCommandParser
     {
         public static Command Sln() =>
-            Create.Command("sln",
-                           ".NET modify solution file command",
-                           CommonOptions.HelpOption(),
-                           Create.Command("add",
-                                          ".NET Add project(s) to a solution file Command",
-                                          Accept.ExactlyOneArgument()
-                                                .With(name: "SLN_FILE"),
-                                          CommonOptions.HelpOption()),
-                           Create.Command("list",
-                                          "List all projects in the solution.",
-                                          Accept.ExactlyOneArgument()
-                                                .With(name: "SLN_FILE"),
-                                          CommonOptions.HelpOption()),
-                           Create.Command("remove",
-                                          "Remove the specified project(s) from the solution. The project is not impacted."));
+            Create.Command(
+                "sln",
+                ".NET modify solution file command",
+                Accept.ExactlyOneArgument()
+                      .DefaultToCurrentDirectory(),
+                CommonOptions.HelpOption(),
+                Create.Command("add",
+                               ".NET Add project(s) to a solution file Command",
+                               Accept.ExactlyOneArgument()
+                                     .With(name: "SLN_FILE"),
+                               CommonOptions.HelpOption()),
+                Create.Command("list",
+                               "List all projects in the solution.",
+                               Accept.ExactlyOneArgument()
+                                     .With(name: "SLN_FILE"),
+                               CommonOptions.HelpOption()),
+                Create.Command("remove",
+                               "Remove the specified project(s) from the solution. The project is not impacted."));
     }
 }

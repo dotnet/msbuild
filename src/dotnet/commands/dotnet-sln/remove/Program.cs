@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public RemoveProjectFromSolutionCommand(AppliedOption appliedCommand)
+        public RemoveProjectFromSolutionCommand(AppliedOption appliedCommand, string fileOrDirectory)
         {
             if (appliedCommand == null)
             {
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             }
 
             _appliedCommand = appliedCommand;
-            _fileOrDirectory = appliedCommand.Arguments.Single();
+            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()

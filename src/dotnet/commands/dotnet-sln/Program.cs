@@ -22,9 +22,21 @@ namespace Microsoft.DotNet.Tools.Sln
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                { "add", o => new AddProjectToSolutionCommand(o) },
-                { "list", o => new ListProjectsInSolutionCommand(o) },
-                { "remove", o => new RemoveProjectFromSolutionCommand(o) }
+                ["add"] =
+                sln => new AddProjectToSolutionCommand(
+                    sln["add"],
+                    sln.Value<string>()),
+
+                ["list"] =
+                sln => new ListProjectsInSolutionCommand(
+                    sln["list"],
+                    sln.Value<string>()),
+
+                ["remove"] =
+                sln =>
+                    new RemoveProjectFromSolutionCommand(
+                        sln["remove"],
+                        sln.Value<string>())
             };
 
         public static int Run(string[] args)
