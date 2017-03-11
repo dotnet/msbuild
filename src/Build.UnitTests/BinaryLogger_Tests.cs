@@ -30,10 +30,11 @@ namespace Microsoft.Build.UnitTests
         {
             var originalTargetOutputLogging = Environment.GetEnvironmentVariable(MSBUILDTARGETOUTPUTLOGGING);
 
+            var logFilePath = $"BinaryLoggerTest{Environment.TickCount}.binlog";
+
             try
             {
                 var binaryLogger = new BinaryLogger();
-                var logFilePath = "BinaryLoggerTest.binlog";
                 binaryLogger.Parameters = logFilePath;
 
                 var mockLogger1 = new MockLogger();
@@ -49,15 +50,15 @@ namespace Microsoft.Build.UnitTests
                 // read the binary log and replay into mockLogger2
                 binaryLogReader.Replay(logFilePath);
 
+                Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
+            }
+            finally
+            {
                 if (File.Exists(logFilePath))
                 {
                     File.Delete(logFilePath);
                 }
 
-                Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
-            }
-            finally
-            {
                 Environment.SetEnvironmentVariable(MSBUILDTARGETOUTPUTLOGGING, originalTargetOutputLogging);
             }
         }
