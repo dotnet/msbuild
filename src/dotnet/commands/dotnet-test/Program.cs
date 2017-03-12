@@ -34,8 +34,6 @@ namespace Microsoft.DotNet.Tools.Test
 
             var result = parser.ParseFrom("dotnet test", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             var parsedTest = result["dotnet"]["test"];

@@ -29,8 +29,6 @@ namespace Microsoft.DotNet.Tools.Cache
 
             var result = parser.ParseFrom("dotnet cache", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             var appliedBuildOptions = result["dotnet"]["cache"];

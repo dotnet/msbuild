@@ -29,8 +29,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = command.Parse("dotnet add reference my.csproj");
 
-            output.WriteLine(result.Diagram());
-
             result["dotnet"]["add"]
                 .Arguments
                 .Should()
@@ -44,8 +42,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var command = Parser.Instance;
 
             var result = command.Parse("dotnet add reference");
-
-            output.WriteLine(result.Diagram());
 
             result
                 .Errors

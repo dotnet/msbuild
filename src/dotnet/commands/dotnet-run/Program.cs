@@ -17,8 +17,6 @@ namespace Microsoft.DotNet.Tools.Run
 
             var result = parser.ParseFrom("dotnet run", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             return result["dotnet"]["run"].Value<RunCommand>();

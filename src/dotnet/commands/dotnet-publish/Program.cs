@@ -27,8 +27,6 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var result = parser.ParseFrom("dotnet publish", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             msbuildArgs.Add("/t:Publish");

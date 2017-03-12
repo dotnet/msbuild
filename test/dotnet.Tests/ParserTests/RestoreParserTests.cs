@@ -26,8 +26,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = parser.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            output.WriteLine(result.Diagram());
-
             result["dotnet"]["restore"]
                 .Arguments
                 .Should()
@@ -40,8 +38,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var parser = Parser.Instance;
 
             var result = parser.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
-
-            output.WriteLine(result.Diagram());
 
             result["dotnet"]["restore"]
                 .Arguments

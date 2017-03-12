@@ -25,8 +25,6 @@ namespace Microsoft.DotNet.Cli
 
             var result = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             var subcommandName = result.Command().Name;

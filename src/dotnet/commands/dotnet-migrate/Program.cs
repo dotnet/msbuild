@@ -20,8 +20,6 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             var result = parser.ParseFrom("dotnet migrate", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             return result["dotnet"]["migrate"].Value<MigrateCommand>();

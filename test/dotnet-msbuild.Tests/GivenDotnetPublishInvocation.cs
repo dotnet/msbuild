@@ -71,8 +71,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var result = parser.ParseFrom("dotnet publish", args);
 
-            output.WriteLine(result.Diagram());
-
             result["dotnet"]["publish"]
                 .OptionValuesToBeForwarded()
                 .Should()

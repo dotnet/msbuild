@@ -24,8 +24,6 @@ namespace Microsoft.DotNet.Tools.Pack
 
             var result = parser.ParseFrom("dotnet pack", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             var parsedPack = result["dotnet"]["pack"];

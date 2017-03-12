@@ -25,8 +25,6 @@ namespace Microsoft.DotNet.Tools.Clean
 
             var result = parser.ParseFrom("dotnet clean", args);
 
-            Reporter.Output.WriteLine(result.Diagram());
-
             result.ShowHelpIfRequested();
 
             var parsedClean = result["dotnet"]["clean"];
