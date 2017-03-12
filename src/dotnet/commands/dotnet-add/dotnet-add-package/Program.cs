@@ -20,17 +20,22 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         private readonly string _packageId;
         private readonly string _fileOrDirectory;
 
-        public AddPackageReferenceCommand(AppliedOption appliedCommand, string fileOrDirectory)
+        public AddPackageReferenceCommand(
+            AppliedOption appliedCommand,
+            string fileOrDirectory)
         {
+            if (appliedCommand == null)
+            {
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            if (fileOrDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(fileOrDirectory));
+            }
+
             _appliedCommand = appliedCommand;
             _fileOrDirectory = fileOrDirectory;
             _packageId = appliedCommand.Value<string>();
-
-            
-            if ( string.IsNullOrWhiteSpace(_packageId) || _appliedCommand.Arguments.Count > 1) 
-            { 
-                throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference); 
-            } 
         }
 
         public override int Execute()

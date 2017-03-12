@@ -20,12 +20,19 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public AddProjectToProjectReferenceCommand(AppliedOption appliedCommand, string fileOrDirectory)
+        public AddProjectToProjectReferenceCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory)
         {
             if (appliedCommand == null)
             {
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
+            if (fileOrDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(fileOrDirectory));
+            }
+
             _appliedCommand = appliedCommand;
             _fileOrDirectory = fileOrDirectory;
         }

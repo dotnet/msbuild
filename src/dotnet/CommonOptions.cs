@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -63,5 +64,25 @@ namespace Microsoft.DotNet.Cli
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+
+        public static ArgumentsRule ExistingSlnFileOrDirectoryOnly(
+            this ArgumentsRule rule) =>
+            rule
+                .ExistingFilesOnly()
+                .And(new ArgumentsRule(o =>
+                {
+                    foreach (var path in o.Arguments)
+                    {
+                        if (path.HasExtension(".sln") || 
+                        path.IsDirectory())
+                        {
+                            continue;
+                        }
+
+                        return $"Specified path '{path}' is not a directory or solution file.";
+                    }
+
+                    return null;
+                }));
     }
 }

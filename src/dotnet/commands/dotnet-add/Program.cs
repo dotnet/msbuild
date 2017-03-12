@@ -22,18 +22,15 @@ namespace Microsoft.DotNet.Tools.Add
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                {
-                    "reference",
-                    add => new AddProjectToProjectReferenceCommand(
-                        add["reference"],
-                        add.Value<string>())
-                },
-                {
-                    "package",
-                    add => new AddPackageReferenceCommand(
-                        add["package"], 
-                        add.Value<string>())
-                }
+                ["reference"] =
+                add => new AddProjectToProjectReferenceCommand(
+                    add["reference"],
+                    add.Value<string>()),
+
+                ["package"] =
+                add => new AddPackageReferenceCommand(
+                    add["package"],
+                    add.Value<string>())
             };
 
         public static int Run(string[] args)

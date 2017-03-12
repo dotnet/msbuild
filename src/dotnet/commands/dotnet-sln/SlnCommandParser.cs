@@ -12,19 +12,19 @@ namespace Microsoft.DotNet.Cli
                 "sln",
                 ".NET modify solution file command",
                 Accept.ExactlyOneArgument()
+                      .ExistingSlnFileOrDirectoryOnly()
                       .DefaultToCurrentDirectory(),
                 CommonOptions.HelpOption(),
                 Create.Command("add",
                                ".NET Add project(s) to a solution file Command",
-                               Accept.ExactlyOneArgument()
-                                     .With(name: "SLN_FILE"),
+                               Accept.OneOrMoreArguments(),
                                CommonOptions.HelpOption()),
                 Create.Command("list",
                                "List all projects in the solution.",
-                               Accept.ExactlyOneArgument()
-                                     .With(name: "SLN_FILE"),
+                               Accept.OneOrMoreArguments(),
                                CommonOptions.HelpOption()),
                 Create.Command("remove",
-                               "Remove the specified project(s) from the solution. The project is not impacted."));
+                               "Remove the specified project(s) from the solution. The project is not impacted.",
+                               Accept.OneOrMoreArguments()));
     }
 }

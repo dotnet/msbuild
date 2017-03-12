@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli
                                     CompleteCommandParser.Complete(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
-                                    Create.Option("-d", "")));
+                                    Create.Option("-d", ""),
+                                    Create.Option("--debug", "")));
     }
 }
