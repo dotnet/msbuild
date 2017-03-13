@@ -17,7 +17,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NoWarn Condition=" '$(NoWarn)' == '' ">1701;1702;1705</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
+    <DefineConstants Condition=" '$(DefineConstants)' != '' ">$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
 
 </Project>
