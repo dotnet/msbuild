@@ -32,11 +32,6 @@
       "type": "computed",
       "value": "(Framework == \"netcoreapp1.1\")"
     },
-    "sdkVersion": {
-      "type": "bind",
-      "binding": "dotnet-cli-version",
-      "replaces": "1.0.0-preview5-004445"
-    },
     "copyrightYear": {
       "type": "generated",
       "generator": "now",
