@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Cache
 
             var result = parser.ParseFrom("dotnet cache", args);
 
-            result.ShowHelpIfRequested();
+            result.ShowHelpOrErrorIfAppropriate();
 
             var appliedBuildOptions = result["dotnet"]["cache"];
 

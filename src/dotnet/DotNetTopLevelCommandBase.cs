@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
 
             var result = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            result.ShowHelpIfRequested();
+            result.ShowHelpOrErrorIfAppropriate();
 
             var subcommandName = result.Command().Name;
 

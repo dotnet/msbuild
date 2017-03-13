@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
 using Newtonsoft.Json.Linq;
+using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -23,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Command(
                     "package",
                     ".NET Add Package reference Command",
-                    Accept.ExactlyOneArgument()
+                    Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
                           .WithSuggestionsFrom(QueryNuGet),
                     CommonOptions.HelpOption(),
                     Create.Option("-v|--version",

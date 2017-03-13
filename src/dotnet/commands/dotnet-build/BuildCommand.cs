@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             var result = parser.ParseFrom("dotnet build", args);
 
-            result.ShowHelpIfRequested();
+            result.ShowHelpOrErrorIfAppropriate();
 
             var appliedBuildOptions = result["dotnet"]["build"];
 

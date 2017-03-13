@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
             var result = parser.ParseFrom("dotnet restore", args);
 
-            result.ShowHelpIfRequested();
+            result.ShowHelpOrErrorIfAppropriate();
 
             var parsedRestore = result["dotnet"]["restore"];
 

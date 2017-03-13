@@ -13,7 +13,8 @@ namespace Microsoft.DotNet.Cli
                 ".NET modify solution file command",
                 Accept.ExactlyOneArgument()
                       .ExistingSlnFileOrDirectoryOnly()
-                      .DefaultToCurrentDirectory(),
+                      .DefaultToCurrentDirectory()
+                      .With(name: "SLN_FILE" ),
                 CommonOptions.HelpOption(),
                 Create.Command("add",
                                ".NET Add project(s) to a solution file Command",
@@ -21,7 +22,6 @@ namespace Microsoft.DotNet.Cli
                                CommonOptions.HelpOption()),
                 Create.Command("list",
                                "List all projects in the solution.",
-                               Accept.OneOrMoreArguments(),
                                CommonOptions.HelpOption()),
                 Create.Command("remove",
                                "Remove the specified project(s) from the solution. The project is not impacted.",
