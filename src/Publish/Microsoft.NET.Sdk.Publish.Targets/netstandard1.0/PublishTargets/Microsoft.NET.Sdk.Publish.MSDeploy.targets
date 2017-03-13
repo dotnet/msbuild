@@ -90,7 +90,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CreateProperty>
 
     <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
-    <NormalizeServiceUrl ServiceUrl="$(MsDeployServiceUrl)" UseWMSVC="$(_UseWMSVC)" UseRemoteAgent="$(_UseRemoteAgent)" Condition="$(NormalizePublishSettings) == 'true'" >
+    <NormalizeServiceUrl 
+      ServiceUrl="$(MsDeployServiceUrl)" 
+      UseWMSVC="$(_UseWMSVC)" 
+      UseRemoteAgent="$(_UseRemoteAgent)" 
+      SiteName="$(DeployIisAppPath)"
+      Condition="$(NormalizePublishSettings) == 'true'" >
       <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
     </NormalizeServiceUrl>
 

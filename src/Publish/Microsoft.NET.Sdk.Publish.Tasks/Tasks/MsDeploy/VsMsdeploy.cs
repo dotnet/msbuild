@@ -612,9 +612,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         private int m_retryAttempts = -1;
         private int m_retryInterval = -1;
 
-        //task of VSMSDeploy is used by package and publishing(transport) targets both, so we create a field to identify
-        //we are in package or publishing. We probably should create a separate task class for "publishing" 
-        bool _invokedByPublish = false; 
         bool _allowUntrustedCert;
         bool _skipExtraFilesOnServer=false;
 
@@ -659,12 +656,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             get { return _skipExtraFilesOnServer;}
             set { _skipExtraFilesOnServer = value; }
-        }
-
-        public bool InvokedByPublish
-        {
-            get { return _invokedByPublish; }
-            set { _invokedByPublish = value; }
         }
 
         public bool WhatIf
@@ -803,18 +794,33 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public Framework.ITaskItem[] AdditionalDestinationProviderOptions {get;set;}
 
-        public bool BuildingInsideVisualStudio
-        {
-            get;
-            set;
-        }
-
         public string MSDeployVersionsToTry
         {
             get;
             set;
         }
-        
+
+        private bool AllowUntrustedCertCallback(object sp,
+                System.Security.Cryptography.X509Certificates.X509Certificate cert,
+                System.Security.Cryptography.X509Certificates.X509Chain chain,
+                System.Net.Security.SslPolicyErrors problem)
+        {
+            if (AllowUntrustedCertificate)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        private void SetupPublishRelatedProperties(ref VSMSDeployObject dest)
+        {
+            if (AllowUntrustedCertificate) 
+            {
+                System.Net.ServicePointManager.ServerCertificateValidationCallback
+                         += new System.Net.Security.RemoteCertificateValidationCallback(AllowUntrustedCertCallback);
+            }
+        }
+
         public override bool Execute()
         {
             Result = false;
@@ -880,6 +886,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             dest.UserAgent = this.UserAgent;
 
+            SetupPublishRelatedProperties(ref dest);
+
             // change to use when we have MSDeploy implement the dispose method 
             BaseMSDeployDriver driver = BaseMSDeployDriver.CreateBaseMSDeployDriver(src, dest, this);
             m_msdeployDriver = driver;
@@ -897,7 +905,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 }
 
                 System.Type eType = e.GetType();
-                if (MsDeploy.Utility.IsType( eType, MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentCanceledException")))
+                if (MsDeploy.Utility.IsType(eType, MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentCanceledException")))
                 {
                     Log.LogMessageFromText(Resources.VSMSDEPLOY_Canceled, Microsoft.Build.Framework.MessageImportance.High);
                 }
@@ -911,6 +919,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     if (!driver.IsCancelOperation)
                         Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_FailedWithException, e.Message));
                 }
+            }
+            finally
+            {
+                if (AllowUntrustedCertificate)
+                    System.Net.ServicePointManager.ServerCertificateValidationCallback
+                        -= new System.Net.Security.RemoteCertificateValidationCallback(AllowUntrustedCertCallback);
             }
 
             Tasks.MsDeploy.Utility.MsDeployEndOfExecuteMessage(Result, dest.Provider, dest.Root, Log);

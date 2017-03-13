@@ -18,6 +18,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     {
         private string _serviceUrl = string.Empty;
         private string _resultUrl = string.Empty;
+        private string _siteName = string.Empty;
         private bool _useWMSVC = false;
         private bool _useRemoteAgent = false;
 
@@ -42,6 +43,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             get { return this._useRemoteAgent; }
             set { this._useRemoteAgent = value; }
+        }
+
+        [Required]
+        public string SiteName
+        {
+            get { return this._siteName; }
+            set { this._siteName = value; }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "This is interface with the Msbuild method, all argument is basically pass by string")]
@@ -143,6 +151,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (serviceUrl.IndexOf(serviceUriBuilder.Scheme, StringComparison.OrdinalIgnoreCase) == -1)
             {
                 serviceUriBuilder.Scheme = https;
+            }
+
+            if (string.IsNullOrEmpty(serviceUriBuilder.Query))
+            {
+                string[] fragments = SiteName.Trim().Split(new char[] { '/', '\\' });
+                serviceUriBuilder.Query = "site=" + fragments[0];
             }
 
             return serviceUriBuilder.Uri.AbsoluteUri;
