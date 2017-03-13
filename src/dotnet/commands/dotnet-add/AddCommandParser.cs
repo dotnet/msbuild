@@ -18,12 +18,14 @@ namespace Microsoft.DotNet.Cli
                 "add",
                 ".NET Add Command",
                 Accept.ExactlyOneArgument()
+                      .ExistingFilesOnly()
                       .DefaultToCurrentDirectory(),
                 Create.Command(
                     "package",
                     ".NET Add Package reference Command",
                     Accept.ExactlyOneArgument()
-                          .WithSuggestionsFrom(QueryNuGet), CommonOptions.HelpOption(),
+                          .WithSuggestionsFrom(QueryNuGet),
+                    CommonOptions.HelpOption(),
                     Create.Option("-v|--version",
                                   "Version for the package to be added.",
                                   Accept.ExactlyOneArgument()

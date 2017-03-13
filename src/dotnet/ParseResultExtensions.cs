@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
 
         public static void ShowHelpIfRequested(this ParseResult parseResult)
         {
-            if (parseResult.HasOption("help"))
+            if (parseResult.AppliedCommand().HasOption("help"))
             {
                 // NOTE: this is a temporary stage in refactoring toward the ClicCommandLineParser being used at the CLI entry point. 
                 throw new HelpException(parseResult.Command().HelpView());
