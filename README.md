@@ -20,7 +20,7 @@ msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderPro
 ````
 or
 ```
-dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
 ```
 
  - MSDeploy Publish with a profile:
