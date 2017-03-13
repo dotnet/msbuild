@@ -353,6 +353,8 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion46Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion47Path { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
         public string Path { get { throw null; } }
         public override bool Execute() { throw null; }
     }
