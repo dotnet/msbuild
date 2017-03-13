@@ -13,11 +13,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1701;1702;1705</NoWarn>
+    <WarningLevel Condition=" '$(WarningLevel)' == '' ">4</WarningLevel>
+    <NoWarn Condition=" '$(NoWarn)' == '' ">1701;1702;1705</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
   </PropertyGroup>
 
 </Project>
