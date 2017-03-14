@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if !RUNTIME_TYPE_NETCORE
+#if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
 

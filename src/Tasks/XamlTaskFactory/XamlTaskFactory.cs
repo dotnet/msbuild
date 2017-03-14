@@ -13,7 +13,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-#if !RUNTIME_TYPE_NETCORE
+#if FEATURE_XAMLTASKFACTORY
 
     using Microsoft.Build.Tasks.Xaml;
     using System.CodeDom.Compiler;
