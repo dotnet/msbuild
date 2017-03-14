@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli
             }
             catch (HelpException e)
             {
-                Reporter.Output.Write(e.Message);
+                Reporter.Output.WriteLine(e.Message);
                 return 0;
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (!e.ShouldBeDisplayedAsError())
             {
-                Reporter.Output.WriteLine(e.ToString().Red().Bold());
+                Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
                 return 1;
             }

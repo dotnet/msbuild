@@ -18,10 +18,11 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 Usage: dotnet sln <SLN_FILE> list [options]
 
 Arguments:
-  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>      Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h|--help  Show help information";
+  -h, --help                               Show help information
+";
 
         [Theory]
         [InlineData("--help")]

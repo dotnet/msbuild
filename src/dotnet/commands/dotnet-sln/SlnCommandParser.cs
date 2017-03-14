@@ -25,13 +25,14 @@ namespace Microsoft.DotNet.Cli
                                            description: LocalizableStrings.AddSubcommandHelpText),
                                CommonOptions.HelpOption()),
                 Create.Command("list",
-                               "List all projects in the solution.",
+                               ".NET List project(s) in a solution file Command",
                                CommonOptions.HelpOption()),
                 Create.Command("remove",
-                               "Remove the specified project(s) from the solution. The project is not impacted.",
-                               Accept.OneOrMoreArguments()
+                               ".NET Remove project(s) from a solution file Command",
+                               Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove)
                                      .With(name: "args",
                                            description: LocalizableStrings.RemoveSubcommandHelpText),
                                CommonOptions.HelpOption()));
+
     }
 }
