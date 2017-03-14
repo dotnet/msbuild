@@ -17,10 +17,7 @@ namespace Microsoft.DotNet.Cli
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
                            Create.Command("reference", "Command to list project to project references",
-                                          Accept.ExactlyOneArgument()
-                                                .With(name: "PROJECT",
-                                                      description:
-                                                      "The project file to operate on. If a file is not specified, the command will search the current directory for one."),
+                                          Accept.ExactlyOneArgument(),
                                           CommonOptions.HelpOption()));
     }
 }
