@@ -14,7 +14,11 @@ namespace Microsoft.DotNet.Cli
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
-            if (parseResult.AppliedCommand().HasOption("help"))
+            var appliedCommand = parseResult.AppliedCommand();
+
+            if (appliedCommand.HasOption("help") ||
+                appliedCommand.Arguments.Contains("-?") ||
+                appliedCommand.Arguments.Contains("/?"))
             {
                 // NOTE: this is a temporary stage in refactoring toward the ClicCommandLineParser being used at the CLI entry point. 
                 throw new HelpException(parseResult.Command().HelpView());
