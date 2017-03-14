@@ -186,15 +186,13 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         {
-            Paths paths = new Paths(environmentSettings);
-
             string codebase = typeof(Program).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
 
-            string packages = dir.CombinePaths("..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
-            string templates = dir.CombinePaths("..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
+            string packages = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
+            string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
             installer.InstallPackages(new[] { packages });
             installer.InstallPackages(new[] { templates });
         }

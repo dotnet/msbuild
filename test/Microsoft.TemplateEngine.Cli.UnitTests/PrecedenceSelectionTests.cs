@@ -36,9 +36,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
 
-            string harnessPath = dir.CombinePaths("..", "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness");
-            string testScript = dir.CombinePaths(script);
-            string outputPath = Directory.GetCurrentDirectory().CombinePaths("temp");
+            string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness");
+            string testScript = Path.Combine(dir, script);
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "temp");
 
             Process p = Process.Start(new ProcessStartInfo
             {
