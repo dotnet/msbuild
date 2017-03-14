@@ -1,2 +1,1 @@
-%DN3%\..\artifacts\templates\*.ItemTemplates.*.nupkg
-%DN3%\..\artifacts\templates\*.1.x.*.nupkg
+%DN3%\..\template_feed\

@@ -193,8 +193,8 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
 
-            string packages = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
-            string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "templates") + Path.DirectorySeparatorChar + "*.nupkg";
+            string packages = dir.CombinePaths("..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
+            string templates = dir.CombinePaths("..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
             installer.InstallPackages(new[] { packages });
             installer.InstallPackages(new[] { templates });
         }
