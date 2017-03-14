@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.HelpOption(),
                 Create.Command("add",
                                ".NET Add project(s) to a solution file Command",
-                               Accept.OneOrMoreArguments()
+                               Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd)
                                      .With(name: "args",
                                            description: LocalizableStrings.AddSubcommandHelpText),
                                CommonOptions.HelpOption()),

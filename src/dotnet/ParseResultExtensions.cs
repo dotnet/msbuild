@@ -27,8 +27,9 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.Errors.Any())
             {
                 throw new CommandParsingException(
-                    string.Join(Environment.NewLine,
-                                parseResult.Errors.Select(e => e.Message)));
+                    message: string.Join(Environment.NewLine,
+                                parseResult.Errors.Select(e => e.Message)),
+                    helpText: parseResult?.Command()?.HelpView());
             }
         }
     }

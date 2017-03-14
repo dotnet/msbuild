@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -84,9 +85,15 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose() ? 
-                        e.ToString().Red().Bold() : 
-                        e.Message.Red().Bold());
+                Reporter.Error.WriteLine(CommandContext.IsVerbose() 
+                    ? e.ToString().Red().Bold() 
+                    : e.Message.Red().Bold());
+
+                var commandParsingException = e as CommandParsingException;
+                if (commandParsingException != null)
+                {
+                    Reporter.Output.WriteLine(commandParsingException.HelpText);
+                }
 
                 return 1;
             }

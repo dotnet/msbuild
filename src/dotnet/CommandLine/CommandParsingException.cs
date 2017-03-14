@@ -10,8 +10,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
     {
         private readonly bool _isRequireSubCommandMissing;
 
-        public CommandParsingException(string message) : base(message)
+        public CommandParsingException(
+            string message, 
+            string helpText = null) : base(message)
         {
+            HelpText = helpText ?? "";
             Data.Add("CLI_User_Displayed_Exception", true);
         }
 
@@ -26,6 +29,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
         }
 
         public CommandLineApplication Command { get; }
+
+        public string HelpText { get; } = "";
 
         public override string Message
         {
