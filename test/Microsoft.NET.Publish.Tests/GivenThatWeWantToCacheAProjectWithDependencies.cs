@@ -50,6 +50,11 @@ namespace Microsoft.NET.Publish.Tests
                     // microsoft.netcore.coredistools only has assets for osx.10.10
                     _runtimeRid = "osx.10.10-x64";
                 }
+                else if (rid.Contains("ubuntu"))
+                {
+                    // microsoft.netcore.coredistools only has assets for ubuntu.14.04-x64
+                    _runtimeRid = "ubuntu.14.04-x64";
+                }
                 else
                 {
                     _runtimeRid = rid;                    
