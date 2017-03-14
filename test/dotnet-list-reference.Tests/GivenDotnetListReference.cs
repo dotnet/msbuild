@@ -18,10 +18,11 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 Usage: dotnet list <PROJECT> reference [options]
 
 Arguments:
-  <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>       The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h|--help  Show help information";
+  -h, --help                               Show help information
+";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";

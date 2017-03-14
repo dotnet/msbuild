@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.CommandLine;
+using LocalizableStrings = Microsoft.DotNet.Tools.List.ProjectToProjectReferences.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -16,7 +17,8 @@ namespace Microsoft.DotNet.Cli
                                        "The project file to operate on. If a file is not specified, the command will search the current directory for one.")
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
-                           Create.Command("reference", "Command to list project to project references",
+                           Create.Command("reference",
+                                          LocalizableStrings.AppFullName,
                                           Accept.ExactlyOneArgument(),
                                           CommonOptions.HelpOption()));
     }
