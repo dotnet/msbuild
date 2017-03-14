@@ -13,7 +13,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-#if !RUNTIME_TYPE_NETCORE
+#if FEATURE_CODETASKFACTORY
     using System.CodeDom.Compiler;
     using System.CodeDom;
     using System.Collections.Concurrent;

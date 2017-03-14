@@ -12,7 +12,6 @@ using System.Runtime.Loader;
 #endif
 using Microsoft.Build.Shared;
 
-
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -119,7 +118,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #endif
 
                         }
-#else
+#else // !FEATURE_APPDOMAIN
                         AssemblyNameExtension taskAssemblyName = new AssemblyNameExtension(AssemblyLoadContext.GetAssemblyName(_taskAssemblyFile));
                         AssemblyNameExtension argAssemblyName = new AssemblyNameExtension(assemblyName);
                         if (taskAssemblyName.Equals(argAssemblyName))
