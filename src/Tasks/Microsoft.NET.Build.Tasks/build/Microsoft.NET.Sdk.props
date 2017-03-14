@@ -84,7 +84,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
-    <ResolveNuGetPackages >false</ResolveNuGetPackages>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
 
     <!-- Skip import of Microsoft.NuGet.props and Microsoft.NuGet.targets -->
     <SkipImportNuGetProps>true</SkipImportNuGetProps>

@@ -15,7 +15,6 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToSetPropertiesInDirectoryBuildProps : SdkTest
     {
-
         [Fact]
         public void The_default_configuration_can_be_set_to_release()
         {
