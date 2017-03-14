@@ -23,7 +23,7 @@ or
 dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
 ```
 
- - MSDeploy Publish with a profile:
+ - MSDeploy Publish with a profile and password:
 ```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
 ```
@@ -31,7 +31,7 @@ msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployP
 
  - MsDeploy Package Publish with a profile:
 ```
-msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName>
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployPackageProfileName>
 ```
 (Not available on DotNet Core yet)
 
