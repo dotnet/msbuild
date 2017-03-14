@@ -7,18 +7,13 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class PublishCommand : TestCommand
+    public sealed class PublishCommand : DotnetCommand
     {
         private string _framework;
         private string _output;
         private string _runtime;
         private List<string> _profileFilterProject = new List<string>();
-
-        public PublishCommand()
-            : base("dotnet")
-        {
-        }
-
+        
         public PublishCommand WithFramework(string framework)
         {
             _framework = framework;

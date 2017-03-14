@@ -5,13 +5,8 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class HelpCommand : TestCommand
+    public sealed class HelpCommand : DotnetCommand
     {
-        public HelpCommand()
-            : base("dotnet")
-        {
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"help {args}";

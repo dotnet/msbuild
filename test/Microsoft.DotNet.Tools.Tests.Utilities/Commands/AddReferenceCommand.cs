@@ -5,14 +5,9 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class AddReferenceCommand : TestCommand
+    public sealed class AddReferenceCommand : DotnetCommand
     {
         private string _projectName = null;
-
-        public AddReferenceCommand()
-            : base("dotnet")
-        {
-        }
 
         public override CommandResult Execute(string args = "")
         {

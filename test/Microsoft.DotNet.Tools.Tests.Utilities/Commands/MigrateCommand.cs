@@ -5,14 +5,8 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class MigrateCommand : TestCommand
+    public sealed class MigrateCommand : DotnetCommand
     {
-        public MigrateCommand()
-            : base("dotnet")
-        {
-
-        }
-
         public override CommandResult Execute(string args="")
         {
             args = $"migrate {args}";

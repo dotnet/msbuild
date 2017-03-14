@@ -5,13 +5,8 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class MSBuildCommand : TestCommand
+    public sealed class MSBuildCommand : DotnetCommand
     {
-        public MSBuildCommand()
-            : base("dotnet")
-        {
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"msbuild {args}";

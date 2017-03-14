@@ -7,13 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public class DependencyToolInvokerCommand : TestCommand
+    public class DependencyToolInvokerCommand : DotnetCommand
     {
-        public DependencyToolInvokerCommand()
-            : base("dotnet")
-        {
-        }
-
         public CommandResult Execute(string commandName, string framework, string additionalArgs)
         {
             var args = $"dependency-tool-invoker {commandName} --framework {framework} {additionalArgs}";
