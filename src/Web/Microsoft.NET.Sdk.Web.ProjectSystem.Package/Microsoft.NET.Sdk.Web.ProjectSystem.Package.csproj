@@ -10,7 +10,6 @@
     <IntermediateOutputPath>..\..\obj\Debug</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <OutputPath>..\..\bin\Release\</OutputPath>
     <IntermediateOutputPath>..\..\obj\Release</IntermediateOutputPath>
   </PropertyGroup>
