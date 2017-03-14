@@ -178,7 +178,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         _GenerateCrossgenProj
-    Generates the project used to restore netcoreapp correspoding to FX_Version
+    Generates the project used to restore netcoreapp corresponding to RuntimeFrameworkVersion
     ============================================================
     -->
   <Target Name="_GenerateCrossgenProj"
@@ -192,7 +192,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
       <TargetFramework>$(_TFM)</TargetFramework>
       <RuntimeIdentifier>$(RuntimeIdentifier)</RuntimeIdentifier>
-      <RuntimeFrameworkVersion Condition="'$(FX_Version)' != ''">$(FX_Version)</RuntimeFrameworkVersion>
+      <RuntimeFrameworkVersion>$(RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 </Project>        
 
