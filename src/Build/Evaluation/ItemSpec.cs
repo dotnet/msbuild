@@ -261,10 +261,19 @@ namespace Microsoft.Build.Evaluation
         public ExpressionShredder.ItemExpressionCapture Capture { get; }
 
         private readonly ItemSpec<P, I> _containingItemSpec;
-        private IList<ValueFragment> _itemValueFragments;
         private Expander<P, I> _expander;
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec) 
+        private IList<ValueFragment> _referencedItems;
+        public IList<ValueFragment> ReferencedItems
+        {
+            get
+            {
+                InitReferencedItemsIfNecessary();
+                return _referencedItems;
+            }
+        }
+
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
             : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
         {
             Capture = capture;
@@ -275,19 +284,29 @@ namespace Microsoft.Build.Evaluation
 
         public override int MatchCount(string itemToMatch)
         {
+
+            return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
+        }
+
+        private void InitReferencedItemsIfNecessary()
+        {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
-            if (_itemValueFragments == null || _expander != _containingItemSpec.Expander)
+            if (_referencedItems == null || _expander != _containingItemSpec.Expander)
             {
                 _expander = _containingItemSpec.Expander;
 
                 IList<Tuple<string, I>> itemsFromCapture;
                 bool throwaway;
-                _expander.ExpandExpressionCapture(Capture, _containingItemSpec.ItemSpecLocation, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, out itemsFromCapture);
-                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+                _expander.ExpandExpressionCapture(
+                    Capture,
+                    _containingItemSpec.ItemSpecLocation,
+                    ExpanderOptions.ExpandItems,
+                    false /* do not include null expansion results */,
+                    out throwaway,
+                    out itemsFromCapture);
+                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
             }
-
-            return _itemValueFragments.Count(v => v.MatchCount(itemToMatch) > 0);
         }
     }
 }
