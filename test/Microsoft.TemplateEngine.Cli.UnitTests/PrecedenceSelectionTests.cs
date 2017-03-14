@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -35,9 +36,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
 
-            string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness");
-            string testScript = Path.Combine(dir, script);
-            string outputPath = @"c:\temp";
+            string harnessPath = dir.CombinePaths("..", "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness");
+            string testScript = dir.CombinePaths(script);
+            string outputPath = Directory.GetCurrentDirectory().CombinePaths("temp");
 
             Process p = Process.Start(new ProcessStartInfo
             {
