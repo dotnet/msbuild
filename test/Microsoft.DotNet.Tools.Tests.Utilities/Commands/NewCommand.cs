@@ -5,14 +5,8 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class NewCommand : TestCommand
+    public sealed class NewCommand : DotnetCommand
     {
-        public NewCommand()
-            : base("dotnet")
-        {
-
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"new {args}";

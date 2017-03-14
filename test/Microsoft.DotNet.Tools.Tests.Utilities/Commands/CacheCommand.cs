@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class CacheCommand : TestCommand
+    public sealed class CacheCommand : DotnetCommand
     {
         private List<string> _profileProject = new List<string>();
         private string _framework;
@@ -15,11 +15,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _runtime;
         private string _frameworkVersion;
         private string _intermediateWorkingDirectory;
-
-        public CacheCommand()
-            : base("dotnet")
-        {
-        }
 
         public CacheCommand WithEntries(string profileProject)
         {

@@ -6,7 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class PackCommand : TestCommand
+    public sealed class PackCommand : DotnetCommand
     {
         private string _projectPath;
         private string _outputDirectory;
@@ -90,7 +90,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string configuration="", 
             string versionSuffix="",
             bool serviceable = false)
-            : base("dotnet")
         {
             _projectPath = projectPath;
             _outputDirectory = output;

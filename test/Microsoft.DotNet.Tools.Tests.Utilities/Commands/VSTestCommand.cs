@@ -5,13 +5,8 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class VSTestCommand: TestCommand
+    public sealed class VSTestCommand: DotnetCommand
     {
-        public VSTestCommand()
-            :base("dotnet")
-        {
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"vstest {args}";

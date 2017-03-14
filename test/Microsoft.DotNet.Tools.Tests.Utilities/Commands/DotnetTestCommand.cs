@@ -5,13 +5,9 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public class DotnetTestCommand : TestCommand
+    public class DotnetTestCommand : DotnetCommand
     {
         private string _runtime;
-
-        public DotnetTestCommand() : base("dotnet")
-        {
-        }
 
         public override CommandResult Execute(string args = "")
         {
