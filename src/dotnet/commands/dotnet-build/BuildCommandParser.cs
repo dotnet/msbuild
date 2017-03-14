@@ -13,7 +13,10 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "build",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments(),
+                Accept.ZeroOrMoreArguments()
+                      .With(name: "PROJECT",
+                            description:
+                            "The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file."),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",

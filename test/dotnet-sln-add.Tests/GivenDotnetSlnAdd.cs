@@ -17,16 +17,14 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
     {
         private string HelpText = @".NET Add project(s) to a solution file Command
 
-Usage: dotnet sln <SLN_FILE> add [options] [args]
+Usage: dotnet sln <SLN_FILE> add [options] <args>
 
 Arguments:
-  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>      Solution file to operate on. If not specified, the command will search the current directory for one.
+  <args>          Add one or more specified projects to the solution.
 
 Options:
-  -h|--help  Show help information
-
-Additional Arguments:
- Add one or more specified projects to the solution.
+  -h, --help                               Show help information
 ";
         private ITestOutputHelper _output;
 

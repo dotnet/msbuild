@@ -20,12 +20,16 @@ namespace Microsoft.DotNet.Cli
                 ".NET Add Command",
                 Accept.ExactlyOneArgument()
                       .ExistingFilesOnly()
-                      .DefaultToCurrentDirectory(),
+                      .DefaultToCurrentDirectory()
+                      .With(name: "PROJECT",
+                            description: "The project file to operate on. If a file is not specified, the command will search the current directory for one."),
                 Create.Command(
                     "package",
                     ".NET Add Package reference Command",
                     Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
-                          .WithSuggestionsFrom(QueryNuGet),
+                          .WithSuggestionsFrom(QueryNuGet)
+                          .With(name: "PACKAGE_NAME",
+                                description: "Package references to add"),
                     CommonOptions.HelpOption(),
                     Create.Option("-v|--version",
                                   "Version for the package to be added.",
@@ -52,7 +56,7 @@ namespace Microsoft.DotNet.Cli
                 Create.Command(
                     "reference",
                     "Command to add project to project reference",
-                    Accept.OneOrMoreArguments(), 
+                    Accept.OneOrMoreArguments(),
                     CommonOptions.HelpOption(),
                     Create.Option("-f|--framework",
                                   "Add reference only when targetting a specific framework",

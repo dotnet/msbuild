@@ -11,7 +11,9 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                   "test",
                   LocalizableStrings.AppFullName,
-                  Accept.ZeroOrMoreArguments(),
+                  Accept.ZeroOrMoreArguments()
+                        .With(name: LocalizableStrings.CmdArgProject,
+                              description: LocalizableStrings.CmdArgDescription),
                   CommonOptions.HelpOption(),
                   Create.Option(
                         "-s|--settings",
