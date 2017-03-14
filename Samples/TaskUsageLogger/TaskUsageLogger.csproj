@@ -23,20 +23,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\XMakeBuildEngine\Microsoft.Build.csproj">
-      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
-      <Name>Microsoft.Build</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="TaskUsageLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="project.json" />
