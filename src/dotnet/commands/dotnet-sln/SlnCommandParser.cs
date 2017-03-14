@@ -12,7 +12,6 @@ namespace Microsoft.DotNet.Cli
                 "sln",
                 ".NET modify solution file command",
                 Accept.ExactlyOneArgument()
-                      .ExistingSlnFileOrDirectoryOnly()
                       .DefaultToCurrentDirectory()
                       .With(name: "SLN_FILE"),
                 CommonOptions.HelpOption(),

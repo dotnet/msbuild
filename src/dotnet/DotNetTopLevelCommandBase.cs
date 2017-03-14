@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -29,13 +30,17 @@ namespace Microsoft.DotNet.Cli
 
             var subcommandName = result.Command().Name;
 
-            var create = SubCommands[subcommandName];
-
-            var command = create(result["dotnet"][CommandName]);
-
             try
             {
+                var create = SubCommands[subcommandName];
+
+                var command = create(result["dotnet"][CommandName]);
+
                 return command.Execute();
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw new GracefulException(CommonLocalizableStrings.RequiredCommandNotPassed);
             }
             catch (GracefulException e)
             {

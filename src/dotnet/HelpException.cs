@@ -9,15 +9,9 @@ namespace Microsoft.DotNet.Cli
     [Obsolete("This is intended to facilitate refactoring during parser replacement and should not be used after that work is done.")]
     public class HelpException : Exception
     {
-        public HelpException(
-            string message,
-            bool isError = false) : base(message)
+        public HelpException(string message) : base(message)
         {
-            IsError = isError;
-
             Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, true);
         }
-
-        public bool IsError { get; }
     }
 }

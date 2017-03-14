@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli
             catch (HelpException e)
             {
                 Reporter.Output.Write(e.Message);
-                return e.IsError ? 1 : 0;
+                return 0;
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
