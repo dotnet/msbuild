@@ -30,6 +30,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
 
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
+
 namespace Microsoft.Build.Evaluation
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
@@ -1128,8 +1130,8 @@ namespace Microsoft.Build.Evaluation
 
         private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
         {
-            var includeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
-            var excludeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
+            var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
+            var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
 
             var excludeSet =
                 new Lazy<IEnumerable<string>>(
@@ -1344,7 +1346,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // expand the properties
-            var expandedItemSpec = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
+            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, expandProperties: true);
             var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
 
             // Result is inconclusive if properties are present
@@ -1356,7 +1358,7 @@ namespace Microsoft.Build.Evaluation
             return numberOfMatches;
         }
 
-        private int ItemMatchesInItemSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
+        private int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
         {
             provenance = Provenance.Undefined;
 
