@@ -15,7 +15,7 @@ Use the new `/bl` switch to enable the binary logger:
 > msbuild.exe MySolution.sln /bl
 ```
 
-By default the binary log file is `msbuild.binlog` and it's written to the current directory. To specify a custom log file name and/or path, pass it after a colon:
+By default the binary log file is named `msbuild.binlog` and it is written to the current directory. To specify a custom log file name and/or path, pass it after a colon:
 ```
 > msbuild.exe MySolution.sln /bl:out.binlog
 ```
