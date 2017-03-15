@@ -1499,33 +1499,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ====================================================================================
-                                        _GetProjectReferenceTargetFrameworkProperties
+                                        _GetProjectReferencesThatCrossTarget
 
-    Builds the GetTargetFrameworkProperties target of all existent project references,
-    passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
-    SetTargetFramework metadata of the project reference to the value that is returned.
+    Builds the IsCrossTargetingProject target of all existent project references,
+    removing any TargetFramework and RuntimeIdentifier properties that are set as
+    global properties in this project.
 
-    This allows a cross-targeting project to select how it should be configured to
-    build against the most appropriate target for the referring target framework.
+    This allows a cross-targeting project to indicate that it should be asked
+    for a compatible TargetFramework before building.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties"
-          Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
-    <!--
-      Honor SkipGetTargetFrameworkProperties=true metadata on project references
-      to mean that the project reference is known not to target multiple frameworks
-      and the mechanism here for selecting the best one can be skipped as an optimization.
-
-      We give this treatment to .vcxproj by default since no .vcxproj can target more
-      than one framework.
-   -->
-   <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and '%(Extension)' == '.vcxproj'">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
-      </_MSBuildProjectReferenceExistent>
-   </ItemGroup>
-
+  <Target Name="_GetProjectReferencesThatCrossTarget">
     <!--
        Allow project references to specify which target framework properties to set and their values
        without consulting the referenced project. This has two use cases:
@@ -1544,6 +1529,47 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <!--
+      Honor SkipGetTargetFrameworkProperties=true metadata on project references
+      to mean that the project reference is known not to target multiple frameworks
+      and the mechanism here for selecting the best one can be skipped as an optimization.
+    -->
+    <MSBuild
+        Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="IsCrossTargetingProject"
+        BuildInParallel="$(BuildInParallel)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+
+      <Output TaskParameter="TargetOutputs" ItemName="_MSBuildProjectReferenceCrossTargetingResults" />
+    </MSBuild>
+
+    <ItemGroup>
+      <_MSBuildProjectReferenceCrossTargeting Include="@(_MSBuildProjectReferenceCrossTargetingResults->'%(OriginalItemSpec)')"
+                                              Condition="'%(_MSBuildProjectReferenceCrossTargetingResults.Identity)' == 'true'" />
+      <_MSBuildProjectReferenceNoCrossTargeting Include="@(_MSBuildProjectReferenceExistent)"
+                                                Exclude="@(_MSBuildProjectReferenceCrossTargeting)" />
+
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ====================================================================================
+                                        _GetProjectReferenceTargetFrameworkProperties
+
+    Builds the GetTargetFrameworkProperties target of all existent project references,
+    passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
+    SetTargetFramework metadata of the project reference to the value that is returned.
+
+    This allows a cross-targeting project to select how it should be configured to
+    build against the most appropriate target for the referring target framework.
+
+    ======================================================================================
+  -->
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties"
+          DependsOnTargets="_GetProjectReferencesThatCrossTarget">
+    <!--
       Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
       TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
       has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
@@ -1555,7 +1581,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <MSBuild
-        Projects="%(_MSBuildProjectReferenceExistent.Identity)"
+        Projects="@(_MSBuildProjectReferenceCrossTargeting)"
         Targets="GetTargetFrameworkProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
@@ -1563,30 +1589,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
 
-      <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
 
     <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
-        <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
+      <!-- Build an item that has Identity matching _MSBuildProjectReferenceExistent and metadata for properties to set. -->
+      <_ProjectReferencesWithTargetFrameworkProperties Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')" />
+      <_ProjectReferencesWithTargetFrameworkProperties Include="@(_MSBuildProjectReferenceNoCrossTargeting)">
+        <HasSingleTargetFramework>true</HasSingleTargetFramework>
+        <IsRidAgnostic>true</IsRidAgnostic>
+      </_ProjectReferencesWithTargetFrameworkProperties>
 
-        <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework;ProjectHasSingleTargetFramework</UndefineProperties>
-        <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove TargetFramework -->
-        <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectHasSingleTargetFramework</UndefineProperties>
+      <!-- Set the project's returned TargetFramework -->
+      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' != 'true'">
+        <SetTargetFramework>@(_ProjectReferencesWithTargetFrameworkProperties->'%(DesiredTargetFrameworkProperties)')</SetTargetFramework>
+      </_MSBuildProjectReferenceExistent>
+
+      <!-- If the project has only one TF, don't specify it. It will go directly to the inner build anyway and we don't want to redundantly specify a global property, which can cause a race. -->
+      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' == 'true'">
+        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');TargetFramework</UndefineProperties>
+      </_MSBuildProjectReferenceExistent>
+
+      <!-- If the project has only one RID, assume it's compatible with the current project and don't pass this one along. -->
+      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(IsRidAgnostic)')' == 'true'">
+        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');RuntimeIdentifier</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
-
-    <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
-        <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);RuntimeIdentifier;ProjectIsRidAgnostic</UndefineProperties>
-        <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove RuntimeIdentifier -->
-        <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectIsRidAgnostic</UndefineProperties>
-      </_MSBuildProjectReferenceExistent>
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_ProjectReferenceTargetFrameworkProperties />
-    </PropertyGroup>
   </Target>
 
   <!--
@@ -1602,6 +1630,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     in as $(ReferringTargetFramework)
   -->
   <Target Name="GetTargetFrameworkProperties" />
+
+  <!--
+    ============================================================
+                                         IsCrossTargetingProject
+
+    Overrridden by cross-targeting projects to return "true" if
+    the project should have its GetTargetFrameworkProperties
+    target called with a ReferringTargetFramework. If "false",
+    the single output of the project is used.
+  -->
+  <Target Name="IsCrossTargetingProject" Returns="false" />
 
   <!--
     ============================================================
