@@ -1,7 +1,4 @@
 ﻿using Microsoft.TemplateEngine.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {

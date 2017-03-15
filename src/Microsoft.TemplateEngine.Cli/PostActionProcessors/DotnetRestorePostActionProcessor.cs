@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 restoreCommand.CaptureStdErr();
 
                 Reporter.Output.WriteLine($"Running 'dotnet restore' on {pathToRestore}");
-                var commandResult = restoreCommand.Execute();
+                CommandResult commandResult = restoreCommand.Execute();
                 Reporter.Output.WriteLine(commandResult.StdOut);
 
                 if (commandResult.ExitCode != 0)

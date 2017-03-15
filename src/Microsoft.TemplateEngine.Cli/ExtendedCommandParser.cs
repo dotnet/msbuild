@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -80,14 +79,14 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_helpDisplayer.Options.Any())
             {
-                var maxOptLen = 0;
-                foreach (var opt in _helpDisplayer.Options)
+                int maxOptLen = 0;
+                foreach (CommandOption opt in _helpDisplayer.Options)
                 {
                     maxOptLen = opt.Template.Length > maxOptLen ? opt.Template.Length : maxOptLen;
                 }
 
-                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxOptLen + 2);
-                foreach (var opt in _helpDisplayer.Options)
+                string outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxOptLen + 2);
+                foreach (CommandOption opt in _helpDisplayer.Options)
                 {
                     optionsBuilder.AppendFormat(outputFormat, opt.Template, opt.Description);
                     optionsBuilder.AppendLine();
@@ -151,7 +150,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Once testing is done, we can probably remove them.
         internal void HiddenInternalOption(string parameterVariants, string canonical, CommandOptionType optionType)
         {
-            string[] parameters = parameterVariants.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parameters = parameterVariants.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < parameters.Length; i++)
             {
