@@ -78,16 +78,16 @@ namespace Microsoft.TemplateEngine.Cli
             switch (kind)
             {
                 case ChangeKind.Change:
-                    changeType = LocalizableStrings.Change;
+                    changeType = Strings.Change;
                     break;
                 case ChangeKind.Delete:
-                    changeType = LocalizableStrings.Delete;
+                    changeType = Strings.Delete;
                     break;
                 case ChangeKind.Overwrite:
-                    changeType = LocalizableStrings.Overwrite;
+                    changeType = Strings.Overwrite;
                     break;
                 default:
-                    changeType = LocalizableStrings.UnknownChangeKind;
+                    changeType = Strings.UnknownChangeKind;
                     break;
             }
 
@@ -96,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
         {
-            Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
+            Reporter.Error.WriteLine(Strings.DestructiveChangesNotification.Bold().Red());
             int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
             int padLen = 5 + longestChangeTextLength;
 
@@ -107,7 +107,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             
             Reporter.Error.WriteLine();
-            Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
+            Reporter.Error.WriteLine(Strings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
             return false;
         }
 

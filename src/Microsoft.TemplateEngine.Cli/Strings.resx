@@ -1,0 +1,366 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Alias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="AliasAlreadyExists" xml:space="preserve">
+    <value>Specified alias "{0}" already exists. Please specify a different alias.</value>
+  </data>
+  <data name="AliasCreated" xml:space="preserve">
+    <value>Alias creation successful.</value>
+  </data>
+  <data name="AmbiguousInputTemplateName" xml:space="preserve">
+    <value>Unable to determine the desired template from the input template name: [{0}].</value>
+  </data>
+  <data name="ArgsFileNotFound" xml:space="preserve">
+    <value>The specified extra args file does not exist: [{0}].</value>
+  </data>
+  <data name="ArgsFileWrongFormat" xml:space="preserve">
+    <value>Extra args file [{0}] is not formatted properly.</value>
+  </data>
+  <data name="Assembly" xml:space="preserve">
+    <value>Assembly</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>Author: {0}</value>
+  </data>
+  <data name="BadLocaleError" xml:space="preserve">
+    <value>Invalid format for input locale: "{0}". Example valid formats: [en] [en-US].</value>
+  </data>
+  <data name="BadPackageSpec" xml:space="preserve">
+    <value>Package "{0}" is not a valid package specification.</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="CheckingForUpdates" xml:space="preserve">
+    <value>Checking for updates for {0}...</value>
+  </data>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Template Instantiation Commands for .NET Core CLI</value>
+  </data>
+  <data name="ConfiguredValue" xml:space="preserve">
+    <value>Configured Value: {0}</value>
+  </data>
+  <data name="ContinueQuestion" xml:space="preserve">
+    <value>Continue?</value>
+  </data>
+  <data name="CreateAliasHelp" xml:space="preserve">
+    <value>Creates an alias for the specified template.</value>
+  </data>
+  <data name="CreateDirectoryHelp" xml:space="preserve">
+    <value>Indicates whether to create a directory for the generated content.</value>
+  </data>
+  <data name="CreateFailed" xml:space="preserve">
+    <value>Template "{0}" could not be created.
+{1}</value>
+  </data>
+  <data name="CreateSuccessful" xml:space="preserve">
+    <value>The template "{0}" was created successfully.</value>
+  </data>
+  <data name="CurrentConfiguration" xml:space="preserve">
+    <value>Current configuration:</value>
+  </data>
+  <data name="DefaultValue" xml:space="preserve">
+    <value>Default: {0}</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description: {0}</value>
+  </data>
+  <data name="DestructiveChangesNotification" xml:space="preserve">
+    <value>Creating this template will make changes to existing files:</value>
+  </data>
+  <data name="DisplaysHelp" xml:space="preserve">
+    <value>Displays help for this command.</value>
+  </data>
+  <data name="ExtraArgsFileHelp" xml:space="preserve">
+    <value>Specifies a file containing additional parameters.</value>
+  </data>
+  <data name="Factory" xml:space="preserve">
+    <value>Factory</value>
+  </data>
+  <data name="ForcesTemplateCreation" xml:space="preserve">
+    <value>Forces content to be generated even if it would change existing files.</value>
+  </data>
+  <data name="Generators" xml:space="preserve">
+    <value>Generators</value>
+  </data>
+  <data name="GenericPlaceholderTemplateContextError" xml:space="preserve">
+    <value>[{0}] cannot be created in the target location.</value>
+  </data>
+  <data name="GettingReady" xml:space="preserve">
+    <value>Getting ready...</value>
+  </data>
+  <data name="Id" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="InstallFailed" xml:space="preserve">
+    <value>"{0}" could not be installed.
+{1}.</value>
+  </data>
+  <data name="InstallHelp" xml:space="preserve">
+    <value>Installs a source or a template pack.</value>
+  </data>
+  <data name="InstallingUpdates" xml:space="preserve">
+    <value>Installing updates...</value>
+  </data>
+  <data name="InstallSuccessful" xml:space="preserve">
+    <value>"{0}" was installed successfully.</value>
+  </data>
+  <data name="InvalidInputSwitch" xml:space="preserve">
+    <value>Invalid input switch:</value>
+  </data>
+  <data name="InvalidParameterDetail" xml:space="preserve">
+    <value>{0} {1}
+    '{1}' is not a valid value for {0} ({2}).</value>
+  </data>
+  <data name="InvalidParameterValues" xml:space="preserve">
+    <value>Error: Invalid values for parameter(s) [{0}] for template [{1}].</value>
+  </data>
+  <data name="InvalidTemplateParameterValues" xml:space="preserve">
+    <value>Error: Invalid parameter(s):</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LanguageParameter" xml:space="preserve">
+    <value>Specifies the language of the template to create.</value>
+  </data>
+  <data name="ListsTemplates" xml:space="preserve">
+    <value>Lists templates containing the specified name. If no name is specified, lists all templates.</value>
+  </data>
+  <data name="LocaleHelp" xml:space="preserve">
+    <value>The locale to use.</value>
+  </data>
+  <data name="MissingRequiredParameter" xml:space="preserve">
+    <value>Mandatory parameter {0} missing for template {1}.</value>
+  </data>
+  <data name="MountPointFactories" xml:space="preserve">
+    <value>Mount Point Factories</value>
+  </data>
+  <data name="MountPoints" xml:space="preserve">
+    <value>Mount Points</value>
+  </data>
+  <data name="MultipleArgsSpecifiedError" xml:space="preserve">
+    <value>Template name is the only allowed argument. Invalid argument: [{0}].</value>
+  </data>
+  <data name="MultipleValuesSpecifiedForSingleValuedParameter" xml:space="preserve">
+    <value>Multiple values specified for single value parameter: {0}.</value>
+  </data>
+  <data name="NameOfOutput" xml:space="preserve">
+    <value>The name for the output being created. If no name is specified, the name of the current directory is used.</value>
+  </data>
+  <data name="NoItems" xml:space="preserve">
+    <value>(No Items)</value>
+  </data>
+  <data name="NoParameters" xml:space="preserve">
+    <value>    (No Parameters)</value>
+  </data>
+  <data name="NoTemplatesMatchName" xml:space="preserve">
+    <value>No templates matched the input template name: [{0}].</value>
+  </data>
+  <data name="NoUpdates" xml:space="preserve">
+    <value>No updates were found.</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options:</value>
+  </data>
+  <data name="OptionVariantAlreadyDefined" xml:space="preserve">
+    <value>Option variant {0} for canonical {1} was already defined for canonical {2}.</value>
+  </data>
+  <data name="OutputPath" xml:space="preserve">
+    <value>Location to place the generated output.</value>
+  </data>
+  <data name="Overwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="ParameterMissingValue" xml:space="preserve">
+    <value>Parameter [{0}] ({1}) must be given a value.</value>
+  </data>
+  <data name="ParameterNamePrefixError" xml:space="preserve">
+    <value>Parameter names must start with -- or -.</value>
+  </data>
+  <data name="ParameterReuseError" xml:space="preserve">
+    <value>Parameter name {0} cannot be used for multiple purposes.</value>
+  </data>
+  <data name="ParameterSpecifiedMultipleTimes" xml:space="preserve">
+    <value>Parameter [{0}] was specified multiple times, including with the flag [{1}].</value>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Parent</value>
+  </data>
+  <data name="QuietModeHelp" xml:space="preserve">
+    <value>Doesn't output any status information.</value>
+  </data>
+  <data name="RerunCommandAndPassForceToCreateAnyway" xml:space="preserve">
+    <value>Rerun the command and pass --force to accept and create.</value>
+  </data>
+  <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
+    <value>Run dotnet {0} --help for usage information.</value>
+  </data>
+  <data name="ShortName" xml:space="preserve">
+    <value>Short Name</value>
+  </data>
+  <data name="ShowsAllTemplates" xml:space="preserve">
+    <value>Shows all templates.</value>
+  </data>
+  <data name="ShowsFilteredTemplates" xml:space="preserve">
+    <value>Shows a subset of the available templates. Valid values are "project", "item" or "other".</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="TemplateArgumentHelp" xml:space="preserve">
+    <value>The template to instantiate.</value>
+  </data>
+  <data name="TemplateMalformedDueToBadParameters" xml:space="preserve">
+    <value>Template is malformed. The following parameter names are invalid: {0}.</value>
+  </data>
+  <data name="TemplateMultiplePartialNameMatches" xml:space="preserve">
+    <value>The following templates partially match the input. Be more specific with the template name and/or language.</value>
+  </data>
+  <data name="TemplateNotValidGivenTheSpecifiedFilter" xml:space="preserve">
+    <value>[{0}] matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.</value>
+  </data>
+  <data name="Templates" xml:space="preserve">
+    <value>Templates</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="UnknownChangeKind" xml:space="preserve">
+    <value>Unknown Change</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>An update for {0} is available...</value>
+  </data>
+  <data name="UpdateHelp" xml:space="preserve">
+    <value>Update matching templates.</value>
+  </data>
+  <data name="ValueSpecifiedForValuelessParameter" xml:space="preserve">
+    <value>Value specified for valueless parameter: {0}.</value>
+  </data>
+  <data name="WillCreateTemplate" xml:space="preserve">
+    <value>About to create: </value>
+  </data>
+</root>

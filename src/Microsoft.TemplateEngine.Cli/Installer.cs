@@ -134,12 +134,12 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     else
                     {
-                        _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                        _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(Strings.BadPackageSpec, pkg), null, 0);
                     }
                 }
                 catch
                 {
-                    _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                    _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(Strings.BadPackageSpec, pkg), null, 0);
                 }
             }
         }
