@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.List
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                { "list", o => new ListProjectToProjectReferencesCommand(o) }
+                { "reference", o => new ListProjectToProjectReferencesCommand(o) }
             };
 
         public static int Run(string[] args)
