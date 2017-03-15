@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.EscapingStringExtensions;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -30,6 +32,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The expander needs to have a default item factory set.
         /// </summary>
+        // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
         public Expander<P, I> Expander { get; set; }
 
         /// <summary>
@@ -186,6 +189,15 @@ namespace Microsoft.Build.Evaluation
 
             return result;
         }
+
+        /// <summary>
+        /// Return an MsBuildGlob that represents this ItemSpec.
+        /// </summary>
+        /// <returns></returns>
+        public IMsBuildGlob ToMsBuildGlob()
+        {
+            return new CompositeGlob(Fragments.Select(f => f.ToMsBuildGlob()).ToImmutableArray());
+        }
     }
 
     internal abstract class ItemFragment
@@ -204,6 +216,9 @@ namespace Microsoft.Build.Evaluation
         /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
         /// </summary>
         protected Lazy<Func<string, bool>> FileMatcher { get; }
+
+        private readonly Lazy<IMsBuildGlob> _msbuildGlob;
+        protected virtual IMsBuildGlob MsBuildGlob => _msbuildGlob.Value;
 
         protected ItemFragment(string itemSpecFragment, string projectPath)
             : this(
@@ -229,12 +244,24 @@ namespace Microsoft.Build.Evaluation
             ItemSpecFragment = itemSpecFragment;
             ProjectPath = projectPath;
             FileMatcher = fileMatcher;
+
+            _msbuildGlob = new Lazy<IMsBuildGlob>(CreateMsBuildGlob);
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
             return FileMatcher.Value(itemToMatch) ? 1 : 0;
+        }
+
+        public virtual IMsBuildGlob ToMsBuildGlob()
+        {
+            return MsBuildGlob;
+        }
+
+        protected virtual IMsBuildGlob CreateMsBuildGlob()
+        {
+            return Globbing.MsBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
         }
     }
 
@@ -273,6 +300,20 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private IMsBuildGlob _msbuildGlob;
+        protected override IMsBuildGlob MsBuildGlob
+        {
+            get
+            {
+                if (InitReferencedItemsIfNecessary() || _msbuildGlob == null)
+                {
+                    _msbuildGlob = CreateMsBuildGlob();
+                }
+
+                return _msbuildGlob;
+            }
+        }
+
         public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
             : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
         {
@@ -288,7 +329,17 @@ namespace Microsoft.Build.Evaluation
             return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
         }
 
-        private void InitReferencedItemsIfNecessary()
+        public override IMsBuildGlob ToMsBuildGlob()
+        {
+            return MsBuildGlob;
+        }
+
+        protected override IMsBuildGlob CreateMsBuildGlob()
+        {
+            return new CompositeGlob(ReferencedItems.Select(i => i.ToMsBuildGlob()).ToImmutableArray());
+        }
+
+        private bool InitReferencedItemsIfNecessary()
         {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
@@ -306,7 +357,11 @@ namespace Microsoft.Build.Evaluation
                     out throwaway,
                     out itemsFromCapture);
                 _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+
+                return true;
             }
+
+            return false;
         }
     }
 }
