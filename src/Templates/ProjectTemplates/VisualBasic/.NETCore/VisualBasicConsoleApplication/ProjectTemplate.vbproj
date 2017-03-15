@@ -5,9 +5,4 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="**\*.vb" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
-
 </Project>
