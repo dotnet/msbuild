@@ -6,7 +6,7 @@ Goals:
  * completeness (more information than the most detailed file log)
  * build speed (doesn't slow the build down nearly as much as the diagnostic-level file log)
  * smaller disk size (10-20x more compact than a file log)
- * structure (preserves the exact build event args that can later be replayed to reconstruct the exact events and information as if a real build was running). File logs erase structure and are harder to parse (especially for multicore /m builds).
+ * structure (preserves the exact build event args that can later be replayed to reconstruct the exact events and information as if a real build was running). File logs erase structure and are harder to parse (especially for multicore /m builds). Build analyzer tools are conceivable that could benefit from the structure in a binary log.
 
 # Creating a binary log during a build
 
@@ -19,6 +19,8 @@ By default the binary log file is named `msbuild.binlog` and it is written to th
 ```
 > msbuild.exe MySolution.sln /bl:out.binlog
 ```
+
+You can use the binary logger simultaneously with other loggers, such as text file (/fl) and console loggers. They are independent and having a binary log side-by-side with other logs may be beneficial (for sending a log to other people or running automatic build analysis tools that rely on the exact build event structure without having to parse text logs).
 
 When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch. Builds will usually be much faster if you don't pass the console and file loggers.
 
