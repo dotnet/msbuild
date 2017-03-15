@@ -3,8 +3,8 @@ Documents Index
 
 ## Overview and general information
 
-- [Intro to .NET Core CLI](intro-to-cli.md)
-- [CLI UX Guidelines](cli-ux-guidelines.md)
+- [Intro to .NET Core CLI](general/intro-to-cli.md)
+- [CLI UX Guidelines](general/cli-ux-guidelines.md)
 - [.NET Core native pre-requisities document](https://github.com/dotnet/core/blob/master/Documentation/prereqs.md)
 - [Roadmap and OS support](https://github.com/dotnet/core/blob/master/roadmap.md)
 - [Comprehensive CLI documentation](https://docs.microsoft.com/en-us/dotnet/articles/core/preview3/tools/)
@@ -12,7 +12,7 @@ Documents Index
 ## Working with the CLI repo
 
 - [Developer Guide](project-docs/developer-guide.md)
-- [How to file issues](project-docs/issue-filing.guide.md)
+- [How to file issues](project-docs/issue-filing-guide.md)
 
 ## Troubleshooting and issues reporting
 
