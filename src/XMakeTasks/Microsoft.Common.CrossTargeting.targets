@@ -104,6 +104,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <!--
+    ============================================================
+                                         IsCrossTargetingProject
+
+    Indicate that this project cross-targets, so before building
+    it, a referring project must call GetTargetFrameworkProperties
+    to get the matching TargetFramework to specify.
+  -->
+  <Target Name="IsCrossTargetingProject" Returns="true" />
+
+  <!--
     This will import NuGet restore targets, which is a special case separate from the package -> project extension 
     mechanism below. For obvious reasons,  we need restore to work before any package assets are available.
 
