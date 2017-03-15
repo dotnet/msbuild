@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             var projects = new ProjectCollection();
             MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, _fileOrDirectory);
 
-            var frameworkString = _appliedCommand["framework"].Value<string>();
+            var frameworkString = _appliedCommand.ValueOrDefault<string>("framework");
 
             PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.ReferenceDoesNotExist);
             List<MsbuildProject> refs = _appliedCommand.Arguments

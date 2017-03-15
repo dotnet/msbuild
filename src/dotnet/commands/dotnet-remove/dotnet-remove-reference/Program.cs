@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
             var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
 
             int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                _appliedCommand["framework"].Value<string>(),
+                _appliedCommand.ValueOrDefault<string>("framework"),
                 _appliedCommand.Arguments);
 
             if (numberOfRemovedReferences != 0)
