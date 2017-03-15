@@ -6,22 +6,24 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Text;
-using System.CodeDom.Compiler;
-using System.Reflection;
-using System.Xml;
-using System.IO;
-using System.Threading;
-
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.Xaml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+#if FEATURE_XAMLTASKFACTORY
+
+    using Microsoft.Build.Tasks.Xaml;
+    using System.CodeDom.Compiler;
+    using System.CodeDom;
+    using System.IO;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading;
+    using System.Xml;
+
     /// <summary>
     /// The task factory provider for XAML tasks.
     /// </summary>
@@ -249,4 +251,46 @@ namespace Microsoft.Build.Tasks
             return propertyInfos;
         }
     }
+#else
+    /// <summary>
+    /// The task factory provider for XAML tasks.
+    /// </summary>
+    /// <remarks>Xaml is not supported on .NET Core so this task factory simply logs an error that it isn't supported.
+    /// If we don't compile this class, then the user will get an error that the class doesn't exist which is a bad experience.</remarks>
+    [Obsolete("The XamlTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", error: true)]
+    public sealed class XamlTaskFactory : ITaskFactory
+    {
+        public string FactoryName => "XamlTaskFactory";
+    
+        public Type TaskType { get; } = null;
+
+        public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
+        {
+            TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
+            
+            log.LogErrorFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
+
+            return false;
+        }
+
+        public TaskPropertyInfo[] GetTaskParameters()
+        {
+            throw new NotSupportedException();
+        }
+
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void CleanupTask(ITask task)
+        {
+            throw new NotSupportedException();
+        }
+    }
+#endif
 }

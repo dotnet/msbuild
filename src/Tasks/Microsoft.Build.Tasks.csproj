@@ -522,6 +522,8 @@
     <Compile Include="WriteCodeFragment.cs" />
     <Compile Include="XmlPeek.cs" />
     <Compile Include="XmlPoke.cs" />
+    <Compile Include="CodeTaskFactory.cs" />
+    <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -552,8 +554,7 @@
     <Compile Include="AxTlbBaseTask.cs" />
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CodeTaskFactory.cs" />
+    </Compile>    
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -697,7 +698,6 @@
     <Compile Include="XamlTaskFactory\XamlDataDrivenToolTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <!-- Shim targets only work when the destination targets are installed. -->

@@ -94,6 +94,7 @@
     <Compile Include="WriteCodeFragment_Tests.cs" />
     <Compile Include="XmlPeek_Tests.cs" />
     <Compile Include="XmlPoke_Tests.cs" />
+    <Compile Include="CodeTaskFactoryTests.cs" />
     <EmbeddedResource Include="SampleResx" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
@@ -115,7 +116,6 @@
     <Compile Include="AssignProjectConfiguration_Tests.cs" />
     <Compile Include="AxImp_Tests.cs" />
     <Compile Include="AxTlbBaseTask_Tests.cs" />
-    <Compile Include="CodeTaskFactoryTests.cs" />
     <Compile Include="CommandLine_Support.cs" />
     <Compile Include="ComReferenceWalker_Tests.cs" />
     <Compile Include="ComReference_Tests.cs" />
