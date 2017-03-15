@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string SlnDefinition = "Modify solution (SLN) files.";
 
-        public const string CommandDoesNotExist = "Specified command {0} is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.";
+        public const string CommandDoesNotExist = "Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.";
 
         public const string AppFullName = ".NET CLI help utility";
 

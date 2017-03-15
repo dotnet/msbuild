@@ -75,6 +75,7 @@ Advanced Commands:
           
           cmd.Should().Fail();
           cmd.StdErr.Should().ContainVisuallySameFragment($"Specified command invalid is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.");
+          cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
         }
 
         [WindowsOnlyFact]
