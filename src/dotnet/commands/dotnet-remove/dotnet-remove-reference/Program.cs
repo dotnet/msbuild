@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
 
-            if (_appliedCommand.Arguments.Count == 0)
+            if (appliedCommand.Arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
             }

@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                                         .With(name: "VERSION")
                                         .ForwardAs(o => $"--version {o.Arguments.Single()}")),
                     Create.Option("-f|--framework",
-                                  "Add reference only when targetting a specific framework",
+                                  "Add reference only when targeting a specific framework",
                                   Accept.ExactlyOneArgument()
                                         .With(name: "FRAMEWORK")
                                         .ForwardAs(o => $"--framework {o.Arguments.Single()}")),
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli
                     Accept.OneOrMoreArguments(),
                     CommonOptions.HelpOption(),
                     Create.Option("-f|--framework",
-                                  "Add reference only when targetting a specific framework",
+                                  "Add reference only when targeting a specific framework",
                                   Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
                                         .With(name: "FRAMEWORK"))), 
                 CommonOptions.HelpOption());
