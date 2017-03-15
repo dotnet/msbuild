@@ -1,0 +1,161 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.ComputeFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Only the compute target relevant to the project type will be invoked.  -->
+  <PropertyGroup>
+    <_DotNetPublishComputeFiles>
+      _DetermineProjectType;
+      _WebAppComputeFiles;
+      _ConsoleAppComputeFiles;
+    </_DotNetPublishComputeFiles>
+  </PropertyGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Target _DetermineProjectType                                  -->
+  <!--***************************************************************-->
+
+  <Target Name="_DetermineProjectType" >
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsAspNetCoreProject)' == 'true' ">AspNetCore</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
+    </PropertyGroup>
+  </Target>
+
+  <!--***************************************************************-->
+  <!-- Target _ComputeFiles (Web App)                                -->
+  <!--***************************************************************-->
+
+  <PropertyGroup>
+    <_WebAppComputeFilesDependsOn>
+      $(_WebAppComputeFilesDependsOn);
+      _PrepareForWebAppPublish
+      _ComputeFilesFromOutDir;
+      _ComputeFilesFromContent;
+    </_WebAppComputeFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_WebAppComputeFiles"
+          Condition="'$(_PublishProjectType)' == 'WebApp'"
+          DependsOnTargets="$(_WebAppComputeFilesDependsOn)">
+  </Target>
+
+
+
+  <!--***************************************************************-->
+  <!-- Target _PrepareForWebAppPublish                               -->
+  <!--***************************************************************-->
+
+  <Target Name="_PrepareForWebAppPublish">
+  <PropertyGroup>
+    <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">bin\</_ComputeFilesFromOutDirPrefix>
+    <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
+  </PropertyGroup>
+  </Target>
+
+
+  <!--***************************************************************-->
+  <!-- Target _ComputeFiles (Console)                                -->
+  <!--***************************************************************-->
+
+  <PropertyGroup>
+    <_ConsoleAppComputeFilesDependsOn>
+      $(_ConsoleAppComputeFilesDependsOn);
+      _PrepareForConsoleAppPublish
+      _ComputeFilesFromOutDir;
+      _ComputeFilesFromContent;
+    </_ConsoleAppComputeFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_ConsoleAppComputeFiles"
+          Condition="'$(_PublishProjectType)' == 'Console'"
+          DependsOnTargets="$(_ConsoleAppComputeFilesDependsOn)">
+  </Target>
+
+
+
+  <!--***************************************************************-->
+  <!-- Target _PrepareForConsoleAppPublish                              -->
+  <!--***************************************************************-->
+
+  <Target Name="_PrepareForConsoleAppPublish">
+    <PropertyGroup>
+      <WebJobType Condition="'$(WebJobType)' == ''">Continuous</WebJobType>
+      <WebJobName Condition="'$(WebJobName)' == ''">$(AssemblyName)</WebJobName>
+      <_WebJobAppDataPath Condition="'$(_WebJobAppDataPath)' == ''" >app_data\Jobs\$(WebJobType)\$(WebJobName)\</_WebJobAppDataPath>
+      <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">$(_WebJobAppDataPath)</_ComputeFilesFromOutDirPrefix>
+      <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
+    </PropertyGroup>
+  </Target>
+
+
+  <!--***************************************************************-->
+  <!-- Target _ComputeFilesFromOutDir                                -->
+  <!--***************************************************************-->
+
+  <Target Name="_ComputeFilesFromOutDir"
+          Condition="'$(OutDir)' != ''">
+
+    <ItemGroup>
+      <_OutDirFiles
+        Include="$(OutDir)**\*.*"
+        Exclude="$(OutDir)Publish\**\*.*">
+      </_OutDirFiles>
+    </ItemGroup>
+
+    <CreateItem
+      Include="@(_OutDirFiles)"
+      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
+      <Output TaskParameter="Include" ItemName="_OutDirFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_OutDirFilesWithMetadata)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--***************************************************************-->
+  <!-- Target _ComputeFilesFromContent                               -->
+  <!--***************************************************************-->
+
+  <Target Name="_ComputeFilesFromContent"
+          Condition="'@(Content)' != ''">
+
+    <CreateItem
+      Include="@(Content)"
+      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromContentPrefix)%(Identity)">
+      <Output TaskParameter="Include" ItemName="_ContentFilesWithMetadata"/>
+    </CreateItem>
+
+    <ItemGroup>
+      <DotNetPublishFiles Include="@(_ContentFilesWithMetadata)" />
+    </ItemGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata        -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
+  
+</Project>
