@@ -176,6 +176,10 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
                 .CaptureStdOut()
                 .Execute();
 
+            Console.WriteLine($"STDOUT: {commandResult.StdOut}");
+            
+            Console.WriteLine($"STDERR: {commandResult.StdErr}");
+
             commandResult.ExitCode.Should().Be(0);
 
             return ParseReflectorOutput(commandResult.StdOut);
