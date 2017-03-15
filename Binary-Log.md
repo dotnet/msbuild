@@ -24,7 +24,7 @@ When using the binary logger all other log formats are technically redundant sin
 
 # Creating a binary log with older MSBuild versions
 
-It is also possible to use the BinaryLogger with older MSBuild versions, such as MSBuild 14.0. You'll need to download the https://www.nuget.org/packages/Microsoft.Build.Logging.StructuredLogger NuGet package and save the StructuredLogger.dll somewhere. Then pass it to MSBuild like this:
+It is also possible to use the BinaryLogger with older MSBuild versions, such as MSBuild 14.0. You'll need to download the https://www.nuget.org/packages/Microsoft.Build.Logging.StructuredLogger NuGet package and save the `StructuredLogger.dll` somewhere. Then pass it to MSBuild like this:
 
 ```
 > msbuild.exe /logger:BinaryLogger,"path\to\StructuredLogger.dll";msbuild.binlog
