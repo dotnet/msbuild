@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class PrecedenceSelectionTests
     {
-        [Theory(DisplayName = nameof(MvcCorrectlyDisambiguatesPrecedenceTest))]
+        [Theory(DisplayName = nameof(VerifyTemplateContent))]
         [InlineData("mvc", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
         [InlineData("mvc -au individual", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
 
