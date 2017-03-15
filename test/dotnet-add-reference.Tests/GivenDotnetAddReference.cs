@@ -16,17 +16,15 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
     {
         private const string HelpText = @".NET Add Project to Project reference Command
 
-Usage: dotnet add <PROJECT> reference [options] [args]
+Usage: dotnet add <PROJECT> reference [options] <args>
 
 Arguments:
-  <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>       The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <args>          Project to project references to add
 
 Options:
-  -h|--help                   Show help information
-  -f|--framework <FRAMEWORK>  Add reference only when targeting a specific framework
-
-Additional Arguments:
- Project to project references to add
+  -h, --help                               Show help information
+  -f, --framework <FRAMEWORK>              Add reference only when targeting a specific framework
 ";
 
         const string FrameworkNet451Arg = "-f net451";

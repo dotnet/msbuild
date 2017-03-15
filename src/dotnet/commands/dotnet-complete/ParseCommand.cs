@@ -11,9 +11,16 @@ namespace Microsoft.DotNet.Cli
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var result =
-                Parser.Instance.Parse(
+            ParseResult result;
+            try
+            {
+                result = Parser.Instance.Parse(
                     args.Single());
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("The parser threw an exception.", e);
+            }
 
             Console.WriteLine(result.Diagram());
 

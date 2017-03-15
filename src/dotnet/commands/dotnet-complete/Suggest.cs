@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
+using static System.Array;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -10,33 +13,46 @@ namespace Microsoft.DotNet.Cli
     {
         public static IEnumerable<string> TargetFrameworksFromProjectFile()
         {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(
-                new ProjectCollection(),
-                Directory.GetCurrentDirectory());
+            var msBuildProject = GetMSBuildProject();
 
-            foreach (var tfm in msbuildProj.GetTargetFrameworks())
+            if (msBuildProject == null)
+            {
+                yield break;
+            }
+
+            foreach (var tfm in msBuildProject.GetTargetFrameworks())
             {
                 yield return tfm.GetShortFolderName();
             }
         }
 
-        public static IEnumerable<string> RunTimesFromProjectFile()
+        private static void Report(Exception e) =>
+            Reporter.Verbose.WriteLine($"Exception occurred while getting suggestions: {e}");
+
+        public static IEnumerable<string> RunTimesFromProjectFile() =>
+            GetMSBuildProject()
+                .GetRuntimeIdentifiers() ??
+            Empty<string>();
+
+        public static IEnumerable<string> ProjectReferencesFromProjectFile() =>
+            GetMSBuildProject()
+                ?.GetProjectToProjectReferences()
+                .Select(r => r.Include) ??
+            Empty<string>();
+
+        private static MsbuildProject GetMSBuildProject()
         {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(
-                new ProjectCollection(),
-                Directory.GetCurrentDirectory());
-
-            return msbuildProj.GetRuntimeIdentifiers();
-        }
-
-        public static IEnumerable<string> ProjectReferencesFromProjectFile()
-        {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(
-                new ProjectCollection(),
-                Directory.GetCurrentDirectory());
-
-            return msbuildProj.GetProjectToProjectReferences()
-                              .Select(r => r.Include);
+            try
+            {
+                return MsbuildProject.FromFileOrDirectory(
+                    new ProjectCollection(),
+                    Directory.GetCurrentDirectory());
+            }
+            catch (Exception e)
+            {
+                Report(e);
+                return null;
+            }
         }
     }
 }

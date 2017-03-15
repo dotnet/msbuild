@@ -55,13 +55,15 @@ namespace Microsoft.DotNet.Cli
                                         .ForwardAs(o => $"--package-directory {o.Arguments.Single()}"))),
                 Create.Command(
                     "reference",
-                    "Command to add project to project reference",
-                    Accept.OneOrMoreArguments(),
+                    Tools.Add.ProjectToProjectReference.LocalizableStrings.AppFullName,
+                    Accept.OneOrMoreArguments()
+                          .With(name: "args",
+                                description: Tools.Add.ProjectToProjectReference.LocalizableStrings.AppHelpText),
                     CommonOptions.HelpOption(),
                     Create.Option("-f|--framework",
                                   "Add reference only when targeting a specific framework",
                                   Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
-                                        .With(name: "FRAMEWORK"))), 
+                                        .With(name: "FRAMEWORK"))),
                 CommonOptions.HelpOption());
 
         public static IEnumerable<string> QueryNuGet(string match)
