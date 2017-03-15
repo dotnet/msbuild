@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         [InlineData("mvc -f netcoreapp2.0", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
         [InlineData("mvc -au individual -f netcoreapp2.0", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
-        public void MvcCorrectlyDisambiguatesPrecedenceTest(string args, params string[] scripts)
+        public void VerifyTemplateContent(string args, params string[] scripts)
         {
             string codebase = typeof(PrecedenceSelectionTests).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);
