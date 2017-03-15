@@ -135,7 +135,7 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
 </Project>
 ```
 
-Sample to remove files from getting published:
+Sample to prevent files from being published:
 
 ```xml
 <ItemGroup>
@@ -143,7 +143,7 @@ Sample to remove files from getting published:
 </ItemGroup>
 ```
 
-Sample to Skip a specific folder/file during Web Deploy Publish:
+Sample to skip a specific folder and files during Web Deploy Publish:
 
 ```xml
 <ItemGroup>
@@ -154,7 +154,12 @@ Sample to Skip a specific folder/file during Web Deploy Publish:
 
     <MsDeploySkipRules Include="CustomSkipFile">
       <ObjectName>filePath</ObjectName>
-      <AbsolutePath>Views\\Home\\About.cshtml$</AbsolutePath>
+      <AbsolutePath>Views\\Home\\About.cshtml</AbsolutePath>
+    </MsDeploySkipRules>
+    
+     <MsDeploySkipRules Include="CustomSkipFile">
+      <ObjectName>filePath</ObjectName>
+      <AbsolutePath>Views\\Home\\About2.cshtml</AbsolutePath>
     </MsDeploySkipRules>
 </ItemGroup>
 ```
