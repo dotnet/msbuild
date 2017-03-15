@@ -10,8 +10,29 @@ Goals:
 
 # Creating a binary log during a build
 
+Use the new /bl switch to enable the binary logger:
+```
+> msbuild.exe MySolution.sln /bl
+```
+
+By default the binary log file is `msbuild.binlog` and it's written to the current directory. To specify a custom log file name and/or path, pass it after a colon:
+```
+> msbuild.exe MySolution.sln /bl:out.binlog
+```
+
+When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch.
+
 # Replaying a binary log
 
+Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a .binlog file to the diagnostic verbosity text log:
+
+```
+> msbuild.exe msbuild.binlog /noconlog /flp:v=diag;logfile=diag.log
+```
+
 # Using MSBuild Structured Log Viewer
+
+You can use the MSBuild Structured Log Viewer tool to view .binlog files:
+https://github.com/KirillOsenkov/MSBuildStructuredLog
 
 # Binary log file format
