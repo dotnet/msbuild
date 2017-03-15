@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli
                            CommonOptions.HelpOption(),
                            Create.Command("reference",
                                           LocalizableStrings.AppFullName,
+                                          Accept.ZeroOrOneArgument(),
                                           CommonOptions.HelpOption()));
     }
 }
