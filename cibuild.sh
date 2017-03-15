@@ -293,6 +293,7 @@ esac
 
 BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build-$host.log"
 LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
+LOCAL_BUILD_BINLOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_rebuild-$host.binlog"
 MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
 
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
@@ -335,4 +336,4 @@ _NOWARN="MSB3276;MSB3277;MSB3026;AL1053"
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS $CSC_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS $CSC_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH" /bl:"$LOCAL_BUILD_BINLOG_PATH"

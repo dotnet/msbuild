@@ -78,7 +78,7 @@ def project = GithubProject
             Utilities.standardJobSetup(newJob, project, isPR, branch)
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
-                                  'init-tools.log,msbuild*.log,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
+                                  'init-tools.log,msbuild*.log,msbuild*.binlog,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
                                   '', /* filesToExclude */
                                   false, /* doNotFailIfNothingArchived */
                                   false, /* archiveOnlyIfSuccessful */)
