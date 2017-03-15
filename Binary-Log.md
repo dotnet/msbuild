@@ -10,7 +10,7 @@ Goals:
 
 # Creating a binary log during a build
 
-Use the new /bl switch to enable the binary logger:
+Use the new `/bl` switch to enable the binary logger:
 ```
 > msbuild.exe MySolution.sln /bl
 ```
@@ -24,7 +24,7 @@ When using the binary logger all other log formats are technically redundant sin
 
 # Replaying a binary log
 
-Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a .binlog file to the diagnostic verbosity text log:
+Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a `.binlog` file to the diagnostic verbosity text log:
 
 ```
 > msbuild.exe msbuild.binlog /noconlog /flp:v=diag;logfile=diag.log
@@ -32,7 +32,7 @@ Instead of passing the project/solution to MSBuild.exe you can now pass a binary
 
 # Using MSBuild Structured Log Viewer
 
-You can use the MSBuild Structured Log Viewer tool to view .binlog files:
+You can use the MSBuild Structured Log Viewer tool to view `.binlog` files:
 https://github.com/KirillOsenkov/MSBuildStructuredLog
 
 # Binary log file format
