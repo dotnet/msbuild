@@ -87,10 +87,6 @@ namespace Microsoft.NET.TestFramework.Commands
             string outputFilename = $"{_valueName}Values.txt";
             var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
 
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                outputFilename,
-            });
-
             return File.ReadAllLines(Path.Combine(outputDirectory.FullName, outputFilename))
                 .Select(line => line.Trim())
                 .Where(line => !string.IsNullOrEmpty(line))

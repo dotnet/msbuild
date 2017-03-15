@@ -34,22 +34,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <FileAlignment>512</FileAlignment>
-    <ErrorReport>prompt</ErrorReport>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
-    <Deterministic>true</Deterministic>
+    <OutputType Condition=" '$(OutputType)' == '' ">Library</OutputType>
+    <FileAlignment Condition=" '$(FileAlignment)' == '' ">512</FileAlignment>
+    <ErrorReport Condition=" '$(ErrorReport)' == '' ">prompt</ErrorReport>
+    <AssemblyName Condition=" '$(AssemblyName)' == '' ">$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(MSBuildProjectName)</RootNamespace>
+    <Deterministic Condition=" '$(Deterministic)' == '' ">true</Deterministic>
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
+    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <Optimize>true</Optimize>
+    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
   </PropertyGroup>
 
   <!-- User-facing platform-specific defaults -->
@@ -70,18 +70,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_PlatformWithoutConfigurationInference>$(Platform)</_PlatformWithoutConfigurationInference>
   </PropertyGroup>  
   <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'x64' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'ARM' ">
-    <PlatformTarget>ARM</PlatformTarget>
+    <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">ARM</PlatformTarget>
   </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->
   <PropertyGroup>
-    <DebugType>portable</DebugType>
+    <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
@@ -96,8 +96,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     
     <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
-    <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
+    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+    <DesignTimeAssemblySearchPaths Condition=" '$(DesignTimeAssemblySearchPaths)' == '' ">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
 
     <AllowUnsafeBlocks Condition="'$(AllowUnsafeBlocks)'==''">false</AllowUnsafeBlocks>
     <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)'==''">false</TreatWarningsAsErrors>
@@ -116,7 +116,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
-    <NoLogo>true</NoLogo>
+    <NoLogo Condition=" '$(NoLogo)' == '' ">true</NoLogo>
 
     <!-- Workaround: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
@@ -124,8 +124,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
   <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'"> 
-    <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
-    <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
+    <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+    <GenerateResourceMSBuildRuntime Condition=" '$(GenerateResourceMSBuildRuntime)' == '' ">CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
