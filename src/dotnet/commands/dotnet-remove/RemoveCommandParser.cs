@@ -12,14 +12,17 @@ namespace Microsoft.DotNet.Cli
         public static Command Remove() =>
             Create.Command("remove",
                            ".NET Remove Command",
-                           Accept.ZeroOrOneArgument()
+                           Accept.ExactlyOneArgument()
+                                 .ExistingFilesOnly()
+                                 .DefaultToCurrentDirectory()
                                  .With(name: "PROJECT",
                                        description: CommonLocalizableStrings.ArgumentsProjectDescription)
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
-                           Create.Command("package",
-                                          LocalizableStrings.AppFullName,
-                                          CommonOptions.HelpOption()),
+                           Create.Command(
+                               "package",
+                               LocalizableStrings.AppFullName,
+                               CommonOptions.HelpOption()),
                            Create.Command(
                                "reference",
                                LocalizableStrings.AppFullName,

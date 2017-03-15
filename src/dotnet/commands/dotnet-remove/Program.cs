@@ -21,8 +21,15 @@ namespace Microsoft.DotNet.Tools.Remove
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
-                { "reference", o => new RemoveProjectToProjectReferenceCommand(o) },
-                { "package", o => new RemovePackageReferenceCommand(o) }
+                ["reference"] =
+                remove => new RemoveProjectToProjectReferenceCommand(
+                    remove["reference"],
+                    remove.Value<string>()),
+
+                ["package"] =
+                remove => new RemovePackageReferenceCommand(
+                    remove["package"],
+                    remove.Value<string>())
             };
 
         public static int Run(string[] args)

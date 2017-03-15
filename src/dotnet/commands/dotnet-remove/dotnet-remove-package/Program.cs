@@ -16,11 +16,17 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public RemovePackageReferenceCommand(AppliedOption appliedCommand)
+        public RemovePackageReferenceCommand(
+            AppliedOption appliedCommand,
+            string fileOrDirectory)
         {
             if (appliedCommand == null)
             {
                 throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            if (fileOrDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(fileOrDirectory));
             }
             if (_appliedCommand.Arguments.Count != 1)
             {
@@ -28,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
             }
 
             _appliedCommand = appliedCommand;
-            _fileOrDirectory = appliedCommand.Arguments.Single();
+            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()
