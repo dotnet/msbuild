@@ -1,0 +1,179 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.targets  
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process to deploy web application projects.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Properties corresponding to the tasks and targets path-->
+  
+  <PropertyGroup>
+    <!-- We want to force this property to be true, hence not adding a condition check -->
+    <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
+    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</_PublishTaskFramework>
+    <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
+    <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
+    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
+    <_BeforePublishTargetsDir Condition=" '$(_BeforePublishTargetsDir)' == ''">$(MSBuildThisFileDirectory)BeforePublishTargets\</_BeforePublishTargetsDir>
+    <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
+    <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
+    <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
+    <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
+    <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+    <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
+  </PropertyGroup>
+
+  <!-- Extension points for BeforePublish and AfterPublish-->
+  <Target Name="BeforePublish" />
+  <Target Name="AfterPublish" />
+
+  <!--
+  ***********************************************************************************************
+  Import the PublishProfiles
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</_PublishProfileRootFolder>
+    <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</_PublishProfileRootFolder>
+    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
+    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
+    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(_PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>
+
+    <!-- This is what get passed from the Visual Studio UI.-->
+    <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == ''">$(PublishProfileFullPath)</WebPublishProfileFile>
+  </PropertyGroup>
+
+  <Import Project="$(WebPublishProfileFile)" Condition="Exists('$(WebPublishProfileFile)')" />
+  <Import Project="$(WebPublishProfileFile).user" Condition="Exists('$(WebPublishProfileFile).user')" />
+
+  <!--
+  ***********************************************************************************************
+  Set the properties based on PublishProfile properties
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <!-- Properties for identifying the Publish Protocol -->
+    <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
+    <!-- For backward compat -->
+    <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
+    
+    <!-- For Docker Support -->
+    <PublishProtocol Condition="'$(DockerPublish)' == 'true'">Docker</PublishProtocol>
+    
+    <!-- Properties setting the publish intermediate paths -->
+    <PublishConfiguration Condition ="'$(PublishConfiguration)' == ''">$(LastUsedBuildConfiguration)</PublishConfiguration>
+    <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">$(Configuration)</PublishConfiguration>
+    <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == '' And '$(PublishConfiguration)' != ''">$(PublishConfiguration)\</_PublishConfigurationPath>
+
+    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFramework)</PublishFramework>
+    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFrameworks)</PublishFramework>
+    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(PublishFramework)' != ''">$(PublishFramework)\</_PublishFrameworkPath>
+
+    <_RuntimeIdentifierPath Condition="'$(_RuntimeIdentifierPath)' == '' And '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)\</_RuntimeIdentifierPath>
+
+    <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
+    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)Out\</PublishIntermediateOutputPath>
+    <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
+    
+    <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
+  </PropertyGroup>
+
+  <!--
+  ***********************************************************************************************
+  Import the BeforePublish target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets" Condition="Exists('$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets')" />
+
+  
+  <!--
+  ***********************************************************************************************
+  Import the Compute target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets')" />
+
+  <!--
+  ***********************************************************************************************
+  Import the Copy target
+  ***********************************************************************************************
+ -->
+  
+  <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets')"/>
+
+
+  <!--
+  ***********************************************************************************************
+  Import the transform target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets" Condition="Exists('$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets')"/>
+
+  <!--
+  ***********************************************************************************************
+  Import the Protocol target
+  ***********************************************************************************************
+ -->
+  
+  <Import Project="$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets')"/>
+
+  <!--
+  ***********************************************************************************************
+  Import the DotNetCLITool target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : DotNetPublish
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <DotNetPublishDependsOn>
+      BeforePublish;
+      CorePublish;
+      AfterPublish;
+    </DotNetPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="DotNetPublish"
+          DependsOnTargets="$(DotNetPublishDependsOn)"
+          AfterTargets="Build"
+          Condition=" '$(DeployOnBuild)' == 'true' " >
+  </Target>
+
+
+  <PropertyGroup>
+    <CorePublishDependsOn>
+      $(_DotNetPublishComputeFiles);
+      $(_DotNetPublishCopyFiles);
+      $(_DotNetPublishTransformFiles);
+      $(_DotNetPublishFiles);
+    </CorePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CorePublish" 
+          DependsOnTargets="$(CorePublishDependsOn)"/>
+  
+</Project>

@@ -1,0 +1,47 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Web.ProjectSystem.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets"
+          Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets') AND '$(EnableTypeScriptNuGetTarget)' != 'true'"/>
+
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.DotNetCore.targets"
+          Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.DotNetCore.targets') AND '$(EnableTypeScriptNuGetTarget)' != 'true'"/>
+
+  <PropertyGroup>
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
+    <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
+    <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
+  </PropertyGroup>
+
+  <!-- Web project capabilities that enables web features for .NET Core projects -->
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+    <ProjectCapability Include="AspNetCore" />
+    <ProjectCapability Include="Web" />
+    <ProjectCapability Include="SupportHierarchyContextSvc" />
+    <ProjectCapability Include="DynamicDependentFile" />    
+  </ItemGroup>
+
+  <!-- Web specific properties -->
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml"
+                        Condition="Exists('$(MSBuildWebPath)$(ActualLangName)\GeneralBrowseObject.xaml')">
+      <Context>BrowseObject</Context>
+    </PropertyPageSchema>
+  </ItemGroup>
+
+</Project>
