@@ -20,7 +20,7 @@ By default the binary log file is named `msbuild.binlog` and it is written to th
 > msbuild.exe MySolution.sln /bl:out.binlog
 ```
 
-When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch.
+When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch. Builds will usually be much faster if you don't pass the console and file loggers.
 
 # Creating a binary log with older MSBuild versions
 
