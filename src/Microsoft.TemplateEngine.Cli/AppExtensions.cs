@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli
     {
         public static CommandOption Help(this CommandLineApplication app)
         {
-            return app.Option("-h|--help", Strings.DisplaysHelp, CommandOptionType.NoValue);
+            return app.Option("-h|--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
         }
 
         public static IReadOnlyDictionary<string, IList<string>> ParseExtraArgs(this CommandLineApplication app, IList<string> extraArgFileNames)
@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     if (!File.Exists(argFile))
                     {
-                        throw new CommandParserException(string.Format(Strings.ArgsFileNotFound, argFile), argFile);
+                        throw new CommandParserException(string.Format(LocalizableStrings.ArgsFileNotFound, argFile), argFile);
                     }
 
                     try
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     catch (Exception ex)
                     {
-                        throw new CommandParserException(string.Format(Strings.ArgsFileWrongFormat, argFile), argFile, ex);
+                        throw new CommandParserException(string.Format(LocalizableStrings.ArgsFileWrongFormat, argFile), argFile, ex);
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!key.StartsWith("-", StringComparison.Ordinal))
                 {
-                    throw new CommandParserException(string.Format(Strings.MultipleArgsSpecifiedError, key), key);
+                    throw new CommandParserException(string.Format(LocalizableStrings.MultipleArgsSpecifiedError, key), key);
                 }
 
                 // Check the next value. If it doesn't start with a '-' then it's a value for the current param.

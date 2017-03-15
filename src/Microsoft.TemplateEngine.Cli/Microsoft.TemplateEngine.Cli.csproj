@@ -19,17 +19,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Strings.Designer.cs">
+    <Compile Update="LocalizableStrings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
+      <DependentUpon>LocalizableStrings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Strings.resx">
+    <EmbeddedResource Update="LocalizableStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 </Project>
