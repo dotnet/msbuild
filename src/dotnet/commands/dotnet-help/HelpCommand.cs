@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Help
 {
@@ -63,17 +64,17 @@ Project modification commands:
 
             app.OnExecute(() => 
             {
-                Cli.BuiltInCommandMetadata builtIn;
-                if (Cli.BuiltInCommandsCatalog.Commands.TryGetValue(commandNameArgument.Value, out builtIn))
+                BuiltInCommandMetadata builtIn;
+                if (BuiltInCommandsCatalog.Commands.TryGetValue(commandNameArgument.Value, out builtIn))
                 {
-                    // var p = Process.Start(GetProcessStartInfo(builtIn));
-                    var process = ConfigureProcess(builtIn.DocLink.ToString());
+                    var process = ConfigureProcess(builtIn.DocLink);
                     process.Start();
                     process.WaitForExit();
                 }
                 else
                 {
                     Reporter.Error.WriteLine(String.Format(LocalizableStrings.CommandDoesNotExist, commandNameArgument.Value));
+                    Reporter.Output.WriteLine(UsageText);
                     return 1;
                 }
                 return 0;

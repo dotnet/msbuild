@@ -68,7 +68,7 @@ Advanced Commands:
         }
 
         [Fact]
-        public void WhenInvalidCommandIsPassedToDOtnetHelpItPrintsError()
+        public void WhenInvalidCommandIsPassedToDotnetHelpItPrintsError()
         {
           var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("help invalid");

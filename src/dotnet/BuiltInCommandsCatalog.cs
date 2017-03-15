@@ -29,110 +29,110 @@ namespace Microsoft.DotNet.Cli
             {
                 Command = AddCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-add-reference
-                DocLink = new Uri("https://aka.ms/dotnet-add")
+                DocLink = "https://aka.ms/dotnet-add"
             },
             ["build"] = new BuiltInCommandMetadata
             {
                 Command = BuildCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-build
-                DocLink = new Uri("https://aka.ms/dotnet-build")
+                DocLink = "https://aka.ms/dotnet-build"
             },
             ["cache"] = new BuiltInCommandMetadata
             {
                 Command = CacheCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-cache
-                DocLink = new Uri("https://aka.ms/dotnet-cache")
+                DocLink = "https://aka.ms/dotnet-cache"
             },
             ["clean"] = new BuiltInCommandMetadata 
             {
                 Command = CleanCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-clean
-                DocLink = new Uri("https://aka.ms/dotnet-clean")
+                DocLink = "https://aka.ms/dotnet-clean"
             },
             ["help"] = new BuiltInCommandMetadata
             {
                 Command = HelpCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-help
-                DocLink = new Uri("https://aka.ms/dotnet-help")
+                DocLink = "https://aka.ms/dotnet-help"
             },
             ["list"] = new BuiltInCommandMetadata
             {
                 Command = ListCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-list-reference
-                DocLink = new Uri("https://aka.ms/dotnet-list")
+                DocLink = "https://aka.ms/dotnet-list"
             },
             ["migrate"] = new BuiltInCommandMetadata
             {
                 Command = MigrateCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-migrate
-                DocLink = new Uri("http://aka.ms/dotnet-migrate")
+                DocLink = "http://aka.ms/dotnet-migrate"
 
             },
             ["msbuild"] = new BuiltInCommandMetadata
             {
                 Command = MSBuildCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-msbuild
-                DocLink = new Uri("https://aka.ms/dotnet-msbuild")
+                DocLink = "https://aka.ms/dotnet-msbuild"
             },
             ["new"] = new BuiltInCommandMetadata
             {
                 Command = NewCommandShim.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-new
-                DocLink = new Uri("https://aka.ms/dotnet-new")
+                DocLink = "https://aka.ms/dotnet-new"
             },
             ["nuget"] = new BuiltInCommandMetadata
             {
                 Command = NuGetCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-nuget-locals
-                DocLink = new Uri("https://aka.ms/dotnet-nuget")
+                DocLink = "https://aka.ms/dotnet-nuget"
             },
             ["pack"] = new BuiltInCommandMetadata
             {
                 Command = PackCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-pack
-                DocLink = new Uri("https://aka.ms/dotnet-pack")
+                DocLink = "https://aka.ms/dotnet-pack"
             },
             ["publish"] = new BuiltInCommandMetadata
             {
                 Command = PublishCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-publish
-                DocLink = new Uri("https://aka.ms/dotnet-publish")
+                DocLink = "https://aka.ms/dotnet-publish"
             },
             ["remove"] = new BuiltInCommandMetadata
             {
                 Command = RemoveCommand.Run,
                 // aka.ms link: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-remove-reference
-                DocLink = new Uri("https://aka.ms/dotnet-remove")
+                DocLink = "https://aka.ms/dotnet-remove"
             },
             ["restore"] = new BuiltInCommandMetadata
             {
                 Command = RestoreCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-restore
-                DocLink = new Uri("https://aka.ms/dotnet-restore")
+                DocLink = "https://aka.ms/dotnet-restore"
             },
             ["run"] = new BuiltInCommandMetadata
             {
                 Command = RunCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-run
-                DocLink = new Uri("https://aka.ms/dotnet-run")
+                DocLink = "https://aka.ms/dotnet-run"
             },
             ["sln"] = new BuiltInCommandMetadata
             {
                 Command = SlnCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-sln
-                DocLink = new Uri("https://aka.ms/dotnet-sln")
+                DocLink = "https://aka.ms/dotnet-sln"
             },
             ["test"] = new BuiltInCommandMetadata
             {
                 Command = TestCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-test
-                DocLink = new Uri("https://aka.ms/dotnet-test")
+                DocLink = "https://aka.ms/dotnet-test"
             },
             ["vstest"] = new BuiltInCommandMetadata
             {
                 Command = VSTestCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-vstest
-                DocLink = new Uri("https://aka.ms/dotnet-vstest")
+                DocLink = "https://aka.ms/dotnet-vstest"
             }
         };
 
