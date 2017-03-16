@@ -31,6 +31,10 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-p|--project",
                     LocalizableStrings.CommandOptionProjectDescription,
-                    Accept.ExactlyOneArgument()));
+                    Accept.ExactlyOneArgument()),
+                Create.Option(
+                    "--no-build",
+                    LocalizableStrings.CommandOptionNoBuildDescription,
+                    Accept.NoArguments().ForwardAs("/p:NoBuild=true")));
     }
 }

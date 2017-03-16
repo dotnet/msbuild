@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Tools.Run
 
         public const string CommandOptionProjectDescription = "The path to the project file to run (defaults to the current directory if there is only one project).";
 
+        public const string CommandOptionNoBuildDescription = "Skip building the project prior to running. By default, the project will be built.";
+
         public const string RunCommandException = "The build failed. Please fix the build errors and run again.";
 
         public const string RunCommandExceptionUnableToRun = "Unable to run your project\nPlease ensure you have a runnable project type and ensure '{0}' supports this project.\nThe current {1} is '{2}'";
