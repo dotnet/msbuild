@@ -119,7 +119,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
 
-  <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1878 -->
+  <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
 
