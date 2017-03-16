@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Cli
                 "add",
                 ".NET Add Command",
                 Accept.ExactlyOneArgument()
-                      .ExistingFilesOnly()
                       .DefaultToCurrentDirectory()
                       .With(name: "PROJECT",
                             description: "The project file to operate on. If a file is not specified, the command will search the current directory for one."),
