@@ -11,7 +11,8 @@
 namespace Microsoft.TemplateEngine.Cli {
     using System;
     using System.Reflection;
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -174,6 +175,34 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string CommandDescription {
             get {
                 return ResourceManager.GetString("CommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Command failed..
+        /// </summary>
+        internal static string CommandFailed {
+            get {
+                return ResourceManager.GetString("CommandFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output from command:
+        ///{0}.
+        /// </summary>
+        internal static string CommandOutput {
+            get {
+                return ResourceManager.GetString("CommandOutput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Command succeeded..
+        /// </summary>
+        internal static string CommandSucceeded {
+            get {
+                return ResourceManager.GetString("CommandSucceeded", resourceCulture);
             }
         }
         
@@ -532,6 +561,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Primary Outputs to restore..
+        /// </summary>
+        internal static string NoPrimaryOutputsToRestore {
+            get {
+                return ResourceManager.GetString("NoPrimaryOutputsToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No templates matched the input template name: [{0}]..
         /// </summary>
         internal static string NoTemplatesMatchName {
@@ -649,11 +687,47 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore failed..
+        /// </summary>
+        internal static string RestoreFailed {
+            get {
+                return ResourceManager.GetString("RestoreFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore succeeded..
+        /// </summary>
+        internal static string RestoreSucceeded {
+            get {
+                return ResourceManager.GetString("RestoreSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Run dotnet {0} --help for usage information..
         /// </summary>
         internal static string RunHelpForInformationAboutAcceptedParameters {
             get {
                 return ResourceManager.GetString("RunHelpForInformationAboutAcceptedParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Running command &apos;{0}&apos;....
+        /// </summary>
+        internal static string RunningCommand {
+            get {
+                return ResourceManager.GetString("RunningCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Running &apos;dotnet restore&apos; on {0}....
+        /// </summary>
+        internal static string RunningDotnetRestoreOn {
+            get {
+                return ResourceManager.GetString("RunningDotnetRestoreOn", resourceCulture);
             }
         }
         

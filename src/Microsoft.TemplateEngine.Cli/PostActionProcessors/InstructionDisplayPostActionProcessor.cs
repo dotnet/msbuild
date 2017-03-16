@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
         }
 
-        public bool Process(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
             Reporter.Output.WriteLine(actionConfig.Description);
             Reporter.Output.WriteLine(actionConfig.ManualInstructions);

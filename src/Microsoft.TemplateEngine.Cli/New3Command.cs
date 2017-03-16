@@ -406,7 +406,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(creationResult, EnvironmentSettings.SettingsLoader.Components);
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult);
             postActionDispatcher.Process();
         }
 

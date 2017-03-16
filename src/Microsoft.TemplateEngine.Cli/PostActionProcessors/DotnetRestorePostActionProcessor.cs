@@ -15,11 +15,11 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
         }
 
-        public bool Process(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
             if (templateCreationResult.PrimaryOutputs.Count == 0)
             {
-                Reporter.Output.WriteLine("No Primary Outputs to restore");
+                settings.Host.LogMessage(LocalizableStrings.NoPrimaryOutputsToRestore);
                 return true;
             }
 
@@ -32,16 +32,19 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 restoreCommand.CaptureStdOut();
                 restoreCommand.CaptureStdErr();
 
-                Reporter.Output.WriteLine($"Running 'dotnet restore' on {pathToRestore}");
+                settings.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
                 CommandResult commandResult = restoreCommand.Execute();
-                Reporter.Output.WriteLine(commandResult.StdOut);
 
                 if (commandResult.ExitCode != 0)
                 {
-                    Reporter.Output.WriteLine("restore failed:");
-                    Reporter.Output.WriteLine($"StdErr: {commandResult.StdErr}");
-                    Reporter.Output.WriteLine();
+                    settings.Host.LogMessage(LocalizableStrings.RestoreFailed);
+                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdErr));
+                    settings.Host.LogMessage(string.Empty);
                     allSucceeded = false;
+                }
+                else
+                {
+                    settings.Host.LogMessage(LocalizableStrings.RestoreSucceeded);
                 }
             }
 

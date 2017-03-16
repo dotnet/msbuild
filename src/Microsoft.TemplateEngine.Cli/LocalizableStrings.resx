@@ -363,4 +363,29 @@
   <data name="WillCreateTemplate" xml:space="preserve">
     <value>About to create: </value>
   </data>
+  <data name="NoPrimaryOutputsToRestore" xml:space="preserve">
+    <value>No Primary Outputs to restore.</value>
+  </data>
+  <data name="CommandFailed" xml:space="preserve">
+    <value>Command failed.</value>
+  </data>
+  <data name="CommandOutput" xml:space="preserve">
+    <value>Output from command:
+{0}</value>
+  </data>
+  <data name="CommandSucceeded" xml:space="preserve">
+    <value>Command succeeded.</value>
+  </data>
+  <data name="RestoreFailed" xml:space="preserve">
+    <value>Restore failed.</value>
+  </data>
+  <data name="RestoreSucceeded" xml:space="preserve">
+    <value>Restore succeeded.</value>
+  </data>
+  <data name="RunningDotnetRestoreOn" xml:space="preserve">
+    <value>Running 'dotnet restore' on {0}...</value>
+  </data>
+  <data name="RunningCommand" xml:space="preserve">
+    <value>Running command '{0}'...</value>
+  </data>
 </root>
