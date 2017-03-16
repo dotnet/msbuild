@@ -7,7 +7,7 @@
     <CLI_NETSDK_Version>1.1.0-alpha-20170306-2</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-beta1-2342</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.0.0</CLI_TestPlatform_Version>
+    <CLI_TestPlatform_Version>15.1.0-preview-20170316-05</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
