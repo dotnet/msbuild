@@ -621,7 +621,7 @@ namespace Microsoft.Build.Tasks
                 // be empty (because it's referencing the 7.0A SDK in the registry, which doesn't exist).  In that case, we 
                 // want to look for VersionLatest.  However, if ExecuteAsTool is true (default value) and SDKToolsPath is 
                 // empty, then we can safely assume that we want to get the 3.5 version of the tool.
-                TargetDotNetFrameworkVersion targetAxImpVersion = ExecuteAsTool ? TargetDotNetFrameworkVersion.Version35 : TargetDotNetFrameworkVersion.VersionLatest;
+                TargetDotNetFrameworkVersion targetAxImpVersion = ExecuteAsTool ? TargetDotNetFrameworkVersion.Version35 : TargetDotNetFrameworkVersion.Latest;
 
                 // We want to use the copy of AxImp corresponding to our targeted architecture if possible.  
                 _aximpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("AxImp.exe", targetAxImpVersion, VisualStudioVersion.VersionLatest);

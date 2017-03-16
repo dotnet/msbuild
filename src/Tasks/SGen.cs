@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
             // the SDK, which may or may not be installed. The following will look there.
             if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_Version")))
             {
-                pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.VersionLatest);
+                pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.Latest);
             }
 
             if (String.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
