@@ -154,18 +154,6 @@
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
           AfterTargets="PublishMSBuildExtensions">
     <ItemGroup>
-      <NETCore10Assemblies Include="$(PublishDir)/System.ComponentModel.Primitives.dll;
-                                    $(PublishDir)/System.Collections.Specialized.dll;
-                                    $(PublishDir)/System.Collections.NonGeneric.dll;
-                                    $(PublishDir)/System.Private.DataContractSerialization.dll" />
-    </ItemGroup>
-
-    <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
-          We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
-    <Move SourceFiles="@(NETCore10Assemblies)"
-          DestinationFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')" />
-
-    <ItemGroup>
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
     </ItemGroup>
@@ -195,10 +183,6 @@
               PlatformAssemblyPaths="@(PlatformAssemblies);
                                      @(PublishDirSubDirectories);
                                      $(SharedFrameworkNameVersionPath)" />
-
-    <!-- Move the "1.0" assemblies back -->
-    <Move SourceFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')"
-          DestinationFiles="@(NETCore10Assemblies)" />
   </Target>
 
   <Target Name="RemoveVbc"
