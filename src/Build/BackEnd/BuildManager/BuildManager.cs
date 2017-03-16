@@ -1589,8 +1589,6 @@ namespace Microsoft.Build.Execution
                 {
                     BuildSubmission submission = _buildSubmissions[result.SubmissionId];
 
-                    SetOverallResultIfWarningsAsErrors(result);
-
                     submission.CompleteResults(result);
 
                     // If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
@@ -1621,6 +1619,8 @@ namespace Microsoft.Build.Execution
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || submission.BuildRequest == null)
                 {
+                    SetOverallResultIfWarningsAsErrors(submission.BuildResult);
+
                     _buildSubmissions.Remove(submission.SubmissionId);
                 }
 
@@ -1841,13 +1841,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void SetOverallResultIfWarningsAsErrors(BuildResult result)
         {
-            if (result.OverallResult == BuildResultCode.Success)
+            if (result != null && result.OverallResult == BuildResultCode.Success)
             {
                 ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
 
                 if (loggingService.HasBuildSubmissionLoggedErrors(result.SubmissionId))
                 {
                     result.SetOverallResult(overallResult: false);
+
+                    _overallBuildSuccess = false;
                 }
             }
         }
