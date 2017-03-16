@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                                         .With(name: "VERSION")
                                         .ForwardAs(o => $"--version {o.Arguments.Single()}")),
                     Create.Option("-f|--framework",
-                                  "Add reference only when targeting a specific framework",
+                                  LocalizableStrings.CmdFrameworkDescription,
                                   Accept.ExactlyOneArgument()
                                         .With(name: "FRAMEWORK")
                                         .ForwardAs(o => $"--framework {o.Arguments.Single()}")),
@@ -61,9 +61,11 @@ namespace Microsoft.DotNet.Cli
                                 description: Tools.Add.ProjectToProjectReference.LocalizableStrings.AppHelpText),
                     CommonOptions.HelpOption(),
                     Create.Option("-f|--framework",
-                                  "Add reference only when targeting a specific framework",
-                                  Accept.AnyOneOf(Suggest.TargetFrameworksFromProjectFile)
-                                        .With(name: "FRAMEWORK"))),
+                                  LocalizableStrings.CmdFrameworkDescription,
+                                  Accept
+                                      .ExactlyOneArgument()
+                                      .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
+                                      .With(name: "FRAMEWORK"))),
                 CommonOptions.HelpOption());
 
         public static IEnumerable<string> QueryNuGet(string match)
