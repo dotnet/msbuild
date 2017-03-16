@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks
     {
         static GetFrameworkPath()
         {
-            s_path           = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest));
+            s_path           = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest));
             s_version11Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11));
             s_version20Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20));
             s_version30Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30));
@@ -26,6 +26,7 @@ namespace Microsoft.Build.Tasks
             s_version46Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46));
             s_version461Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version461));
             s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
+            s_version47Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version47));
         }
 
         #region ITask Members
@@ -59,6 +60,7 @@ namespace Microsoft.Build.Tasks
         private static Lazy<string> s_version46Path;
         private static Lazy<string> s_version461Path;
         private static Lazy<string> s_version462Path;
+        private static Lazy<string> s_version47Path;
 
         /// <summary>
         /// Path to the latest framework, whatever version it happens to be
@@ -132,6 +134,11 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string FrameworkVersion462Path => s_version462Path.Value;
 
+        /// <summary>
+        /// Path to the v4.7 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion47Path => s_version47Path.Value;
         #endregion
     }
 }

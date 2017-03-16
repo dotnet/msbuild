@@ -38,15 +38,15 @@ namespace Microsoft.Build.Tasks
             {
                 if (s_path == null)
                 {
-                    s_path = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
+                    s_path = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.VersionLatest);
 
                     if (String.IsNullOrEmpty(s_path))
                     {
                         Log.LogMessageFromResources(
                             MessageImportance.High,
                             "GetFrameworkSdkPath.CouldNotFindSDK",
-                            ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest),
-                            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest)
+                            ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.VersionLatest),
+                            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.VersionLatest)
                         );
 
                         s_path = String.Empty;

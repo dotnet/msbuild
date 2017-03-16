@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks
 
                 if (pathToTool == null && logErrorsAndWarnings)
                 {
-                    log.LogErrorWithCodeFromResources("General.SdkToolsPathToolDoesNotExist", toolName, sdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest));
+                    log.LogErrorWithCodeFromResources("General.SdkToolsPathToolDoesNotExist", toolName, sdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.VersionLatest));
                 }
             }
 
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Tasks
         internal static string FindSDKToolUsingToolsLocationHelper(string toolName)
         {
             // If it isn't there, we should find it in the SDK based on the version compiled into the utilities
-            string pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(toolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
+            string pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(toolName, TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.VersionLatest);
             return pathToTool;
         }
 
