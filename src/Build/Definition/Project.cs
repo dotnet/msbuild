@@ -1097,12 +1097,12 @@ namespace Microsoft.Build.Evaluation
         ///]
         /// </example>
         /// <remarks>
-        /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMsBuildGlob"/> that combines all globs in the include element and ignores
+        /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
         /// 
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
-        /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MsBuildGlob).ToArray());
+        /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
         /// </code>
         /// 
@@ -1131,7 +1131,7 @@ namespace Microsoft.Build.Evaluation
 
         private struct CumulatedRemoveElementData
         {
-            public ImmutableList<IMsBuildGlob>.Builder Globs { get; set; }
+            public ImmutableList<IMSBuildGlob>.Builder Globs { get; set; }
             public ImmutableHashSet<string>.Builder FragmentStrings { get; set; }
         }
 
@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.Evaluation
             var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMsBuildGlob()).ToImmutableArray());
 
             IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
-            IMsBuildGlob excludeGlob = null;
+            IMSBuildGlob excludeGlob = null;
 
             if (!string.IsNullOrEmpty(itemElement.Exclude))
             {
@@ -1202,7 +1202,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
-            IMsBuildGlob removeGlob = null;
+            IMSBuildGlob removeGlob = null;
 
             if (removeElementCache.ContainsKey(itemElement.ItemType))
             {
@@ -1215,11 +1215,11 @@ namespace Microsoft.Build.Evaluation
             return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
         }
 
-        private static IMsBuildGlob CreateIncludeGlobWithGaps(IMsBuildGlob includeGlob, IMsBuildGlob excludeGlob, IMsBuildGlob removeGlob)
+        private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
         {
             if (excludeGlob != null && removeGlob != null)
             {
-                return new MsBuildGlobWithGaps(
+                return new MSBuildGlobWithGaps(
                     includeGlob,
                     new CompositeGlob(
                         excludeGlob,
@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var gapGlob = excludeGlob ?? removeGlob;
 
-                return new MsBuildGlobWithGaps(
+                return new MSBuildGlobWithGaps(
                     includeGlob,
                     gapGlob
                 );
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.Evaluation
             {
                 cumulatedRemoveElementData = new CumulatedRemoveElementData
                 {
-                    Globs = ImmutableList.CreateBuilder<IMsBuildGlob>(),
+                    Globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
                     FragmentStrings = ImmutableHashSet.CreateBuilder<string>()
                 };
 
@@ -3700,9 +3700,9 @@ namespace Microsoft.Build.Evaluation
         public IEnumerable<string> IncludeGlobs { get; private set; }
 
         /// <summary>
-        /// A <see cref="IMsBuildGlob"/> representing the include globs. It also takes the excludes and relevant removes into consideration.
+        /// A <see cref="IMSBuildGlob"/> representing the include globs. It also takes the excludes and relevant removes into consideration.
         /// </summary>
-        public IMsBuildGlob MsBuildGlob { get; set; }
+        public IMSBuildGlob MsBuildGlob { get; set; }
 
         /// <summary>
         /// Gets an <see cref="ISet{String}"/> containing strings that were excluded.
@@ -3714,7 +3714,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<string> Removes { get; set; }
 
-        internal GlobResult(ProjectItemElement itemElement, IEnumerable<string> includeGlobStrings, IMsBuildGlob globWithGaps, IEnumerable<string> excludeFragmentStrings, IEnumerable<string> removeFragmentStrings)
+        internal GlobResult(ProjectItemElement itemElement, IEnumerable<string> includeGlobStrings, IMSBuildGlob globWithGaps, IEnumerable<string> excludeFragmentStrings, IEnumerable<string> removeFragmentStrings)
         {
             ItemElement = itemElement;
 

@@ -191,10 +191,10 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Return an MsBuildGlob that represents this ItemSpec.
+        /// Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
         /// <returns></returns>
-        public IMsBuildGlob ToMsBuildGlob()
+        public IMSBuildGlob ToMsBuildGlob()
         {
             return new CompositeGlob(Fragments.Select(f => f.ToMsBuildGlob()).ToImmutableArray());
         }
@@ -217,8 +217,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         protected Lazy<Func<string, bool>> FileMatcher { get; }
 
-        private readonly Lazy<IMsBuildGlob> _msbuildGlob;
-        protected virtual IMsBuildGlob MsBuildGlob => _msbuildGlob.Value;
+        private readonly Lazy<IMSBuildGlob> _msbuildGlob;
+        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
 
         protected ItemFragment(string itemSpecFragment, string projectPath)
             : this(
@@ -245,7 +245,7 @@ namespace Microsoft.Build.Evaluation
             ProjectPath = projectPath;
             FileMatcher = fileMatcher;
 
-            _msbuildGlob = new Lazy<IMsBuildGlob>(CreateMsBuildGlob);
+            _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
@@ -254,14 +254,14 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.Value(itemToMatch) ? 1 : 0;
         }
 
-        public virtual IMsBuildGlob ToMsBuildGlob()
+        public virtual IMSBuildGlob ToMsBuildGlob()
         {
             return MsBuildGlob;
         }
 
-        protected virtual IMsBuildGlob CreateMsBuildGlob()
+        protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return Globbing.MsBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
+            return Globbing.MSBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
         }
     }
 
@@ -300,8 +300,8 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private IMsBuildGlob _msbuildGlob;
-        protected override IMsBuildGlob MsBuildGlob
+        private IMSBuildGlob _msbuildGlob;
+        protected override IMSBuildGlob MsBuildGlob
         {
             get
             {
@@ -329,12 +329,12 @@ namespace Microsoft.Build.Evaluation
             return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
         }
 
-        public override IMsBuildGlob ToMsBuildGlob()
+        public override IMSBuildGlob ToMsBuildGlob()
         {
             return MsBuildGlob;
         }
 
-        protected override IMsBuildGlob CreateMsBuildGlob()
+        protected override IMSBuildGlob CreateMsBuildGlob()
         {
             return new CompositeGlob(ReferencedItems.Select(i => i.ToMsBuildGlob()).ToImmutableArray());
         }
