@@ -183,10 +183,6 @@
               PlatformAssemblyPaths="@(PlatformAssemblies);
                                      @(PublishDirSubDirectories);
                                      $(SharedFrameworkNameVersionPath)" />
-
-    <!-- Move the "1.0" assemblies back -->
-    <Move SourceFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')"
-          DestinationFiles="@(NETCore10Assemblies)" />
   </Target>
 
   <Target Name="RemoveVbc"
