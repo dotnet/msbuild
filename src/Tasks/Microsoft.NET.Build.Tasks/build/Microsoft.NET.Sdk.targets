@@ -433,5 +433,5 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Message Importance="Low" Text="Including @(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
 
   </Target>
-  
+
 </Project>
