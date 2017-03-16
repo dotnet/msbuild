@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string CmdNoRestoreDescription = "Adds reference without performing restore preview and compatibility check.";
 
-        public const string CmdSourceDescription = "Uses specific NuGet package sources to use during the restore.";
+        public const string CmdSourceDescription = "Specifies NuGet package sources to use during the restore.";
 
         public const string CmdPackageDirectoryDescription = "Restores the packages to the specified directory.";
 
