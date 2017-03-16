@@ -59,7 +59,7 @@ LINUX_PORTABLE_INSTALL_ARGS=
 CUSTOM_BUILD_ARGS=
 
 # Set nuget package cache under the repo
-export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
+[ -z $NUGET_PACKAGES ] && export NUGET_PACKAGES="$REPOROOT/.nuget/packages"
 
 args=( "$@" )
 
