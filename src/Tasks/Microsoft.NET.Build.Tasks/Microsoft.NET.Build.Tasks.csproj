@@ -35,6 +35,10 @@
       <Version>$(MsBuildPackagesVersion)</Version>
       <ExcludeAssets>Runtime</ExcludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0"
+                      Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System" />
@@ -91,6 +95,7 @@
     <Compile Include="CacheArtifactParser.cs" />
     <Compile Include="EmbedAppNameInHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConflictResolution\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
