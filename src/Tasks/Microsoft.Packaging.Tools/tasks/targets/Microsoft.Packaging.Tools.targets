@@ -1,0 +1,122 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(MicrosoftPackagingToolsTaskDirectory)' == ''">
+    <MicrosoftPackagingToolsTaskDirectory>$(MSBuildThisFileDirectory)</MicrosoftPackagingToolsTaskDirectory>
+    <MicrosoftPackagingToolsTaskDirectory Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)desktop/</MicrosoftPackagingToolsTaskDirectory>
+  </PropertyGroup>
+
+  <Choose>
+    <!-- Allow completely disabling the conflict resolution targets-->
+    <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
+    <!-- Condition here is a hack until https://github.com/dotnet/sdk/issues/534 is fixed -->
+    <When Condition="'$(TargetFramework)' != '' or '$(TargetFrameworks)' != ''">
+      <!-- NuGet 4, run after the targets that construct items from deps -->
+      <PropertyGroup>
+        <HandlePackageFileConflictsAfter>ResolvePackageDependenciesForBuild</HandlePackageFileConflictsAfter>
+        <HandlePublishFileConflictsAfter>RunResolvePublishAssemblies</HandlePublishFileConflictsAfter>
+        <RemoveDepsFileConflictsAfter>GenerateBuildDependencyFile</RemoveDepsFileConflictsAfter>
+        <RemovePublishDepsFileConflictsAfter>GeneratePublishDependencyFile</RemovePublishDepsFileConflictsAfter>
+        <!-- If CopyLocalLockFileAssemblies is not true the host will run from packages,
+             but we still need to consider those package items for conflicts -->
+        <HandlePackageFileConflictsDependsOn Condition="'$(CopyLocalLockFileAssemblies)' != 'true'">_GetLockFileAssemblies</HandlePackageFileConflictsDependsOn>
+
+        <_supportsTrimming>true</_supportsTrimming>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
+      <!-- NuGet 3, run after the target that constructs items from lock file -->
+      <PropertyGroup>
+        <HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</HandlePackageFileConflictsAfter>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <!-- NuGet 2, run before targets that consume references -->
+      <PropertyGroup>
+        <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);HandlePackageFileConflicts</ResolveAssemblyReferencesDependsOn>
+        <PrepareResourcesDependsOn>HandlePackageFileConflicts;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="_GetLockFileAssemblies"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+                            _DefaultMicrosoftNETPlatformLibrary">
+    <!-- Essentially a copy of the SDKs RunResolvePublishAssemblies.
+         We need to find all the files that will be loaded from deps for conflict resolution.-->
+    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
+                              AssetsFilePath="$(ProjectAssetsFile)"
+                              TargetFramework="$(TargetFrameworkMoniker)"
+                              RuntimeIdentifier="$(RuntimeIdentifier)"
+                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
+
+      <Output TaskParameter="AssembliesToPublish" ItemName="_LockFileAssemblies" />
+
+    </ResolvePublishAssemblies>
+  </Target>
+
+  <UsingTask TaskName="HandlePackageFileConflicts" AssemblyFile="$(MicrosoftPackagingToolsTaskDirectory)Microsoft.Packaging.Tools.Tasks.dll" />
+  <Target Name="HandlePackageFileConflicts" AfterTargets="$(HandlePackageFileConflictsAfter)" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">
+    <HandlePackageFileConflicts References="@(Reference)"
+                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                OtherRuntimeItems="@(_LockFileAssemblies)"
+                                PlatformManifests="@(PackageConflictPlatformManifests)"
+                                PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
+      <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
+    </HandlePackageFileConflicts>
+
+    <!-- Replace Reference / ReferenceCopyLocalPaths with the filtered lists.
+         We must remove all and include rather than just remove since removal is based
+         only on ItemSpec and duplicate ItemSpecs may exist with different metadata 
+         (eg: HintPath) -->
+    <ItemGroup>
+      <Reference Remove="@(Reference)" />
+      <Reference Include="@(_ReferencesWithoutConflicts)" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <_RemoveDepsFileConflictsSemaphore>$(IntermediateOutputPath)\RemoveDepsFileConflicts.semaphore</_RemoveDepsFileConflictsSemaphore>
+  </PropertyGroup>
+  <UsingTask TaskName="RemoveDepsFileConflicts" AssemblyFile="$(MicrosoftPackagingToolsTaskDirectory)Microsoft.Packaging.Tools.Tasks.dll" />
+  <Target Name="RemoveDepsFileConflicts" AfterTargets="$(RemoveDepsFileConflictsAfter)"
+          Inputs="$(ProjectDepsFilePath)" Outputs="$(_RemoveDepsFileConflictsSemaphore)"
+          Condition="'$(GenerateDependencyFile)'=='true'">
+    <RemoveDepsFileConflicts DepsFilePath="$(ProjectDepsFilePath)" Conflicts="@(_ConflictPackageFiles)" />
+
+    <Touch Files="$(_RemoveDepsFileConflictsSemaphore)" AlwaysCreate="true">
+      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
+  </Target>
+
+  <Target Name="HandlePublishFileConflicts" AfterTargets="$(HandlePublishFileConflictsAfter)">
+    <HandlePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
+                                PlatformManifests="@(PackageConflictPlatformManifests)"
+                                PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedAssembliesToPublishWithoutConflicts" />
+      <Output TaskParameter="Conflicts" ItemName="_PublishConflictPackageFiles" />
+    </HandlePackageFileConflicts>
+    <ItemGroup>
+      <ResolvedAssembliesToPublish Remove="@(ResolvedAssembliesToPublish)" />
+      <ResolvedAssembliesToPublish Include="@(_ResolvedAssembliesToPublishWithoutConflicts)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <_RemovePublishDepsFileConflictsSemaphore>$(IntermediateOutputPath)\RemovePublishDepsFileConflicts.semaphore</_RemovePublishDepsFileConflictsSemaphore>
+  </PropertyGroup>
+  <Target Name="RemovePublishDepsFileConflicts" AfterTargets="$(RemovePublishDepsFileConflictsAfter)"
+          Inputs="$(PublishDepsFilePath)" Outputs="$(_RemovePublishDepsFileConflictsSemaphore)">
+    <RemoveDepsFileConflicts DepsFilePath="$(PublishDepsFilePath)" Conflicts="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)" />
+
+    <Touch Files="$(_RemovePublishDepsFileConflictsSemaphore)" AlwaysCreate="true">
+      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
+  </Target>
+
+  <Import Project="Microsoft.Packaging.Tools.Trimming.targets" Condition="'$(_supportsTrimming)' == 'true' AND '$(TrimUnusedDependencies)' == 'true'" />
+</Project>
