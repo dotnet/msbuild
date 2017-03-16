@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new TestCommand("dotnet")
+            new DotnetCommand()
                 .WithWorkingDirectory(appWithToolDepRoot)
                 .ExecuteWithCapturedOutput("throwingtool")
                 .Should().Fail()
