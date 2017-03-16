@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string CmdPackageDescription = "The package reference to add.";
 
-        public const string SpecifyExactlyOnePackageReference = "Please specify only one package reference to be added.";
+        public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to add.";
 
         public const string CmdFrameworkDescription = "Adds reference only when targeting a specific framework.";
 

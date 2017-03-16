@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"add package package1 package2 package3");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Please specify only one package reference to be added.");
+            cmd.StdErr.Should().Contain("Please specify one package reference to add.");
         }
 
         [Fact]
