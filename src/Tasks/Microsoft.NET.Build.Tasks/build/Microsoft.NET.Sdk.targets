@@ -434,11 +434,4 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
-
-  <!-- Remove the ProjectConfigurationsInferredFromUsage included in the C#/VB targets so that it doesn't
-       collides with ProjectConfigurationsDeclaredDimensions. This should be removed from those targets
-       directly but those come from a different repo so until all changes meet remove the capability here-->
-  <ItemGroup>
-    <ProjectCapability Remove="ProjectConfigurationsInferredFromUsage" />
-  </ItemGroup>
 </Project>
