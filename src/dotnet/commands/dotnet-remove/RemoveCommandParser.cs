@@ -13,7 +13,6 @@ namespace Microsoft.DotNet.Cli
             Create.Command("remove",
                            ".NET Remove Command",
                            Accept.ExactlyOneArgument()
-                                 .ExistingFilesOnly()
                                  .DefaultToCurrentDirectory()
                                  .With(name: "PROJECT",
                                        description: CommonLocalizableStrings.ArgumentsProjectDescription)

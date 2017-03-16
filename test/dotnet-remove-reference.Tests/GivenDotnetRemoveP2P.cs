@@ -138,8 +138,7 @@ Options:
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two'");
-            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
         }
 
         [Theory]
