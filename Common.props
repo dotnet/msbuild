@@ -28,7 +28,7 @@
     <!-- Reset $(BuildEpoch) whenever $(VersionPrefix) increments. We subtract this from YYYYMMDD portion of build
          number below to obtain the fourth part of file version that must fit in 16 bits. We can produce builds 
          for seven years from every epoch reset. -->
-    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.1.0</VersionPrefix>
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
     <BuildEpoch>20170101</BuildEpoch>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
@@ -40,15 +40,7 @@
     <!-- Prepare Version number used in template builds -->
     <BuildNumberPart1>$(BuildNumber.Split('-')[0])</BuildNumberPart1>
     <BuildNumberPart2>$(BuildNumber.Split('-')[1].PadLeft(2,'0'))</BuildNumberPart2>
-
-    <!-- Unfortunately we have already shipped template manifests with version 2.0.0.0 (matching
-         the version for the NETCore Project System.) Changing this version to match $(VsixVersion) 
-         which is 1.0.0.xxx may create upgrade problems for users doing B2B or Preview 5 upgrades. 
-         Introducing a version variable that continues the 2.0.0.xxx scheme but uses the right build 
-         number. This conforms to the dependencies specified in the ManagedDesktop workload [2.0.0.0,3.0.0.0).
-         We can get rid of this, and references to it, when we bump Microsoft.NET.Sdk version to 2.0.0.
-      -->    
-    <VsixVersion Condition="'$(VsixVersion)' == ''">2.0.0.$(BuildNumberPart1)$(BuildNumberPart2)</VsixVersion>
+    <VsixVersion Condition="'$(VsixVersion)' == ''">$(VersionPrefix).$(BuildNumberPart1)$(BuildNumberPart2)</VsixVersion>
 
     <!-- Prepare assembly metadata -->
     <Authors>Microsoft Corporation</Authors>
