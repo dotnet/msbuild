@@ -53,7 +53,7 @@ Options:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new AddReferenceCommand()
+            var cmd = new ListReferenceCommand()
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
