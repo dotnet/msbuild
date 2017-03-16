@@ -58,7 +58,7 @@ Options:
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().BeVisuallyEquivalentTo(
-                "Unrecognized command or argument 'one'\r\nUnrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
+                "Unrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
         }
 
         [Theory]

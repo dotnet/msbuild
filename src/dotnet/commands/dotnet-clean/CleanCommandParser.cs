@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
                               LocalizableStrings.CmdOutputDirDescription,
                                          Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
-                        .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VerbosityOption());

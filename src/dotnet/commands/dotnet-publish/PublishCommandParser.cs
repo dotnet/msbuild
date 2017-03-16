@@ -22,15 +22,15 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                               Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAs(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--filter", 
                     LocalizableStrings.FilterProjOptionDescription,
-                              Accept.ExactlyOneArgument()
+                              Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.FilterProjOption)
-                        .ForwardAs(o => $"/p:FilterProjectFiles={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
                 CommonOptions.VerbosityOption());
     }
 }

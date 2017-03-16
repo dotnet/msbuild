@@ -34,24 +34,24 @@ namespace Microsoft.DotNet.Cli
                                   "Version for the package to be added.",
                                   Accept.ExactlyOneArgument()
                                         .With(name: "VERSION")
-                                        .ForwardAs(o => $"--version {o.Arguments.Single()}")),
+                                        .ForwardAsSingle(o => $"--version {o.Arguments.Single()}")),
                     Create.Option("-f|--framework",
                                   LocalizableStrings.CmdFrameworkDescription,
                                   Accept.ExactlyOneArgument()
                                         .With(name: "FRAMEWORK")
-                                        .ForwardAs(o => $"--framework {o.Arguments.Single()}")),
+                                        .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
                     Create.Option("-n|--no-restore ",
                                   "Add reference without performing restore preview and compatibility check."),
                     Create.Option("-s|--source",
                                   "Use specific NuGet package sources to use during the restore.",
                                   Accept.ExactlyOneArgument()
                                         .With(name: "SOURCE")
-                                        .ForwardAs(o => $"--source {o.Arguments.Single()}")),
+                                        .ForwardAsSingle(o => $"--source {o.Arguments.Single()}")),
                     Create.Option("--package-directory",
                                   "Restore the packages to this Directory .",
                                   Accept.ExactlyOneArgument()
                                         .With(name: "PACKAGE_DIRECTORY")
-                                        .ForwardAs(o => $"--package-directory {o.Arguments.Single()}"))),
+                                        .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}"))),
                 Create.Command(
                     "reference",
                     Tools.Add.ProjectToProjectReference.LocalizableStrings.AppFullName,

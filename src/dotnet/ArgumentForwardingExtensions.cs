@@ -13,37 +13,36 @@ namespace Microsoft.DotNet.Cli
 
         public static ArgumentsRule ForwardAs(
             this ArgumentsRule rule,
-            string template) =>
-            rule.MaterializeAs(o => new ForwardedArgument(template));
+            string value) =>
+            rule.MaterializeAs(o => new ForwardedArgument(value));
 
-        public static ArgumentsRule ForwardAs(
+        public static ArgumentsRule ForwardAsSingle(
             this ArgumentsRule rule,
             Func<AppliedOption, string> format) =>
             rule.MaterializeAs(o =>
-                new ForwardedArgument(format(o)));
+                                   new ForwardedArgument(format(o)));
+
+        public static ArgumentsRule ForwardAsMany(
+            this ArgumentsRule rule,
+            Func<AppliedOption, IEnumerable<string>> format) =>
+            rule.MaterializeAs(o =>
+                                   new ForwardedArgument(format(o).ToArray()));
 
         public static IEnumerable<string> OptionValuesToBeForwarded(
             this AppliedOption command) =>
             command.AppliedOptions
                    .Select(o => o.Value())
                    .OfType<ForwardedArgument>()
-                   .Select(o => o.ToString());
+                   .SelectMany(o => o.Values);
 
         private class ForwardedArgument
         {
-            private readonly string _value;
-
-            public ForwardedArgument(string value)
+            public ForwardedArgument(params string[] values)
             {
-                _value = value;
+                Values = values;
             }
 
-            public override string ToString() => _value;  
-            
-            public static explicit operator string(ForwardedArgument argument)
-            {
-                return argument.ToString();
-            }
+            public string[] Values { get; }
         }
     }
 }

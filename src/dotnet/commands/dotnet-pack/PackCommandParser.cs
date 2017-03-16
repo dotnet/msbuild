@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdOutputDirDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
-                        .ForwardAs(o => $"/p:PackageOutputPath={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:PackageOutputPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.CmdNoBuildOptionDescription,

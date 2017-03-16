@@ -20,20 +20,20 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdSourceOptionDescription,
                     Accept.OneOrMoreArguments()
                           .With(name: LocalizableStrings.CmdSourceOption)
-                          .ForwardAs(o => $"/p:RestoreSources={string.Join("%3B", o.Arguments)}")),
+                          .ForwardAsSingle(o => $"/p:RestoreSources={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "-r|--runtime",
                     LocalizableStrings.CmdRuntimeOptionDescription,
                     Accept.OneOrMoreArguments()
                           .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                           .With(name: LocalizableStrings.CmdRuntimeOption)
-                          .ForwardAs(o => $"/p:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
+                          .ForwardAsSingle(o => $"/p:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--packages",
                     LocalizableStrings.CmdPackagesOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdPackagesOption)
-                          .ForwardAs(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--disable-parallel",
                     LocalizableStrings.CmdDisableParallelOptionDescription,
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdConfigFileOption)
-                          .ForwardAs(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-cache",
                     LocalizableStrings.CmdNoCacheOptionDescription,

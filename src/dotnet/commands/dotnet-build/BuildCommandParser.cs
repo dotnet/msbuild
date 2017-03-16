@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAs(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),

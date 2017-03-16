@@ -19,24 +19,34 @@ namespace Microsoft.DotNet.Cli
                     "-e|--entries",
                     LocalizableStrings.ProjectEntryDescription,
                     Accept.OneOrMoreArguments()
-                        .With(name: LocalizableStrings.ProjectEntries)
-                        .ForwardAs(o => 
-                        {
-                            var materializedString = $"{o.Arguments.First()}";
+                          .With(name: LocalizableStrings.ProjectEntries)
+                          .ForwardAsMany(o =>
+                          {
+                              var materializedString = $"{o.Arguments.First()}";
 
-                            if (o.Arguments.Count() == 1) return materializedString;
-
-                            var additionalProjects = string.Join("%3B", o.Arguments.Skip(1));
-
-                            return $"{materializedString} /p:AdditionalProjects={additionalProjects}";
-                        })),
+                              if (o.Arguments.Count == 1)
+                              {
+                                  return new[]
+                                  {
+                                      materializedString
+                                  };
+                              }
+                              else
+                              {
+                                  return new[]
+                                  {
+                                      materializedString,
+                                      $"/p:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1))}"
+                                  };
+                              }
+                          })),
                 CommonOptions.FrameworkOption(),
                 Create.Option(
                     "--framework-version",
                     LocalizableStrings.FrameworkVersionOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FrameworkVersionOption)
-                        .ForwardAs(o => $"/p:FX_Version={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:FX_Version={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
                 Create.Option(
@@ -44,18 +54,18 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAs(o => $"/p:ComposeDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:ComposeDir={o.Arguments.Single()}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
-                        .ForwardAs(o => $"/p:ComposeWorkingDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:ComposeWorkingDir={o.Arguments.Single()}")),
                 Create.Option(
                     "--preserve-working-dir",
                     LocalizableStrings.PreserveIntermediateWorkingDirOptionDescription,
                     Accept.NoArguments()
-                        .ForwardAs(o => $"/p:PreserveComposeWorkingDir=true")),
+                        .ForwardAsSingle(o => $"/p:PreserveComposeWorkingDir=true")),
                 Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,
