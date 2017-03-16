@@ -2,60 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Add;
-using Microsoft.DotNet.Tools.Build;
-using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Help;
-using Microsoft.DotNet.Tools.List;
-using Microsoft.DotNet.Tools.Migrate;
-using Microsoft.DotNet.Tools.MSBuild;
-using Microsoft.DotNet.Tools.New;
-using Microsoft.DotNet.Tools.NuGet;
-using Microsoft.DotNet.Tools.Pack;
-using Microsoft.DotNet.Tools.Publish;
-using Microsoft.DotNet.Tools.Remove;
-using Microsoft.DotNet.Tools.Restore;
-using Microsoft.DotNet.Tools.RestoreProjectJson;
-using Microsoft.DotNet.Tools.Run;
-using Microsoft.DotNet.Tools.Sln;
-using Microsoft.DotNet.Tools.Test;
-using Microsoft.DotNet.Tools.VSTest;
-using Microsoft.DotNet.Tools.Cache;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-        private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
-        {
-            ["add"] = AddCommand.Run,
-            ["build"] = BuildCommand.Run,
-            ["cache"] = CacheCommand.Run,
-            ["clean"] = CleanCommand.Run,
-            ["help"] = HelpCommand.Run,
-            ["list"] = ListCommand.Run,
-            ["migrate"] = MigrateCommand.Run,
-            ["msbuild"] = MSBuildCommand.Run,
-            ["new"] = NewCommandShim.Run,
-            ["nuget"] = NuGetCommand.Run,
-            ["pack"] = PackCommand.Run,
-            ["publish"] = PublishCommand.Run,
-            ["remove"] = RemoveCommand.Run,
-            ["restore"] = RestoreCommand.Run,
-            ["run"] = RunCommand.Run,
-            ["sln"] = SlnCommand.Run,
-            ["test"] = TestCommand.Run,
-            ["vstest"] = VSTestCommand.Run,
-        };
-
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -169,10 +127,10 @@ namespace Microsoft.DotNet.Cli
             telemetryClient.TrackEvent(command, null, null);
 
             int exitCode;
-            Func<string[], int> builtIn;
-            if (s_builtIns.TryGetValue(command, out builtIn))
+            BuiltInCommandMetadata builtIn;
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out builtIn))
             {
-                exitCode = builtIn(appArgs.ToArray());
+                exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
             {
@@ -215,9 +173,9 @@ namespace Microsoft.DotNet.Cli
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
-        internal static bool TryGetBuiltInCommand(string commandName, out Func<string[], int> builtInCommand)
+        internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)
         {
-            return s_builtIns.TryGetValue(commandName, out builtInCommand);
+            return BuiltInCommandsCatalog.Commands.TryGetValue(commandName, out builtInCommand);
         }
 
         private static void PrintVersion()
