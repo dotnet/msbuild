@@ -10,6 +10,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -29,6 +30,8 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     sealed internal class MockEngine : IBuildEngine5
     {
+        private readonly ITestOutputHelper _output;
+
         private bool _isRunningMultipleNodes;
         private int _messages = 0;
         private int _warnings = 0;
@@ -73,6 +76,12 @@ namespace Microsoft.Build.UnitTests
             _logToConsole = logToConsole;
         }
 
+        public MockEngine(ITestOutputHelper output)
+        {
+            _output = output;
+            _mockLogger = new MockLogger(output);
+            _logToConsole = false; // We have a better place to put it.
+        }
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
@@ -90,6 +99,7 @@ namespace Microsoft.Build.UnitTests
 
             if (_logToConsole)
                 Console.WriteLine(message);
+            _output?.WriteLine(message);
             _log.AppendLine(message);
         }
 
@@ -109,6 +119,7 @@ namespace Microsoft.Build.UnitTests
 
             if (_logToConsole)
                 Console.WriteLine(message);
+            _output?.WriteLine(message);
             _log.AppendLine(message);
         }
 
@@ -116,6 +127,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (_logToConsole)
                 Console.WriteLine(eventArgs.Message);
+            _output?.WriteLine(eventArgs.Message);
             _log.AppendLine(eventArgs.Message);
         }
 
@@ -123,6 +135,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (_logToConsole)
                 Console.WriteLine(eventArgs.Message);
+            _output?.WriteLine(eventArgs.Message);
             _log.AppendLine(eventArgs.Message);
             ++_messages;
         }
@@ -139,6 +152,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Console.WriteLine(message);
             }
+            _output?.WriteLine(message);
             _log.AppendLine(message);
         }
 
@@ -411,7 +425,11 @@ namespace Microsoft.Build.UnitTests
                 )
               )
             {
-                Console.WriteLine(_log);
+                if (_output == null)
+                {
+                    Console.WriteLine(_log.ToString());
+                }
+
                 _mockLogger.AssertLogContains(contains);
             }
         }
@@ -424,7 +442,10 @@ namespace Microsoft.Build.UnitTests
         /// <param name="contains"></param>
         internal void AssertLogDoesntContain(string contains)
         {
-            Console.WriteLine(_log);
+            if (_output == null)
+            {
+                Console.WriteLine(_log);
+            }
 
             if (_upperLog == null)
             {
