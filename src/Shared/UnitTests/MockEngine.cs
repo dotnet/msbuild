@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -32,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         private int _messages = 0;
         private int _warnings = 0;
         private int _errors = 0;
-        private string _log = "";
+        private StringBuilder _log = new StringBuilder();
         private string _upperLog = null;
         private ProjectCollection _projectCollection = new ProjectCollection();
         private bool _logToConsole = false;
@@ -89,8 +90,7 @@ namespace Microsoft.Build.UnitTests
 
             if (_logToConsole)
                 Console.WriteLine(message);
-            _log += message;
-            _log += "\n";
+            _log.AppendLine(message);
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
@@ -109,24 +109,21 @@ namespace Microsoft.Build.UnitTests
 
             if (_logToConsole)
                 Console.WriteLine(message);
-            _log += message;
-            _log += "\n";
+            _log.AppendLine(message);
         }
 
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
         {
             if (_logToConsole)
                 Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
+            _log.AppendLine(eventArgs.Message);
         }
 
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
             if (_logToConsole)
                 Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
+            _log.AppendLine(eventArgs.Message);
             ++_messages;
         }
 
@@ -142,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Console.WriteLine(message);
             }
-            _log += message;
+            _log.AppendLine(message);
         }
 
         public bool ContinueOnError
@@ -179,8 +176,16 @@ namespace Microsoft.Build.UnitTests
 
         internal string Log
         {
-            set { _log = value; }
-            get { return _log; }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException("Expected log setter to be used only to reset the log to empty.");
+                }
+
+                _log.Clear();
+            }
+            get { return _log.ToString(); }
         }
 
         public bool IsRunningMultipleNodes
@@ -394,8 +399,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (_upperLog == null)
             {
-                _upperLog = _log;
-                _upperLog = _upperLog.ToUpperInvariant();
+                _upperLog = _log.ToString().ToUpperInvariant();
             }
 
             // If we do not contain this string than pass it to
@@ -424,8 +428,7 @@ namespace Microsoft.Build.UnitTests
 
             if (_upperLog == null)
             {
-                _upperLog = _log;
-                _upperLog = _upperLog.ToUpperInvariant();
+                _upperLog = _log.ToString().ToUpperInvariant();
             }
 
             Assert.False(_upperLog.Contains
