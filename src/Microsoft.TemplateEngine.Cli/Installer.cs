@@ -63,6 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Remove=""Microsoft.NETCore.App"" />
 {0}
   </ItemGroup>
 </Project>";
@@ -81,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
-            CommandResult commandResult = Command.CreateDotNet("restore", new[] { proj, "--packages", restored }).ForwardStdErr().Execute();
+            Command.CreateDotNet("restore", new[] { proj, "--packages", restored }).ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
