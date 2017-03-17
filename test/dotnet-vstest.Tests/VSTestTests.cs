@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .GetDirectory("bin", configuration, "netcoreapp2.0")
                 .GetFile($"{testAppName}.dll");
 
-            var argsForVstest = $"\"{outputDll.FullName}\" {TestBase.ConsoleLoggerOutputNormal}";
+            var argsForVstest = $"\"{outputDll.FullName}\" --logger:console;verbosity=normal";
 
             // Call vstest
             var result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);

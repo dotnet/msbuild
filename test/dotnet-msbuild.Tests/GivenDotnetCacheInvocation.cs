@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData("--output")]
         public void ItAddsOutputPathToMsBuildInvocation(string optionName)
         {
-            string path = Directory.GetCurrentDirectory();
+            string path = "/some/path";
             var args = ArgsPrefix.Concat(new string[] { optionName, path }).ToArray();
 
             var msbuildPath = "<msbuildpath>";
