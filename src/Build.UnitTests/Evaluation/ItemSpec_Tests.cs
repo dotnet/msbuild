@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             var itemSpec = CreateItemSpecFrom("a;b*;c*;@(foo)", CreateExpander(new Dictionary<string, string[]> {{"foo", new[] {"d", "e"}}}));
 
-            var itemSpecGlob = itemSpec.ToMsBuildGlob();
+            var itemSpecGlob = itemSpec.ToMSBuildGlob();
 
             Assert.True(itemSpecGlob.IsMatch("a"));
             Assert.True(itemSpecGlob.IsMatch("bar"));
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
             Assert.Equal(1, matches);
 
-            var itemSpecGlob = itemSpec.ToMsBuildGlob();
+            var itemSpecGlob = itemSpec.ToMSBuildGlob();
 
             Assert.True(itemSpecGlob.IsMatch("a"));
             Assert.True(itemSpecGlob.IsMatch("bar"));

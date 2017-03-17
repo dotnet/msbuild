@@ -194,9 +194,9 @@ namespace Microsoft.Build.Evaluation
         /// Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
         /// <returns></returns>
-        public IMSBuildGlob ToMsBuildGlob()
+        public IMSBuildGlob ToMSBuildGlob()
         {
-            return new CompositeGlob(Fragments.Select(f => f.ToMsBuildGlob()).ToImmutableArray());
+            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()).ToImmutableArray());
         }
     }
 
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.Value(itemToMatch) ? 1 : 0;
         }
 
-        public virtual IMSBuildGlob ToMsBuildGlob()
+        public virtual IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
         }
@@ -329,14 +329,14 @@ namespace Microsoft.Build.Evaluation
             return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
         }
 
-        public override IMSBuildGlob ToMsBuildGlob()
+        public override IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
         }
 
         protected override IMSBuildGlob CreateMsBuildGlob()
         {
-            return new CompositeGlob(ReferencedItems.Select(i => i.ToMsBuildGlob()).ToImmutableArray());
+            return new CompositeGlob(ReferencedItems.Select(i => i.ToMSBuildGlob()).ToImmutableArray());
         }
 
         private bool InitReferencedItemsIfNecessary()

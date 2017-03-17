@@ -1188,7 +1188,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             var includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
-            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMsBuildGlob()).ToImmutableArray());
+            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()).ToImmutableArray());
 
             IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
             IMSBuildGlob excludeGlob = null;
@@ -1197,8 +1197,8 @@ namespace Microsoft.Build.Evaluation
             {
                 var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
 
-                excludeFragmentStrings = GetRelevantFragmentStringsForExcludesAndRemove(excludeItemspec).ToImmutableHashSet();
-                excludeGlob = excludeItemspec.ToMsBuildGlob();
+                excludeFragmentStrings = GetRelevantFragmentStringsForExcludesAndRemoves(excludeItemspec).ToImmutableHashSet();
+                excludeGlob = excludeItemspec.ToMSBuildGlob();
             }
 
             IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
@@ -1255,8 +1255,8 @@ namespace Microsoft.Build.Evaluation
             }
 
             var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
-            var removeSpecFragmentStrings = GetRelevantFragmentStringsForExcludesAndRemove(removeSpec);
-            var removeGlob = removeSpec.ToMsBuildGlob();
+            var removeSpecFragmentStrings = GetRelevantFragmentStringsForExcludesAndRemoves(removeSpec);
+            var removeGlob = removeSpec.ToMSBuildGlob();
 
             cumulatedRemoveElementData.Globs.Add(removeGlob);
 
@@ -1266,7 +1266,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private IEnumerable<string> GetRelevantFragmentStringsForExcludesAndRemove(EvaluationItemSpec spec)
+        private IEnumerable<string> GetRelevantFragmentStringsForExcludesAndRemoves(EvaluationItemSpec spec)
         {
             foreach (var valueString in spec.Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
             {
