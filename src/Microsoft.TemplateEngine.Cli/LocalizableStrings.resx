@@ -127,13 +127,13 @@
     <value>Alias creation successful.</value>
   </data>
   <data name="AmbiguousInputTemplateName" xml:space="preserve">
-    <value>Unable to determine the desired template from the input template name: [{0}].</value>
+    <value>Unable to determine the desired template from the input template name: {0}.</value>
   </data>
   <data name="ArgsFileNotFound" xml:space="preserve">
-    <value>The specified extra args file does not exist: [{0}].</value>
+    <value>The specified extra args file does not exist: {0}.</value>
   </data>
   <data name="ArgsFileWrongFormat" xml:space="preserve">
-    <value>Extra args file [{0}] is not formatted properly.</value>
+    <value>Extra args file {0} is not formatted properly.</value>
   </data>
   <data name="Assembly" xml:space="preserve">
     <value>Assembly</value>
@@ -206,7 +206,7 @@
     <value>Generators</value>
   </data>
   <data name="GenericPlaceholderTemplateContextError" xml:space="preserve">
-    <value>[{0}] cannot be created in the target location.</value>
+    <value>{0} cannot be created in the target location.</value>
   </data>
   <data name="GettingReady" xml:space="preserve">
     <value>Getting ready...</value>
@@ -235,7 +235,7 @@
     '{1}' is not a valid value for {0} ({2}).</value>
   </data>
   <data name="InvalidParameterValues" xml:space="preserve">
-    <value>Error: Invalid values for parameter(s) [{0}] for template [{1}].</value>
+    <value>Error: Invalid values for parameter(s) {0} for template {1}.</value>
   </data>
   <data name="InvalidTemplateParameterValues" xml:space="preserve">
     <value>Error: Invalid parameter(s):</value>
@@ -262,7 +262,7 @@
     <value>Mount Points</value>
   </data>
   <data name="MultipleArgsSpecifiedError" xml:space="preserve">
-    <value>Template name is the only allowed argument. Invalid argument: [{0}].</value>
+    <value>Template name is the only allowed argument. Invalid argument: {0}.</value>
   </data>
   <data name="MultipleValuesSpecifiedForSingleValuedParameter" xml:space="preserve">
     <value>Multiple values specified for single value parameter: {0}.</value>
@@ -277,7 +277,7 @@
     <value>    (No Parameters)</value>
   </data>
   <data name="NoTemplatesMatchName" xml:space="preserve">
-    <value>No templates matched the input template name: [{0}].</value>
+    <value>No templates matched the input template name: {0}.</value>
   </data>
   <data name="NoUpdates" xml:space="preserve">
     <value>No updates were found.</value>
@@ -295,7 +295,7 @@
     <value>Overwrite</value>
   </data>
   <data name="ParameterMissingValue" xml:space="preserve">
-    <value>Parameter [{0}] ({1}) must be given a value.</value>
+    <value>Parameter {0} ({1}) must be given a value.</value>
   </data>
   <data name="ParameterNamePrefixError" xml:space="preserve">
     <value>Parameter names must start with -- or -.</value>
@@ -304,7 +304,7 @@
     <value>Parameter name {0} cannot be used for multiple purposes.</value>
   </data>
   <data name="ParameterSpecifiedMultipleTimes" xml:space="preserve">
-    <value>Parameter [{0}] was specified multiple times, including with the flag [{1}].</value>
+    <value>Parameter {0} was specified multiple times, including with the flag {1}.</value>
   </data>
   <data name="Parent" xml:space="preserve">
     <value>Parent</value>
@@ -340,7 +340,7 @@
     <value>The following templates partially match the input. Be more specific with the template name and/or language.</value>
   </data>
   <data name="TemplateNotValidGivenTheSpecifiedFilter" xml:space="preserve">
-    <value>[{0}] matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.</value>
+    <value>{0} matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.</value>
   </data>
   <data name="Templates" xml:space="preserve">
     <value>Templates</value>

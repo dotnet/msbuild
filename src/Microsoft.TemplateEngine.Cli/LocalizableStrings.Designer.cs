@@ -89,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to determine the desired template from the input template name: [{0}]..
+        ///   Looks up a localized string similar to Unable to determine the desired template from the input template name: {0}..
         /// </summary>
         internal static string AmbiguousInputTemplateName {
             get {
@@ -98,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The specified extra args file does not exist: [{0}]..
+        ///   Looks up a localized string similar to The specified extra args file does not exist: {0}..
         /// </summary>
         internal static string ArgsFileNotFound {
             get {
@@ -107,7 +107,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Extra args file [{0}] is not formatted properly..
+        ///   Looks up a localized string similar to Extra args file {0} is not formatted properly..
         /// </summary>
         internal static string ArgsFileWrongFormat {
             get {
@@ -352,7 +352,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [{0}] cannot be created in the target location..
+        ///   Looks up a localized string similar to {0} cannot be created in the target location..
         /// </summary>
         internal static string GenericPlaceholderTemplateContextError {
             get {
@@ -435,7 +435,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error: Invalid values for parameter(s) [{0}] for template [{1}]..
+        ///   Looks up a localized string similar to Error: Invalid values for parameter(s) {0} for template {1}..
         /// </summary>
         internal static string InvalidParameterValues {
             get {
@@ -516,7 +516,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template name is the only allowed argument. Invalid argument: [{0}]..
+        ///   Looks up a localized string similar to Template name is the only allowed argument. Invalid argument: {0}..
         /// </summary>
         internal static string MultipleArgsSpecifiedError {
             get {
@@ -570,7 +570,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No templates matched the input template name: [{0}]..
+        ///   Looks up a localized string similar to No templates matched the input template name: {0}..
         /// </summary>
         internal static string NoTemplatesMatchName {
             get {
@@ -624,7 +624,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parameter [{0}] ({1}) must be given a value..
+        ///   Looks up a localized string similar to Parameter {0} ({1}) must be given a value..
         /// </summary>
         internal static string ParameterMissingValue {
             get {
@@ -651,7 +651,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parameter [{0}] was specified multiple times, including with the flag [{1}]..
+        ///   Looks up a localized string similar to Parameter {0} was specified multiple times, including with the flag {1}..
         /// </summary>
         internal static string ParameterSpecifiedMultipleTimes {
             get {
@@ -795,7 +795,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [{0}] matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template..
+        ///   Looks up a localized string similar to {0} matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template..
         /// </summary>
         internal static string TemplateNotValidGivenTheSpecifiedFilter {
             get {
