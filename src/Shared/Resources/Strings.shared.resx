@@ -164,6 +164,9 @@
   <data name="Shared.ParameterCannotBeNull" UESanitized="false" Visibility="Public">
     <value>Parameter "{0}" cannot be null.</value>
   </data>
+  <data name="Shared.ParameterCannotHaveInvalidPathChars" UESanitized="false" Visibility="Public">
+    <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
+  </data>
   <data name="Shared.ParameterCannotHaveZeroLength" UESanitized="false" Visibility="Public">
     <value>Parameter "{0}" cannot have zero length.</value>
   </data>

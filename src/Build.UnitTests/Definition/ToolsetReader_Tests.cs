@@ -228,9 +228,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidRelativePath()
         {
-            if (NativeMethodsShared.IsUnix)
+            if (NativeMethodsShared.IsLinux)
             {
-                return; // "Cannot force invalid character name on Unix"
+                return; // "Cannot force invalid character name on Linux"
             }
 
             string invalidRelativePath = ".." + Path.DirectorySeparatorChar + ":|invalid|";

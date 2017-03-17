@@ -12,13 +12,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.OM.UnitTests.Construction;
+using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -3535,202 +3533,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "1.foo");
         }
 
+        public static IEnumerable<object[]> GetItemProvenanceShouldBeSensitiveToGlobbingConeTestData => GlobbingTestData.GlobbingConesTestData;
+
         [Theory]
-        // recursive globing cone is at the project directory
-        [InlineData(
-            // item include glob
-            "**/*.cs",
-            // argument to GetItemProvenance
-            "a/a.cs",
-            // subdirectory path the project file should be placed in, relative to the test directory root.
-            // Subdirs are necessary if .. appears in any of the test paths.
-            // This is to ensure that Path.GetFullpath has enough path fragments to eat into, and to keep the glob inside the test directory root
-            "", 
-            true // should GetItemProvenance find a match
-            )]
-        [InlineData(
-            "**/*.cs",
-            "../a/a.cs",
-            "ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is a superset of the project directory via relative path
-        [InlineData(
-            "../**/*.cs",
-            "../a/a.cs",
-            "ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../**/*.cs",
-            "a/a.cs",
-            "ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../**/*.cs",
-            "../../a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is a subset of the project directory via relative path
-        [InlineData(
-            "a/**/*.cs",
-            "b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/**/*.cs",
-            "a/b/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/**/*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is disjoint of the project directory via relative path
-        [InlineData(
-            "../a/**/*.cs",
-            "../a/b/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/**/*.cs",
-            "../b/c/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/**/*.cs",
-            "a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is at the project directory
-        [InlineData(
-            "a*a/*.cs",
-            "aba/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a*a/*.cs",
-            "aba/aba/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a*a/*.cs",
-            "../aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is inside the project directory
-        [InlineData(
-            "a/a*a/*.cs",
-            "a/aba/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/a*a/*.cs",
-            "a/aba/a/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/a*a/*.cs",
-            "../a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is disjoing to the project directory
-        [InlineData(
-            "../a/a*a/*.cs",
-            ".././a/aba/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/a*a/*.cs",
-            "../a/a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/a*a/*.cs",
-            "../../a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is at the project directory
-        [InlineData(
-            "*.cs",
-            "a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "*.cs",
-            "a/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is under the project directory
-        [InlineData(
-            "a/*.cs",
-            "a/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/*.cs",
-            "a/b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/*.cs",
-            "b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is disjoing to the project directory
-        [InlineData(
-            ".././a/*.cs",
-            "../a/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/*.cs",
-            "a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/*.cs",
-            "../a/a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
+        [MemberData(nameof(GetItemProvenanceShouldBeSensitiveToGlobbingConeTestData))]
         public void GetItemProvenanceShouldBeSensitiveToGlobbingCone(string includeGlob, string getItemProvenanceArgument, string relativePathOfProjectFile, bool provenanceShouldFindAMatch)
         {
             var projectContents =
@@ -3750,10 +3556,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProvenanceResultTupleList expectedProvenance = null;
 
+                var provenanceKind = includeGlob.IndexOfAny(new[]{'*', '?'}) != -1  ? Provenance.Glob : Provenance.StringLiteral;
                 expectedProvenance = provenanceShouldFindAMatch
                     ? new ProvenanceResultTupleList
                     {
-                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1)
+                        Tuple.Create("A", Operation.Include, provenanceKind, 1)
                     }
                     : new ProvenanceResultTupleList();
 

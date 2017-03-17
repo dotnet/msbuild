@@ -515,6 +515,13 @@
     <Compile Include="Evaluation\Evaluator.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />
+    <Compile Include="Globbing\CompositeGlob.cs" />
+    <Compile Include="Globbing\Extensions\MSBuildGlobExtensions.cs" />
+    <Compile Include="Globbing\Visitor\GlobVisitor.cs" />
+    <Compile Include="Globbing\MSBuildGlobWithGaps.cs" />
+    <Compile Include="Globbing\MSBuildGlob.cs" />
+    <Compile Include="Globbing\IMSBuildGlob.cs" />
+    <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />

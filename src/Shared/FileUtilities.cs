@@ -1021,6 +1021,11 @@ namespace Microsoft.Build.Shared
             return s.Replace('\\', '/');
         }
 
+        internal static string WithTrailingSlash(this string s)
+        {
+            return EnsureTrailingSlash(s);
+        }
+
         internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
 
         internal static bool PathsEqual(string path1, string path2)
