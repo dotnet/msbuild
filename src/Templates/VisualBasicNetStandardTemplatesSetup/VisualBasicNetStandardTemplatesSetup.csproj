@@ -48,12 +48,6 @@
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ProjectSelector.pkgdef">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ProjectTemplates\VisualBasic\.NETStandard\VisualBasicNetStandardClassLibrary\VisualBasicNetStandardClassLibrary.csproj">
       <Project>{76B09ABB-8D19-41BD-99AE-C3A067C7583C}</Project>
       <Name>VisualBasicNetStandardClassLibrary</Name>
