@@ -13,8 +13,6 @@ namespace StreamForwarderTests
 {
     public class StreamForwarderTests : TestBase
     {
-        private static readonly string s_rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-
         public static IEnumerable<object[]> ForwardingTheoryVariations
         {
             get
