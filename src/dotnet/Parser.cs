@@ -9,7 +9,6 @@ namespace Microsoft.DotNet.Cli
     public static class Parser
     {
         public static CommandLine.Parser Instance { get; } = new CommandLine.Parser(
-            delimiters: Array.Empty<char>(),
             options: Create.Command("dotnet",
                                     ".NET Command Line Tools",
                                     Accept.NoArguments(),
