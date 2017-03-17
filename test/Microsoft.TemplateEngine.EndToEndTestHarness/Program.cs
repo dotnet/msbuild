@@ -29,17 +29,15 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             VerificationLookup["file_contains"] = CheckFileContains;
             VerificationLookup["file_does_not_contain"] = CheckFileDoesNotContain;
 
-            string[] passthroughArgs = new string[args.Length - 2];
+            int batteryCount = int.Parse(args[0], CultureInfo.InvariantCulture);
+            string[] passthroughArgs = new string[args.Length - 2 - batteryCount];
+            string outputPath = args[batteryCount + 1];
 
             for(int i = 0; i < passthroughArgs.Length; ++i)
             {
-                passthroughArgs[i] = args[i + 2];
+                passthroughArgs[i] = args[i + 2 + batteryCount];
             }
 
-            string verificationsFile = args[0];
-            string outputPath = args[1];
-            string verificationsFileContents = File.ReadAllText(verificationsFile);
-            JArray verifications = JArray.Parse(verificationsFileContents);
             ITemplateEngineHost host = CreateHost();
             string profileDir = Environment.ExpandEnvironmentVariables("%USERPROFILE%");
 
@@ -57,16 +55,23 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(outputPath);
 
             int result = New3Command.Run(CommandName, host, FirstRun, passthroughArgs);
-
             bool verificationsPassed = false;
-            try
+
+            for (int i = 0; i < batteryCount; ++i)
             {
-                verificationsPassed = RunVerifications(verifications, host.FileSystem, outputPath);
-            }
-            catch (Exception ex)
-            {
-                verificationsPassed = false;
-                Console.Error.WriteLine(ex.ToString());
+                string verificationsFile = args[i + 1];
+                string verificationsFileContents = File.ReadAllText(verificationsFile);
+                JArray verifications = JArray.Parse(verificationsFileContents);
+
+                try
+                {
+                    verificationsPassed = RunVerifications(verifications, host.FileSystem, outputPath);
+                }
+                catch (Exception ex)
+                {
+                    verificationsPassed = false;
+                    Console.Error.WriteLine(ex.ToString());
+                }
             }
 
             return result != 0 ? result : verificationsPassed ? 0 : 1;
@@ -186,15 +191,13 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         {
-            Paths paths = new Paths(environmentSettings);
-
             string codebase = typeof(Program).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
 
             string packages = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
-            string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "templates") + Path.DirectorySeparatorChar + "*.nupkg";
+            string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
             installer.InstallPackages(new[] { packages });
             installer.InstallPackages(new[] { templates });
         }

@@ -7,13 +7,13 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class PostActionDispatcher
     {
-        private TemplateCreationResult _creationResult;
-        private IComponentManager _components;
+        private readonly TemplateCreationResult _creationResult;
+        private readonly IEngineEnvironmentSettings _settings;
 
-        public PostActionDispatcher(TemplateCreationResult creationResult, IComponentManager components)
+        public PostActionDispatcher(IEngineEnvironmentSettings settings, TemplateCreationResult creationResult)
         {
+            _settings = settings;
             _creationResult = creationResult;
-            _components = components;
         }
 
         public void Process()
@@ -28,12 +28,12 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IPostActionProcessor actionProcessor = null;
 
-                if (action.ActionId == null || !_components.TryGetComponent(action.ActionId, out actionProcessor))
+                if (action.ActionId == null || !_settings.SettingsLoader.Components.TryGetComponent(action.ActionId, out actionProcessor) || actionProcessor == null)
                 {
                     actionProcessor = new InstructionDisplayPostActionProcessor();
                 }
 
-                bool result = actionProcessor.Process(action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
+                bool result = actionProcessor.Process(_settings, action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
 
                 if (!result && !action.ContinueOnError)
                 {   

@@ -11,6 +11,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         public TestHost()
         {
             BuiltInComponents = new List<KeyValuePair<Guid, Func<Type>>>();
+            HostParamDefaults = new Dictionary<string, string>();
         }
 
         public event Action<string, TimeSpan> TimingCompleted;

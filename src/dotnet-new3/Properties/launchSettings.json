@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "dotnet-new3": {
-      "commandName": "Project",
-      "commandLineArgs": "template list"
-    }
-  }
-}

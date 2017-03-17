@@ -2,33 +2,27 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class PrecedenceSelectionTests
     {
-        [Theory]
-        [InlineData("MvcNoAuthTest.json", "mvc")]
-        [InlineData("MvcFramework20Test.json", "mvc")]
-        [InlineData("MvcIndAuthTest.json", "mvc -au individual")]
-        [InlineData("MvcFramework20Test.json", "mvc -au individual")]
+        [Theory(DisplayName = nameof(VerifyTemplateContent))]
+        [InlineData("mvc", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
+        [InlineData("mvc -au individual", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
 
-        [InlineData("MvcNoAuthTest.json", "mvc -f netcoreapp1.0")]
-        [InlineData("MvcFramework10Test.json", "mvc -f netcoreapp1.0")]
-        [InlineData("MvcIndAuthTest.json", "mvc -au individual -f netcoreapp1.0")]
-        [InlineData("MvcFramework10Test.json", "mvc -au individual -f netcoreapp1.0")]
+        [InlineData("mvc -f netcoreapp1.0", "MvcNoAuthTest.json", "MvcFramework10Test.json")]
+        [InlineData("mvc -au individual -f netcoreapp1.0", "MvcIndAuthTest.json", "MvcFramework10Test.json")]
 
-        [InlineData("MvcNoAuthTest.json", "mvc -f netcoreapp1.1")]
-        [InlineData("MvcFramework11Test.json", "mvc -f netcoreapp1.1")]
-        [InlineData("MvcIndAuthTest.json", "mvc -au individual -f netcoreapp1.1")]
-        [InlineData("MvcFramework11Test.json", "mvc -au individual -f netcoreapp1.1")]
+        [InlineData("mvc -f netcoreapp1.1", "MvcNoAuthTest.json", "MvcFramework11Test.json")]
+        [InlineData("mvc -au individual -f netcoreapp1.1", "MvcIndAuthTest.json", "MvcFramework11Test.json")]
 
-        [InlineData("MvcNoAuthTest.json", "mvc -f netcoreapp2.0")]
-        [InlineData("MvcFramework20Test.json", "mvc -f netcoreapp2.0")]
-        [InlineData("MvcIndAuthTest.json", "mvc -au individual -f netcoreapp2.0")]
-        [InlineData("MvcFramework20Test.json", "mvc -au individual -f netcoreapp2.0")]
-        public void MvcCorrectlyDisambiguatesPrecedenceTest(string script, string args)
+        [InlineData("mvc -f netcoreapp2.0", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
+        [InlineData("mvc -au individual -f netcoreapp2.0", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
+        public void VerifyTemplateContent(string args, params string[] scripts)
         {
             string codebase = typeof(PrecedenceSelectionTests).GetTypeInfo().Assembly.CodeBase;
             Uri cb = new Uri(codebase);
@@ -36,8 +30,18 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string dir = Path.GetDirectoryName(asmPath);
 
             string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness");
-            string testScript = Path.Combine(dir, script);
-            string outputPath = @"c:\temp";
+            int scriptCount = scripts.Length;
+            StringBuilder builder = new StringBuilder();
+            builder.Append(scriptCount);
+            builder.Append(" ");
+
+            foreach (string script in scripts)
+            {
+                string testScript = Path.Combine(dir, script);
+                builder.Append($"\"{testScript}\" ");
+            }
+
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "temp");
 
             Process p = Process.Start(new ProcessStartInfo
             {
@@ -47,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 CreateNoWindow = false,
                 WorkingDirectory = harnessPath,
                 FileName = "dotnet",
-                Arguments = $"run \"{testScript}\" \"{outputPath}\" {args} -o \"{outputPath}\""
+                Arguments = $"run {builder} \"{outputPath}\" {args} -o \"{outputPath}\""
             });
 
             p.WaitForExit();
