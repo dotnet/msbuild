@@ -59,6 +59,15 @@ namespace Microsoft.NET.Build.Tasks {
                 resourceCulture = value;
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to use &apos;{0}&apos; as application host executable as it does not contain the expected placeholder byte sequence &apos;{1}&apos; that would mark where the application name would be written..
+        /// </summary>
+        internal static string AppHostHasBeenModified {
+            get {
+                return ResourceManager.GetString("AppHostHasBeenModified", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Asset preprocessor must be configured before assets are processed..
@@ -203,7 +212,6 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("DuplicateItemsError", resourceCulture);
             }
         }
-        
         /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
@@ -222,6 +230,15 @@ namespace Microsoft.NET.Build.Tasks {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to Given file name &apos;{0}&apos; is longer than 1024 bytes.
+        /// </summary>
+        internal static string FileNameIsTooLong {
+            get {
+                return ResourceManager.GetString("FileNameIsTooLong", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Folder &apos;{0}&apos; already exists either delete it or provide a different ComposeWorkingDir.
         /// </summary>
