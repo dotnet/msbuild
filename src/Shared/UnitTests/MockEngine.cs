@@ -75,41 +75,41 @@ namespace Microsoft.Build.UnitTests
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
+            string message = string.Empty;
+
             if (eventArgs.File != null && eventArgs.File.Length > 0)
             {
-                if (_logToConsole)
-                    Console.Write("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
-                _log += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
+                message += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
             }
 
-            if (_logToConsole)
-                Console.Write("ERROR " + eventArgs.Code + ": ");
-            _log += "ERROR " + eventArgs.Code + ": ";
+            message += "ERROR " + eventArgs.Code + ": ";
             ++_errors;
 
+            message += eventArgs.Message;
+
             if (_logToConsole)
-                Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
+                Console.WriteLine(message);
+            _log += message;
             _log += "\n";
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
+            string message = string.Empty;
+
             if (eventArgs.File != null && eventArgs.File.Length > 0)
             {
-                if (_logToConsole)
-                    Console.Write("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
-                _log += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
+                message += String.Format("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
             }
 
-            if (_logToConsole)
-                Console.Write("WARNING " + eventArgs.Code + ": ");
-            _log += "WARNING " + eventArgs.Code + ": ";
+            message += "WARNING " + eventArgs.Code + ": ";
             ++_warnings;
 
+            message += eventArgs.Message;
+
             if (_logToConsole)
-                Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
+                Console.WriteLine(message);
+            _log += message;
             _log += "\n";
         }
 
@@ -132,22 +132,17 @@ namespace Microsoft.Build.UnitTests
 
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
         {
+            string message = $"Received telemetry event '{eventName}'{Environment.NewLine}";
+            foreach (string key in properties?.Keys)
+            {
+                message += $"  Property '{key}' = '{properties[key]}'{Environment.NewLine}";
+            }
+
             if (_logToConsole)
             {
-                Console.WriteLine($"Received telemetry event '{eventName}'");
+                Console.WriteLine(message);
             }
-            _log += $"Received telemetry event '{eventName}'{Environment.NewLine}";
-            if (properties != null)
-            {
-                foreach (string key in properties.Keys)
-                {
-                    if (_logToConsole)
-                    {
-                        Console.WriteLine($"  Property '{key}' = '{properties[key]}'{Environment.NewLine}");
-                    }
-                    _log += $"  Property '{key}' = '{properties[key]}'{Environment.NewLine}";
-                }
-            }
+            _log += message;
         }
 
         public bool ContinueOnError
