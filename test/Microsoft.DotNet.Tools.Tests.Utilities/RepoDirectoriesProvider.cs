@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
@@ -11,6 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public class RepoDirectoriesProvider
     {
         private static string s_repoRoot;
+        private static string s_buildRid;
 
         private string _artifacts;
         private string _builtDotnet;
@@ -49,6 +51,32 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
+        private static string BuildRid
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(s_buildRid))
+                {
+                    var buildInfoPath = Path.Combine(RepoRoot, "artifacts", "obj", "BuildInfo.props");
+                    var root = XDocument.Load(buildInfoPath).Root;
+                    var ns = root.Name.Namespace;
+
+                    s_buildRid = root
+                        .Elements(ns + "PropertyGroup")
+                        .Elements(ns + "Rid")
+                        .FirstOrDefault()
+                        ?.Value;
+
+                    if (string.IsNullOrEmpty(s_buildRid))
+                    {
+                        throw new InvalidOperationException($"Could not find a property named 'Rid' in {buildInfoPath}");
+                    }
+                }
+                
+                return s_buildRid;
+            }
+        }
+
         public string Artifacts => _artifacts;
         public string BuiltDotnet => _builtDotnet;
         public string NugetPackages => _nugetPackages;
@@ -64,9 +92,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string corehostDummyPackages = null,
             string pjDotnet = null)
         {
-            var currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
-
-            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", currentRid);
+            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
