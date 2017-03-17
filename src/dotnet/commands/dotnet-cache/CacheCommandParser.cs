@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.Cache.LocalizableStrings;
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"/p:ComposeDir={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:ComposeDir={Path.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
