@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         protected const string DefaultFramework = "netcoreapp1.0";
         protected const string DefaultLibraryFramework = "netstandard1.5";
-        protected const string ConsoleLoggerOutputNormal = "--logger console;verbosity=normal";
+        protected const string ConsoleLoggerOutputNormal = "--logger:console;verbosity=normal";
         private TempRoot _temp;
         private static TestAssets s_testAssets;
 
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                     s_testAssets = new TestAssets(
                         new DirectoryInfo(assetsRoot),
-                        new FileInfo(new EnvironmentProvider().GetCommandPath("dotnet")),
+                        new FileInfo(new Muxer().MuxerPath),
                         new FileInfo(new RepoDirectoriesProvider().PjDotnet)); 
                 }
 
