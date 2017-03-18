@@ -157,7 +157,7 @@ Sample to skip a specific folder and files during Web Deploy Publish:
       <AbsolutePath>Views\\Home\\About.cshtml</AbsolutePath>
     </MsDeploySkipRules>
     
-     <MsDeploySkipRules Include="CustomSkipFile">
+     <MsDeploySkipRules Include="CustomSkipFile2">
       <ObjectName>filePath</ObjectName>
       <AbsolutePath>Views\\Home\\About2.cshtml</AbsolutePath>
     </MsDeploySkipRules>
