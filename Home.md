@@ -11,6 +11,6 @@
  * [Rebuilding when nothing changed](Rebuilding-when-nothing-changed)
  * [Something's wrong in my build](Something's-wrong-in-my-build)
  * [Microsoft.Build.Framework](Microsoft.Build.Framework) - Some gotchas around the Microsoft.Build.Framework project/assembly.
- * [Target Map](Target-Map)
+ * [Target Maps](Target-Maps)
  * Tasks
    * [ResolveAssemblyReference](ResolveAssemblyReference)
