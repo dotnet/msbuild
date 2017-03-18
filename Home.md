@@ -12,4 +12,4 @@
  * [Microsoft.Build.Framework](Microsoft.Build.Framework) - Some gotchas around the Microsoft.Build.Framework project/assembly.
  * [Binary log](Binary-Log)
  * Tasks
-  * [ResolveAssemblyReference](ResolveAssemblyReference)
+   * [ResolveAssemblyReference](ResolveAssemblyReference)
