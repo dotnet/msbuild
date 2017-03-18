@@ -414,7 +414,7 @@ construct_download_link() {
     return 0
 }
 
-get_user_share_path() {
+get_user_install_path() {
     eval $invocation
     
     if [ ! -z "${DOTNET_INSTALL_DIR:-}" ]; then
@@ -432,9 +432,9 @@ resolve_installation_path() {
     
     local install_dir=$1
     if [ "$install_dir" = "<auto>" ]; then
-        local user_share_path=$(get_user_share_path)
-        say_verbose "resolve_installation_path: share_path=$user_share_path"
-        echo "$user_share_path"
+        local user_install_path=$(get_user_install_path)
+        say_verbose "resolve_installation_path: user_install_path=$user_install_path"
+        echo "$user_install_path"
         return 0
     fi
     
@@ -684,7 +684,7 @@ do
             echo "  Location is chosen in following order:"
             echo "    - --install-dir option"
             echo "    - Environmental variable DOTNET_INSTALL_DIR"
-            echo "    - /usr/local/share/dotnet"
+            echo "    - $HOME/.dotnet"
             exit 0
             ;;
         *)
