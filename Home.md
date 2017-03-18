@@ -7,9 +7,10 @@
  * [MSBuild Roadmap](Roadmap)
  * [MSBuild Resources](MSBuild-Resources)
  * [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks)
+ * [Binary log](Binary-Log)
  * [Rebuilding when nothing changed](Rebuilding-when-nothing-changed)
  * [Something's wrong in my build](Something's-wrong-in-my-build)
  * [Microsoft.Build.Framework](Microsoft.Build.Framework) - Some gotchas around the Microsoft.Build.Framework project/assembly.
- * [Binary log](Binary-Log)
+ * [Target Map](Target-Map)
  * Tasks
    * [ResolveAssemblyReference](ResolveAssemblyReference)
