@@ -97,7 +97,7 @@ while [[ $# > 0 ]]; do
             shift
             ;;
         --linux-portable)
-            LINUX_PORTABLE_INSTALL_ARGS="--linux-portable"
+            LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
             # Until we get test support for 2.0 we need to pass in the targets without test.
             CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:CLITargets=\"Prepare;Compile;Package;Publish\""
             args=( "${args[@]/$1}" )
