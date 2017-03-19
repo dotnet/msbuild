@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (!string.IsNullOrEmpty(Logger))
             {
-                return $"--logger {Logger}";
+                return $"--logger:{Logger}";
             }
 
             return null;
