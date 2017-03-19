@@ -12,27 +12,14 @@ namespace Microsoft.DotNet.Cli
         public static Command Sln() =>
             Create.Command(
                 "sln",
-                ".NET modify solution file command",
+                LocalizableStrings.AppFullName,
                 Accept.ExactlyOneArgument()
                       .DefaultToCurrentDirectory()
-                      .With(name: "SLN_FILE",
+                      .With(name: CommonLocalizableStrings.CmdSlnFile,
                             description: CommonLocalizableStrings.ArgumentsSolutionDescription),
                 CommonOptions.HelpOption(),
-                Create.Command("add",
-                               ".NET Add project(s) to a solution file Command",
-                               Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd)
-                                     .With(name: "args",
-                                           description: LocalizableStrings.AddSubcommandHelpText),
-                               CommonOptions.HelpOption()),
-                Create.Command("list",
-                               ".NET List project(s) in a solution file Command",
-                               CommonOptions.HelpOption()),
-                Create.Command("remove",
-                               ".NET Remove project(s) from a solution file Command",
-                               Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove)
-                                     .With(name: "args",
-                                           description: LocalizableStrings.RemoveSubcommandHelpText),
-                               CommonOptions.HelpOption()));
-
+                SlnAddParser.SlnAdd(),
+                SlnListParser.SlnList(),
+                SlnRemoveParser.SlnRemove());
     }
 }

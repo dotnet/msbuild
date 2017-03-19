@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
-using Newtonsoft.Json.Linq;
-using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
+using Microsoft.DotNet.Tools;
+using LocalizableStrings = Microsoft.DotNet.Tools.Add.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -17,81 +14,12 @@ namespace Microsoft.DotNet.Cli
         public static Command Add() =>
             Create.Command(
                 "add",
-                ".NET Add Command",
+                LocalizableStrings.NetAddCommand,
                 Accept.ExactlyOneArgument()
                       .DefaultToCurrentDirectory()
-                      .With(name: "PROJECT",
-                            description: "The project file to operate on. If a file is not specified, the command will search the current directory for one."),
-                Create.Command(
-                    "package",
-                    ".NET Add Package reference Command",
-                    Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
-                          .WithSuggestionsFrom(QueryNuGet)
-                          .With(name: "PACKAGE_NAME",
-                                description: "Package references to add"),
-                    CommonOptions.HelpOption(),
-                    Create.Option("-v|--version",
-                                  "Version for the package to be added.",
-                                  Accept.ExactlyOneArgument()
-                                        .With(name: "VERSION")
-                                        .ForwardAsSingle(o => $"--version {o.Arguments.Single()}")),
-                    Create.Option("-f|--framework",
-                                  LocalizableStrings.CmdFrameworkDescription,
-                                  Accept.ExactlyOneArgument()
-                                        .With(name: "FRAMEWORK")
-                                        .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
-                    Create.Option("-n|--no-restore ",
-                                  "Add reference without performing restore preview and compatibility check."),
-                    Create.Option("-s|--source",
-                                  "Use specific NuGet package sources to use during the restore.",
-                                  Accept.ExactlyOneArgument()
-                                        .With(name: "SOURCE")
-                                        .ForwardAsSingle(o => $"--source {o.Arguments.Single()}")),
-                    Create.Option("--package-directory",
-                                  "Restore the packages to this Directory .",
-                                  Accept.ExactlyOneArgument()
-                                        .With(name: "PACKAGE_DIRECTORY")
-                                        .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}"))),
-                Create.Command(
-                    "reference",
-                    Tools.Add.ProjectToProjectReference.LocalizableStrings.AppFullName,
-                    Accept.OneOrMoreArguments()
-                          .With(name: "args",
-                                description: Tools.Add.ProjectToProjectReference.LocalizableStrings.AppHelpText),
-                    CommonOptions.HelpOption(),
-                    Create.Option("-f|--framework",
-                                  LocalizableStrings.CmdFrameworkDescription,
-                                  Accept
-                                      .ExactlyOneArgument()
-                                      .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
-                                      .With(name: "FRAMEWORK"))),
+                      .With(name: CommonLocalizableStrings.CmdProjectFile,
+                            description: CommonLocalizableStrings.ArgumentsProjectDescription), AddPackageParser.AddPackage(),
+                AddProjectToProjectReferenceParser.AddProjectReference(),
                 CommonOptions.HelpOption());
-
-        public static IEnumerable<string> QueryNuGet(string match)
-        {
-            var httpClient = new HttpClient();
-
-            string result;
-
-            try
-            {
-                var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/query?q={match}&skip=0&take=100&prerelease=true", cancellation.Token)
-                                         .Result;
-
-                result = response.Content.ReadAsStringAsync().Result;
-            }
-            catch (Exception)
-            {
-                yield break;
-            }
-
-            var json = JObject.Parse(result);
-
-            foreach (var id in json["data"])
-            {
-                yield return id["id"].Value<string>();
-            }
-        }
     }
 }

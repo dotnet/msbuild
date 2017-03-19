@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
@@ -14,27 +13,28 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "run",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments()
-                    .MaterializeAs(o =>
-                    {
-                        return new RunCommand()
-                        {
-                            Configuration = o.SingleArgumentOrDefault("--configuration"),
-                            Framework = o.SingleArgumentOrDefault("--framework"),
-                            Project = o.SingleArgumentOrDefault("--project"),
-                            Args = (IReadOnlyList<string>)o.Arguments
-                        };
-                    }),
-                CommonOptions.HelpOption(),
-                CommonOptions.ConfigurationOption(),
-                CommonOptions.FrameworkOption(),
-                Create.Option(
-                    "-p|--project",
-                    LocalizableStrings.CommandOptionProjectDescription,
-                    Accept.ExactlyOneArgument()),
-                Create.Option(
-                    "--no-build",
-                    LocalizableStrings.CommandOptionNoBuildDescription,
-                    Accept.NoArguments().ForwardAs("/p:NoBuild=true")));
+                treatUnmatchedTokensAsErrors: false,
+                arguments: Accept.ZeroOrMoreArguments()
+                                 .MaterializeAs(o => new RunCommand
+                                 {
+                                     Configuration = o.SingleArgumentOrDefault("--configuration"),
+                                     Framework = o.SingleArgumentOrDefault("--framework"),
+                                     Project = o.SingleArgumentOrDefault("--project"),
+                                     Args = o.Arguments
+                                 }),
+                options: new[]
+                {
+                    CommonOptions.HelpOption(),
+                    CommonOptions.ConfigurationOption(),
+                    CommonOptions.FrameworkOption(),
+                    Create.Option(
+                        "-p|--project",
+                        LocalizableStrings.CommandOptionProjectDescription,
+                        Accept.ExactlyOneArgument()),
+                    Create.Option(
+                        "--no-build",
+                        LocalizableStrings.CommandOptionNoBuildDescription,
+                        Accept.NoArguments().ForwardAs("/p:NoBuild=true"))
+                });
     }
 }

@@ -15,34 +15,32 @@ namespace Microsoft.DotNet.Cli
                 "migrate",
                 ".NET Migrate Command",
                 Accept.ZeroOrOneArgument()
-                    .MaterializeAs(o =>
-                    {            
-                        return new MigrateCommand(
-                            o.ValueOrDefault<string>("--template-file"),
-                            o.Arguments.FirstOrDefault(),
-                            o.ValueOrDefault<string>("--sdk-package-version"),
-                            o.ValueOrDefault<string>("--xproj-file"),
-                            o.ValueOrDefault<string>("--report-file"),
-                            o.ValueOrDefault<bool>("--skip-project-references"),
-                            o.ValueOrDefault<bool>("--format-report-file-json"),
-                            o.ValueOrDefault<bool>("--skip-backup"));
-                    })
-                .With(name: LocalizableStrings.CmdProjectArgument,
-                    description: LocalizableStrings.CmdProjectArgumentDescription),
+                      .MaterializeAs(o =>
+                                         new MigrateCommand(
+                                             o.ValueOrDefault<string>("--template-file"),
+                                             o.Arguments.FirstOrDefault(),
+                                             o.ValueOrDefault<string>("--sdk-package-version"),
+                                             o.ValueOrDefault<string>("--xproj-file"),
+                                             o.ValueOrDefault<string>("--report-file"),
+                                             o.ValueOrDefault<bool>("--skip-project-references"),
+                                             o.ValueOrDefault<bool>("--format-report-file-json"),
+                                             o.ValueOrDefault<bool>("--skip-backup")))
+                      .With(name: LocalizableStrings.CmdProjectArgument,
+                            description: LocalizableStrings.CmdProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option("-t|--template-file",
-                                LocalizableStrings.CmdTemplateDescription),
+                              LocalizableStrings.CmdTemplateDescription),
                 Create.Option("-v|--sdk-package-version",
-                                LocalizableStrings.CmdVersionDescription),
+                              LocalizableStrings.CmdVersionDescription),
                 Create.Option("-x|--xproj-file",
-                                LocalizableStrings.CmdXprojFileDescription),
+                              LocalizableStrings.CmdXprojFileDescription),
                 Create.Option("-s|--skip-project-references",
-                                LocalizableStrings.CmdSkipProjectReferencesDescription),
+                              LocalizableStrings.CmdSkipProjectReferencesDescription),
                 Create.Option("-r|--report-file",
-                                LocalizableStrings.CmdReportFileDescription),
+                              LocalizableStrings.CmdReportFileDescription),
                 Create.Option("--format-report-file-json",
-                                LocalizableStrings.CmdReportOutputDescription),
+                              LocalizableStrings.CmdReportOutputDescription),
                 Create.Option("--skip-backup",
-                                LocalizableStrings.CmdSkipBackupDescription));
+                              LocalizableStrings.CmdSkipBackupDescription));
     }
 }

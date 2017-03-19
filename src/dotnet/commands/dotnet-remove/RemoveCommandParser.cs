@@ -3,7 +3,7 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
-using LocalizableStrings = Microsoft.DotNet.Tools.Remove.ProjectToProjectReference.LocalizableStrings;
+using LocalizableStrings = Microsoft.DotNet.Tools.Remove.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -11,30 +11,14 @@ namespace Microsoft.DotNet.Cli
     {
         public static Command Remove() =>
             Create.Command("remove",
-                           ".NET Remove Command",
+                           LocalizableStrings.NetRemoveCommand,
                            Accept.ExactlyOneArgument()
                                  .DefaultToCurrentDirectory()
-                                 .With(name: "PROJECT",
+                                 .With(name: CommonLocalizableStrings.CmdProjectFile,
                                        description: CommonLocalizableStrings.ArgumentsProjectDescription)
                                  .DefaultToCurrentDirectory(),
                            CommonOptions.HelpOption(),
-                           Create.Command(
-                               "package",
-                               LocalizableStrings.AppFullName,
-                               CommonOptions.HelpOption()),
-                           Create.Command(
-                               "reference",
-                               LocalizableStrings.AppFullName,
-                               Accept
-                                   .OneOrMoreArguments()
-                                   .WithSuggestionsFrom(_ => Suggest.ProjectReferencesFromProjectFile())
-                                   .With(name: "args",
-                                         description: LocalizableStrings.AppHelpText),
-                               CommonOptions.HelpOption(),
-                               Create.Option(
-                                   "-f|--framework",
-                                   "Remove reference only when targeting a specific framework",
-                                   Accept.ExactlyOneArgument()
-                                         .With(name: "FRAMEWORK"))));
+                           RemovePackageParser.RemovePackage(),
+                           RemoveProjectToProjectReferenceParser.RemoveReference());
     }
 }

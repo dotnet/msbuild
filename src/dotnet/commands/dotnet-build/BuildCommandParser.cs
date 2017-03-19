@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Cli
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: "PROJECT",
+                      .With(name: CommonLocalizableStrings.CmdProjectFile,
                             description:
                             "The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file."),
                 CommonOptions.HelpOption(),
