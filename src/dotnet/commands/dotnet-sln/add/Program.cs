@@ -17,7 +17,10 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public AddProjectToSolutionCommand(AppliedOption appliedCommand, string fileOrDirectory)
+        public AddProjectToSolutionCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

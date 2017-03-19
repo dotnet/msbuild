@@ -25,18 +25,21 @@ namespace Microsoft.DotNet.Tools.Sln
                 ["add"] =
                 sln => new AddProjectToSolutionCommand(
                     sln["add"],
-                    sln.Value<string>()),
+                    sln.Value<string>(),
+                    ParseResult),
 
                 ["list"] =
                 sln => new ListProjectsInSolutionCommand(
                     sln["list"],
-                    sln.Value<string>()),
+                    sln.Value<string>(),
+                    ParseResult),
 
                 ["remove"] =
                 sln =>
                     new RemoveProjectFromSolutionCommand(
                         sln["remove"],
-                        sln.Value<string>())
+                        sln.Value<string>(),
+                        ParseResult)
             };
 
         public static int Run(string[] args)

@@ -24,12 +24,14 @@ namespace Microsoft.DotNet.Tools.Remove
                 ["reference"] =
                 remove => new RemoveProjectToProjectReferenceCommand(
                     remove["reference"],
-                    remove.Value<string>()),
+                    remove.Value<string>(),
+                    ParseResult),
 
                 ["package"] =
                 remove => new RemovePackageReferenceCommand(
                     remove["package"],
-                    remove.Value<string>())
+                    remove.Value<string>(),
+                    ParseResult)
             };
 
         public static int Run(string[] args)

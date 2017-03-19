@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public AddProjectToProjectReferenceCommand(
             AppliedOption appliedCommand, 
-            string fileOrDirectory)
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

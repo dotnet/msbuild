@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
     {
         private readonly string _fileOrDirectory;
 
-        public ListProjectToProjectReferencesCommand(AppliedOption appliedCommand)
+        public ListProjectToProjectReferencesCommand(
+            AppliedOption appliedCommand,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

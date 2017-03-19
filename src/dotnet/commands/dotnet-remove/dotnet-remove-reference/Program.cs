@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 
         public RemoveProjectToProjectReferenceCommand(
             AppliedOption appliedCommand,
-            string fileOrDirectory)
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

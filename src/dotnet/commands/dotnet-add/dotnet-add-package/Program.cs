@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public AddPackageReferenceCommand(
             AppliedOption appliedCommand,
-            string fileOrDirectory)
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {
@@ -36,6 +37,16 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             _appliedCommand = appliedCommand;
             _fileOrDirectory = fileOrDirectory;
             _packageId = appliedCommand.Value<string>();
+        }
+
+        protected override void ShowHelpOrErrorIfAppropriate(ParseResult parseResult)
+        {
+            if (parseResult.UnmatchedTokens.Any())
+            {
+                throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
+            }
+
+            base.ShowHelpOrErrorIfAppropriate(parseResult);
         }
 
         public override int Execute()

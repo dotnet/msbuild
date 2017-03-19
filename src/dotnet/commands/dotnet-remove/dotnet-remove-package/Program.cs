@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
 
         public RemovePackageReferenceCommand(
             AppliedOption appliedCommand,
-            string fileOrDirectory)
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

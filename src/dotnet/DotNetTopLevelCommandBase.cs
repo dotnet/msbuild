@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Cli
         protected abstract string FullCommandNameLocalized { get; }
         protected abstract string ArgumentName { get; }
         protected abstract string ArgumentDescriptionLocalized { get; }
+        protected ParseResult ParseResult { get; private set; }
+
         internal abstract Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
@@ -24,33 +26,26 @@ namespace Microsoft.DotNet.Cli
 
             var parser = Parser.Instance;
 
-            var result = parser.ParseFrom($"dotnet {CommandName}", args);
+            ParseResult = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            result.ShowHelpOrErrorIfAppropriate();
-
-            var subcommandName = result.Command().Name;
+            var subcommandName = ParseResult.Command().Name;
 
             try
             {
                 var create = SubCommands[subcommandName];
 
-                var command = create(result["dotnet"][CommandName]);
+                var command = create(ParseResult["dotnet"][CommandName]);
 
                 return command.Execute();
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 throw new GracefulException(CommonLocalizableStrings.RequiredCommandNotPassed);
             }
             catch (GracefulException e)
             {
                 Reporter.Error.WriteLine(e.Message.Red());
-                result.ShowHelp();
-                return 1;
-            }
-            catch (CommandParsingException e)
-            {
-                Reporter.Error.WriteLine(e.Message.Red());
+                ParseResult.ShowHelp();
                 return 1;
             }
         }

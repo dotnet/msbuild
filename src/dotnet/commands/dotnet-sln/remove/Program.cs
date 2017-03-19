@@ -17,7 +17,10 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
 
-        public RemoveProjectFromSolutionCommand(AppliedOption appliedCommand, string fileOrDirectory)
+        public RemoveProjectFromSolutionCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
             if (appliedCommand == null)
             {

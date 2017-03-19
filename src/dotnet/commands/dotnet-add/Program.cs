@@ -25,12 +25,14 @@ namespace Microsoft.DotNet.Tools.Add
                 ["reference"] =
                 add => new AddProjectToProjectReferenceCommand(
                     add["reference"],
-                    add.Value<string>()),
+                    add.Value<string>(),
+                    ParseResult),
 
                 ["package"] =
                 add => new AddPackageReferenceCommand(
                     add["package"],
-                    add.Value<string>())
+                    add.Value<string>(),
+                    ParseResult)
             };
 
         public static int Run(string[] args)
