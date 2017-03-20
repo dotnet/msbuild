@@ -44,7 +44,7 @@ Using the `dotnet` built in the previous step:
 1. To run all tests invoke `build.cmd` or `build.sh` which will build the product and run the tests.
 2. To run a specific test, cd into that test's directory and execute `dotnet test`. If using this approach, make sure to add `artifacts/{RID}/stage2` to your `PATH` and set the `NUGET_PACKAGES` environment variable to point to the repo's `.nuget/packages` directory.
 
-##Adding a Command
+## Adding a Command
 
 The dotnet CLI supports several models for adding new commands:
 
