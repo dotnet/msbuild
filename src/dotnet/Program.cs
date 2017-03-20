@@ -1,17 +1,13 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Add;
-using Microsoft.DotNet.Tools.Build;
-using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.Migrate;
@@ -34,7 +30,6 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-
         private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
         {
             ["add"] = AddCommand.Run,
@@ -58,7 +53,6 @@ namespace Microsoft.DotNet.Cli
             ["complete"] = CompleteCommand.Run,
             ["parse"] = ParseCommand.Run
         };
-
 
         public static int Main(string[] args)
         {
