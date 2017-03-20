@@ -74,7 +74,7 @@ Runs a portable app named `myapp.dll`.
 
 ## ENVIRONMENT 
 
-`DOTNET_PACKAGES`
+`NUGET_PACKAGES`
 
 The primary package cache. If not set, it defaults to $HOME/.nuget/packages on Unix or %HOME%\NuGet\Packages on Windows.
 

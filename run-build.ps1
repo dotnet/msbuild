@@ -29,7 +29,9 @@ if($Help)
 
 $env:CONFIGURATION = $Configuration;
 $RepoRoot = "$PSScriptRoot"
-$env:NUGET_PACKAGES = "$RepoRoot\.nuget\packages"
+if(!$env:NUGET_PACKAGES){
+  $env:NUGET_PACKAGES = "$RepoRoot\.nuget\packages"
+}
 
 if($NoPackage)
 {
@@ -71,6 +73,10 @@ $env:VSTEST_TRACE_BUILD=1
 
 # set the base tools directory
 $toolsLocalPath = Join-Path $PSScriptRoot "build_tools"
+if($env:BOOTSTRAP_INSTALL_DIR)
+{
+  $toolsLocalPath = $env:BOOTSTRAP_INSTALL_DIR
+}
 $bootStrapperPath = Join-Path $toolsLocalPath "bootstrap.ps1"
 # if the boot-strapper script doesn't exist then download it
 if ((Test-Path $bootStrapperPath) -eq 0)

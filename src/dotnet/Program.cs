@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
+
         private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
         {
             ["add"] = AddCommand.Run,
@@ -57,6 +58,7 @@ namespace Microsoft.DotNet.Cli
             ["complete"] = CompleteCommand.Run,
             ["parse"] = ParseCommand.Run
         };
+
 
         public static int Main(string[] args)
         {
@@ -188,10 +190,10 @@ namespace Microsoft.DotNet.Cli
             telemetryClient.TrackEvent(command, null, null);
 
             int exitCode;
-            Func<string[], int> builtIn;
-            if (s_builtIns.TryGetValue(command, out builtIn))
+            BuiltInCommandMetadata builtIn;
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out builtIn))
             {
-                exitCode = builtIn(appArgs.ToArray());
+                exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
             {
@@ -234,9 +236,9 @@ namespace Microsoft.DotNet.Cli
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
-        internal static bool TryGetBuiltInCommand(string commandName, out Func<string[], int> builtInCommand)
+        internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)
         {
-            return s_builtIns.TryGetValue(commandName, out builtInCommand);
+            return BuiltInCommandsCatalog.Commands.TryGetValue(commandName, out builtInCommand);
         }
 
         private static void PrintVersion()

@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">복원 중 사용할 특정 NuGet 패키지 소스를 사용합니다.</target>
+        <target state="translated">복원 중 사용할 특정 NuGet 패키지 원본을 사용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">

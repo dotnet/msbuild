@@ -24,13 +24,13 @@ namespace Microsoft.DotNet.Cli
         	NuGetFramework framework = null, 
         	string configuration = Constants.DefaultConfiguration)
         {
-            Func<string[], int> builtInCommand;
+            BuiltInCommandMetadata builtInCommand;
             if (!_alwaysRunOutOfProc && Program.TryGetBuiltInCommand(commandName, out builtInCommand))
             {
                 Debug.Assert(framework == null, "BuiltInCommand doesn't support the 'framework' argument.");
                 Debug.Assert(configuration == Constants.DefaultConfiguration, "BuiltInCommand doesn't support the 'configuration' argument.");
 
-                return new BuiltInCommand(commandName, args, builtInCommand);
+                return new BuiltInCommand(commandName, args, builtInCommand.Command);
             }
 
             return Command.CreateDotNet(commandName, args, framework, configuration);

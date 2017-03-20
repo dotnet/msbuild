@@ -6,4 +6,4 @@ See [Contributing](https://github.com/dotnet/corefx/blob/master/Documentation/pr
 Developers
 ==========
 
-See the [Developer Guide](Documentation/developer-guide.md) for details about developing in this repo.
+See the [Developer Guide](Documentation/project-docs/developer-guide.md) for details about developing in this repo.
