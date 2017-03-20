@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp11);
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp11);
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp11);
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectReference = projectReferences.First();
             projectReference.Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
-            projectReference.Parent.Condition.Should().Be(" '$(TargetFramework)' == 'netcoreapp1.0' ");
+            projectReference.Parent.Condition.Should().Be(" '$(TargetFramework)' == 'netcoreapp1.1' ");
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var libraryDirectory = Path.Combine(solutionDirectory, "TestLibrary");
             Directory.Delete(libraryDirectory, true);
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp11);
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(), mockProj.AddPropertyGroup());
@@ -322,7 +322,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var appDirectory = Path.Combine(solutionDirectory, "ProjectB");
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp11);
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
@@ -337,7 +337,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         private ProjectRootElement MigrateProject(string solution, string project)
         {
-            return MigrateProject(solution, project, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            return MigrateProject(solution, project, FrameworkConstants.CommonFrameworks.NetCoreApp11);
         }
 
         private ProjectRootElement MigrateProject(
