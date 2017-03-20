@@ -1499,9 +1499,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ====================================================================================
-                                        _GetProjectReferencesThatCrossTarget
+                                        _GetProjectReferencesThatNeedProperties
 
-    Builds the IsCrossTargetingProject target of all existent project references,
+    Builds the ShouldQueryForProperties target of all existent project references,
     removing any TargetFramework and RuntimeIdentifier properties that are set as
     global properties in this project.
 
@@ -1510,7 +1510,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferencesThatCrossTarget">
+  <Target Name="_GetProjectReferencesThatNeedProperties">
     <!--
        Allow project references to specify which target framework properties to set and their values
        without consulting the referenced project. This has two use cases:
@@ -1520,27 +1520,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           there is also a .NETFramework implementation.
 
        2. As an escape hatch for cases where the compatibility check performed by 
-          GetTargetFrameworkProperties is faulty.
+          GetReferenceProperties is faulty.
     -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <SkipGetReferenceProperties>true</SkipGetReferenceProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
     <!--
-      Honor SkipGetTargetFrameworkProperties=true metadata on project references
+      Honor SkipGetReferenceProperties=true metadata on project references
       to mean that the project reference is known not to target multiple frameworks
       and the mechanism here for selecting the best one can be skipped as an optimization.
     -->
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="IsCrossTargetingProject"
+        Targets="ShouldQueryForProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetReferenceProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_MSBuildProjectReferenceCrossTargetingResults" />
     </MSBuild>
@@ -1558,7 +1558,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
 
-    Builds the GetTargetFrameworkProperties target of all existent project references,
+    Builds the GetReferenceProperties target of all existent project references,
     passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
     SetTargetFramework metadata of the project reference to the value that is returned.
 
@@ -1568,7 +1568,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ======================================================================================
   -->
   <Target Name="_GetProjectReferenceTargetFrameworkProperties"
-          DependsOnTargets="_GetProjectReferencesThatCrossTarget">
+          DependsOnTargets="_GetProjectReferencesThatNeedProperties">
     <!--
       Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
       TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
@@ -1582,12 +1582,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuild
         Projects="@(_MSBuildProjectReferenceCrossTargeting)"
-        Targets="GetTargetFrameworkProperties"
+        Targets="GetReferenceProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetReferenceProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
@@ -1619,7 +1619,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                                    GetTargetFrameworkProperties
+                                    GetReferenceProperties
 
     Overrridden by cross-targeting projects to return the set of
     properties (in the form "key1=value1;...keyN=valueN") needed
@@ -1629,18 +1629,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     The referring project's $(TargetFrameworkMoniker) is passed 
     in as $(ReferringTargetFramework)
   -->
-  <Target Name="GetTargetFrameworkProperties" />
+  <Target Name="GetReferenceProperties" />
 
   <!--
     ============================================================
-                                         IsCrossTargetingProject
+                                        ShouldQueryForProperties
 
     Overrridden by cross-targeting projects to return "true" if
-    the project should have its GetTargetFrameworkProperties
+    the project should have its GetReferenceProperties
     target called with a ReferringTargetFramework. If "false",
     the single output of the project is used.
   -->
-  <Target Name="IsCrossTargetingProject" Returns="false" />
+  <Target Name="ShouldQueryForProperties" Returns="false" />
 
   <!--
     ============================================================
