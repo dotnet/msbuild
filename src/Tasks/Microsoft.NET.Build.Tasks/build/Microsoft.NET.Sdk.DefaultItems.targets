@@ -50,8 +50,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
        The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
        in the project file. -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETStandardTargetFrameworkVersion)'">$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
+
+    <!-- Default to use v1.6.1 (latest stable release) -->
+    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">1.6.1</NETStandardImplicitPackageVersion>
   </PropertyGroup>
   
   <!--  
@@ -85,6 +89,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If targeting netcoreapp1.1, and RuntimeFrameworkVersion is not specified, use version 1.1.1 -->
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.4</RuntimeFrameworkVersion>
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.1</RuntimeFrameworkVersion>
+
+    <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     
     <!-- Default to use the version of the framework runtime matching the target framework version-->
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
