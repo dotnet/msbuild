@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
     <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
-    <RenamePublishedHost Condition=" '$(RenamePublishedHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</RenamePublishedHost>
+    <DeployAppHost Condition=" '$(DeployAppHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</DeployAppHost>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -518,22 +518,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        RenamePublishedHost
+                                        DeployAppHost
 
-    Renames the dotnet native host to match the application's name.
+    Deploys the host to run the stand alone app and ensures it matches the app name
     ============================================================
     -->
 
-  <Target Name="RenamePublishedHost"
+  <Target Name="DeployAppHost"
+          DependsOnTargets="_ComputeNETCoreBuildOutputFiles"
           AfterTargets="ComputeFilesToPublish"
           BeforeTargets="CopyFilesToPublishDirectory"
-          Condition="'$(RenamePublishedHost)' == 'true'">
+          Condition="'$(DeployAppHost)' == 'true'">
 
     <ItemGroup>
 
-      <ResolvedFileToPublish Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
-        <RelativePath>$(AssemblyName)%(ResolvedFileToPublish.Extension)</RelativePath>
+      <ResolvedFileToRemove  Include ="%(ResolvedFileToPublish.Identity)" Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)' Or '%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetAppHostExecutableName)'"/>
+      <ResolvedFileToPublish Remove ="%(ResolvedFileToRemove.Identity)"/>
+
+      <ResolvedFileToPublish Include="%(NativeAppHostNETCore.Identity)">
+        <RelativePath>$(AssemblyName)%(Extension)</RelativePath>
       </ResolvedFileToPublish>
+      
 
     </ItemGroup>
 

@@ -89,6 +89,7 @@
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="RemoveDuplicatePackageReferences.cs" />
     <Compile Include="CacheArtifactParser.cs" />
+    <Compile Include="EmbedAppNameInHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
