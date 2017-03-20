@@ -134,8 +134,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private Process CreateProcess(string executable, string args)
         {
-            Console.WriteLine("[CreateProcess] " + new {executable, args});
-
             var psi = new ProcessStartInfo
             {
                 FileName = executable,
