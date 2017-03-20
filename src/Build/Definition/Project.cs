@@ -1129,7 +1129,8 @@ namespace Microsoft.Build.Evaluation
             return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(), itemType));
         }
 
-        private struct CumulatedRemoveElementData
+        // represents cumulated remove information for a particular item type
+        private struct CumulativeRemoveElementData
         {
             public ImmutableList<IMSBuildGlob>.Builder Globs { get; set; }
             public ImmutableHashSet<string>.Builder FragmentStrings { get; set; }
@@ -1142,14 +1143,27 @@ namespace Microsoft.Build.Evaluation
                 return new List<GlobResult>();
             }
 
-            // scan the project elements in reverse order and build globbing information for each include element
-            // based on the fact that relevant removes for a particular include element (element A) consist of:
+            // Scan the project elements in reverse order and build globbing information for each include element.
+            // Based on the fact that relevant removes for a particular include element (element A) consist of:
             // - all the removes seen by the next include statement of A's type (element B which appears after A in file order)
-            // - new removes between A and B
+            // - new removes between A and B (removes that apply to A but not to B. Spacially, these are placed between A's element and B's element)
+
+            // Example:
+            // 1. <A Include="A"/>
+            // 2. <A Remove="..."/> // this remove applies to the A includes
+            // 3. <A Include="B"/>
+            // 4. <A Remove="..."/> // this remove applies to the A and B includes
+            // 5. <A Include="C"/>
+            // 6. <A Remove="..."/> // this remove applies to the A, B, and C includes
+            // So A's applicable removes are composed of:
+            // 
+            // The applicable removes for the element at position 1. are composed of:
+            // - all the removes seen by the next include statement of A's type (element B which appears after A in file order). In this example that's Removes 4 and 6.
+            // - new removes between A and B. In this example that's Remove 2.
 
             // use immutable lists because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
             // item type -> aggregated information about all removes seen so far for that item type
-            var removeElementCache = new Dictionary<string, CumulatedRemoveElementData>(projectItemElements.Count);
+            var removeElementCache = new Dictionary<string, CumulativeRemoveElementData>(projectItemElements.Count);
             var globResults = new List<GlobResult>(projectItemElements.Count);
 
             for (var i = projectItemElements.Count - 1; i >= 0; i--)
@@ -1176,7 +1190,7 @@ namespace Microsoft.Build.Evaluation
             return globResults;
         }
 
-        private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulatedRemoveElementData> removeElementCache)
+        private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulativeRemoveElementData> removeElementCache)
         {
             var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
 
@@ -1240,29 +1254,29 @@ namespace Microsoft.Build.Evaluation
             return includeGlob;
         }
 
-        private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulatedRemoveElementData> removeElementCache)
+        private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
         {
-            CumulatedRemoveElementData cumulatedRemoveElementData;
-            if (!removeElementCache.TryGetValue(itemElement.ItemType, out cumulatedRemoveElementData))
+            CumulativeRemoveElementData cumulativeRemoveElementData;
+            if (!removeElementCache.TryGetValue(itemElement.ItemType, out cumulativeRemoveElementData))
             {
-                cumulatedRemoveElementData = new CumulatedRemoveElementData
+                cumulativeRemoveElementData = new CumulativeRemoveElementData
                 {
                     Globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
                     FragmentStrings = ImmutableHashSet.CreateBuilder<string>()
                 };
 
-                removeElementCache[itemElement.ItemType] = cumulatedRemoveElementData;
+                removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
             }
 
             var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
             var removeSpecFragmentStrings = GetRelevantFragmentStringsForExcludesAndRemoves(removeSpec);
             var removeGlob = removeSpec.ToMSBuildGlob();
 
-            cumulatedRemoveElementData.Globs.Add(removeGlob);
+            cumulativeRemoveElementData.Globs.Add(removeGlob);
 
             foreach (var removeFragment in removeSpecFragmentStrings)
             {
-                cumulatedRemoveElementData.FragmentStrings.Add(removeFragment);
+                cumulativeRemoveElementData.FragmentStrings.Add(removeFragment);
             }
         }
 
