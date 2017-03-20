@@ -1132,8 +1132,33 @@ namespace Microsoft.Build.Evaluation
         // represents cumulated remove information for a particular item type
         private struct CumulativeRemoveElementData
         {
-            public ImmutableList<IMSBuildGlob>.Builder Globs { get; set; }
-            public ImmutableHashSet<string>.Builder FragmentStrings { get; set; }
+            private ImmutableList<IMSBuildGlob>.Builder _globs;
+            private ImmutableHashSet<string>.Builder _fragmentStrings;
+
+            public IEnumerable<IMSBuildGlob> Globs => _globs.ToImmutable();
+            public IEnumerable<string> FragmentStrings => _fragmentStrings.ToImmutable();
+
+            public static CumulativeRemoveElementData New()
+            {
+                return new CumulativeRemoveElementData
+                {
+                    _globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
+                    _fragmentStrings = ImmutableHashSet.CreateBuilder<string>()
+                };
+            }
+
+            public void CumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+            {
+                var removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
+                var removeGlob = removeSpec.ToMSBuildGlob();
+
+                _globs.Add(removeGlob);
+
+                foreach (var removeFragment in removeSpecFragmentStrings)
+                {
+                    _fragmentStrings.Add(removeFragment);
+                }
+            }
         }
 
         private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
@@ -1220,7 +1245,7 @@ namespace Microsoft.Build.Evaluation
 
             if (removeElementCache.ContainsKey(itemElement.ItemType))
             {
-                removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings.ToImmutable();
+                removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings;
                 removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
             }
 
@@ -1259,26 +1284,14 @@ namespace Microsoft.Build.Evaluation
             CumulativeRemoveElementData cumulativeRemoveElementData;
             if (!removeElementCache.TryGetValue(itemElement.ItemType, out cumulativeRemoveElementData))
             {
-                cumulativeRemoveElementData = new CumulativeRemoveElementData
-                {
-                    Globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
-                    FragmentStrings = ImmutableHashSet.CreateBuilder<string>()
-                };
+                cumulativeRemoveElementData = CumulativeRemoveElementData.New();
 
                 removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
             }
 
             var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
-            var removeSpecFragmentStrings = ConvertItemSpecToFragmentStrings(removeSpec);
-            var removeGlob = removeSpec.ToMSBuildGlob();
 
-            cumulativeRemoveElementData.Globs.Add(removeGlob);
-
-            foreach (var removeFragment in removeSpecFragmentStrings)
-            {
-                cumulativeRemoveElementData.FragmentStrings.Add(removeFragment);
-            }
-
+            cumulativeRemoveElementData.CumulateInformationFromRemoveItemSpec(removeSpec);
         }
 
         /// <summary>
