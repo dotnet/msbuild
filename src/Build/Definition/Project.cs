@@ -1202,7 +1202,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             var includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
-            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()).ToImmutableArray());
+            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
             IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
             IMSBuildGlob excludeGlob = null;
@@ -1221,7 +1221,7 @@ namespace Microsoft.Build.Evaluation
             if (removeElementCache.ContainsKey(itemElement.ItemType))
             {
                 removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings.ToImmutable();
-                removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs.ToImmutable());
+                removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
             }
 
             var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);

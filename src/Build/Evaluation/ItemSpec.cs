@@ -196,7 +196,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public IMSBuildGlob ToMSBuildGlob()
         {
-            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()).ToImmutableArray());
+            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
         }
     }
 
@@ -336,7 +336,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IMSBuildGlob CreateMsBuildGlob()
         {
-            return new CompositeGlob(ReferencedItems.Select(i => i.ToMSBuildGlob()).ToImmutableArray());
+            return new CompositeGlob(ReferencedItems.Select(i => i.ToMSBuildGlob()));
         }
 
         private bool InitReferencedItemsIfNecessary()
