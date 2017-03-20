@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        private static string BuildRid
+        public static string BuildRid
         {
             get
             {
