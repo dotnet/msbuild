@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -9,20 +9,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Help;
-using Microsoft.DotNet.Tools.List;
-using Microsoft.DotNet.Tools.Migrate;
-using Microsoft.DotNet.Tools.MSBuild;
-using Microsoft.DotNet.Tools.New;
-using Microsoft.DotNet.Tools.NuGet;
-using Microsoft.DotNet.Tools.Pack;
-using Microsoft.DotNet.Tools.Publish;
-using Microsoft.DotNet.Tools.Remove;
-using Microsoft.DotNet.Tools.Restore;
-using Microsoft.DotNet.Tools.Run;
-using Microsoft.DotNet.Tools.Sln;
-using Microsoft.DotNet.Tools.Test;
-using Microsoft.DotNet.Tools.VSTest;
-using Microsoft.DotNet.Tools.Cache;
 using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 
@@ -30,30 +16,6 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-        private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
-        {
-            ["add"] = AddCommand.Run,
-            ["build"] = BuildCommand.Run,
-            ["cache"] = CacheCommand.Run,
-            ["clean"] = CleanCommand.Run,
-            ["help"] = HelpCommand.Run,
-            ["list"] = ListCommand.Run,
-            ["migrate"] = MigrateCommand.Run,
-            ["msbuild"] = MSBuildCommand.Run,
-            ["new"] = NewCommandShim.Run,
-            ["nuget"] = NuGetCommand.Run,
-            ["pack"] = PackCommand.Run,
-            ["publish"] = PublishCommand.Run,
-            ["remove"] = RemoveCommand.Run,
-            ["restore"] = RestoreCommand.Run,
-            ["run"] = RunCommand.Run,
-            ["sln"] = SlnCommand.Run,
-            ["test"] = TestCommand.Run,
-            ["vstest"] = VSTestCommand.Run,
-            ["complete"] = CompleteCommand.Run,
-            ["parse"] = ParseCommand.Run
-        };
-
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
