@@ -9,7 +9,7 @@ using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     static partial class FileUtilities
     {

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     public partial class HandlePackageFileConflicts : Task
     {

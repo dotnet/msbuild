@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 using System;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     /// <summary>
     /// Internal utilties copied from microsoft/MSBuild repo.

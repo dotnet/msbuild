@@ -6,7 +6,7 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     internal class MSBuildLog : ILog
     {

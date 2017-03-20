@@ -4,7 +4,7 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     public enum LogImportance
     {

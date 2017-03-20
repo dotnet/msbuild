@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 using System;
 using System.IO;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     static partial class NuGetUtilities
     {
