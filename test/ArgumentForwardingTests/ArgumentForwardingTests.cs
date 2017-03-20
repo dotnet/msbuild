@@ -25,9 +25,9 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 
         public ArgumentForwardingTests()
         {
-            Environment.SetEnvironmentVariable(
-                Constants.MSBUILD_EXE_PATH,
-                Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
+//            Environment.SetEnvironmentVariable(
+//                Constants.MSBUILD_EXE_PATH,
+//                Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
 
             // This test has a dependency on an argument reflector
             // Make sure it's been binplaced properly
@@ -255,7 +255,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = Env.GetCommandPath("dotnet", ".exe", ""),
+                    FileName = new Muxer().MuxerPath,
                     Arguments = $"{ReflectorPath} {testUserArgument}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
