@@ -158,7 +158,6 @@ namespace Microsoft.Build.Evaluation
         /// Return true if the given <paramref name="item"/> matches this itemspec
         /// </summary>
         /// <param name="item">The item to attempt to find a match for.</param>
-        /// <returns></returns>
         public bool MatchesItem(I item)
         {
             return Fragments.Any(f => f.MatchCount(item.EvaluatedInclude) > 0);
@@ -193,10 +192,36 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
-        /// <returns></returns>
         public IMSBuildGlob ToMSBuildGlob()
         {
             return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
+        }
+
+        /// <summary>
+        ///     Returns all the fragment strings that represent it.
+        ///     "1;*;2;@(foo)" gets returned as ["1", "2", "*", "a", "b"], given that @(foo)=["a", "b"]
+        /// 
+        ///     Order is not preserved. Globs are not expanded. Item expressions get replaced with their referring item instances.
+        /// </summary>
+        public IEnumerable<string> FlattenFragmentsAsStrings()
+        {
+            foreach (var valueString in Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
+            {
+                yield return valueString;
+            }
+
+            foreach (var globString in Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment))
+            {
+                yield return globString;
+            }
+
+            foreach (
+                var referencedItemString in
+                Fragments.OfType<ItemExpressionFragment<P, I>>().SelectMany(f => f.ReferencedItems).Select(v => v.ItemSpecFragment)
+            )
+            {
+                yield return referencedItemString;
+            }
         }
     }
 

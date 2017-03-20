@@ -1211,7 +1211,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
 
-                excludeFragmentStrings = ConvertItemSpecToFragmentStrings(excludeItemspec).ToImmutableHashSet();
+                excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
                 excludeGlob = excludeItemspec.ToMSBuildGlob();
             }
 
@@ -1278,34 +1278,7 @@ namespace Microsoft.Build.Evaluation
             {
                 cumulativeRemoveElementData.FragmentStrings.Add(removeFragment);
             }
-        }
 
-        /// <summary>
-        /// Given an ItemSpec, this method returns all the fragment strings that represent it.
-        /// "1;*;2;@(foo)" gets returned as ["1", "2", "*", "a", "b"], given that @(foo)=["a", "b"]
-        /// 
-        /// Order is not preserved.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerable<string> ConvertItemSpecToFragmentStrings(EvaluationItemSpec spec)
-        {
-            foreach (var valueString in spec.Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
-            {
-                yield return valueString;
-            }
-
-            foreach (var globString in spec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment))
-            {
-                yield return globString;
-            }
-
-            foreach (
-                var referencedItemString in
-                spec.Fragments.OfType<EvaluationItemExpressionFragment>().SelectMany(f => f.ReferencedItems).Select(v => v.ItemSpecFragment)
-            )
-            {
-                yield return referencedItemString;
-            }
         }
 
         /// <summary>
