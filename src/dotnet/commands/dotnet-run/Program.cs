@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.Tools.Run
             CommandOption framework = app.Option(
                 $"-f|--framework <{LocalizableStrings.CommandOptionFramework}>", LocalizableStrings.CommandOptionFrameworkDescription,
                 CommandOptionType.SingleValue);
+            CommandOption noBuild = app.Option(
+                "--no-build", LocalizableStrings.CommandOptionNoBuild,
+                CommandOptionType.BoolValue);
             CommandOption project = app.Option(
                 "-p|--project", LocalizableStrings.CommandOptionProjectDescription,
                 CommandOptionType.SingleValue);
@@ -38,6 +41,7 @@ namespace Microsoft.DotNet.Tools.Run
 
                 runCmd.Configuration = configuration.Value();
                 runCmd.Framework = framework.Value();
+                runCmd.NoBuild = noBuild.BoolValue ?? false;
                 runCmd.Project = project.Value();
                 runCmd.Args = app.RemainingArguments;
 
