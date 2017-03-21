@@ -70,14 +70,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             ResolveCommand(ref resolvedCommand, ref args);
 
-            var commandPath = Env.GetCommandPath(resolvedCommand, ".exe", ".cmd", "") ??
-                Env.GetCommandPathFromRootPath(_baseDirectory, resolvedCommand, ".exe", ".cmd", "");
-
-            Console.WriteLine($"Executing (Captured Output) - {commandPath} {args} - {WorkingDirectoryInfo()}");
+            Console.WriteLine($"Executing (Captured Output) - {resolvedCommand} {args} - {WorkingDirectoryInfo()}");
 
             return Task.Run(async () => await ExecuteAsyncInternal(resolvedCommand, args)).Result;
         }
-
 
         private async Task<CommandResult> ExecuteAsyncInternal(string executable, string args)
         {
@@ -209,8 +205,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 executable = new Muxer().MuxerPath;
             }
-
-            if (!Path.IsPathRooted(executable))
+            else if ( executable == "dotnet")
+            {
+                executable = new Muxer().MuxerPath;
+            }
+            else if (!Path.IsPathRooted(executable))
             {
                 executable = Env.GetCommandPath(executable) ??
                              Env.GetCommandPathFromRootPath(_baseDirectory, executable);
