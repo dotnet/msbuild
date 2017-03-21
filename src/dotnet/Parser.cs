@@ -1,13 +1,33 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Microsoft.DotNet.Cli.CommandLine;
+using static System.Environment;
+using static Microsoft.DotNet.Cli.CommandLine.LocalizableStrings;
+using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     public static class Parser
     {
+        static Parser()
+        {
+            ConfigureCommandLineLocalizedStrings();
+        }
+
+        private static void ConfigureCommandLineLocalizedStrings()
+        {
+            DefaultHelpViewText.AdditionalArgumentsSection =
+                $"{UsageCommandsAdditionalArgsHeader}:{NewLine}  {LocalizableStrings.RunCommandAdditionalArgsHelpText}";
+            DefaultHelpViewText.ArgumentsSection.Title = UsageArgumentsHeader;
+            DefaultHelpViewText.CommandsSection.Title = UsageCommandsHeader;
+            DefaultHelpViewText.OptionsSection.Title = UsageOptionsHeader;
+            DefaultHelpViewText.Synopsis.AdditionalArguments = UsageCommandAdditionalArgs;
+            DefaultHelpViewText.Synopsis.Command = UsageCommandToken;
+            DefaultHelpViewText.Synopsis.Options = UsageOptionsToken;
+            DefaultHelpViewText.Synopsis.Title = UsageHeader;
+        }
+
         public static CommandLine.Parser Instance { get; } = new CommandLine.Parser(
             options: Create.Command("dotnet",
                                     ".NET Command Line Tools",
@@ -28,7 +48,7 @@ namespace Microsoft.DotNet.Cli
                                     NuGetCommandParser.NuGet(),
                                     CacheCommandParser.Cache(),
                                     Create.Command("msbuild", ""),
-                                    Create.Command("vstest", ""), 
+                                    Create.Command("vstest", ""),
                                     CompleteCommandParser.Complete(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
