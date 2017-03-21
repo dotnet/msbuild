@@ -1169,24 +1169,24 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Scan the project elements in reverse order and build globbing information for each include element.
-            // Based on the fact that relevant removes for a particular include element (element A) consist of:
-            // - all the removes seen by the next include statement of A's type (element B which appears after A in file order)
+            // Based on the fact that relevant removes for a particular include element (xml element A) consist of:
+            // - all the removes seen by the next include statement of A's type (xml element B which appears after A in file order)
             // - new removes between A and B (removes that apply to A but not to B. Spacially, these are placed between A's element and B's element)
 
             // Example:
-            // 1. <A Include="A"/>
-            // 2. <A Remove="..."/> // this remove applies to the A includes
-            // 3. <A Include="B"/>
-            // 4. <A Remove="..."/> // this remove applies to the A and B includes
-            // 5. <A Include="C"/>
-            // 6. <A Remove="..."/> // this remove applies to the A, B, and C includes
+            // 1. <I Include="A"/>
+            // 2. <I Remove="..."/> // this remove applies to the include at 1
+            // 3. <I Include="B"/>
+            // 4. <I Remove="..."/> // this remove applies to the includes at 1, 3
+            // 5. <I Include="C"/>
+            // 6. <I Remove="..."/> // this remove applies to the includes at 1, 3, 5
             // So A's applicable removes are composed of:
             // 
-            // The applicable removes for the element at position 1. are composed of:
-            // - all the removes seen by the next include statement of A's type (element B which appears after A in file order). In this example that's Removes 4 and 6.
+            // The applicable removes for the element at position 1 (xml element A) are composed of:
+            // - all the removes seen by the next include statement of I's type (xml element B, position 3, which appears after A in file order). In this example that's Removes at positions 4 and 6.
             // - new removes between A and B. In this example that's Remove 2.
 
-            // use immutable lists because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
+            // use immutable builders because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
             // item type -> aggregated information about all removes seen so far for that item type
             var removeElementCache = new Dictionary<string, CumulativeRemoveElementData>(projectItemElements.Count);
             var globResults = new List<GlobResult>(projectItemElements.Count);
