@@ -45,6 +45,8 @@ These targets should exist in a project to be compatible with the common targets
 
 These targets are all defined in `Microsoft.Common.targets` and are defined in Microsoft SDKs. You should only have to implement them yourself if you require custom behavior or are authoring a project that doesn't import the common targets.
 
+If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
+
 <!--* `BuildGenerateSources` is run
   * **Conditions**: only if `'$(BuildPassReferences)' == 'true'`.
   * Rare in managed projects but common in C++ scenarios (for example, using IDL to generate header code).-->
@@ -52,7 +54,6 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
   * **New** for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
   * Skipped for `*.vcxproj` by default.
-  * This target must be present in a build request that does not specify a `TargetFramework`—the “outer” build. It is not required in a fully-specified (“inner”) build.
 * `GetTargetPath` should the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
