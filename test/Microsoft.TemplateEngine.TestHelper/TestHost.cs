@@ -12,6 +12,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             BuiltInComponents = new List<KeyValuePair<Guid, Func<Type>>>();
             HostParamDefaults = new Dictionary<string, string>();
+            FileSystem = new PhysicalFileSystem();
         }
 
         public event Action<string, TimeSpan> TimingCompleted;
