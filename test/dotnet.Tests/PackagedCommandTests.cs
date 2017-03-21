@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")] // https://github.com/dotnet/cli/issues/6087
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
             var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.Tests
                 .Should().Fail();
         }
 
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")] // https://github.com/dotnet/cli/issues/6087
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = TestAssets.Get("DependencyContextFromTool")
