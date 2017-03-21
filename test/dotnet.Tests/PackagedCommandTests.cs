@@ -355,10 +355,9 @@ namespace Microsoft.DotNet.Tests
             p.Save();
         }
 
-        class HelloCommand : TestCommand
+        class HelloCommand : DotnetCommand
         {
             public HelloCommand()
-                : base("dotnet")
             {
             }
 
@@ -375,10 +374,9 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        class PortableCommand : TestCommand
+        class PortableCommand : DotnetCommand
         {
             public PortableCommand()
-                : base("dotnet")
             {
             }
 
@@ -395,12 +393,11 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        class GenericCommand : TestCommand
+        class GenericCommand : DotnetCommand
         {
             private readonly string _commandName;
 
             public GenericCommand(string commandName)
-                : base("dotnet")
             {
                 _commandName = commandName;
             }
@@ -418,10 +415,9 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        class DependencyContextTestCommand : TestCommand
+        class DependencyContextTestCommand : DotnetCommand
         {
             public DependencyContextTestCommand()
-                : base("dotnet")
             {
             }
 
