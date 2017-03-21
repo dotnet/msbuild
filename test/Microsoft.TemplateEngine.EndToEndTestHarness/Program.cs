@@ -74,6 +74,13 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 }
             }
 
+            Console.Error.WriteLine(" ");
+            Console.Error.WriteLine("Output Files:");
+            foreach (string fileName in host.FileSystem.EnumerateFiles(outputPath, "*", SearchOption.AllDirectories))
+            {
+                Console.Error.WriteLine(fileName.Substring(outputPath.Length));
+            }
+
             return result != 0 ? result : verificationsPassed ? 0 : 1;
         }
 
@@ -198,8 +205,9 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             string packages = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
             string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
+            string testTemplates = Path.Combine(dir, "test_templates") + Path.DirectorySeparatorChar;
             installer.InstallPackages(new[] { packages });
-            installer.InstallPackages(new[] { templates });
+            installer.InstallPackages(new[] { templates, testTemplates });
         }
     }
 }

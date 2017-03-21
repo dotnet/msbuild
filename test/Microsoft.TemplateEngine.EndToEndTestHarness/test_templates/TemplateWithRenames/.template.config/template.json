@@ -1,0 +1,16 @@
+﻿{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithRenames",
+  "groupIdentity": "TestAssets.TemplateWithRenames",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithRenames",
+  "shortName": "TestAssets.TemplateWithRenames",
+  "symbols": {
+    "foo": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "bar"
+    }
+  }
+}

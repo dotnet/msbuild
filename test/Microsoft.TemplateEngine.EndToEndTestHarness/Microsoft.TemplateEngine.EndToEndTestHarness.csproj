@@ -8,11 +8,36 @@
   <ItemGroup>
     <None Include="**/*.list" CopyToOutputDirectory="Always" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="test_templates/**/*.cs" />
+    <EmbeddedResource Remove="test_templates/**/*" />
+    <None Remove="test_templates/**/*" />
+    <Page Remove="test_templates/**/*" />
+    <None Include="test_templates/**/*" CopyToOutputDirectory="Always" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="test_templates\ConfigurationKitchenSink\.template.config\template.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="test_templates\ConfigurationKitchenSink\Test.css" />
+    <None Include="test_templates\ConfigurationKitchenSink\Test.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="test_templates\ConfigurationKitchenSink\Test.json" />
+    <None Include="test_templates\TemplateWithRenames\bar\bar.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="test_templates\TemplateWithSourceName\bar\bar.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
