@@ -1,4 +1,4 @@
-# The `ProjectReference` Protocol
+﻿# The `ProjectReference` Protocol
 
 The MSBuild engine doesn't have a notion of a “project reference”—it only provides the [`MSBuild` task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) to allow cross-project communication.
 
@@ -69,4 +69,4 @@ As with all MSBuild logic, targets can be added to do other work with `ProjectRe
 
 In particular, NuGet depends on being able to identify referenced projects' package dependencies, and calls some targets that are imported through `Microsoft.Common.targets` to do so. At the time of writing this this is in [`NuGet.targets`](https://github.com/NuGet/NuGet.Client/blob/79264a74262354c1a8f899c2c9ddcaff58afaf62/src/NuGet.Core/NuGet.Build.Tasks/NuGet.targets).
 
-XAML targets add a dependency on the target `GetPackagingOutputs`.
+`Microsoft.AppxPackage.targets` adds a dependency on the target `GetPackagingOutputs`.
