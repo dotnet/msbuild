@@ -1584,10 +1584,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceCrossTargeting)"
         Targets="GetReferenceProperties"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
+        Properties="%(_MSBuildProjectReferenceCrossTargeting.SetConfiguration); %(_MSBuildProjectReferenceCrossTargeting.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+        RemoveProperties="%(_MSBuildProjectReferenceCrossTargeting.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        Condition="'%(_MSBuildProjectReferenceCrossTargeting.SkipGetTargetFrameworkProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
