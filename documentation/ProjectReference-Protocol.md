@@ -52,6 +52,7 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
   * **New** for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
   * Skipped for `*.vcxproj` by default.
+  * This target must be present in a build request that does not specify a `TargetFramework`—the “outer” build. It is not required in a fully-specified (“inner”) build.
 * `GetTargetPath` should the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
