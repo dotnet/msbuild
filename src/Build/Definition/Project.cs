@@ -1138,7 +1138,7 @@ namespace Microsoft.Build.Evaluation
             public IEnumerable<IMSBuildGlob> Globs => _globs.ToImmutable();
             public IEnumerable<string> FragmentStrings => _fragmentStrings.ToImmutable();
 
-            public static CumulativeRemoveElementData New()
+            public static CumulativeRemoveElementData Create()
             {
                 return new CumulativeRemoveElementData
                 {
@@ -1147,7 +1147,7 @@ namespace Microsoft.Build.Evaluation
                 };
             }
 
-            public void CumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+            public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
             {
                 var removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
                 var removeGlob = removeSpec.ToMSBuildGlob();
@@ -1284,14 +1284,14 @@ namespace Microsoft.Build.Evaluation
             CumulativeRemoveElementData cumulativeRemoveElementData;
             if (!removeElementCache.TryGetValue(itemElement.ItemType, out cumulativeRemoveElementData))
             {
-                cumulativeRemoveElementData = CumulativeRemoveElementData.New();
+                cumulativeRemoveElementData = CumulativeRemoveElementData.Create();
 
                 removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
             }
 
             var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
 
-            cumulativeRemoveElementData.CumulateInformationFromRemoveItemSpec(removeSpec);
+            cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec);
         }
 
         /// <summary>
