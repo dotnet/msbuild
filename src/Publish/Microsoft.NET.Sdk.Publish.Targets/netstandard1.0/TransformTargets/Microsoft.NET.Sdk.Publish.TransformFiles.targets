@@ -16,12 +16,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="TransformWebConfig" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="TransformAppSettings" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateEFSQLScripts" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="GenerateRunCommandFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <_DotNetPublishTransformFiles>
       _TransformWebConfig;
       _TransformAppSettings;
-      _GenerateEFSQLScripts
+      _GenerateEFSQLScripts;
+      _GenerateRunCommandFile;
     </_DotNetPublishTransformFiles>
   </PropertyGroup>
 
@@ -98,5 +100,28 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
     </GenerateEFSQLScripts>
   </Target>
-  
+
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _GenerateRunCommandFile
+  ***********************************************************************************************
+ -->
+  <Target Name="_GenerateRunCommandFile">
+
+    <PropertyGroup>
+      <_IsWebJobProject Condition="'$(_IsWebJobProject)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">true</_IsWebJobProject>
+      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
+      <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
+      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
+    </PropertyGroup>
+
+    <GenerateRunCommandFile
+        Condition="'$(_IsWebJobProject)' == 'true' And '$(IsGenerateRunCommandFileDisabled)' != 'true'"
+        ProjectDirectory="$(MSBuildProjectDirectory)"
+        TargetPath="$(TargetPath)"
+        WebJobsDirectory="$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\"
+        IsPortable="$(_IsPortable)"
+        ExecutableExtension="$(_ExecutableExtension)" />
+  </Target>
 </Project>
