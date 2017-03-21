@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli
                                  {
                                      Configuration = o.SingleArgumentOrDefault("--configuration"),
                                      Framework = o.SingleArgumentOrDefault("--framework"),
+                                     NoBuild = o.HasOption("--no-build"),
                                      Project = o.SingleArgumentOrDefault("--project"),
                                      Args = o.Arguments
                                  }),
