@@ -1,6 +1,6 @@
 {
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": [
         "portable-net451+win8",
         "dnxcore50"
@@ -10,7 +10,7 @@
       },
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0",
+          "version": "1.1.0",
           "type": "platform"
         }
       }

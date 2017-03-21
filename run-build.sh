@@ -97,9 +97,8 @@ while [[ $# > 0 ]]; do
             shift
             ;;
         --linux-portable)
-            LINUX_PORTABLE_INSTALL_ARGS="--linux-portable"
-            # Until we get test support for 2.0 we need to pass in the targets without test.
-            CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:CLITargets=\"Prepare;Compile;Package;Publish\""
+            LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
+            CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\""
             args=( "${args[@]/$1}" )
             ;;
         --help)
@@ -168,8 +167,8 @@ if [ $? != 0 ]; then
 fi
 
 # now execute the script
-echo "installing CLI: $dotnetInstallPath --channel \"master\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
-$dotnetInstallPath --channel "master" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
+echo "installing CLI: $dotnetInstallPath --channel \"master\" --version \"2.0.0-preview1-005165\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
+$dotnetInstallPath --channel "master" --version "2.0.0-preview1-005390" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $?." >&2
     exit $?

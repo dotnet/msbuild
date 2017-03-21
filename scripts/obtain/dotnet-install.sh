@@ -113,10 +113,7 @@ get_current_os_name() {
     eval $invocation
 
     local uname=$(uname)
-    if [ "$linux_portable" = true ]; then
-        echo "linux"
-        return 0
-    elif [ "$uname" = "Darwin" ]; then
+    if [ "$uname" = "Darwin" ]; then
         echo "osx"
         return 0
     elif [ -n "$runtime_id" ]; then
@@ -601,7 +598,6 @@ azure_feed="https://dotnetcli.azureedge.net/dotnet"
 uncached_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 verbose=false
 shared_runtime=false
-linux_portable=false
 runtime_id=""
 
 while [ $# -ne 0 ]
@@ -643,9 +639,6 @@ do
             shift
             azure_feed="$1"
             ;;
-        --linux-portable|-[Ll]inux[Pp]ortable)
-            linux_portable=true
-            ;;
         --runtime-id|-[Rr]untime[Ii]d)
             shift
             runtime_id="$1"
@@ -674,9 +667,7 @@ do
             echo "  --no-path, -NoPath             Do not set PATH for the current process."
             echo "  --verbose,-Verbose             Display diagnostics information."
             echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
-            echo "  --linux-portable               Installs the Linux portable .NET Tools instead of a distro-specific version."
-            echo "      -LinuxPortable"
-            echo "  --runtime-id                   Installs the .NET Tools for the given platform (such as linux-x64)."
+            echo "  --runtime-id                   Installs the .NET Tools for the given platform (use linux-x64 for portable linux)."
             echo "      -RuntimeId"
             echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""

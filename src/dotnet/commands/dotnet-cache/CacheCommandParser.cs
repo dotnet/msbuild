@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.FrameworkVersionOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FrameworkVersionOption)
-                        .ForwardAsSingle(o => $"/p:FX_Version={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"/p:RuntimeFrameworkVersion={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
                 Create.Option(
