@@ -145,5 +145,23 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }
+
+        [Fact]
+        public void ItReportsAGoodErrorWhenProjectHasMultipleFrameworks()
+        {
+            var testAppName = "MSBuildAppWithMultipleFrameworks";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            // use --no-build so this test can run on all platforms.
+            // the test app targets net451, which can't be built on non-Windows
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--no-build")
+                .Should().Fail()
+                    .And.HaveStdErrContaining("--framework");
+        }
     }
 }
