@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli
                     Create.Option(
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
-                        Accept.NoArguments().ForwardAs("/p:NoBuild=true"))
+                        Accept.NoArguments())
                 });
     }
 }
