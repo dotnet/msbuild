@@ -160,7 +160,7 @@ namespace Microsoft.Build.CommandLine
 
             ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
 
-            if (showStackTrace)
+            if (showStackTrace && e != null)
             {
                 errorMessage += Environment.NewLine + e.ToString();
             }
