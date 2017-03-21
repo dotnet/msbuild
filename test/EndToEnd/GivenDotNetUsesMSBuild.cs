@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
         }
 
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")] // https://github.com/dotnet/cli/issues/6087
         public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
         {
             var repoDirectoriesProvider = new RepoDirectoriesProvider();

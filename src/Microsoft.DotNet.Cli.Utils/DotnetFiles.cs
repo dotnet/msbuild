@@ -25,16 +25,5 @@ namespace Microsoft.DotNet.Cli
         {
             get { return s_versionFileObject.Value; }
         }
-
-        /// <summary>
-        /// Reads the version file and adds runtime specific information
-        /// </summary>
-        public static string ReadAndInterpretVersionFile()
-        {
-            var content = File.ReadAllText(DotnetFiles.VersionFile);
-            content += Environment.NewLine;
-            content += RuntimeEnvironment.GetRuntimeIdentifier();
-            return content;
-        }
     }
 }

@@ -60,11 +60,7 @@ platformList.each { platform ->
 
     Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, 'latest-or-auto')
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-    // Remove this check once tests work for 2.0. Until that time Linux portable tests will fail so we 
-    // don't run the tests and there won't be any .trx file.
-    if (os != 'Linux') {
-        Utilities.addMSTestResults(newJob, '**/*.trx')
-    }
+    Utilities.addMSTestResults(newJob, '**/*.trx')
     Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${architecture} ${configuration} Build")
 }
 
