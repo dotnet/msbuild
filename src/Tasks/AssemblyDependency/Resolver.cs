@@ -167,13 +167,16 @@ namespace Microsoft.Build.Tasks
             ResolutionSearchLocation searchLocation
         )
         {
-            searchLocation.FileNameAttempted = pathToCandidateAssembly;
+            if (searchLocation != null)
+            {
+                searchLocation.FileNameAttempted = pathToCandidateAssembly;
+            }
 
             // Base name of the target file has to match the Name from the assemblyName
             if (!allowMismatchBetweenFusionNameAndFileName)
             {
                 string candidateBaseName = Path.GetFileNameWithoutExtension(pathToCandidateAssembly);
-                if (String.Compare(assemblyName.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase) != 0)
+                if (String.Compare(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase) != 0)
                 {
                     if (searchLocation != null)
                     {
@@ -246,7 +249,10 @@ namespace Microsoft.Build.Tasks
                               && (targetProcessorArchitecture != ProcessorArchitecture.MSIL && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.MSIL) /*The assembly is not MSIL*/
                            )
                         {
-                            searchLocation.Reason = NoMatchReason.ProcessorArchitectureDoesNotMatch;
+                            if (searchLocation != null)
+                            {
+                                searchLocation.Reason = NoMatchReason.ProcessorArchitectureDoesNotMatch;
+                            }
                             return false;
                         }
                     }
