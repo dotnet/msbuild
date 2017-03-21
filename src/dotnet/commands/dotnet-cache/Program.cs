@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Cache
 
                 if (!string.IsNullOrEmpty(fxOption.Value()))
                 {
-                    msbuildArgs.Add($"/p:FX_Version={fxOption.Value()}");
+                    msbuildArgs.Add($"/p:RuntimeFrameworkVersion={fxOption.Value()}");
                 }
 
                 if (!string.IsNullOrEmpty(workingDir.Value()))
