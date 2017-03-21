@@ -25,6 +25,12 @@ namespace Microsoft.Build.Globbing
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
         {
+            // ImmutableArray also does this check, but copied it here just in case they remove it
+            if (globs is ImmutableArray<IMSBuildGlob>)
+            {
+                Globs = (ImmutableArray<IMSBuildGlob>)globs;
+            }
+
             Globs = globs.ToImmutableArray();
         }
 
