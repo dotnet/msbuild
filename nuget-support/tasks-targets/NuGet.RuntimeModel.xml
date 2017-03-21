@@ -38,6 +38,13 @@
             <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
             <param name="value">The datum.</param>
         </member>
+        <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.Boolean)">
+            <summary>
+            Writes a name-value pair.
+            </summary>
+            <param name="name">The name of the datum.  Throws if <c>null</c>.</param>
+            <param name="value">The datum.</param>
+        </member>
         <member name="M:NuGet.RuntimeModel.IObjectWriter.WriteNameValue(System.String,System.String)">
             <summary>
             Writes a name-value pair.

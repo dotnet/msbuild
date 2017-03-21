@@ -76,6 +76,11 @@
             Optional TargetPlatformIdentifier property value.
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetPlatformMinVersion">
+            <summary>
+            Optional TargetPlatformMinVersion property value.
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetPlatformVersion">
             <summary>
             Optional TargetPlatformVersion property value.

@@ -4,6 +4,11 @@
         <name>NuGet.LibraryModel</name>
     </assembly>
     <members>
+        <member name="P:NuGet.LibraryModel.LibraryDependency.AutoReferenced">
+            <summary>
+            True if the PackageReference is added by the SDK and not the user.
+            </summary>
+        </member>
         <member name="M:NuGet.LibraryModel.LibraryDependency.HasFlag(NuGet.LibraryModel.LibraryDependencyTypeFlag)">
             <summary>
             Type property flag

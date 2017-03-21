@@ -26,9 +26,14 @@
             Pattern used to locate all files designed for loading as managed code assemblies at run-time
             </summary>
         </member>
-        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileAssemblies">
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileRefAssemblies">
             <summary>
-            Pattern used to locate all files designed for using as managed code references at compile-time
+            Pattern used to locate ref assemblies for compile.
+            </summary>
+        </member>
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.CompileLibAssemblies">
+            <summary>
+            Pattern used to locate lib assemblies for compile.
             </summary>
         </member>
         <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.NativeLibraries">

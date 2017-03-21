@@ -143,6 +143,11 @@
                Looks up a localized string similar to An absolute path is required: &apos;{0}&apos;..
             </summary>
         </member>
+        <member name="P:NuGet.Common.Strings.Argument_Must_Be_GreaterThanOrEqualTo">
+            <summary>
+               Looks up a localized string similar to Value must be greater than or equal to {0}.
+            </summary>
+        </member>
         <member name="P:NuGet.Common.Strings.ArgumentNullOrEmpty">
             <summary>
                Looks up a localized string similar to Argument cannot be null or empty.
@@ -385,6 +390,16 @@
         <member name="M:NuGet.Common.PathUtility.GetUniquePathsBasedOnOS(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Returns distinct orderd paths based on the file system case sensitivity.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathUtility.GetRelativePath(System.String,System.String)">
+            <summary>
+            Returns path2 relative to path1, with Path.DirectorySeparatorChar as separator
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.PathUtility.GetRelativePath(System.String,System.String,System.Char)">
+            <summary>
+            Returns path2 relative to path1, with given path separator
             </summary>
         </member>
         <member name="M:NuGet.Common.PathValidator.IsValidSource(System.String)">

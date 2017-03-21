@@ -807,6 +807,11 @@
             Remove the snapshot version section of a version
             </summary>
         </member>
+        <member name="M:NuGet.Versioning.VersionRange.ToShortString">
+            <summary>
+            ToLegacyShortString that also includes floating ranges
+            </summary>
+        </member>
         <member name="F:NuGet.Versioning.VersionRange.All">
             <summary>
             A range that accepts all versions, prerelease and stable.
