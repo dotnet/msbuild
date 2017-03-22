@@ -6,7 +6,7 @@
     <MsBuildPackagesVersion>15.1.548</MsBuildPackagesVersion>
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
-    <NuGetVersion>4.3.0-beta1-2342</NuGetVersion>
+    <NuGetVersion>4.3.0-beta1-2418</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <NewtonsoftJsonSideBySideVersion>6.0.4</NewtonsoftJsonSideBySideVersion>
   </PropertyGroup>
