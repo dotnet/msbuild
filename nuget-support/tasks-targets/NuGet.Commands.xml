@@ -1317,11 +1317,6 @@
             Convert MSBuild items to a PackageSpec.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.MSBuildRestoreUtility.AddPlaceHolderFiles(NuGet.ProjectModel.PackageSpec,System.String)">
-            <summary>
-            Add placeholder files, these will be used under the compile and runtime sections.
-            </summary>
-        </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetVersion(NuGet.Commands.IMSBuildItem)">
             <summary>
             Return the parsed version or 1.0.0 if the property does not exist.
@@ -1336,16 +1331,6 @@
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.IsPersistDGSet">
             <summary>
             True if NUGET_PERSIST_DG is set to true.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.PathUtility.GetRelativePath(System.String,System.String)">
-            <summary>
-            Returns path2 relative to path1, with Path.DirectorySeparatorChar as separator
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.PathUtility.GetRelativePath(System.String,System.String,System.Char)">
-            <summary>
-            Returns path2 relative to path1, with given path separator
             </summary>
         </member>
         <member name="M:NuGet.Commands.SpecValidationUtility.ValidateDependencySpec(NuGet.ProjectModel.DependencyGraphSpec)">
@@ -1619,12 +1604,12 @@
             Helper functions for shared command runners (push, delete, etc)
             </summary>
         </member>
-        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
             Determine the target framework of an msbuild project.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
             <summary>
             Determine the target framework of an msbuild project.
             </summary>

@@ -160,6 +160,16 @@
             <param name="name">project name</param>
             <param name="packageSpecPath">file path</param>
         </member>
+        <member name="M:NuGet.ProjectModel.JsonPackageSpecReader.GetBoolOrFalse(Newtonsoft.Json.Linq.JToken,System.String,System.String)">
+            <summary>
+            Returns true if the property is set to true. Otherwise false.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.JsonPackageSpecReader.GetBoolOrFalse(Newtonsoft.Json.Linq.JObject,System.String,System.String)">
+            <summary>
+            Returns true if the property is set to true. Otherwise false.
+            </summary>
+        </member>
         <member name="T:NuGet.ProjectModel.PackageSpec">
             <summary>
             Represents the specification of a package that can be built.

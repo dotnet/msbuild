@@ -1459,7 +1459,7 @@
             </summary>
             <param name="root">Nupkg folder directory path.</param>
         </member>
-        <member name="M:NuGet.Protocol.LocalFolderUtility.GetPackagesConfigFolderPackage(System.IO.DirectoryInfo)">
+        <member name="M:NuGet.Protocol.LocalFolderUtility.GetPackagesConfigFolderPackage(System.IO.DirectoryInfo,NuGet.Common.ILogger)">
             <summary>
             Return the package nupkg from a packages.config folder sub directory.
             </summary>
