@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<PartiallyEvaluatedMetadata> metadata)
             {
                 if (metadata.Any())
                 {
@@ -107,12 +107,17 @@ namespace Microsoft.Build.Evaluation
                     // It means that 99% of cases still go through the old code, which is best for the CTP.
                     // When we ultimately implement this correctly, we should make sure we optimize for the case of very many items
                     // and little metadata, none of which varies between items.
+
+                    // Do not expand properties as they have been already expanded by the lazy evaluator upon item operation construction.
+                    // Prior to lazy evaluation ExpanderOptions.ExpandAll was used.
+                    const ExpanderOptions metadataExpansionOptions = ExpanderOptions.ExpandMetadata | ExpanderOptions.ExpandItems;
+
                     List<string> values = new List<string>(metadata.Count * 2);
 
-                    foreach (ProjectMetadataElement metadatumElement in metadata)
+                    foreach (var metadatum in metadata)
                     {
-                        values.Add(metadatumElement.Value);
-                        values.Add(metadatumElement.Condition);
+                        values.Add(metadatum.ValueWithPropertiesExpanded);
+                        values.Add(metadatum.ConditionWithPropertiesExpanded);
                     }
 
                     ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
@@ -148,7 +153,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             _expander.Metadata = item;
 
-                            foreach (ProjectMetadataElement metadatumElement in metadata)
+                            foreach (var metadatum in metadata)
                             {
 #if FEATURE_MSBUILD_DEBUGGER
                                 //if (DebuggerManager.DebuggingEnabled)
@@ -157,14 +162,14 @@ namespace Microsoft.Build.Evaluation
                                 //}
 #endif
 
-                                if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                                if (!EvaluateCondition(metadatum.ConditionWithPropertiesExpanded, metadatum.Element, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                                 {
                                     continue;
                                 }
 
-                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
+                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatum.ValueWithPropertiesExpanded, metadataExpansionOptions, metadatum.Element.Location);
 
-                                item.SetMetadata(metadatumElement, evaluatedValue);
+                                item.SetMetadata(metadatum.Element, evaluatedValue);
                             }
                         }
 
@@ -185,11 +190,11 @@ namespace Microsoft.Build.Evaluation
                         // Also keep a list of everything so we can get the predecessor objects correct.
                         List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>();
 
-                        foreach (ProjectMetadataElement metadatumElement in metadata)
+                        foreach (var metadatum in metadata)
                         {
                             // Because of the checking above, it should be safe to expand metadata in conditions; the condition
                             // will be true for either all the items or none
-                            if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                            if (!EvaluateCondition(metadatum.ConditionWithPropertiesExpanded, metadatum.Element, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                             {
                                 continue;
                             }
@@ -201,10 +206,10 @@ namespace Microsoft.Build.Evaluation
                             //}
 #endif
 
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
+                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatum.ValueWithPropertiesExpanded, metadataExpansionOptions, metadatum.Element.Location);
 
-                            metadataTable.SetValue(metadatumElement, evaluatedValue);
-                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadatumElement, evaluatedValue));
+                            metadataTable.SetValue(metadatum.Element, evaluatedValue);
+                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadatum.Element, evaluatedValue));
                         }
 
                         // Apply those metadata to each item
