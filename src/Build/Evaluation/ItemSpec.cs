@@ -223,6 +223,11 @@ namespace Microsoft.Build.Evaluation
                 yield return referencedItemString;
             }
         }
+		
+        public override string ToString()
+        {
+            return ItemSpecString;
+        }
     }
 
     internal abstract class ItemFragment
