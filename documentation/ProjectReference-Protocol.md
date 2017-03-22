@@ -14,7 +14,7 @@ In its simplest form, a project need only specify the path to another project in
 </ItemGroup>
 ```
 
-Including `Microsoft.Common.targets` includes logic that consumes these items and transforms them into compile-time references before the compiler runs. 
+Importing `Microsoft.Common.targets` includes logic that consumes these items and transforms them into compile-time references before the compiler runs. 
 
 ## Who this document is for
 
@@ -31,7 +31,7 @@ There are empty hooks in the default targets for
 
 `AssignProjectConfiguration` runs when building in a solution context, and ensures that the right `Configuration` and `Platform` are assigned to each reference. For example, if a solution specifies (using the Solution Build Manager) that for a given solution configuration, a project should always be built `Release`, that is applied inside MSBuild in this target.
 
-`PrepareProjectReferences` then runs, ensuring that each referenced project exists (creating the item `@(_MSBuildProjectReferenceExistent)`) and asking it for the closest matching `TargetFramework` to build.
+`PrepareProjectReferences` then runs, ensuring that each referenced project exists (creating the item `@(_MSBuildProjectReferenceExistent)`) and determining the parameters it needs to produce a compatible build by calling its `GetTargetFrameworkProperties` target.
 
 `ResolveProjectReferences` does the bulk of the work, building the referenced projects and collecting their outputs.
 
@@ -47,17 +47,15 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
 
 If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
 
-<!--* `BuildGenerateSources` is run
-  * **Conditions**: only if `'$(BuildPassReferences)' == 'true'`.
-  * Rare in managed projects but common in C++ scenarios (for example, using IDL to generate header code).-->
-* `GetTargetFrameworkProperties` determines what properties should be passed to the main get-build-output target.
+* `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target.
   * **New** for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
   * Skipped for `*.vcxproj` by default.
 * `GetTargetPath` should the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
-* Default/explicitly specified targets do the full build and return an assembly to be referenced.
+* **Default** targets should do the full build and return an assembly to be referenced.
+  * **Conditions**: this is _not_ called when building inside Visual Studio. Instead, Visual Studio builds each project in isolation but in order, so the path returned from `GetTargetPath` can be assumed to exist at consumption time.
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
 * `GetNativeManifest` should return a manifest suitable for passing to the `ResolveNativeReferences` target.
 * `GetCopyToOutputDirectoryItems` should return the outputs of a project that should be copied to the output of a referencing project.
