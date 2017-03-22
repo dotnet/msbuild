@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeIdentifier>$(Rid)</RuntimeIdentifier>
+    <RuntimeIdentifier>$(CoreCLRRid)</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
