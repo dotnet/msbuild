@@ -86,7 +86,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForAspNetCoreProjectSystemPublish">
     <PropertyGroup>
       <PublishDir>$(PublishIntermediateOutputPath)</PublishDir>
-      <TargetFramework>$(PublishFramework)</TargetFramework>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
   </Target>
@@ -113,7 +112,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForWebJobPublish">
     <PropertyGroup>
       <PublishDir>$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\</PublishDir>
-      <TargetFramework>$(PublishFramework)</TargetFramework>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
   </Target>
