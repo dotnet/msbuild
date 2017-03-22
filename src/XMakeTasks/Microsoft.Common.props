@@ -143,6 +143,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WMSJSProjectDirectory Condition="'$(WMSJSProjectDirectory)' == ''">JavaScript</WMSJSProjectDirectory>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PropertiesToRemoveWhenQueryingForDesiredProperties Condition="'$(PropertiesToRemoveWhenQueryingForDesiredProperties)' == ''">TargetFramework;RuntimeIdentifier</PropertiesToRemoveWhenQueryingForDesiredProperties>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualStudioVersion.v*.Common.props" Condition="'$(VisualStudioVersion)' == ''" />
 
   <!-- 

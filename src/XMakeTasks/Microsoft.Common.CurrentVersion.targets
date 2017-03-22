@@ -1539,7 +1539,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_MSBuildProjectReferenceCrossTargetingResults" />
@@ -1586,7 +1586,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceCrossTargeting.SetConfiguration); %(_MSBuildProjectReferenceCrossTargeting.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceCrossTargeting.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        RemoveProperties="%(_MSBuildProjectReferenceCrossTargeting.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceCrossTargeting.SkipGetTargetFrameworkProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
