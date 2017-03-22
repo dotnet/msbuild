@@ -77,16 +77,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">$(Configuration)</PublishConfiguration>
     <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == '' And '$(PublishConfiguration)' != ''">$(PublishConfiguration)\</_PublishConfigurationPath>
 
-    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFramework)</PublishFramework>
-    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFrameworks)</PublishFramework>
-    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(PublishFramework)' != ''">$(PublishFramework)\</_PublishFrameworkPath>
-
+    <_TargetFrameworkPath Condition="'$(_TargetFrameworkPath)' == '' And '$(TargetFramework)' != ''">$(TargetFramework)\</_TargetFrameworkPath>
     <_RuntimeIdentifierPath Condition="'$(_RuntimeIdentifierPath)' == '' And '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)\</_RuntimeIdentifierPath>
 
     <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
 
-    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_TargetFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)Out\</PublishIntermediateOutputPath>
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
     
