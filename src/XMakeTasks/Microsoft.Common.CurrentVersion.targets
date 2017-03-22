@@ -1520,7 +1520,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           there is also a .NETFramework implementation.
 
        2. As an escape hatch for cases where the compatibility check performed by 
-          GetReferenceProperties is faulty.
+          GetDesiredProperties is faulty.
     -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
@@ -1558,7 +1558,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
 
-    Builds the GetReferenceProperties target of all existent project references,
+    Builds the GetDesiredProperties target of all existent project references,
     passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
     SetTargetFramework metadata of the project reference to the value that is returned.
 
@@ -1582,7 +1582,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuild
         Projects="@(_MSBuildProjectReferenceWithDesiredProperties)"
-        Targets="GetReferenceProperties"
+        Targets="GetDesiredProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceWithDesiredProperties.SetConfiguration); %(_MSBuildProjectReferenceWithDesiredProperties.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
@@ -1619,7 +1619,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                                    GetReferenceProperties
+                                    GetDesiredProperties
 
     Overrridden by cross-targeting projects to return the set of
     properties (in the form "key1=value1;...keyN=valueN") needed
@@ -1629,14 +1629,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     The referring project's $(TargetFrameworkMoniker) is passed 
     in as $(ReferringTargetFramework)
   -->
-  <Target Name="GetReferenceProperties" />
+  <Target Name="GetDesiredProperties" />
 
   <!--
     ============================================================
                                         ShouldQueryForProperties
 
     Overrridden by cross-targeting projects to return "true" if
-    the project should have its GetReferenceProperties
+    the project should have its GetDesiredProperties
     target called with a ReferringTargetFramework. If "false",
     the single output of the project is used.
   -->
