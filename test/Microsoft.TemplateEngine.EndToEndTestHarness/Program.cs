@@ -42,7 +42,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             if (Path.DirectorySeparatorChar == '/')
             {
-                home = "%HOME";
+                home = "%HOME%";
             }
 
             ITemplateEngineHost host = CreateHost();
