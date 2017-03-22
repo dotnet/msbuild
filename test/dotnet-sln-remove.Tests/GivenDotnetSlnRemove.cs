@@ -18,11 +18,11 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 Usage: dotnet sln <SLN_FILE> remove [options] <args>
 
 Arguments:
-  <SLN_FILE>      Solution file to operate on. If not specified, the command will search the current directory for one.
-  <args>          Remove the specified project(s) from the solution. The project is not impacted.
+  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <args>       Remove the specified project(s) from the solution. The project is not impacted.
 
 Options:
-  -h, --help                               Show help information
+  -h, --help   Show help information
 ";
 
         private const string ExpectedSlnContentsAfterRemove = @"
