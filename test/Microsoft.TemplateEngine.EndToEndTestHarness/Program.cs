@@ -107,7 +107,10 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             }
 
             Console.Error.WriteLine($"Expected {path} to contain {config["text"].ToString()} but it did not");
+
+            text = text.Replace('\r', '%').Replace('\n', '$');
             Console.Error.WriteLine($"Actual content = {text}");
+
             return false;
         }
 
