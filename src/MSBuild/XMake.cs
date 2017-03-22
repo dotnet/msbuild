@@ -598,26 +598,36 @@ namespace Microsoft.Build.CommandLine
 
                     DateTime t1 = DateTime.Now;
 
+                    // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
+                    // as if a build is happening
+                    if (FileUtilities.IsBinaryLogFilename(projectFile))
+                    {
+                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
+                    }
+                    else // regular build
+                    {
 #if !STANDALONEBUILD
                     if (Environment.GetEnvironmentVariable("MSBUILDOLDOM") != "1")
 #endif
-                    {
-                        // if everything checks out, and sufficient information is available to start building
-                        if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
+                        {
+                            // if everything checks out, and sufficient information is available to start building
+                            if (!BuildProject(projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
                             cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages))
-                        {
-                            exitType = ExitType.BuildError;
+                            {
+                                exitType = ExitType.BuildError;
+                            }
                         }
-                    }
 #if !STANDALONEBUILD
                     else
                     {
                         exitType = OldOMBuildProject(exitType, projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, needToValidateProject, schemaFile, cpuCount);
                     }
 #endif
+                    } // end of build
+
                     DateTime t2 = DateTime.Now;
 
                     TimeSpan elapsedTime = t2.Subtract(t1);
@@ -626,7 +636,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!String.IsNullOrEmpty(timerOutputFilename))
                     {
-                        AppendOutputFile(timerOutputFilename, elapsedTime.Milliseconds);
+                        AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
                 }
                 else
@@ -2622,7 +2632,7 @@ namespace Microsoft.Build.CommandLine
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
-            ProcessBinaryLogger(binaryLoggerParameters, loggers);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             if (verbosity == LoggerVerbosity.Diagnostic)
             {
@@ -2709,7 +2719,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, ArrayList loggers)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, ArrayList loggers, ref LoggerVerbosity verbosity)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -2720,6 +2730,11 @@ namespace Microsoft.Build.CommandLine
 
             BinaryLogger logger = new BinaryLogger();
             logger.Parameters = outputLogFilePath;
+
+            // If we have a binary logger, force verbosity to diagnostic.
+            // The only place where verbosity is used downstream is to determine whether to log task inputs.
+            // Since we always want task inputs for a binary logger, set it to diagnostic.
+            verbosity = LoggerVerbosity.Diagnostic;
 
             loggers.Add(logger);
         }
@@ -3160,6 +3175,62 @@ namespace Microsoft.Build.CommandLine
             }
 
             return logger;
+        }
+
+        private static void ReplayBinaryLog
+        (
+            string binaryLogFilePath,
+            ILogger[] loggers,
+            IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
+            int cpuCount)
+        {
+            var replayEventSource = new Logging.BinaryLogReplayEventSource();
+
+            foreach (var distributedLoggerRecord in distributedLoggerRecords)
+            {
+                var nodeLogger = distributedLoggerRecord.CentralLogger as INodeLogger;
+                if (nodeLogger != null)
+                {
+                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                }
+                else
+                {
+                    distributedLoggerRecord.CentralLogger.Initialize(replayEventSource);
+                }
+            }
+
+            foreach (var logger in loggers)
+            {
+                var nodeLogger = logger as INodeLogger;
+                if (nodeLogger != null)
+                {
+                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                }
+                else
+                {
+                    logger.Initialize(replayEventSource);
+                }
+            }
+
+            try
+            {
+                replayEventSource.Replay(binaryLogFilePath);
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceString("InvalidLogFileFormat", ex.Message);
+                Console.WriteLine(message);
+            }
+
+            foreach (var logger in loggers)
+            {
+                logger.Shutdown();
+            }
+
+            foreach (var distributedLoggerRecord in distributedLoggerRecords)
+            {
+                distributedLoggerRecord.CentralLogger.Shutdown();
+            }
         }
 
         /// <summary>

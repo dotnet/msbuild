@@ -662,6 +662,55 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Log when a property is being assigned a new value.
+        /// </summary>
+        [Fact]
+        public void LogPropertyAssignments()
+        {
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+                                <Project xmlns='msbuildnamespace'>
+                                     <PropertyGroup>
+                                         <Prop>OldValue</Prop>
+                                         <Prop>NewValue</Prop>
+                                     </PropertyGroup>
+
+                                  <Target Name=""Test""/>
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            bool originalValue = BuildParameters.WarnOnUninitializedProperty;
+            try
+            {
+                BuildParameters.WarnOnUninitializedProperty = true;
+                Directory.CreateDirectory(targetDirectory);
+                File.WriteAllText(testTargetPath, testtargets);
+
+                MockLogger logger = new MockLogger();
+                logger.Verbosity = LoggerVerbosity.Diagnostic;
+                ProjectCollection pc = new ProjectCollection();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(testTargetPath);
+
+                bool result = project.Build();
+                Assert.Equal(true, result);
+                logger.AssertLogContains("Evaluation started");
+                logger.AssertLogContains("Property reassignment");
+                logger.AssertLogContains("Evaluation finished");
+                logger.AssertLogContains("Prop");
+                logger.AssertLogContains("OldValue");
+                logger.AssertLogContains("NewValue");
+            }
+            finally
+            {
+                BuildParameters.WarnOnUninitializedProperty = originalValue;
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
+            }
+        }
+
+        /// <summary>
         /// If we use a property twice make sure we warn and dont crash due to the dictionary which is holding the used but uninitialized variables..
         /// </summary>
         [Fact]
@@ -1395,6 +1444,68 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(null, metadatum.Predecessor.Predecessor);
         }
 
+        [Fact]
+        public void ItemPredecessorToItemWithCaseChange()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                    <Project xmlns='msbuildnamespace' >
+                        <ItemGroup>
+                          <item_with_lowercase_name Include='h1'>
+                            <m>1</m>
+                          </item_with_lowercase_name>
+                          <i Include='@(ITEM_WITH_LOWERCASE_NAME)'>
+                            <m>2;%(m)</m>
+                          </i>
+                        </ItemGroup>
+                    </Project>");
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+            ProjectMetadataElement metadataElementFromProjectRootElement =
+                project.Xml.Items.First().Metadata.First();
+
+            Assert.Collection(project.GetItems("i"), item =>
+            {
+                ProjectMetadata metadatum = item.GetMetadata("m");
+
+                Assert.Equal("2;1", metadatum.EvaluatedValue);
+                Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
+                Assert.Same(metadataElementFromProjectRootElement, metadatum.Predecessor.Xml);
+
+                Assert.Null(metadatum.Predecessor.Predecessor);
+            });
+        }
+
+        /// <summary>
+        /// Should be removed when escape hatch for #1751 is removed
+        /// </summary>
+        [Fact]
+        public void ItemPredecessorToItemWithCaseChangeAndEscapeHatch()
+        {
+            using (new Helpers.TemporaryEnvironment("MSBUILDUSECASESENSITIVEITEMNAMES", "1"))
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
+                    <Project xmlns='msbuildnamespace' >
+                        <ItemGroup>
+                          <item_with_lowercase_name Include='h1'>
+                            <m>1</m>
+                          </item_with_lowercase_name>
+                          <i Include='@(ITEM_WITH_LOWERCASE_NAME)'>
+                            <m>2;%(m)</m>
+                          </i>
+                        </ItemGroup>
+                    </Project>");
+
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+                ProjectMetadataElement metadataElementFromProjectRootElement =
+                    project.Xml.Items.First().Metadata.First();
+
+                // empty because of the case mismatch
+                Assert.Collection(project.GetItems("i"));
+            }
+        }
+
         /// <summary>
         /// Predecessor of item is item via transform
         /// </summary>
@@ -1419,6 +1530,58 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal("2;", metadatum.EvaluatedValue);
             Assert.Equal(null, metadatum.Predecessor);
+        }
+
+        [Fact]
+        public void ItemPredecessorToItemViaTransformWithCaseChange()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                    <Project xmlns='msbuildnamespace' >
+                        <ItemGroup>
+                          <ITEM_WITH_UPPERCASE_NAME Include='h1'>
+                            <m>1</m>
+                          </ITEM_WITH_UPPERCASE_NAME>
+                          <i Include=""@(item_with_uppercase_name->'%(identity)')"">
+                            <m>2;%(m)</m>
+                          </i>
+                        </ItemGroup>
+                    </Project>");
+
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+            Assert.Collection(project.GetItems("i"), item =>
+            {
+                Assert.Equal("h1", item.EvaluatedInclude);
+            });
+        }
+
+        /// <summary>
+        /// Should be removed when escape hatch for #1751 is removed
+        /// </summary>
+        [Fact]
+        public void ItemPredecessorToItemViaTransformWithCaseChangeWithEscapeHatch()
+        {
+            using (new Helpers.TemporaryEnvironment("MSBUILDUSECASESENSITIVEITEMNAMES", "1"))
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
+                    <Project xmlns='msbuildnamespace' >
+                        <ItemGroup>
+                          <ITEM_WITH_UPPERCASE_NAME Include='h1'>
+                            <m>1</m>
+                          </ITEM_WITH_UPPERCASE_NAME>
+                          <i Include=""@(item_with_uppercase_name->'%(identity)')"">
+                            <m>2;%(m)</m>
+                          </i>
+                        </ItemGroup>
+                    </Project>");
+
+
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+                // Should be empty because of the case mismatch
+                Assert.Collection(project.GetItems("i"));
+            }
         }
 
         /// <summary>

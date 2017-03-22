@@ -966,15 +966,20 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         return 0;
                     }
-                    else if (p1.reenteredScope)
+                    else if (p1.reenteredScope && !p2.reenteredScope)
                     {
                         // p1 was reentrant; sort first
                         return -1;
                     }
-                    else
+                    else if (!p1.reenteredScope && p2.reenteredScope)
                     {
                         // p2 was reentrant; sort first
                         return 1;
+                    }
+                    else
+                    {
+                        // both reentrant; sort stably by another field to avoid throwing
+                        return string.Compare(p1.ScopeName, p2.ScopeName, StringComparison.Ordinal);
                     }
                 }
             }

@@ -103,7 +103,6 @@ namespace Microsoft.Build.Logging
             ColorResetter colorReset
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(write, "write");
             _verbosity = verbosity;
             _write = write;
             _colorSet = colorSet;

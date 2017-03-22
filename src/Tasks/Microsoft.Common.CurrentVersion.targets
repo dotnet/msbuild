@@ -2318,6 +2318,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        ReferenceExtensions="$(ExpandSDKAllowedReferenceExtensions)"
        TargetSDKIdentifier="$(SDKIdentifier)"
        TargetSDKVersion="$(SDKVersion)"
+       TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
+       TargetPlatformVersion="$(TargetPlatformVersion)"
        LogRedistFilesList="$(GetSDKReferenceFilesLogRedistFilesList)"
        LogRedistConflictWithinSDKAsWarning ="$(GetSDKReferenceFilesLogRedistConflictsWithinSDKAsWarning)"
        LogRedistConflictBetweenSDKsAsWarning ="$(GetSDKReferenceFilesLogRedistConflictsBetweenSDKsAsWarning)"
@@ -3249,7 +3251,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)CoreCompileInputs.cache" />
+      <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
       <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
     </ItemGroup>
@@ -3258,10 +3260,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
-    <WriteLinesToFile Lines="$(CoreCompileDependencyHash)" File="$(IntermediateOutputPath)CoreCompileInputs.cache" Overwrite="True" WriteOnlyWhenDifferent="True" />
+    <WriteLinesToFile Lines="$(CoreCompileDependencyHash)" File="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" Overwrite="True" WriteOnlyWhenDifferent="True" />
 
     <ItemGroup>
-      <FileWrites Include="$(IntermediateOutputPath)CoreCompileInputs.cache" />
+      <FileWrites Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
     </ItemGroup>
   </Target>
 

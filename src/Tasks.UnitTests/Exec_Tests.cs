@@ -233,13 +233,21 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand1()
         {
-            string directoryWithAmpersand = "foo&bar";
+            string directoryWithAmpersand = "nospace&nospace";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -259,13 +267,21 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand2()
         {
-            string directoryWithAmpersand = "foo &bar";
+            string directoryWithAmpersand = "space &nospace";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -286,13 +302,21 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand3()
         {
-            string directoryWithAmpersand = "foo& bar";
+            string directoryWithAmpersand = "nospace& space";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 
@@ -312,13 +336,21 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TempPathContainsAmpersand4()
         {
-            string directoryWithAmpersand = "foo & bar";
+            string directoryWithAmpersand = "space & space";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
             {
                 Directory.CreateDirectory(newTmp);
+
+                if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
+                {
+                    // Short file paths not supported, this test will fail.
+                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    return;
+                }
+
                 Environment.SetEnvironmentVariable("TMP", newTmp);
                 Exec exec = PrepareExec("echo [hello]");
 

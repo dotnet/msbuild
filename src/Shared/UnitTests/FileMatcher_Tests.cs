@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(longString, result[0]); // Does not throw
 
-            // Not checking that GetFileSpecInfo returns the illegal-path flag,
+            // Not checking that GetFileSpecMatchInfo returns the illegal-path flag,
             // not certain that won't break something; this fix is merely to avoid a crash.
         }
 
@@ -1573,7 +1573,7 @@ namespace Microsoft.Build.UnitTests
             Regex regexFileMatch;
             bool needsRecursion;
             bool isLegalFileSpec;
-            FileMatcher.GetFileSpecInfo
+            FileMatcher.GetFileSpecInfoWithRegexObject
             (
                 filespec,
                 out regexFileMatch,

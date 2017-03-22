@@ -339,6 +339,12 @@
   <data name="ErrorWarningMessageNotSupported" UESanitized="false" Visibility="Public">
     <value>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</value>
   </data>
+  <data name="EvaluationStarted" UESanitized="false" Visibility="Public">
+    <value>Evaluation started ("{0}")</value>
+  </data>
+  <data name="EvaluationFinished" UESanitized="false" Visibility="Public">
+    <value>Evaluation finished ("{0}")</value>
+  </data>
   <data name="ExecutingTaskInTaskHost">
     <value>Launching task "{0}" from assembly "{1}" in an external task host with a runtime of "{2}" and a process architecture of "{3}".</value>
   </data>
@@ -466,10 +472,6 @@
     <comment>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
-  </data>
-  <data name="InvalidLogFileFormat" UESanitized="false" Visibility="Public">
-    <value>MSB4233: There was an exception while reading the log file: {0}</value>
-    <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
   </data>
   <data name="InvalidPropertyNameInToolset" UESanitized="false" Visibility="Private_OM">
     <value>MSB4147: The property "{0}" at "{1}" is invalid. {2}</value>
@@ -743,6 +745,9 @@
   <data name="PropertyNameInRegistryHasZeroLength" UESanitized="false" Visibility="Public">
     <value>MSB4148: The name of a property stored under the registry key "{0}" has zero length.</value>
     <comment>{StrBegin="MSB4148: "}</comment>
+  </data>
+  <data name="PropertyReassignment" UESanitized="false" Visibility="Public">
+    <value>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</value>
   </data>
   <data name="QualifiedMetadataInTransformNotAllowed" UESanitized="false" Visibility="Public">
     <value>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</value>
@@ -1563,11 +1568,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   
   <!-- Engine errors for features not supported on .NET Core have the arbitrarily-chosen 48 prefix -->
-  <data name="TaskFactoryNotSupportedFailure" xml:space="preserve">
-    <value>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</value>
-    <comment>{StrBegin="MSB4801: "}</comment>
-  </data>
-
   <data name="TaskInstantiationFailureNotSupported" xml:space="preserve">
     <value>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</value>
     <comment>{StrBegin="MSB4802: "}</comment>

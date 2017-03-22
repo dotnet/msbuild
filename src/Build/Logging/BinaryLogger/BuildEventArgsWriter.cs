@@ -434,8 +434,9 @@ namespace Microsoft.Build.Logging
             }
 
             var entries = items.OfType<DictionaryEntry>()
-                .Where(e => e.Key is string && e.Value is ITaskItem);
-            Write(entries.Count());
+                .Where(e => e.Key is string && e.Value is ITaskItem)
+                .ToArray();
+            Write(entries.Length);
 
             foreach (DictionaryEntry entry in entries)
             {
@@ -467,9 +468,13 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            Write(properties.Cast<object>().Count());
+            // there are no guarantees that the properties iterator won't change, so 
+            // take a snapshot and work with the readonly copy
+            var propertiesArray = properties.OfType<DictionaryEntry>().ToArray();
 
-            foreach (DictionaryEntry entry in properties)
+            Write(propertiesArray.Length);
+
+            foreach (DictionaryEntry entry in propertiesArray)
             {
                 if (entry.Key is string && entry.Value is string)
                 {

@@ -49,7 +49,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
-        private Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>();
+        // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
+        // for https://github.com/Microsoft/msbuild/issues/1751. It should
+        // be removed (permanently set to false) after establishing that
+        // it's unneeded (at least by the 16.0 timeframe).
+        private Dictionary<string, LazyItemList> _itemLists = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+            new Dictionary<string, LazyItemList>() :
+            new Dictionary<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
         {
@@ -365,7 +371,10 @@ namespace Microsoft.Build.Evaluation
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+                ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
+                ImmutableDictionary.CreateBuilder<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
+
             public bool ConditionResult { get; set; }
 
             public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)

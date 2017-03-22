@@ -38,7 +38,7 @@ def project = GithubProject
                 case 'Windows_NT':
                     newJob.with{
                         steps{
-                            def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && cibuild.cmd --target ${runtime}"
+                            def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\" && cibuild.cmd --target ${runtime}"
 
                             // only Desktop support localized builds 
                             if (runtime == "Desktop") {
@@ -50,6 +50,7 @@ def project = GithubProject
 
                         skipTestsWhenResultsNotFound = false
                     }
+                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-rc')
 
                     break;
                 case 'OSX':
@@ -58,6 +59,7 @@ def project = GithubProject
                             shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
+					Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
                 case { it.startsWith('Ubuntu') }:
@@ -66,17 +68,17 @@ def project = GithubProject
                             shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
+					Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
             }
 
             // Add xunit result archiving. Skip if no results found.
             Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
-            Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
             Utilities.standardJobSetup(newJob, project, isPR, branch)
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
-                                  'init-tools.log,msbuild*.log,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
+                                  'init-tools.log,msbuild*.log,msbuild*.binlog,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
                                   '', /* filesToExclude */
                                   false, /* doNotFailIfNothingArchived */
                                   false, /* archiveOnlyIfSuccessful */)

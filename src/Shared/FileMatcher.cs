@@ -45,6 +45,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly char[] s_invalidPathChars = Path.GetInvalidPathChars();
 
+        internal const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase;
+
         /// <summary>
         /// The type of entity that GetFileSystemEntries should return.
         /// </summary>
@@ -1147,7 +1149,7 @@ namespace Microsoft.Build.Shared
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
-        internal static void GetFileSpecInfo
+        internal static void GetFileSpecInfoWithRegexObject
         (
             string filespec,
             out Regex regexFileMatch,
@@ -1167,13 +1169,19 @@ namespace Microsoft.Build.Shared
                 out matchFileExpression, out needsRecursion, out isLegalFileSpec,
                 getFileSystemEntries);
 
+            
             regexFileMatch = isLegalFileSpec
-                ? new Regex(matchFileExpression, RegexOptions.IgnoreCase)
+                ? new Regex(matchFileExpression, DefaultRegexOptions)
                 : null;
         }
 
+        internal delegate Tuple<string, string, string> FixupParts(
+            string fixedDirectoryPart,
+            string recursiveDirectoryPart,
+            string filenamePart);
+
         /// <summary>
-        /// Given a filespec, get the information needed for file matching.
+        /// Given a filespec, parse it and construct the regular expression string.
         /// </summary>
         /// <param name="filespec">The filespec.</param>
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
@@ -1183,6 +1191,7 @@ namespace Microsoft.Build.Shared
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
+        /// <param name="fixupParts">hook method to further change the parts</param>
         internal static void GetFileSpecInfo
         (
             string filespec,
@@ -1192,7 +1201,8 @@ namespace Microsoft.Build.Shared
             out string matchFileExpression,
             out bool needsRecursion,
             out bool isLegalFileSpec,
-            GetFileSystemEntries getFileSystemEntries
+            GetFileSystemEntries getFileSystemEntries,
+            FixupParts fixupParts = null
         )
         {
             isLegalFileSpec = true;
@@ -1202,38 +1212,7 @@ namespace Microsoft.Build.Shared
             filenamePart = String.Empty;
             matchFileExpression = null;
 
-            // bail out if filespec contains illegal characters
-            if (-1 != filespec.IndexOfAny(s_invalidPathChars))
-            {
-                isLegalFileSpec = false;
-                return;
-            }
-
-            /*
-             * Check for patterns in the filespec that are explicitly illegal.
-             * 
-             * Any path with "..." in it is illegal.
-             */
-            if (-1 != filespec.IndexOf("...", StringComparison.Ordinal))
-            {
-                isLegalFileSpec = false;
-                return;
-            }
-
-            /*
-             * If there is a ':' anywhere but the second character, this is an illegal pattern.
-             * Catches this case among others,
-             * 
-             *        http://www.website.com
-             * 
-             */
-            int rightmostColon = filespec.LastIndexOf(":", StringComparison.Ordinal);
-
-            if
-            (
-                -1 != rightmostColon
-                && 1 != rightmostColon
-            )
+            if (!RawFileSpecIsValid(filespec))
             {
                 isLegalFileSpec = false;
                 return;
@@ -1243,6 +1222,16 @@ namespace Microsoft.Build.Shared
              * Now break up the filespec into constituent parts--fixed, wildcard and filename.
              */
             SplitFileSpec(filespec, out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart, getFileSystemEntries);
+
+            if (fixupParts != null)
+            {
+                var newParts = fixupParts(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+
+                // todo use named tuples when they'll be available
+                fixedDirectoryPart = newParts.Item1;
+                wildcardDirectoryPart = newParts.Item2;
+                filenamePart = newParts.Item3;
+            }
 
             /*
              *  Get a regular expression for matching files that will be found.
@@ -1261,6 +1250,45 @@ namespace Microsoft.Build.Shared
              * Determine whether recursion will be required.
              */
             needsRecursion = (wildcardDirectoryPart.Length != 0);
+        }
+
+        internal static bool RawFileSpecIsValid(string filespec)
+        {
+            // filespec cannot contain illegal characters
+            if (-1 != filespec.IndexOfAny(s_invalidPathChars))
+            {
+                return false;
+            }
+
+            /*
+             * Check for patterns in the filespec that are explicitly illegal.
+             * 
+             * Any path with "..." in it is illegal.
+             */
+            if (-1 != filespec.IndexOf("...", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            /*
+             * If there is a ':' anywhere but the second character, this is an illegal pattern.
+             * Catches this case among others,
+             * 
+             *        http://www.website.com
+             * 
+             */
+            int rightmostColon = filespec.LastIndexOf(":", StringComparison.Ordinal);
+
+            if
+            (
+                -1 != rightmostColon
+                && 1 != rightmostColon
+            )
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -1284,7 +1312,6 @@ namespace Microsoft.Build.Shared
             internal string filenamePart = String.Empty;
         }
 
-
         /// <summary>
         /// Given a pattern (filespec) and a candidate filename (fileToMatch)
         /// return matching information.
@@ -1303,7 +1330,7 @@ namespace Microsoft.Build.Shared
             fileToMatch = GetLongPathName(fileToMatch, s_defaultGetFileSystemEntries);
 
             Regex regexFileMatch;
-            GetFileSpecInfo
+            GetFileSpecInfoWithRegexObject
             (
                 filespec,
                 out regexFileMatch,
@@ -1314,18 +1341,39 @@ namespace Microsoft.Build.Shared
 
             if (matchResult.isLegalFileSpec)
             {
-                Match match = regexFileMatch.Match(fileToMatch);
-                matchResult.isMatch = match.Success;
-
-                if (matchResult.isMatch)
-                {
-                    matchResult.fixedDirectoryPart = match.Groups["FIXEDDIR"].Value;
-                    matchResult.wildcardDirectoryPart = match.Groups["WILDCARDDIR"].Value;
-                    matchResult.filenamePart = match.Groups["FILENAME"].Value;
-                }
+                GetRegexMatchInfo(
+                    fileToMatch,
+                    regexFileMatch,
+                    out matchResult.isMatch,
+                    out matchResult.fixedDirectoryPart,
+                    out matchResult.wildcardDirectoryPart,
+                    out matchResult.filenamePart);
             }
 
             return matchResult;
+        }
+
+        internal static void GetRegexMatchInfo(
+            string fileToMatch,
+            Regex fileSpecRegex,
+            out bool isMatch,
+            out string fixedDirectoryPart,
+            out string wildcardDirectoryPart,
+            out string filenamePart)
+        {
+            Match match = fileSpecRegex.Match(fileToMatch);
+
+            isMatch = match.Success;
+            fixedDirectoryPart = string.Empty;
+            wildcardDirectoryPart = String.Empty;
+            filenamePart = string.Empty;
+
+            if (isMatch)
+            {
+                fixedDirectoryPart = match.Groups["FIXEDDIR"].Value;
+                wildcardDirectoryPart = match.Groups["WILDCARDDIR"].Value;
+                filenamePart = match.Groups["FILENAME"].Value;
+            }
         }
 
         /// <summary>

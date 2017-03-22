@@ -10,17 +10,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Framework;
+using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using System.Threading.Tasks;
-using Xunit;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Xml;
+using Xunit;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -768,6 +768,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string loggingVariable = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", null);
+            bool originalTargetOutputLoggingValue = TargetLoggingContext.EnableTargetOutputLogging;
+            TargetLoggingContext.EnableTargetOutputLogging = false;
+
             try
             {
                 foreach (bool returnsEnabledForThisProject in returnsEnabled)
@@ -817,6 +820,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
+                TargetLoggingContext.EnableTargetOutputLogging = originalTargetOutputLoggingValue;
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", loggingVariable);
             }
         }
