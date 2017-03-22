@@ -7,7 +7,7 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class BuildCommand : TestCommand
+    public sealed class BuildCommand : DotnetCommand
     {
 
         private bool _captureOutput;
@@ -25,11 +25,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private FileInfo _projectFile;
 
         private DirectoryInfo _workingDirectory;
-
-        public BuildCommand()
-            : base("dotnet")
-        {
-        }
 
         public override CommandResult Execute(string args = "")
         {

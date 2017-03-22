@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--no-cache" }, "/p:RestoreNoCache=true")]
         [InlineData(new string[] { "--ignore-failed-sources" }, "/p:RestoreIgnoreFailedSources=true")]
         [InlineData(new string[] { "--no-dependencies" }, "/p:RestoreRecursive=false")]
-        [InlineData(new string[] { "-v", "<verbosity>" }, @"/verbosity:<verbosity>")]
-        [InlineData(new string[] { "--verbosity", "<verbosity>" }, @"/verbosity:<verbosity>")]
+        [InlineData(new string[] { "-v", "minimal" }, @"/verbosity:minimal")]
+        [InlineData(new string[] { "--verbosity", "minimal" }, @"/verbosity:minimal")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");

@@ -1,33 +1,35 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.DotNet.Tools.Sln;
 
 namespace Microsoft.DotNet.Tools.Sln.List
 {
-    internal class ListProjectsInSolutionCommand : DotNetSubCommandBase
+    internal class ListProjectsInSolutionCommand : CommandBase
     {
-        public static DotNetSubCommandBase Create()
+        private readonly string _fileOrDirectory;
+
+        public ListProjectsInSolutionCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new ListProjectsInSolutionCommand()
+            if (appliedCommand == null)
             {
-                Name = "list",
-                FullName = LocalizableStrings.ListAppFullName,
-                Description = LocalizableStrings.ListSubcommandHelpText,
-            };
-
-            command.HelpOption("-h|--help");
-
-            return command;
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            _fileOrDirectory = fileOrDirectory;
         }
 
-        public override int Run(string fileOrDirectory)
+        public override int Execute()
         {
-            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(fileOrDirectory);
+            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
             if (slnFile.Projects.Count == 0)
             {
                 Reporter.Output.WriteLine(CommonLocalizableStrings.NoProjectsFound);

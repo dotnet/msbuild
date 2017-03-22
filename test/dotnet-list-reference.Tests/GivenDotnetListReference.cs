@@ -18,10 +18,11 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 Usage: dotnet list <PROJECT> reference [options]
 
 Arguments:
-  <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>       The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h|--help  Show help information";
+  -h, --help                               Show help information
+";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
@@ -52,11 +53,12 @@ Options:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new AddReferenceCommand()
+            var cmd = new ListReferenceCommand()
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two'");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                "Unrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
         }
 
         [Theory]

@@ -17,14 +17,10 @@ namespace Microsoft.DotNet.Tools.Run
         public string Framework { get; set; }
         public bool NoBuild { get; set; }
         public string Project { get; set; }
-        public IReadOnlyList<string> Args { get; set; }
+        public IReadOnlyCollection<string> Args { get; set; }
 
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
-
-        public RunCommand()
-        {
-        }
 
         public int Start()
         {

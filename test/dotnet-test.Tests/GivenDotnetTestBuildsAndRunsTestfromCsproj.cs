@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test with logger enable
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--logger:trx");
+                                       .ExecuteWithCapturedOutput("--logger trx");
 
             // Verify
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");

@@ -104,12 +104,23 @@ EndGlobal
 
             SlnFile slnFile = SlnFile.Read(tmpFile.Path);
 
+            Console.WriteLine(new
+            {
+                slnFile_FormatVersion = slnFile.FormatVersion,
+                slnFile_ProductDescription = slnFile.ProductDescription,
+                slnFile_VisualStudioVersion = slnFile.VisualStudioVersion,
+                slnFile_MinimumVisualStudioVersion = slnFile.MinimumVisualStudioVersion,
+                slnFile_BaseDirectory = slnFile.BaseDirectory,
+                slnFile_FullPath = slnFile.FullPath,
+                tmpFilePath = tmpFile.Path
+            }.ToString());
+
             slnFile.FormatVersion.Should().Be("12.00");
             slnFile.ProductDescription.Should().Be("Visual Studio 15");
             slnFile.VisualStudioVersion.Should().Be("15.0.26006.2");
             slnFile.MinimumVisualStudioVersion.Should().Be("10.0.40219.1");
             slnFile.BaseDirectory.Should().Be(Path.GetDirectoryName(tmpFile.Path));
-            slnFile.FullPath.Should().Be(tmpFile.Path);
+            slnFile.FullPath.Should().Be(Path.GetFullPath(tmpFile.Path));
 
             slnFile.Projects.Count.Should().Be(2);
             var project = slnFile.Projects[0];

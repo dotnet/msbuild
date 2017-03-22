@@ -6,14 +6,8 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class NewCommandShim : TestCommand
+    public sealed class NewCommandShim : DotnetCommand
     {
-        public NewCommandShim()
-            : base("dotnet")
-        {
-
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"new {args} --debug:ephemeral-hive";

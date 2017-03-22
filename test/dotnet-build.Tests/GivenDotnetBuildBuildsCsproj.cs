@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.0")
                 .GetFile($"{testAppName}.dll");
 
-            var outputRunCommand = new TestCommand("dotnet");
+            var outputRunCommand = new DotnetCommand();
 
             outputRunCommand.ExecuteWithCapturedOutput(outputDll.FullName)
                 .Should().Pass()
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 SearchOption.TopDirectoryOnly)
                 .Single();
 
-            var outputRunCommand = new TestCommand("dotnet");
+            var outputRunCommand = new DotnetCommand();
 
             outputRunCommand.ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()

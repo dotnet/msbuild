@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.0", "publish", $"{testAppName}.dll");
 
-            new TestCommand("dotnet")
+            new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");

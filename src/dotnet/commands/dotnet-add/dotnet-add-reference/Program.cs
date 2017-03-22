@@ -1,59 +1,54 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
-    internal class AddProjectToProjectReferenceCommand : DotNetSubCommandBase
+    internal class AddProjectToProjectReferenceCommand : CommandBase
     {
-        private CommandOption _frameworkOption;
+        private readonly AppliedOption _appliedCommand;
+        private readonly string _fileOrDirectory;
 
-        public static DotNetSubCommandBase Create()
+        public AddProjectToProjectReferenceCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new AddProjectToProjectReferenceCommand()
+            if (appliedCommand == null)
             {
-                Name = "reference",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-                HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
-            };
-
-            command.HelpOption("-h|--help");
-
-            command._frameworkOption = command.Option(
-               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
-               LocalizableStrings.CmdFrameworkDescription,
-               CommandOptionType.SingleValue);
-
-            return command;
-        }
-
-        public override int Run(string fileOrDirectory)
-        {
-            var projects = new ProjectCollection();
-            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
-
-            if (RemainingArguments.Count == 0)
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            if (fileOrDirectory == null)
             {
-                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
+                throw new ArgumentNullException(nameof(fileOrDirectory));
             }
 
-            string frameworkString = _frameworkOption.Value();
-            PathUtility.EnsureAllPathsExist(RemainingArguments, CommonLocalizableStrings.ReferenceDoesNotExist);
-            List<MsbuildProject> refs = RemainingArguments
-                .Select((r) => MsbuildProject.FromFile(projects, r))
-                .ToList();
+            _appliedCommand = appliedCommand;
+            _fileOrDirectory = fileOrDirectory;
+        }
+
+        public override int Execute()
+        {
+            var projects = new ProjectCollection();
+            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, _fileOrDirectory);
+
+            var frameworkString = _appliedCommand.ValueOrDefault<string>("framework");
+
+            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.ReferenceDoesNotExist);
+            List<MsbuildProject> refs = _appliedCommand.Arguments
+                                                       .Select((r) => MsbuildProject.FromFile(projects, r))
+                                                       .ToList();
 
             if (frameworkString == null)
             {
@@ -64,8 +59,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                         if (!@ref.CanWorkOnFramework(tfm))
                         {
                             Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
-                                    @ref,
-                                    msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
+                                                     @ref,
+                                                     msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
                             return 1;
                         }
                     }
@@ -77,9 +72,9 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 if (!msbuildProj.IsTargetingFramework(framework))
                 {
                     Reporter.Error.WriteLine(string.Format(
-                        CommonLocalizableStrings.ProjectDoesNotTargetFramework,
-                        msbuildProj.ProjectRootElement.FullPath,
-                        frameworkString));
+                                                 CommonLocalizableStrings.ProjectDoesNotTargetFramework,
+                                                 msbuildProj.ProjectRootElement.FullPath,
+                                                 frameworkString));
                     return 1;
                 }
 
@@ -88,18 +83,19 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     if (!@ref.CanWorkOnFramework(framework))
                     {
                         Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
-                            @ref,
-                            new string[] { frameworkString }));
+                                                 @ref,
+                                                 new string[] { frameworkString }));
                         return 1;
                     }
                 }
             }
 
-            var relativePathReferences = RemainingArguments.Select((r) =>
-                PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
+            var relativePathReferences = _appliedCommand.Arguments.Select((r) =>
+                                                                              PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r)))
+                                                        .ToList();
 
             int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
-                _frameworkOption.Value(),
+                frameworkString,
                 relativePathReferences);
 
             if (numberOfAddedReferences != 0)

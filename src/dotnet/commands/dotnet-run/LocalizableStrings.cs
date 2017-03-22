@@ -9,9 +9,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public const string AppDescription = "Command used to run .NET apps";
 
-        public const string CommandOptionConfigurationDescription = "Configuration to use for building the project. Default for most projects is \"Debug\".";
-
-        public const string CommandOptionFramework = "FRAMEWORK";
+        public const string CommandOptionNoBuildDescription = "Skip building the project prior to running. By default, the project will be built.";
 
         public const string CommandOptionFrameworkDescription = "Build and run the app using the specified framework. The framework has to be specified in the project file. ";
 

@@ -18,10 +18,11 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 Usage: dotnet sln <SLN_FILE> list [options]
 
 Arguments:
-  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>      Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h|--help  Show help information";
+  -h, --help                               Show help information
+";
 
         [Theory]
         [InlineData("--help")]
@@ -51,7 +52,7 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'");
         }
 
         [Theory]

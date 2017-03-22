@@ -1,49 +1,50 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.DotNet.Tools.Sln;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Sln.Remove
 {
-    internal class RemoveProjectFromSolutionCommand : DotNetSubCommandBase
+    internal class RemoveProjectFromSolutionCommand : CommandBase
     {
-        public static DotNetSubCommandBase Create()
+        private readonly AppliedOption _appliedCommand;
+        private readonly string _fileOrDirectory;
+
+        public RemoveProjectFromSolutionCommand(
+            AppliedOption appliedCommand, 
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new RemoveProjectFromSolutionCommand()
+            if (appliedCommand == null)
             {
-                Name = "remove",
-                FullName = LocalizableStrings.RemoveAppFullName,
-                Description = LocalizableStrings.RemoveSubcommandHelpText,
-                HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.RemoveSubcommandHelpText,
-            };
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
 
-            command.HelpOption("-h|--help");
-
-            return command;
-        }
-
-        public override int Run(string fileOrDirectory)
-        {
-            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(fileOrDirectory);
-
-            if (RemainingArguments.Count == 0)
+            if (appliedCommand.Arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
             }
 
-            var relativeProjectPaths = RemainingArguments.Select((p) =>
-                PathUtility.GetRelativePath(
-                    PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
-                    Path.GetFullPath(p))).ToList();
+            _appliedCommand = appliedCommand;
+            _fileOrDirectory = fileOrDirectory;
+        }
+
+        public override int Execute()
+        {
+            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
+
+            var relativeProjectPaths = _appliedCommand.Arguments.Select(p =>
+                                                                            PathUtility.GetRelativePath(
+                                                                                PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
+                                                                                Path.GetFullPath(p)))
+                                                      .ToList();
 
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)

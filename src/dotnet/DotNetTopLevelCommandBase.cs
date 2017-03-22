@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -18,65 +16,36 @@ namespace Microsoft.DotNet.Cli
         protected abstract string FullCommandNameLocalized { get; }
         protected abstract string ArgumentName { get; }
         protected abstract string ArgumentDescriptionLocalized { get; }
-        internal abstract List<Func<DotNetSubCommandBase>> SubCommands { get; }
+        protected ParseResult ParseResult { get; private set; }
+
+        internal abstract Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication command = new CommandLineApplication(throwOnUnexpectedArg: true)
-            {
-                Name = $"dotnet {CommandName}",
-                FullName = FullCommandNameLocalized,
-            };
+            var parser = Parser.Instance;
 
-            command.HelpOption("-h|--help");
+            ParseResult = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            command.Argument(ArgumentName, ArgumentDescriptionLocalized);
-
-            foreach (var subCommandCreator in SubCommands)
-            {
-                var subCommand = subCommandCreator();
-                command.AddCommand(subCommand);
-
-                subCommand.OnExecute(() => {
-                    try
-                    {
-                        if (!command.Arguments.Any())
-                        {
-                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, ArgumentDescriptionLocalized);
-                        }
-
-                        var projectOrDirectory = command.Arguments.First().Value;
-                        if (string.IsNullOrEmpty(projectOrDirectory))
-                        {
-                            projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                        }
-
-                        return subCommand.Run(projectOrDirectory);
-                    }
-                    catch (GracefulException e)
-                    {
-                        Reporter.Error.WriteLine(e.Message.Red());
-                        subCommand.ShowHelp();
-                        return 1;
-                    }
-                });
-            }
+            var subcommandName = ParseResult.Command().Name;
 
             try
             {
-                return command.Execute(args);
+                var create = SubCommands[subcommandName];
+
+                var command = create(ParseResult["dotnet"][CommandName]);
+
+                return command.Execute();
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new GracefulException(CommonLocalizableStrings.RequiredCommandNotPassed);
             }
             catch (GracefulException e)
             {
                 Reporter.Error.WriteLine(e.Message.Red());
-                command.ShowHelp();
-                return 1;
-            }
-            catch (CommandParsingException e)
-            {
-                Reporter.Error.WriteLine(e.Message.Red());
+                ParseResult.ShowHelp();
                 return 1;
             }
         }

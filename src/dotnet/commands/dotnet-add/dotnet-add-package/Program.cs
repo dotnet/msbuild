@@ -1,105 +1,81 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Evaluation;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.NuGet;
-using NuGet.Frameworks;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.DotNet.Tools.Add.PackageReference
 {
-    internal class AddPackageReferenceCommand : DotNetSubCommandBase
+    internal class AddPackageReferenceCommand : CommandBase
     {
-        private CommandOption _versionOption;
-        private CommandOption _frameworkOption;
-        private CommandOption _noRestoreOption;
-        private CommandOption _sourceOption;
-        private CommandOption _packageDirectoryOption;
-        private CommandArgument _packageNameArgument;
+        private readonly AppliedOption _appliedCommand;
 
-        public static DotNetSubCommandBase Create()
+        private readonly string _packageId;
+        private readonly string _fileOrDirectory;
+
+        public AddPackageReferenceCommand(
+            AppliedOption appliedCommand,
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new AddPackageReferenceCommand
+            if (appliedCommand == null)
             {
-                Name = "package",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-                HandleRemainingArguments = false
-            };
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
+            if (fileOrDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(fileOrDirectory));
+            }
 
-            command.HelpOption("-h|--help");
-
-            command._packageNameArgument = command.Argument(
-                $"<{LocalizableStrings.CmdPackage}>",
-                LocalizableStrings.CmdPackageDescription,
-                multipleValues: false);
-
-            command._versionOption = command.Option(
-                $"-v|--version <{LocalizableStrings.CmdVersion}>",
-                description: LocalizableStrings.CmdVersionDescription,
-                optionType: CommandOptionType.SingleValue);
-
-            command._frameworkOption = command.Option(
-               $"-f|--framework <{LocalizableStrings.CmdFramework}>",
-               LocalizableStrings.CmdFrameworkDescription,
-               CommandOptionType.SingleValue);
-
-            command._noRestoreOption = command.Option(
-                "-n|--no-restore ",
-               LocalizableStrings.CmdNoRestoreDescription,
-               CommandOptionType.NoValue);
-
-            command._sourceOption = command.Option(
-                $"-s|--source <{LocalizableStrings.CmdSource}>",
-                LocalizableStrings.CmdSourceDescription,
-                CommandOptionType.SingleValue);
-
-            command._packageDirectoryOption = command.Option(
-                $"--package-directory <{LocalizableStrings.CmdPackageDirectory}>",
-                LocalizableStrings.CmdPackageDirectoryDescription,
-                CommandOptionType.SingleValue);
-
-            return command;
+            _appliedCommand = appliedCommand;
+            _fileOrDirectory = fileOrDirectory;
+            _packageId = appliedCommand.Value<string>();
         }
 
-        public override int Run(string fileOrDirectory)
+        protected override void ShowHelpOrErrorIfAppropriate(ParseResult parseResult)
         {
-            if (_packageNameArgument.Values.Count != 1 || string.IsNullOrWhiteSpace(_packageNameArgument.Value) || RemainingArguments.Count > 0)
+            if (parseResult.UnmatchedTokens.Any())
             {
                 throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
             }
 
+            base.ShowHelpOrErrorIfAppropriate(parseResult);
+        }
+
+        public override int Execute()
+        {
             var projectFilePath = string.Empty;
 
-            if (!File.Exists(fileOrDirectory))
+            if (!File.Exists(_fileOrDirectory))
             {
-                projectFilePath = MsbuildProject.GetProjectFileFromDirectory(fileOrDirectory).FullName;
+                projectFilePath = MsbuildProject.GetProjectFileFromDirectory(_fileOrDirectory).FullName;
             }
             else
             {
-                projectFilePath = fileOrDirectory;
+                projectFilePath = _fileOrDirectory;
             }
 
             var tempDgFilePath = string.Empty;
 
-            if (!_noRestoreOption.HasValue())
+            if (!_appliedCommand.HasOption("no-restore"))
             {
                 // Create a Dependency Graph file for the project
                 tempDgFilePath = Path.GetTempFileName();
                 GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
             }
 
-            var result = NuGetCommand.Run(TransformArgs(_packageNameArgument.Value, tempDgFilePath, projectFilePath));
+            var result = NuGetCommand.Run(
+                TransformArgs(
+                    _packageId,
+                    tempDgFilePath,
+                    projectFilePath));
             DisposeTemporaryFile(tempDgFilePath);
 
             return result;
@@ -136,7 +112,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         private string[] TransformArgs(string packageId, string tempDgFilePath, string projectFilePath)
         {
-            var args = new List<string>(){
+            var args = new List<string>
+            {
                 "package",
                 "add",
                 "--package",
@@ -145,27 +122,11 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 projectFilePath
             };
 
-            if (_versionOption.HasValue())
-            {
-                args.Add("--version");
-                args.Add(_versionOption.Value());
-            }
-            if (_sourceOption.HasValue())
-            {
-                args.Add("--source");
-                args.Add(_sourceOption.Value());
-            }
-            if (_frameworkOption.HasValue())
-            {
-                args.Add("--framework");
-                args.Add(_frameworkOption.Value());
-            }
-            if (_packageDirectoryOption.HasValue())
-            {
-                args.Add("--package-directory");
-                args.Add(_packageDirectoryOption.Value());
-            }
-            if (_noRestoreOption.HasValue())
+            args.AddRange(_appliedCommand
+                .OptionValuesToBeForwarded()
+                .SelectMany(a => a.Split(' ')));
+
+            if (_appliedCommand.HasOption("no-restore"))
             {
                 args.Add("--no-restore");
             }

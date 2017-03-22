@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Tools
 
         private ProjectCollection _projects;
         private List<NuGetFramework> _cachedTfms = null;
+        private IEnumerable<string> cachedRuntimeIdentifiers;
 
         private MsbuildProject(ProjectCollection projects, ProjectRootElement project)
         {
@@ -147,6 +148,12 @@ namespace Microsoft.DotNet.Tools
         public IEnumerable<ProjectItemElement> GetProjectToProjectReferences()
         {
             return ProjectRootElement.GetAllItemsWithElementType(ProjectItemElementType);
+        }
+
+        public IEnumerable<string> GetRuntimeIdentifiers()
+        {
+            return cachedRuntimeIdentifiers ??
+                   (cachedRuntimeIdentifiers = GetEvaluatedProject().GetRuntimeIdentifiers());
         }
 
         public IEnumerable<NuGetFramework> GetTargetFrameworks()

@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -8,42 +10,42 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {
-    internal class RemoveProjectToProjectReferenceCommand : DotNetSubCommandBase
+    internal class RemoveProjectToProjectReferenceCommand : CommandBase
     {
-        private CommandOption _frameworkOption;
+        private readonly AppliedOption _appliedCommand;
+        private readonly string _fileOrDirectory;
 
-        public static DotNetSubCommandBase Create()
+        public RemoveProjectToProjectReferenceCommand(
+            AppliedOption appliedCommand,
+            string fileOrDirectory,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new RemoveProjectToProjectReferenceCommand()
+            if (appliedCommand == null)
             {
-                Name = "reference",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-                HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
-            };
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
 
-            command.HelpOption("-h|--help");
+            if (fileOrDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(fileOrDirectory));
+            }
 
-            command._frameworkOption = command.Option(
-               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
-               LocalizableStrings.CmdFrameworkDescription,
-               CommandOptionType.SingleValue);
-
-            return command;
-        }
-
-        public override int Run(string fileOrDirectory)
-        {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), fileOrDirectory);
-            if (RemainingArguments.Count == 0)
+            if (appliedCommand.Arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
             }
 
+            _appliedCommand = appliedCommand;
+            _fileOrDirectory = fileOrDirectory;
+        }
+
+        public override int Execute()
+        {
+            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
+
             int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                _frameworkOption.Value(),
-                RemainingArguments);
+                _appliedCommand.ValueOrDefault<string>("framework"),
+                _appliedCommand.Arguments);
 
             if (numberOfRemovedReferences != 0)
             {

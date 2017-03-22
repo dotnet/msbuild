@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
 
-            new TestCommand("dotnet")
+            new DotnetCommand()
                 .WithEnvironmentVariable("DOTNET_SHARED_PACKAGES", localAssemblyCache)
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
 
-            new TestCommand("dotnet")
+            new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Fail()
                 .And.HaveStdErrContaining("assembly specified in the dependencies manifest was not found -- package: 'newtonsoft.json',");
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
 
-            new TestCommand("dotnet")
+            new DotnetCommand()
                 .WithEnvironmentVariable("DOTNET_SHARED_PACKAGES", localAssemblyCache)
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()
