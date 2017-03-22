@@ -1542,14 +1542,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
 
-      <Output TaskParameter="TargetOutputs" ItemName="_MSBuildProjectReferenceCrossTargetingResults" />
+      <Output TaskParameter="TargetOutputs" ItemName="_MSBuildProjectReferenceWithDesiredPropertiesResults" />
     </MSBuild>
 
     <ItemGroup>
-      <_MSBuildProjectReferenceCrossTargeting Include="@(_MSBuildProjectReferenceCrossTargetingResults->'%(OriginalItemSpec)')"
-                                              Condition="'%(_MSBuildProjectReferenceCrossTargetingResults.Identity)' == 'true'" />
+      <_MSBuildProjectReferenceWithDesiredProperties Include="@(_MSBuildProjectReferenceWithDesiredPropertiesResults->'%(OriginalItemSpec)')"
+                                              Condition="'%(_MSBuildProjectReferenceWithDesiredPropertiesResults.Identity)' == 'true'" />
       <_MSBuildProjectReferenceNoCrossTargeting Include="@(_MSBuildProjectReferenceExistent)"
-                                                Exclude="@(_MSBuildProjectReferenceCrossTargeting)" />
+                                                Exclude="@(_MSBuildProjectReferenceWithDesiredProperties)" />
 
     </ItemGroup>
   </Target>
@@ -1581,13 +1581,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <MSBuild
-        Projects="@(_MSBuildProjectReferenceCrossTargeting)"
+        Projects="@(_MSBuildProjectReferenceWithDesiredProperties)"
         Targets="GetReferenceProperties"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceCrossTargeting.SetConfiguration); %(_MSBuildProjectReferenceCrossTargeting.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
+        Properties="%(_MSBuildProjectReferenceWithDesiredProperties.SetConfiguration); %(_MSBuildProjectReferenceWithDesiredProperties.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceCrossTargeting.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
-        Condition="'%(_MSBuildProjectReferenceCrossTargeting.SkipGetTargetFrameworkProperties)' != 'true'">
+        RemoveProperties="%(_MSBuildProjectReferenceWithDesiredProperties.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
+        Condition="'%(_MSBuildProjectReferenceWithDesiredProperties.SkipGetTargetFrameworkProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
