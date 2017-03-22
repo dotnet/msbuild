@@ -29,9 +29,16 @@ namespace Microsoft.DotNet.Archive
                 string line = $"{value.Phase} {progress}%";
                 if (value.Phase == _currentPhase)
                 {
-                    Console.Write(new string('\b', _lastLineLength));
+                    if (Console.IsOutputRedirected)
+                    {
+                        Console.Write($"...{progress}%");
+                    }
+                    else
+                    {
+                        Console.Write(new string('\b', _lastLineLength));
+                        Console.Write(line);
+                    }
 
-                    Console.Write(line);
                     _lastLineLength = line.Length;
 
                     if (progress == 100)
