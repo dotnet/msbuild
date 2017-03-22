@@ -248,8 +248,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="PrepforRestoreForComposeCache">
 
     <PropertyGroup>
-      <CachePackageVersion>$(CachePackageVersion.Replace('*','-'))</CachePackageVersion>
-      <CacheWorkerWorkingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"$(CachePackageName)_$(CachePackageVersion)"))</CacheWorkerWorkingDir>
+      <CachePackageVersionForFolderName>$(CachePackageVersion.Replace('*','-'))</CachePackageVersionForFolderName>
+      <CacheWorkerWorkingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"$(CachePackageName)_$(CachePackageVersionForFolderName)"))</CacheWorkerWorkingDir>
       <_PackageProjFile>$([System.IO.Path]::Combine($(CacheWorkerWorkingDir), "Package.csproj"))</_PackageProjFile>
       <ProjectAssetsFile>$(CacheWorkerWorkingDir)\project.assets.json</ProjectAssetsFile>
       <_PackageProjContent>

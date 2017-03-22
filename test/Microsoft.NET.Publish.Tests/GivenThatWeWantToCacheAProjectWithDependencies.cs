@@ -1,21 +1,22 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using NuGet.Packaging.Core;
+using NuGet.Versioning;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.PlatformAbstractions;
-using FluentAssertions;
-using NuGet.Versioning;
-using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -261,6 +262,39 @@ namespace Microsoft.NET.Publish.Tests
             {
                 packagescomposed.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
             }
+        }
+
+        [Fact]
+        public void It_uses_star_versions_correctly()
+        {
+            TestAsset profileListsAsset = _testAssetsManager
+                .CopyTestAsset("ProfileLists")
+                .WithSource();
+
+            var outputFolder = Path.Combine(profileListsAsset.TestRoot, "o");
+            var workingDir = Path.Combine(profileListsAsset.TestRoot, "w");
+
+            new ComposeCache(Stage0MSBuild, profileListsAsset.TestRoot, "StarVersion.xml")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true")
+                .Should()
+                .Pass();
+
+            var artifactFile = Path.Combine(outputFolder, "artifact.xml");
+            var cacheArtifacts = ParseCacheArtifacts(artifactFile);
+
+            var nugetPackage = cacheArtifacts.Single(p => string.Equals(p.Id, "NuGet.Common", StringComparison.OrdinalIgnoreCase));
+
+            // nuget.org/packages/NuGet.Common currently contains:
+            // 4.0.0
+            // 4.0.0-rtm-2283
+            // 4.0.0-rtm-2265
+            // 4.0.0-rc3
+            // 4.0.0-rc2
+            //
+            // and the StarVersion.xml uses Version="4.0.0-*", 
+            // so we expect a version greater than 4.0.0-rc2, since there is
+            // a higher version on the feed that meets the criteria
+            nugetPackage.Version.Should().BeGreaterThan(NuGetVersion.Parse("4.0.0-rc2"));
         }
 
         private static HashSet<PackageIdentity> ParseCacheArtifacts(string path)
