@@ -97,6 +97,10 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
 
+        public bool AllowScriptsToRunHasValue => _app.InternalParamHasValue("--allow-scripts");
+
+        public string AllowScriptsToRun => _app.InternalParamValue("--allow-scripts");
+
         private static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
         {
             return templateList.AllAreTheSame((x) => x.Info.GroupIdentity, StringComparer.OrdinalIgnoreCase);
@@ -406,8 +410,27 @@ namespace Microsoft.TemplateEngine.Cli
                 return;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult);
-            postActionDispatcher.Process();
+            AllowPostActionsSetting scriptRunSettings;
+
+            if (!AllowScriptsToRunHasValue || string.IsNullOrEmpty(AllowScriptsToRun) || string.Equals(AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.Prompt;
+            }
+            else if (string.Equals(AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.Yes;
+            }
+            else if (string.Equals(AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.No;
+            }
+            else
+            {
+                scriptRunSettings = AllowPostActionsSetting.Prompt;
+            }
+
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings);
+            postActionDispatcher.Process(() => Console.ReadLine());
         }
 
         // Checks the result of TemplatesToDisplayInfoAbout()
@@ -1256,6 +1279,7 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
             appExt.InternalOption("--type", "--type", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
             appExt.InternalOption("--force", "--force", LocalizableStrings.ForcesTemplateCreation, CommandOptionType.NoValue);
+            appExt.InternalOption("--allow-scripts", "--allow-scripts", LocalizableStrings.WhetherToAllowScriptsToRun, CommandOptionType.SingleValue);
 
             // hidden
             appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);

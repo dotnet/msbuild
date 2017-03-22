@@ -669,6 +669,42 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of (Y|N)..
+        /// </summary>
+        internal static string PostActionInvalidInputRePrompt {
+            get {
+                return ResourceManager.GetString("PostActionInvalidInputRePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template is configured to run the following action:.
+        /// </summary>
+        internal static string PostActionPromptHeader {
+            get {
+                return ResourceManager.GetString("PostActionPromptHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want to run this action (Y|N)?.
+        /// </summary>
+        internal static string PostActionPromptRequest {
+            get {
+                return ResourceManager.GetString("PostActionPromptRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing Post Actions.
+        /// </summary>
+        internal static string ProcessingPostActions {
+            get {
+                return ResourceManager.GetString("ProcessingPostActions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Doesn&apos;t output any status information..
         /// </summary>
         internal static string QuietModeHelp {
@@ -854,6 +890,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string ValueSpecifiedForValuelessParameter {
             get {
                 return ResourceManager.GetString("ValueSpecifiedForValuelessParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify how post action scripts should run. Valid values are &quot;yes&quot;, &quot;no&quot;, or &quot;prompt&quot;..
+        /// </summary>
+        internal static string WhetherToAllowScriptsToRun {
+            get {
+                return ResourceManager.GetString("WhetherToAllowScriptsToRun", resourceCulture);
             }
         }
         

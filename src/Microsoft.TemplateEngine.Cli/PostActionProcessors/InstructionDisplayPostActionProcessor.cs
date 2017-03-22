@@ -18,7 +18,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
             Reporter.Output.WriteLine(actionConfig.Description);
             Reporter.Output.WriteLine(actionConfig.ManualInstructions);
-            Reporter.Output.WriteLine();
             return true;
         }
     }
