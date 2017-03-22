@@ -38,13 +38,16 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 passthroughArgs[i] = args[i + 2 + batteryCount];
             }
 
-            ITemplateEngineHost host = CreateHost();
-            string profileDir = Environment.ExpandEnvironmentVariables("%USERPROFILE%");
+            string home = "%USERPROFILE%";
 
-            if (string.IsNullOrWhiteSpace(profileDir))
+            if (Path.DirectorySeparatorChar == '/')
             {
-                profileDir = Environment.ExpandEnvironmentVariables("$HOME");
+                home = "%HOME";
             }
+
+            ITemplateEngineHost host = CreateHost();
+            string profileDir = Environment.ExpandEnvironmentVariables(home);
+
             if (string.IsNullOrWhiteSpace(profileDir))
             {
                 Console.Error.WriteLine("Could not determine home directory");
