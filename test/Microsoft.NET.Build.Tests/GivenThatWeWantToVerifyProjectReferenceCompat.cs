@@ -153,15 +153,6 @@ namespace Microsoft.NET.Build.Tests
                 referencerProject.IsExe = true;
             }
 
-            //  Skip running test if not running on Windows
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (!referencerProject.BuildsOnNonWindows || !dependencyProject.BuildsOnNonWindows)
-                {
-                    return;
-                }
-            }
-
             var testAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(It_checks_for_valid_project_reference_compat), identifier);
             var restoreCommand = testAsset.GetRestoreCommand(relativePath: "Referencer").Execute().Should().Pass();
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Referencer");
@@ -196,10 +187,10 @@ namespace Microsoft.NET.Build.Tests
             if (isSdkProject)
             {
                 ret.TargetFrameworks = target;
-                //  Workaround for .NET Core 2.0
+                //  Workaround for .NET Core 2.0 and .NET Framework 4.6.2
                 if (target.Equals("netcoreapp2.0", StringComparison.OrdinalIgnoreCase) || target.Equals("net462", StringComparison.OrdinalIgnoreCase))
                 {
-                    ret.RuntimeFrameworkVersion = "2.0.0-beta-001689-00";
+                    ret.RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version;
                 }
             }
             else
