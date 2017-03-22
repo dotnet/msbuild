@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
                     Console.WriteLine(suggestion);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return 1;
             }
