@@ -3,11 +3,9 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -604,6 +602,73 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             string actual = writer.ToString();
 
             VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void VerifyUtf8WithoutBomTreatedAsUtf8()
+        {
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.None);
+            StringWriter writer = new EncodingStringWriter(new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectFileWithBomContainsBomAfterSave()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"<Project />");
+
+            var file = FileUtilities.GetTemporaryFile(".proj");
+            try
+            {
+                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+                Assert.True(EncodingUtilities.FileStartsWithPreamble(file));
+
+                // Load and manipulate/save the project
+                var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
+                project.AddItem("Compile", "Program.cs");
+                project.Save();
+
+                // Ensure the file was really saved and that the file still contains a BOM
+                Assert.Contains("<Compile Include=\"Program.cs\" />", File.ReadAllText(file));
+                Assert.True(EncodingUtilities.FileStartsWithPreamble(file));
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(Path.GetDirectoryName(file), false);
+            }
+        }
+
+        [Fact]
+        public void ProjectFileWithoutBomDoesNotContainsBomAfterSave()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"<Project><Target Name=""Build""/></Project>");
+
+            var file = FileUtilities.GetTemporaryFile(".proj");
+            try
+            {
+                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                Assert.False(EncodingUtilities.FileStartsWithPreamble(file));
+
+                // Load and manipulate/save the project
+                var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
+                project.AddItem("Compile", "Program.cs");
+                project.Save();
+
+                // Ensure the file was really saved and that the file still contains a BOM
+                Assert.Contains("<Compile Include=\"Program.cs\" />", File.ReadAllText(file));
+                Assert.False(EncodingUtilities.FileStartsWithPreamble(file));
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(Path.GetDirectoryName(file), false);
+            }
         }
     }
 }

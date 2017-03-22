@@ -1785,7 +1785,9 @@ namespace Microsoft.Build.Construction
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectSaveToFileBegin, CodeMarkerEvent.perfMSBuildProjectSaveToFileEnd))
 #endif
             {
-                if (HasUnsavedChanges || saveEncoding != Encoding)
+                // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
+                // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
+                if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
