@@ -154,6 +154,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Skip running .NET Framework tests if not running on Windows
+            //        https://github.com/dotnet/sdk/issues/335
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (!referencerProject.BuildsOnNonWindows || !dependencyProject.BuildsOnNonWindows)
@@ -196,8 +197,8 @@ namespace Microsoft.NET.Build.Tests
             if (isSdkProject)
             {
                 ret.TargetFrameworks = target;
-                //  Workaround for .NET Core 2.0 and .NET Framework 4.6.2
-                if (target.Equals("netcoreapp2.0", StringComparison.OrdinalIgnoreCase) || target.Equals("net462", StringComparison.OrdinalIgnoreCase))
+                //  Workaround for .NET Core 2.0
+                if (target.Equals("netcoreapp2.0", StringComparison.OrdinalIgnoreCase))
                 {
                     ret.RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version;
                 }
