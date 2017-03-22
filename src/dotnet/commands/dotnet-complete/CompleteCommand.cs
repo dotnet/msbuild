@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -28,11 +26,6 @@ namespace Microsoft.DotNet.Cli
 
                 var suggestions = Suggestions(complete);
 
-                var log = new StringBuilder();
-                log.AppendLine($"args: {string.Join(" ", args.Select(a => $"\"{a}\""))}");
-                log.AppendLine("diagram: " + result.Diagram());
-                File.WriteAllText("parse.log", log.ToString());
-
                 foreach (var suggestion in suggestions)
                 {
                     Console.WriteLine(suggestion);
@@ -40,8 +33,7 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e)
             {
-                File.WriteAllText("dotnet completion exception.log", e.ToString());
-                throw;
+                return 1;
             }
 
             return 0;
