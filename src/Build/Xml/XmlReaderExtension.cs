@@ -34,25 +34,20 @@ namespace Microsoft.Build.Internal
         {
             try
             {
+                // Note: Passing in UTF8 w/o BOM into StreamReader. If the BOM is detected StreamReader will set the
+                // Encoding correctly (detectEncodingFromByteOrderMarks = true). The default is to use UTF8 (with BOM)
+                // which will cause the BOM to be added when we re-save the file in cases where it was not present on
+                // load.
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                _streamReader = new StreamReader(_stream, Encoding.UTF8, true);
+                _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
+
                 Reader = GetXmlReader(_streamReader, out _encoding);
-                var bom = _stream.StartsWithPreamble();
 
                 // Override detected encoding if xml encoding attribute is specified
                 var encodingAttribute = Reader.GetAttribute("encoding");
                 _encoding = !string.IsNullOrEmpty(encodingAttribute)
                     ? Encoding.GetEncoding(encodingAttribute)
                     : _encoding;
-
-                // If the encoding is UTF8 but there was not a BOM detected in the file then we need
-                // to override the detected Encoding with UTF8 and encoderShouldEmitUTF8Identifier
-                // set to false. This is to prevent the BOM from being added if we save the file
-                // later using the detected encoding.
-                if (Equals(_encoding, Encoding.UTF8) && !bom)
-                {
-                    _encoding = s_utf8NoBom;
-                }
             }
             catch
             {
