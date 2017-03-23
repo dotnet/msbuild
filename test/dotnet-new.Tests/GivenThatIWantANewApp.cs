@@ -72,8 +72,8 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        [InlineData("console", "RuntimeFrameworkVersion", "Microsoft.NETCore.App")]
-        [InlineData("classlib", "NetStandardImplicitPackageVersion", "NETStandard.Library")]
+        [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
+        [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
             // These will fail when templates stop including explicit version.
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.New.Tests
                     .EnumerateDirectories()
                     .Single(d => d.Name.StartsWith("2.0.0"));
 
-                if (packageName == "Microsoft.NETCore.App")
+                if (packageName == "microsoft.netcore.app")
                 {
                     return sharedFxDir.Name;
                 }
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.New.Tests
                     var context = reader.Read(stream);
                     var dependency = context
                         .RuntimeLibraries
-                        .Single(library => library.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+                        .Single(library => library.Name == packageName);
 
                     return dependency.Version;
                 }
