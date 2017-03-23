@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal
 {
@@ -17,12 +19,13 @@ namespace Microsoft.Build.Internal
         ///     Creates an XmlReaderExtension with handle to an XmlReader.
         /// </summary>
         /// <param name="filePath">Path to the file on disk.</param>
-        /// <returns>Disposable XmlReaderExtenion object.</returns>
+        /// <returns>Disposable XmlReaderExtension object.</returns>
         internal static XmlReaderExtension Create(string filePath)
         {
             return new XmlReaderExtension(filePath);
         }
 
+        private static readonly Encoding s_utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         private readonly Encoding _encoding;
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
@@ -34,12 +37,22 @@ namespace Microsoft.Build.Internal
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 _streamReader = new StreamReader(_stream, Encoding.UTF8, true);
                 Reader = GetXmlReader(_streamReader, out _encoding);
+                var bom = _stream.StartsWithPreamble();
 
                 // Override detected encoding if xml encoding attribute is specified
                 var encodingAttribute = Reader.GetAttribute("encoding");
                 _encoding = !string.IsNullOrEmpty(encodingAttribute)
                     ? Encoding.GetEncoding(encodingAttribute)
                     : _encoding;
+
+                // If the encoding is UTF8 but there was not a BOM detected in the file then we need
+                // to override the detected Encoding with UTF8 and encoderShouldEmitUTF8Identifier
+                // set to false. This is to prevent the BOM from being added if we save the file
+                // later using the detected encoding.
+                if (Equals(_encoding, Encoding.UTF8) && !bom)
+                {
+                    _encoding = s_utf8NoBom;
+                }
             }
             catch
             {
