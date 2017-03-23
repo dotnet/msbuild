@@ -38,5 +38,6 @@
       "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
     }
   },
-  "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ],
+  "defaultName": "TestProject1"
 }

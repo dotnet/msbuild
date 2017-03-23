@@ -41,5 +41,6 @@
       }
     }
   },
-  "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ],
+  "defaultName": "WebApplication1"
 }

@@ -58,5 +58,6 @@
       "defaultValue": "netstandard1.4"
     }
   },
-  "primaryOutputs": [ { "path": "Company.ClassLibrary1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.ClassLibrary1.csproj" } ],
+  "defaultName": "ClassLibrary1"
 }

@@ -36,5 +36,6 @@
       "defaultValue": "netstandard2.0"
     }
   },
-  "primaryOutputs": [ { "path": "Company.ClassLibrary1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.ClassLibrary1.fsproj" } ],
+  "defaultName": "ClassLibrary1"
 }

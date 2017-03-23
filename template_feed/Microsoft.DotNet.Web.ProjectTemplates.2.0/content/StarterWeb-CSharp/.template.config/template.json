@@ -108,5 +108,6 @@
       "defaultValue": "false"
     }
   },
-  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
+  "defaultName": "WebApplication1"
 }

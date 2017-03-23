@@ -90,7 +90,20 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool LocaleHasValue => _app.InternalParamHasValue("--locale");
 
-        public string Name => _app.InternalParamValue("--name");
+        public string Name
+        {
+            get
+            {
+                string specifiedName = _app.InternalParamValue("--name");
+
+                if (string.IsNullOrWhiteSpace(specifiedName))
+                {
+                    return null;
+                }
+
+                return specifiedName;
+            }
+        }
 
         public string OutputPath => _app.InternalParamValue("--output");
 
@@ -312,6 +325,12 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateInfo template)
         {
             string fallbackName = new DirectoryInfo(OutputPath ?? Directory.GetCurrentDirectory()).Name;
+
+            if (string.IsNullOrEmpty(fallbackName))
+            {
+                fallbackName = null;
+            }
+
             TemplateCreationResult instantiateResult;
 
             try

@@ -32,5 +32,6 @@
       "defaultValue": "netcoreapp2.0"
     }
   },
-  "primaryOutputs": [ { "path": "Company.ConsoleApplication1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.ConsoleApplication1.csproj" } ],
+  "defaultName": "ConsoleApp1"
 }

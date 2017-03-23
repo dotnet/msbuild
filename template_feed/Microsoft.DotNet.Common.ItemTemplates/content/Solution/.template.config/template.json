@@ -7,5 +7,6 @@
   "identity": "Microsoft.Standard.QuickStarts.Solution",
   "shortName": "sln",
   "sourceName": "Solution1",
-  "primaryOutputs": [ { "path": "Solution1.sln" } ]
+  "primaryOutputs": [ { "path": "Solution1.sln" } ],
+  "defaultName": "Solution1"
 }
