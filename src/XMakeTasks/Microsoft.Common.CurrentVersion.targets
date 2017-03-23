@@ -899,7 +899,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildGenerateSources"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework);"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties);"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != '' and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -924,7 +924,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildCompile"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -949,7 +949,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildLink"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1523,7 +1523,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           GetDesiredProperties is faulty.
     -->
     <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetDesiredProperties)' != ''">
         <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
@@ -1560,7 +1560,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     Builds the GetDesiredProperties target of all existent project references,
     passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
-    SetTargetFramework metadata of the project reference to the value that is returned.
+    SetDesiredProperties metadata of the project reference to the value that is returned.
 
     This allows a cross-targeting project to select how it should be configured to
     build against the most appropriate target for the referring target framework.
@@ -1595,24 +1595,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <!-- Build an item that has Identity matching _MSBuildProjectReferenceExistent and metadata for properties to set. -->
       <_ProjectReferencesWithTargetFrameworkProperties Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')" />
-      <_ProjectReferencesWithTargetFrameworkProperties Include="@(_MSBuildProjectReferenceNoCrossTargeting)">
-        <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <IsRidAgnostic>true</IsRidAgnostic>
-      </_ProjectReferencesWithTargetFrameworkProperties>
 
       <!-- Set the project's returned TargetFramework -->
       <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' != 'true'">
-        <SetTargetFramework>@(_ProjectReferencesWithTargetFrameworkProperties->'%(DesiredTargetFrameworkProperties)')</SetTargetFramework>
+        <SetDesiredProperties>@(_ProjectReferencesWithTargetFrameworkProperties->'%(SetDesiredProperties)')</SetDesiredProperties>
       </_MSBuildProjectReferenceExistent>
 
-      <!-- If the project has only one TF, don't specify it. It will go directly to the inner build anyway and we don't want to redundantly specify a global property, which can cause a race. -->
+      <!-- Remove any properties that the reference didn't want. -->
       <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' == 'true'">
-        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');TargetFramework</UndefineProperties>
-      </_MSBuildProjectReferenceExistent>
-
-      <!-- If the project has only one RID, assume it's compatible with the current project and don't pass this one along. -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(IsRidAgnostic)')' == 'true'">
-        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');RuntimeIdentifier</UndefineProperties>
+        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');@(_ProjectReferencesWithTargetFrameworkProperties->'%(UndefineProperties)')</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
   </Target>
@@ -1653,8 +1644,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [OUT]
         @(ProjectReferenceWithConfiguration)   - Project references with apporpriate metadata
-        @(_MSBuildProjectReferenceExistent)    - Subset of @(ProjectReferenceWithConfiguration) that exist 
-                                                 with added SetTargetFramework metadata for cross-targeting
+        @(_MSBuildProjectReferenceExistent)    - Subset of @(ProjectReferenceWithConfiguration) that exist
+                                                 with added SetDesiredProperties metadata for cross-targeting
         @(_MSBuildProjectReferenceNonExistent) - Subset of  @(ProjectReferenceWithConfiguration) that do not exist
     ============================================================
   -->
@@ -1709,7 +1700,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' != '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1736,7 +1727,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="%(_MSBuildProjectReferenceExistent.Targets);GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' == '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1753,7 +1744,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="%(_MSBuildProjectReferenceExistent.Targets)"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1770,7 +1761,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetNativeManifest"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -2300,7 +2291,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
       Projects="@(_MSBuildProjectReferenceExistent)"
-      Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+      Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
       Targets="GetTargetPathWithTargetPlatformMoniker"
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
@@ -4255,7 +4246,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetCopyToOutputDirectoryItems"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -4817,7 +4808,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="Clean"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetDesiredProperties)"
         BuildInParallel="$(BuildInParallel)"
         Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
