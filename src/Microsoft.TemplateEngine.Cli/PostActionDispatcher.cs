@@ -17,13 +17,13 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly TemplateCreationResult _creationResult;
         private readonly IEngineEnvironmentSettings _environment;
-        private readonly AllowPostActionsSetting _canRunStatus;
+        private readonly AllowPostActionsSetting _canRunScripts;
 
         public PostActionDispatcher(IEngineEnvironmentSettings environment, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus)
         {
             _environment = environment;
             _creationResult = creationResult;
-            _canRunStatus = canRunStatus;
+            _canRunScripts = canRunStatus;
         }
 
         public void Process(Func<string> inputGetter)
@@ -45,19 +45,31 @@ namespace Microsoft.TemplateEngine.Cli
 
                 bool result = false;
 
-                if (actionProcessor == null || _canRunStatus == AllowPostActionsSetting.No)
+                if (actionProcessor == null)
                 {   // The host doesn't know how to handle this action, just display instructions.
                     result = DisplayInstructionsForAction(action);
                 }
-                else if (_canRunStatus == AllowPostActionsSetting.Prompt)
+                else if (actionProcessor is ProcessStartPostActionProcessor)
                 {
-                    result = HandlePromptRequired(action, actionProcessor, inputGetter);
+                    if (_canRunScripts == AllowPostActionsSetting.No)
+                    {
+                        DisplayInstructionsForAction(action);
+                        result = false; // post action didn't run, it's an error in the sense that continue on error sees it.
+                    }
+                    else if (_canRunScripts == AllowPostActionsSetting.Yes)
+                    {
+                        result = ProcessAction(action, actionProcessor);
+                    }
+                    else if (_canRunScripts == AllowPostActionsSetting.Prompt)
+                    {
+                        result = HandlePromptRequired(action, actionProcessor, inputGetter);
+                    }
+                    // no trailing else - no other cases.
                 }
-                else if (_canRunStatus == AllowPostActionsSetting.Yes)
+                else
                 {
                     result = ProcessAction(action, actionProcessor);
                 }
-                // no trailing else - no other cases.
 
                 if (!result && !action.ContinueOnError)
                 {
