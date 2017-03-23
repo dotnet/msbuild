@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine();
                 foreach (var error in result.Errors)
                 {
-                    Console.WriteLine($"[{error?.Option?.Name ?? "???"}] {error.Message}");
+                    Console.WriteLine($"[{error?.Option?.Name ?? "???"}] {error?.Message}");
                 }
             }
 

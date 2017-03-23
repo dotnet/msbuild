@@ -18,12 +18,12 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 Usage: dotnet remove <PROJECT> reference [options] <args>
 
 Arguments:
-  <PROJECT>       The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <args>          Project to project references to remove
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <args>      Project to project references to remove
 
 Options:
-  -h, --help                               Show help information
-  -f, --framework <FRAMEWORK>              Remove reference only when targeting a specific framework
+  -h, --help                    Show help information
+  -f, --framework <FRAMEWORK>   Remove reference only when targeting a specific framework
 ";
 
         const string FrameworkNet451Arg = "-f net451";

@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 throw new CommandParsingException(
                     command,
                     "Required command missing",
-                    isRequireSubCommandMissing: true);
+                    isRequiredSubCommandMissing: true);
             }
 
             return command.Invoke();
