@@ -6,7 +6,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
     public class ProcessStartPostActionProcessor : IPostActionProcessor
     {
-        private static readonly Guid ActionProcessorId = new Guid("3A7C4B45-1F5D-4A30-959A-51B88E82B5D2");
+        public static readonly Guid ActionProcessorId = new Guid("3A7C4B45-1F5D-4A30-959A-51B88E82B5D2");
 
         public Guid Id => ActionProcessorId;
 

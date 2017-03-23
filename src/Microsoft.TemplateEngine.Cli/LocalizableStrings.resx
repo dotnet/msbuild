@@ -401,6 +401,15 @@
     <value>Processing Post Actions</value>
   </data>
   <data name="WhetherToAllowScriptsToRun" xml:space="preserve">
-    <value>Specify how post action scripts should run. Valid values are "yes", "no", or "prompt".</value>
+    <value>Specify if post action scripts should run.</value>
+  </data>
+  <data name="AllowScriptsNoChoice" xml:space="preserve">
+    <value>Do not allow scripts to run</value>
+  </data>
+  <data name="AllowScriptsPromptChoice" xml:space="preserve">
+    <value>Ask before running each script</value>
+  </data>
+  <data name="AllowScriptsYesChoice" xml:space="preserve">
+    <value>Allow scripts to run</value>
   </data>
 </root>

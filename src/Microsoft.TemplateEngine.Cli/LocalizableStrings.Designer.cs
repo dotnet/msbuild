@@ -89,6 +89,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do not allow scripts to run.
+        /// </summary>
+        internal static string AllowScriptsNoChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsNoChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ask before running each script.
+        /// </summary>
+        internal static string AllowScriptsPromptChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsPromptChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow scripts to run.
+        /// </summary>
+        internal static string AllowScriptsYesChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsYesChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to determine the desired template from the input template name: {0}..
         /// </summary>
         internal static string AmbiguousInputTemplateName {
@@ -894,7 +921,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify how post action scripts should run. Valid values are &quot;yes&quot;, &quot;no&quot;, or &quot;prompt&quot;..
+        ///   Looks up a localized string similar to Specify if post action scripts should run..
         /// </summary>
         internal static string WhetherToAllowScriptsToRun {
             get {
