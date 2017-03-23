@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -28,12 +28,16 @@ namespace Microsoft.Build.Tasks
         private string _resolvedKeyFile = String.Empty;
         private string _resolvedThumbprint = String.Empty;
         private const string pfxFileExtension = ".pfx";
+#if FEATURE_PFX_SIGNING
         private const string pfxFileContainerPrefix = "VS_KEY_";
+#endif
         private bool _suppressAutoClosePasswordPrompt = false;
         private bool _showImportDialogDespitePreviousFailures = false;
         private int _autoClosePasswordPromptTimeout = 20;
         private int _autoClosePasswordPromptShow = 15;
+#if FEATURE_PFX_SIGNING
         static private Hashtable s_pfxKeysToIgnore = new Hashtable(StringComparer.OrdinalIgnoreCase);
+#endif
 
 
         #region Properties
@@ -111,6 +115,7 @@ namespace Microsoft.Build.Tasks
             return ResolveAssemblyKey() && ResolveManifestKey();
         }
 
+#if FEATURE_PFX_SIGNING
         // We we use hash the contens of .pfx file so we can establish relationship file <-> container name, whithout
         // need to prompt for password. Note this is not used for any security reasons. With the departure from standard MD5 algoritm
         // we need as simple hash function for replacement. The data blobs we use (.pfx files)  are
@@ -136,7 +141,7 @@ namespace Microsoft.Build.Tasks
             result |= dw2;
             return result;
         }
-
+#endif
 
         private bool ResolveAssemblyKey()
         {
