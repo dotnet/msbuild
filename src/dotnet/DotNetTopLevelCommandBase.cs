@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.Cli
 
             ParseResult = parser.ParseFrom($"dotnet {CommandName}", args);
 
+            ParseResult.ShowHelpIfRequested();
+
             var subcommandName = ParseResult.Command().Name;
 
             try
