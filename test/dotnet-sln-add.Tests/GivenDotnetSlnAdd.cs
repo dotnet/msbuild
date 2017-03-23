@@ -20,11 +20,11 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 Usage: dotnet sln <SLN_FILE> add [options] <args>
 
 Arguments:
-  <SLN_FILE>      Solution file to operate on. If not specified, the command will search the current directory for one.
-  <args>          Add one or more specified projects to the solution.
+  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <args>       Add one or more specified projects to the solution.
 
 Options:
-  -h, --help                               Show help information
+  -h, --help   Show help information
 ";
         private ITestOutputHelper _output;
 

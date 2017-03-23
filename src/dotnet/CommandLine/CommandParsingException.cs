@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 {
     internal class CommandParsingException : Exception
     {
-        private readonly bool _isRequireSubCommandMissing;
+        private readonly bool _isRequiredSubCommandMissing;
 
         public CommandParsingException(
             string message, 
@@ -21,11 +21,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public CommandParsingException(
             CommandLineApplication command,
             string message,
-            bool isRequireSubCommandMissing = false)
+            bool isRequiredSubCommandMissing = false)
             : this(message)
         {
             Command = command;
-            _isRequireSubCommandMissing = isRequireSubCommandMissing;
+            _isRequiredSubCommandMissing = isRequiredSubCommandMissing;
         }
 
         public CommandLineApplication Command { get; }
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             get
             {
-                return _isRequireSubCommandMissing
+                return _isRequiredSubCommandMissing
                            ? CommonLocalizableStrings.RequiredCommandNotPassed
                            : base.Message;
             }
