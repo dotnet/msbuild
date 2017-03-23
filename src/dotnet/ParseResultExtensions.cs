@@ -14,6 +14,19 @@ namespace Microsoft.DotNet.Cli
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
+            parseResult.ShowHelpIfRequested();
+
+            if (parseResult.Errors.Any())
+            {
+                throw new CommandParsingException(
+                    message: string.Join(Environment.NewLine,
+                                         parseResult.Errors.Select(e => e.Message)),
+                    helpText: parseResult?.Command()?.HelpView());
+            }
+        }
+
+        public static void ShowHelpIfRequested(this ParseResult parseResult)
+        {
             var appliedCommand = parseResult.AppliedCommand();
 
             if (appliedCommand.HasOption("help") ||
@@ -22,14 +35,6 @@ namespace Microsoft.DotNet.Cli
             {
                 // NOTE: this is a temporary stage in refactoring toward the ClicCommandLineParser being used at the CLI entry point. 
                 throw new HelpException(parseResult.Command().HelpView());
-            }
-
-            if (parseResult.Errors.Any())
-            {
-                throw new CommandParsingException(
-                    message: string.Join(Environment.NewLine,
-                                parseResult.Errors.Select(e => e.Message)),
-                    helpText: parseResult?.Command()?.HelpView());
             }
         }
     }
