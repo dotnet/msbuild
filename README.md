@@ -143,16 +143,22 @@ Sample to prevent files from being published:
 </ItemGroup>
 ```
 
-Sample to skip a specific folder and files during Web Deploy Publish:
+Sample to skip specific folders and files during Web Deploy Publish:
 
 ```xml
 <ItemGroup>
-    <MsDeploySkipRules Include="CustomSkipFolder">
+    <MsDeploySkipRules Include="CustomSkipFolder1">
       <ObjectName>dirPath</ObjectName>
       <AbsolutePath>wwwroot</AbsolutePath>
     </MsDeploySkipRules>
+	
+    <MsDeploySkipRules Include="CustomSkipFolder2">
+      <ObjectName>dirPath</ObjectName>
+      <AbsolutePath>wwwroot\\Content$</AbsolutePath>
+    </MsDeploySkipRules>
 
-    <MsDeploySkipRules Include="CustomSkipFile">
+
+    <MsDeploySkipRules Include="CustomSkipFile1">
       <ObjectName>filePath</ObjectName>
       <AbsolutePath>Views\\Home\\About.cshtml</AbsolutePath>
     </MsDeploySkipRules>
@@ -164,3 +170,14 @@ Sample to skip a specific folder and files during Web Deploy Publish:
 </ItemGroup>
 ```
 
+Pre-Publish and Post-Publish extensibility:
+
+```xml  
+  <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">
+    <Message Text="Actions BeforePublish" Importance="high" />
+  </Target>
+  
+  <Target Name="CustomActionsAfterPublish" AfterTargets="AfterPublish">
+    <Message Text="Actions AfterPublish" Importance="high" />
+  </Target>
+```
