@@ -144,6 +144,8 @@ namespace Microsoft.DotNet.New.Tests
                    .SingleOrDefault();
 
                 explicitVersionNode.Should().NotBeNull();
+                explicitVersionNode.Value.Should().Be(expectedVersion);
+
                 if (deleteExplicitVersion)
                 {
                     explicitVersionNode.Remove();
