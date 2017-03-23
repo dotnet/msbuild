@@ -17,135 +17,43 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantToVerifyProjectReferenceCompat : SdkTest
     {
         [Theory]
-        [InlineData("net45", "netstandard1.0", true)]
-        [InlineData("net45", "netstandard1.1", true)]
-        [InlineData("net45", "net45", true)]
+        [InlineData("net45", "FullMatrix", "netstandard1.0 netstandard1.1 net45", true)]
+        [InlineData("net451", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true)]
+        [InlineData("net46", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 net45 net451 net46", true)]
+        [InlineData("net461", "PartialM3", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 net45 net451 net46 net461", true)]
+        [InlineData("net462", "PartialM2", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 net45 net451 net46 net461", true)]
+        //  Fullframework NuGet versioning on Jenkins infrastructure issue
+        //        https://github.com/dotnet/sdk/issues/1041
+        //[InlineData("net461", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true)]
+        //[InlineData("net462", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true)]
 
-        [InlineData("net451", "netstandard1.0", true)]
-        [InlineData("net451", "netstandard1.1", true)]
-        [InlineData("net451", "netstandard1.2", true)]
-        [InlineData("net451", "net45", true)]
-        [InlineData("net451", "net451", true)]
+        [InlineData("netstandard1.0", "FullMatrix", "netstandard1.0", true)]
+        [InlineData("netstandard1.1", "FullMatrix", "netstandard1.0 netstandard1.1", true)]
+        [InlineData("netstandard1.2", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2", true)]
+        [InlineData("netstandard1.3", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3", true)]
+        [InlineData("netstandard1.4", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4", true)]
+        [InlineData("netstandard1.5", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5", true)]
+        [InlineData("netstandard1.6", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6", true)]
+        [InlineData("netstandard2.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0", true)]
+        [InlineData("netcoreapp1.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0", true)]
+        [InlineData("netcoreapp1.1", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1", true)]
+        [InlineData("netcoreapp2.0", "PartialM1", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true)]
+        //  Fullframework NuGet versioning on Jenkins infrastructure issue
+        //        https://github.com/dotnet/sdk/issues/1041
+        //[InlineData("netcoreapp2.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true)]
 
-        [InlineData("net46", "netstandard1.0", true)]
-        [InlineData("net46", "netstandard1.1", true)]
-        [InlineData("net46", "netstandard1.2", true)]
-        [InlineData("net46", "netstandard1.3", true)]
-        [InlineData("net46", "net45", true)]
-        [InlineData("net46", "net451", true)]
-        [InlineData("net46", "net46", true)]
-
-        [InlineData("net461", "netstandard1.0", true)]
-        [InlineData("net461", "netstandard1.1", true)]
-        [InlineData("net461", "netstandard1.2", true)]
-        [InlineData("net461", "netstandard1.3", true)]
-        [InlineData("net461", "netstandard1.4", true)]
-        [InlineData("net461", "netstandard1.5", true)]
-        [InlineData("net461", "netstandard1.6", true)]
-        [InlineData("net461", "netstandard2.0", true)]
-        [InlineData("net461", "net45", true)]
-        [InlineData("net461", "net451", true)]
-        [InlineData("net461", "net46", true)]
-        [InlineData("net461", "net461", true)]
-
-        [InlineData("net462", "netstandard1.0", true)]
-        [InlineData("net462", "netstandard1.1", true)]
-        [InlineData("net462", "netstandard1.2", true)]
-        [InlineData("net462", "netstandard1.3", true)]
-        [InlineData("net462", "netstandard1.4", true)]
-        [InlineData("net462", "netstandard1.5", true)]
-        [InlineData("net462", "netstandard1.6", true)]
-        [InlineData("net462", "netstandard2.0", true)]
-        [InlineData("net462", "net45", true)]
-        [InlineData("net462", "net451", true)]
-        [InlineData("net462", "net46", true)]
-        [InlineData("net462", "net461", true)]
-        [InlineData("net462", "net462", true)]
-
-        [InlineData("netstandard1.0", "netstandard1.0", true)]
-
-        [InlineData("netstandard1.1", "netstandard1.0", true)]
-        [InlineData("netstandard1.1", "netstandard1.1", true)]
-
-        [InlineData("netstandard1.2", "netstandard1.0", true)]
-        [InlineData("netstandard1.2", "netstandard1.1", true)]
-        [InlineData("netstandard1.2", "netstandard1.2", true)]
-
-        [InlineData("netstandard1.3", "netstandard1.0", true)]
-        [InlineData("netstandard1.3", "netstandard1.1", true)]
-        [InlineData("netstandard1.3", "netstandard1.2", true)]
-        [InlineData("netstandard1.3", "netstandard1.3", true)]
-
-        [InlineData("netstandard1.4", "netstandard1.0", true)]
-        [InlineData("netstandard1.4", "netstandard1.1", true)]
-        [InlineData("netstandard1.4", "netstandard1.2", true)]
-        [InlineData("netstandard1.4", "netstandard1.3", true)]
-        [InlineData("netstandard1.4", "netstandard1.4", true)]
-
-        [InlineData("netstandard1.5", "netstandard1.0", true)]
-        [InlineData("netstandard1.5", "netstandard1.1", true)]
-        [InlineData("netstandard1.5", "netstandard1.2", true)]
-        [InlineData("netstandard1.5", "netstandard1.3", true)]
-        [InlineData("netstandard1.5", "netstandard1.4", true)]
-        [InlineData("netstandard1.5", "netstandard1.5", true)]
-
-        [InlineData("netstandard1.6", "netstandard1.0", true)]
-        [InlineData("netstandard1.6", "netstandard1.1", true)]
-        [InlineData("netstandard1.6", "netstandard1.2", true)]
-        [InlineData("netstandard1.6", "netstandard1.3", true)]
-        [InlineData("netstandard1.6", "netstandard1.4", true)]
-        [InlineData("netstandard1.6", "netstandard1.5", true)]
-        [InlineData("netstandard1.6", "netstandard1.6", true)]
-
-        [InlineData("netstandard2.0", "netstandard1.0", true)]
-        [InlineData("netstandard2.0", "netstandard1.1", true)]
-        [InlineData("netstandard2.0", "netstandard1.2", true)]
-        [InlineData("netstandard2.0", "netstandard1.3", true)]
-        [InlineData("netstandard2.0", "netstandard1.4", true)]
-        [InlineData("netstandard2.0", "netstandard1.5", true)]
-        [InlineData("netstandard2.0", "netstandard1.6", true)]
-        [InlineData("netstandard2.0", "netstandard2.0", true)]
-
-        [InlineData("netcoreapp1.0", "netstandard1.0", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.1", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.2", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.3", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.4", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.5", true)]
-        [InlineData("netcoreapp1.0", "netstandard1.6", true)]
-        [InlineData("netcoreapp1.0", "netcoreapp1.0", true)]
-
-        [InlineData("netcoreapp1.1", "netstandard1.0", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.1", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.2", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.3", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.4", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.5", true)]
-        [InlineData("netcoreapp1.1", "netstandard1.6", true)]
-        [InlineData("netcoreapp1.1", "netcoreapp1.0", true)]
-        [InlineData("netcoreapp1.1", "netcoreapp1.1", true)]
-
-        [InlineData("netcoreapp2.0", "netstandard1.0", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.1", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.2", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.3", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.4", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.5", true)]
-        [InlineData("netcoreapp2.0", "netstandard1.6", true)]
-        [InlineData("netcoreapp2.0", "netstandard2.0", true)]
-        [InlineData("netcoreapp2.0", "netcoreapp1.0", true)]
-        [InlineData("netcoreapp2.0", "netcoreapp1.1", true)]
-        [InlineData("netcoreapp2.0", "netcoreapp2.0", true)]
-
-        public void It_checks_for_valid_project_reference_compat(string referencerTarget, string dependencyTarget, bool buildSucceeds)
+        public void It_checks_for_valid_project_reference_compat(string referencerTarget, string testIDPostFix, string rawDependencyTargets, bool buildSucceeds)
         {
-            string identifier = "_" + referencerTarget.ToString() + "_" + dependencyTarget.ToString();
-            //  MSBuild isn't happy with semicolons in the path when doing file exists checks
-            identifier = identifier.Replace(';', '_');
+            string identifier = "_TestID_" + referencerTarget + "_" + testIDPostFix;
 
             TestProject referencerProject = GetTestProject("Referencer", referencerTarget, true);
-            TestProject dependencyProject = GetTestProject("Dependency", dependencyTarget, true);
-            referencerProject.ReferencedProjects.Add(dependencyProject);
+            List<string> dependencyTargets = rawDependencyTargets.Split(',', ';', ' ').ToList();
+            int dependencyTargetNamingIndex = 1;
+            foreach (string dependencyTarget in dependencyTargets)
+            {
+                TestProject dependencyProject = GetTestProject("Dependency" + dependencyTargetNamingIndex++, dependencyTarget, true);
+                referencerProject.ReferencedProjects.Add(dependencyProject);
+            }
 
             //  Set the referencer project as an Exe unless it targets .NET Standard
             if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains("netstandard"))
@@ -157,15 +65,15 @@ namespace Microsoft.NET.Build.Tests
             //        https://github.com/dotnet/sdk/issues/335
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (!referencerProject.BuildsOnNonWindows || !dependencyProject.BuildsOnNonWindows)
+                if (!AllProjectsBuildOnNonWindows(referencerProject))
                 {
                     return;
                 }
             }
 
             var testAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(It_checks_for_valid_project_reference_compat), identifier);
-            var restoreCommand = testAsset.GetRestoreCommand(relativePath: "Referencer").Execute().Should().Pass();
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Referencer");
+            var restoreCommand = testAsset.GetRestoreCommand(relativePath: referencerProject.Name).Execute().Should().Pass();
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, referencerProject.Name);
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
             if (!buildSucceeds)
@@ -209,6 +117,11 @@ namespace Microsoft.NET.Build.Tests
             }
 
             return ret;
+        }
+
+        bool AllProjectsBuildOnNonWindows(TestProject referencerProject) {
+
+            return (referencerProject.BuildsOnNonWindows && referencerProject.ReferencedProjects.All(rp => rp.BuildsOnNonWindows));
         }
     }
 }
