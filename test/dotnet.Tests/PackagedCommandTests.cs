@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.Tests
             result.Should().Fail();        
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/6144")]
         public void WhenToolAssetsFileIsInUseThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
         {
             var testInstance = TestAssets.Get("AppWithToolDependency")

@@ -15,7 +15,7 @@ param(
 $RepoRoot = Convert-Path "$PSScriptRoot\..\..\.."
 $NuGetDir = Join-Path $RepoRoot ".nuget"
 $NuGetExe = Join-Path $NuGetDir "nuget.exe"
-$OutputDirectory = [System.IO.Path]::GetDirectoryName($SdkBundlePath)
+$OutputDirectory = [System.IO.Path]::GetDirectoryName($NupkgFile)
 
 function DownloadNugetExe
 {
@@ -37,10 +37,10 @@ function GenerateNupkg
         Write-Host 'Error nuspec not found - $NuspecFile'
     }
 
-    $SdkBundleName = [System.IO.Path]::GetFileName($SdkBundlePath)
+    $SdkBundlePath = [System.IO.Path]::GetFullPath($SdkBundlePath)
     $NuspecFileName = [System.IO.Path]::GetFileName($NuspecFile)
     $TempNuspecFile = [System.IO.Path]::Combine($OutputDirectory, $NuspecFileName)
-    (Get-Content $NuspecFile) -replace '\[DOTNET_BUNDLE\]', $SdkBundleName | Set-Content $TempNuspecFile
+    (Get-Content $NuspecFile) -replace '\[DOTNET_BUNDLE\]', $SdkBundlePath | Set-Content $TempNuspecFile
     & $NuGetExe pack $TempNuspecFile -Version $NugetVersion -OutputDirectory $OutputDirectory
 }
 

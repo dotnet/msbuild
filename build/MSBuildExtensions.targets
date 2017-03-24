@@ -1,12 +1,17 @@
 <Project>
-  <PropertyGroup>
-    <BundledVersionsIntermediateDirectory>$(IntermediateDirectory)/GeneratedMSBuildImports</BundledVersionsIntermediateDirectory>
-    <BundledVersionsPropsFolder>15.0/Imports/Microsoft.Common.props/ImportBefore</BundledVersionsPropsFolder>
-    <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
-  </PropertyGroup>
+  <Target Name="GenerateMSBuildExtensions"
+          DependsOnTargets="GenerateBundledVersionsProps">
 
-  <Target Name="GenerateBundledVersionsProps"
-          BeforeTargets="PublishMSBuildExtensions">
+    <ItemGroup>
+      <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GenerateBundledVersionsProps">
+    <PropertyGroup>
+      <BundledVersionsPropsFolder>15.0/Imports/Microsoft.Common.props/ImportBefore</BundledVersionsPropsFolder>
+      <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
+    </PropertyGroup>
 
     <!-- 
       The bundled version of Microsoft.NETCore.App is determined statically from DependencyVersions.props whereas the bundled version
@@ -54,14 +59,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </BundledVersionsPropsContent>
   </PropertyGroup>
 
-    <MakeDir Directories="$(BundledVersionsIntermediateDirectory)/$(BundledVersionsPropsFolder)" />
-    <WriteLinesToFile File="$(BundledVersionsIntermediateDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)" />
+    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
                       Lines="$(BundledVersionsPropsContent)"
                       Overwrite="true" />
 
-    <!-- MSBuildExtensionsContent destination is driven by %(RecursiveDir), which is why we glob here. -->
-    <ItemGroup>
-      <MSBuildExtensionsContent Include="$(BundledVersionsIntermediateDirectory)/**/$(BundledVersionsPropsFileName)" />
-    </ItemGroup>
   </Target>
 </Project>
