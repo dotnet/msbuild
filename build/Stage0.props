@@ -7,7 +7,7 @@
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
       <CoreCLRRid>$(Rid)</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.12-x64</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
     </PropertyGroup>
 </Project>
