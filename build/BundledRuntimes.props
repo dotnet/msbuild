@@ -10,7 +10,11 @@
     <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
     <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
-    <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
+    <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
+         NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
+    <SharedFrameworkRid>$(ProductMonikerRid)</SharedFrameworkRid>
+    <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
+    <CombinedFrameworkHostCompressedFileName>dotnet-$(SharedFrameworkRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
   </PropertyGroup>
 
   <!-- Additional Shared Framework to be installed -->

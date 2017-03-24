@@ -7,5 +7,6 @@
     <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' ">false</IncludeAdditionalSharedFrameworks>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
+    <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
   </PropertyGroup>
 </Project>

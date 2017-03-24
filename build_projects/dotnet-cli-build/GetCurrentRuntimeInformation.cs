@@ -16,10 +16,14 @@ namespace Microsoft.DotNet.Cli.Build
         [Output]
         public string OSName { get; set; }
 
+        [Output]
+        public string OSPlatform { get; set; }
+
         public override bool Execute()
         {
             Rid = RuntimeEnvironment.GetRuntimeIdentifier();
             OSName = GetOSShortName();
+            OSPlatform = RuntimeEnvironment.OperatingSystemPlatform.ToString().ToLower();
 
             return true;
         }
