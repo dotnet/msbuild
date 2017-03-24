@@ -21,7 +21,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ProjectContext projectContext = lockFile.CreateProjectContext(
                FrameworkConstants.CommonFrameworks.NetStandard16,
                null,
-               Constants.DefaultPlatformLibrary);
+               Constants.DefaultPlatformLibrary,
+               false);
 
             IEnumerable<string> privateAssetPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
             IDictionary<string, LockFileTargetLibrary> libraryLookup =

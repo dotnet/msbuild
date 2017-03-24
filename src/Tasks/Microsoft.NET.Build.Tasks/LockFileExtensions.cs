@@ -16,7 +16,8 @@ namespace Microsoft.NET.Build.Tasks
             this LockFile lockFile,
             NuGetFramework framework,
             string runtime,
-            string platformLibraryName)
+            string platformLibraryName,
+            bool isPortable)
         {
             if (lockFile == null)
             {
@@ -39,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
             }
 
-            return new ProjectContext(lockFile, lockFileTarget, platformLibraryName);
+            return new ProjectContext(lockFile, lockFileTarget, platformLibraryName, isPortable);
         }
 
         public static LockFileTargetLibrary GetLibrary(this LockFileTarget lockFileTarget, string libraryName)

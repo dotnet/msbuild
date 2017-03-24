@@ -43,6 +43,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
 
+        public bool IsSharedFrameworkApplication { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -57,7 +59,8 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                IsSharedFrameworkApplication);
 
             WriteRuntimeConfig(projectContext);
 

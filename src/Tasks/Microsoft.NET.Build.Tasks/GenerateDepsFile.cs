@@ -55,6 +55,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
+        public bool IsSharedFrameworkApplication { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -90,7 +92,8 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                IsSharedFrameworkApplication);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithFrameworkReferences(frameworkReferences)

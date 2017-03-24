@@ -25,14 +25,14 @@ namespace Microsoft.NET.Build.Tasks
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, string platformLibraryName)
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, string platformLibraryName, bool isPortable)
         {
             _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
             _platformLibraryName = platformLibraryName;
 
             PlatformLibrary = _lockFileTarget.GetLibrary(_platformLibraryName);
-            IsPortable = PlatformLibrary != null && string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier);
+            IsPortable = PlatformLibrary != null && (isPortable || string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier));
         }
 
         public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(IEnumerable<string> privateAssetPackageIds)

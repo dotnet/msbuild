@@ -49,7 +49,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
-                Constants.DefaultPlatformLibrary);
+                Constants.DefaultPlatformLibrary,
+                false);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithDirectReferences(directReferences)
