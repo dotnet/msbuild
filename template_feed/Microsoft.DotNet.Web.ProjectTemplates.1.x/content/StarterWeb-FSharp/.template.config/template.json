@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Web", "MVC"],
   "name": "ASP.NET Core Web App",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Mvc",
   "precedence": "100",
   "identity": "Microsoft.Web.Mvc.FSharp",
@@ -41,5 +42,6 @@
       }
     }
   },
-  "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ],
+  "defaultName": "WebApplication1"
 }

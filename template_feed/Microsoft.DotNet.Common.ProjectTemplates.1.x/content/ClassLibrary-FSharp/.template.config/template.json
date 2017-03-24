@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Common", "Library"],
   "name": "Class library",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Library",
   "precedence": "100",
   "identity": "Microsoft.Common.Library.FSharp",
@@ -12,5 +13,6 @@
   },
   "sourceName": "Company.ClassLibrary1",
   "preferNameDirectory": true,
-  "primaryOutputs": [ { "path": "Company.ClassLibrary1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.ClassLibrary1.fsproj" } ],
+  "defaultName": "ClassLibrary1"
 }

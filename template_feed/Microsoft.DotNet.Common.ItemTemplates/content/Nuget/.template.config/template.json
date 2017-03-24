@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Config"],
   "name": "Nuget Config",
+  "generatorVersions": "[1.0.0.0-*)",
   "tags": {
     "type": "item"
   },
@@ -10,5 +11,6 @@
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
   "shortName": "nugetconfig",
   "sourceName": "Nuget",
-  "primaryOutputs": [ { "path": "nuget.config" } ]
+  "primaryOutputs": [ { "path": "nuget.config" } ],
+  "defaultName": "nuget.config"
 }

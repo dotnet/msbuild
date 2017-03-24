@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Web", "Empty"],
   "name": "ASP.NET Core Empty",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Empty",
   "precedence": "200",
   "identity": "Microsoft.Web.Empty.CSharp.2.0",
@@ -46,5 +47,6 @@
       }
     }
   },
-  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
+  "defaultName": "WebApplication1"
 }

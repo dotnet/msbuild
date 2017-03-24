@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Config"],
   "name": "Web Config",
+  "generatorVersions": "[1.0.0.0-*)",
   "tags": {
     "type": "item"
   },
@@ -10,5 +11,6 @@
   "identity": "Microsoft.Standard.QuickStarts.Web.Config",
   "shortName": "webconfig",
   "sourceName": "WebConfig",
-  "primaryOutputs": [ { "path": "web.config" } ]
+  "primaryOutputs": [ { "path": "web.config" } ],
+  "defaultName": "web.config"
 }

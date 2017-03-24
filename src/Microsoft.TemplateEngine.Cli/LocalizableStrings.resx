@@ -388,4 +388,28 @@
   <data name="RunningCommand" xml:space="preserve">
     <value>Running command '{0}'...</value>
   </data>
+  <data name="PostActionInvalidInputRePrompt" xml:space="preserve">
+    <value>Invalid input "{0}". Please enter one of (Y|N).</value>
+  </data>
+  <data name="PostActionPromptHeader" xml:space="preserve">
+    <value>Template is configured to run the following action:</value>
+  </data>
+  <data name="PostActionPromptRequest" xml:space="preserve">
+    <value>Do you want to run this action (Y|N)?</value>
+  </data>
+  <data name="ProcessingPostActions" xml:space="preserve">
+    <value>Processing Post Actions</value>
+  </data>
+  <data name="WhetherToAllowScriptsToRun" xml:space="preserve">
+    <value>Specify if post action scripts should run.</value>
+  </data>
+  <data name="AllowScriptsNoChoice" xml:space="preserve">
+    <value>Do not allow scripts to run</value>
+  </data>
+  <data name="AllowScriptsPromptChoice" xml:space="preserve">
+    <value>Ask before running each script</value>
+  </data>
+  <data name="AllowScriptsYesChoice" xml:space="preserve">
+    <value>Allow scripts to run</value>
+  </data>
 </root>

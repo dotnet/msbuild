@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Common", "Library"],
   "name": "Class library",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Library",
   "precedence": "200",
   "identity": "Microsoft.Common.Library.CSharp.2.0",
@@ -36,5 +37,6 @@
       "defaultValue": "netstandard2.0"
     }
   },
-  "primaryOutputs": [ { "path": "Company.ClassLibrary1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.ClassLibrary1.csproj" } ],
+  "defaultName": "ClassLibrary1"
 }

@@ -89,6 +89,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do not allow scripts to run.
+        /// </summary>
+        internal static string AllowScriptsNoChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsNoChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ask before running each script.
+        /// </summary>
+        internal static string AllowScriptsPromptChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsPromptChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow scripts to run.
+        /// </summary>
+        internal static string AllowScriptsYesChoice {
+            get {
+                return ResourceManager.GetString("AllowScriptsYesChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to determine the desired template from the input template name: {0}..
         /// </summary>
         internal static string AmbiguousInputTemplateName {
@@ -669,6 +696,42 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of (Y|N)..
+        /// </summary>
+        internal static string PostActionInvalidInputRePrompt {
+            get {
+                return ResourceManager.GetString("PostActionInvalidInputRePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template is configured to run the following action:.
+        /// </summary>
+        internal static string PostActionPromptHeader {
+            get {
+                return ResourceManager.GetString("PostActionPromptHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want to run this action (Y|N)?.
+        /// </summary>
+        internal static string PostActionPromptRequest {
+            get {
+                return ResourceManager.GetString("PostActionPromptRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing Post Actions.
+        /// </summary>
+        internal static string ProcessingPostActions {
+            get {
+                return ResourceManager.GetString("ProcessingPostActions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Doesn&apos;t output any status information..
         /// </summary>
         internal static string QuietModeHelp {
@@ -854,6 +917,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string ValueSpecifiedForValuelessParameter {
             get {
                 return ResourceManager.GetString("ValueSpecifiedForValuelessParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify if post action scripts should run..
+        /// </summary>
+        internal static string WhetherToAllowScriptsToRun {
+            get {
+                return ResourceManager.GetString("WhetherToAllowScriptsToRun", resourceCulture);
             }
         }
         

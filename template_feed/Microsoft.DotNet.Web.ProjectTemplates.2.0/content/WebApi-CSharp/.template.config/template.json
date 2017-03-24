@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Web", "WebAPI"],
   "name": "ASP.NET Core Web API",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.WebApi",
   "precedence": "200",
   "identity": "Microsoft.Web.WebApi.CSharp.2.0",
@@ -46,5 +47,6 @@
       }
     }
   },
-  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ]
+  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
+  "defaultName": "WebApplication1"
 }

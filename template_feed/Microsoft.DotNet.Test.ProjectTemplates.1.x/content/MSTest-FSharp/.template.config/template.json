@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Test", "MSTest"],
   "name": "Unit Test Project",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Test.MSTest",
   "precedence": "100",
   "identity": "Microsoft.Test.MSTest.FSharp",
@@ -35,5 +36,6 @@
       "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
     }
   },
-  "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ],
+  "defaultName": "TestProject1"
 }

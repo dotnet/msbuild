@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Common", "Console"],
   "name": "Console Application",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Console",
   "precedence": "100",
   "identity": "Microsoft.Common.Console.FSharp",
@@ -29,5 +30,6 @@
       "defaultValue": "netcoreapp1.1"
     }
   },
-  "primaryOutputs": [ { "path": "Company.ConsoleApplication1.fsproj" } ]
+  "primaryOutputs": [ { "path": "Company.ConsoleApplication1.fsproj" } ],
+  "defaultName": "ConsoleApp1"
 }
