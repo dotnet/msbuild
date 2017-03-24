@@ -290,11 +290,19 @@ namespace Microsoft.NET.Publish.Tests
             // 4.0.0-rtm-2265
             // 4.0.0-rc3
             // 4.0.0-rc2
+            // 4.0.0-rc-2048
             //
             // and the StarVersion.xml uses Version="4.0.0-*", 
             // so we expect a version greater than 4.0.0-rc2, since there is
             // a higher version on the feed that meets the criteria
             nugetPackage.Version.Should().BeGreaterThan(NuGetVersion.Parse("4.0.0-rc2"));
+
+            // work around https://github.com/dotnet/sdk/issues/1045. The unnecessary assets getting
+            // put in the cache folder cause long path issues, so delete them
+            foreach (var runtimeFolder in new DirectoryInfo(outputFolder).GetDirectories("runtime.*"))
+            {
+                runtimeFolder.Delete(true);
+            }
         }
 
         private static HashSet<PackageIdentity> ParseCacheArtifacts(string path)
