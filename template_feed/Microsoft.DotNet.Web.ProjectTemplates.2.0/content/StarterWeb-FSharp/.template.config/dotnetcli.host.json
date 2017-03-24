@@ -2,11 +2,6 @@
   "symbolInfo": {
     "Framework": {
       "longName": "framework"
-    },
-    "RuntimeFrameworkVersion": {
-      "longName": "runtime-framework-version",
-      "shortName": "fv",
-      "isHidden": "true"
     }
   }
 }

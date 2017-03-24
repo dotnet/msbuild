@@ -2,11 +2,6 @@
   "symbolInfo": {
     "Framework": {
       "longName": "framework"
-    },
-    "NetStandardImplicitPackageVersion": {
-      "longName": "implicit-package-version",
-      "shortName": "ipv",
-      "isHidden": "true"
     }
   }
 }

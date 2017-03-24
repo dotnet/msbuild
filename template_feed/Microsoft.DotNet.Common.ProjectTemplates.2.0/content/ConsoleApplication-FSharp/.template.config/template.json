@@ -14,12 +14,6 @@
   "sourceName": "Company.ConsoleApplication1",
   "preferNameDirectory": true,
   "symbols": {
-    "RuntimeFrameworkVersion": {
-      "type": "parameter",
-      "datatype": "string",
-      "replaces": "2.0.0-beta-001507",
-      "defaultValue": "2.0.0-beta-001507"
-    },
     "Framework": {
       "type": "parameter",
       "datatype": "choice",

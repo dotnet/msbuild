@@ -9,11 +9,6 @@
     "Framework": {
       "longName": "framework"
     },
-    "RuntimeFrameworkVersion": {
-      "longName": "runtime-framework-version",
-      "shortName": "fv",
-      "isHidden": "true"
-    },
     "NoTools": {
       "isHidden": "true",
       "longName": "no-tools"

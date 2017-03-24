@@ -14,12 +14,6 @@
   "sourceName": "Company.TestProject1",
   "preferNameDirectory": true,
   "symbols": {
-    "RuntimeFrameworkVersion": {
-      "type": "parameter",
-      "replaces": "2.0.0-beta-001507",
-      "datatype": "string",
-      "defaultValue": "2.0.0-beta-001507"
-    },
     "Framework": {
       "type": "parameter",
       "datatype": "choice",
