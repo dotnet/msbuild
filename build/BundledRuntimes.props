@@ -1,117 +1,116 @@
 <Project>
-    <PropertyGroup>
+  <PropertyGroup>
+    <!-- Downloaded Installers + Archives -->
+    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
+    <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
-      <!-- Downloaded Installers + Archives -->
-      <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
-      <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
+    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
+    <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
 
-      <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
-      <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
+    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
+    <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
-      <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
-      <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
+    <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
+  </PropertyGroup>
 
-      <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
-    </PropertyGroup>
+  <!-- Additional Shared Framework to be installed -->
+  <PropertyGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">
+    <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
+    <AdditionalSharedFrameworkVersion>1.1.1</AdditionalSharedFrameworkVersion>
+    <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
+    <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
 
-    <!-- Additional Shared Framework to be installed -->
-    <PropertyGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">
-      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
-      <AdditionalSharedFrameworkVersion>1.1.1</AdditionalSharedFrameworkVersion>
-      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
-      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
+    <!-- Additional Downloaded Installers + Archives -->
+    <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
+    <AdditionalDownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedHostInstallerFileName)</AdditionalDownloadedSharedHostInstallerFile>
 
-      <!-- Additional Downloaded Installers + Archives -->
-      <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
-      <AdditionalDownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedHostInstallerFileName)</AdditionalDownloadedSharedHostInstallerFile>
+    <AdditionalDownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(AdditionalHostFxrVersion)$(InstallerExtension)</AdditionalDownloadedHostFxrInstallerFileName>
+    <AdditionalDownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedHostFxrInstallerFileName)</AdditionalDownloadedHostFxrInstallerFile>
 
-      <AdditionalDownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(AdditionalHostFxrVersion)$(InstallerExtension)</AdditionalDownloadedHostFxrInstallerFileName>
-      <AdditionalDownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedHostFxrInstallerFileName)</AdditionalDownloadedHostFxrInstallerFile>
+    <AdditionalDownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(InstallerExtension)</AdditionalDownloadedSharedFrameworkInstallerFileName>
+    <AdditionalDownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</AdditionalDownloadedSharedFrameworkInstallerFile>
 
-      <AdditionalDownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(InstallerExtension)</AdditionalDownloadedSharedFrameworkInstallerFileName>
-      <AdditionalDownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</AdditionalDownloadedSharedFrameworkInstallerFile>
+    <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
+  </PropertyGroup>
 
-      <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
-    </PropertyGroup>
+  <PropertyGroup>
+    <CoreSetupChannel>master</CoreSetupChannel>
+    <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
+    <CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(CoreSetupChannel)</CoreSetupBlobRootUrlWithChannel>
+    <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
+    <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Installers</CoreSetupInstallerBlobRootUrl>
+    <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
+    <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
+  </PropertyGroup>
 
-    <PropertyGroup>
-      <CoreSetupChannel>master</CoreSetupChannel>
-      <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
-      <CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(CoreSetupChannel)</CoreSetupBlobRootUrlWithChannel>
-      <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
-      <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Installers</CoreSetupInstallerBlobRootUrl>
-      <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
-      <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
-    </PropertyGroup>
+  <ItemGroup>
+    <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
+                             Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
+      <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)</Url>
+      <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+      <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
+    </_DownloadAndExtractItem>
 
-    <ItemGroup>
-      <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
-                               Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
-        <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)</Url>
-        <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
-        <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
-      </_DownloadAndExtractItem>
+    <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
+      <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
-        <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
-        <ExtractDestination></ExtractDestination>
-      </_DownloadAndExtractItem>
+    <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
+      <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
-        <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
-        <ExtractDestintation></ExtractDestintation>
-      </_DownloadAndExtractItem>
+    <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
+      <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
 
-      <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
-        <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
-        <ExtractDestintation></ExtractDestintation>
-      </_DownloadAndExtractItem>
-    </ItemGroup>
+  <!-- Additional Shared Framework to be installed -->
+  <PropertyGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' != 'false' ">
+    <AdditionalCoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(AdditionalCoreSetupChannel)</AdditionalCoreSetupBlobRootUrlWithChannel>
+    <AdditionalSharedFrameworkArchiveBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Binaries/$(AdditionalSharedFrameworkVersion)</AdditionalSharedFrameworkArchiveBlobRootUrl>
+    <AdditionalCoreSetupInstallerBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Installers</AdditionalCoreSetupInstallerBlobRootUrl>
+    <AdditionalCoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(AdditionalSharedFrameworkVersion)</AdditionalCoreSetupDownloadDirectory>
+    <AdditionalCombinedSharedHostAndFrameworkArchive>$(AdditionalCoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</AdditionalCombinedSharedHostAndFrameworkArchive>
+  </PropertyGroup>
 
-    <!-- Additional Shared Framework to be installed -->
-    <PropertyGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' != 'false' ">
-      <AdditionalCoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(AdditionalCoreSetupChannel)</AdditionalCoreSetupBlobRootUrlWithChannel>
-      <AdditionalSharedFrameworkArchiveBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Binaries/$(AdditionalSharedFrameworkVersion)</AdditionalSharedFrameworkArchiveBlobRootUrl>
-      <AdditionalCoreSetupInstallerBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Installers</AdditionalCoreSetupInstallerBlobRootUrl>
-      <AdditionalCoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(AdditionalSharedFrameworkVersion)</AdditionalCoreSetupDownloadDirectory>
-      <AdditionalCombinedSharedHostAndFrameworkArchive>$(AdditionalCoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</AdditionalCombinedSharedHostAndFrameworkArchive>
-    </PropertyGroup>
+  <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' != 'false' ">
+    <_DownloadAndExtractItem Include="AdditionalCombinedSharedHostAndFrameworkArchive"
+                             Condition="!Exists('$(AdditionalCombinedSharedHostAndFrameworkArchive)')">
+      <Url>$(AdditionalSharedFrameworkArchiveBlobRootUrl)/$(AdditionalCombinedFrameworkHostCompressedFileName)</Url>
+      <DownloadFileName>$(AdditionalCombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+      <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
+      <!-- don't overwrite the destination because both shared fx's need to be combined -->
+      <OverwriteDestination>False</OverwriteDestination>
+    </_DownloadAndExtractItem>
 
-    <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' != 'false' ">
-      <_DownloadAndExtractItem Include="AdditionalCombinedSharedHostAndFrameworkArchive"
-                               Condition="!Exists('$(AdditionalCombinedSharedHostAndFrameworkArchive)')">
-        <Url>$(AdditionalSharedFrameworkArchiveBlobRootUrl)/$(AdditionalCombinedFrameworkHostCompressedFileName)</Url>
-        <DownloadFileName>$(AdditionalCombinedSharedHostAndFrameworkArchive)</DownloadFileName>
-        <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
-        <!-- don't overwrite the destination because both shared fx's need to be combined -->
-        <OverwriteDestination>False</OverwriteDestination>
-      </_DownloadAndExtractItem>
+    <_DownloadAndExtractItem Include="AdditionalDownloadedSharedFrameworkInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedFrameworkVersion)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</Url>
+      <DownloadFileName>$(AdditionalDownloadedSharedFrameworkInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="AdditionalDownloadedSharedFrameworkInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedFrameworkVersion)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</Url>
-        <DownloadFileName>$(AdditionalDownloadedSharedFrameworkInstallerFile)</DownloadFileName>
-        <ExtractDestination></ExtractDestination>
-      </_DownloadAndExtractItem>
+    <_DownloadAndExtractItem Include="AdditionalDownloadedSharedHostInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedHostVersion)/$(AdditionalDownloadedSharedHostInstallerFileName)</Url>
+      <DownloadFileName>$(AdditionalDownloadedSharedHostInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
 
-      <_DownloadAndExtractItem Include="AdditionalDownloadedSharedHostInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedHostVersion)/$(AdditionalDownloadedSharedHostInstallerFileName)</Url>
-        <DownloadFileName>$(AdditionalDownloadedSharedHostInstallerFile)</DownloadFileName>
-        <ExtractDestintation></ExtractDestintation>
-      </_DownloadAndExtractItem>
-
-      <_DownloadAndExtractItem Include="AdditionalDownloadedHostFxrInstallerFile"
-                               Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)</Url>
-        <DownloadFileName>$(AdditionalDownloadedHostFxrInstallerFile)</DownloadFileName>
-        <ExtractDestintation></ExtractDestintation>
-      </_DownloadAndExtractItem>
-    </ItemGroup>
+    <_DownloadAndExtractItem Include="AdditionalDownloadedHostFxrInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(AdditionalDownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)</Url>
+      <DownloadFileName>$(AdditionalDownloadedHostFxrInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
 </Project>
