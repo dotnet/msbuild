@@ -134,21 +134,12 @@ namespace Microsoft.DotNet.Tools.Run
         {
             if (string.IsNullOrWhiteSpace(Project))
             {
-                string directory = Directory.GetCurrentDirectory();
-                string[] projectFiles = Directory.GetFiles(directory, "*.*proj");
-
-                if (projectFiles.Length == 0)
-                {
-                    var project = "--project";
-
-                    throw new GracefulException(LocalizableStrings.RunCommandExceptionNoProjects, directory, project);
-                }
-                else if (projectFiles.Length > 1)
-                {
-                    throw new GracefulException(LocalizableStrings.RunCommandExceptionMultipleProjects, directory);
-                }
-
-                Project = projectFiles[0];
+                Project = Directory.GetCurrentDirectory();
+            } 
+            
+            if (Directory.Exists(Project)) 
+            {
+                Project = FindSingleProjectInDirectory(Project);
             }
 
             if (Args == null)
@@ -159,6 +150,24 @@ namespace Microsoft.DotNet.Tools.Run
             {
                 _args = new List<string>(Args);
             }
+        }
+
+        private static string FindSingleProjectInDirectory(string directory)
+        {
+            string[] projectFiles = Directory.GetFiles(directory, "*.*proj");
+
+            if (projectFiles.Length == 0)
+            {
+                var project = "--project";
+
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionNoProjects, directory, project);
+            }
+            else if (projectFiles.Length > 1)
+            {
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionMultipleProjects, directory);
+            }
+
+            return projectFiles[0];
         }
     }
 }
