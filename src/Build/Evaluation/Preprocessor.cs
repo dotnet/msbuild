@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Table to resolve import tags
         /// </summary>
-        private readonly Dictionary<string, IList<ProjectRootElement>> _importTable;
+        private readonly Dictionary<XmlElement, IList<ProjectRootElement>> _importTable;
 
         /// <summary>
         /// Stack of file paths pushed as we follow imports
@@ -56,18 +56,11 @@ namespace Microsoft.Build.Evaluation
 
             IList<ResolvedImport> imports = project.Imports;
 
-            _importTable = new Dictionary<string, IList<ProjectRootElement>>(imports.Count);
+            _importTable = new Dictionary<XmlElement, IList<ProjectRootElement>>(imports.Count);
 
             foreach (ResolvedImport entry in imports)
             {
-                IList<ProjectRootElement> list;
-                if (!_importTable.TryGetValue(entry.ImportingElement.XmlElement.OuterXml, out list))
-                {
-                    list = new List<ProjectRootElement>();
-                    _importTable[entry.ImportingElement.XmlElement.OuterXml] = list;
-                }
-
-                list.Add(entry.ImportedProject);
+                AddToImportTable(entry.ImportingElement.XmlElement, entry.ImportedProject);
             }
         }
 
@@ -107,24 +100,29 @@ namespace Microsoft.Build.Evaluation
                 //
                 foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Top))
                 {
-                    XmlNode node = outerDocument.ImportNode(import.ImportingElement.XmlElement, false);
+                    XmlElement xmlElement = (XmlElement)outerDocument.ImportNode(import.ImportingElement.XmlElement, false);
                     if (lastImplicitImportAdded == null)
                     {
-                        documentElement.InsertBefore(node, documentElement.FirstChild);
-                        lastImplicitImportAdded = node;
+                        documentElement.InsertBefore(xmlElement, documentElement.FirstChild);
+                        lastImplicitImportAdded = xmlElement;
                     }
                     else
                     {
-                        documentElement.InsertAfter(node, lastImplicitImportAdded);
+                        documentElement.InsertAfter(xmlElement, lastImplicitImportAdded);
                     }
-                    addedNodes.Add(node);
+                    addedNodes.Add(xmlElement);
+                    AddToImportTable(xmlElement, import.ImportedProject);
                 }
 
                 // Add the implicit bottom imports
                 //
                 foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Bottom))
                 {
-                    addedNodes.Add(documentElement.InsertAfter(outerDocument.ImportNode(import.ImportingElement.XmlElement, false), documentElement.LastChild));
+                    XmlElement xmlElement = (XmlElement)documentElement.InsertAfter(outerDocument.ImportNode(import.ImportingElement.XmlElement, false), documentElement.LastChild);
+
+                    AddToImportTable(xmlElement, import.ImportedProject);
+
+                    addedNodes.Add(xmlElement);
                 }
             }
 
@@ -147,6 +145,18 @@ namespace Microsoft.Build.Evaluation
             }
 
             return destinationDocument;
+        }
+
+        private void AddToImportTable(XmlElement element, ProjectRootElement importedProject)
+        {
+            IList<ProjectRootElement> list;
+            if (!_importTable.TryGetValue(element, out list))
+            {
+                list = new List<ProjectRootElement>();
+                _importTable[element] = list;
+            }
+
+            list.Add(importedProject);
         }
 
         /// <summary>
@@ -216,7 +226,7 @@ namespace Microsoft.Build.Evaluation
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
-                    if (!_importTable.TryGetValue(((XmlElement)child).OuterXml, out resolvedList))
+                    if (!_importTable.TryGetValue((XmlElement)child, out resolvedList))
                     {
                         // Import didn't resolve to anything; just display as a comment and move on
                         string closedImportTag =
