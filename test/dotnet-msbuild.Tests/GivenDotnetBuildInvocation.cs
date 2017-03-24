@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData(new string[] { }, "/t:Build")]
         [InlineData(new string[] { "-o", "foo" }, "/t:Build /p:OutputPath=foo")]
+        [InlineData(new string[] { "-p:Verbosity=diag" }, "/t:Build -p:Verbosity=diag")]
         [InlineData(new string[] { "--output", "foo" }, "/t:Build /p:OutputPath=foo")]
         [InlineData(new string[] { "-o", "foo1 foo2" }, "/t:Build \"/p:OutputPath=foo1 foo2\"")]
         [InlineData(new string[] { "--no-incremental" }, "/t:Rebuild")]

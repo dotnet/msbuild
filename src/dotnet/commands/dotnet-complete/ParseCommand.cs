@@ -24,6 +24,13 @@ namespace Microsoft.DotNet.Cli
 
             Console.WriteLine(result.Diagram());
 
+            var optionValuesToBeForwarded = result.AppliedCommand()
+                                                  .OptionValuesToBeForwarded();
+            if (optionValuesToBeForwarded.Any())
+            {
+                Console.WriteLine("Option values to be forwarded: ");
+                Console.WriteLine(string.Join(" ", optionValuesToBeForwarded));
+            }
             if (result.Errors.Any())
             {
                 Console.WriteLine();
