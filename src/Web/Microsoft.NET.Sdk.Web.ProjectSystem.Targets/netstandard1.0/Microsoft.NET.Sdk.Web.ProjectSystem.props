@@ -20,6 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
