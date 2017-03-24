@@ -31,6 +31,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// Flags for controlling the build.
     /// </summary>
+    [Obsolete]
     [Flags]
     public enum BuildSettings
     {
@@ -50,6 +51,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// Flags for controlling the project load.
     /// </summary>
+    [Obsolete]
     [Flags]
     public enum ProjectLoadSettings
     {
@@ -67,6 +69,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// Flags for controlling the toolset initialization.
     /// </summary>
+    [Obsolete]
     [Flags]
     public enum ToolsetDefinitionLocations
     {

@@ -29,6 +29,7 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildItem (Name = { Name }, Include = { Include }, FinalItemSpec = { FinalItemSpec }, Condition = { Condition } )")]
+    [Obsolete]
     public class BuildItem
     {
         #region Member Data

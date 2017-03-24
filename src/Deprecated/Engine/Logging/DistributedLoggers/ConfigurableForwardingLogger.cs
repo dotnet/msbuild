@@ -16,6 +16,7 @@ namespace Microsoft.Build.BuildEngine
     /// Logger that forwards events to a central logger (e.g ConsoleLogger)
     /// residing on the parent node.
     /// </summary>
+    [Obsolete]
     public class ConfigurableForwardingLogger: IForwardingLogger
     {
         #region Constructors

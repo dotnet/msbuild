@@ -1,5 +1,6 @@
 namespace Microsoft.Build.Conversion
 {
+    [System.ObsoleteAttribute("The ProjectFileConverter class is deprecated.")]
     public sealed partial class ProjectFileConverter
     {
         public ProjectFileConverter() { }
