@@ -11,5 +11,6 @@
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
       <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
+      <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
   </PropertyGroup>
 </Project>
