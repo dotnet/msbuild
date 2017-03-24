@@ -129,6 +129,12 @@
           DestinationFolder="@(RuntimeProjectJson->'%(TestDeploymentDir)')"
           SkipUnchangedFiles="true"
           />
+
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition=" '$(BuildingInsideVisualStudio)' == 'true' "
+          />
   </Target>
 
   <Target Name="SetUnixPermissions"
