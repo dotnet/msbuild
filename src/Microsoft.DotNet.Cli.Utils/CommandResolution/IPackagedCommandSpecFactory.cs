@@ -18,5 +18,14 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             string runtimeConfigPath);
 
+        CommandSpec CreateCommandSpecFromLibrary(
+            LockFileTargetLibrary toolLibrary,
+            string commandName,
+            IEnumerable<string> commandArguments,
+            IEnumerable<string> allowedExtensions,
+            IEnumerable<string> packageFolders,
+            CommandResolutionStrategy commandResolutionStrategy,
+            string depsFilePath,
+            string runtimeConfigPath);
     }
 }

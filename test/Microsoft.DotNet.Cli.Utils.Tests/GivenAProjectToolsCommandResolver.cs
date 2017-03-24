@@ -335,6 +335,59 @@ namespace Microsoft.DotNet.Tests
             result.Args.Should().NotContain("--fx-version");
         }
 
+        [Fact]
+        public void ItFindsToolsLocatedInTheNuGetFallbackFolder()
+        {
+            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
+
+            var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
+                .CreateInstance()
+                .WithSourceFiles();
+            var testProjectDirectory = testInstance.Root.FullName;
+            var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
+
+            PopulateFallbackFolder(testProjectDirectory, fallbackFolder);
+
+            var nugetConfig = testInstance.Root.GetFile("NuGet.Config").FullName;
+            File.WriteAllText(
+                nugetConfig,
+                $@"<?xml version=""1.0"" encoding=""utf-8""?>
+                <configuration>
+                  <fallbackPackageFolders>
+                        <add key=""MachineWide"" value=""{fallbackFolder}""/>
+                    </fallbackPackageFolders>
+                </configuration>
+                ");
+
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"--configfile {nugetConfig}")
+                .Should()
+                .Pass();
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "dotnet-fallbackfoldertool",
+                CommandArguments = null,
+                ProjectDirectory = testProjectDirectory
+            };
+
+            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+        }
+
+        private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
+        {
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"--packages {fallbackFolder}")
+                .Should()
+                .Pass();
+
+            Directory.Delete(Path.Combine(fallbackFolder, ".tools"), true);
+        }
+
         private ProjectToolsCommandResolver SetupProjectToolsCommandResolver()
         {
             Environment.SetEnvironmentVariable(
