@@ -1,45 +1,141 @@
-﻿using Microsoft.DotNet.Cli.Utils;
+﻿using System;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
+    public enum AllowPostActionsSetting
+    {
+        No,
+        Yes,
+        Prompt
+    };
+
     public class PostActionDispatcher
     {
         private readonly TemplateCreationResult _creationResult;
-        private readonly IEngineEnvironmentSettings _settings;
+        private readonly IEngineEnvironmentSettings _environment;
+        private readonly AllowPostActionsSetting _canRunScripts;
 
-        public PostActionDispatcher(IEngineEnvironmentSettings settings, TemplateCreationResult creationResult)
+        public PostActionDispatcher(IEngineEnvironmentSettings environment, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus)
         {
-            _settings = settings;
+            _environment = environment;
             _creationResult = creationResult;
+            _canRunScripts = canRunStatus;
         }
 
-        public void Process()
+        public void Process(Func<string> inputGetter)
         {
             if (_creationResult.ResultInfo.PostActions.Count > 0)
             {
                 Reporter.Output.WriteLine();
-                Reporter.Output.WriteLine("Processing Post Actions");
+                Reporter.Output.WriteLine(LocalizableStrings.ProcessingPostActions);
             }
 
             foreach (IPostAction action in _creationResult.ResultInfo.PostActions)
             {
                 IPostActionProcessor actionProcessor = null;
 
-                if (action.ActionId == null || !_settings.SettingsLoader.Components.TryGetComponent(action.ActionId, out actionProcessor) || actionProcessor == null)
+                if (action.ActionId != null)
                 {
-                    actionProcessor = new InstructionDisplayPostActionProcessor();
+                    _environment.SettingsLoader.Components.TryGetComponent(action.ActionId, out actionProcessor);
                 }
 
-                bool result = actionProcessor.Process(_settings, action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
+                bool result = false;
+
+                if (actionProcessor == null)
+                {   // The host doesn't know how to handle this action, just display instructions.
+                    result = DisplayInstructionsForAction(action);
+                }
+                else if (actionProcessor is ProcessStartPostActionProcessor)
+                {
+                    if (_canRunScripts == AllowPostActionsSetting.No)
+                    {
+                        DisplayInstructionsForAction(action);
+                        result = false; // post action didn't run, it's an error in the sense that continue on error sees it.
+                    }
+                    else if (_canRunScripts == AllowPostActionsSetting.Yes)
+                    {
+                        result = ProcessAction(action, actionProcessor);
+                    }
+                    else if (_canRunScripts == AllowPostActionsSetting.Prompt)
+                    {
+                        result = HandlePromptRequired(action, actionProcessor, inputGetter);
+                    }
+                    // no trailing else - no other cases.
+                }
+                else
+                {
+                    result = ProcessAction(action, actionProcessor);
+                }
 
                 if (!result && !action.ContinueOnError)
-                {   
+                {
                     break;
                 }
+
+                Reporter.Output.WriteLine();
             }
+        }
+
+        // If the action is just instructions, display them and be done with the action.
+        // Otherwise ask the user if they want to run the action. 
+        // If they do, run it, and return the result.
+        // Otherwise return false, indicating the action was not run. 
+        private bool HandlePromptRequired(IPostAction action, IPostActionProcessor actionProcessor, Func<string> inputGetter)
+        {
+            if (actionProcessor is InstructionDisplayPostActionProcessor)
+            {   // it's just instructions, no need to prompt
+                bool result = ProcessAction(action, actionProcessor);
+                return result;
+            }
+
+            // TODO: determine if this is the proper way to get input.
+            bool userWantsToRunAction = AskUserIfActionShouldRun(action, inputGetter);
+
+            if (!userWantsToRunAction)
+            {
+                return false;
+            }
+
+            return ProcessAction(action, actionProcessor);
+        }
+
+        private bool AskUserIfActionShouldRun(IPostAction action, Func<string> inputGetter)
+        {
+            Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptHeader);
+            DisplayInstructionsForAction(action);
+
+            Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptRequest);
+
+            do
+            {
+                string input = inputGetter();
+
+                if (input.Equals("Y", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                else if (input.Equals("N", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInvalidInputRePrompt, input));
+            } while (true);
+        }
+
+        private bool ProcessAction(IPostAction action, IPostActionProcessor actionProcessor)
+        {
+            return actionProcessor.Process(_environment, action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
+        }
+
+        private bool DisplayInstructionsForAction(IPostAction action)
+        {
+            IPostActionProcessor instructionProcessor = new InstructionDisplayPostActionProcessor();
+            return ProcessAction(action, instructionProcessor);
         }
     }
 }

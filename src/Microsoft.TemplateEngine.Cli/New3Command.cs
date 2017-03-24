@@ -13,6 +13,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -96,6 +97,10 @@ namespace Microsoft.TemplateEngine.Cli
         public string TemplateName => _templateNameArgument.Value;
 
         public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
+
+        public bool AllowScriptsToRunHasValue => _app.InternalParamHasValue("--allow-scripts");
+
+        public string AllowScriptsToRun => _app.InternalParamValue("--allow-scripts");
 
         private static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
         {
@@ -346,7 +351,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    string invalidParamsError = GetTemplateParameterErrorsMessage(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues);
+                    string invalidParamsError = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
                     Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     break;
@@ -357,12 +362,13 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.Status;
         }
 
-        private string GetTemplateParameterErrorsMessage(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues)
+        private string GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner)
         {
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
             ParseTemplateArgs(templateInfo);
-            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
+            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out userParamsWithInvalidValues);
+            hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template);
 
             if (userParamsWithInvalidValues.Any())
             {
@@ -380,6 +386,16 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return null;
+        }
+
+        private bool CheckIfTemplateHasScriptRunningPostActions(ITemplate template)
+        {
+            // use a throwaway set of params for getting the creation effects - it makes changes to them.
+            string targetDir = OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
+            IParameterSet paramsForCreationEffects = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IList<string> throwaway);
+            _templateCreator.ResolveUserParameters(template, paramsForCreationEffects, _app.AllTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
+            ICreationEffects creationEffects = template.Generator.GetCreationEffects(EnvironmentSettings, template, paramsForCreationEffects, EnvironmentSettings.SettingsLoader.Components, targetDir);
+            return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
         }
 
         private string GetLanguageMismatchErrorMessage(string inputLanguage)
@@ -406,8 +422,27 @@ namespace Microsoft.TemplateEngine.Cli
                 return;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult);
-            postActionDispatcher.Process();
+            AllowPostActionsSetting scriptRunSettings;
+
+            if (!AllowScriptsToRunHasValue || string.IsNullOrEmpty(AllowScriptsToRun) || string.Equals(AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.Prompt;
+            }
+            else if (string.Equals(AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.Yes;
+            }
+            else if (string.Equals(AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptRunSettings = AllowPostActionsSetting.No;
+            }
+            else
+            {
+                scriptRunSettings = AllowPostActionsSetting.Prompt;
+            }
+
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings);
+            postActionDispatcher.Process(() => Console.ReadLine());
         }
 
         // Checks the result of TemplatesToDisplayInfoAbout()
@@ -903,12 +938,32 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Note: This method explicitly filters out "type" and "language", in addition to other filtering.
-        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false)
+        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false)
         {
-            IEnumerable<ITemplateParameter> filteredParams = parameterDefinitions
+            IList<ITemplateParameter> filteredParams = parameterDefinitions
                 .Where(x => x.Priority != TemplateParameterPriority.Implicit 
                         && !hiddenParams.Contains(x.Name) && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase) && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
-                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1));    // for filtering "tags"
+                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1)).ToList();    // for filtering "tags"
+
+            if (hasPostActionScriptRunner)
+            {
+                ITemplateParameter allowScriptsParam = new TemplateParameter()
+                {
+                    Documentation = LocalizableStrings.WhetherToAllowScriptsToRun,
+                    Name = "allow-scripts",
+                    DataType = "choice",
+                    DefaultValue = "prompt",
+                    Choices = new Dictionary<string, string>()
+                    {
+                        { "yes", LocalizableStrings.AllowScriptsYesChoice },
+                        { "no", LocalizableStrings.AllowScriptsNoChoice },
+                        { "prompt", LocalizableStrings.AllowScriptsPromptChoice }
+                    }
+                };
+
+                filteredParams.Add(allowScriptsParam);
+            }
+
             return filteredParams;
         }
 
@@ -987,7 +1042,7 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams, bool showImplicitlyHiddenParams)
+        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams, bool showImplicitlyHiddenParams, bool hasPostActionScriptRunner)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
@@ -995,7 +1050,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
             }
 
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, explicitlyHiddenParams, showImplicitlyHiddenParams);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, explicitlyHiddenParams, showImplicitlyHiddenParams, hasPostActionScriptRunner);
 
             if (filteredParams.Any())
             {
@@ -1004,9 +1059,18 @@ namespace Microsoft.TemplateEngine.Cli
                 formatter.DefineColumn(
                     param =>
                     {
-                        // the key is guaranteed to exist
-                        IList<string> variants = _app.CanonicalToVariantsTemplateParamMap[param.Name];
-                        string options = string.Join("|", variants.Reverse());
+                        string options;
+                        if (string.Equals(param.Name, "allow-scripts", StringComparison.OrdinalIgnoreCase))
+                        {
+                            options = "--" + param.Name;
+                        }
+                        else
+                        {
+                            // the key is guaranteed to exist
+                            IList<string> variants = _app.CanonicalToVariantsTemplateParamMap[param.Name];
+                            options = string.Join("|", variants.Reverse());
+                        }
+
                         return "  " + options;
                     },
                     LocalizableStrings.Options
@@ -1256,6 +1320,7 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
             appExt.InternalOption("--type", "--type", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
             appExt.InternalOption("--force", "--force", LocalizableStrings.ForcesTemplateCreation, CommandOptionType.NoValue);
+            appExt.InternalOption("--allow-scripts", "--allow-scripts", LocalizableStrings.WhetherToAllowScriptsToRun, CommandOptionType.SingleValue);
 
             // hidden
             appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
@@ -1366,10 +1431,9 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
             }
 
-            string additionalInfo = GetTemplateParameterErrorsMessage(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues);
-
+            string additionalInfo = GetTemplateUsageInformation(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
             HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
-            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, parametersToExplicitlyHide, showImplicitlyHiddenParams);
+            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, parametersToExplicitlyHide, showImplicitlyHiddenParams, hasPostActionScriptRunner);
         }
 
         // Returns true if any partial matches were displayed, false otherwise
