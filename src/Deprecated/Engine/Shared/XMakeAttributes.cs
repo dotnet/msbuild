@@ -52,7 +52,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string parameterType             = "ParameterType";
         internal const string required                  = "Required";
         internal const string output                    = "Output";
-        internal const string defaultValue              = "DefaultValue";
         internal const string evaluate                  = "Evaluate";
         internal const string label                     = "Label";
         internal const string returns                   = "Returns";
@@ -96,19 +95,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 (String.Compare(attribute, continueOnError, StringComparison.OrdinalIgnoreCase) == 0) || 
                 (String.Compare(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase) == 0) || 
                 (String.Compare(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase) == 0)));
-        }
-
-        /// <summary>
-        /// Indicates if the specified attribute cannot be used for batching targets.
-        /// </summary>
-        /// <owner>SumedhK</owner>
-        /// <param name="attribute"></param>
-        /// <returns>true, if a target cannot batch on the given attribute</returns>
-        internal static bool IsNonBatchingTargetAttribute(string attribute)
-        {
-            return ((attribute == name) ||
-                    (attribute == condition) ||
-                    (attribute == dependsOnTargets));
         }
     }
 }

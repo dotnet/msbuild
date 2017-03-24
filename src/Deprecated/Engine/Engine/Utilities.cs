@@ -121,26 +121,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        /*
-         * Method:  GatherReferencedPropertyNames
-         * Owner:   DavidLe
-         * 
-         * Find and record all of the properties that are referenced in the given
-         * condition.
-         *
-         * FUTURE: it is unfortunate that we have to completely parse+evaluate the expression
-         */
-        internal static void GatherReferencedPropertyNames
-        (
-            string          condition,                  // Can be null
-            XmlAttribute    conditionAttribute,         // XML attribute on which the condition is evaluated
-            Expander        expander,                   // The set of properties to use for expansion
-            Hashtable       conditionedPropertiesTable  // Can be null
-        )
-        {
-            EvaluateCondition(condition, conditionAttribute, expander, conditionedPropertiesTable, ParserOptions.AllowProperties | ParserOptions.AllowItemLists, null, null);
-        }
-
         // An array of hashtables with cached expression trees for all the combinations of condition strings 
         // and parser options
         private static volatile Hashtable[] cachedExpressionTrees = new Hashtable[8 /* == ParserOptions.AllowAll*/]

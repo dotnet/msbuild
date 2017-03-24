@@ -21,9 +21,6 @@ namespace Microsoft.Build.Tasks
         // Date and time the file was last modified           
         private DateTime lastModified;
 
-        // Whether the file exists or not.
-        private bool exists = false;
-
         /// <summary>
         /// The name of the file.
         /// </summary>
@@ -43,15 +40,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns true if the file existed when this class was instantiated.
-        /// </summary>
-        /// <value></value>
-        internal bool Exists
-        {
-            get { return exists; }
-        }
-
-        /// <summary>
         /// Construct.
         /// </summary>
         /// <param name="filename">The file name.</param>
@@ -62,11 +50,6 @@ namespace Microsoft.Build.Tasks
             if (File.Exists(FileName))
             {
                 lastModified = File.GetLastWriteTime(FileName);
-                exists = true;
-            }
-            else
-            {
-                exists = false;
             }
         }
 

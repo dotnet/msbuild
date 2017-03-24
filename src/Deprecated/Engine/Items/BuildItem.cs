@@ -2020,28 +2020,6 @@ namespace Microsoft.Build.BuildEngine
             return convertedItems;
         }
 
-        /// <summary>
-        /// Convert the given array of ITaskItems into nameless BuildItems
-        /// </summary>
-        /// <param name="originalItems"></param>
-        /// <returns></returns>
-        internal static BuildItem[] ConvertTaskItemArrayToBuildItems(ITaskItem[] originalItems)
-        {
-            if (originalItems == null)
-            {
-                return null;
-            }
-
-            BuildItem[] convertedItems = new BuildItem[originalItems.Length];
-
-            for (int i = 0; i < originalItems.Length; i++)
-            {
-                convertedItems[i] = new BuildItem(null, originalItems[i]);
-            }
-
-            return convertedItems;
-        }
-
         #endregion
 
     }

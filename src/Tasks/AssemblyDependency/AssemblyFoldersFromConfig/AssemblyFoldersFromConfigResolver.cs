@@ -68,11 +68,6 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         private string _assemblyFolderConfigFile;
 
         /// <summary>
-        /// If it is not initialized then just return the null object, that would mean the resolver was not called.
-        /// </summary>
-        internal AssemblyFoldersFromConfig AssemblyFoldersExLocations => _assemblyFoldersCache?.AssemblyFoldersFromConfig;
-
-        /// <summary>
         /// Construct.
         /// </summary>
         public AssemblyFoldersFromConfigResolver(string searchPathElement, GetAssemblyName getAssemblyName,

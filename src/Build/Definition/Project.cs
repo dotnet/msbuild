@@ -2499,15 +2499,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Verify that the project has not been unloaded from its collection.
-        /// Once it's been unloaded, it cannot be used.
-        /// </summary>
-        internal void VerifyThrowInvalidOperationNotZombie()
-        {
-            ErrorUtilities.VerifyThrow(_renameHandler != null, "OM_ProjectIsNoLongerActive");
-        }
-
-        /// <summary>
         /// Verify that the provided object location is in the same file as the project.
         /// If it is not, throws an InvalidOperationException indicating that imported evaluated objects should not be modified.
         /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the 
@@ -3621,16 +3612,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             #endregion
-
-            /// <summary>
-            /// Clears out certain cached values. 
-            /// FOR UNIT TESTING ONLY
-            /// </summary>
-            internal static void ClearCachedFlags()
-            {
-                s_shouldTreatHigherToolsVersionsAsCurrent = false;
-                s_shouldTreatOtherToolsVersionsAsCurrent = false;
-            }
 
             /// <summary>
             /// Removes an item.

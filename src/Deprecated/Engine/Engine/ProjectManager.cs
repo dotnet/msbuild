@@ -143,29 +143,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Gets the first project contained in the ProjectManager that matches the full path
-        /// specified.
-        /// </summary>
-        /// <param name="projectFileFullPath"></param>
-        /// <returns></returns>
-        internal Project GetFirstProject
-            (
-            string projectFileFullPath
-            )
-        {
-            // Get the list of projects that have this full path.
-            ArrayList projectsWithThisFullPath = (ArrayList) this.projects[projectFileFullPath];
-
-            if ((projectsWithThisFullPath != null) && (projectsWithThisFullPath.Count > 0))
-            {
-                return (Project) projectsWithThisFullPath[0];
-            }
-
-            // No project was found that matched the full path specified.
-            return null;
-        }
-
-        /// <summary>
         /// Gets the list of projects which are currently in process of being build (i.e have at least
         /// one build request inside the project)
         /// </summary>

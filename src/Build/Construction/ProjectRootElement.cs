@@ -761,11 +761,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Retrieves the root element cache with which this root element is associated.
-        /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache => _projectRootElementCache;
-
-        /// <summary>
         /// Gets a value indicating whether this PRE is known by its containing collection.
         /// </summary>
         internal bool IsMemberOfProjectCollection => _projectFileLocation != null;

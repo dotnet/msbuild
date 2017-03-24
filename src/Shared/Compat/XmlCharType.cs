@@ -41,7 +41,6 @@ namespace System.Xml {
         internal const int SurHighEnd = 0xdbff;
         internal const int SurLowStart = 0xdc00;    // 1101 11xx
         internal const int SurLowEnd = 0xdfff;
-        internal const int SurMask = 0xfc00;    // 1111 11xx
 
 #if XML10_FIFTH_EDITION
         // Characters defined in the XML 1.0 Fifth Edition
@@ -248,10 +247,6 @@ namespace System.Xml {
         const string s_CharData =
             "\u0009\u000a\u000d\u000d\u0020\ud7ff\ue000\ufffd";
 
-        const string s_PublicID =
-            "\u000a\u000a\u000d\u000d\u0020\u0021\u0023\u0025" +
-            "\u0027\u003b\u003d\u003d\u003f\u005a\u005f\u005f" +
-            "\u0061\u007a";
 
         const string s_Text = // TextChar = CharData - { 0xA | 0xD | '<' | '&' | 0x9 | ']' | 0xDC00 - 0xDFFF }
             "\u0020\u0025\u0027\u003b\u003d\u005c\u005e\ud7ff\ue000\ufffd";
@@ -583,24 +578,6 @@ namespace System.Xml {
             return false;
         }
 
-        // TextChar = CharData - { 0xA, 0xD, '<', '&', ']' }
-        // NOTE: This method will not be inlined (because it uses byte* charProperties)
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY && XMLCHARTYPE_USE_RESOURCE
-        [System.Security.SecuritySafeCritical]
-#endif
-        internal bool IsTextChar( char ch ) {
-            return ( charProperties[ch] & fText ) != 0;
-        }
-
-        // AttrValueChar = CharData - { 0xA, 0xD, 0x9, '<', '>', '&', '\'', '"' }
-        // NOTE: This method will not be inlined (because it uses byte* charProperties)
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY && XMLCHARTYPE_USE_RESOURCE
-        [System.Security.SecuritySafeCritical]
-#endif
-        internal bool IsAttributeValueChar( char ch ) {
-            return ( charProperties[ch] & fAttrValue ) != 0;
-        }
-
         // XML 1.0 Fourth Edition definitions
         //
         // NOTE: This method will not be inlined (because it uses byte* charProperties)
@@ -663,12 +640,6 @@ namespace System.Xml {
             return ( lowChar - SurLowStart ) | ( ( highChar - SurHighStart ) << 10 ) + 0x10000;
         }
 
-        internal static void SplitSurrogateChar( int combinedChar, out char lowChar, out char highChar ) {
-            int v = combinedChar - 0x10000;
-            lowChar = (char)( SurLowStart + v % 1024 );
-            highChar = (char)( SurHighStart + v / 1024 );
-        }
-
         internal bool IsOnlyWhitespace( string str ) {
             return IsOnlyWhitespaceWithPos( str ) == -1;
         }
@@ -681,62 +652,6 @@ namespace System.Xml {
             if ( str != null ) {
                 for ( int i = 0; i < str.Length; i++ ) {
                     if ( ( charProperties[str[i]] & fWhitespace ) == 0 ) {
-                        return i;
-                    }
-                }
-            }
-            return -1;
-        }
-
-#if SILVERLIGHT && !SILVERLIGHT_DISABLE_SECURITY && XMLCHARTYPE_USE_RESOURCE
-        [System.Security.SecuritySafeCritical]
-#endif
-        internal int IsOnlyCharData( string str ) {
-            if ( str != null ) {
-                for ( int i = 0; i < str.Length; i++ ) {
-                    if ( ( charProperties[str[i]] & fCharData ) == 0 ) {
-                        if ( i + 1 >= str.Length || !(XmlCharType.IsHighSurrogate(str[i]) && XmlCharType.IsLowSurrogate(str[i+1]))) {
-                            return i;
-                        }
-                        else {
-                            i++;
-                        }
-                    }
-                }
-            }
-            return -1;
-        }
-
-        static internal bool IsOnlyDigits(string str, int startPos, int len) {
-            Debug.Assert(str != null);
-            Debug.Assert(startPos + len <= str.Length);
-            Debug.Assert(startPos <= str.Length);
-
-            for (int i = startPos; i < startPos + len; i++) {
-                if (!IsDigit(str[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        static internal bool IsOnlyDigits( char[] chars, int startPos, int len ) {
-            Debug.Assert( chars != null );
-            Debug.Assert( startPos + len <= chars.Length );
-            Debug.Assert( startPos <= chars.Length );
-                
-            for ( int i = startPos; i < startPos + len; i++ ) {
-                if ( !IsDigit( chars[i] ) ) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        internal int IsPublicId( string str ) {
-            if ( str != null ) {
-                for ( int i = 0; i < str.Length; i++ ) {
-                    if ( !IsPubidChar(str[i]) ) {
                         return i;
                     }
                 }

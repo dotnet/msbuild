@@ -192,9 +192,6 @@ namespace Microsoft.Build.Internal
                 return assemblyTimestamp;
             }
         }
-
-        // Name of the environment variable that always points to 32-bit program files.
-        internal const string programFilesx86 = "ProgramFiles(x86)";
     }
 
     /// <summary>

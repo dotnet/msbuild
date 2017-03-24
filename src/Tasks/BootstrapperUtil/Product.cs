@@ -131,11 +131,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             get { return _dependencies; }
         }
 
-        internal bool ContainsCulture(string culture)
-        {
-            return _cultures.Contains(culture.ToLowerInvariant());
-        }
-
         internal bool ContainsDependencies(List<Product> dependenciesToCheck)
         {
             foreach (List<Product> d in _dependencies)
@@ -190,11 +185,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 Debug.WriteLine(String.Format(CultureInfo.CurrentCulture, "A package with culture '{0}' has already been added to product '{1}'", package.Culture.ToLowerInvariant(), ProductCode));
             }
-        }
-
-        internal void AddIncludedProduct(Product product)
-        {
-            _includes.Add(product);
         }
 
         internal void AddDependentProduct(Product product)

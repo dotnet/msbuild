@@ -43,7 +43,6 @@ namespace System.Reflection
             bool IsGenericParameter { get { return TargetType.IsGenericParameter; } }
 
             private const BindingFlags MemberBindingMask = (BindingFlags)0x000000FF;
-            private const BindingFlags InvocationMask = (BindingFlags)0x0000FF00;
 
             //  InvokeMember code copied and modified from: https://github.com/Microsoft/referencesource/blob/74706335e3b8c806f44fa0683dc1e18d3ed747c2/mscorlib/system/rttype.cs#L4562
             //[Diagnostics.DebuggerHidden]

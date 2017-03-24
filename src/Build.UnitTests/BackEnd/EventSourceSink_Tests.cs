@@ -1009,17 +1009,6 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TaskStartedEventArgs TaskStarted
-            {
-                get
-                {
-                    return s_taskStarted;
-                }
-            }
-
-            /// <summary>
-            /// Event which can be raised in multiple tests.
-            /// </summary>
             internal static TaskFinishedEventArgs TaskFinished
             {
                 get

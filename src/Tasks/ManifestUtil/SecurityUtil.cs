@@ -33,7 +33,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public static class SecurityUtilities
     {
         private const string PermissionSetsFolder = "PermissionSets";
-        private const string Everything = "Everything";
         private const string LocalIntranet = "LocalIntranet";
         private const string Internet = "Internet";
         private const string Custom = "Custom";
@@ -327,77 +326,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 default:
                     throw new ArgumentException(String.Empty /* no message */, "targetZone");
             }
-        }
-
-        private static string[] GetRegistryPermissionSetByName(string name)
-        {
-            string[] extensibleNamedPermissionSetRegistryInfo = null;
-            RegistryKey localMachineKey = Registry.LocalMachine;
-
-            using (RegistryKey versionIndependentFXKey = localMachineKey.OpenSubKey(@"Software\Microsoft\.NETFramework", false))
-            {
-                if (versionIndependentFXKey != null)
-                {
-                    using (RegistryKey namedPermissionSetsKey = versionIndependentFXKey.OpenSubKey(@"Security\Policy\Extensions\NamedPermissionSets", false))
-                    {
-                        if (namedPermissionSetsKey != null)
-                        {
-                            using (RegistryKey permissionSetKey = namedPermissionSetsKey.OpenSubKey(name, false))
-                            {
-                                if (permissionSetKey != null)
-                                {
-                                    string[] permissionKeys = permissionSetKey.GetSubKeyNames();
-                                    extensibleNamedPermissionSetRegistryInfo = new string[permissionKeys.Length];
-                                    for (int i = 0; i < permissionKeys.Length; i++)
-                                    {
-                                        using (RegistryKey permissionKey = permissionSetKey.OpenSubKey(permissionKeys[i], false))
-                                        {
-                                            string permissionXml = permissionKey.GetValue("Xml") as string;
-                                            extensibleNamedPermissionSetRegistryInfo[i] = permissionXml;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return extensibleNamedPermissionSetRegistryInfo;
-        }
-
-        private static PermissionSet RemoveNonReferencedPermissions(string[] setToFilter, ITaskItem[] dependencies)
-        {
-            PermissionSet retSet = new PermissionSet(PermissionState.None);
-            if (dependencies == null || setToFilter == null || setToFilter.Length == 0)
-                return retSet;
-
-            List<string> assemblyNameList = new List<string>();
-            foreach (ITaskItem dependency in dependencies)
-            {
-                AssemblyName dependentAssemblyName = AssemblyName.GetAssemblyName(dependency.ItemSpec);
-                assemblyNameList.Add(dependentAssemblyName.Name + ", " + dependentAssemblyName.Version.ToString());
-            }
-            SecurityElement retSetElement = retSet.ToXml();
-            foreach (string permissionXml in setToFilter)
-            {
-                if (!String.IsNullOrEmpty(permissionXml))
-                {
-                    string permissionAssemblyName;
-                    string className;
-                    string assemblyVersion;
-
-                    SecurityElement permission = SecurityElement.FromString(permissionXml);
-
-                    if (!ParseElementForAssemblyIdentification(permission, out className, out permissionAssemblyName, out assemblyVersion))
-                        continue;
-                    if (assemblyNameList.Contains(permissionAssemblyName + ", " + assemblyVersion))
-                    {
-                        retSetElement.AddChild(SecurityElement.FromString(permissionXml));
-                    }
-                }
-            }
-            retSet = new ReadOnlyPermissionSet(retSetElement);
-            return retSet;
         }
 
         internal static bool ParseElementForAssemblyIdentification(SecurityElement el,

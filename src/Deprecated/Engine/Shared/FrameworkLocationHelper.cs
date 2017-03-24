@@ -43,12 +43,10 @@ namespace Microsoft.Build.BuildEngine.Shared
         private const string dotNetFrameworkRegistryKeyV20 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionV20;
 
         internal const string dotNetFrameworkVersionFolderPrefixV30 = "v3.0"; // v3.0 is for WinFx.
-        private const string dotNetFrameworkVersionV30 = "v3.0"; // full WinFx version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV30 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30;
         private const string dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 +"\\Setup";
 
         private const string dotNetFrameworkSdkRegistryPathV35 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A";
-        internal const string fullDotNetFrameworkSdkRegistryKeyV35 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV35;
         private const string dotNetFrameworkRegistryKeyV35 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV35;
         internal const string dotNetFrameworkSdkInstallKeyValueV35 = "InstallationFolder";
        
@@ -59,9 +57,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string secondaryDotNetFrameworkSdkInstallKeyValueV35 = "CurrentInstallFolder";
 
         internal const string dotNetFrameworkVersionFolderPrefixV40 = "v4.0";
-        private const string dotNetFrameworkVersionV40 = dotNetFrameworkVersionFolderPrefixV40; // full Dev10 version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
         private const string dotNetFrameworkSdkRegistryPathV40 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A";
-        internal const string fullDotNetFrameworkSdkRegistryKeyV40 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV40;
         internal const string dotNetFrameworkSdkInstallKeyValueV40 = "InstallationFolder";
 
 
@@ -240,166 +236,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkSdkV20;
-            }
-        }
-
-        private static string pathToDotNetFrameworkSdkV35;
-
-        internal static string PathToDotNetFrameworkSdkV35
-        {
-            get
-            {
-                if (FrameworkLocationHelper.pathToDotNetFrameworkSdkV35 == null)
-                {
-                    FrameworkLocationHelper.pathToDotNetFrameworkSdkV35 = FindRegistryValueUnderKey(
-                        dotNetFrameworkSdkRegistryPathV35,
-                        dotNetFrameworkSdkInstallKeyValueV35);
-
-                    // Because there is no longer a strong 1:1 mapping between FX versions and SDK
-                    // versions, if we're unable to locate the desired SDK version, we will try to 
-                    // use whichever SDK version is installed by looking at the key pointing to the
-                    // "latest" version.
-                    //
-                    // This isn't ideal, but it will allow our tasks to function on any of several 
-                    // related SDKs even if they don't have exactly the same versions.
-                    
-                    if (String.IsNullOrEmpty(FrameworkLocationHelper.pathToDotNetFrameworkSdkV35))
-                    {
-                        FrameworkLocationHelper.pathToDotNetFrameworkSdkV35 = FindRegistryValueUnderKey(
-                            secondaryDotNetFrameworkSdkRegistryPathV35,
-                            secondaryDotNetFrameworkSdkInstallKeyValueV35);
-                    }
-
-                }
-
-                return FrameworkLocationHelper.pathToDotNetFrameworkSdkV35;
-            }
-        }
-
-        private static string pathToDotNetFrameworkSdkV40;
-
-        internal static string PathToDotNetFrameworkSdkV40
-        {
-            get
-            {
-                if (FrameworkLocationHelper.pathToDotNetFrameworkSdkV40 == null)
-                {
-                    FrameworkLocationHelper.pathToDotNetFrameworkSdkV40 = FindRegistryValueUnderKey(
-                        dotNetFrameworkSdkRegistryPathV40,
-                        dotNetFrameworkSdkInstallKeyValueV40);
-
-                    // Because there is no longer a strong 1:1 mapping between FX versions and SDK
-                    // versions, if we're unable to locate the desired SDK version, we will try to 
-                    // use whichever SDK version is installed by looking at the key pointing to the
-                    // "latest" version. For example, instead of 6.0A, we might fall back to 6.0B.
-                    //
-                    // This isn't ideal, but it will allow our tasks to function on any of several 
-                    // related SDKs even if they don't have exactly the same versions.
-
-                    if (String.IsNullOrEmpty(FrameworkLocationHelper.pathToDotNetFrameworkSdkV40))
-                    {
-                        FrameworkLocationHelper.pathToDotNetFrameworkSdkV40 = FindRegistryValueUnderKey(
-                            secondaryDotNetFrameworkSdkRegistryPathV40,
-                            secondaryDotNetFrameworkSdkInstallKeyValueV40);
-                    }
-
-                }
-
-                return FrameworkLocationHelper.pathToDotNetFrameworkSdkV40;
-            }
-        }
-
-        private static string pathToDotNetFrameworkReferenceAssembliesV30;
-
-        internal static string PathToDotNetFrameworkReferenceAssembliesV30
-        {
-            get
-            {
-                if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV30 == null)
-                {
-                    FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV30 = FindRegistryValueUnderKey(
-                        dotNetFrameworkAssemblyFoldersRegistryKeyV30,
-                        referenceAssembliesRegistryValueName);
-
-                    if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV30 == null)
-                    {
-                        FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV30 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV30);
-                    }
-                }
-
-                return FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV30;
-            }
-        }
-
-        private static string pathToDotNetFrameworkReferenceAssembliesV35;
-
-        internal static string PathToDotNetFrameworkReferenceAssembliesV35
-        {
-            get
-            {
-                if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 == null)
-                {
-                    FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 = FindRegistryValueUnderKey(
-                        dotNetFrameworkAssemblyFoldersRegistryKeyV35,
-                        referenceAssembliesRegistryValueName);
-
-                    if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 == null)
-                    {
-                        FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV35);
-                    }
-
-                }
-
-                return FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35;
-            }
-        }
-
-        private static string pathToDotNetFrameworkReferenceAssembliesV40;
-
-        internal static string PathToDotNetFrameworkReferenceAssembliesV40
-        {
-            get
-            {
-                if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 == null)
-                {
-                    FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = FindRegistryValueUnderKey(
-                        dotNetFrameworkAssemblyFoldersRegistryKeyV40,
-                        referenceAssembliesRegistryValueName);
-
-                    if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 == null)
-                    {
-                       FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV40);
-                    }
-                }
-
-                return FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40;
-            }
-        }
-
-        internal static string GetPathToDotNetFramework(Version version)
-        {
-            string frameworkVersion = version.Major + "." + version.Minor;
-
-            switch (frameworkVersion)
-            {
-                case "1.1":
-                    return FrameworkLocationHelper.PathToDotNetFrameworkV11;
-
-                case "2.0":
-                    return FrameworkLocationHelper.PathToDotNetFrameworkV20;
-
-                case "3.0":
-                    return FrameworkLocationHelper.PathToDotNetFrameworkV30;
-
-                case "3.5":
-                    return FrameworkLocationHelper.PathToDotNetFrameworkV35;
-
-                case "4.0":
-                    return FrameworkLocationHelper.PathToDotNetFrameworkV40;
-
-                default:
-                    ErrorUtilities.VerifyThrowArgument(false, "FrameworkLocationHelper.UnsupportedFrameworkVersion", frameworkVersion);
-                    return null;
             }
         }
 

@@ -1457,11 +1457,6 @@ namespace Microsoft.Build.BuildEngine
             private Dictionary<BuildEventContext, object> startedEvent;
             private int messageIdentLevel = 2;
 
-            internal int MessageIdentLevel
-            {
-                get { return messageIdentLevel; }
-                set { messageIdentLevel = value; }
-            }
 
             internal MPPerformanceCounter(string scopeName)
                 : base(scopeName)

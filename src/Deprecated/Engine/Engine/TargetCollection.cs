@@ -55,19 +55,6 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
-        /// Read-only accessor for parent project object.
-        /// </summary>
-        /// <value></value>
-        /// <owner>RGoel</owner>
-        internal Project ParentProject
-        {
-            get
-            {
-                return this.parentProject;
-            }
-        }
-
-        /// <summary>
         /// Read-only property which returns the number of Targets contained
         /// in our collection.
         /// </summary>

@@ -44,13 +44,5 @@ namespace Microsoft.Build.CommandLine
         {
             Translate(translator);
         }
-
-        /// <summary>
-        /// Factory for serialization
-        /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
-        {
-            return new LogMessagePacket(translator);
-        }
     }
 }

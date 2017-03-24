@@ -33,10 +33,12 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private static DateTime s_last = DateTime.MinValue;
 
+#if DEBUG
         /// <summary>
         /// How often to log
         /// </summary>
         private static TimeSpan s_interval;
+#endif
 
         /// <summary>
         /// A place callers can put something worth logging later
@@ -97,45 +99,6 @@ namespace Microsoft.Build.Internal
         internal static void Slot<K, V>(string tag, KeyValuePair<K, V> value)
         {
             Slot(tag, value.Key.ToString() + "=" + value.Key.ToString());
-        }
-
-        /// <summary>
-        /// Increment the named counter, and dump if it's time to do so
-        /// </summary>
-        [Conditional("DEBUG")]
-        internal static void Record(string counter)
-        {
-            lock (s_counts)
-            {
-                int existing;
-                s_counts.TryGetValue(counter, out existing);
-                int incremented = ++existing;
-                s_counts[counter] = incremented;
-                DateTime now = DateTime.Now;
-
-                if (now > s_last + s_interval)
-                {
-                    Trace.WriteLine("================================================");
-                    Trace.WriteLine(s_slot);
-                    s_slot = String.Empty;
-                    Dump();
-                    Trace.WriteLine(System.Environment.StackTrace);
-                    s_last = now;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Log the provided items
-        /// </summary>
-        /// <typeparam name="T">The item type.</typeparam>
-        [Conditional("DEBUG")]
-        internal static void List<T>(IEnumerable<T> items)
-        {
-            foreach (T item in items)
-            {
-                Trace.WriteLine(item.ToString());
-            }
         }
 
         /// <summary>

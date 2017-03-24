@@ -43,12 +43,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ILoggingService _loggingService;
 
-        /// <summary>
-        /// The CultureInfo from the invariant culture. Used to avoid allocations for
-        /// perfoming IndexOf etc.
-        /// </summary>
-        private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
-
         // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
         // for https://github.com/Microsoft/msbuild/issues/1751. It should
         // be removed (permanently set to false) after establishing that
@@ -234,11 +228,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _cache[globsToIgnore] = items;
-            }
-
-            private bool IsCached(ISet<string> globsToIgnore)
-            {
-                return _cache != null && _cache.ContainsKey(globsToIgnore);
             }
         }
 

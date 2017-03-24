@@ -215,18 +215,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Trims the string and removes any double quotes around it.
-        /// </summary>
-        internal static string TrimAndStripAnyQuotes(string path)
-        {
-            // Trim returns the same string if trimming isn't needed
-            path = path.Trim();
-            path = path.Trim(new char[] { '"' });
-
-            return path;
-        }
-
-        /// <summary>
         /// Get the directory name of a rooted full path
         /// </summary>
         /// <param name="fullPath"></param>

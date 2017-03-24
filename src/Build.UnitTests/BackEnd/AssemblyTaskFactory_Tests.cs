@@ -736,15 +736,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// Expect not to find this parameter as it is internal
-            /// </summary>
-            internal string NotExpected
-            {
-                get;
-                set;
-            }
-
-            /// <summary>
             /// Execute the test
             /// </summary>
             public override bool Execute()

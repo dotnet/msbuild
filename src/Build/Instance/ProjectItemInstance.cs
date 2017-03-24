@@ -332,15 +332,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The full path to the project file being built
-        /// Can be null: if the project hasn't been saved yet it will be null
-        /// </summary>
-        internal string ProjectFullPath
-        {
-            get { return _project.FullPath; }
-        }
-
-        /// <summary>
         /// Get any metadata in the item that has the specified name,
         /// otherwise returns null. 
         /// Includes any metadata inherited from item definitions.

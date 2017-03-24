@@ -142,16 +142,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Re-initialize.
-        /// Unit tests need this when they enable "unsafe" methods -- which will then go in the collection,
-        /// and mess up subsequent tests.
-        /// </summary>
-        internal static void Reset_ForUnitTestsOnly()
-        {
-            InitializeAvailableMethods();
-        }
-
-        /// <summary>
         /// Fill up the dictionary for first use
         /// </summary>
         private static void InitializeAvailableMethods()

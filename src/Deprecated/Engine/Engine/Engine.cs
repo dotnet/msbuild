@@ -1188,22 +1188,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Stop forwarding events to any loggers
-        /// </summary>
-        internal void BeginEatingLoggingEvents()
-        {
-            primaryLoggingServices.BeginEatingEvents();
-        }
-
-        /// <summary>
-        /// Resume forwarding events to loggers
-        /// </summary>
-        internal void EndEatingLoggingEvents()
-        {
-            primaryLoggingServices.EndEatingEvents();
-        }
-
-        /// <summary>
         /// Clear out all registered loggers so that none are registered.
         /// </summary>
         /// <exception cref="LoggerException">Logger indicating it failed in a controlled way</exception>

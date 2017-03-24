@@ -582,18 +582,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Trims the string and removes any double quotes around it.
-        /// </summary>
-        internal static string TrimAndStripAnyQuotes(string path)
-        {
-            // Trim returns the same string if trimming isn't needed
-            path = path.Trim();
-            path = path.Trim(new char[] { '"' });
-
-            return path;
-        }
-
-        /// <summary>
         /// Determines the full path for the given file-spec.
         /// </summary>
         /// <owner>SumedhK</owner>
@@ -650,26 +638,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             return directory;
         }
 
-        /// <summary>
-        /// Determines whether the given assembly file name has one of the listed extensions.
-        /// </summary>
-        /// <param name="fileName">The name of the file</param>
-        /// <param name="allowedExtensions">Array of extensions to consider.</param>
-        /// <returns></returns>
-        internal static bool HasExtension(string fileName, string[] allowedExtensions)
-        {
-            string fileExtension = Path.GetExtension(fileName);
-            foreach (string extension in allowedExtensions)
-            {
-                if (String.Compare(fileExtension, extension, true /* ignore case */, CultureInfo.CurrentCulture) == 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // ISO 8601 Universal time with sortable format
+       // ISO 8601 Universal time with sortable format
         internal const string FileTimeFormat = "yyyy'-'MM'-'dd HH':'mm':'ss'.'fffffff";
 
         /// <summary>
@@ -769,14 +738,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             return buffer.ToString();
-        }
-
-        /// <summary>
-        /// Returns true if the specified filename is a VC++ project file, otherwise returns false
-        /// </summary>
-        internal static bool IsVCProjFilename(string filename)
-        {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

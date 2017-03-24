@@ -73,21 +73,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// To be used as a delegate. Gets the AssemblyName of the given file.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        internal static AssemblyNameExtension GetAssemblyNameEx(string path)
-        {
-            AssemblyName assemblyName = AssemblyName.GetAssemblyName(path);
-            if (assemblyName == null)
-            {
-                return null;
-            }
-            return new AssemblyNameExtension(assemblyName);
-        }
-        
-        /// <summary>
         /// Assume there is a string version, create the AssemblyName version.
         /// </summary>
         private void CreateAssemblyName()
@@ -135,22 +120,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // Is there a string?
                 CreateAssemblyName();
                 return asAssemblyName.Version;
-            }
-        }
-
-        /// <summary>
-        /// Replace the current version with a new version.
-        /// </summary>
-        /// <param name="version"></param>
-        internal void ReplaceVersion(Version version)
-        {
-            CreateAssemblyName();
-            if (asAssemblyName.Version != version)
-            {
-                asAssemblyName.Version = version;
-
-                // String would now be invalid.
-                asString = null;
             }
         }
 
@@ -474,27 +443,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             AssemblyName assemblyName = new AssemblyName(displayName);
             return assemblyName;
-        }
-
-        /// <summary>
-        /// Return a string that has AssemblyName special characters escaped. 
-        /// Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).
-        /// </summary>
-        /// <remarks>
-        /// WARNING! This method is not meant as a general purpose escaping method for assembly names.
-        /// Use only if you really know that this does what you need.
-        /// </remarks>
-        /// <param name="displayName"></param>
-        /// <returns></returns>
-        internal static string EscapeDisplayNameCharacters(string displayName)
-        {
-            StringBuilder sb = new StringBuilder(displayName);
-            sb = sb.Replace("\\", "\\\\");
-            sb = sb.Replace("=", "\\=");
-            sb = sb.Replace(",", "\\,");
-            sb = sb.Replace("\"", "\\\"");
-            sb = sb.Replace("'", "\\'");
-            return sb.ToString();
         }
 
         /// <summary>

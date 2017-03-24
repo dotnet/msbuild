@@ -13,26 +13,6 @@ namespace Microsoft.Build.Shared
     internal static class AssemblyResources
     {
         /// <summary>
-        /// A slot for msbuild.exe to add a resource manager over its own resources, that can also be consulted.
-        /// </summary>
-        private static ResourceManager s_msbuildExeResourceManager;
-
-        /// <summary>
-        /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and 
-        /// ResourceUtilities class that uses it. To make this possible, MSBuild.exe registers its resources here and they are
-        /// normally consulted last. This assumes that there are no duplicated resource ID's between the Engine and MSBuild.exe.
-        /// (Actually there are currently two: LoggerCreationError and LoggerNotFoundError.
-        /// We can't change the resource ID's this late in the cycle and we sometimes want to load the MSBuild.exe ones,
-        /// because they're a little different. So for that purpose we call GetStringLookingInMSBuildExeResourcesFirst() )
-        /// </summary>
-        internal static void RegisterMSBuildExeResources(ResourceManager manager)
-        {
-            ErrorUtilities.VerifyThrow(s_msbuildExeResourceManager == null, "Only one extra resource manager");
-
-            s_msbuildExeResourceManager = manager;
-        }
-
-        /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
@@ -46,22 +26,6 @@ namespace Microsoft.Build.Shared
             if (resource == null)
             {
                 resource = GetStringFromMSBuildExeResources(name);
-            }
-
-            return resource;
-        }
-
-        /// <summary>
-        /// Loads the specified resource string.
-        /// </summary>
-        /// <returns>The resource string, or null if not found.</returns>
-        internal static string GetStringLookingInMSBuildExeResourcesFirst(string name)
-        {
-            string resource = GetStringFromMSBuildExeResources(name);
-
-            if (resource == null)
-            {
-                resource = GetStringFromEngineResources(name);
             }
 
             return resource;
@@ -92,12 +56,6 @@ namespace Microsoft.Build.Shared
         private static string GetStringFromMSBuildExeResources(string name)
         {
             string resource = null;
-
-            if (s_msbuildExeResourceManager != null)
-            {
-                // Try MSBuild.exe's resources
-                resource = s_msbuildExeResourceManager.GetString(name, CultureInfo.CurrentUICulture);
-            }
 
             return resource;
         }

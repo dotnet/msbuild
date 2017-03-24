@@ -337,16 +337,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Accesses the unescaped evaluated include prior to wildcard expansion
-        /// </summary>
-        internal string EvaluatedIncludeBeforeWildcardExpansion
-        {
-            [DebuggerStepThrough]
-            get
-            { return EscapingUtilities.UnescapeAll(_evaluatedIncludeBeforeWildcardExpansionEscaped); }
-        }
-
-        /// <summary>
         /// Accesses the evaluated include prior to wildcard expansion
         /// </summary>
         internal string EvaluatedIncludeBeforeWildcardExpansionEscaped

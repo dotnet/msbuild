@@ -486,6 +486,7 @@ multi-line comment here
             Helpers.VerifyAssertLineByLine(expected, actual, false);
         }
 
+#if FEATURE_XMLTEXTREADER
         /// <summary>
         /// Ensure that all line-endings in the save result are correct for the current OS
         /// </summary>
@@ -507,5 +508,6 @@ multi-line comment here
                 Assert.Equal(0, Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline).Count);
             }
         }
+#endif
     }
 }

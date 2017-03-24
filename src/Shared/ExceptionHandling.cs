@@ -128,40 +128,6 @@ namespace Microsoft.Build.Shared
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }
 
-        /// <summary> Extracts line and column numbers from the exception if it is XML-related one. </summary>
-        /// <param name="e"> XML-related exception. </param>
-        /// <returns> Line and column numbers if available, (0,0) if not. </returns>
-        /// <remarks> This function works around the fact that XmlException and XmlSchemaException are not directly related. </remarks>
-        internal static LineAndColumn GetXmlLineAndColumn(Exception e)
-        {
-            var line = 0;
-            var column = 0;
-
-            var xmlException = e as XmlException;
-            if (xmlException != null)
-            {
-                line = xmlException.LineNumber;
-                column = xmlException.LinePosition;
-            }
-            else
-            {
-#if FEATURE_VARIOUS_EXCEPTIONS
-                var schemaException = e as XmlSchemaException;
-                if (schemaException != null)
-                {
-                    line = schemaException.LineNumber;
-                    column = schemaException.LinePosition;
-                }
-#endif
-            }
-
-            return new LineAndColumn
-            {
-                Line = line,
-                Column = column
-            };
-        }
-
 #if !BUILDINGAPPXTASKS
 
         /// <summary>
@@ -337,9 +303,6 @@ namespace Microsoft.Build.Shared
         {
             /// <summary> Gets or sets line number. </summary>
             internal int Line { get; set; }
-
-            /// <summary> Gets or sets column position. </summary>
-            internal int Column { get; set; }
         }
     }
 }

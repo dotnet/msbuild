@@ -116,22 +116,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
-        /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-        /// anything caused by user action.
-        /// </summary>
-        /// <param name="locker">The object that should already have been used as a lock.</param>
-        internal static void VerifyThrowInternalLockHeld(object locker)
-        {
-#if !CLR2COMPATIBILITY
-            if (!Monitor.IsEntered(locker))
-            {
-                ThrowInternalError("Lock should already have been taken");
-            }
-#endif
-        }
-
-        /// <summary>
         /// Helper to throw an InternalErrorException when the specified parameter is null or zero length.
         /// This should be used ONLY if this would indicate a bug in MSBuild rather than
         /// anything caused by user action.

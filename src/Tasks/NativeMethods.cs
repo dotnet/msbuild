@@ -518,18 +518,12 @@ namespace Microsoft.Build.Tasks
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
         internal static readonly IntPtr InvalidIntPtr = new IntPtr((int)-1);
 
-        internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
-        internal const uint CREATE_NO_WINDOW = 0x08000000;
-        internal const Int32 STARTF_USESTDHANDLES = 0x00000100;
-        internal const int ERROR_SUCCESS = 0;
 
         internal const int TYPE_E_REGISTRYACCESS = -2147319780;
         internal const int TYPE_E_CANTLOADLIBRARY = -2147312566;
 
-        internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
 
         internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
-        internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
         internal static Guid GUID_TYPELIB_NAMESPACE = new Guid("{0F21F359-AB84-41E8-9A78-36D110E6D2F9}");
         internal static Guid GUID_ExportedFromComPlus = new Guid("{90883f05-3d28-11d2-8f17-00a0c9a6186d}");
@@ -968,26 +962,6 @@ namespace Microsoft.Build.Tasks
         internal static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
 
         //------------------------------------------------------------------------------
-        // CreateProcess
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
-            string lpApplicationName,
-            string lpCommandLine,
-            IntPtr lpProcessAttributes,
-            IntPtr lpThreadAttributes,
-            [In, MarshalAs(UnmanagedType.Bool)]
-            bool bInheritHandles,
-            uint dwCreationFlags,
-            IntPtr lpEnvironment,
-            string lpCurrentDirectory,
-            [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
-
-        //------------------------------------------------------------------------------
         // ImageNtHeader
         //------------------------------------------------------------------------------
         [DllImport("dbghelp.dll", SetLastError = true)]
@@ -1242,67 +1216,6 @@ typedef enum _tagAssemblyComparisonResult
             ACR_EquivalentPartialFXUnified,
             ACR_NonEquivalentPartialVersion
         }
-
-        //------------------------------------------------------------------------------
-        // PFXImportCertStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern IntPtr PFXImportCertStore([In] IntPtr blob, [In] string password, [In] CryptFlags flags);
-
-        //------------------------------------------------------------------------------
-        // CertCloseStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In]   IntPtr CertStore, CertStoreClose Flags);
-
-        //------------------------------------------------------------------------------
-        // CertEnumCertificatesInStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In]   IntPtr CertStore, [In]   IntPtr PrevCertContext);
-
-        //------------------------------------------------------------------------------
-        // CryptAcquireCertificatePrivateKey
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptAcquireCertificatePrivateKey([In] IntPtr CertContext, [In] uint flags, [In] IntPtr reserved, [In, Out] ref IntPtr CryptProv, [In, Out] ref KeySpec KeySpec, [In, Out, MarshalAs(UnmanagedType.Bool)] ref bool CallerFreeProv);
-
-        //------------------------------------------------------------------------------
-        // CryptGetUserKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptGetUserKey([In] IntPtr CryptProv, [In] KeySpec KeySpec, [In, Out] ref IntPtr Key);
-
-        //------------------------------------------------------------------------------
-        // CryptExportKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptExportKey([In] IntPtr Key, [In] IntPtr ExpKey, [In] BlobType type, [In] uint Flags, [In] IntPtr Data, [In, Out] ref uint DataLen);
-
-        //------------------------------------------------------------------------------
-        // CryptDestroyKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptDestroyKey(IntPtr hKey);
-
-        //------------------------------------------------------------------------------
-        // CryptReleaseContext
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static bool CryptReleaseContext([In] IntPtr Prov, [In] uint Flags);
-
-        //------------------------------------------------------------------------------
-        // CertFreeCertificateContext
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertFreeCertificateContext(IntPtr CertContext);
 
 #if FEATURE_MSCOREE
         /// <summary>

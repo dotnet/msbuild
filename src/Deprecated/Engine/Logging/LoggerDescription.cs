@@ -122,17 +122,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Create an ILogger out of the data in this description. This method may throw a variety of
-        /// reflection exceptions if the data is invalid. It is the resposibility of the caller to handle these
-        /// exceptions if desired.
-        /// </summary>
-        /// <returns></returns>
-        internal ILogger CreateLogger()
-        {
-            return CreateLogger(false);
-        }
-
-        /// <summary>
         /// Loads a logger from its assembly, instantiates it, and handles errors.
         /// </summary>
         /// <returns>Instantiated logger.</returns>

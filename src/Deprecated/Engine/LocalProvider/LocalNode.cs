@@ -582,16 +582,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         #endregion
-        #region Properties
-        internal static string DumpFileName
-        {
-            get
-            {
-                return dumpFileName;
-            }
-        }
-        #endregion
-
         #region Member data
 
         private Node node;

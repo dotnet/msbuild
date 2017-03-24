@@ -322,27 +322,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Internal helper to get the next ProjectItemElement sibling.
-        /// If there is none, returns null.
-        /// </summary>
-        internal ProjectItemElement NextItem
-        {
-            get
-            {
-                ProjectItemElement result = null;
-                ProjectElement sibling = NextSibling;
-
-                while (sibling != null && result == null)
-                {
-                    result = NextSibling as ProjectItemElement;
-                    sibling = sibling.NextSibling;
-                }
-
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Convenience method to add a piece of metadata to this item.
         /// Adds after any existing metadata. Does not modify any existing metadata.
         /// </summary>

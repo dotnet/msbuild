@@ -123,13 +123,5 @@ namespace Microsoft.Build.Execution
         {
             get { return _conditionLocation; }
         }
-
-        /// <summary>
-        /// Deep clone
-        /// </summary>
-        internal ProjectPropertyGroupTaskPropertyInstance DeepClone()
-        {
-            return new ProjectPropertyGroupTaskPropertyInstance(this);
-        }
     }
 }

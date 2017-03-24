@@ -67,67 +67,6 @@ namespace Microsoft.Build.Tasks
 
 
         /// <summary>
-        /// Set a switch if its value exists by choosing from the input choices
-        /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
-        /// <param name="choice1"></param>
-        /// <param name="choice2"></param>
-        internal void AppendByChoiceSwitch
-            (
-            string switchName,
-            Hashtable bag,
-            string parameterName,
-            string choice1,
-            string choice2
-            )
-        {
-            object obj = bag[parameterName];
-            // If the switch isn't set, don't add it to the command line.
-            if (obj != null)
-            {
-                bool value = (bool)obj;
-                AppendSwitchUnquotedIfNotNull(switchName, (value ? choice1 : choice2));
-            }
-        }
-
-        /// <summary>
-        /// Set an integer switch only if its value exists.
-        /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
-        internal void AppendSwitchWithInteger
-            (
-            string switchName,
-            Hashtable bag,
-            string parameterName
-            )
-        {
-            object obj = bag[parameterName];
-            // If the switch isn't set, don't add it to the command line.
-            if (obj != null)
-            {
-                int value = (int)obj;
-                AppendSwitchIfNotNull(switchName, value.ToString(CultureInfo.InvariantCulture));
-            }
-        }
-
-        /// <summary>
-        /// Adds an aliased switch, used for ResGen:
-        ///      /reference:Foo=System.Xml.dll
-        /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="alias"></param>
-        /// <param name="parameter"></param>
-        internal void AppendSwitchAliased(string switchName, string alias, string parameter)
-        {
-            AppendSwitchUnquotedIfNotNull(switchName, alias + "=");
-            AppendTextWithQuoting(parameter);
-        }
-
-        /// <summary>
         /// Adds a nested switch, used by SGen.exe.  For example:
         ///     /compiler:"/keyfile:\"c:\some folder\myfile.snk\""
         /// </summary>
@@ -194,28 +133,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        /// <summary>
-        /// Returns true if the parameter is empty in spirits, 
-        /// even if it contains the separators and white space only
-        /// Split on the characters provided.
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="splitOn"></param>
-        internal static bool IsParameterEmpty(string parameter, params char[] splitOn)
-        {
-            if (parameter != null)
-            {
-                string[] splits = parameter.Split(splitOn, /* omitEmptyEntries */ StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < splits.Length; ++i)
-                {
-                    if (!String.IsNullOrEmpty(splits[i].Trim()))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
         /// <summary>
         /// Designed to handle the /link and /embed swithes:
         ///

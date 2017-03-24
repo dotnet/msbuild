@@ -2699,16 +2699,6 @@ namespace Microsoft.Build.UnitTests
             return new string[0];
         }
 
-        /*
-        * Method:   GetDirectories35
-        *
-        * Delegate method simulates a file system for testing location methods.
-        */
-        private static string[] GetDirectories35(string path, string pattern)
-        {
-            return new string[] { @"{runtime-base}\v3.5.12333", @"{runtime-base}\v3.5", @"{runtime-base}\v3.5.23455" };
-        }
-
         /// <summary>
         /// Delegate method simulates a file system for testing location methods. 
         /// </summary>

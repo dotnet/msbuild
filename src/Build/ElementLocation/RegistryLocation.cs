@@ -89,14 +89,6 @@ namespace Microsoft.Build.Construction
             translator.Translate(ref registryPath);
         }
 
-        /// <summary>
-        /// Factory for serialization.
-        /// </summary>
-        static internal RegistryLocation FactoryForDeserialization(INodePacketTranslator translator)
-        {
-            return new RegistryLocation(translator);
-        }
-
         #endregion
     }
 }

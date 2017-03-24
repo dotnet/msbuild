@@ -407,17 +407,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(caught); // "Did not receive InternalErrorException."
         }
 
-        private void VerifyListenCallSuccess(NodeEndpointInProc endpoint)
-        {
-            endpoint.Listen(_host);
-        }
-
-        private void VerifyConnectCallSuccess(NodeEndpointInProc endpoint)
-        {
-            endpoint.Connect(_host);
-            Assert.Equal(endpoint.LinkStatus, LinkStatus.Active);
-        }
-
         private void DisconnectionTestHelper(NodeEndpointInProc.EndpointMode mode)
         {
             NodeEndpointInProc.EndpointPair endpoints = SetupConnection(mode);

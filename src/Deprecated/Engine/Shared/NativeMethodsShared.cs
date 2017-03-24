@@ -17,9 +17,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         #region Constants
 
         internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
-        internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
         internal const uint S_OK = 0x0;
-        internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
         internal const uint FILE_TYPE_CHAR = 0x0002;
         internal const Int32 STD_OUTPUT_HANDLE = -11;
 
@@ -99,17 +97,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         #region PInvoke
 
-        /// <summary>
-        /// Gets the current OEM code page which is used by console apps 
-        /// (as opposed to the Windows/ANSI code page used by the normal people)
-        /// Basically for each ANSI code page (set in Regional settings) there's a corresponding OEM code page 
-        /// that needs to be used for instance when writing to batch files
-        /// </summary>
-        /// <owner>LukaszG</owner>
-        [DllImport(kernel32Dll)]
-        internal static extern int GetOEMCP();
-
-
         [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern uint SearchPath
         (
@@ -120,30 +107,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             StringBuilder buffer,
             int[] filePart
         );
-
-
-        [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool FreeLibrary([In] IntPtr module);
-
-        [DllImport("kernel32.dll", PreserveSig = true, BestFitMapping = false, ThrowOnUnmappableChar = true, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern IntPtr GetProcAddress(IntPtr module, string procName);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern IntPtr LoadLibrary(string fileName);
-
-        [DllImport(mscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetRequestedRuntimeInfo(String pExe,
-                                                String pwszVersion,
-                                                String pConfigurationFile,
-                                                uint startupFlags,
-                                                uint runtimeInfoFlags,
-                                                StringBuilder pDirectory,
-                                                int dwDirectory,
-                                                out uint dwDirectoryLength,
-                                                StringBuilder pVersion,
-                                                int cchBuffer,
-                                                out uint dwlength);
 
         /// <summary>
         /// Gets the fully qualified filename of the currently executing .exe

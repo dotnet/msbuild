@@ -140,13 +140,6 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         // Need to access this for testing purposes
-        internal FileLogger InternalFilelogger
-        {
-            get
-            {
-                return nodeFileLogger;
-            }
-        }
         public IEventRedirector BuildEventRedirector
         {
             get

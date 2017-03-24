@@ -85,26 +85,6 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// This method adds an entry to the cache in a thread-safe way
-        /// </summary>
-        internal void AddCacheEntry(CacheEntry cacheEntry)
-        {
-            cacheScopeReaderWriterLock.AcquireWriterLock(Timeout.Infinite);
-
-            try
-            {
-                if (cacheEntry != null)
-                {
-                    AddCacheEntryInternal(cacheEntry);
-                }
-            }
-            finally
-            {
-                cacheScopeReaderWriterLock.ReleaseWriterLock();
-            }
-        }
-
-        /// <summary>
         /// This method adds multiple entries to the cache in a thread-safe way.
         /// </summary>
         /// <param name="cacheEntries"></param>
@@ -191,27 +171,6 @@ namespace Microsoft.Build.BuildEngine
             }
 
             return results;
-        }
-
-        /// <summary>
-        /// This method removes an entry from the cache if it exists and does nothing if it doesn't exist
-        /// This method is thread safe.
-        /// </summary>
-        internal void ClearCacheEntry(string name)
-        {
-            if (cacheContents.ContainsKey(name))
-            {
-                cacheScopeReaderWriterLock.AcquireWriterLock(Timeout.Infinite);
-
-                try
-                {
-                    cacheContents.Remove(name);
-                }
-                finally
-                {
-                    cacheScopeReaderWriterLock.ReleaseWriterLock();
-                }
-            }
         }
 
         /// <summary>

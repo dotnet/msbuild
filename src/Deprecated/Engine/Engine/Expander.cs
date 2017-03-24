@@ -20,12 +20,6 @@ namespace Microsoft.Build.BuildEngine
 {
     internal class Expander
     {
-        /// <summary>
-        /// Debugging aid and emergency exit for customers.
-        /// Allows any functions to be used not just the safe list.
-        /// </summary>
-        private static bool enableAllPropertyFunctions = (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1");
-
         // Items and properties to refer to
         private ReadOnlyLookup lookup;
 

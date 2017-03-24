@@ -78,11 +78,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string TypeInteger = "CommandLineToolSwitchType.Integer";
 
         /// <summary>
-        /// ITaskItem switch type
-        /// </summary>
-        private const string TypeITaskItem = "CommandLineToolSwitchType.ITaskItem";
-
-        /// <summary>
         /// ITaskItemArray switch type.
         /// </summary>
         private const string TypeITaskItemArray = "CommandLineToolSwitchType.ITaskItemArray";

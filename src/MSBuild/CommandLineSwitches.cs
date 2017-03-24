@@ -323,6 +323,7 @@ namespace Microsoft.Build.CommandLine
             return (parameterlessSwitch != ParameterlessSwitch.Invalid);
         }
 
+#if FEATURE_MSBUILD_DEBUGGER
         /// <summary>
         /// Identifies/detects a switch that takes no parameters.
         /// </summary>
@@ -335,6 +336,7 @@ namespace Microsoft.Build.CommandLine
             string duplicateSwitchErrorMessage;
             return CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage);
         }
+#endif
 
         /// <summary>
         /// Identifies/detects a switch that takes parameters.

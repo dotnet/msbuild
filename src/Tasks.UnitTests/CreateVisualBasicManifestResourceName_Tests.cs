@@ -625,24 +625,6 @@ End Namespace
 
             Assert.Equal(@"RootNamespace.MyResource.resources", result);
         }
-
-        private void AssertSimpleCase(string code, string expected)
-        {
-            string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    "MyForm.resx",
-                    null,    // Link file name
-                    true,
-                    "RootNamespace",    // Root namespace
-                    "MyForm.vb",
-                    null,
-                    StreamHelpers.StringToStream(code),
-                    null
-                );
-
-            Assert.Equal(expected, result);
-        }
     }
 }
 

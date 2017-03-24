@@ -568,26 +568,6 @@ namespace Microsoft.Build.BuildEngine
 
         #endregion
 
-        #region Methods used for unittest only
-        /// <summary>
-        /// ONLY for unit testing
-        /// </summary>
-        internal TaskExecutionModuleMode GetExecutionModuleMode()
-        {
-           // The Execution module mode is used to determine if they system is running under single proc or multiproc for the purposes of creating a new thread
-           // to execute tasks on.
-           return moduleMode;
-        }
-
-        /// <summary>
-        ///  ONLY for unit testing
-        /// </summary>
-        internal TaskWorkerThread GetWorkerThread()
-        {
-            return workerThread;
-        }
-        #endregion
-
         #region Member data
         /// <summary>
         /// Callback interface to communicate with the engine

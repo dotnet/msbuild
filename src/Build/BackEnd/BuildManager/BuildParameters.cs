@@ -99,11 +99,6 @@ namespace Microsoft.Build.Execution
         private static bool? s_enableBuildPlan = null;
 
         /// <summary>
-        /// The maximum number of idle request builders we will retain.
-        /// </summary>
-        private static int? s_idleRequestBuilderLimit = null;
-
-        /// <summary>
         /// Location that msbuild.exe was last successfully found at.
         /// </summary>
         private static string s_msbuildExeKnownToExistAt;
@@ -679,30 +674,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets the engine shutdown timeout.
-        /// </summary>
-        static internal int EngineShutdownTimeout
-        {
-            get { return CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDENGINESHUTDOWNTIMEOUT", DefaultEngineShutdownTimeout); }
-        }
-
-        /// <summary>
-        /// Gets the maximum number of idle request builders to retain.
-        /// </summary>
-        static internal int IdleRequestBuilderLimit
-        {
-            get { return GetStaticIntVariableOrDefault("MSBUILDIDLEREQUESTBUILDERLIMIT", ref s_idleRequestBuilderLimit, DefaultIdleRequestBuilderLimit); }
-        }
-
-        /// <summary>
-        /// Gets the logging thread shutdown timeout.
-        /// </summary>
-        static internal int LoggingThreadShutdownTimeout
-        {
-            get { return CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDLOGGINGTHREADSHUTDOWNTIMEOUT", DefaultLoggingThreadShutdownTimeout); }
-        }
-
-        /// <summary>
         /// Gets or sets the request builder shutdown timeout.
         /// </summary>
         static internal int RequestBuilderShutdownTimeout
@@ -807,14 +778,6 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
                 _environmentProperties = value;
             }
-        }
-
-        /// <summary>
-        /// Gets the global properties.
-        /// </summary>
-        internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesInternal
-        {
-            get { return _globalProperties; }
         }
 
         /// <summary>

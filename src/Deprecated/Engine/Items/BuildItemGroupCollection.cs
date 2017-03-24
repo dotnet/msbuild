@@ -199,20 +199,6 @@ namespace Microsoft.Build.BuildEngine
             this.groupingCollection.InsertAtEnd(newItemGroup);
         }
 
-        /// <summary>
-        /// Removes a BuildItemGroup from our collection.  This method does nothing
-        /// to manipulate the project's XML content.
-        /// </summary>
-        /// <owner>DavidLe</owner>
-        /// <param name="itemGroup"></param>
-        internal void RemoveItemGroup
-        (
-            BuildItemGroup itemGroup
-        )
-        {
-            this.groupingCollection.RemoveItemGroup(itemGroup);
-        }
-
         #endregion
     }
 }

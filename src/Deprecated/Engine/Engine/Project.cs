@@ -1326,15 +1326,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Tells you whether this project file is dirty such that it would need
-        /// to get reevaluated.
-        /// </summary>
-        internal bool IsDirtyNeedToReevaluate
-        {
-            get { return this.dirtyNeedToReevaluate; }
-        }
-
-        /// <summary>
         /// Returns the timestamp of when the project was last touched in a way
         /// that would require it to need to be saved.
         /// </summary>

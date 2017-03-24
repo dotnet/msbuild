@@ -33,11 +33,6 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _resolvedSDKReferences = new TaskItem[0];
 
         /// <summary>
-        /// Set of the redist files for the resolved sdks
-        /// </summary>
-        private ITaskItem[] _sdkRedistFiles = new TaskItem[0];
-
-        /// <summary>
         /// Resolved reference assemblies from the SDK
         /// </summary>
         private ITaskItem[] _references = new TaskItem[0];

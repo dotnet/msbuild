@@ -37,18 +37,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>t-jeffv</owner>
         /// <param name="e">Error to format</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e)
-        {
-            return FormatEventMessage(e, false);
-        }
-
-        /// <summary>
-        /// Format the error event message and all the other event data into
-        /// a single string.
-        /// </summary>
-        /// <owner>t-jeffv</owner>
-        /// <param name="e">Error to format</param>
-        /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e, bool removeCarriageReturn)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
@@ -57,18 +45,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             return FormatEventMessage("error", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
                             e.Code, e.File, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
-        }
-
-        /// <summary>
-        /// Format the warning message and all the other event data into a
-        /// single string.
-        /// </summary>
-        /// <owner>t-jeffv, sumedhk</owner>
-        /// <param name="e">Warning to format</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e)
-        {
-            return FormatEventMessage(e, false);
         }
 
         /// <summary>

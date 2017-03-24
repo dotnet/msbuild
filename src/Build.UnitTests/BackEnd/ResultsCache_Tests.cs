@@ -223,19 +223,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static internal bool AreResultsIdenticalForTargets(BuildResult a, BuildResult b, string[] targets)
-        {
-            foreach (string target in targets)
-            {
-                if (!AreResultsIdenticalForTarget(a, b, target))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         static private bool AreResultsIdenticalForTarget(BuildResult a, BuildResult b, string target)
         {
             if (!a.HasResultsForTarget(target) || !b.HasResultsForTarget(target))

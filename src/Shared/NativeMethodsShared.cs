@@ -27,24 +27,21 @@ namespace Microsoft.Build.Shared
         #region Constants
 
         internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
-        internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
+
         internal const uint S_OK = 0x0;
-        internal const uint S_FALSE = 0x1;
+
         internal const uint ERROR_ACCESS_DENIED = 0x5;
-        internal const uint ERROR_FILE_NOT_FOUND = 0x80070002;
-        internal const uint FUSION_E_PRIVATE_ASM_DISALLOWED = 0x80131044; // Tried to find unsigned assembly in GAC
-        internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
+
+
+
         internal const uint FILE_TYPE_CHAR = 0x0002;
         internal const Int32 STD_OUTPUT_HANDLE = -11;
         internal const uint RPC_S_CALLPENDING = 0x80010115;
-        internal const uint E_ABORT = (uint)0x80004004;
 
         internal const int FILE_ATTRIBUTE_READONLY = 0x00000001;
         internal const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
-        internal const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
 
         private const string kernel32Dll = "kernel32.dll";
-        private const string mscoreeDLL = "mscoree.dll";
 
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -57,11 +54,6 @@ namespace Microsoft.Build.Shared
         internal const ushort PROCESSOR_ARCHITECTURE_ARM = 5;
         internal const ushort PROCESSOR_ARCHITECTURE_IA64 = 6;
         internal const ushort PROCESSOR_ARCHITECTURE_AMD64 = 9;
-
-        internal const uint INFINITE = 0xFFFFFFFF;
-        internal const uint WAIT_ABANDONED_0 = 0x00000080;
-        internal const uint WAIT_OBJECT_0 = 0x00000000;
-        internal const uint WAIT_TIMEOUT = 0x00000102;
 
 #if FEATURE_CHARSET_AUTO
         internal const CharSet AutoOrUnicode = CharSet.Auto;
@@ -1171,17 +1163,6 @@ namespace Microsoft.Build.Shared
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern uint SearchPath
-        (
-            string path,
-            string fileName,
-            string extension,
-            int numBufferChars,
-            [Out] StringBuilder buffer,
-            int[] filePart
-        );
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true)]
@@ -1196,19 +1177,6 @@ namespace Microsoft.Build.Shared
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
         internal static extern IntPtr LoadLibrary(string fileName);
 
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport(mscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetRequestedRuntimeInfo(String pExe,
-                                                String pwszVersion,
-                                                String pConfigurationFile,
-                                                uint startupFlags,
-                                                uint runtimeInfoFlags,
-                                                [Out] StringBuilder pDirectory,
-                                                int dwDirectory,
-                                                out uint dwDirectoryLength,
-                                                [Out] StringBuilder pVersion,
-                                                int cchBuffer,
-                                                out uint dwlength);
 
         /// <summary>
         /// Gets the fully qualified filename of the currently executing .exe
@@ -1284,14 +1252,6 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
         internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
-        internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
-        internal static extern bool ReadFile(SafeFileHandle hFile, byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
         /// <summary>
         /// CoWaitForMultipleHandles allows us to wait in an STA apartment and still service RPC requests from other threads.

@@ -64,12 +64,6 @@ namespace Microsoft.Build.UnitTests
             get { return _errors; }
         }
 
-        internal int CommandLine
-        {
-            set { _commandLine = value; }
-            get { return _commandLine; }
-        }
-
         public bool IsRunningMultipleNodes
         {
             get { return _isRunningMultipleNodes; }

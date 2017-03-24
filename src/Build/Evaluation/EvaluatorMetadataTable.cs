@@ -41,22 +41,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Enumerator over the entries in this table
-        /// </summary>
-        internal IEnumerable<EvaluatorMetadata> Entries
-        {
-            get
-            {
-                if (_metadata == null)
-                {
-                    return ReadOnlyEmptyList<EvaluatorMetadata>.Instance;
-                }
-
-                return _metadata.Values;
-            }
-        }
-
-        /// <summary>
         /// Retrieves any value we have in our metadata table for the metadata name specified,
         /// whatever the item type.
         /// If no value is available, returns empty string.

@@ -509,20 +509,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return request;
         }
 
-        private void WaitForEngineStatus(BuildRequestEngineStatus expectedStatus)
-        {
-            DateTime time = DateTime.Now;
-            while (DateTime.Now - time > new TimeSpan(0, 0, 5))
-            {
-                WaitForEvent(_engineStatusChangedEvent, "EngineStatusChanged");
-                if (expectedStatus == _engineStatusChanged_Status)
-                {
-                    return;
-                }
-            }
-            Assert.True(false, "Engine failed to change to status " + expectedStatus);
-        }
-
         private void VerifyEngineStatus(BuildRequestEngineStatus expectedStatus)
         {
             IBuildRequestEngine engine = (IBuildRequestEngine)_host.GetComponent(BuildComponentType.RequestEngine);

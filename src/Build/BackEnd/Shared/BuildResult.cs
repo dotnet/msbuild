@@ -478,17 +478,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Returns true if this result belongs to a root request (that is, no node is waiting for 
-        /// these results.
-        /// </summary>
-        internal bool ResultBelongsToRootRequest
-        {
-            [DebuggerStepThrough]
-            get
-            { return _parentGlobalRequestId == BuildRequest.InvalidGlobalRequestId; }
-        }
-
-        /// <summary>
         /// Indexer which sets or returns results for the specified target
         /// </summary>
         /// <param name="target">The target</param>

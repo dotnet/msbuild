@@ -318,6 +318,7 @@ namespace Microsoft.Build.Tasks
                 );
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Set of resolvers the reference table uses.
         /// </summary>
@@ -325,6 +326,7 @@ namespace Microsoft.Build.Tasks
         {
             get { return _compiledSearchPaths; }
         }
+#endif
 
         /// <summary>
         /// Get a table of all vertices.

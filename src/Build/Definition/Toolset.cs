@@ -601,14 +601,6 @@ namespace Microsoft.Build.Evaluation
         internal Dictionary<string, ProjectImportPathMatch> ImportPropertySearchPathsTable => _propertySearchPathsTable;
 
         /// <summary>
-        /// Map of MSBuildExtensionsPath properties to their list of fallback search paths
-        /// </summary>
-        internal Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>> MSBuildExtensionsPathSearchPathsTable
-        {
-            get; set;
-        }
-
-        /// <summary>
         /// Function for serialization.
         /// </summary>
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)

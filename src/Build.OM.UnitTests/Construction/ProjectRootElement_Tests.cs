@@ -1813,14 +1813,6 @@ true, true, true)]
             }
         }
 
-        private static string SaveToString(ProjectRootElement project)
-        {
-            var writer = new EncodingStringWriter();
-            project.Save(writer);
-
-            return writer.ToString();
-        }
-
         /// <summary>
         /// Test helper for validating that DeepClone and CopyFrom work as advertised.
         /// </summary>

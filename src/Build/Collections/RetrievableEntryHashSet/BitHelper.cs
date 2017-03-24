@@ -60,9 +60,6 @@ namespace Microsoft.Build.Collections
         // array of ints
         private int[] _array;
 
-        // whether to operate on stack alloc'd or heap alloc'd array 
-        private bool _useStackAlloc;
-
         /// <summary>
         /// Instantiates a BitHelper with a heap alloc'd array of ints
         /// </summary>
@@ -73,7 +70,6 @@ namespace Microsoft.Build.Collections
         {
             _arrayPtr = bitArrayPtr;
             _length = length;
-            _useStackAlloc = true;
         }
 
         /// <summary>
@@ -86,68 +82,6 @@ namespace Microsoft.Build.Collections
         {
             _array = bitArray;
             _length = length;
-        }
-
-        /// <summary>
-        /// Mark bit at specified position
-        /// </summary>
-        /// <param name="bitPosition"></param>
-        internal unsafe void MarkBit(int bitPosition)
-        {
-            if (_useStackAlloc)
-            {
-                int bitArrayIndex = bitPosition / IntSize;
-                if (bitArrayIndex < _length && bitArrayIndex >= 0)
-                {
-                    _arrayPtr[bitArrayIndex] |= (MarkedBitFlag << (bitPosition % IntSize));
-                }
-            }
-            else
-            {
-                int bitArrayIndex = bitPosition / IntSize;
-                if (bitArrayIndex < _length && bitArrayIndex >= 0)
-                {
-                    _array[bitArrayIndex] |= (MarkedBitFlag << (bitPosition % IntSize));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Is bit at specified position marked?
-        /// </summary>
-        /// <param name="bitPosition"></param>
-        /// <returns></returns>
-        internal unsafe bool IsMarked(int bitPosition)
-        {
-            if (_useStackAlloc)
-            {
-                int bitArrayIndex = bitPosition / IntSize;
-                if (bitArrayIndex < _length && bitArrayIndex >= 0)
-                {
-                    return ((_arrayPtr[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0);
-                }
-                return false;
-            }
-            else
-            {
-                int bitArrayIndex = bitPosition / IntSize;
-                if (bitArrayIndex < _length && bitArrayIndex >= 0)
-                {
-                    return ((_array[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0);
-                }
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// How many ints must be allocated to represent n bits. Returns (n+31)/32, but 
-        /// avoids overflow
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        internal static int ToIntArrayLength(int n)
-        {
-            return n > 0 ? ((n - 1) / IntSize + 1) : 0;
         }
     }
 }

@@ -361,6 +361,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeProviderOutOfProcTaskHost();
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Clears out our cached values for the various task host names and paths. 
         /// FOR UNIT TESTING ONLY
@@ -376,6 +377,7 @@ namespace Microsoft.Build.BackEnd
             s_baseTaskHostPath = null;
             s_baseTaskHostPath64 = null;
         }
+#endif
 
         /// <summary>
         /// Given a TaskHostContext, returns the name of the executable we should be searching for. 

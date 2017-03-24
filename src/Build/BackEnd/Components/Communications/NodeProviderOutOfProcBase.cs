@@ -565,12 +565,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            /// <summary>
-            /// Whether to trace communications.
-            /// Stored here as a field to avoid a function call when writing packets
-            /// </summary>
-            private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
-
             // The pipe(s) used to communicate with the node.
             private Stream _clientToServerStream;
             private Stream _serverToClientStream;
