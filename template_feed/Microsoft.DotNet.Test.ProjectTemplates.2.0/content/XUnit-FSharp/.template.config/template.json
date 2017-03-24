@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Test", "xUnit"],
   "name": "xUnit Test Project",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Test.xUnit",
   "precedence": "200",
   "identity": "Microsoft.Test.xUnit.FSharp.2.0",

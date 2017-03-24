@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Config"],
   "name": "Nuget Config",
+  "generatorVersions": "[1.0.0.0-*)",
   "tags": {
     "type": "item"
   },

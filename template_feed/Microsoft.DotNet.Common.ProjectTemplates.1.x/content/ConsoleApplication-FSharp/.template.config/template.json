@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Common", "Console"],
   "name": "Console Application",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Console",
   "precedence": "100",
   "identity": "Microsoft.Common.Console.FSharp",

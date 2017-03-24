@@ -2,6 +2,7 @@
   "author": "Microsoft",
   "classifications": ["Web", "Empty"],
   "name": "ASP.NET Core Empty",
+  "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Empty",
   "precedence": "100",
   "identity": "Microsoft.Web.Empty.CSharp",
