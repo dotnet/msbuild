@@ -242,7 +242,7 @@ namespace {this.Name}
 ";
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        public static string {dependency.Name} {{ get {{ return {dependency.Name}; }} }}" + Environment.NewLine;
+                        source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
                     }
 
                     source +=
