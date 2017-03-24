@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.0
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -27,12 +27,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\BranchInfo.props = build\BranchInfo.props
 		build\Branding.props = build\Branding.props
 		build\BuildDefaults.props = build\BuildDefaults.props
+		build\BuildInfo.targets = build\BuildInfo.targets
 		build\BundledRuntimes.props = build\BundledRuntimes.props
 		build\BundledSdks.proj = build\BundledSdks.proj
 		build\BundledSdks.props = build\BundledSdks.props
 		build\BundledTemplates.proj = build\BundledTemplates.proj
 		build\BundledTemplates.props = build\BundledTemplates.props
 		build\BundledTools.props = build\BundledTools.props
+		build\BundledVersions.targets = build\BundledVersions.targets
 		build\Compile.targets = build\Compile.targets
 		build\CrossGen.props = build\CrossGen.props
 		build\DependencyVersions.props = build\DependencyVersions.props
@@ -43,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\InitRepo.targets = build\InitRepo.targets
 		build\InputDirectories.props = build\InputDirectories.props
 		build\InstallerInfo.props = build\InstallerInfo.props
+		build\Microsoft.DotNet.Cli.tasks = build\Microsoft.DotNet.Cli.tasks
 		build\MSBuildExtensions.props = build\MSBuildExtensions.props
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
@@ -50,9 +53,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\ProjectsToPublish.props = build\ProjectsToPublish.props
 		build\Publish.targets = build\Publish.targets
 		build\Run.targets = build\Run.targets
+		build\sdks\sdks.csproj = build\sdks\sdks.csproj
 		build\Signing.proj = build\Signing.proj
 		build\Stage0.props = build\Stage0.props
-		build\tasks = build\tasks
 		build\Test.targets = build\Test.targets
 		build\Version.props = build\Version.props
 		build\VersionBadge.props = build\VersionBadge.props
@@ -208,6 +211,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Cli.Sln.Internal.Tests", "test\Microsoft.DotNet.Cli.Sln.Internal.Tests\Microsoft.DotNet.Cli.Sln.Internal.Tests.csproj", "{56F1E090-B80F-4BDF-8991-4B0F9B5B8C9A}"
 EndProject
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-cache.Tests", "test\dotnet-cache.Tests\dotnet-cache.Tests.csproj", "{CACA427D-5A71-45E6-88DC-3E2DB6C4D52D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdk", "sdk", "{3275D006-54C8-4C64-A537-B9941C5D2F0C}"
+	ProjectSection(SolutionItems) = preProject
+		build\sdks\sdks.csproj = build\sdks\sdks.csproj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{DE4D1AEB-871B-4E7C-945A-453F9A490C06}"
+	ProjectSection(SolutionItems) = preProject
+		build\templates\templates.csproj = build\templates\templates.csproj
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1503,7 +1516,12 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1AB5B24B-B317-4142-A5D1-A6E84F15BA34} = {ADA7052B-884B-4776-8B8D-D04191D0AA70}
+		{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE} = {89905EC4-BC0F-443B-8ADF-691321F10108}
+		{8E3354BD-827F-41B7-9EE6-6BE1F1EDD8E9} = {89905EC4-BC0F-443B-8ADF-691321F10108}
+		{FF498306-2DE2-47F6-8C35-3CF0589CF2B8} = {89905EC4-BC0F-443B-8ADF-691321F10108}
+		{27B12960-ABB0-4903-9C60-5E9157E659C8} = {89905EC4-BC0F-443B-8ADF-691321F10108}
 		{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1} = {88278B81-7649-45DC-8A6A-D3A645C5AFC3}
+		{2BDC1BC2-867E-47C0-BAD0-ADE897F07F78} = {89905EC4-BC0F-443B-8ADF-691321F10108}
 		{48A62BA4-D798-46A2-AB49-8A8471CF8165} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
 		{7C3D62C6-1D71-4C45-872F-7583F2AB304A} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
 		{79B4932C-3D57-494B-95AF-E5624F9D2F01} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
@@ -1558,5 +1576,7 @@ Global
 		{C98C7C2E-2C29-4A40-958C-60561ED77791} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{56F1E090-B80F-4BDF-8991-4B0F9B5B8C9A} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{CACA427D-5A71-45E6-88DC-3E2DB6C4D52D} = {FF498306-2DE2-47F6-8C35-3CF0589CF2B8}
+		{3275D006-54C8-4C64-A537-B9941C5D2F0C} = {89905EC4-BC0F-443B-8ADF-691321F10108}
+		{DE4D1AEB-871B-4E7C-945A-453F9A490C06} = {89905EC4-BC0F-443B-8ADF-691321F10108}
 	EndGlobalSection
 EndGlobal
