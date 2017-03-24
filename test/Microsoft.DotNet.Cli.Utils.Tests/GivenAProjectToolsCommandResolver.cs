@@ -375,6 +375,15 @@ namespace Microsoft.DotNet.Tests
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
 
             result.Should().NotBeNull();
+
+            var commandPath = result.Args.Trim('"');
+            commandPath.Should().Contain(Path.Combine(
+                fallbackFolder,
+                "dotnet-fallbackfoldertool",
+                "1.0.0",
+                "lib",
+                "netcoreapp2.0",
+                "dotnet-fallbackfoldertool.dll"));
         }
 
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
