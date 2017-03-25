@@ -77,12 +77,6 @@
       "defaultValue": "false",
       "description": "Whether or not to include Application Insights in the project"
     },
-    "RuntimeFrameworkVersion": {
-      "type": "parameter",
-      "replaces": "2.0.0-beta-001507",
-      "datatype": "string",
-      "defaultValue": "2.0.0-beta-001507"
-    },
     "Framework": {
       "type": "parameter",
       "datatype": "choice",
