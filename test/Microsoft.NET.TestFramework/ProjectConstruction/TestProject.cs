@@ -239,8 +239,15 @@ namespace {this.Name}
     public class {this.Name}Class
     {{
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
-    }}
-}}";
+";
+                    foreach (var dependency in this.ReferencedProjects)
+                    {
+                        source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
+                    }
+
+                    source +=
+    @"    }
+}";
                 }
                 string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
 
