@@ -226,6 +226,7 @@
         public string ExePath
         {
             get {
+#if NET46
                 if (string.IsNullOrEmpty(m_exePath))
                 {
                     // if path is not set, we optimize to latest version of msdeploy
@@ -259,6 +260,7 @@
                         }
                     }
                 }
+#endif
                 return m_exePath; 
             }
             set { m_exePath = value; }
@@ -783,8 +785,13 @@
                                 MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ExistingDeclareParameterMetadata), valueQuote);
                                 if (arguments.Count > 0 && !string.IsNullOrEmpty(data))
                                 {
+#if NET46
                                     arguments.Add(string.Concat(MsDeploy.ExistingSyncParameterMetadata.Value.ToString().ToLower(System.Globalization.CultureInfo.InvariantCulture),
                                                             "=", MsDeploy.Utility.PutValueInQuote(data, valueQuote)));
+#else
+                                    arguments.Add(string.Concat(MsDeploy.ExistingSyncParameterMetadata.Value.ToString().ToLower(),
+                                                            "=", MsDeploy.Utility.PutValueInQuote(data, valueQuote)));
+#endif
                                 }
                                 lookupDictionary.Add(identity, name);
 

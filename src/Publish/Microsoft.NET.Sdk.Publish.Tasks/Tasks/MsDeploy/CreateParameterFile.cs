@@ -73,21 +73,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                                                            ExistingParameterValiationMetadata.Kind.ToString().ToLowerInvariant(),
                                                                           "validationString",};
 
-
-
-
-        /// <summary>
-        /// Utility function to save the documente in UTF8 and Indented
-        /// </summary>
-        /// <param name="document"></param>
-        private static void SaveDocument(Xml.XmlDocument document, string outputFileName, System.Text.Encoding encode)
-        {
-            Xml.XmlTextWriter textWriter = new Xml.XmlTextWriter(outputFileName, encode);
-            textWriter.Formatting = System.Xml.Formatting.Indented;
-            document.Save(textWriter);
-            textWriter.Close();
-        }
-
         /// <summary>
         /// utility class to write the declare parameter.xml file
         /// </summary>
@@ -229,7 +214,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             // Save the UTF8 and Indented 
-            SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
+            Utility.SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
         }
 
         /// <summary>
@@ -268,7 +253,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             // Save the UTF8 and Indented 
-            SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
+            Utility.SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
         }
 
         /// <summary>
@@ -315,11 +300,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         }
                     }
                 }
+#if NET46
                 catch (System.Xml.XmlException ex)
                 {
                     System.Uri sourceUri = new System.Uri(ex.SourceUri);
                     succeeded = false;
                 }
+#endif
                 catch (System.Exception)
                 {
                     succeeded = false;

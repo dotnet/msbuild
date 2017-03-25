@@ -223,9 +223,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
             // maybe we should show the "secure data to display"
             // for now just supress it.
+#if NET46
             if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), System.StringComparison.InvariantCultureIgnoreCase)
                 || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx , System.StringComparison.InvariantCultureIgnoreCase))
                 m_fNoDisplayRoot = true;
+#else
+            if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString())
+                || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx, System.StringComparison.OrdinalIgnoreCase))
+                m_fNoDisplayRoot = true;
+#endif
         }
 
         public VSMSDeployObject(Build.Framework.ITaskItem taskItem)
@@ -548,9 +554,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public void SyncTo(VSMSDeployObject destObject, /*VSMSDeploySyncOption*/ dynamic syncOptions, IVSMSDeployHost _host)
         {
+#if NET46
             //$BUGBUG lmchen, there is only set to source provider?
             // set up the provider setting
-            /*Deployment.DeploymentProviderOptions*/ dynamic srcProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{this.Provider.ToString()});
+            /*Deployment.DeploymentProviderOptions*/
+            dynamic srcProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{this.Provider.ToString()});
             srcProviderConfig.Path = this.Root;
             MsDeploy.Utility.AddProviderOptions(srcProviderConfig, this.ProviderOptions, _host);
 
@@ -571,6 +579,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                 srcObj.SyncTo(destProviderConfig, destObject.BaseOptions, syncOptions);
             }
+#endif
         }
     }
 }
