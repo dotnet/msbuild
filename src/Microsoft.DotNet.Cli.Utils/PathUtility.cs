@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.Tools.Common
             return result;
         }
 
-        public static bool HasExtension(string filePath, string extension)
+        public static bool HasExtension(this string filePath, string extension)
         {
             var comparison = StringComparison.Ordinal;
 
@@ -313,9 +313,12 @@ namespace Microsoft.DotNet.Tools.Common
             return Path.GetFullPath(path);
         }
 
-        public static void EnsureAllPathsExist(List<string> paths, string pathDoesNotExistLocalizedFormatString)
+        public static void EnsureAllPathsExist(
+            IReadOnlyCollection<string> paths,
+            string pathDoesNotExistLocalizedFormatString)
         {
             var notExisting = new List<string>();
+
             foreach (var p in paths)
             {
                 if (!File.Exists(p))
@@ -329,8 +332,11 @@ namespace Microsoft.DotNet.Tools.Common
                 throw new GracefulException(
                     string.Join(
                         Environment.NewLine,
-                        notExisting.Select((p) => string.Format(pathDoesNotExistLocalizedFormatString, p))));
+                        notExisting.Select(p => string.Format(pathDoesNotExistLocalizedFormatString, p))));
             }
         }
+
+        public static bool IsDirectory(this string path) => 
+            File.GetAttributes(path).HasFlag(FileAttributes.Directory);
     }
 }

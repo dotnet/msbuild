@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Execution;
+using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 
@@ -15,20 +15,21 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public string Configuration { get; set; }
         public string Framework { get; set; }
+        public bool NoBuild { get; set; }
         public string Project { get; set; }
-        public IReadOnlyList<string> Args { get; set; }
+        public IReadOnlyCollection<string> Args { get; set; }
 
         private List<string> _args;
-
-        public RunCommand()
-        {
-        }
+        private bool ShouldBuild => !NoBuild;
 
         public int Start()
         {
             Initialize();
 
-            EnsureProjectIsBuilt();
+            if (ShouldBuild)
+            {
+                EnsureProjectIsBuilt();
+            }
 
             ICommand runCommand = GetRunCommand();
 
@@ -40,9 +41,9 @@ namespace Microsoft.DotNet.Tools.Run
         private void EnsureProjectIsBuilt()
         {
             List<string> buildArgs = new List<string>();
- 
-            buildArgs.Add(Project); 
- 
+
+            buildArgs.Add(Project);
+
             buildArgs.Add("/nologo");
             buildArgs.Add("/verbosity:quiet");
 
@@ -82,23 +83,16 @@ namespace Microsoft.DotNet.Tools.Run
                 globalProperties.Add("TargetFramework", Framework);
             }
 
-            ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
+            Project project = new Project(Project, globalProperties, null);
 
-            string runProgram = projectInstance.GetPropertyValue("RunCommand");
+            string runProgram = project.GetPropertyValue("RunCommand");
             if (string.IsNullOrEmpty(runProgram))
             {
-                string outputType = projectInstance.GetPropertyValue("OutputType");
-
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.RunCommandExceptionUnableToRun,
-                        "dotnet run",
-                        "OutputType",
-                        outputType));
+                ThrowUnableToRunError(project);
             }
 
-            string runArguments = projectInstance.GetPropertyValue("RunArguments");
-            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
+            string runArguments = project.GetPropertyValue("RunArguments");
+            string runWorkingDirectory = project.GetPropertyValue("RunWorkingDirectory");
 
             string fullArguments = runArguments;
             if (_args.Any())
@@ -112,27 +106,40 @@ namespace Microsoft.DotNet.Tools.Run
                 .WorkingDirectory(runWorkingDirectory);
         }
 
+        private void ThrowUnableToRunError(Project project)
+        {
+            string targetFrameworks = project.GetPropertyValue("TargetFrameworks");
+            if (!string.IsNullOrEmpty(targetFrameworks))
+            {
+                string targetFramework = project.GetPropertyValue("TargetFramework");
+                if (string.IsNullOrEmpty(targetFramework))
+                {
+                    var framework = "--framework";
+
+                    throw new GracefulException(LocalizableStrings.RunCommandExceptionUnableToRunSpecifyFramework, framework);
+                }
+            }
+
+            string outputType = project.GetPropertyValue("OutputType");
+
+            throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.RunCommandExceptionUnableToRun,
+                        "dotnet run",
+                        "OutputType",
+                        outputType));
+        }
+
         private void Initialize()
         {
             if (string.IsNullOrWhiteSpace(Project))
             {
-                string directory = Directory.GetCurrentDirectory();
-                string[] projectFiles = Directory.GetFiles(directory, "*.*proj");
-
-                if (projectFiles.Length == 0)
-                {
-                    var project = "--project";
-
-                    throw new InvalidOperationException(
-                        $"Couldn't find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}");
-                }
-                else if (projectFiles.Length > 1)
-                {
-                    throw new InvalidOperationException(
-                        $"Specify which project file to use because {directory} contains more than one project file.");
-                }
-
-                Project = projectFiles[0];
+                Project = Directory.GetCurrentDirectory();
+            } 
+            
+            if (Directory.Exists(Project)) 
+            {
+                Project = FindSingleProjectInDirectory(Project);
             }
 
             if (Args == null)
@@ -143,6 +150,24 @@ namespace Microsoft.DotNet.Tools.Run
             {
                 _args = new List<string>(Args);
             }
+        }
+
+        private static string FindSingleProjectInDirectory(string directory)
+        {
+            string[] projectFiles = Directory.GetFiles(directory, "*.*proj");
+
+            if (projectFiles.Length == 0)
+            {
+                var project = "--project";
+
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionNoProjects, directory, project);
+            }
+            else if (projectFiles.Length > 1)
+            {
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionMultipleProjects, directory);
+            }
+
+            return projectFiles[0];
         }
     }
 }

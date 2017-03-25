@@ -1,40 +1,42 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
 {
-    internal class ListProjectToProjectReferencesCommand : DotNetSubCommandBase
+    internal class ListProjectToProjectReferencesCommand : CommandBase
     {
-        public static DotNetSubCommandBase Create()
+        private readonly string _fileOrDirectory;
+
+        public ListProjectToProjectReferencesCommand(
+            AppliedOption appliedCommand,
+            ParseResult parseResult) : base(parseResult)
         {
-            var command = new ListProjectToProjectReferencesCommand()
+            if (appliedCommand == null)
             {
-                Name = "reference",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-            };
+                throw new ArgumentNullException(nameof(appliedCommand));
+            }
 
-            command.HelpOption("-h|--help");
-
-            return command;
+            _fileOrDirectory = appliedCommand.Arguments.Single();
         }
 
-        public override int Run(string fileOrDirectory)
+        public override int Execute()
         {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), fileOrDirectory);
+            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
 
             var p2ps = msbuildProj.GetProjectToProjectReferences();
             if (!p2ps.Any())
             {
                 Reporter.Output.WriteLine(string.Format(
-                    CommonLocalizableStrings.NoReferencesFound,
-                    CommonLocalizableStrings.P2P,
-                    fileOrDirectory));
+                                              CommonLocalizableStrings.NoReferencesFound,
+                                              CommonLocalizableStrings.P2P,
+                                              _fileOrDirectory));
                 return 0;
             }
 

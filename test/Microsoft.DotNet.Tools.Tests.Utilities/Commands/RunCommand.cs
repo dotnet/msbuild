@@ -7,13 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class RunCommand : TestCommand
+    public sealed class RunCommand : DotnetCommand
     {
-        public RunCommand()
-            : base("dotnet")
-        {
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"run {args}";

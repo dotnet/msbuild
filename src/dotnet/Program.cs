@@ -4,11 +4,13 @@
 using System;
 using System.Linq;
 using System.Text;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Help;
 using NuGet.Frameworks;
+using Command = Microsoft.DotNet.Cli.Utils.Command;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -34,11 +36,28 @@ namespace Microsoft.DotNet.Cli
                     return ProcessArgs(args);
                 }
             }
+            catch (HelpException e)
+            {
+                Reporter.Output.WriteLine(e.Message);
+                return 0;
+            }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose() ? 
-                        e.ToString().Red().Bold() : 
-                        e.Message.Red().Bold());
+                Reporter.Error.WriteLine(CommandContext.IsVerbose() 
+                    ? e.ToString().Red().Bold() 
+                    : e.Message.Red().Bold());
+
+                var commandParsingException = e as CommandParsingException;
+                if (commandParsingException != null)
+                {
+                    Reporter.Output.WriteLine(commandParsingException.HelpText);
+                }
+
+                return 1;
+            }
+            catch (Exception e) when (!e.ShouldBeDisplayedAsError())
+            {
+                Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
                 return 1;
             }

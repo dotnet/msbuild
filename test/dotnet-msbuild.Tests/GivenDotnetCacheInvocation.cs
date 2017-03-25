@@ -27,10 +27,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { "-f", "<framework>" }, @"/p:TargetFramework=<framework>")]
-        [InlineData(new string[] { "--framework", "<framework>" }, @"/p:TargetFramework=<framework>")]
-        [InlineData(new string[] { "-r", "<runtime>" }, @"/p:RuntimeIdentifier=<runtime>")]
-        [InlineData(new string[] { "--runtime", "<runtime>" }, @"/p:RuntimeIdentifier=<runtime>")]
+        [InlineData(new string[] { "-f", "<tfm>" }, @"/p:TargetFramework=<tfm>")]
+        [InlineData(new string[] { "--framework", "<tfm>" }, @"/p:TargetFramework=<tfm>")]
+        [InlineData(new string[] { "-r", "<rid>" }, @"/p:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--runtime", "<rid>" }, @"/p:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--entries", "one.xml", "--entries", "two.xml", "--entries", "three.xml" }, @"/p:AdditionalProjects=one.xml%3Btwo.xml%3Bthree.xml")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             args = ArgsPrefix.Concat(args).ToArray();

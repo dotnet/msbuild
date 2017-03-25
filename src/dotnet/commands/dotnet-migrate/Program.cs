@@ -2,13 +2,30 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
     public partial class MigrateCommand
     {
+        public static MigrateCommand FromArgs(string[] args, string msbuildPath = null)
+        {
+            var msbuildArgs = new List<string>();
+
+            var parser = Parser.Instance;
+
+            var result = parser.ParseFrom("dotnet migrate", args);
+
+            result.ShowHelpOrErrorIfAppropriate();
+
+            return result["dotnet"]["migrate"].Value<MigrateCommand>();
+        }
+
+
         public static int Run(string[] args)
         {
 
@@ -19,64 +36,19 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication app = new CommandLineApplication();
-            app.Name = "dotnet migrate";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleResponseFiles = true;
-            app.HelpOption("-h|--help");
-
-            CommandArgument projectArgument = app.Argument(
-                $"<{LocalizableStrings.CmdProjectArgument}>",
-                LocalizableStrings.CmdProjectArgumentDescription);
-
-            CommandOption template = app.Option(
-                "-t|--template-file",
-                LocalizableStrings.CmdTemplateDescription,
-                CommandOptionType.SingleValue);
-            CommandOption sdkVersion = app.Option(
-                "-v|--sdk-package-version", 
-                LocalizableStrings.CmdVersionDescription, 
-                CommandOptionType.SingleValue);
-            CommandOption xprojFile = app.Option(
-                "-x|--xproj-file", 
-                LocalizableStrings.CmdXprojFileDescription, 
-                CommandOptionType.SingleValue);
-            CommandOption skipProjectReferences = app.Option(
-                "-s|--skip-project-references", 
-                LocalizableStrings.CmdSkipProjectReferencesDescription, 
-                CommandOptionType.BoolValue);
-
-            CommandOption reportFile = app.Option(
-                "-r|--report-file", 
-                LocalizableStrings.CmdReportFileDescription, 
-                CommandOptionType.SingleValue);
-            CommandOption structuredReportOutput = app.Option(
-                "--format-report-file-json", 
-                LocalizableStrings.CmdReportOutputDescription, 
-                CommandOptionType.BoolValue);
-            CommandOption skipBackup = app.Option("--skip-backup", 
-                LocalizableStrings.CmdSkipBackupDescription, 
-                CommandOptionType.BoolValue);
-
-            app.OnExecute(() =>
+            MigrateCommand cmd;
+            try
             {
-                MigrateCommand migrateCommand = new MigrateCommand(
-                    template.Value(),
-                    projectArgument.Value,
-                    sdkVersion.Value(),
-                    xprojFile.Value(),
-                    reportFile.Value(),
-                    skipProjectReferences.BoolValue.HasValue ? skipProjectReferences.BoolValue.Value : false,
-                    structuredReportOutput.BoolValue.HasValue ? structuredReportOutput.BoolValue.Value : false,
-                    skipBackup.BoolValue.HasValue ? skipBackup.BoolValue.Value : false);
-
-                return migrateCommand.Execute();
-            });
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
 
             try
             {
-                return app.Execute(args);
+                return cmd.Execute();
             }
             catch (GracefulException e)
             {

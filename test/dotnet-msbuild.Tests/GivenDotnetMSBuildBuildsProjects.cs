@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .HaveStdOutContaining("You want me to say 'GreatScott'");
         }
 
-        [Theory]
+        [Theory(Skip="New parser feature needed")]
         [InlineData("build")]
         [InlineData("clean")]
         [InlineData("pack")]

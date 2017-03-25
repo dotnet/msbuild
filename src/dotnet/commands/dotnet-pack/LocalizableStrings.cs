@@ -19,14 +19,6 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public const string CmdIncludeSourceDescription  = "Include PDBs and source files. Source files go into the src folder in the resulting nuget package";
 
-        public const string CmdConfig = "CONFIGURATION";
-
-        public const string CmdConfigDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
-
-        public const string CmdVersionSuffix = "VERSION_SUFFIX";
-
-        public const string CmdVersionSuffixDescription = "Defines the value for the $(VersionSuffix) property in the project.";
-
         public const string CmdServiceableDescription = "Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.";
 
         public const string CmdArgumentProject = "PROJECT";

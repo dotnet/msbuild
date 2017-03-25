@@ -1,0 +1,78 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using Microsoft.DotNet.Cli.CommandLine;
+using Newtonsoft.Json.Linq;
+using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
+
+namespace Microsoft.DotNet.Cli
+{
+    internal static class AddPackageParser
+    {
+        public static Command AddPackage()
+        {
+            return Create.Command(
+                "package",
+                LocalizableStrings.AppFullName,
+                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
+                      .WithSuggestionsFrom(QueryNuGet)
+                      .With(name: LocalizableStrings.CmdPackage,
+                            description: LocalizableStrings.CmdPackageDescription),
+                CommonOptions.HelpOption(),
+                Create.Option("-v|--version",
+                              LocalizableStrings.CmdVersionDescription,
+                              Accept.ExactlyOneArgument()
+                                    .With(name: LocalizableStrings.CmdVersion)
+                                    .ForwardAsSingle(o => $"--version {o.Arguments.Single()}")),
+                Create.Option("-f|--framework",
+                              LocalizableStrings.CmdFrameworkDescription,
+                              Accept.ExactlyOneArgument()
+                                    .With(name: LocalizableStrings.CmdFramework)
+                                    .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
+                Create.Option("-n|--no-restore ",
+                              LocalizableStrings.CmdNoRestoreDescription),
+                Create.Option("-s|--source",
+                              LocalizableStrings.CmdSourceDescription,
+                              Accept.ExactlyOneArgument()
+                                    .With(name: LocalizableStrings.CmdSource)
+                                    .ForwardAsSingle(o => $"--source {o.Arguments.Single()}")),
+                Create.Option("--package-directory",
+                              LocalizableStrings.CmdPackageDirectoryDescription,
+                              Accept.ExactlyOneArgument()
+                                    .With(name: LocalizableStrings.CmdPackageDirectory)
+                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")));
+        }
+
+        public static IEnumerable<string> QueryNuGet(string match)
+        {
+            var httpClient = new HttpClient();
+
+            string result;
+
+            try
+            {
+                var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/query?q={match}&skip=0&take=100&prerelease=true", cancellation.Token)
+                                         .Result;
+
+                result = response.Content.ReadAsStringAsync().Result;
+            }
+            catch (Exception)
+            {
+                yield break;
+            }
+
+            var json = JObject.Parse(result);
+
+            foreach (var id in json["data"])
+            {
+                yield return id["id"].Value<string>();
+            }
+        }
+    }
+}

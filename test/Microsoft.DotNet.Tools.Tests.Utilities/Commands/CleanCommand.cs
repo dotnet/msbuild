@@ -7,13 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class CleanCommand : TestCommand
+    public sealed class CleanCommand : DotnetCommand
     {
-        public CleanCommand()
-            : base("dotnet")
-        {
-        }
-
         public override CommandResult Execute(string args = "")
         {
             args = $"clean {args}";

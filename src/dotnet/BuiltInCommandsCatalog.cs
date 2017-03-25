@@ -133,8 +133,15 @@ namespace Microsoft.DotNet.Cli
                 Command = VSTestCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-vstest
                 DocLink = "https://aka.ms/dotnet-vstest"
+            },
+            ["complete"] = new BuiltInCommandMetadata
+            {
+                Command = CompleteCommand.Run
+            },
+            ["parse"] = new BuiltInCommandMetadata
+            {
+                Command = ParseCommand.Run
             }
         };
-
     }
 }

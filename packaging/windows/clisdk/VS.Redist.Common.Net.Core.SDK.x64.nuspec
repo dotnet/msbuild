@@ -13,6 +13,6 @@
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     </metadata>
     <files>
-        <file src="[DOTNET_BUNDLE]" target="[DOTNET_BUNDLE]" />
+        <file src="[DOTNET_BUNDLE]" />
     </files>
 </package>

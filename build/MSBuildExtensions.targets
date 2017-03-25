@@ -1,0 +1,68 @@
+<Project>
+  <Target Name="GenerateMSBuildExtensions"
+          DependsOnTargets="GenerateBundledVersionsProps">
+
+    <ItemGroup>
+      <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GenerateBundledVersionsProps">
+    <PropertyGroup>
+      <BundledVersionsPropsFolder>15.0/Imports/Microsoft.Common.props/ImportBefore</BundledVersionsPropsFolder>
+      <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
+    </PropertyGroup>
+
+    <!-- 
+      The bundled version of Microsoft.NETCore.App is determined statically from DependencyVersions.props whereas the bundled version
+      of NETStandard.Library is defined by what Microsoft.NETCore.App pulls in. This digs in to the package resolution items of
+      of our build against Microsoft.NETCore.App to find the correct NETStandard.Library version
+    -->
+    <ItemGroup>
+      <_NETStandardLibraryVersions Include="@(PackageDefinitions->'%(Version)')"
+                                   Condition="%(PackageDefinitions.Name) == 'NetStandard.Library'" />
+    </ItemGroup>
+
+    <Error Condition="@(_NETStandardLibraryVersions->Distinct()->Count()) != 1"
+           Text="Failed to determine the NETStandard.Library version pulled in Microsoft.NETCore.App" />
+
+    <PropertyGroup>
+      <_NETCoreAppPackageVersion>$(CLI_SharedFrameworkVersion)</_NETCoreAppPackageVersion>
+      <_NETStandardPackageVersion>@(_NETStandardLibraryVersions->Distinct())</_NETStandardPackageVersion>
+
+      <!-- Use only major and minor in target framework version -->
+      <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
+      <_NETStandardTargetFrameworkVersion>$(_NETStandardPackageVersion.Split('.')[0]).$(_NETStandardPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
+
+      <BundledVersionsPropsContent>
+<![CDATA[
+<!--
+***********************************************************************************************
+$(BundledVersionsPropsFileName)
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project>
+  <PropertyGroup>
+    <BundledNETCoreAppTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</BundledNETCoreAppTargetFrameworkVersion>
+    <BundledNETCoreAppPackageVersion>$(_NETCoreAppPackageVersion)</BundledNETCoreAppPackageVersion>
+    <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
+    <BundledNETStandardPackageVersion>$(_NETStandardPackageVersion)</BundledNETStandardPackageVersion>
+  </PropertyGroup>
+</Project>
+]]>
+    </BundledVersionsPropsContent>
+  </PropertyGroup>
+
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)" />
+    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
+                      Lines="$(BundledVersionsPropsContent)"
+                      Overwrite="true" />
+
+  </Target>
+</Project>

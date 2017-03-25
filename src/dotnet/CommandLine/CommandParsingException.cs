@@ -8,29 +8,37 @@ namespace Microsoft.DotNet.Cli.CommandLine
 {
     internal class CommandParsingException : Exception
     {
-        private bool _isRequireSubCommandMissing;
+        private readonly bool _isRequiredSubCommandMissing;
+
+        public CommandParsingException(
+            string message, 
+            string helpText = null) : base(message)
+        {
+            HelpText = helpText ?? "";
+            Data.Add("CLI_User_Displayed_Exception", true);
+        }
 
         public CommandParsingException(
             CommandLineApplication command,
             string message,
-            bool isRequireSubCommandMissing = false)
-            : base(message)
+            bool isRequiredSubCommandMissing = false)
+            : this(message)
         {
             Command = command;
-            _isRequireSubCommandMissing = isRequireSubCommandMissing;
-
-            Data.Add("CLI_User_Displayed_Exception", true);
+            _isRequiredSubCommandMissing = isRequiredSubCommandMissing;
         }
 
         public CommandLineApplication Command { get; }
+
+        public string HelpText { get; } = "";
 
         public override string Message
         {
             get
             {
-                return _isRequireSubCommandMissing
-                     ? CommonLocalizableStrings.RequiredCommandNotPassed
-                     : base.Message;
+                return _isRequiredSubCommandMissing
+                           ? CommonLocalizableStrings.RequiredCommandNotPassed
+                           : base.Message;
             }
         }
     }

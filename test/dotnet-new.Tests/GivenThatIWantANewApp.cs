@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.DependencyModel;
 using Xunit;
 
 namespace Microsoft.DotNet.New.Tests
@@ -70,36 +71,87 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
         }
 
-        [Fact]
-        public void NewClassLibRestoresCorrectNetStandardLibraryVersion()
+        [Theory]
+        [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
+        [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            // These will fail when templates stop including explicit version.
+            // Collapse back to one method and remove the explicit version handling when that happens.
+            NewProjectRestoresCorrectPackageVersion(type, propertyName, packageName, deleteExplicitVersion: true);
+            NewProjectRestoresCorrectPackageVersion(type, propertyName, packageName, deleteExplicitVersion: false);
+        }
+
+        private void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName, bool deleteExplicitVersion)
+        {
+            var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}_{deleteExplicitVersion}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
-            var projectName = "Library";
-            var projectFileName = $"{projectName}.csproj";
+            var projectName = "Project";
+            var expectedVersion = GetFrameworkPackageVersion();
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"classlib --name {projectName} -o .")
+                .Execute($"{type} --name {projectName} -o .")
                 .Should().Pass();
+
+            ValidateAndRemoveExplicitVersion();
 
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .Execute($"--packages {packagesDirectory}")
                 .Should().Pass();
 
-            var expectedVersion = XDocument.Load(Path.Combine(rootPath, projectFileName))
-                .Elements("Project")
-                .Elements("PropertyGroup")
-                .Elements("NetStandardImplicitPackageVersion")
-                .FirstOrDefault()
-                ?.Value;
-
-            expectedVersion.Should().NotBeNullOrEmpty("Could not find NetStandardImplicitPackageVersion property in a new classlib.");
-
-            new DirectoryInfo(Path.Combine(packagesDirectory, "netstandard.library"))
+            new DirectoryInfo(Path.Combine(packagesDirectory, packageName))
                 .Should().Exist()
                 .And.HaveDirectory(expectedVersion);
+
+            string GetFrameworkPackageVersion()
+            {
+                var dotnetDir = new FileInfo(DotnetUnderTest.FullName).Directory;
+                var sharedFxDir = dotnetDir
+                    .GetDirectory("shared", "Microsoft.NETCore.App")
+                    .EnumerateDirectories()
+                    .Single(d => d.Name.StartsWith("2.0.0"));
+
+                if (packageName == "microsoft.netcore.app")
+                {
+                    return sharedFxDir.Name;
+                }
+
+                var depsFile = Path.Combine(sharedFxDir.FullName, "Microsoft.NETCore.App.deps.json");
+                using (var stream = File.OpenRead(depsFile))
+                using (var reader = new DependencyContextJsonReader())
+                {
+                    var context = reader.Read(stream);
+                    var dependency = context
+                        .RuntimeLibraries
+                        .Single(library => library.Name == packageName);
+
+                    return dependency.Version;
+                }
+            }
+
+            // Remove when templates stop putting an explicit version
+            void ValidateAndRemoveExplicitVersion()
+            {
+                var projectFileName = $"{projectName}.csproj";
+                var projectPath = Path.Combine(rootPath, projectFileName);
+                var projectDocument = XDocument.Load(projectPath);
+                var explicitVersionNode = projectDocument
+                   .Elements("Project")
+                   .Elements("PropertyGroup")
+                   .Elements(propertyName)
+                   .SingleOrDefault();
+
+                explicitVersionNode.Should().NotBeNull();
+                explicitVersionNode.Value.Should().Be(expectedVersion);
+
+                if (deleteExplicitVersion)
+                {
+                    explicitVersionNode.Remove();
+                    projectDocument.Save(projectPath);
+                }
+            }
         }
     }
 }

@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Tools.Test
         public const string CmdTestAdapterPathDescription = @"Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path <PATH_TO_ADAPTER>";
 
+        public const string CmdTestAdapterPath = "PATH_TO_ADAPTER";
+
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
         public const string CmdLoggerDescription = @"Specify a logger for test results.
@@ -58,7 +60,10 @@ namespace Microsoft.DotNet.Tools.Test
 
         public const string RunSettingsArgsHelpText = @"Any extra command-line runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
                                         Example: -- RunConfiguration.ResultsDirectory=""C:\users\user\desktop\Results Directory"" MSTest.DeploymentEnabled=false";
+
         public const string CmdResultsDirectoryDescription = @"The test results directory will be created in the specified path if it does not exist.
                                         Example: --results-directory <PATH_TO_RESULTS_DIRECTORY>";
+
+        public const string CmdPathToResultsDirectory = "PATH_TO_RESULTS_DIRECTORY";
     }
 }

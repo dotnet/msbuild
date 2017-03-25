@@ -5,12 +5,14 @@
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="HostRid" />
       <Output TaskParameter="OSName" PropertyName="HostOSName" />
+      <Output TaskParameter="OSPlatform" PropertyName="HostOSPlatform" />
     </GetCurrentRuntimeInformation>
 
     <PropertyGroup>
       <Rid Condition=" '$(Rid)' == '' ">$(HostRid)</Rid>
       <Architecture Condition=" '$(Architecture)' == '' ">x64</Architecture>
       <OSName Condition=" '$(OSName)' == '' ">$(HostOSName)</OSName>
+      <OSPlatform Condition=" '$(OSPlatform)' == '' ">$(HostOSPlatform)</OSPlatform>
 
       <BuildInfoPropsContent>
 &lt;Project ToolsVersion=&quot;15.0&quot;&gt;
@@ -18,6 +20,7 @@
         &lt;Rid&gt;$(Rid)&lt;/Rid&gt;
         &lt;Architecture&gt;$(Architecture)&lt;/Architecture&gt;
         &lt;OSName&gt;$(OSName)&lt;/OSName&gt;
+        &lt;OSPlatform&gt;$(OSPlatform)&lt;/OSPlatform&gt;
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;
       </BuildInfoPropsContent>

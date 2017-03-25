@@ -5,14 +5,9 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class RemoveReferenceCommand : TestCommand
+    public sealed class RemoveReferenceCommand : DotnetCommand
     {
         private string _projectName = null;
-
-        public RemoveReferenceCommand()
-            : base("dotnet")
-        {
-        }
 
         public override CommandResult Execute(string args = "")
         {

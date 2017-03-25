@@ -119,6 +119,24 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItRunsPortableAppsFromADifferentPathSpecifyingOnlyTheDirectoryWithoutBuilding()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.Parent)
+                .ExecuteWithCapturedOutput($"--project {testProjectDirectory}")
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
+        }
+
+        [Fact]
         public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
@@ -144,6 +162,24 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput()
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItReportsAGoodErrorWhenProjectHasMultipleFrameworks()
+        {
+            var testAppName = "MSBuildAppWithMultipleFrameworks";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            // use --no-build so this test can run on all platforms.
+            // the test app targets net451, which can't be built on non-Windows
+            new RunCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--no-build")
+                .Should().Fail()
+                    .And.HaveStdErrContaining("--framework");
         }
     }
 }

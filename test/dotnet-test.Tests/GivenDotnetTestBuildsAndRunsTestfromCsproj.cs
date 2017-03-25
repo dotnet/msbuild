@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test with trx logger enabled and results directory explicitly specified.
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--logger:trx -r \"" + trxLoggerDirectory + "\"");
+                                       .ExecuteWithCapturedOutput("--logger trx -r \"" + trxLoggerDirectory + "\"");
 
             // Verify
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");

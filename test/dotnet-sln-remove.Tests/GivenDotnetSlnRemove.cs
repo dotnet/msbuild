@@ -15,16 +15,14 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
     {
         private const string HelpText = @".NET Remove project(s) from a solution file Command
 
-Usage: dotnet sln <SLN_FILE> remove [options] [args]
+Usage: dotnet sln <SLN_FILE> remove [options] <args>
 
 Arguments:
-  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <args>       Remove the specified project(s) from the solution. The project is not impacted.
 
 Options:
-  -h|--help  Show help information
-
-Additional Arguments:
- Remove the specified project(s) from the solution. The project is not impacted.
+  -h, --help   Show help information
 ";
 
         private const string ExpectedSlnContentsAfterRemove = @"
@@ -177,8 +175,7 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln remove");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
-            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\nYou must specify at least one project to remove.");
         }
 
         [Theory]
