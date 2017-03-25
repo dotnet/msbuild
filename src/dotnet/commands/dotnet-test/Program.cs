@@ -79,9 +79,14 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.SingleValue);
 
             var noBuildtOption = cmd.Option(
-               "--no-build",
-               LocalizableStrings.CmdNoBuildDescription,
-               CommandOptionType.NoValue);
+                "--no-build",
+                LocalizableStrings.CmdNoBuildDescription,
+                CommandOptionType.NoValue);
+
+            var resultsDirectoryOption = cmd.Option(
+                "-r|--results-directory",
+                LocalizableStrings.CmdResultsDirectoryDescription,
+                CommandOptionType.SingleValue);
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
@@ -142,6 +147,11 @@ namespace Microsoft.DotNet.Tools.Test
                 if (noBuildtOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:VSTestNoBuild=true");
+                }
+
+                if (resultsDirectoryOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:VSTestResultsDirectory={resultsDirectoryOption.Value()}");
                 }
 
                 if (verbosityOption.HasValue())
