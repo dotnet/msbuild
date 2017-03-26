@@ -1,10 +1,21 @@
+<!--
+***********************************************************************************************
+Microsoft.Packaging.Tools.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Condition="'$(MicrosoftPackagingToolsTaskDirectory)' == ''">
-    <MicrosoftPackagingToolsTaskDirectory>$(MSBuildThisFileDirectory)</MicrosoftPackagingToolsTaskDirectory>
-    <MicrosoftPackagingToolsTaskDirectory Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)desktop/</MicrosoftPackagingToolsTaskDirectory>
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
-
+  
   <Choose>
     <!-- Allow completely disabling the conflict resolution targets-->
     <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
@@ -55,7 +66,7 @@
     </ResolvePublishAssemblies>
   </Target>
 
-  <UsingTask TaskName="HandlePackageFileConflicts" AssemblyFile="$(MicrosoftPackagingToolsTaskDirectory)Microsoft.Packaging.Tools.Tasks.dll" />
+  <UsingTask TaskName="HandlePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="HandlePackageFileConflicts" AfterTargets="$(HandlePackageFileConflictsAfter)" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">
     <HandlePackageFileConflicts References="@(Reference)"
                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
@@ -82,7 +93,7 @@
   <PropertyGroup>
     <_RemoveDepsFileConflictsSemaphore>$(IntermediateOutputPath)\RemoveDepsFileConflicts.semaphore</_RemoveDepsFileConflictsSemaphore>
   </PropertyGroup>
-  <UsingTask TaskName="RemoveDepsFileConflicts" AssemblyFile="$(MicrosoftPackagingToolsTaskDirectory)Microsoft.Packaging.Tools.Tasks.dll" />
+  <UsingTask TaskName="RemoveDepsFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="RemoveDepsFileConflicts" AfterTargets="$(RemoveDepsFileConflictsAfter)"
           Inputs="$(ProjectDepsFilePath)" Outputs="$(_RemoveDepsFileConflictsSemaphore)"
           Condition="'$(GenerateDependencyFile)'=='true'">
