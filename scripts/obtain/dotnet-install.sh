@@ -92,7 +92,7 @@ get_current_os_name() {
                     echo "opensuse.42.1"
                     return 0
                     ;;
-                "rhel.7.0" | "rhel.7.1" | "rhel.7.2")
+                "rhel.7"*)
                     echo "rhel"
                     return 0
                     ;;
