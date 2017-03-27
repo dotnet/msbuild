@@ -29,6 +29,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<string> References { get; } = new List<string>();
 
+        public PackageReference PublishedNuGetPackageLibrary { get; set; }
+
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
         private static string GetShortTargetFrameworkIdentifier(string targetFramework)
@@ -121,6 +123,18 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup = new XElement(ns + "ItemGroup");
                 projectXml.Root.Add(packageReferenceItemGroup);
             }
+            if (this.ReferencedProjects.Any())
+            {
+                foreach (TestProject referencedProject in ReferencedProjects)
+                {
+                    if (referencedProject.PublishedNuGetPackageLibrary != null)
+                    {
+                        packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
+                            new XAttribute("Include", $"{referencedProject.PublishedNuGetPackageLibrary.ID}"),
+                            new XAttribute("Version", $"{referencedProject.PublishedNuGetPackageLibrary.Version}")));
+                    }
+                }
+            }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
 
@@ -177,8 +191,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
                 foreach (var referencedProject in ReferencedProjects)
                 {
-                    projectReferenceItemGroup.Add(new XElement(ns + "ProjectReference",
+                    if (referencedProject.PublishedNuGetPackageLibrary == null)
+                    {
+                        projectReferenceItemGroup.Add(new XElement(ns + "ProjectReference",
                         new XAttribute("Include", $"../{referencedProject.Name}/{referencedProject.Name}.csproj")));
+                    }
                 }
             }
 

@@ -81,7 +81,10 @@ namespace Microsoft.NET.TestFramework
 
                     foreach (var referencedProject in project.ReferencedProjects)
                     {
-                        projectStack.Push(referencedProject);
+                        if (referencedProject.PublishedNuGetPackageLibrary == null)
+                        {
+                            projectStack.Push(referencedProject);
+                        }
                     }
                 }
             }

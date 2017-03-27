@@ -67,6 +67,12 @@ namespace Microsoft.NET.TestFramework
             get { return Path.Combine(BinPath, Configuration, "Packages"); }
         }
 
+        public static string NuGetCachePath
+        {
+            get { return Path.Combine(RepoRoot, "Packages"); }
+        }
+
+
         public static string SdksPath
         {
             get { return Path.Combine(BinPath, Configuration, "Sdks"); }
