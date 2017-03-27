@@ -16,8 +16,8 @@ In order to build .NET Command Line Interface, you need the following installed 
 ### For OS X
 
 1. Xcode
-3. git (available from http://www.git-scm.com/) on the PATH.
-4. Install OpenSSL (a .NET Core requirement)
+2. git (available from http://www.git-scm.com/) on the PATH.
+3. Install OpenSSL (a .NET Core requirement)
   - brew install openssl
   - brew link --force openssl
 
