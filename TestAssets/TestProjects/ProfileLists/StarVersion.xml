@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="NuGet.Common" Version="4.0.0-*" />
+  </ItemGroup>
+</Project>

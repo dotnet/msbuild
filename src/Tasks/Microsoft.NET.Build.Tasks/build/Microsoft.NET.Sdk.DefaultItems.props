@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" IsImplicitlyDefined="true"/>
+    <PackageReference Include="NETStandard.Library" Version="$(NETStandardImplicitPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

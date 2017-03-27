@@ -10,9 +10,6 @@
     <version>$version$</version>
     <authors>dotnet</authors>
     <projectUrl>http://dot.net</projectUrl>
-    <dependencies>
-        <dependency id="Nuget.Build.Tasks.Pack" version="4.0.0-rtm-2323" />
-    </dependencies>
   </metadata>
   <files>
     <file src="PackagesLayout\**" />
