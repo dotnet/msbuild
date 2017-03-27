@@ -98,13 +98,19 @@ namespace Microsoft.DotNet.Cli.Utils
             LockFileTargetLibrary toolLibrary,
             LockFileItem runtimeAssembly)
         {
-
             var packageFoldersCount = packageFolders.Count();
             var userPackageFolder = packageFoldersCount == 1 ? string.Empty : packageFolders.First();
             var fallbackPackageFolders = packageFoldersCount > 1 ? packageFolders.Skip(1) : packageFolders;
 
             var packageDirectory = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders)
                 .GetPackageDirectory(toolLibrary.Name, toolLibrary.Version);
+
+            if (packageDirectory == null)
+            {
+                throw new GracefulException(string.Format(
+                    LocalizableStrings.CommandAssembliesNotFound,
+                    toolLibrary.Name));
+            }
 
             var filePath = Path.Combine(
                 packageDirectory,
