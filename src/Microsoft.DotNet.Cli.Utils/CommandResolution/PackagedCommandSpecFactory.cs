@@ -32,6 +32,27 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             string runtimeConfigPath)
         {
+            return CreateCommandSpecFromLibrary(
+                toolLibrary,
+                commandName,
+                commandArguments,
+                allowedExtensions,
+                new List<string> { nugetPackagesRoot },
+                commandResolutionStrategy,
+                depsFilePath,
+                runtimeConfigPath);
+        }
+
+        public CommandSpec CreateCommandSpecFromLibrary(
+            LockFileTargetLibrary toolLibrary,
+            string commandName,
+            IEnumerable<string> commandArguments,
+            IEnumerable<string> allowedExtensions,
+            IEnumerable<string> packageFolders,
+            CommandResolutionStrategy commandResolutionStrategy,
+            string depsFilePath,
+            string runtimeConfigPath)
+        {
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.AttemptingToFindCommand,
                 PackagedCommandSpecFactoryName,
@@ -51,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var commandPath = GetCommandFilePath(nugetPackagesRoot, toolLibrary, toolAssembly);
+            var commandPath = GetCommandFilePath(packageFolders, toolLibrary, toolAssembly);
 
             if (!File.Exists(commandPath))
             {
@@ -68,17 +89,28 @@ namespace Microsoft.DotNet.Cli.Utils
                 commandArguments,
                 depsFilePath,
                 commandResolutionStrategy,
-                nugetPackagesRoot,
+                packageFolders,
                 runtimeConfigPath);
         }
 
         private string GetCommandFilePath(
-            string nugetPackagesRoot,
+            IEnumerable<string> packageFolders,
             LockFileTargetLibrary toolLibrary,
             LockFileItem runtimeAssembly)
         {
-            var packageDirectory = new VersionFolderPathResolver(nugetPackagesRoot)
-                .GetInstallPath(toolLibrary.Name, toolLibrary.Version);
+            var packageFoldersCount = packageFolders.Count();
+            var userPackageFolder = packageFoldersCount == 1 ? string.Empty : packageFolders.First();
+            var fallbackPackageFolders = packageFoldersCount > 1 ? packageFolders.Skip(1) : packageFolders;
+
+            var packageDirectory = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders)
+                .GetPackageDirectory(toolLibrary.Name, toolLibrary.Version);
+
+            if (packageDirectory == null)
+            {
+                throw new GracefulException(string.Format(
+                    LocalizableStrings.CommandAssembliesNotFound,
+                    toolLibrary.Name));
+            }
 
             var filePath = Path.Combine(
                 packageDirectory,
@@ -92,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> commandArguments,
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
-            string nugetPackagesRoot,
+            IEnumerable<string> packageFolders,
             string runtimeConfigPath)
         {
             var commandExtension = Path.GetExtension(commandPath);
@@ -104,7 +136,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandArguments,
                     depsFilePath,
                     commandResolutionStrategy,
-                    nugetPackagesRoot,
+                    packageFolders,
                     runtimeConfigPath);
             }
 
@@ -116,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> commandArguments,
             string depsFilePath,
             CommandResolutionStrategy commandResolutionStrategy,
-            string nugetPackagesRoot,
+            IEnumerable<string> packageFolders,
             string runtimeConfigPath)
         {
             var host = string.Empty;
@@ -144,8 +176,11 @@ namespace Microsoft.DotNet.Cli.Utils
                 arguments.Add(depsFilePath);
             }
 
-            arguments.Add("--additionalprobingpath");
-            arguments.Add(nugetPackagesRoot);
+            foreach (var packageFolder in packageFolders)
+            {
+                arguments.Add("--additionalprobingpath");
+                arguments.Add(packageFolder);
+            }
 
             if(_addAdditionalArguments != null)
             {

@@ -71,6 +71,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public const string NoExecutableFoundMatchingCommand = "No executable found matching command \"{0}\"";
 
+        public const string CommandAssembliesNotFound = "The command executable for \"{0}\" was not found. The project may not have been restored or restore failed - run `dotnet restore`";
+
         public const string WaitingForDebuggerToAttach = "Waiting for debugger to attach. Press ENTER to continue";
 
         public const string ProcessId = "Process ID: {0}";

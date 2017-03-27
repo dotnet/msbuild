@@ -136,12 +136,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var toolPackageFramework = project.DotnetCliToolTargetFramework;
 
-            string nugetPackagesRoot;
             var toolLockFile = GetToolLockFile(
                 toolLibraryRange,
                 toolPackageFramework,
-                possiblePackageRoots,
-                out nugetPackagesRoot);
+                possiblePackageRoots);
 
             if (toolLockFile == null)
             {
@@ -174,7 +172,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolLockFile,
                 depsFileRoot);
 
-            var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
+            var packageFolders = toolLockFile.PackageFolders.Select(p =>
+                PathUtility.EnsureNoTrailingDirectorySeparator(p.Path));
 
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.AttemptingToCreateCommandSpec,
@@ -185,7 +184,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandName,
                     args,
                     _allowedCommandExtensions,
-                    normalizedNugetPackagesRoot,
+                    packageFolders,
                     s_commandResolutionStrategy,
                     depsFilePath,
                     null);
@@ -215,19 +214,16 @@ namespace Microsoft.DotNet.Cli.Utils
         private LockFile GetToolLockFile(
             SingleProjectInfo toolLibrary,
             NuGetFramework framework,
-            IEnumerable<string> possibleNugetPackagesRoot,
-            out string nugetPackagesRoot)
+            IEnumerable<string> possibleNugetPackagesRoot)
         {
             foreach (var packagesRoot in possibleNugetPackagesRoot)
             {
                 if (TryGetToolLockFile(toolLibrary, framework, packagesRoot, out LockFile lockFile))
                 {
-                    nugetPackagesRoot = packagesRoot;
                     return lockFile;
                 }
             }
 
-            nugetPackagesRoot = null;
             return null;
         }
 
