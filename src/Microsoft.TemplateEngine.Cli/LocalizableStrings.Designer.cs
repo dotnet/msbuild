@@ -170,7 +170,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package &quot;{0}&quot; is not a valid package specification..
+        ///   Looks up a localized string similar to Could not install &quot;{0}&quot;..
         /// </summary>
         public static string BadPackageSpec {
             get {

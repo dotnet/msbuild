@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -47,7 +48,17 @@ namespace dotnet_new3
         }
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
-        { 
+        {
+            string baseDir = Environment.ExpandEnvironmentVariables("%DN3%");
+
+            if (baseDir.Contains('%'))
+            {
+                Assembly a = typeof(Program).GetTypeInfo().Assembly;
+                string path = new Uri(a.CodeBase, UriKind.Absolute).LocalPath;
+                path = Path.GetDirectoryName(path);
+                Environment.SetEnvironmentVariable("DN3", path);
+            }
+
             string[] packageList;
             Paths paths = new Paths(environmentSettings);
 
@@ -56,6 +67,11 @@ namespace dotnet_new3
                 packageList = paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
+                    for (int i = 0; i < packageList.Length; ++i)
+                    {
+                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
+                    }
+
                     installer.InstallPackages(packageList);
                 }
             }
@@ -65,6 +81,11 @@ namespace dotnet_new3
                 packageList = paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
+                    for (int i = 0; i < packageList.Length; ++i)
+                    {
+                        packageList[i] = packageList[i].Replace('\\', Path.DirectorySeparatorChar);
+                    }
+
                     installer.InstallPackages(packageList);
                 }
             }

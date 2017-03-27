@@ -145,7 +145,7 @@
     <value>Invalid format for input locale: "{0}". Example valid formats: [en] [en-US].</value>
   </data>
   <data name="BadPackageSpec" xml:space="preserve">
-    <value>Package "{0}" is not a valid package specification.</value>
+    <value>Could not install "{0}".</value>
   </data>
   <data name="Change" xml:space="preserve">
     <value>Change</value>
