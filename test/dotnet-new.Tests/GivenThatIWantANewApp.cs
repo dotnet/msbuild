@@ -76,15 +76,7 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
-            // These will fail when templates stop including explicit version.
-            // Collapse back to one method and remove the explicit version handling when that happens.
-            NewProjectRestoresCorrectPackageVersion(type, propertyName, packageName, deleteExplicitVersion: true);
-            NewProjectRestoresCorrectPackageVersion(type, propertyName, packageName, deleteExplicitVersion: false);
-        }
-
-        private void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName, bool deleteExplicitVersion)
-        {
-            var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}_{deleteExplicitVersion}").FullName;
+            var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
             var expectedVersion = GetFrameworkPackageVersion();
@@ -93,8 +85,6 @@ namespace Microsoft.DotNet.New.Tests
                 .WithWorkingDirectory(rootPath)
                 .Execute($"{type} --name {projectName} -o .")
                 .Should().Pass();
-
-            ValidateAndRemoveExplicitVersion();
 
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
@@ -128,28 +118,6 @@ namespace Microsoft.DotNet.New.Tests
                         .Single(library => library.Name == packageName);
 
                     return dependency.Version;
-                }
-            }
-
-            // Remove when templates stop putting an explicit version
-            void ValidateAndRemoveExplicitVersion()
-            {
-                var projectFileName = $"{projectName}.csproj";
-                var projectPath = Path.Combine(rootPath, projectFileName);
-                var projectDocument = XDocument.Load(projectPath);
-                var explicitVersionNode = projectDocument
-                   .Elements("Project")
-                   .Elements("PropertyGroup")
-                   .Elements(propertyName)
-                   .SingleOrDefault();
-
-                explicitVersionNode.Should().NotBeNull();
-                explicitVersionNode.Value.Should().Be(expectedVersion);
-
-                if (deleteExplicitVersion)
-                {
-                    explicitVersionNode.Remove();
-                    projectDocument.Save(projectPath);
                 }
             }
         }
