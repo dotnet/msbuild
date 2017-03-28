@@ -16,8 +16,22 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
-            Reporter.Output.WriteLine(actionConfig.Description);
-            Reporter.Output.WriteLine(actionConfig.ManualInstructions);
+            Reporter.Output.WriteLine($"Description: {actionConfig.Description}");
+            Reporter.Output.WriteLine($"Manual instructions: {actionConfig.ManualInstructions}");
+
+            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string executable))
+            {
+                Reporter.Output.Write("Actual command: ");
+                if (actionConfig.Args.TryGetValue("args", out string commandArgs))
+                {
+                    Reporter.Output.WriteLine($"{executable} {commandArgs}".Bold().Red());
+                }
+                else
+                {
+                    Reporter.Output.WriteLine(executable.Bold().Red());
+                }
+            }
+
             return true;
         }
     }
