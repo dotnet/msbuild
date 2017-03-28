@@ -212,10 +212,13 @@ public static class Program
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
-                    itemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", "System.Xml.XDocument"),
-                        new XAttribute("Version", "4.3.0")));
 
+                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    {
+                        itemGroup.Add(new XElement(ns + "PackageReference",
+                            new XAttribute("Include", dependency.Item1),
+                            new XAttribute("Version", dependency.Item2)));
+                    }
                 })
                 .Restore(testProject.Name);
 

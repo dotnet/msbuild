@@ -15,7 +15,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToTargetNetStandard2 : SdkTest
+    public class GivenThatWeWantToBuildANetStandard2Library : SdkTest
     {
         [Fact]
         public void It_builds_a_netstandard2_library_successfully()
@@ -62,9 +62,13 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
-                    itemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", "System.Xml.XDocument"),
-                        new XAttribute("Version", "4.3.0")));
+
+                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    {
+                        itemGroup.Add(new XElement(ns + "PackageReference",
+                            new XAttribute("Include", dependency.Item1),
+                            new XAttribute("Version", dependency.Item2)));
+                    }
 
                 })
                 .Restore(project.Name);
