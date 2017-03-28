@@ -12,6 +12,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public DynamicAssembly(string assemblyName, System.Version verToLoad, string publicKeyToken)
         {
             AssemblyFullName = string.Format(System.Globalization.CultureInfo.CurrentCulture, "{0}, Version={1}.{2}.0.0, Culture=neutral, PublicKeyToken={3}", assemblyName, verToLoad.Major, verToLoad.Minor, publicKeyToken);
+#if NET46
             bool isAssemblyLoaded = false;
             try
             {
@@ -27,11 +28,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 Assembly = Assembly.LoadFrom(Path.Combine(TaskAssemblyDirectory, assemblyName+".dll"));
             }
-
+#endif
             Version = verToLoad;
         }
 
-
+#if NET46
         public static string TaskAssemblyDirectory
         {
             get
@@ -42,7 +43,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 return Path.GetDirectoryName(path);
             }
         }
-
+#endif
         public DynamicAssembly() { }
 
         public string AssemblyFullName { get; set; }
@@ -128,11 +129,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return createdObject;
         }
 
+#if NET46
         public object CallStaticMethod(string typeName, string methodName, object[] arguments)
         {
             System.Type t = GetType(typeName);
             return t.InvokeMember(methodName, BindingFlags.InvokeMethod, null, t, arguments, System.Globalization.CultureInfo.InvariantCulture);
         }
+
+#endif
 
         /// <summary>
         /// Support late bind delegate
@@ -150,7 +154,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             MethodCallExpression body = Expression.Call(Expression.Constant(d), d.GetType().GetMethod("Invoke"), parameters);
             var lambda = Expression.Lambda(body, parameters);
             // Diagnostics.Debug.Assert(false, lambda.ToString());
+#if NET46
             return System.Delegate.CreateDelegate(handlerType, lambda.Compile(), "Invoke", false);
+#else
+            return null;
+#endif
         }
 
         static public System.Delegate AddEventDeferHandler(dynamic obj, string eventName, System.Delegate deferEventHandler)

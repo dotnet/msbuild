@@ -167,6 +167,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (_option == null)
             {
                 object option =  MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentSyncOptions");
+#if NET46
                 System.Type deploymentCancelCallbackType = MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentCancelCallback");
                 object cancelCallbackDelegate = System.Delegate.CreateDelegate(deploymentCancelCallbackType, this, "CancelCallback");
 
@@ -174,12 +175,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                 // dynamic doesn't work with delegate. it complain on explicit cast needed from object -> DelegateType :(
                 // _option.CancelCallback = cancelCallbackDelegate;
+#endif
                 _option = option;
             }
             return _option;
         }
 
-
+#if NET46
         private System.Collections.Generic.Dictionary<string, Microsoft.Build.Framework.MessageImportance> _highImportanceEventTypes = null;
         private System.Collections.Generic.Dictionary<string, Microsoft.Build.Framework.MessageImportance> GetHighImportanceEventTypes()
         {
@@ -197,13 +199,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             return _highImportanceEventTypes;
         }
-
+#endif
         void TraceEventHandlerDynamic(object sender, dynamic e)
         {
             // throw new System.NotImplementedException();
             string msg = e.Message;
             System.Diagnostics.Trace.WriteLine("MSDeploy TraceEvent Handler is called with " + msg);
+#if NET46
             LogTrace(e, GetHighImportanceEventTypes());
+#endif
             //try
             //{
             //    LogTrace(e);
@@ -227,7 +231,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             //}
         }
 
-        
+
         /// <summary>
         /// Using MSDeploy API to invoke MSDeploy
         /// </summary>
@@ -326,7 +330,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     /// We create CustomBuildWithPropertiesEventArgs is for the purpose of logging verious information
     /// in a IDictionary such that the MBuild handler can handle generically.
     /// </summary>
+#if NET46
     [System.Serializable]
+#endif
     public class CustomBuildWithPropertiesEventArgs : Framework.CustomBuildEventArgs, Collections.IDictionary
     {
         public CustomBuildWithPropertiesEventArgs() : base() { }
@@ -442,6 +448,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         // Utility function to log all public instance property to CustomerBuildEventArgs 
         private static void AddAllPropertiesToCustomBuildWithPropertyEventArgs(CustomBuildWithPropertiesEventArgs cbpEventArg,System.Object obj)
         {
+#if NET46
             if (obj != null)
             {
                 System.Type thisType = obj.GetType();
@@ -457,9 +464,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     }
                 }
             }
+#endif
         }
 
-        
+
         ///// <summary>
         ///// Log Trace ifnormation in the command line
         ///// </summary>
@@ -495,12 +503,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         //             default: // Is Warning is a Normal message
         //                 _host.Log.LogMessageFromText(strMsg, messageImportance);
         //                 break;
-                     
+
         //         }
         //    }
         //    // additionally we fire the Custom event for the detail information
         //    CustomBuildWithPropertiesEventArgs customBuildWithPropertiesEventArg = new CustomBuildWithPropertiesEventArgs(args.Message, null, TaskName);
-            
+
         //    customBuildWithPropertiesEventArg.Add("TaskName", TaskName);
         //    customBuildWithPropertiesEventArg.Add("EventType", strEventType);
         //    AddAllPropertiesToCustomBuildWithPropertyEventArgs(customBuildWithPropertiesEventArg, args);
@@ -814,11 +822,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
         private void SetupPublishRelatedProperties(ref VSMSDeployObject dest)
         {
+#if NET46
             if (AllowUntrustedCertificate) 
             {
                 System.Net.ServicePointManager.ServerCertificateValidationCallback
                          += new System.Net.Security.RemoteCertificateValidationCallback(AllowUntrustedCertCallback);
             }
+#endif
         }
 
         public override bool Execute()
@@ -922,9 +932,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             finally
             {
+#if NET46
+
                 if (AllowUntrustedCertificate)
                     System.Net.ServicePointManager.ServerCertificateValidationCallback
                         -= new System.Net.Security.RemoteCertificateValidationCallback(AllowUntrustedCertCallback);
+#endif
             }
 
             Tasks.MsDeploy.Utility.MsDeployEndOfExecuteMessage(Result, dest.Provider, dest.Root, Log);
@@ -1099,7 +1112,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public object GetProperty(string propertyName)
         {
+#if NET46
             string lowerName = propertyName.ToLower(System.Globalization.CultureInfo.InvariantCulture);
+#else
+            string lowerName = propertyName.ToLower();
+#endif
             switch (lowerName)
             {
                 case "msdeployversionstotry":

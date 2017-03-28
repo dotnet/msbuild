@@ -20,6 +20,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using System.Linq;
     using System.Reflection;
     using Microsoft.NET.Sdk.Publish.Tasks.Properties;
+    using System.IO;
 
     internal enum PipelineMetadata
     {
@@ -354,8 +355,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-
-
+#if NET46
         /// <summary>
         /// Return the current machine's IIS version
         /// </summary>
@@ -372,8 +372,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             return iisMajorVersion;
         }
-
-
+#endif
 
         /// <summary>
         /// verify it is in IIS6
@@ -443,6 +442,28 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
         /// <summary>
+        /// Utility function to save the documente in UTF8 and Indented
+        /// </summary>
+        /// <param name="document"></param>
+        public static void SaveDocument(Xml.XmlDocument document, string outputFileName, System.Text.Encoding encode)
+        {
+#if NET46
+            Xml.XmlTextWriter textWriter = new Xml.XmlTextWriter(outputFileName, encode);
+            textWriter.Formatting = System.Xml.Formatting.Indented;
+            document.Save(textWriter);
+            textWriter.Close();
+#else
+            using (FileStream fs = new FileStream(outputFileName, FileMode.OpenOrCreate))
+            {
+                using (StreamWriter writer = new StreamWriter(fs, encode))
+                {
+                    document.Save(fs);
+                }
+            }
+#endif
+        }
+
+        /// <summary>
         /// Utility to check the MinimumVersion of Msdeploy
         /// </summary>
         static string s_strMinimumVersion;
@@ -462,6 +483,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 currentMinVersion = new System.Version(7, 1, 614); // current drop
                 {
                     string strMinimumVersion = string.Empty;
+#if NET46
                     using (Win32.RegistryKey registryKeyVs = Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\VisualStudio\11.0\WebDeploy"))
                     {
                         if (registryKeyVs != null)
@@ -479,6 +501,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             }
                         }
                     }
+#endif
                     if (!string.IsNullOrEmpty(s_strMinimumVersion))
                     {
                         currentMinVersion = new System.Version(strMinimumVersion);
@@ -517,16 +540,24 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             else
             {
+#if NET46
                 _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_MSDEPLOYLOADFAIL,
                  Resources.VSMSDEPLOY_MSDEPLOY32bit,
                  Resources.VSMSDEPLOY_MSDEPLOY64bit,
                  new System.Version(),
                  currentMinVersion);
+#else
+                _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_MSDEPLOYLOADFAIL,
+                 Resources.VSMSDEPLOY_MSDEPLOY32bit,
+                 Resources.VSMSDEPLOY_MSDEPLOY64bit,
+                 new System.Version(3,6),
+                 currentMinVersion);
+#endif
                 return false;
             }
         }
 
-
+#if NET46
         /// <summary>
         /// Return a search path for the data
         /// </summary>
@@ -554,7 +585,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             return null;
         }
-
+#endif
         /// <summary>
         /// Utility to help build the argument list from the enum type
         /// </summary>
@@ -570,7 +601,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 if (!string.IsNullOrEmpty(data))
                 {
                     string valueData = PutValueInQuote(data, valueQuote);
+#if NET46
                     arguments.Add(string.Concat(enumName.ToLower(System.Globalization.CultureInfo.InvariantCulture), "=", valueData));
+#else
+                    arguments.Add(string.Concat(enumName.ToLower()));
+#endif
                 }
             }
         }
@@ -646,14 +681,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             string[] ArchiveDirOnly = new string[] { MSDeploy.Provider.ArchiveDir };
             if (bSuccess)
             {
+#if NET46
                 if (IsOneof(destType, packageArchivedir, System.StringComparison.InvariantCultureIgnoreCase))
+#else
+                if (IsOneof(destType, packageArchivedir, System.StringComparison.OrdinalIgnoreCase))
+#endif
                 {
                     //strip off the trailing slash, so IO.Path.GetDirectoryName/GetFileName will return values correctly
                     destRoot = StripOffTrailingSlashes(destRoot);
 
                     string dir = IO.Path.GetDirectoryName(destRoot);
                     string dirUri = ConvertAbsPhysicalPathToAbsUriPath(dir);
+#if NET46
                     if (IsOneof(destType, ArchiveDirOnly, System.StringComparison.InvariantCultureIgnoreCase))
+#else
+                    if (IsOneof(destType, ArchiveDirOnly, System.StringComparison.OrdinalIgnoreCase))
+#endif
                         strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_SucceedArchiveDir, string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
                     else
                         strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_SucceedPackage, IO.Path.GetFileName(destRoot), string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
@@ -666,7 +709,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             else
             {
+#if NET46
                 if (IsOneof(destType, packageArchivedir, System.StringComparison.InvariantCultureIgnoreCase))
+#else
+                if (IsOneof(destType, packageArchivedir, System.StringComparison.OrdinalIgnoreCase))
+#endif
                 {
                     strSucceedFailMsg = Resources.VSMSDEPLOY_FailedPackage;
                 }
@@ -695,8 +742,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             // Deployment.DeploymentWellKnownProvider wellKnownProvider =  Deployment.DeploymentWellKnownProvider.Unknown;
             System.Type DeploymentWellKnownProviderType = MSWebDeploymentAssembly.DynamicAssembly.GetType(MSDeploy.TypeName.DeploymentWellKnownProvider);
             dynamic wellKnownProvider = MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, "Unknown");
-
+#if NET46
             if (string.Compare(destType, MSDeploy.Provider.DbDacFx, System.StringComparison.InvariantCultureIgnoreCase) != 0)
+#else
+            if (string.Compare(destType, MSDeploy.Provider.DbDacFx, System.StringComparison.OrdinalIgnoreCase) != 0)
+#endif
             {
                 try
                 {
@@ -1320,7 +1370,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public static bool IsDeploymentWellKnownProvider(string strProvider)
         {
+#if NET46
             if (string.Compare(strProvider, MSDeploy.Provider.DbDacFx, System.StringComparison.InvariantCultureIgnoreCase) == 0)
+#else
+            if (string.Compare(strProvider, MSDeploy.Provider.DbDacFx, System.StringComparison.OrdinalIgnoreCase) == 0)
+#endif
             {
                 return true;
             }
@@ -1494,11 +1548,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         internal static bool IsType(System.Type type, System.Type checkType)
         {
+#if NET46
             if (checkType!=null && 
                 (type == checkType || type.IsSubclassOf(checkType)))
             {
                 return true;
             }
+#endif
             return false;
         }
 
@@ -1546,7 +1602,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         lastDeploymentException = rootException;
                 }
 
-
+#if NET46
                 bool isWebException = rootException is System.Net.WebException;
                 if (isWebException)
                 {
@@ -1640,6 +1696,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         }
                     }
                 }
+#endif
             }
 
             if (e.InnerException == null)
@@ -1681,7 +1738,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
         internal class PriorityIndexComparer : Generic.IComparer<Generic.KeyValuePair<int, int>>
         {
-            #region IComparer<KeyValuePair<int,int>> Members
+#region IComparer<KeyValuePair<int,int>> Members
             public int Compare(System.Collections.Generic.KeyValuePair<int, int> x, System.Collections.Generic.KeyValuePair<int, int> y)
             {
                 if (x.Key == y.Key)
@@ -1693,7 +1750,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     return x.Key - y.Key;
                 }
             }
-            #endregion
+#endregion
         }
 
         static public string StripOffTrailingSlashes(string str)
@@ -1797,6 +1854,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     MSWebDeploymentAssembly.SetVersion(version);
 
                     System.Version webDelegationAssemblyVersion = version;
+#if NET46
                     if (MSWebDeploymentAssembly.DynamicAssembly != null && MSWebDeploymentAssembly.DynamicAssembly.Assembly != null)
                     {
                         foreach (System.Reflection.AssemblyName assemblyName in MSWebDeploymentAssembly.DynamicAssembly.Assembly.GetReferencedAssemblies())
@@ -1808,7 +1866,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             }
                         }
                     }
-
+#endif
                     MSWebDelegationAssembly.SetVersion(webDelegationAssemblyVersion);
                     task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDeploymentAssembly.DynamicAssembly.AssemblyFullName));
                     task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDelegationAssembly.DynamicAssembly.AssemblyFullName));
@@ -1871,6 +1929,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         public static string GetFullUserAgentString(string userAgent)
         {
+#if NET46
             if(string.IsNullOrEmpty(userAgent))
                 return null;
             try 
@@ -1885,6 +1944,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 Debug.Assert(false, "Error getting WTE version");
             }
+#endif
             return userAgent;
         }
 
@@ -1897,7 +1957,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public static bool ItemFilterPipelineMetadata(Framework.ITaskItem item, string metadataName, string metadataValue, bool fIgnoreCase)
         {
+#if NET46
             return (string.Compare(item.GetMetadata(metadataName), metadataValue, fIgnoreCase, CultureInfo.InvariantCulture) == 0);
+#else
+            return (string.Compare(item.GetMetadata(metadataName), metadataValue, fIgnoreCase) == 0);
+#endif
+
         }
 
         public static bool ItemFilterExcludeTrue(Framework.ITaskItem iTaskItem)
