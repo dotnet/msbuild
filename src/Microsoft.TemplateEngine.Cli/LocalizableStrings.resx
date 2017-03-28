@@ -412,4 +412,13 @@
   <data name="AllowScriptsYesChoice" xml:space="preserve">
     <value>Allow scripts to run</value>
   </data>
+  <data name="PostActionCommand" xml:space="preserve">
+    <value>Actual command:</value>
+  </data>
+  <data name="PostActionDescription" xml:space="preserve">
+    <value>Description:</value>
+  </data>
+  <data name="PostActionInstructions" xml:space="preserve">
+    <value>Manual instructions:</value>
+  </data>
 </root>
