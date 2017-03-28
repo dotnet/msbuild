@@ -39,8 +39,8 @@ namespace Microsoft.Build.Internal
                 // load.
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
-
-                Reader = GetXmlReader(_streamReader, out var detectedEncoding);
+                Encoding detectedEncoding;
+                Reader = GetXmlReader(_streamReader, out detectedEncoding);
 
                 // Override detected encoding if an XML encoding attribute is specified and that encoding is sufficiently
                 // different from the detected encoding.
