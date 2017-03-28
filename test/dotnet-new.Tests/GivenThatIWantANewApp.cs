@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"{type} --name {projectName} -o .")
+                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive")
                 .Should().Pass();
 
             new RestoreCommand()
