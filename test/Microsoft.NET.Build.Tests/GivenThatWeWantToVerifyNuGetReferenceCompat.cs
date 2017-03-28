@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 TestProject dependencyProject = GetTestProject(DependencyProjectNamePrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
                 dependencyProject.PublishedNuGetPackageLibrary = new PackageReference(dependencyProject.Name, "1.0.0",
-                        Path.Combine(RepoInfo.BinPath, "Debug", "Tests", nameof(Nuget_reference_compat) + identifier, dependencyProject.Name, dependencyProject.Name, "bin", "Debug"));
+                        Path.Combine(RepoInfo.GetBaseDirectory(), nameof(Nuget_reference_compat) + identifier, dependencyProject.Name, dependencyProject.Name, "bin", "Debug"));
                 referencerProject.ReferencedProjects.Add(dependencyProject);
                 dependencyProjects.Add(dependencyProject);
                 //  Remove the cached NuGet package if it exists

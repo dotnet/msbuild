@@ -114,7 +114,7 @@ namespace Microsoft.NET.TestFramework
             return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
 
-        private static string GetBaseDirectory()
+        public static string GetBaseDirectory()
         {
 #if NET451
             string directory = AppDomain.CurrentDomain.BaseDirectory;
