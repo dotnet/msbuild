@@ -26,7 +26,6 @@ namespace Microsoft.Build.Internal
         }
 
         private static readonly Encoding s_utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-        private readonly Encoding _encoding;
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
 
@@ -41,13 +40,16 @@ namespace Microsoft.Build.Internal
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
 
-                Reader = GetXmlReader(_streamReader, out _encoding);
+                Reader = GetXmlReader(_streamReader, out var detectedEncoding);
 
-                // Override detected encoding if xml encoding attribute is specified
-                var encodingAttribute = Reader.GetAttribute("encoding");
-                _encoding = !string.IsNullOrEmpty(encodingAttribute)
-                    ? Encoding.GetEncoding(encodingAttribute)
-                    : _encoding;
+                // Override detected encoding if an XML encoding attribute is specified and that encoding is sufficiently
+                // different from the detected encoding.
+                // Note: Using SimilarToEncoding to ensure that if the encoding is specified "utf-8" but the detected
+                // encoding is UTF w/o BOM use the detected encoding and not utf-8 which will add a BOM on save.
+                var encodingFromAttribute = GetEncodingFromAttribute(Reader);
+                Encoding = encodingFromAttribute != null && !detectedEncoding.SimilarToEncoding(encodingFromAttribute)
+                    ? encodingFromAttribute
+                    : detectedEncoding;
             }
             catch
             {
@@ -60,7 +62,7 @@ namespace Microsoft.Build.Internal
 
         internal XmlReader Reader { get; }
 
-        internal Encoding Encoding => _encoding;
+        internal Encoding Encoding { get; }
 
         public void Dispose()
         {
@@ -107,6 +109,20 @@ namespace Microsoft.Build.Internal
 
             return xr;
 #endif
+        }
+
+        /// <summary>
+        /// Get the Encoding type from the XML declaration tag
+        /// </summary>
+        /// <param name="reader">XML Reader object</param>
+        /// <returns>Encoding if specified, else null.</returns>
+        private static Encoding GetEncodingFromAttribute(XmlReader reader)
+        {
+            var encodingAttributeString = reader.GetAttribute("encoding");
+
+            return !string.IsNullOrEmpty(encodingAttributeString)
+                ? Encoding.GetEncoding(encodingAttributeString)
+                : null;
         }
     }
 }

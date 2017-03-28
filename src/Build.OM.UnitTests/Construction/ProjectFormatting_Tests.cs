@@ -622,48 +622,58 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         [Fact]
         public void ProjectFileWithBomContainsBomAfterSave()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"<Project />");
-
-            var file = FileUtilities.GetTemporaryFile(".proj");
-            try
-            {
-                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-                Assert.True(EncodingUtilities.FileStartsWithPreamble(file));
-
-                // Load and manipulate/save the project
-                var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
-                project.AddItem("Compile", "Program.cs");
-                project.Save();
-
-                // Ensure the file was really saved and that the file still contains a BOM
-                Assert.Contains("<Compile Include=\"Program.cs\" />", File.ReadAllText(file));
-                Assert.True(EncodingUtilities.FileStartsWithPreamble(file));
-            }
-            finally
-            {
-                FileUtilities.DeleteDirectoryNoThrow(Path.GetDirectoryName(file), false);
-            }
+            CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: true);
         }
 
         [Fact]
         public void ProjectFileWithoutBomDoesNotContainsBomAfterSave()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"<Project><Target Name=""Build""/></Project>");
+            CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: false);
+        }
+
+        [Fact]
+        public void ProjectFileWithoutBomWithXmlDeclarationDoesNotContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: false);
+        }
+
+        [Fact]
+        public void ProjectFileWithBomWithXmlDeclarationContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: true);
+        }
+
+        private static void CreateProjectAndAssertEncoding(bool xmlDeclaration, bool byteOrderMark)
+        {
+            string declaration = @"<?xml version=""1.0"" encoding=""utf-8""?>";
+
+            string content = xmlDeclaration ? declaration : string.Empty;
+            content += @"<Project><Target Name=""Build""/></Project>";
+            content = ObjectModelHelpers.CleanupFileContents(content);
 
             var file = FileUtilities.GetTemporaryFile(".proj");
             try
             {
-                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                Assert.False(EncodingUtilities.FileStartsWithPreamble(file));
+                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: byteOrderMark));
+                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
 
                 // Load and manipulate/save the project
                 var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
                 project.AddItem("Compile", "Program.cs");
                 project.Save();
 
-                // Ensure the file was really saved and that the file still contains a BOM
-                Assert.Contains("<Compile Include=\"Program.cs\" />", File.ReadAllText(file));
-                Assert.False(EncodingUtilities.FileStartsWithPreamble(file));
+                // Ensure the file was really saved and that the presence of a BOM has not changed
+                string actualContents = File.ReadAllText(file);
+                Assert.Contains("<Compile Include=\"Program.cs\" />", actualContents);
+                if (xmlDeclaration)
+                {
+                    Assert.Contains(declaration, actualContents);
+                }
+                else
+                {
+                    Assert.DoesNotContain(declaration, actualContents);
+                }
+                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
             }
             finally
             {
