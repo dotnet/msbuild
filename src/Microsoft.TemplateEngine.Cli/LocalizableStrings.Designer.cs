@@ -696,7 +696,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Actual command:.
+        ///   Looks up a localized string similar to Actual command: {0}.
         /// </summary>
         public static string PostActionCommand {
             get {
@@ -705,7 +705,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Description:.
+        ///   Looks up a localized string similar to Description: {0}.
         /// </summary>
         public static string PostActionDescription {
             get {
@@ -714,7 +714,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Manual instructions:.
+        ///   Looks up a localized string similar to Manual instructions: {0}.
         /// </summary>
         public static string PostActionInstructions {
             get {

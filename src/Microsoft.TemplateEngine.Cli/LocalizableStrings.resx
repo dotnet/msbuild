@@ -413,12 +413,12 @@
     <value>Allow scripts to run</value>
   </data>
   <data name="PostActionCommand" xml:space="preserve">
-    <value>Actual command:</value>
+    <value>Actual command: {0}</value>
   </data>
   <data name="PostActionDescription" xml:space="preserve">
-    <value>Description:</value>
+    <value>Description: {0}</value>
   </data>
   <data name="PostActionInstructions" xml:space="preserve">
-    <value>Manual instructions:</value>
+    <value>Manual instructions: {0}</value>
   </data>
 </root>
