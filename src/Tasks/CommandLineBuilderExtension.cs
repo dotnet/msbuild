@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrow
             (
                 treatAsFlags == null ||
-                (metadataNames.Length == treatAsFlags.Length),
+                (metadataNames != null && metadataNames.Length == treatAsFlags.Length),
                 "metadataNames and treatAsFlags should have the same length."
             );
 

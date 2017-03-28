@@ -2873,7 +2873,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private static void ExtractSdkDiskRootsFromEnvironment(List<string> diskRoots, string directoryRoots)
         {
-            if (!String.IsNullOrEmpty(directoryRoots))
+            if (diskRoots != null && !String.IsNullOrEmpty(directoryRoots))
             {
                 string[] splitRoots = directoryRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
                 ErrorUtilities.DebugTraceMessage("ExtractSdkDiskRootsFromEnvironment", "DiskRoots from Registry '{0}'", String.Join(";", splitRoots));
