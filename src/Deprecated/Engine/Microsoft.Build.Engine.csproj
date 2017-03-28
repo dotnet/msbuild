@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Microsoft.Build.Engine</AssemblyName>
     <RootNamespace>Microsoft.Build.Engine</RootNamespace>
-    <NoWarn>$(NoWarn);618</NoWarn>
+    <NoWarn>$(NoWarn);618;612</NoWarn>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -199,20 +199,16 @@
     <Compile Include="Shared\XMakeAttributes.cs" />
     <Compile Include="Shared\XMakeElements.cs" />
     <Compile Include="Shared\XmlUtilities.cs" />
-
     <!-- Resource Files -->
-
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-
     <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    
     <!-- Assemblies Files we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Data" />
