@@ -11,6 +11,8 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Xml.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -159,6 +161,120 @@ public static class Program
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello from a netcoreapp2.0.!");
+        }
+
+        [Fact]
+        public void Conflicts_are_resolved_when_publishing_a_portable_app()
+        {
+            Conflicts_are_resolved_when_publishing(false);
+        }
+
+        [Fact]
+        public void Conflicts_are_resolved_when_publishing_a_self_contained_app()
+        {
+            Conflicts_are_resolved_when_publishing(true);
+        }
+
+        void Conflicts_are_resolved_when_publishing(bool selfContained, [CallerMemberName] string callingMethod = "")
+        {
+            var targetFramework = "netcoreapp2.0";
+            var rid = selfContained ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
+
+            TestProject testProject = new TestProject()
+            {
+                Name = selfContained ? "SelfContainedWithConflicts" : "PortableWithConflicts",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                RuntimeIdentifier = rid,
+                IsExe = true,
+            };
+
+            string outputMessage = $"Hello from {testProject.Name}!";
+
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(""" + outputMessage + @""");
+    }
+}
+";
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, "SelfContainedPublishConflicts")
+                .WithProjectChanges(p =>
+                {
+
+                    var ns = p.Root.Name.Namespace;
+
+                    //  Note: if you want to see how this fails when conflicts are not resolved, set the DisableHandlePackageFileConflicts property to true, like this:
+                    //  p.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "DisableHandlePackageFileConflicts", "True"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "System.Xml.XDocument"),
+                        new XAttribute("Version", "4.3.0")));
+
+                })
+                .Restore(testProject.Name);
+
+            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework: targetFramework,
+                runtimeIdentifier: rid ?? string.Empty);
+
+            ICommand runCommand;
+
+            if (selfContained)
+            {
+                var selfContainedExecutable = testProject.Name + Constants.ExeSuffix;
+
+                string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
+
+                var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
+
+                publishDirectory.Should().HaveFiles(new[] {
+                    selfContainedExecutable,
+                    $"{testProject.Name}.dll",
+                    $"{testProject.Name}.pdb",
+                    $"{testProject.Name}.deps.json",
+                    $"{testProject.Name}.runtimeconfig.json",
+                    $"{libPrefix}coreclr{Constants.DynamicLibSuffix}",
+                    $"{libPrefix}hostfxr{Constants.DynamicLibSuffix}",
+                    $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                    $"mscorlib.dll",
+                    $"System.Private.CoreLib.dll",
+                });
+
+                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { })
+                    .EnsureExecutable();
+            }
+
+            else
+            {
+                publishDirectory.Should().OnlyHaveFiles(new[] {
+                    $"{testProject.Name}.dll",
+                    $"{testProject.Name}.pdb",
+                    $"{testProject.Name}.deps.json",
+                    $"{testProject.Name}.runtimeconfig.json"
+                });
+
+                runCommand = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
+            }
+
+            runCommand
+                    .CaptureStdOut()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining(outputMessage);
+
         }
 
         [Fact]
