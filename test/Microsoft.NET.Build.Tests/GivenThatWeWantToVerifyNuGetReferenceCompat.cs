@@ -16,9 +16,6 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest
     {
-        private static string DependencyProjectNamePrefix = "Dep_";
-        private static string ReferenceProjectName = "Reference";
-
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
@@ -50,25 +47,19 @@ namespace Microsoft.NET.Build.Tests
         //[InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
 
         public void Nuget_reference_compat(string referencerTarget, string testIDPostFix, string rawDependencyTargets,
-            bool restoreSucceeds, bool buildSucceeds)
+                bool restoreSucceeds, bool buildSucceeds)
         {
-            string identifier = "_" + referencerTarget + "_" + testIDPostFix;
+            string referencerTestDirectoryIdentifier = "_" + referencerTarget + "_" + testIDPostFix;
+            string dependencyNuGetSharedDirectoryIdentifier = "_NuGetDependencies";
 
-            TestProject referencerProject = GetTestProject(ReferenceProjectName, referencerTarget, true);
+            TestProject referencerProject = GetTestProject("Reference", referencerTarget, true);
 
-            List<TestProject> dependencyProjects = new List<TestProject>();
             foreach (string dependencyTarget in rawDependencyTargets.Split(',', ';', ' ').ToList())
             {
-                TestProject dependencyProject = GetTestProject(DependencyProjectNamePrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
+                TestProject dependencyProject = GetTestProject(dependencyTarget.Replace('.', '_'), dependencyTarget, true);
                 dependencyProject.PublishedNuGetPackageLibrary = new PackageReference(dependencyProject.Name, "1.0.0",
-                        Path.Combine(RepoInfo.GetBaseDirectory(), nameof(Nuget_reference_compat) + identifier, dependencyProject.Name, dependencyProject.Name, "bin", "Debug"));
+                        Path.Combine(RepoInfo.GetBaseDirectory(), nameof(Nuget_reference_compat) + dependencyNuGetSharedDirectoryIdentifier, dependencyProject.Name, dependencyProject.Name, "bin", "Debug"));
                 referencerProject.ReferencedProjects.Add(dependencyProject);
-                dependencyProjects.Add(dependencyProject);
-                //  Remove the cached NuGet package if it exists
-                if (Directory.Exists(Path.Combine(RepoInfo.NuGetCachePath, dependencyProject.Name)))
-                {
-                    Directory.Delete(Path.Combine(RepoInfo.NuGetCachePath, dependencyProject.Name), true);
-                }
             }
 
             //  Skip running .NET Framework tests if not running on Windows
@@ -88,21 +79,27 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Create the NuGet packages
-            foreach (TestProject dependencyProject in dependencyProjects)
+            //      To force the regeneration of the NuGet package on manual re-run:
+            //          1. Delete the previously generated NuGet package
+            //          2. Delete the cached NuGet package
+            foreach (TestProject dependencyProject in referencerProject.ReferencedProjects)
             {
-                var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, nameof(Nuget_reference_compat), identifier);
-                var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
-                var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
+                if (!NuGetPackageExists(dependencyProject))
+                {
+                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, nameof(Nuget_reference_compat), dependencyNuGetSharedDirectoryIdentifier);
+                    var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
+                    var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
 
-                var dependencyBuildCommand = new BuildCommand(Stage0MSBuild, dependencyProjectDirectory);
-                var dependencyBuildResult = dependencyBuildCommand.Execute().Should().Pass();
+                    var dependencyBuildCommand = new BuildCommand(Stage0MSBuild, dependencyProjectDirectory);
+                    var dependencyBuildResult = dependencyBuildCommand.Execute().Should().Pass();
 
-                var dependencyPackCommand = new PackCommand(Stage0MSBuild, dependencyProjectDirectory);
-                var dependencyPackResult = dependencyPackCommand.Execute().Should().Pass();
+                    var dependencyPackCommand = new PackCommand(Stage0MSBuild, dependencyProjectDirectory);
+                    var dependencyPackResult = dependencyPackCommand.Execute().Should().Pass();
+                }
             }
 
             //  Create the referencing app and run the compat test
-            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(Nuget_reference_compat), identifier);
+            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(Nuget_reference_compat), referencerTestDirectoryIdentifier);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the NuGet packages just created
@@ -129,8 +126,7 @@ namespace Microsoft.NET.Build.Tests
             }
             else
             {
-                referencerBuildResult.Should().Fail()
-                    .And.HaveStdOutContaining("It cannot be referenced by a project that targets");
+                referencerBuildResult.Should().Fail().And.HaveStdOutContaining("It cannot be referenced by a project that targets");
             }
         }
 
@@ -161,8 +157,14 @@ namespace Microsoft.NET.Build.Tests
 
         bool AllProjectsBuildOnNonWindows(TestProject referencerProject)
         {
-
             return (referencerProject.BuildsOnNonWindows && referencerProject.ReferencedProjects.All(rp => rp.BuildsOnNonWindows));
         }
+
+        bool NuGetPackageExists(TestProject dependencyProject)
+        {
+            return File.Exists(Path.Combine(dependencyProject.PublishedNuGetPackageLibrary.LocalPath,
+                    String.Concat(dependencyProject.PublishedNuGetPackageLibrary.ID + "." + dependencyProject.PublishedNuGetPackageLibrary.Version + ".nupkg"))) ;
+        }
+
     }
 }
