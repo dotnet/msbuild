@@ -298,5 +298,22 @@
     "kind": "file_contains",
     "path": "Test.css",
     "text": "/*Stuff*/"
+  },
+  //Renames
+  {
+    "kind": "file_exists",
+    "path": "RenameBattery/B.txt"
+  },
+  {
+    "kind": "file_exists",
+    "path": "RenameBattery/D.txt"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "RenameBattery/A.txt"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "RenameBattery/C.txt"
   }
 ]
