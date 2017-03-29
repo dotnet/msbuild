@@ -58,25 +58,20 @@ namespace Microsoft.NET.Build.Tests
         }
     }
 
-    [CollectionDefinition("GivenThatWeWantToVerifyNuGetReferenceCompat Fixture Collection")]
+    [CollectionDefinition("GivenThatWeWantToVerifyNuGetReferenceCompatFixture Collection")]
     public class GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection : ICollectionFixture<GivenThatWeWantToVerifyNuGetReferenceCompatFixture>
+    { }
+
+    [Collection("GivenThatWeWantToVerifyNuGetReferenceCompatFixture Collection")]
+    public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest
     {
+        GivenThatWeWantToVerifyNuGetReferenceCompatFixture fixture;
 
-    }
-
-    [Collection("GivenThatWeWantToVerifyNuGetReferenceCompat Fixture Collection")]
-    public class GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollectionClass
-    {
-        GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection fixture;
-
-        public GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollectionClass(GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection fixture)
+        public GivenThatWeWantToVerifyNuGetReferenceCompat(GivenThatWeWantToVerifyNuGetReferenceCompatFixture fixture)
         {
             this.fixture = fixture;
         }
-    }
 
-    public class GivenThatWeWantToVerifyNuGetReferenceCompat : IClassFixture<GivenThatWeWantToVerifyNuGetReferenceCompatFixture>
-    {
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
@@ -110,9 +105,6 @@ namespace Microsoft.NET.Build.Tests
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
-            SdkTest sdkTest = new SdkTest();
-            TestAssetsManager testAssetsManager = new TestAssetsManager();
-
             string referencerDirectoryIdentifierPostfix = "_" + referencerTarget + "_" + testDescription;
 
             TestProject referencerProject = GetTestProject(ConstantStringValues.ReferencerBaseDirectory, referencerTarget, true);
@@ -146,7 +138,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 if (!NuGetPackageExists(dependencyProject))
                 {
-                    var dependencyTestAsset = testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.IdentifierDirectoryPrefix, ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix);
+                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.IdentifierDirectoryPrefix, ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix);
                     var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
                     var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
 
@@ -159,7 +151,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Create the referencing app and run the compat test
-            var referencerTestAsset = testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
+            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the NuGet packages just created
@@ -223,7 +215,7 @@ namespace Microsoft.NET.Build.Tests
         bool NuGetPackageExists(TestProject dependencyProject)
         {
             return File.Exists(Path.Combine(dependencyProject.PublishedNuGetPackageLibrary.LocalPath,
-                    String.Concat(dependencyProject.PublishedNuGetPackageLibrary.ID + "." + dependencyProject.PublishedNuGetPackageLibrary.Version + ".nupkg"))) ;
+                    String.Concat(dependencyProject.PublishedNuGetPackageLibrary.ID + "." + dependencyProject.PublishedNuGetPackageLibrary.Version + ".nupkg")));
         }
 
         string ConstructNuGetPackageReferencePath(TestProject dependencyProject)
