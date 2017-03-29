@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class ConstantValues
+    public class ConstantStringValues
     {
         public static string IdentifierDirectoryPrefix = "Nuget_reference_compat";
         public static string ReferencerBaseDirectory = "Reference";
@@ -23,20 +23,30 @@ namespace Microsoft.NET.Build.Tests
         public static string DependencyPrefix = "D_";
     }
 
-    public class Initilize : SdkTest
+    public class GivenThatWeWantToVerifyNuGetReferenceCompatFixture : IDisposable
     {
-        public Initilize()
+        public GivenThatWeWantToVerifyNuGetReferenceCompatFixture()
+        {
+            DeleteNuGetArtifacts();
+        }
+
+        public void Dispose()
+        {
+            DeleteNuGetArtifacts();
+        }
+
+        private void DeleteNuGetArtifacts()
         {
             try
             {
                 //  Delete the shared NuGet package directory before running all the tests.
-                string directory = Path.Combine(RepoInfo.GetBaseDirectory(), ConstantValues.IdentifierDirectoryPrefix + ConstantValues.NuGetSharedDirectoryIdentifierPostfix);
+                string directory = Path.Combine(RepoInfo.GetBaseDirectory(), ConstantStringValues.IdentifierDirectoryPrefix + ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix);
                 if (Directory.Exists(directory))
                 {
                     Directory.Delete(directory, true);
                 }
                 //  Delete the generated NuGet packages in the cache.
-                foreach (string dir in Directory.EnumerateDirectories(RepoInfo.NuGetCachePath, ConstantValues.DependencyPrefix + "*"))
+                foreach (string dir in Directory.EnumerateDirectories(RepoInfo.NuGetCachePath, ConstantStringValues.DependencyPrefix + "*"))
                 {
                     Directory.Delete(dir, true);
                 }
@@ -48,8 +58,24 @@ namespace Microsoft.NET.Build.Tests
         }
     }
 
+    [CollectionDefinition("GivenThatWeWantToVerifyNuGetReferenceCompat Fixture Collection")]
+    public class GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection : ICollectionFixture<GivenThatWeWantToVerifyNuGetReferenceCompatFixture>
+    {
 
-    public class GivenThatWeWantToVerifyNuGetReferenceCompat : Initilize
+    }
+
+    [Collection("GivenThatWeWantToVerifyNuGetReferenceCompat Fixture Collection")]
+    public class GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollectionClass
+    {
+        GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection fixture;
+
+        public GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollectionClass(GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection fixture)
+        {
+            this.fixture = fixture;
+        }
+    }
+
+    public class GivenThatWeWantToVerifyNuGetReferenceCompat : IClassFixture<GivenThatWeWantToVerifyNuGetReferenceCompatFixture>
     {
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
@@ -84,13 +110,19 @@ namespace Microsoft.NET.Build.Tests
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
+            //  Imported from the Sdktest class
+            TestAssetsManager testAssetsManager = new TestAssetsManager();
+            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
+            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
+            bool usingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
+
             string referencerDirectoryIdentifierPostfix = "_" + referencerTarget + "_" + testDescription;
 
-            TestProject referencerProject = GetTestProject(ConstantValues.ReferencerBaseDirectory, referencerTarget, true);
+            TestProject referencerProject = GetTestProject(ConstantStringValues.ReferencerBaseDirectory, referencerTarget, true);
 
             foreach (string dependencyTarget in rawDependencyTargets.Split(',', ';', ' ').ToList())
             {
-                TestProject dependencyProject = GetTestProject(ConstantValues.DependencyPrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
+                TestProject dependencyProject = GetTestProject(ConstantStringValues.DependencyPrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
                 dependencyProject.PublishedNuGetPackageLibrary = new PackageReference(dependencyProject.Name, "1.0.0", ConstructNuGetPackageReferencePath(dependencyProject));
                 referencerProject.ReferencedProjects.Add(dependencyProject);
             }
@@ -106,7 +138,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Set the referencer project as an Exe unless it targets .NET Standard
-            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains(ConstantValues.NetstandardToken))
+            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains(ConstantStringValues.NetstandardToken))
             {
                 referencerProject.IsExe = true;
             }
@@ -117,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 if (!NuGetPackageExists(dependencyProject))
                 {
-                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantValues.IdentifierDirectoryPrefix, ConstantValues.NuGetSharedDirectoryIdentifierPostfix);
+                    var dependencyTestAsset = testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.IdentifierDirectoryPrefix, ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix);
                     var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
                     var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
 
@@ -130,7 +162,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Create the referencing app and run the compat test
-            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
+            var referencerTestAsset = testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the NuGet packages just created
@@ -158,6 +190,12 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 referencerBuildResult.Should().Fail().And.HaveStdOutContaining("It cannot be referenced by a project that targets");
+            }
+
+            //  Imported from the Sdktest class
+            if (!usingFullFrameworkMSBuild)
+            {
+                testAssetsManager.ValidateDestinationDirectories();
             }
         }
 
@@ -199,7 +237,7 @@ namespace Microsoft.NET.Build.Tests
 
         string ConstructNuGetPackageReferencePath(TestProject dependencyProject)
         {
-            return Path.Combine(RepoInfo.GetBaseDirectory(), ConstantValues.IdentifierDirectoryPrefix + ConstantValues.NuGetSharedDirectoryIdentifierPostfix, dependencyProject.Name, dependencyProject.Name, "bin", "Debug");
+            return Path.Combine(RepoInfo.GetBaseDirectory(), ConstantStringValues.IdentifierDirectoryPrefix + ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix, dependencyProject.Name, dependencyProject.Name, "bin", "Debug");
         }
 
     }
