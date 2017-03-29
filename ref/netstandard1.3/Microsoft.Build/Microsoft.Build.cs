@@ -254,7 +254,7 @@ namespace Microsoft.Build.Construction
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemGroupElement> ItemGroups { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemGroupElement> ItemGroupsReversed { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemElement> Items { get { throw null; } }
-        public System.DateTime LastWriteTimeWhenRead { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public System.DateTime LastWriteTimeWhenRead { get { throw null; } }
         public bool PreserveFormatting { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation ProjectFileLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyElement> Properties { get { throw null; } }
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Construction
         public string Sdk { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public Microsoft.Build.Construction.ElementLocation SdkLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectTargetElement> Targets { get { throw null; } }
-        public System.DateTime TimeLastChanged { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public System.DateTime TimeLastChanged { get { throw null; } }
         public string ToolsVersion { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public Microsoft.Build.Construction.ElementLocation ToolsVersionLocation { get { throw null; } }
         public string TreatAsLocalProperty { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
@@ -488,10 +488,12 @@ namespace Microsoft.Build.Evaluation
 {
     public partial class GlobResult
     {
-        public GlobResult(Microsoft.Build.Construction.ProjectItemElement itemElement, string glob, System.Collections.Generic.IEnumerable<string> excludes) { }
+        internal GlobResult() { }
         public System.Collections.Generic.IEnumerable<string> Excludes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string Glob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Collections.Generic.IEnumerable<string> IncludeGlobs { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectItemElement ItemElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Globbing.IMSBuildGlob MsBuildGlob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Collections.Generic.IEnumerable<string> Removes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     [System.FlagsAttribute]
     public enum NewProjectFileOptions
@@ -1325,6 +1327,55 @@ namespace Microsoft.Build.Execution
         Success = (byte)1,
     }
 }
+namespace Microsoft.Build.Globbing
+{
+    public partial class CompositeGlob : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        public CompositeGlob(params Microsoft.Build.Globbing.IMSBuildGlob[] globs) { }
+        public CompositeGlob(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { }
+        public System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> Globs { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+    }
+    public partial interface IMSBuildGlob
+    {
+        bool IsMatch(string stringToMatch);
+    }
+    public partial class MSBuildGlob : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        internal MSBuildGlob() { }
+        public string FilenamePart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FixedDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsLegal { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string WildcardDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+        public Microsoft.Build.Globbing.MSBuildGlob.MatchInfoResult MatchInfo(string stringToMatch) { throw null; }
+        public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }
+        public static Microsoft.Build.Globbing.MSBuildGlob Parse(string globRoot, string fileSpec) { throw null; }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct MatchInfoResult
+        {
+            public string FilenamePartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public string FixedDirectoryPartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public bool IsMatch { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public string WildcardDirectoryPartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        }
+    }
+    public partial class MSBuildGlobWithGaps : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        public MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, params Microsoft.Build.Globbing.IMSBuildGlob[] gaps) { }
+        public MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> gaps) { }
+        public Microsoft.Build.Globbing.IMSBuildGlob Gaps { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Globbing.IMSBuildGlob MainGlob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+    }
+}
+namespace Microsoft.Build.Globbing.Extensions
+{
+    public static partial class MSBuildGlobExtensions
+    {
+        public static System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.MSBuildGlob> GetParsedGlobs(this Microsoft.Build.Globbing.IMSBuildGlob glob) { throw null; }
+    }
+}
 namespace Microsoft.Build.Logging
 {
     public sealed partial class BinaryLogger : Microsoft.Build.Framework.ILogger
@@ -1334,6 +1385,11 @@ namespace Microsoft.Build.Logging
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
+    }
+    public sealed partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
+    {
+        public BinaryLogReplayEventSource() { }
+        public void Replay(string sourceFilePath) { }
     }
     public delegate void ColorResetter();
     public delegate void ColorSetter(System.ConsoleColor color);
@@ -1386,6 +1442,25 @@ namespace Microsoft.Build.Logging
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount) { }
         public void Shutdown() { }
+    }
+    public partial class EventArgsDispatcher : Microsoft.Build.Framework.IEventSource
+    {
+        public EventArgsDispatcher() { }
+        public event Microsoft.Build.Framework.AnyEventHandler AnyEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildFinishedEventHandler BuildFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildStartedEventHandler BuildStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.CustomBuildEventHandler CustomEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildErrorEventHandler ErrorRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildMessageEventHandler MessageRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.ProjectFinishedEventHandler ProjectFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.ProjectStartedEventHandler ProjectStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildStatusEventHandler StatusEventRaised { add { } remove { } }
+        public event Microsoft.Build.Framework.TargetFinishedEventHandler TargetFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.TargetStartedEventHandler TargetStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.TaskFinishedEventHandler TaskFinished { add { } remove { } }
+        public event Microsoft.Build.Framework.TaskStartedEventHandler TaskStarted { add { } remove { } }
+        public event Microsoft.Build.Framework.BuildWarningEventHandler WarningRaised { add { } remove { } }
+        public void Dispatch(Microsoft.Build.Framework.BuildEventArgs buildEvent) { }
     }
     public partial class FileLogger : Microsoft.Build.Logging.ConsoleLogger
     {

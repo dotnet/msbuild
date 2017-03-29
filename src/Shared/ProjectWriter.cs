@@ -118,8 +118,8 @@ namespace Microsoft.Build.Shared
             }
 
             // don't write an XML declaration unless the project already has one or has non-default encoding
-            _writeXmlDeclaration = (projectRootElementDeclaration != null) ||
-                                   (_documentEncoding != null && !Equals(_documentEncoding, Encoding.UTF8));
+            _writeXmlDeclaration = projectRootElementDeclaration != null ||
+                                   _documentEncoding != null && !_documentEncoding.IsUtf8Encoding();
         }
 
         /// <summary>

@@ -64,6 +64,17 @@ namespace Microsoft.Build.Tasks
         public bool UseResultsCache { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    [System.ObsoleteAttribute("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", true)]
+    public sealed partial class CodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
+    {
+        public CodeTaskFactory() { }
+        public string FactoryName { get { throw null; } }
+        public System.Type TaskType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public void CleanupTask(Microsoft.Build.Framework.ITask task) { }
+        public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+        public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
+        public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+    }
     public partial class CombinePath : Microsoft.Build.Tasks.TaskExtension
     {
         public CombinePath() { }
@@ -353,6 +364,8 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string FrameworkVersion46Path { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion47Path { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
         public string Path { get { throw null; } }
         public override bool Execute() { throw null; }
     }
@@ -636,6 +649,17 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get { throw null; } set { } }
         public bool WriteOnlyWhenDifferent { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
+    }
+    [System.ObsoleteAttribute("The XamlTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", true)]
+    public sealed partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory
+    {
+        public XamlTaskFactory() { }
+        public string FactoryName { get { throw null; } }
+        public System.Type TaskType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public void CleanupTask(Microsoft.Build.Framework.ITask task) { }
+        public Microsoft.Build.Framework.ITask CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
+        public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
+        public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
     }
     public partial class XmlPeek : Microsoft.Build.Tasks.TaskExtension
     {

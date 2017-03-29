@@ -12,21 +12,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.OM.UnitTests.Construction;
+using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 
 using Task = System.Threading.Tasks.Task;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
-using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Immutable.ImmutableHashSet<string>>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -3535,202 +3534,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "1.foo");
         }
 
+        public static IEnumerable<object[]> GetItemProvenanceShouldBeSensitiveToGlobbingConeTestData => GlobbingTestData.GlobbingConesTestData;
+
         [Theory]
-        // recursive globing cone is at the project directory
-        [InlineData(
-            // item include glob
-            "**/*.cs",
-            // argument to GetItemProvenance
-            "a/a.cs",
-            // subdirectory path the project file should be placed in, relative to the test directory root.
-            // Subdirs are necessary if .. appears in any of the test paths.
-            // This is to ensure that Path.GetFullpath has enough path fragments to eat into, and to keep the glob inside the test directory root
-            "", 
-            true // should GetItemProvenance find a match
-            )]
-        [InlineData(
-            "**/*.cs",
-            "../a/a.cs",
-            "ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is a superset of the project directory via relative path
-        [InlineData(
-            "../**/*.cs",
-            "../a/a.cs",
-            "ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../**/*.cs",
-            "a/a.cs",
-            "ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../**/*.cs",
-            "../../a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is a subset of the project directory via relative path
-        [InlineData(
-            "a/**/*.cs",
-            "b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/**/*.cs",
-            "a/b/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/**/*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // recursive globing cone is disjoint of the project directory via relative path
-        [InlineData(
-            "../a/**/*.cs",
-            "../a/b/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/**/*.cs",
-            "../b/c/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/**/*.cs",
-            "a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is at the project directory
-        [InlineData(
-            "a*a/*.cs",
-            "aba/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a*a/*.cs",
-            "aba/aba/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a*a/*.cs",
-            "../aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is inside the project directory
-        [InlineData(
-            "a/a*a/*.cs",
-            "a/aba/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/a*a/*.cs",
-            "a/aba/a/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/a*a/*.cs",
-            "../a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // directory name glob is disjoing to the project directory
-        [InlineData(
-            "../a/a*a/*.cs",
-            ".././a/aba/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/a*a/*.cs",
-            "../a/a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/a*a/*.cs",
-            "../../a/aba/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is at the project directory
-        [InlineData(
-            "*.cs",
-            "a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "*.cs",
-            "a/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is under the project directory
-        [InlineData(
-            "a/*.cs",
-            "a/a.cs",
-            "",
-            true
-            )]
-        [InlineData(
-            "a/*.cs",
-            "a/b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/*.cs",
-            "b/a.cs",
-            "",
-            false
-            )]
-        [InlineData(
-            "a/*.cs",
-            "../a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        // filename glob is disjoing to the project directory
-        [InlineData(
-            ".././a/*.cs",
-            "../a/a.cs",
-            "dir/ProjectDirectory",
-            true
-            )]
-        [InlineData(
-            "../a/*.cs",
-            "a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
-        [InlineData(
-            "../a/*.cs",
-            "../a/a/a.cs",
-            "dir/ProjectDirectory",
-            false
-            )]
+        [MemberData(nameof(GetItemProvenanceShouldBeSensitiveToGlobbingConeTestData))]
         public void GetItemProvenanceShouldBeSensitiveToGlobbingCone(string includeGlob, string getItemProvenanceArgument, string relativePathOfProjectFile, bool provenanceShouldFindAMatch)
         {
             var projectContents =
@@ -3750,15 +3557,31 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProvenanceResultTupleList expectedProvenance = null;
 
+                var provenanceKind = includeGlob.IndexOfAny(new[]{'*', '?'}) != -1  ? Provenance.Glob : Provenance.StringLiteral;
                 expectedProvenance = provenanceShouldFindAMatch
                     ? new ProvenanceResultTupleList
                     {
-                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1)
+                        Tuple.Create("A", Operation.Include, provenanceKind, 1)
                     }
                     : new ProvenanceResultTupleList();
 
                 AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(getItemProvenanceArgument));
             }
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldNotFindGlobsIfThereAreNoItemElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList();
+
+            AssertGlobResult(expected, project);
         }
 
         [Fact]
@@ -3798,32 +3621,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetAllGlobsResultsShouldBeInItemElementOrder()
-        {
-            var itemElements = Environment.ProcessorCount * 5;
-            var expected = new GlobResultList();
-
-            var project =
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    {0}
-                  </ItemGroup>
-                </Project>
-            ";
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < itemElements; i++)
-            {
-                sb.AppendLine($"<i_{i} Include=\"*\"/>");
-                expected.Add(Tuple.Create($"i_{i}", "*", ImmutableHashSet<string>.Empty));
-            }
-
-            project = string.Format(project, sb);
-
-            AssertGlobResult(expected, project);
-        }
-
-        [Fact]
         public void GetAllGlobsShouldFindDirectlyReferencedGlobs()
         {
             var project =
@@ -3835,16 +3632,99 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
+            var expectedIncludes = new[] { "*.a", "*", "**", "?a" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*.a", expectedExcludes),
-                Tuple.Create("A", "*", expectedExcludes),
-                Tuple.Create("A", "**", expectedExcludes),
-                Tuple.Create("A", "?a", expectedExcludes)
+                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet.Create<string>())
             };
 
             AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldFindAllExcludesAndRemoves()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*` Exclude=`e*`/>
+                    <A Remove=`a`/>
+                    <A Remove=`b`/>
+                    <A Include=`**` Exclude=`e**`/>
+                    <A Remove=`c`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", new []{"**"}, new [] {"e**"}.ToImmutableHashSet(), new [] {"c"}.ToImmutableHashSet()),
+                Tuple.Create("A", new []{"*"}, new [] {"e*"}.ToImmutableHashSet(), new [] {"c", "b", "a"}.ToImmutableHashSet()),
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Theory]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+//<A Remove=`e*;f*`/>
+//",
+//        new[] {"ba"},
+//        new[] {"a", "ca", "da", "ea", "fa"}
+//        )]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+//",
+//        new[] {"ba", "ea", "fa"},
+//        new[] {"a", "ca", "da"}
+//        )]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*`/>
+//",
+//        new[] {"ba", "ca", "da", "ea", "fa"},
+//        new[] {"a"}
+//        )]
+        [InlineData(
+            @"
+<E Include=`b`/>
+<R Include=`c`/>
+
+<A Include=`a*;b*;c*` Exclude=`@(E)`/>
+<A Remove=`@(R)`/>
+",
+        new[] {"aa", "bb", "cc"},
+        new[] {"b", "c"}
+        )]
+        public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
+        {
+            var projectTemplate =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var projectContents = string.Format(projectTemplate, itemContents);
+
+            var getAllGlobsResult = ObjectModelHelpers.CreateInMemoryProject(projectContents).GetAllGlobs();
+
+            var uberGlob = new CompositeGlob(getAllGlobsResult.Select(r => r.MsBuildGlob).ToImmutableArray());
+
+            foreach (var matchingString in stringsThatShouldMatch)
+            {
+                Assert.True(uberGlob.IsMatch(matchingString));
+            }
+
+            foreach (var nonMatchingString in stringsThatShouldNotMatch)
+            {
+                Assert.False(uberGlob.IsMatch(nonMatchingString));
+            }
         }
 
         [Fact]
@@ -3859,16 +3739,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
+            var expectedIncludes = new[] { "*.a", "*", "**" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*.a", expectedExcludes),
-                Tuple.Create("A", "*", expectedExcludes),
-                Tuple.Create("A", "**", expectedExcludes)
+                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet<string>.Empty)
             };
 
             AssertGlobResult(expected, project, "A");
-            AssertGlobResult(new GlobResultList(), project, "NotExistant");
+            AssertGlobResult(new GlobResultList(), project, "NotExistent");
         }
 
         [Fact]
@@ -3887,7 +3766,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new[] {"*"}.ToImmutableHashSet()),
+                Tuple.Create("A", new []{"*"}, new[] {"*"}.ToImmutableHashSet(), ImmutableHashSet<string>.Empty),
             };
 
             AssertGlobResult(expected, project);
@@ -3902,17 +3781,24 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <A Include=`*`/>
                     <B Include=`@(A)`/>
                     <C Include=`**` Exclude=`@(A)`/>
+                    <C Remove=`@(A)` />
                   </ItemGroup>
                 </Project>
                 ";
 
-            var expected = new GlobResultList
+            using (var testFiles = new Helpers.TestProjectWithFiles(project, new[] { "a", "b" }))
+            using (var projectCollection = new ProjectCollection())
             {
-                Tuple.Create("A", "*", ImmutableHashSet<string>.Empty),
-                Tuple.Create("C", "**", ImmutableHashSet<string>.Empty),
-            };
+                var globResult = new Project(testFiles.ProjectFile, null, MSBuildConstants.CurrentToolsVersion, projectCollection).GetAllGlobs();
 
-            AssertGlobResult(expected, project);
+                var expected = new GlobResultList
+                {
+                    Tuple.Create("C", new []{"**"}, new [] {"build.proj", "a", "b"}.ToImmutableHashSet(), new [] {"build.proj", "a", "b"}.ToImmutableHashSet()),
+                    Tuple.Create("A", new []{"*"}, ImmutableHashSet<string>.Empty, ImmutableHashSet<string>.Empty)
+                };
+
+                AssertGlobResultsEqual(expected, globResult);
+            }
         }
 
         private static void AssertGlobResult(GlobResultList expected, string project)
@@ -3934,8 +3820,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             for (var i = 0; i < expected.Count; i++)
             {
                 Assert.Equal(expected[i].Item1, globs[i].ItemElement.ItemType);
-                Assert.Equal(expected[i].Item2, globs[i].Glob);
+                Assert.Equal(expected[i].Item2, globs[i].IncludeGlobs);
                 Assert.Equal(expected[i].Item3, globs[i].Excludes);
+                Assert.Equal(expected[i].Item4, globs[i].Removes);
             }
         }
 

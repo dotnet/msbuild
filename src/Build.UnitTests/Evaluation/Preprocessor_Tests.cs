@@ -937,5 +937,33 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 }
             }
         }
+
+        /// <summary>
+        /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in 
+        /// two different folders both import "..\dir.props" or "$(Property)".  Those values will evaluate to different paths at run time
+        /// but the preprocessor builds a map of the imports.
+        /// </summary>
+        [Fact]
+        public void DuplicateUnevaluatedImports()
+        {
+            ProjectRootElement xml1 = ProjectRootElement.Create("p1");
+            ProjectRootElement xml2 = ProjectRootElement.Create("p2");
+            ProjectRootElement xml3 = ProjectRootElement.Create("p3");
+
+            xml1.AddProperty("Import", "p2");
+            xml2.AddProperty("Import", "p3");
+
+            // These imports are duplicates but for each project will evaluate to seperate projects.  We expect that to NOT break
+            // the preprocessor's internal mapping.
+            //
+            xml1.AddImport("$(Import)");
+            xml2.AddImport("$(Import)");
+
+            Project project = new Project(xml1);
+
+            StringWriter writer = new StringWriter();
+
+            project.SaveLogicalProject(writer);
+        }
     }
 }

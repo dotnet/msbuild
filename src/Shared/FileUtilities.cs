@@ -883,6 +883,11 @@ namespace Microsoft.Build.Shared
             return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
         }
 
+        internal static bool IsBinaryLogFilename(string filename)
+        {
+            return (String.Equals(Path.GetExtension(filename), ".binlog", PathComparison));
+        }
+
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
         /// Throws UriFormatException.
@@ -1014,6 +1019,11 @@ namespace Microsoft.Build.Shared
         internal static string ToSlash(this string s)
         {
             return s.Replace('\\', '/');
+        }
+
+        internal static string WithTrailingSlash(this string s)
+        {
+            return EnsureTrailingSlash(s);
         }
 
         internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();

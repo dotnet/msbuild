@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal
 {
@@ -17,13 +19,13 @@ namespace Microsoft.Build.Internal
         ///     Creates an XmlReaderExtension with handle to an XmlReader.
         /// </summary>
         /// <param name="filePath">Path to the file on disk.</param>
-        /// <returns>Disposable XmlReaderExtenion object.</returns>
+        /// <returns>Disposable XmlReaderExtension object.</returns>
         internal static XmlReaderExtension Create(string filePath)
         {
             return new XmlReaderExtension(filePath);
         }
 
-        private readonly Encoding _encoding;
+        private static readonly Encoding s_utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
 
@@ -31,15 +33,23 @@ namespace Microsoft.Build.Internal
         {
             try
             {
+                // Note: Passing in UTF8 w/o BOM into StreamReader. If the BOM is detected StreamReader will set the
+                // Encoding correctly (detectEncodingFromByteOrderMarks = true). The default is to use UTF8 (with BOM)
+                // which will cause the BOM to be added when we re-save the file in cases where it was not present on
+                // load.
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                _streamReader = new StreamReader(_stream, Encoding.UTF8, true);
-                Reader = GetXmlReader(_streamReader, out _encoding);
+                _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
+                Encoding detectedEncoding;
+                Reader = GetXmlReader(_streamReader, out detectedEncoding);
 
-                // Override detected encoding if xml encoding attribute is specified
-                var encodingAttribute = Reader.GetAttribute("encoding");
-                _encoding = !string.IsNullOrEmpty(encodingAttribute)
-                    ? Encoding.GetEncoding(encodingAttribute)
-                    : _encoding;
+                // Override detected encoding if an XML encoding attribute is specified and that encoding is sufficiently
+                // different from the detected encoding.
+                // Note: Using SimilarToEncoding to ensure that if the encoding is specified "utf-8" but the detected
+                // encoding is UTF w/o BOM use the detected encoding and not utf-8 which will add a BOM on save.
+                var encodingFromAttribute = GetEncodingFromAttribute(Reader);
+                Encoding = encodingFromAttribute != null && !detectedEncoding.SimilarToEncoding(encodingFromAttribute)
+                    ? encodingFromAttribute
+                    : detectedEncoding;
             }
             catch
             {
@@ -52,7 +62,7 @@ namespace Microsoft.Build.Internal
 
         internal XmlReader Reader { get; }
 
-        internal Encoding Encoding => _encoding;
+        internal Encoding Encoding { get; }
 
         public void Dispose()
         {
@@ -99,6 +109,20 @@ namespace Microsoft.Build.Internal
 
             return xr;
 #endif
+        }
+
+        /// <summary>
+        /// Get the Encoding type from the XML declaration tag
+        /// </summary>
+        /// <param name="reader">XML Reader object</param>
+        /// <returns>Encoding if specified, else null.</returns>
+        private static Encoding GetEncodingFromAttribute(XmlReader reader)
+        {
+            var encodingAttributeString = reader.GetAttribute("encoding");
+
+            return !string.IsNullOrEmpty(encodingAttributeString)
+                ? Encoding.GetEncoding(encodingAttributeString)
+                : null;
         }
     }
 }

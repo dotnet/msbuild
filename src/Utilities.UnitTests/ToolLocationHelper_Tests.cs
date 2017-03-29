@@ -159,8 +159,8 @@ namespace Microsoft.Build.UnitTests
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
 
-            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", "UnionMetadata");
-            Assert.False(returnValue.Contains("10.0.10586.0"));
+            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14393.0", "10.0.14393.0", "UnionMetadata");
+            Assert.False(returnValue.Contains("10.0.14393.0"));
             Assert.Equal(Path.Combine(sdkRootPath, "UnionMetadata"), returnValue);
         }
 
@@ -648,6 +648,8 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version40), FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV40);
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.VersionLatest), FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV40);
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkRootRegistryKey(TargetDotNetFrameworkVersion.VersionLatest), FrameworkLocationHelper.fullDotNetFrameworkRegistryKey);
+            Assert.Equal(ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Latest), FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV40);
+            Assert.Equal(ToolLocationHelper.GetDotNetFrameworkRootRegistryKey(TargetDotNetFrameworkVersion.Latest), FrameworkLocationHelper.fullDotNetFrameworkRegistryKey);
 
             Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11), FrameworkLocationHelper.PathToDotNetFrameworkV11);
             Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20), FrameworkLocationHelper.PathToDotNetFrameworkV20);
@@ -655,6 +657,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35), FrameworkLocationHelper.PathToDotNetFrameworkV35);
             Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40), FrameworkLocationHelper.PathToDotNetFrameworkV40);
             Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest), FrameworkLocationHelper.PathToDotNetFrameworkV40);
+            Assert.Equal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest), FrameworkLocationHelper.PathToDotNetFrameworkV40);
 
             Assert.Equal(
                     ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, UtilitiesDotNetFrameworkArchitecture.Bitness32),
@@ -679,6 +682,10 @@ namespace Microsoft.Build.UnitTests
                 );
             Assert.Equal(
                     ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, UtilitiesDotNetFrameworkArchitecture.Bitness32),
+                    FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32)
+                );
+            Assert.Equal(
+                    ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, UtilitiesDotNetFrameworkArchitecture.Bitness32),
                     FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32)
                 );
 
@@ -708,6 +715,10 @@ namespace Microsoft.Build.UnitTests
                     );
                 Assert.Equal(
                         ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, UtilitiesDotNetFrameworkArchitecture.Bitness64),
+                        FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness64)
+                    );
+                Assert.Equal(
+                        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, UtilitiesDotNetFrameworkArchitecture.Bitness64),
                         FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness64)
                     );
             }
@@ -814,6 +825,7 @@ namespace Microsoft.Build.UnitTests
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK461 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6.1\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK462 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6.2\WinSDK-NetFx40Tools-x86";
+            string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK47 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7\WinSDK-NetFx40Tools-x86";
 
             // v4.0
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK70A);
@@ -857,6 +869,15 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version110); });
             ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version120); });
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version150), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK462);
+
+            // v4.7
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version100); });
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version110); });
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version120); });
+            Assert.Equal(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version150), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK47);
+
+            // Latest (v4.7)
+            Assert.Equal(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version150), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK47);
         }
 
         [Fact]
@@ -911,7 +932,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
@@ -1083,7 +1104,7 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2723,7 +2744,7 @@ namespace Microsoft.Build.UnitTests
 
         private static IEnumerable<TargetDotNetFrameworkVersion> EnumDotNetFrameworkVersions()
         {
-            for (TargetDotNetFrameworkVersion dotNetVersion = TargetDotNetFrameworkVersion.Version11; dotNetVersion <= TargetDotNetFrameworkVersion.VersionLatest; ++dotNetVersion)
+            for (TargetDotNetFrameworkVersion dotNetVersion = TargetDotNetFrameworkVersion.Version11; dotNetVersion <= TargetDotNetFrameworkVersion.Latest; ++dotNetVersion)
             {
                 yield return dotNetVersion;
             }

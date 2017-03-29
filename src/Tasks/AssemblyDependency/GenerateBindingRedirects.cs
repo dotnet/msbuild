@@ -226,16 +226,17 @@ namespace Microsoft.Build.Tasks
                     }
 
                     var name = assemblyIdentity.Attribute("name");
-                    var nameValue = name.Value;
                     var publicKeyToken = assemblyIdentity.Attribute("publicKeyToken");
-                    var publicKeyTokenValue = publicKeyToken.Value;
-                    var culture = assemblyIdentity.Attribute("culture");
-                    var cultureValue = culture == null ? String.Empty : culture.Value;
 
                     if (name == null || publicKeyToken == null)
                     {
                         continue;
                     }
+
+                    var nameValue = name.Value;
+                    var publicKeyTokenValue = publicKeyToken.Value;
+                    var culture = assemblyIdentity.Attribute("culture");
+                    var cultureValue = culture == null ? String.Empty : culture.Value;
 
                     var oldVersionAttribute = bindingRedirect.Attribute("oldVersion");
                     var newVersionAttribute = bindingRedirect.Attribute("newVersion");

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
      Tests only the public OM of Microsoft.Build.
 
@@ -33,6 +33,9 @@
     </Compile>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EncodingUtilities.cs">
+      <Link>EncodingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -86,6 +89,9 @@
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
+      <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
     <Compile Include="Construction\ConstructionEditing_Tests.cs" />
     <Compile Include="Construction\ElementLocationPublic_Tests.cs" />

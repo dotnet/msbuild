@@ -49,7 +49,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
-        private Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>();
+        // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
+        // for https://github.com/Microsoft/msbuild/issues/1751. It should
+        // be removed (permanently set to false) after establishing that
+        // it's unneeded (at least by the 16.0 timeframe).
+        private Dictionary<string, LazyItemList> _itemLists = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+            new Dictionary<string, LazyItemList>() :
+            new Dictionary<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
         {
@@ -78,16 +84,16 @@ namespace Microsoft.Build.Evaluation
             return EvaluateCondition(element, expanderOptions, parserOptions, _expander, this);
         }
 
-        private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(string condition, ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
-            if (element.Condition.Length == 0)
+            if (condition?.Length == 0)
             {
                 return true;
             }
 
             bool result = ConditionEvaluator.EvaluateCondition
                 (
-                element.Condition,
+                condition,
                 parserOptions,
                 expander,
                 expanderOptions,
@@ -98,7 +104,11 @@ namespace Microsoft.Build.Evaluation
                 );
 
             return result;
+        }
 
+        private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        {
+            return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, expander, lazyEvaluator);
         }
 
         /// <summary>
@@ -365,7 +375,10 @@ namespace Microsoft.Build.Evaluation
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+                ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
+                ImmutableDictionary.CreateBuilder<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
+
             public bool ConditionResult { get; set; }
 
             public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
@@ -378,7 +391,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+            public ImmutableList<PartiallyEvaluatedMetadata>.Builder Metadata = ImmutableList.CreateBuilder<PartiallyEvaluatedMetadata>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
@@ -508,17 +521,35 @@ namespace Microsoft.Build.Evaluation
         {
             if (itemElement.HasMetadata)
             {
-                operationBuilder.Metadata.AddRange(itemElement.Metadata);
+                var values = new List<string>(itemElement.Metadata.Count * 2);
 
-                List<string> values = new List<string>(itemElement.Metadata.Count * 2);
-
-                foreach (ProjectMetadataElement metadatumElement in itemElement.Metadata)
+                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                // if so we need to add the right item reference.
+                foreach (var metadatumElement in itemElement.Metadata)
                 {
-                    values.Add(metadatumElement.Value);
-                    values.Add(metadatumElement.Condition);
+                    var valueWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
+                        metadatumElement.Value,
+                        ExpanderOptions.ExpandProperties,
+                        metadatumElement.Location);
+
+                    var conditionWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
+                        metadatumElement.Condition,
+                        ExpanderOptions.ExpandProperties,
+                        metadatumElement.ConditionLocation);
+
+                    operationBuilder.Metadata.Add(
+                        new PartiallyEvaluatedMetadata
+                        {
+                            ValueWithPropertiesExpanded = valueWithPropertiesExpanded,
+                            ConditionWithPropertiesExpanded = conditionWithPropertiesExpanded,
+                            Element = metadatumElement
+                        });
+
+                    values.Add(valueWithPropertiesExpanded);
+                    values.Add(conditionWithPropertiesExpanded);
                 }
 
-                ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)
@@ -570,6 +601,14 @@ namespace Microsoft.Build.Evaluation
                     AddReferencedItemLists(operationBuilder, subMatch);
                 }
             }
+        }
+
+        // todo: replace with value tuples when we move to C# 7
+        private struct PartiallyEvaluatedMetadata
+        {
+            public ProjectMetadataElement Element { get; set; }
+            public string ConditionWithPropertiesExpanded { get; set; }
+            public string ValueWithPropertiesExpanded { get; set; }
         }
     }
 }

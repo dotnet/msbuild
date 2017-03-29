@@ -10,7 +10,8 @@ namespace Microsoft.Build.Logging
     /// Provides a method to read a binary log file (*.binlog) and replay all stored BuildEventArgs
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
-    internal class BinaryLogReplayEventSource : EventArgsDispatcher
+    /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
+    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher
     {
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
@@ -38,29 +39,7 @@ namespace Microsoft.Build.Logging
                 {
                     BuildEventArgs instance = null;
 
-                    try
-                    {
-                        instance = reader.Read();
-                    }
-                    catch (Exception ex)
-                    {
-                        string code;
-                        string helpKeyword;
-                        var text = ResourceUtilities.FormatResourceString(out code, out helpKeyword, "InvalidLogFileFormat", ex.Message);
-                        var message = new BuildErrorEventArgs(
-                            subcategory: "",
-                            code: code,
-                            file: sourceFilePath,
-                            lineNumber: 0,
-                            columnNumber: 0,
-                            endLineNumber: 0,
-                            endColumnNumber: 0,
-                            message: text,
-                            helpKeyword: helpKeyword,
-                            senderName: "MSBuild");
-                        Dispatch(message);
-                    }
-
+                    instance = reader.Read();
                     if (instance == null)
                     {
                         break;

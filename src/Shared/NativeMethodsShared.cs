@@ -474,15 +474,15 @@ namespace Microsoft.Build.Shared
                 var env = Environment.OSVersion.Platform;
                 return env == PlatformID.MacOSX || env == PlatformID.Unix;
 #else
-                return IsUnix || IsOSX;
+                return IsLinux || IsOSX;
 #endif
             }
         }
 
         /// <summary>
-        /// Gets a flag indicating if we are running under a Unix system (Mac is not included)
+        /// Gets a flag indicating if we are running under Linux
         /// </summary>
-        internal static bool IsUnix
+        internal static bool IsLinux
         {
             get
             {
@@ -572,7 +572,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetOSNameForExtensionsPath()
         {
-            return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+            return IsOSX ? "osx" : (IsLinux ? "unix" : "windows");
         }
 
         /// <summary>

@@ -43,8 +43,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 var msBuildPath = Path.Combine(path, MSBuildExeName);
                 var msBuildConfig = Path.Combine(path, $"{MSBuildExeName}.config");
 
-                Environment.SetEnvironmentVariable("MSBUILD_EXE_PATH", env.MSBuildExePath);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                env.WithEnvironment("MSBUILD_EXE_PATH", env.MSBuildExePath);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(path, BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
                 Assert.Equal(msBuildPath, BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
                 // FIXME: we have added a func for command line arg now.. does this need to be changed?
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory64, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 // All we know about is path to msbuild.exe as the current process
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory64, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
             {
                 // All we know about is path to msbuild.exe as the current process
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyStandaloneEnviroment("MSBuild.dll"))
             {
                 // All we know about is path to msbuild.exe as the current process
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
             {
                 // Only the app base directory will be available
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, () => env.BuildDirectory, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, () => env.BuildDirectory, env.VsInstanceMock, env.EnvironmentMock);
 
                 // Make sure we get the right MSBuild entry point. On .NET Core this will be MSBuild.dll, otherwise MSBuild.exe
                 Assert.Equal(MSBuildExeName, Path.GetFileName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath));
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 // All we know about is path to DevEnv.exe
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory64, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -189,9 +189,9 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
-                Environment.SetEnvironmentVariable("VSINSTALLDIR", env.TempFolderRoot);
-                Environment.SetEnvironmentVariable("VisualStudioVersion", "15.0");
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                env.WithEnvironment("VSINSTALLDIR", env.TempFolderRoot);
+                env.WithEnvironment("VisualStudioVersion", "15.0");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
                 Assert.Equal(BuildEnvironmentMode.VisualStudio, BuildEnvironmentHelper.Instance.Mode);
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 // We only know we're in msbuild.exe, we should still be able to attempt to find Visual Studio
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
                 Assert.Equal(BuildEnvironmentMode.VisualStudio, BuildEnvironmentHelper.Instance.Mode);
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 // We only know we're in amd64\msbuild.exe, we should still be able to attempt to find Visual Studio
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath64, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath64, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
                 Assert.Equal(BuildEnvironmentMode.VisualStudio, BuildEnvironmentHelper.Instance.Mode);
@@ -235,14 +235,11 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
+                env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")));
+                env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version("15.0")));
+
                 // This test has no context to find MSBuild other than Visual Studio root.
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull,
-                    () =>
-                        new List<VisualStudioInstance>
-                        {
-                            new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")),
-                            new VisualStudioInstance("VS", env.TempFolderRoot, new Version("15.0")),
-                        });
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
                 Assert.Equal(BuildEnvironmentMode.VisualStudio, BuildEnvironmentHelper.Instance.Mode);
@@ -254,14 +251,11 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
+                env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")));
+                env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version("14.0")));
+
                 // This test has no context to find MSBuild other than Visual Studio root.
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull,
-                    () =>
-                        new List<VisualStudioInstance>
-                        {
-                            new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")),
-                            new VisualStudioInstance("VS", env.TempFolderRoot, new Version("14.0")),
-                        });
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Null(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
                 Assert.Equal(BuildEnvironmentMode.None, BuildEnvironmentHelper.Instance.Mode);
@@ -286,7 +280,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, () => env.MSBuildExePath, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.True(BuildEnvironmentHelper.Instance.RunningInVisualStudio);
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
@@ -301,7 +295,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.BlendPath, ReturnNull, () => env.MSBuildExePath, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.BlendPath, ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.True(BuildEnvironmentHelper.Instance.RunningInVisualStudio);
                 Assert.Equal(env.TempFolderRoot, BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory);
@@ -317,7 +311,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.DevEnvPath, ReturnNull, ReturnNull,
-                    ReturnNull, ReturnEmptyInstances);
+                    ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory64, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -332,7 +326,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (var env = new EmptyVSEnviroment())
             {
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(()=>env.MSBuildExePath64, ReturnNull, ReturnNull, ReturnNull, ReturnEmptyInstances);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(()=>env.MSBuildExePath64, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(env.BuildDirectory, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32);
                 Assert.Equal(env.BuildDirectory64, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64);
@@ -344,11 +338,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void BuildEnvironmentNoneWhenNotAvailable()
         {
-            using (new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
             {
                 var entryProcess = Path.Combine(Path.GetTempPath(), "foo.exe");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => entryProcess, ReturnNull, ReturnNull, ReturnNull,
-                    ReturnEmptyInstances);
+                    env.VsInstanceMock, env.EnvironmentMock);
 
                 Assert.Equal(entryProcess, BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
                 Assert.Equal(Path.GetDirectoryName(entryProcess), BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
@@ -362,40 +356,21 @@ namespace Microsoft.Build.Engine.UnitTests
             return null;
         }
 
-        private static IEnumerable<VisualStudioInstance> ReturnEmptyInstances()
+        private class EmptyVSEnviroment : EmptyStandaloneEnviroment
         {
-            return new List<VisualStudioInstance>();
-        }
-
-        private class EmptyVSEnviroment : IDisposable
-        {
-            public string TempFolderRoot { get; }
-
             public string DevEnvPath { get; }
 
             public string BlendPath { get; }
 
-            public string BuildDirectory { get; }
-
             public string BuildDirectory64 { get; }
 
-            public string MSBuildExePath => Path.Combine(BuildDirectory, "msbuild.exe");
+            public string MSBuildExePath64 => Path.Combine(BuildDirectory64, MSBuildExeName);
 
-            public string MSBuildExePath64 => Path.Combine(BuildDirectory64, "msbuild.exe");
-
-            private readonly Dictionary<string, string> _originalEnvironment = new Dictionary<string, string>
-            {
-                ["MSBUILD_EXE_PATH"] = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH"),
-                ["VSINSTALLDIR"] = Environment.GetEnvironmentVariable("VSINSTALLDIR"),
-                ["VisualStudioVersion"] = Environment.GetEnvironmentVariable("VisualStudioVersion"),
-            };
-
-            public EmptyVSEnviroment()
+            public EmptyVSEnviroment() : base("msbuild.exe", false)
             {
                 try
                 {
                     var files = new[] { "msbuild.exe", "msbuild.exe.config" };
-                    TempFolderRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
                     BuildDirectory = Path.Combine(TempFolderRoot, "MSBuild", "15.0", "Bin");
                     BuildDirectory64 = Path.Combine(BuildDirectory, "amd64");
                     DevEnvPath = Path.Combine(TempFolderRoot, "Common7", "IDE", "devenv.exe");
@@ -422,34 +397,21 @@ namespace Microsoft.Build.Engine.UnitTests
                     throw;
                 }
             }
-
-            public void Dispose()
-            {
-                FileUtilities.DeleteDirectoryNoThrow(TempFolderRoot, true);
-
-                foreach (var env in _originalEnvironment)
-                    Environment.SetEnvironmentVariable(env.Key, env.Value);
-
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
         }
 
         private class EmptyStandaloneEnviroment : IDisposable
         {
             public string TempFolderRoot { get; }
 
-            public string BuildDirectory { get; }
+            public string BuildDirectory { get; protected set; }
 
             public string MSBuildExeName { get; }
 
             public string MSBuildExePath => Path.Combine(BuildDirectory, MSBuildExeName);
 
-            private readonly Dictionary<string, string> _originalEnvironment = new Dictionary<string, string>
-            {
-                ["MSBUILD_EXE_PATH"] = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH"),
-                ["VSINSTALLDIR"] = Environment.GetEnvironmentVariable("VSINSTALLDIR"),
-                ["VisualStudioVersion"] = Environment.GetEnvironmentVariable("VisualStudioVersion"),
-            };
+            private readonly Dictionary<string, string> _mockEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            private readonly List<VisualStudioInstance> _mockInstances = new List<VisualStudioInstance>();
 
             public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true)
             {
@@ -473,13 +435,29 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
 
+            public void WithEnvironment(string variable, string value)
+            {
+                _mockEnvironment.Add(variable, value);
+            }
+
+            public void WithVsInstance(VisualStudioInstance instance)
+            {
+                _mockInstances.Add(instance);
+            }
+
+            public string EnvironmentMock(string variable)
+            {
+                return _mockEnvironment.ContainsKey(variable) ? _mockEnvironment[variable] : null;
+            }
+
+            public IEnumerable<VisualStudioInstance> VsInstanceMock()
+            {
+                return _mockInstances;
+            }
+
             public void Dispose()
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempFolderRoot, true);
-
-                foreach (var env in _originalEnvironment)
-                    Environment.SetEnvironmentVariable(env.Key, env.Value);
-
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }

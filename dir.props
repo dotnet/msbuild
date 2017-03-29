@@ -336,6 +336,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_USERDOMAINNAME</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XAMLTASKFACTORY</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
@@ -351,6 +352,9 @@
 
   <PropertyGroup>
     <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
+
+    <!-- Useful for tests that need OS information as a constant -->
+    <DefineConstants Condition="'$(OS)'=='Windows_NT'">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">

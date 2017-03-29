@@ -513,7 +513,7 @@ namespace Microsoft.Build.Logging
                 return null;
             }
 
-            Dictionary<string, string> result = new Dictionary<string, string>();
+            Dictionary<string, string> result = new Dictionary<string, string>(count);
             for (int i = 0; i < count; i++)
             {
                 string key = ReadString();

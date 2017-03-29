@@ -3,11 +3,9 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -604,6 +602,83 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             string actual = writer.ToString();
 
             VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void VerifyUtf8WithoutBomTreatedAsUtf8()
+        {
+            string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
+</Project>");
+
+            Project project = new Project(NewProjectFileOptions.None);
+            StringWriter writer = new EncodingStringWriter(new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+            project.Save(writer);
+
+            string actual = writer.ToString();
+
+            VerifyAssertLineByLine(expected, actual);
+        }
+
+        [Fact]
+        public void ProjectFileWithBomContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: true);
+        }
+
+        [Fact]
+        public void ProjectFileWithoutBomDoesNotContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: false);
+        }
+
+        [Fact]
+        public void ProjectFileWithoutBomWithXmlDeclarationDoesNotContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: false);
+        }
+
+        [Fact]
+        public void ProjectFileWithBomWithXmlDeclarationContainsBomAfterSave()
+        {
+            CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: true);
+        }
+
+        private static void CreateProjectAndAssertEncoding(bool xmlDeclaration, bool byteOrderMark)
+        {
+            string declaration = @"<?xml version=""1.0"" encoding=""utf-8""?>";
+
+            string content = xmlDeclaration ? declaration : string.Empty;
+            content += @"<Project><Target Name=""Build""/></Project>";
+            content = ObjectModelHelpers.CleanupFileContents(content);
+
+            var file = FileUtilities.GetTemporaryFile(".proj");
+            try
+            {
+                File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: byteOrderMark));
+                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
+
+                // Load and manipulate/save the project
+                var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
+                project.AddItem("Compile", "Program.cs");
+                project.Save();
+
+                // Ensure the file was really saved and that the presence of a BOM has not changed
+                string actualContents = File.ReadAllText(file);
+                Assert.Contains("<Compile Include=\"Program.cs\" />", actualContents);
+                if (xmlDeclaration)
+                {
+                    Assert.Contains(declaration, actualContents);
+                }
+                else
+                {
+                    Assert.DoesNotContain(declaration, actualContents);
+                }
+                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(Path.GetDirectoryName(file), false);
+            }
         }
     }
 }

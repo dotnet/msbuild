@@ -1,17 +1,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Evaluation;
 using System.IO;
 using System;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.CodeDom.Compiler;
 using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CodeTaskFactoryTests
+#if FEATURE_CODETASKFACTORY
+
+    using System.CodeDom.Compiler;
+
+    public sealed class CodeTaskFactoryTests
     {
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
@@ -109,11 +114,7 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames -- 
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect. 
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "FEATURE: LEGACY TASKS")]
-#else
         [Fact]
-#endif
         public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect()
         {
             string projectFileContents = @"
@@ -1105,5 +1106,37 @@ namespace Microsoft.Build.UnitTests
             }
         }
     }
+#else
+    public sealed class CodeTaskFactoryTests
+    {
+        [Fact]
+        public void CodeTaskFactoryNotSupported()
+        {
+            string projectFileContents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                         <ParameterGroup>     
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
+
+            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
+
+            Assert.NotNull(error);
+            Assert.Equal("MSB4801: The task factory \"CodeTaskFactory\" is not supported on the .NET Core version of MSBuild.", error.Message);
+        }
+    }
+#endif
 }
 

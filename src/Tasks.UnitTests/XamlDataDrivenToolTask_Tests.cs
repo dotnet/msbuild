@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                       </Project>";
 
 
-            string directoryWithAmpersand = "foo&bar";
+            string directoryWithAmpersand = "xaml&datadriven";
             string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 

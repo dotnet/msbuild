@@ -80,12 +80,6 @@ if "%SYNC_XLF%"=="true" (
     set SYNC_XLF_ARGUMENT="/p:SyncXlf=true"
 )
 
-:: Full Framework MSBuild does not have the new built-in property MSBuildRuntimeType
-set RUNTIMETYPE_ARGUMENT=
-if "%TARGET%"=="Full" (
-    set RUNTIMETYPE_ARGUMENT="/p:MSBuildRuntimeType=Full"
-)
-
 :: Restore build tools
 call %~dp0init-tools.cmd
 
@@ -145,11 +139,12 @@ if /i "%TARGET%"=="CoreCLR" (
 :: warning MSB3073: Exec task failure (when set to be a warning) -- needed to keep from failing on dev desktops that don't have C++ tools
 :: warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
 SET _NOWARN=MSB3277;MSB3026;MSB3073;AL1053
+set MSBUILDBINLOGPATH=%~dp0msbuild_rebuild-%HOST%.binlog
 
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /warnaserror
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /warnaserror /bl:%MSBUILDBINLOGPATH%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
