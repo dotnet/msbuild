@@ -21,6 +21,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using System.Reflection;
     using Microsoft.NET.Sdk.Publish.Tasks.Properties;
     using System.IO;
+    using System.Xml;
 
     internal enum PipelineMetadata
     {
@@ -457,7 +458,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 using (StreamWriter writer = new StreamWriter(fs, encode))
                 {
-                    document.Save(fs);
+                    XmlDeclaration xmldecl;
+                    xmldecl = document.CreateXmlDeclaration("1.0", null, null);
+                    xmldecl.Encoding = "utf-8";
+
+                    // Add the new node to the document.
+                    XmlElement root = document.DocumentElement;
+                    document.InsertBefore(xmldecl, root);
+
+                    document.Save(writer);
                 }
             }
 #endif

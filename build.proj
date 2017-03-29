@@ -23,9 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectFiles Include="src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj" />
-    <ProjectFiles Include="src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj" />
-    <ProjectFiles Include="src\Web\Microsoft.NET.Sdk.Web.Package\Microsoft.NET.Sdk.Web.Package.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj" />
+    <ProjectFiles Include="pack\Microsoft.NET.Sdk.Web.Package\Microsoft.NET.Sdk.Web.Package.csproj" />
   </ItemGroup>
 
   <UsingTask TaskName="GetCoreSdkBuildVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
@@ -83,8 +83,9 @@
     -->
     <PropertyGroup>
       <WebSdkBuildVersion Condition="'$(WebSdkVersion)' == ''">$(CoreSdkBuildVersion)</WebSdkBuildVersion>
-      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">-$(BUILD_NUMBER)</CiBuildPostfix>
-      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-final</WebSdkVersion>
+      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</CiBuildPostfix>
+      <CiBuildPostfix Condition="'$(CiBuildPostfix)' == ''">1</CiBuildPostfix>
+      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-build$(CiBuildPostfix)</WebSdkVersion>
     </PropertyGroup>
   </Target>
   

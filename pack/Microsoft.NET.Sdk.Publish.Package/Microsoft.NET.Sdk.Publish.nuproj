@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     
-    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\..\</WebSdkRoot>
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\</WebSdkRoot>
     <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
     <WebSdkTools Condition="'$(WebSdkTools)' == '' ">$(WebSdkRoot)\tools\</WebSdkTools>
     
@@ -10,7 +10,7 @@
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
     <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
-    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0</CoreSdkVersion>
+    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0-final</CoreSdkVersion>
     <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
