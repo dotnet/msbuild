@@ -14,7 +14,42 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest
+    public class ConstantValues
+    {
+        public static string IdentifierDirectoryPrefix = "Nuget_reference_compat";
+        public static string ReferencerBaseDirectory = "Reference";
+        public static string NuGetSharedDirectoryIdentifierPostfix = "_NuGetDependencies";
+        public static string NetstandardToken = "netstandard";
+        public static string DependencyPrefix = "D_";
+    }
+
+    public class Initilize : SdkTest
+    {
+        public Initilize()
+        {
+            try
+            {
+                //  Delete the shared NuGet package directory before running all the tests.
+                string directory = Path.Combine(RepoInfo.GetBaseDirectory(), ConstantValues.IdentifierDirectoryPrefix + ConstantValues.NuGetSharedDirectoryIdentifierPostfix);
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+                //  Delete the generated NuGet packages in the cache.
+                foreach (string dir in Directory.EnumerateDirectories(RepoInfo.NuGetCachePath, ConstantValues.DependencyPrefix + "*"))
+                {
+                    Directory.Delete(dir, true);
+                }
+            }
+            catch
+            {
+                // No-Op; as this is a precaution - do not throw an exception.
+            }
+        }
+    }
+
+
+    public class GivenThatWeWantToVerifyNuGetReferenceCompat : Initilize
     {
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
@@ -46,19 +81,17 @@ namespace Microsoft.NET.Build.Tests
         //[InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
         //[InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
 
-        public void Nuget_reference_compat(string referencerTarget, string testIDPostFix, string rawDependencyTargets,
+        public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
-            string referencerTestDirectoryIdentifier = "_" + referencerTarget + "_" + testIDPostFix;
-            string dependencyNuGetSharedDirectoryIdentifier = "_NuGetDependencies";
+            string referencerDirectoryIdentifierPostfix = "_" + referencerTarget + "_" + testDescription;
 
-            TestProject referencerProject = GetTestProject("Reference", referencerTarget, true);
+            TestProject referencerProject = GetTestProject(ConstantValues.ReferencerBaseDirectory, referencerTarget, true);
 
             foreach (string dependencyTarget in rawDependencyTargets.Split(',', ';', ' ').ToList())
             {
-                TestProject dependencyProject = GetTestProject(dependencyTarget.Replace('.', '_'), dependencyTarget, true);
-                dependencyProject.PublishedNuGetPackageLibrary = new PackageReference(dependencyProject.Name, "1.0.0",
-                        Path.Combine(RepoInfo.GetBaseDirectory(), nameof(Nuget_reference_compat) + dependencyNuGetSharedDirectoryIdentifier, dependencyProject.Name, dependencyProject.Name, "bin", "Debug"));
+                TestProject dependencyProject = GetTestProject(ConstantValues.DependencyPrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
+                dependencyProject.PublishedNuGetPackageLibrary = new PackageReference(dependencyProject.Name, "1.0.0", ConstructNuGetPackageReferencePath(dependencyProject));
                 referencerProject.ReferencedProjects.Add(dependencyProject);
             }
 
@@ -73,20 +106,18 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Set the referencer project as an Exe unless it targets .NET Standard
-            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains("netstandard"))
+            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains(ConstantValues.NetstandardToken))
             {
                 referencerProject.IsExe = true;
             }
 
-            //  Create the NuGet packages
-            //      To force the regeneration of the NuGet package on manual re-run:
-            //          1. Delete the previously generated NuGet package
-            //          2. Delete the cached NuGet package
+            //  Create the NuGet packages;
+            //        do not create a NuGet package if it was created by a previous permutation.
             foreach (TestProject dependencyProject in referencerProject.ReferencedProjects)
             {
                 if (!NuGetPackageExists(dependencyProject))
                 {
-                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, nameof(Nuget_reference_compat), dependencyNuGetSharedDirectoryIdentifier);
+                    var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantValues.IdentifierDirectoryPrefix, ConstantValues.NuGetSharedDirectoryIdentifierPostfix);
                     var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
                     var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
 
@@ -99,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             //  Create the referencing app and run the compat test
-            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(Nuget_reference_compat), referencerTestDirectoryIdentifier);
+            var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the NuGet packages just created
@@ -164,6 +195,11 @@ namespace Microsoft.NET.Build.Tests
         {
             return File.Exists(Path.Combine(dependencyProject.PublishedNuGetPackageLibrary.LocalPath,
                     String.Concat(dependencyProject.PublishedNuGetPackageLibrary.ID + "." + dependencyProject.PublishedNuGetPackageLibrary.Version + ".nupkg"))) ;
+        }
+
+        string ConstructNuGetPackageReferencePath(TestProject dependencyProject)
+        {
+            return Path.Combine(RepoInfo.GetBaseDirectory(), ConstantValues.IdentifierDirectoryPrefix + ConstantValues.NuGetSharedDirectoryIdentifierPostfix, dependencyProject.Name, dependencyProject.Name, "bin", "Debug");
         }
 
     }
