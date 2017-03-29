@@ -368,7 +368,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
 
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
   </PropertyGroup>
 
