@@ -406,8 +406,16 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                Console.ForegroundColor =
-                            TransformColor(c, BackgroundColor);
+                c = TransformColor(c, BackgroundColor);
+
+                if (UseAnsiColors)
+                {
+                    SetColorANSI(c);
+                }
+                else
+                {
+                    Console.ForegroundColor = c;
+                }
             }
             catch (IOException)
             {
@@ -422,7 +430,14 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                Console.ResetColor();
+                if (UseAnsiColors)
+                {
+                    ResetColorANSI();
+                }
+                else
+                {
+                    Console.ResetColor();
+                }
             }
             catch (IOException)
             {
@@ -471,6 +486,61 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             Console.Out.Write("\x1b[m");
         }
+
+        #region ANSI color support detection
+
+        private static bool? useAnsiColors;
+        private static bool UseAnsiColors
+        {
+            get
+            {
+                if (useAnsiColors == null)
+                    DetectAnsiColorSupport();
+
+                return useAnsiColors.Value;
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "isatty")]
+        private extern static int _isatty(int fd);
+
+        private static bool isatty(int fd)
+        {
+            try
+            {
+                return _isatty(fd) == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static void DetectAnsiColorSupport()
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                useAnsiColors = false;
+                return;
+            }
+
+            var _useAnsiColors = false;
+
+            switch (Environment.GetEnvironmentVariable("TERM"))
+            {
+                case "xterm":
+                case "linux":
+                    _useAnsiColors = Environment.GetEnvironmentVariable("COLORTERM") != null;
+                    break;
+                case "xterm-color":
+                    _useAnsiColors = true;
+                    break;
+            }
+
+            useAnsiColors = _useAnsiColors && isatty(1) && isatty(2);
+        }
+
+        #endregion
 
         /// <summary>
         /// Changes the foreground color to black if the foreground is the

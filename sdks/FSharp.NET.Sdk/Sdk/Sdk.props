@@ -1,0 +1,15 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <!-- _DebugFileExt is not an upstream msbuild feature yet -->
+    <_DebugFileExt Condition="'$(FscDebugFileExt)' != ''">$(FscDebugFileExt)</_DebugFileExt>
+    <_DebugFileExt Condition="'$(_DebugFileExt)' == ''">.mdb</_DebugFileExt>
+
+    <DontRunFscWithDotnet>true</DontRunFscWithDotnet>
+    <FscToolExe>fsc.exe</FscToolExe>
+    <FscToolPath>$(MSBuildToolsPath)..\..\..\fsharp</FscToolPath>
+  </PropertyGroup>
+
+</Project>
