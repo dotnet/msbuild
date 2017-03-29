@@ -15,7 +15,7 @@ if not defined DOTNET_INSTALL_DIR (
 )
 
 if not defined DOTNET_VERSION (
-    set DOTNET_VERSION=1.0.0-rc4-004802
+    set DOTNET_VERSION=1.0.0-rc4-004915
 )
 
 if exist "%WebSdkProgramFiles%\Microsoft Visual Studio\VS15Preview\MSBuild\15.0\Bin\MSBuild.exe" (
