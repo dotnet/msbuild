@@ -50,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
             host = _host = new ExtendedTemplateEngineHost(host, this);
             EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
             _settingsLoader = (SettingsLoader)EnvironmentSettings.SettingsLoader;
-            Installer = new Installer(EnvironmentSettings, _settingsLoader.UserTemplateCache);
+            Installer = new Installer(EnvironmentSettings);
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
@@ -669,7 +669,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (installResult == CreationResultStatus.Success)
                 {
-                    _settingsLoader.ReloadTemplates();
+                    _settingsLoader.Reload();
                     PerformCoreTemplateQuery();
                     DisplayTemplateList();
                 }
@@ -952,7 +952,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 EnvironmentSettings.Host.UpdateLocale(newLocale);
                 // cache the templates for the new locale
-                _settingsLoader.ReloadTemplates();
+                _settingsLoader.Reload();
             }
         }
 
@@ -1037,7 +1037,7 @@ namespace Microsoft.TemplateEngine.Cli
                 _paths.Delete(_paths.User.AliasesFile);
                 _paths.Delete(_paths.User.SettingsFile);
                 _settingsLoader.UserTemplateCache.DeleteAllLocaleCacheFiles();
-                _settingsLoader.ReloadTemplates();
+                _settingsLoader.Reload();
                 return false;
             }
 

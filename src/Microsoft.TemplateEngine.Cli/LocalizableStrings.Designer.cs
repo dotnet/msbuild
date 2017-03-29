@@ -696,6 +696,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Actual command: {0}.
+        /// </summary>
+        public static string PostActionCommand {
+            get {
+                return ResourceManager.GetString("PostActionCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Description: {0}.
+        /// </summary>
+        public static string PostActionDescription {
+            get {
+                return ResourceManager.GetString("PostActionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manual instructions: {0}.
+        /// </summary>
+        public static string PostActionInstructions {
+            get {
+                return ResourceManager.GetString("PostActionInstructions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of (Y|N)..
         /// </summary>
         public static string PostActionInvalidInputRePrompt {
