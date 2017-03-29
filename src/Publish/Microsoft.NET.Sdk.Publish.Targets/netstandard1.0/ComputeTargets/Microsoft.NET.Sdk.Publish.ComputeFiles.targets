@@ -43,5 +43,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Exclude>False</Exclude>
     </DotNetPublishFiles>
   </ItemDefinitionGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Target _IncludePrePublishGeneratedContent                     -->
+  <!--***************************************************************-->
+  
+  <Target Name="_IncludePrePublishGeneratedContent" BeforeTargets="GetCopyToPublishDirectoryItems" Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
+    <ItemGroup>
+      <_WebProjectGeneratedContent Include="wwwroot/**" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);@(_ContentIncludedByDefault)" />
+      <ContentWithTargetPath Include="@(_WebProjectGeneratedContent)" TargetPath="%(Identity)" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
   
 </Project>

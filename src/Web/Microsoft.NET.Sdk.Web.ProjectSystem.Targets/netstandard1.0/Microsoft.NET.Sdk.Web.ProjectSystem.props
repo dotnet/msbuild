@@ -37,6 +37,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <None Remove="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" />
     <Compile Remove="wwwroot/**" />
     <EmbeddedResource Remove="wwwroot/**" />
+    
+    <!-- Keep track of the default content items for later to distinguish them from newly generated content items -->
+    <_ContentIncludedByDefault Include="@(Content)" />
 
   </ItemGroup>
 
