@@ -204,6 +204,7 @@
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="GitBuildInfo.cs" Condition="'$(MonoBuild)' == 'true'" />
     <None Include="project.json" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->

@@ -169,4 +169,5 @@
   </Target>
 
   <Import Project="$(NuGetConfigDir)\packageLoad.targets" />
+  <Import Project="Mono.Override.targets" Condition="'$(MonoBuild)' == 'true'" />
 </Project>

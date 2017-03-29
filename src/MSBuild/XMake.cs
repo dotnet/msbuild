@@ -3288,7 +3288,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayCopyrightMessage()
         {
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString()));
+            string msg = ProjectCollection.Version.ToString();
+#if MONO
+            if (!String.IsNullOrEmpty(GitBuildInfoForMono.BuildInfo))
+                msg += $" ({GitBuildInfoForMono.BuildInfo})";
+#endif
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", msg));
         }
 
         /// <summary>
