@@ -110,11 +110,8 @@ namespace Microsoft.NET.Build.Tests
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
-            //  Imported from the Sdktest class
+            SdkTest sdkTest = new SdkTest();
             TestAssetsManager testAssetsManager = new TestAssetsManager();
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
-            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
-            bool usingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
 
             string referencerDirectoryIdentifierPostfix = "_" + referencerTarget + "_" + testDescription;
 
@@ -190,12 +187,6 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 referencerBuildResult.Should().Fail().And.HaveStdOutContaining("It cannot be referenced by a project that targets");
-            }
-
-            //  Imported from the Sdktest class
-            if (!usingFullFrameworkMSBuild)
-            {
-                testAssetsManager.ValidateDestinationDirectories();
             }
         }
 
