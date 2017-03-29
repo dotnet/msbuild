@@ -22,7 +22,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToCacheAProjectWithDependencies : SdkTest
     {
-        private static string _libPrefix;
+        private static readonly string _libPrefix = FileConstants.DynamicLibPrefix;
         private static string _runtimeOs;
         private static string _runtimeLibOs;
         private static string _runtimeRid;
@@ -34,7 +34,6 @@ namespace Microsoft.NET.Publish.Tests
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                _libPrefix = "";
                 _runtimeOs = "win7";
                 _runtimeLibOs = "win";
                 _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
@@ -42,7 +41,6 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
-                _libPrefix = "lib";
                 _runtimeOs = "unix";
                 _runtimeLibOs = "unix";
 

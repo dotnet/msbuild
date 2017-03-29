@@ -103,7 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      IsSharedFrameworkApplication="$(IsSharedFrameworkApplication)">
+                      IsSelfContained="$(SelfContained)">
     </GenerateDepsFile>
 
     <ItemGroup>
@@ -137,7 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)"
-                                       IsSharedFrameworkApplication="$(IsSharedFrameworkApplication)">
+                                       IsSelfContained="$(SelfContained)">
       
     </GenerateRuntimeConfigurationFiles>
     
@@ -209,7 +209,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     it requires a host in the output directory to load the app.
     During "publish", all required assets are copied to the publish directory.
     -->
-    <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'Exe'">
+    <ItemGroup Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'Exe'">
       <_NETCoreNativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
       <__NETCoreNativeItems Include="@(FileDefinitions)" Exclude="@(_NETCoreNativeFileItems)" />
       <_NETCoreNativeItems Include="@(FileDefinitions)" Exclude="@(__NETCoreNativeItems)" />
@@ -254,7 +254,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </NativeNETCoreCopyLocalItems>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'Exe'">
+    <ItemGroup Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'Exe'">
       <AllNETCoreCopyLocalItems Include="@(NativeNETCoreCopyLocalItems)">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
@@ -288,7 +288,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
     
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
-      <PropertyGroup Condition="'$(RuntimeIdentifier)' == ''">
+      <PropertyGroup Condition="'$(SelfContained)' != 'true'">
         <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
         <RunCommand Condition="'$(RunCommand)' == ''">dotnet</RunCommand>
 
@@ -297,7 +297,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
       </PropertyGroup>
 
-      <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+      <PropertyGroup Condition="'$(SelfContained)' == 'true'">
         <RunCommand Condition="'$(RunCommand)' == ''">$(TargetDir)$(AssemblyName)$(_NativeExecutableExtension)</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
       </PropertyGroup>

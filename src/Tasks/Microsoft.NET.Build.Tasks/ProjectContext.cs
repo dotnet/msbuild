@@ -1,14 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using NuGet.Packaging.Core;
+using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
-using NuGet.ProjectModel;
-using NuGet.Packaging.Core;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -16,23 +14,28 @@ namespace Microsoft.NET.Build.Tasks
     {
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
-        private readonly string _platformLibraryName;
         internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
 
-        public bool IsPortable { get; }
+        public bool IsFrameworkDependent { get; }
         public LockFileTargetLibrary PlatformLibrary { get; }
 
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, string platformLibraryName, bool isPortable)
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, LockFileTargetLibrary platformLibrary, bool isFrameworkDependent)
         {
+            Debug.Assert(lockFile != null);
+            Debug.Assert(lockFileTarget != null);
+            if (isFrameworkDependent)
+            {
+                Debug.Assert(platformLibrary != null);
+            }
+
             _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
-            _platformLibraryName = platformLibraryName;
 
-            PlatformLibrary = _lockFileTarget.GetLibrary(_platformLibraryName);
-            IsPortable = PlatformLibrary != null && (isPortable || string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier));
+            PlatformLibrary = platformLibrary;
+            IsFrameworkDependent = isFrameworkDependent;
         }
 
         public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(IEnumerable<string> privateAssetPackageIds)
@@ -43,7 +46,7 @@ namespace Microsoft.NET.Build.Tasks
 
             HashSet<string> allExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (IsPortable)
+            if (IsFrameworkDependent)
             {
                 allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
             }
@@ -58,7 +61,7 @@ namespace Microsoft.NET.Build.Tasks
                 allExclusionList.UnionWith(privateAssetsExclusionList);
             }
 
-            if(PackagesToBeFiltered != null)
+            if (PackagesToBeFiltered != null)
             {
                 var filterLookup = new Dictionary<string, HashSet<PackageIdentity>>(StringComparer.OrdinalIgnoreCase);
                 foreach (var pkg in PackagesToBeFiltered)
@@ -201,7 +204,7 @@ namespace Microsoft.NET.Build.Tasks
           IDictionary<string, LockFileTargetLibrary> packagesToBePublished)
         {
             var exclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            
+
             foreach (var entry in packagesToBePublished)
             {
                 HashSet<PackageIdentity> librarySet;

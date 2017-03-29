@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
     <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
-    <DeployAppHost Condition=" '$(DeployAppHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != '' and '$(IsSharedFrameworkApplication)' != 'true'">true</DeployAppHost>
+    <DeployAppHost Condition=" '$(DeployAppHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != '' and '$(SelfContained)' == 'true'">true</DeployAppHost>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -239,7 +239,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
                               FilterProjectFiles="@(FilterProjectFileList)"
                               PreserveCacheLayout="$(PreserveCacheLayout)"
-                              IsSharedFrameworkApplication="$(IsSharedFrameworkApplication)" >
+                              IsSelfContained="$(SelfContained)" >
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
       <Output TaskParameter="PackagesResolved" ItemName="PackagesThatWereResolved" />
@@ -464,7 +464,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
-                      IsSharedFrameworkApplication="$(IsSharedFrameworkApplication)" />
+                      IsSelfContained="$(SelfContained)" />
 
   </Target>
 
@@ -515,7 +515,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)"
-                                       IsSharedFrameworkApplication="$(IsSharedFrameworkApplication)" />
+                                       IsSelfContained="$(SelfContained)" />
 
   </Target>
 

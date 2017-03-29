@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string[] FilterProjectFiles { get; set; }
 
-        public bool IsSharedFrameworkApplication { get; set; }
+        public bool IsSelfContained { get; set; }
 
         /// <summary>
         /// All the assemblies to publish.
@@ -83,7 +83,7 @@ namespace Microsoft.NET.Build.Tasks
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
-                IsSharedFrameworkApplication);
+                IsSelfContained);
 
             projectContext.PackagesToBeFiltered = packagestoBeFiltered;
 

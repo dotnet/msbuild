@@ -70,17 +70,15 @@ namespace Microsoft.NET.Publish.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
 
-            var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
-
             publishDirectory.Should().HaveFiles(new[] {
                 selfContainedExecutable,
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.json",
-                $"{libPrefix}coreclr{Constants.DynamicLibSuffix}",
-                $"{libPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
                 $"mscorlib.dll",
                 $"System.Private.CoreLib.dll",
             });
@@ -140,17 +138,15 @@ public static class Program
 
             string selfContainedExecutableFullPath = Path.Combine(publishDirectory.FullName, selfContainedExecutable);
 
-            var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
-
             publishDirectory.Should().HaveFiles(new[] {
                 selfContainedExecutable,
                 "Hello.dll",
                 "Hello.pdb",
                 "Hello.deps.json",
                 "Hello.runtimeconfig.json",
-                $"{libPrefix}coreclr{Constants.DynamicLibSuffix}",
-                $"{libPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
                 $"mscorlib.dll",
                 $"System.Private.CoreLib.dll",
             });
