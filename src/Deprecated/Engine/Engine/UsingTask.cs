@@ -14,6 +14,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a single UsingTask element in a project file
     /// </summary>
     /// <owner>LukaszG</owner>
+    [Obsolete]
     public class UsingTask
     {
         #region Properties

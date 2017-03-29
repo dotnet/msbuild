@@ -86,6 +86,9 @@
     <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\EncodingUtilities.cs">
+      <Link>SharedUtilities\EncodingUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
     </Compile>
@@ -657,6 +660,9 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>SharedUtilities\ExceptionHandling.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
+      <Link>SharedUtilities\EscapingStringExtensions\EscapingStringExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -779,9 +785,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets" />
-  <Target Name="CopyImmutableAndDataflowLocal"
-          BeforeTargets="ResolveAssemblyReferences"
-          AfterTargets="ResolveNuGetPackages">
+  <Target Name="CopyImmutableAndDataflowLocal" BeforeTargets="ResolveAssemblyReferences" AfterTargets="ResolveNuGetPackages">
     <!-- The VSIX installer manifest references System.Collections.Immutable and System.Threading.Tasks.Dataflow
          from the Output folder, but they won't be placed there by default because NuGet references come in as CopyLocal false.
 

@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
 
             readonly ImmutableList<string> _excludes;
 
-            readonly ImmutableList<ProjectMetadataElement> _metadata;
+            readonly ImmutableList<PartiallyEvaluatedMetadata> _metadata;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)

@@ -25,6 +25,7 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildPropertyGroup (Count = { Count }, Condition = { Condition })")]
+    [Obsolete]
     public class BuildPropertyGroup : IItemPropertyGrouping, IEnumerable
     {
         #region Member Data

@@ -183,6 +183,175 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI2, metadataForI2);
         }
 
+        public static IEnumerable<object[]> IndirectItemReferencesTestData
+        {
+            get
+            {
+                // indirect item reference via properties in metadata
+                yield return new object[]
+                {
+                    @"<Project>
+                      <ItemGroup>
+                        <IndirectItem Include=`1` />
+                        <IndirectItem Include=`2` />
+                      </ItemGroup>
+                      <PropertyGroup>
+                        <P1>@(IndirectItem)</P1>
+                        <P2>$(P1)</P2>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <i Include=`val`>
+                          <m1>$(P1)</m1>
+                          <m2>$(P2)</m2>
+                        </i>
+                      </ItemGroup>
+
+                    </Project>",
+                    new []{"val"},
+                    new Dictionary<string, string>
+                    {
+                        {"m1", "1;2"},
+                        {"m2", "1;2"}
+                    }
+                };
+
+                // indirect item reference via properties in metadata condition
+                yield return new object[]
+                {
+                    @"<Project>
+                      <ItemGroup>
+                        <IndirectItem Include=`1` />
+                        <IndirectItem Include=`2` />
+                      </ItemGroup>
+                      <PropertyGroup>
+                        <P1>@(IndirectItem)</P1>
+                        <P2>$(P1)</P2>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <i Include=`val`>
+                          <m1 Condition=`'$(P1)' == '1;2'`>val1</m1>
+                          <m2 Condition=`'$(P2)' == '1;2'`>val2</m2>
+                        </i>
+                      </ItemGroup>
+
+                    </Project>",
+                    new []{"val"},
+                    new Dictionary<string, string>
+                    {
+                        {"m1", "val1"},
+                        {"m2", "val2"}
+                    }
+                };
+
+                // indirect item reference via properties in include
+                yield return new object[]
+                {
+                    @"<Project>
+                      <ItemGroup>
+                        <IndirectItem Include=`1` />
+                        <IndirectItem Include=`2` />
+                      </ItemGroup>
+                      <PropertyGroup>
+                        <P1>@(IndirectItem)</P1>
+                        <P2>$(P1)</P2>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <i Include=`$(P1)`/>
+                        <i Include=`$(P2)`/>
+                      </ItemGroup>
+
+                    </Project>",
+                    new []{"1", "2", "1", "2"},
+                    new Dictionary<string, string>()
+                };
+
+                // indirect item reference via properties in condition
+                yield return new object[]
+                {
+                    @"<Project>
+                      <ItemGroup>
+                        <IndirectItem Include=`1` />
+                        <IndirectItem Include=`2` />
+                      </ItemGroup>
+                      <PropertyGroup>
+                        <P1>@(IndirectItem)</P1>
+                        <P2>$(P1)</P2>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <i Condition=`'$(P1)' == '1;2'` Include=`val1`/>
+                        <i Condition=`'$(P2)' == '1;2'` Include=`val2`/>
+                      </ItemGroup>
+
+                    </Project>",
+                    new []{"val1", "val2"},
+                    new Dictionary<string, string>()
+                };
+
+                // indirect item reference via metadata reference in conditions and metadata
+                yield return new object[]
+                {
+                    @"<Project>
+                      <ItemGroup>
+                        <IndirectItem Include=`1` />
+                        <IndirectItem Include=`2` />
+                      </ItemGroup>
+                      <PropertyGroup>
+                        <P1>@(IndirectItem)</P1>
+                        <P2>$(P1)</P2>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <i Include=`val`>
+                          <m1 Condition=`'$(P2)' == '1;2'`>$(P2)</m1>
+                          <m2 Condition=`'%(m1)' == '1;2'`>%(m1)</m2>
+                        </i>
+                      </ItemGroup>
+
+                    </Project>",
+                    new []{"val"},
+                    new Dictionary<string, string>
+                    {
+                        {"m1", "1;2"},
+                        {"m2", "1;2"}
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(IndirectItemReferencesTestData))]
+        public void ItemOperationsShouldExpandIndirectItemReferences(string projectContent, string[] expectedItemValues, Dictionary<string, string> expectedItemMetadata)
+        {
+            var items = ObjectModelHelpers.GetItems(projectContent);
+
+            ObjectModelHelpers.AssertItems(expectedItemValues, items, expectedItemMetadata);
+        }
+
+        [Fact]
+        public void ExcludeSeesIntermediaryState()
+        {
+            var projectContent =
+@"<Project>
+  <ItemGroup>
+    <a Include=`1` />
+    <i Include=`1;2` Exclude=`@(a)` />
+    <a Include=`2` />
+    <a Condition=`'@(a)' == '1;2'` Include=`3` />
+  </ItemGroup>
+  <Target Name=`Build`>
+    <Message Text=`Done!` />
+  </Target>
+</Project>";
+
+            var items = ObjectModelHelpers.GetItems(projectContent);
+
+            ObjectModelHelpers.AssertItems(new []{"2"}, items);
+        }
+
         [Fact]
         public void MultipleInterItemDependenciesOnSameItemOperation()
         {

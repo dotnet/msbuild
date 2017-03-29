@@ -14,6 +14,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a collection of all UsingTask elements in a given project file.
     /// </summary>
     /// <owner>LukaszG</owner>
+    [Obsolete]
     public class UsingTaskCollection : IEnumerable, ICollection
     {
         #region Properties

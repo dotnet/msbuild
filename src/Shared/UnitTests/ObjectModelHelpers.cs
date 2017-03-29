@@ -997,7 +997,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static IList<ProjectItem> GetItems(string content, bool allItems = false)
         {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
 
