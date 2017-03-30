@@ -6,6 +6,6 @@
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-deb-tool" Version="2.0.0-*" />
+    <DotNetCliToolReference Include="dotnet-deb-tool" Version="$(DotnetDebToolVersion)" />
   </ItemGroup>
 </Project>
