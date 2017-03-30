@@ -98,35 +98,25 @@ namespace Microsoft.NET.Build.Tests
 
             TestProject referencerProject = GetTestProject(ConstantStringValues.ReferencerBaseDirectory, referencerTarget, true);
 
+            //  Skip running test if not running on Windows
+            //        https://github.com/dotnet/sdk/issues/335
+            if (!(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || referencerProject.BuildsOnNonWindows))
+            {
+                return;
+            }
+
             foreach (string dependencyTarget in rawDependencyTargets.Split(',', ';', ' ').ToList())
             {
                 TestProject dependencyProject = GetTestProject(ConstantStringValues.DependencyPrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
-                dependencyProject.PublishedNuGetPackageLibrary = new TestPackageReference(dependencyProject.Name, "1.0.0", ConstructNuGetPackageReferencePath(dependencyProject));
-                referencerProject.ReferencedProjects.Add(dependencyProject);
-            }
+                TestPackageReference dependencyPackageReference = new TestPackageReference(dependencyProject.Name, "1.0.0", ConstructNuGetPackageReferencePath(dependencyProject));
 
-            //  Skip running .NET Framework tests if not running on Windows
-            //        https://github.com/dotnet/sdk/issues/335
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (!AllProjectsBuildOnNonWindows(referencerProject))
+                //  Skip creating the NuGet package if not running on Windows; or if the NuGet package already exists
+                //        https://github.com/dotnet/sdk/issues/335
+                if ((RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || dependencyProject.BuildsOnNonWindows) && !dependencyPackageReference.NuGetPackageExists())
                 {
-                    return;
-                }
-            }
+                    referencerProject.PackageReferences.Add(dependencyPackageReference);
 
-            //  Set the referencer project as an Exe unless it targets .NET Standard
-            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains(ConstantStringValues.NetstandardToken))
-            {
-                referencerProject.IsExe = true;
-            }
-
-            //  Create the NuGet packages;
-            //        do not create a NuGet package if it was created by a previous permutation.
-            foreach (TestProject dependencyProject in referencerProject.ReferencedProjects)
-            {
-                if (!NuGetPackageExists(dependencyProject))
-                {
+                    //  Create the NuGet packages
                     var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.IdentifierDirectoryPrefix, ConstantStringValues.NuGetSharedDirectoryIdentifierPostfix);
                     var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
                     var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
@@ -136,14 +126,27 @@ namespace Microsoft.NET.Build.Tests
                 }
             }
 
+            //  Skip running tests if no NuGet packages are referenced
+            //        https://github.com/dotnet/sdk/issues/335
+            if (referencerProject.PackageReferences == null)
+            {
+                return;
+            }
+
+            //  Set the referencer project as an Exe unless it targets .NET Standard
+            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains(ConstantStringValues.NetstandardToken))
+            {
+                referencerProject.IsExe = true;
+            }
+
             //  Create the referencing app and run the compat test
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the created NuGet packages
-            foreach (TestProject dependencyProject in referencerProject.ReferencedProjects)
+            foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
             {
-                referencerRestoreCommand.AddSource(Path.GetDirectoryName(dependencyProject.PublishedNuGetPackageLibrary.NupkgPath));
+                referencerRestoreCommand.AddSource(Path.GetDirectoryName(packageReference.NupkgPath));
             }
 
             if (restoreSucceeds)
@@ -179,11 +182,6 @@ namespace Microsoft.NET.Build.Tests
             if (isSdkProject)
             {
                 ret.TargetFrameworks = target;
-                //  Workaround for .NET Core 2.0
-                if (target.Equals("netcoreapp2.0", StringComparison.OrdinalIgnoreCase))
-                {
-                    ret.RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version;
-                }
             }
             else
             {
@@ -191,17 +189,6 @@ namespace Microsoft.NET.Build.Tests
             }
 
             return ret;
-        }
-
-        bool AllProjectsBuildOnNonWindows(TestProject referencerProject)
-        {
-            return (referencerProject.BuildsOnNonWindows && referencerProject.ReferencedProjects.All(rp => rp.BuildsOnNonWindows));
-        }
-
-        bool NuGetPackageExists(TestProject dependencyProject)
-        {
-            return File.Exists(Path.Combine(dependencyProject.PublishedNuGetPackageLibrary.NupkgPath,
-                    String.Concat(dependencyProject.PublishedNuGetPackageLibrary.ID + "." + dependencyProject.PublishedNuGetPackageLibrary.Version + ".nupkg")));
         }
 
         string ConstructNuGetPackageReferencePath(TestProject dependencyProject)

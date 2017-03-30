@@ -29,7 +29,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<string> References { get; } = new List<string>();
 
-        public TestPackageReference PublishedNuGetPackageLibrary { get; set; }
+        public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
@@ -123,14 +123,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup = new XElement(ns + "ItemGroup");
                 projectXml.Root.Add(packageReferenceItemGroup);
             }
-            foreach (TestProject referencedProject in ReferencedProjects)
+            foreach (TestPackageReference packageReference in PackageReferences)
             {
-                if (referencedProject.PublishedNuGetPackageLibrary != null)
-                {
                     packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", $"{referencedProject.PublishedNuGetPackageLibrary.ID}"),
-                        new XAttribute("Version", $"{referencedProject.PublishedNuGetPackageLibrary.Version}")));
-                }
+                        new XAttribute("Include", $"{packageReference.ID}"),
+                        new XAttribute("Version", $"{packageReference.Version}")));
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
@@ -144,6 +141,12 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 else
                 {
                     propertyGroup.Add(new XElement(ns + "TargetFramework", this.TargetFrameworks));
+                }
+                //  Workaround for .NET Core 2.0
+                //
+                if (this.TargetFrameworks.Contains("netcoreapp2.0") && this.RuntimeFrameworkVersion == null)
+                {
+                    this.RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version;
                 }
 
                 if (!string.IsNullOrEmpty(this.RuntimeFrameworkVersion))
@@ -185,14 +188,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     projectReferenceItemGroup = new XElement(ns + "ItemGroup");
                     packageReferenceItemGroup.AddBeforeSelf(projectReferenceItemGroup);
                 }
-
                 foreach (var referencedProject in ReferencedProjects)
                 {
-                    if (referencedProject.PublishedNuGetPackageLibrary == null)
-                    {
-                        projectReferenceItemGroup.Add(new XElement(ns + "ProjectReference",
-                        new XAttribute("Include", $"../{referencedProject.Name}/{referencedProject.Name}.csproj")));
-                    }
+                    projectReferenceItemGroup.Add(new XElement(ns + "ProjectReference",
+                    new XAttribute("Include", $"../{referencedProject.Name}/{referencedProject.Name}.csproj")));
                 }
             }
 
