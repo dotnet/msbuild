@@ -99,7 +99,7 @@
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
-      <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
+      <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip;$(NuGetPackagesArchiveFolder)/**/*.nupkg" />
 
       <Message Text="Publishing Archiver" />
 

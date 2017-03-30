@@ -5,10 +5,10 @@ using System;
 
 namespace Microsoft.DotNet.Configurer
 {
-    public interface INuGetPackagesArchiver : IDisposable
+    public interface INuGetPackagesArchiver
     {
         string NuGetPackagesArchive { get; }
 
-        string ExtractArchive();        
+        void ExtractArchive(string archiveDestination);        
     }
 }

@@ -10,47 +10,36 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetCachePrimer : INuGetCachePrimer
     {
-        private static IReadOnlyList<IReadOnlyList<string>> _templatesUsedToPrimeCache = new List<IReadOnlyList<string>>()
-        {
-            new List<string>() { "console", "--debug:ephemeral-hive" },
-        };
-
-        private readonly ICommandFactory _commandFactory;
-
-        private readonly IDirectory _directory;
-
         private readonly IFile _file;
 
         private readonly INuGetPackagesArchiver _nugetPackagesArchiver;
 
         private readonly INuGetCacheSentinel _nuGetCacheSentinel;
 
+        private readonly INuGetConfig _nuGetConfig;
+
         public NuGetCachePrimer(
-            ICommandFactory commandFactory,
             INuGetPackagesArchiver nugetPackagesArchiver,
-            INuGetCacheSentinel nuGetCacheSentinel)
-            : this(commandFactory,
-                nugetPackagesArchiver,
+            INuGetCacheSentinel nuGetCacheSentinel,
+            INuGetConfig nuGetConfig)
+            : this(nugetPackagesArchiver,
                 nuGetCacheSentinel,
-                FileSystemWrapper.Default.Directory,
+                nuGetConfig,
                 FileSystemWrapper.Default.File)
         {
         }
 
         internal NuGetCachePrimer(
-            ICommandFactory commandFactory,
             INuGetPackagesArchiver nugetPackagesArchiver,
             INuGetCacheSentinel nuGetCacheSentinel,
-            IDirectory directory,
+            INuGetConfig nuGetConfig,
             IFile file)
         {
-            _commandFactory = commandFactory;
-
-            _directory = directory;
-
             _nugetPackagesArchiver = nugetPackagesArchiver;
 
             _nuGetCacheSentinel = nuGetCacheSentinel;
+
+            _nuGetConfig = nuGetConfig;
 
             _file = file;
         }
@@ -62,79 +51,19 @@ namespace Microsoft.DotNet.Configurer
                 return;
             }
 
-            var extractedPackagesArchiveDirectory = _nugetPackagesArchiver.ExtractArchive();
+            var cliFallbackFolderPathCalculator = new CLIFallbackFolderPathCalculator();
+            var nuGetFallbackFolder = cliFallbackFolderPathCalculator.CLIFallbackFolderPath;
 
-            PrimeCacheUsingArchive(extractedPackagesArchiveDirectory);
+            _nuGetConfig.AddCLIFallbackFolder(nuGetFallbackFolder);
+
+            _nugetPackagesArchiver.ExtractArchive(nuGetFallbackFolder);
+
+            _nuGetCacheSentinel.CreateIfNotExists();
         }
 
         private bool SkipPrimingTheCache()
         {
             return !_file.Exists(_nugetPackagesArchiver.NuGetPackagesArchive);
-        }
-
-        private void PrimeCacheUsingArchive(string extractedPackagesArchiveDirectory)
-        {
-            bool succeeded = true;
-
-            foreach (IReadOnlyList<string> templateInfo in _templatesUsedToPrimeCache)
-            {
-                if (succeeded)
-                {
-                    using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
-                    {
-                        var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
-
-                        succeeded &= CreateTemporaryProject(workingDirectory, templateInfo);
-
-                        if (succeeded)
-                        {
-                            succeeded &= RestoreTemporaryProject(extractedPackagesArchiveDirectory, workingDirectory);
-                        }
-                    }
-                }
-            }
-
-            if (succeeded)
-            {
-                _nuGetCacheSentinel.CreateIfNotExists();
-            }
-        }
-
-        private bool CreateTemporaryProject(string workingDirectory, IReadOnlyList<string> templateInfo)
-        {
-            return RunCommand(
-                "new",
-                templateInfo,
-                workingDirectory);
-        }
-
-        private bool RestoreTemporaryProject(string extractedPackagesArchiveDirectory, string workingDirectory)
-        {
-            return RunCommand(
-                "restore",
-                new[] { "-s", extractedPackagesArchiveDirectory },
-                workingDirectory);
-        }
-
-        private bool RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)
-        {
-            var command = _commandFactory
-                .Create(commandToExecute, args)
-                .WorkingDirectory(workingDirectory)
-                .CaptureStdOut()
-                .CaptureStdErr();
-
-            var commandResult = command.Execute();
-
-            if (commandResult.ExitCode != 0)
-            {
-                Reporter.Verbose.WriteLine(commandResult.StdErr);
-
-                Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.FailedToPrimeCacheError, commandToExecute, commandResult.ExitCode));
-            }
-
-            return commandResult.ExitCode == 0;
         }
     }
 }

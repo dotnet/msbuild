@@ -173,8 +173,9 @@ namespace Microsoft.DotNet.Cli
                 {
                     var environmentProvider = new EnvironmentProvider();
                     var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
+                    var nugetConfig = new NuGetConfi();
                     var nugetCachePrimer = 
-                        new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
+                        new NuGetCachePrimer(nugetPackagesArchiver, nugetCacheSentinel, nugetConfig);
                     var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                         nugetCachePrimer,
                         nugetCacheSentinel,
