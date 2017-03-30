@@ -17,7 +17,7 @@ def branch = GithubBranchName
         // TODO: Mono
 
         runtimes.each { runtime ->
-            def newJobName = Utilities.getFullJobName(project, "innerloop_${osName}_${runtime}", isPR)
+            def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}", isPR)
             def skipTestsWhenResultsNotFound = true
 
             // Create a new job with the specified name.  The brace opens a new closure
