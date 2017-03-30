@@ -297,7 +297,6 @@ LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
 LOCAL_BUILD_BINLOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_rebuild-$host.binlog"
 MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
 
-EXTRA_ARGS="$EXTRA_ARGS /p:DumpTestLogFilesOnFailure=true"
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
 setHome
