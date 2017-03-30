@@ -30,6 +30,7 @@ namespace Microsoft.TemplateEngine.Cli
         private HostSpecificTemplateData _hostSpecificTemplateData;
         private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplates;
         private CommandArgument _templateNameArgument;
+        private readonly ITelemetryLogger _telemetryLogger;
         private readonly TemplateCreator _templateCreator;
         private readonly SettingsLoader _settingsLoader;
         private readonly AliasRegistry _aliasRegistry;
@@ -45,8 +46,9 @@ namespace Microsoft.TemplateEngine.Cli
         private bool _forceAmbiguousFlow;
         private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
 
-        public New3Command(string commandName, ITemplateEngineHost host, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateName)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateName)
         {
+            _telemetryLogger = telemetryLogger;
             host = _host = new ExtendedTemplateEngineHost(host, this);
             EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
             _settingsLoader = (SettingsLoader)EnvironmentSettings.SettingsLoader;
@@ -252,11 +254,16 @@ namespace Microsoft.TemplateEngine.Cli
         
         public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
-        public static int Run(string commandName, ITemplateEngineHost host, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
         {
             if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.Ordinal)))
             {
                 Console.ReadLine();
+            }
+
+            if(args.Length == 0)
+            {
+                telemetryLogger.TrackEvent(commandName + "-CalledWithNoArgs");
             }
 
             ExtendedCommandParser app = new ExtendedCommandParser()
@@ -267,7 +274,7 @@ namespace Microsoft.TemplateEngine.Cli
             SetupInternalCommands(app);
 
             CommandArgument templateName = app.Argument("template", LocalizableStrings.TemplateArgumentHelp);
-            New3Command instance = new New3Command(commandName, host, onFirstRun, app, templateName);
+            New3Command instance = new New3Command(commandName, host, telemetryLogger, onFirstRun, app, templateName);
 
             app.OnExecute(instance.ExecuteAsync);
 
@@ -624,6 +631,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (IsHelpFlagSpecified)
             {
+                _telemetryLogger.TrackEvent(CommandName + "-Help");
                 ShowUsageHelp();
                 DisplayTemplateList();
                 return CreationResultStatus.Success;
@@ -646,6 +654,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterInstallFlow()
         {
+            _telemetryLogger.TrackEvent(CommandName + "-Install", new Dictionary<string, string> { { "CountOfThingsToInstall", Install.Count.ToString() } });
+
             Installer.InstallPackages(Install.ToList());
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
@@ -658,6 +668,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (IsHelpFlagSpecified)
                 {
+                    _telemetryLogger.TrackEvent(CommandName + "-Help");
                     ShowUsageHelp();
                 }
                 else
@@ -694,6 +705,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Setup the alias for the templates in the unambiguous group which don't have parameter problems.
         private CreationResultStatus SetupTemplateAlias()
         {
+            _telemetryLogger.TrackEvent(CommandName + "-CreateAlias");
             bool anyValid = false;
 
             foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
@@ -799,6 +811,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (IsHelpFlagSpecified)
             {
+                _telemetryLogger.TrackEvent(CommandName + "-Help");
                 return DisplayTemplateHelpForSingularGroup();
             }
 
@@ -820,8 +833,28 @@ namespace Microsoft.TemplateEngine.Cli
                 argsError = !ValidateRemainingParameters();
             }
 
+            highestPrecedenceTemplate.Info.Tags.TryGetValue("language", out ICacheTag language);
+            _app.AllTemplateParams.TryGetValue("framework", out string framework);
+            _app.AllTemplateParams.TryGetValue("auth", out string auth);
+            bool isMicrosoftAuthored = string.Equals(highestPrecedenceTemplate.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
+            string templateName = isMicrosoftAuthored ? highestPrecedenceTemplate.Info.Identity : "(3rd Party)";
+
+            if (!isMicrosoftAuthored)
+            {
+                auth = null;
+            }
+
             if (argsError)
             {
+                _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                {
+                    { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                    { "argument-error", "true" },
+                    { "framework", framework },
+                    { "template-name", templateName },
+                    { "auth", auth }
+                });
+
                 if (commandParseFailureMessage != null)
                 {
                     Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
@@ -832,12 +865,15 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
+                bool success = true;
+
                 try
                 {
                     return await CreateTemplateAsync(highestPrecedenceTemplate.Info).ConfigureAwait(false);
                 }
                 catch (ContentGenerationException cx)
                 {
+                    success = false;
                     Reporter.Error.WriteLine(cx.Message.Bold().Red());
                     if(cx.InnerException != null)
                     {
@@ -848,7 +884,20 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 catch (Exception ex)
                 {
+                    success = false;
                     Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                }
+                finally
+                {
+                    _telemetryLogger.TrackEvent(CommandName + "CreateTemplate", new Dictionary<string, string>
+                    {
+                        { "language", language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                        { "argument-error", "false" },
+                        { "framework", framework },
+                        { "template-name", templateName },
+                        { "create-success", success.ToString() },
+                        { "auth", auth }
+                    });
                 }
 
                 return CreationResultStatus.CreateFailed;
@@ -892,6 +941,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (IsHelpFlagSpecified)
                 {
+                    _telemetryLogger.TrackEvent(CommandName + "-Help");
                     ShowUsageHelp();
                 }
                 else
@@ -914,6 +964,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     if (IsHelpFlagSpecified)
                     {
+                        _telemetryLogger.TrackEvent(CommandName + "-Help");
                         ShowUsageHelp();
                     }
                     else

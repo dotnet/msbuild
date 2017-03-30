@@ -57,7 +57,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(Path.Combine(profileDir, ".templateengine"));
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.Run(CommandName, host, FirstRun, passthroughArgs);
+            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), FirstRun, passthroughArgs);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)

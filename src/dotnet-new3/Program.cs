@@ -23,7 +23,7 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            return New3Command.Run(CommandName, CreateHost(), FirstRun, args);
+            return New3Command.Run(CommandName, CreateHost(), new TelemetryLogger(null), FirstRun, args);
         }
 
         private static ITemplateEngineHost CreateHost()
