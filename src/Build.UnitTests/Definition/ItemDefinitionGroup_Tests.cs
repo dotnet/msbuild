@@ -485,20 +485,7 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            var res = p.ItemDefinitions.ContainsKey("Compile");
-            {
-                Console.WriteLine ($"** ItemDefinitionWithFalseCondition:");
-                foreach (var id in p.ItemDefinitions.Values)
-                    Console.WriteLine ($"** {id.ItemType}");
-            }
-
-            foreach (var item in p.Items) {
-                Console.WriteLine ($"** item type: {item.ItemType} EvaluatedInclude: {item.EvaluatedInclude}");
-                foreach (var pm in item.Metadata) {
-                    Console.WriteLine ($"** \tmd.name {pm.Name} value: {pm.EvaluatedValue}");
-                }
-            }
-            Assert.False(res);
+            Assert.False(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
             Assert.False(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
