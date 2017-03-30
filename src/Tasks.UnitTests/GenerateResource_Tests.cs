@@ -334,6 +334,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
 #endif
+        [Trait("Category", "mono-osx-failing")] // libgdiplus not found
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -458,6 +459,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
 #endif
+        [Trait("Category", "mono-osx-failing")] // libgdiplus not found
         public void AllowLinkedNoGenerate()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1485,6 +1487,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")] // libgdiplus not found
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
