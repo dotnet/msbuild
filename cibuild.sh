@@ -303,7 +303,7 @@ BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURAT
 setHome
 
 #temporary workaround to this being set on wrench and breaking tests!
-export FOO=
+unset FOO
 restoreBuildTools
 
 echo
