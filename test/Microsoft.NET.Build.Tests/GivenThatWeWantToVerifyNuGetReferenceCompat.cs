@@ -58,20 +58,8 @@ namespace Microsoft.NET.Build.Tests
         }
     }
 
-    [CollectionDefinition("GivenThatWeWantToVerifyNuGetReferenceCompatFixture Collection")]
-    public class GivenThatWeWantToVerifyNuGetReferenceCompatFixtureCollection : ICollectionFixture<DeleteNuGetArtifactsFixture>
-    { }
-
-    [Collection("GivenThatWeWantToVerifyNuGetReferenceCompatFixture Collection")]
-    public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest
+    public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest, IClassFixture<DeleteNuGetArtifactsFixture>
     {
-        DeleteNuGetArtifactsFixture Fixture;
-
-        public GivenThatWeWantToVerifyNuGetReferenceCompat(DeleteNuGetArtifactsFixture fixture)
-        {
-            this.Fixture = fixture;
-        }
-
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
@@ -152,7 +140,7 @@ namespace Microsoft.NET.Build.Tests
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.IdentifierDirectoryPrefix, referencerDirectoryIdentifierPostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
 
-            //  Modify the restore command to refer to the NuGet packages just created
+            //  Modify the restore command to refer to the created NuGet packages
             foreach (TestProject dependencyProject in referencerProject.ReferencedProjects)
             {
                 referencerRestoreCommand.AddSource(Path.GetDirectoryName(dependencyProject.PublishedNuGetPackageLibrary.NupkgPath));
