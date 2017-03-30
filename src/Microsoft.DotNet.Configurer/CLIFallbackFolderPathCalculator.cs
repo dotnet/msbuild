@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
+using NuGet.Common;
 
 namespace Microsoft.DotNet.Configurer
 {
@@ -19,6 +20,14 @@ namespace Microsoft.DotNet.Configurer
                     RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME");
 
                 return Path.Combine(profileDir, ".dotnet", "NuGetFallbackFolder");
+            }
+        }
+
+        public string NuGetUserSettingsDirectory
+        {
+            get
+            {
+                return NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
             }
         }
     }

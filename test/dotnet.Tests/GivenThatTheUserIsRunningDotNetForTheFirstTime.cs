@@ -19,23 +19,24 @@ namespace Microsoft.DotNet.Tests
     {
         private static CommandResult _firstDotnetNonVerbUseCommandResult;
         private static CommandResult _firstDotnetVerbUseCommandResult;
-        private static DirectoryInfo _nugetCacheFolder;
+        private static DirectoryInfo _nugetFallbackFolder;
 
         static GivenThatTheUserIsRunningDotNetForTheFirstTime()
         {
             var testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests");
-            var testNugetCache = Path.Combine(testDirectory.FullName, "nuget_cache");
+            var testNuGetHome = Path.Combine(testDirectory.FullName, "nuget_home");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(testDirectory);
-            command.Environment["NUGET_PACKAGES"] = testNugetCache;
+            command.Environment["HOME"] = testNuGetHome;
+            command.Environment["USERPROFILE"] = testNuGetHome;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
-            _nugetCacheFolder = new DirectoryInfo(testNugetCache);
+            _nugetFallbackFolder = new DirectoryInfo(Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder"));
         }
 
         [Fact]
@@ -82,7 +83,7 @@ A command is running to initially populate your local package cache, to improve 
         [Fact]
         public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
         {
-            _nugetCacheFolder
+            _nugetFallbackFolder
                 .Should()
                 .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
     	}
@@ -115,11 +116,11 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.visualstudio.web.browserlink",
             };
 
-            _nugetCacheFolder
+            _nugetFallbackFolder
                 .Should()
                 .HaveDirectories(expectedDirectories);
 
-            _nugetCacheFolder
+            _nugetFallbackFolder
                 .Should()
                 .NotHaveDirectories(unexpectedDirectories);
         }

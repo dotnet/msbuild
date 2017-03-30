@@ -13,10 +13,9 @@ namespace Microsoft.DotNet.Configurer
 
         private ISettings _settings;
 
-        public NuGetConfig()
+        public NuGetConfig(CLIFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
         {
-            var nuGetConfigFolder = NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
-            _settings = new Settings(nuGetConfigFolder);
+            _settings = new Settings(cliFallbackFolderPathCalculator.NuGetUserSettingsDirectory);
         }
 
         internal NuGetConfig(ISettings settings)

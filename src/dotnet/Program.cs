@@ -171,11 +171,15 @@ namespace Microsoft.DotNet.Cli
             {
                 using (var nugetPackagesArchiver = new NuGetPackagesArchiver())
                 {
+                    var cliFallbackFolderPathCalculator = new CLIFallbackFolderPathCalculator();
                     var environmentProvider = new EnvironmentProvider();
                     var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                    var nugetConfig = new NuGetConfi();
-                    var nugetCachePrimer = 
-                        new NuGetCachePrimer(nugetPackagesArchiver, nugetCacheSentinel, nugetConfig);
+                    var nugetConfig = new NuGetConfi(cliFallbackFolderPathCalculator);
+                    var nugetCachePrimer = new NuGetCachePrimer(
+                        nugetPackagesArchiver,
+                        nugetCacheSentinel,
+                        nugetConfig,
+                        cliFallbackFolderPathCalculator);
                     var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                         nugetCachePrimer,
                         nugetCacheSentinel,
