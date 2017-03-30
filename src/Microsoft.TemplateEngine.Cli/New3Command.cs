@@ -1271,6 +1271,10 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
                         }
+                        else if (templateWithFilterInfo.Info.CacheParameters.ContainsKey(paramName))
+                        {
+                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
+                        }
                         else
                         {
                             dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName });

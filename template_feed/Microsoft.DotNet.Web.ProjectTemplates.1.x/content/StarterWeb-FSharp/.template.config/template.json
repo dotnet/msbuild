@@ -16,6 +16,7 @@
   "symbols":{
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "datatype": "choice",
       "choices": [
         {
@@ -31,7 +32,7 @@
     },
     "FrameworkIs1_1": {
       "type": "computed",
-      "value": "(Framework == \"netcoreapp1.1\")"
+      "value": "Framework == \"netcoreapp1.1\""
     },
     "copyrightYear": {
       "type": "generated",
@@ -40,12 +41,19 @@
       "parameters": {
         "format": "yyyy"
       }
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ],
   "defaultName": "WebApplication1",
   "postActions": [
     {
+      "condition": "!skipRestore",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
         { "text": "Run 'dotnet restore'" }

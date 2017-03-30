@@ -16,6 +16,7 @@
   "symbols": {
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "replaces": "netstandard1.4",
       "datatype": "choice",
       "choices": [
@@ -57,12 +58,19 @@
         }
       ],
       "defaultValue": "netstandard1.4"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.ClassLibrary1.csproj" } ],
   "defaultName": "ClassLibrary1",
   "postActions": [
     {
+      "condition": "!skipRestore",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
         { "text": "Run 'dotnet restore'" }

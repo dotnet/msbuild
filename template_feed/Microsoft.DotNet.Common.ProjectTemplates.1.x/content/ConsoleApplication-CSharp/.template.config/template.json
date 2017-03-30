@@ -16,6 +16,7 @@
   "symbols": {
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "datatype": "choice",
       "choices": [
         {
@@ -28,12 +29,19 @@
         }
       ],
       "defaultValue": "netcoreapp1.1"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.ConsoleApplication1.csproj" } ],
   "defaultName": "ConsoleApp1",
   "postActions": [
     {
+      "condition": "!skipRestore",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
         { "text": "Run 'dotnet restore'" }

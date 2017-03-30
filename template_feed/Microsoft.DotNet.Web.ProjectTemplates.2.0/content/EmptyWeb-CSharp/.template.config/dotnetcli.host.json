@@ -5,6 +5,10 @@
     },
     "Framework": {
       "longName": "framework"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
   }
 }

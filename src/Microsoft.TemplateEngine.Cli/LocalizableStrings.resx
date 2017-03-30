@@ -398,7 +398,7 @@
     <value>Do you want to run this action (Y|N)?</value>
   </data>
   <data name="ProcessingPostActions" xml:space="preserve">
-    <value>Processing Post Actions</value>
+    <value>Processing post-creation actions...</value>
   </data>
   <data name="WhetherToAllowScriptsToRun" xml:space="preserve">
     <value>Specify if post action scripts should run.</value>

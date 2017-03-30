@@ -3,14 +3,13 @@
     "Framework": {
       "longName": "framework"
     },
-    "RuntimeFrameworkVersion": {
-      "longName": "runtime-framework-version",
-      "shortName": "fv",
-      "isHidden": "true"
-    },
     "EnablePack": {
       "shortName": "p",
       "longName": "enable-pack"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
   }
 }

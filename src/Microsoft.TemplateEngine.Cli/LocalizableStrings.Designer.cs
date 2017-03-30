@@ -750,7 +750,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing Post Actions.
+        ///   Looks up a localized string similar to Processing post-creation actions....
         /// </summary>
         public static string ProcessingPostActions {
             get {

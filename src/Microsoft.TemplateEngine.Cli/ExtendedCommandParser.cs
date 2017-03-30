@@ -333,19 +333,27 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 if (shortNameOverrides != null && shortNameOverrides.TryGetValue(parameterName, out string shortNameOverride))
-                {   // short name starting point was explicitly specified
-                    string fullShortNameOverride = "-" + shortNameOverride;
-                    if (!IsParameterNameTaken(shortNameOverride))
+                {
+                    if (string.IsNullOrEmpty(shortNameOverride))
                     {
-                        MapTemplateParamToCanonical(fullShortNameOverride, parameterName);
                         shortNameFound = true;
                     }
-
-                    string qualifiedShortNameOverride = "-p:" + shortNameOverride;
-                    if (!shortNameFound && !IsParameterNameTaken(qualifiedShortNameOverride))
+                    else
                     {
-                        MapTemplateParamToCanonical(qualifiedShortNameOverride, parameterName);
-                        shortNameFound = true;
+                        // short name starting point was explicitly specified
+                        string fullShortNameOverride = "-" + shortNameOverride;
+                        if (!IsParameterNameTaken(shortNameOverride))
+                        {
+                            MapTemplateParamToCanonical(fullShortNameOverride, parameterName);
+                            shortNameFound = true;
+                        }
+
+                        string qualifiedShortNameOverride = "-p:" + shortNameOverride;
+                        if (!shortNameFound && !IsParameterNameTaken(qualifiedShortNameOverride))
+                        {
+                            MapTemplateParamToCanonical(qualifiedShortNameOverride, parameterName);
+                            shortNameFound = true;
+                        }
                     }
                 }
                 else
