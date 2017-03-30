@@ -16,10 +16,9 @@ mkdir -p ${DESTDIR}${MONO_PREFIX}/bin
 
 cp -r $MSBUILD_OUT_DIR/* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
-MS_COMMON_TARGETS_AFTER_DIR=${XBUILD_DIR}/${MSBUILD_TOOLSVERSION}/Microsoft.Common.targets/ImportBefore
-
-mkdir -p ${DESTDIR}${MS_COMMON_TARGETS_AFTER_DIR}
-mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.Common.Mono.Before.targets ${DESTDIR}${{MS_COMMON_TARGETS_AFTER_DIR}
+# Deploy files meant for the default $(MSBuildExtensionsPath)
+SRC_EXTN_PATH_DIR="mono/ExtensionsPath"
+cp -r ${SRC_EXTN_PATH_DIR}/ ${DESTDIR}${XBUILD_DIR}/${MSBUILD_TOOLSVERSION}
 
 mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.Common.props ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 
