@@ -23,7 +23,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
-    <_BeforePublishTargetsDir Condition=" '$(_BeforePublishTargetsDir)' == ''">$(MSBuildThisFileDirectory)BeforePublishTargets\</_BeforePublishTargetsDir>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
     <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
@@ -90,15 +89,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
   </PropertyGroup>
 
-  <!--
-  ***********************************************************************************************
-  Import the BeforePublish target
-  ***********************************************************************************************
- -->
-
-  <Import Project="$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets" Condition="Exists('$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets')" />
-
-  
   <!--
   ***********************************************************************************************
   Import the Compute target
