@@ -9,18 +9,18 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.TestFramework
 {
-    public class PackageReference
+    public class TestPackageReference
     {
-        public PackageReference(string id, string version, string path)
+        public TestPackageReference(string id, string version, string nupkgPath)
         {
             ID = id;
             Version = version;
-            LocalPath = path;
+            NupkgPath = nupkgPath;
         }
 
         public string ID { get; private set; }
         public string Version { get; private set; }
-        public string LocalPath { get; private set; }
+        public string NupkgPath { get; private set; }
 
     }
 }

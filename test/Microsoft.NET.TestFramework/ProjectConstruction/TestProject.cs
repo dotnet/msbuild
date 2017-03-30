@@ -29,7 +29,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<string> References { get; } = new List<string>();
 
-        public PackageReference PublishedNuGetPackageLibrary { get; set; }
+        public TestPackageReference PublishedNuGetPackageLibrary { get; set; }
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
@@ -123,16 +123,13 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup = new XElement(ns + "ItemGroup");
                 projectXml.Root.Add(packageReferenceItemGroup);
             }
-            if (this.ReferencedProjects.Any())
+            foreach (TestProject referencedProject in ReferencedProjects)
             {
-                foreach (TestProject referencedProject in ReferencedProjects)
+                if (referencedProject.PublishedNuGetPackageLibrary != null)
                 {
-                    if (referencedProject.PublishedNuGetPackageLibrary != null)
-                    {
-                        packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                            new XAttribute("Include", $"{referencedProject.PublishedNuGetPackageLibrary.ID}"),
-                            new XAttribute("Version", $"{referencedProject.PublishedNuGetPackageLibrary.Version}")));
-                    }
+                    packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", $"{referencedProject.PublishedNuGetPackageLibrary.ID}"),
+                        new XAttribute("Version", $"{referencedProject.PublishedNuGetPackageLibrary.Version}")));
                 }
             }
 
