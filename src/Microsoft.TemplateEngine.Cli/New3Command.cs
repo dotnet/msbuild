@@ -359,6 +359,12 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 case CreationResultStatus.Success:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+
+                    if(!string.IsNullOrEmpty(template.ThirdPartyNotices))
+                    {
+                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, template.ThirdPartyNotices));
+                    }
+
                     HandlePostActions(instantiateResult);
                     break;
                 case CreationResultStatus.CreateFailed:
@@ -1448,6 +1454,11 @@ namespace Microsoft.TemplateEngine.Cli
             if (!string.IsNullOrWhiteSpace(templateInfo.Description))
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
+            }
+
+            if (!string.IsNullOrEmpty(templateInfo.ThirdPartyNotices))
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, templateInfo.ThirdPartyNotices));
             }
 
             string additionalInfo = GetTemplateUsageInformation(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);

@@ -903,6 +903,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This template contains technologies from parties other than Microsoft, see {0} for details..
+        /// </summary>
+        public static string ThirdPartyNotices {
+            get {
+                return ResourceManager.GetString("ThirdPartyNotices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
         public static string Type {

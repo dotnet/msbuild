@@ -421,4 +421,7 @@
   <data name="PostActionInstructions" xml:space="preserve">
     <value>Manual instructions: {0}</value>
   </data>
+  <data name="ThirdPartyNotices" xml:space="preserve">
+    <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
+  </data>
 </root>
