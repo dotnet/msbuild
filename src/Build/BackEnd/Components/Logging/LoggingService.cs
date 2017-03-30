@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -481,14 +482,40 @@ namespace Microsoft.Build.BackEnd.Logging
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
             // Warnings as errors are not tracked if the user did not specify to do so
-            if (WarningsAsErrors == null)
+            if (WarningsAsErrors == null && _filterEventSource.WarningsAsErrorsByProject == null && _eventSinkDictionary.Values.All(i => i.WarningsAsErrorsByProject == null))
             {
                 return false;
             }
 
             // Determine if any of the event sinks have logged an error with this submission ID
-            return (_filterEventSource != null && _filterEventSource.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId))
-                || (_eventSinkDictionary != null && _eventSinkDictionary.Values.Any(i => i.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId)));
+            return _filterEventSource != null && _filterEventSource.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId)
+                || _eventSinkDictionary != null && _eventSinkDictionary.Values.Any(i => i.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId));
+        }
+
+        public void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes)
+        {
+            lock (_lockObject)
+            {
+                if (_filterEventSource.WarningsAsErrorsByProject == null)
+                {
+                    _filterEventSource.WarningsAsErrorsByProject = new ConcurrentDictionary<int, ISet<string>>();
+                }
+
+                _filterEventSource.WarningsAsErrorsByProject.Add(projectInstanceId, new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase));
+            }
+        }
+
+        public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
+        {
+            lock (_lockObject)
+            {
+                if (_filterEventSource.WarningsAsMessagesByProject == null)
+                {
+                    _filterEventSource.WarningsAsMessagesByProject = new ConcurrentDictionary<int, ISet<string>>();
+                }
+
+                _filterEventSource.WarningsAsMessagesByProject.Add(projectInstanceId, new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase));
+            }
         }
 
         /// <summary>
