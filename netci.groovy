@@ -6,7 +6,7 @@ def project = GithubProject
 // The input branch name (e.g. master)
 def branch = GithubBranchName
 
-['true', 'false'].each { isPR ->
+[true, false].each { isPR ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
