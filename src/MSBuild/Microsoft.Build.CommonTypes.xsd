@@ -757,7 +757,12 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                    
+                            </xs:element>
+                            <xs:element name="CopyToPublishDirectory">
+                                <xs:annotation>
+                                    <xs:documentation><!-- _locID_text="Content_CopyToPublishDirectory" _locComment="" -->Copy file to publish directory (optional, boolean, default false)</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                     <!-- redefine Include just to give a specific description -->
