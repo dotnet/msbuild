@@ -10,7 +10,7 @@
     <PropertyGroup>
       <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer.csproj</DotnetDebToolConsumerProjectName>
       <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
-      <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/2.0.0-beta-beta-001599/lib/netcoreapp1.0/tool/package_tool</PackageTool>
+      <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp1.0/tool/package_tool</PackageTool>
     </PropertyGroup>
 
     <!-- constants -->
