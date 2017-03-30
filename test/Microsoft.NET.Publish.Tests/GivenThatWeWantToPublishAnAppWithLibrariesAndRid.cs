@@ -18,9 +18,17 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_publishes_a_framework_dependent_RID_specific_runnable_output()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disable this test on full framework, as the current build won't have access to 
+                //  https://github.com/Microsoft/msbuild/pull/1674
+                //  See https://github.com/dotnet/sdk/issues/877
+                return;
+            }
+
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibraryAndRid")
+                .CopyTestAsset("AppWithLibraryAndRid", "PublishFrameworkDependentRIDSpecific")
                 .WithSource();
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
