@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 {
     public sealed class MSBuildLogger : Logger
     {
-        private readonly INuGetCacheSentinel _sentinel = new NuGetCacheSentinel();
+        private readonly INuGetCacheSentinel _sentinel = new NuGetCacheSentinel(new CLIFallbackFolderPathCalculator());
         private readonly ITelemetry _telemetry;
 
         public MSBuildLogger()
