@@ -78,6 +78,10 @@
 
   </Target>
 
+  <Target Name="DumpTestLogFile">
+      <Exec Command="cat @(AssemblyUnderTest)_stdout.txt"/>
+  </Target>
+
   <Target Name="Test"
           DependsOnTargets="Build;CopyBuildOutputToDeploymentDirectories;EnsureDependenciesDeployed;EnsurePrerequisitesCopied"
           Condition="'$(IsTestProject)' == 'true'">
@@ -103,6 +107,8 @@
           IgnoreStandardErrorWarningFormat="true"
           EnvironmentVariables="MSBUILDDONOTLAUNCHDEBUGGER=1"
           Condition="'$(NetCoreBuild)' == 'true'" />
+
+    <OnError ExecuteTargets="DumpTestLogFile" Condition="'$(DumpTestLogFilesOnFailure)' == 'true'" />
   </Target>
 
   <Target Name="EnsureSDKTargetPresent"
