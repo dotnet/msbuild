@@ -5,11 +5,17 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 
+//  Notes on functionality and how to test it
+//  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
+
+
+
+
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    class ConflictResolver
+    internal class ConflictResolver<TConflictItem> where TConflictItem : class, IConflictItem
     {
-        private Dictionary<string, ConflictItem> winningItemsByKey = new Dictionary<string, ConflictItem>();
+        private Dictionary<string, TConflictItem> winningItemsByKey = new Dictionary<string, TConflictItem>();
         private ILog log;
         private PackageRank packageRank;
 
@@ -19,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             this.packageRank = packageRank;
         }
 
-        public void ResolveConflicts(IEnumerable<ConflictItem> conflictItems, Func<ConflictItem, string> getItemKey, Action<ConflictItem> foundConflict, bool commitWinner = true)
+        public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey, Action<TConflictItem> foundConflict, bool commitWinner = true)
         {
             if (conflictItems == null)
             {
@@ -35,7 +41,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     continue;
                 }
 
-                ConflictItem existingItem;
+                TConflictItem existingItem;
 
                 if (winningItemsByKey.TryGetValue(itemKey, out existingItem))
                 {
@@ -49,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         continue;
                     }
 
-                    ConflictItem loser = conflictItem;
+                    TConflictItem loser = conflictItem;
                     if (!ReferenceEquals(winner, existingItem))
                     {
                         // replace existing item
@@ -74,7 +80,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
         }
 
-        private ConflictItem ResolveConflict(ConflictItem item1, ConflictItem item2)
+        private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2)
         {
             var conflictMessage = $"Encountered conflict between {item1.DisplayName} and {item2.DisplayName}.";
 

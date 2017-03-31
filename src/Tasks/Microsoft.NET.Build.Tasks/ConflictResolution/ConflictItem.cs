@@ -14,8 +14,20 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         Runtime,
         Platform
     }
+
+    internal interface IConflictItem
+    {
+        Version AssemblyVersion { get; }
+        ConflictItemType ItemType { get; }
+        bool Exists { get; }
+        string FileName { get; }
+        Version FileVersion { get; }
+        string PackageId { get; }
+        string DisplayName { get; }
+    }
+
     // Wraps an ITask item and adds lazy evaluated properties used by Conflict resolution.
-    internal class ConflictItem
+    internal class ConflictItem : IConflictItem
     {
         public ConflictItem(ITaskItem originalItem, ConflictItemType itemType)
         {

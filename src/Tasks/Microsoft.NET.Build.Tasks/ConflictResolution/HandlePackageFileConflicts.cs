@@ -45,14 +45,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // resolve conflicts at compile time
             var referenceItems = GetConflictTaskItems(References, ConflictItemType.Reference).ToArray();
 
-            var compileConflictScope = new ConflictResolver(packageRanks, log);
+            var compileConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
 
             compileConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceFileName(ci.OriginalItem),
                 HandleCompileConflict);
 
             // resolve conflicts that class in output
-            var runtimeConflictScope = new ConflictResolver(packageRanks, log);
+            var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
 
             runtimeConflictScope.ResolveConflicts(referenceItems,
                 ci => ItemUtilities.GetReferenceTargetPath(ci.OriginalItem),
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             // resolve conflicts with platform (eg: shared framework) items
             // we only commit the platform items since its not a conflict if other items share the same filename.
-            var platformConflictScope = new ConflictResolver(packageRanks, log);
+            var platformConflictScope = new ConflictResolver<ConflictItem>(packageRanks, log);
             var platformItems = PlatformManifests?.SelectMany(pm => PlatformManifestReader.LoadConflictItems(pm.ItemSpec, log)) ?? Enumerable.Empty<ConflictItem>();
 
             platformConflictScope.ResolveConflicts(platformItems, pi => pi.FileName, pi => { });
