@@ -25,6 +25,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="GetPassword" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <_DotNetPublishFiles>
@@ -99,6 +100,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
     </NormalizeServiceUrl>
 
+    <GetPassword
+      EncryptedPassword ="$(EncryptedPassword)"
+      Condition="'$(Password)' == '' And '$(IsGetPasswordEnabled)' == 'true'">
+      <Output TaskParameter="ClearPassword" PropertyName="Password"/>
+    </GetPassword>
+    
     <!--  Data Passed to MSDeploy -->
     <ItemGroup>
       <MsDeploySourceProviderSetting Remove="@(MsDeploySourceProviderSetting)" />
