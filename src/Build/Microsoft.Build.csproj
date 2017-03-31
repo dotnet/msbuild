@@ -785,23 +785,4 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets" />
-  <Target Name="CopyDependenciesFromNugetNeededByVsix" BeforeTargets="ResolveAssemblyReferences" AfterTargets="ResolveNuGetPackages">
-    <!-- The VSIX installer manifest references System.Collections.Immutable, System.Threading.Tasks.Dataflow
-         and System.Runtime.InteropServices.RuntimeInformation from the Output folder, but they won't be placed there
-         by default because NuGet references come in as CopyLocal false.
-
-         Work around this by munging the references after NuGet emits them but before RAR.
-
-         TODO: this shouldn't be here. After moving to a better binplacing model (like "publish
-         msbuild.exe to a folder") it should be removed.
-    -->
-    <ItemGroup>
-      <Reference Condition=
-        "'%(Reference.NuGetPackageId)' == 'System.Collections.Immutable' or
-        '%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Dataflow' or
-        '%(Reference.NuGetPackageId)' == 'System.Runtime.InteropServices.RuntimeInformation'">
-        <Private>true</Private>
-      </Reference>
-    </ItemGroup>
-  </Target>
 </Project>

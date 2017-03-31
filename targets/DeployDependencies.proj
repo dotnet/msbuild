@@ -110,7 +110,7 @@
   <Target Name="DeployRuntime"
           DependsOnTargets="RestoreRuntimePackages"
           Outputs="%(RuntimeProjectJson.LockFile).IntentionallyDoesNotExistSoThisAlwaysRuns">
-    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="true"
                                          IncludeFrameworkReferences="false"
                                          NuGetPackagesDirectory="$(PackagesDir)"
                                          RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
@@ -134,6 +134,41 @@
           DestinationFolder="$(OutputPath)"
           SkipUnchangedFiles="true"
           Condition=" '$(BuildingInsideVisualStudio)' == 'true' "
+          />
+    
+    
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition=
+          "'%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Collections.Immutable' or
+          '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Threading.Tasks.Dataflow' or
+          '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Runtime.InteropServices.RuntimeInformation'"
+          />
+  </Target>
+
+  <!-- The VSIX installer manifest references
+        System.Collections.Immutable,
+        System.Threading.Tasks.Dataflow,
+        System.Runtime.InteropServices.RuntimeInformation
+        from the Output folder, but they won't be placed there
+        by default because NuGet references come in as CopyLocal false.
+
+        Work around this by manually copying them here.
+
+        TODO: this shouldn't be here. After moving to a better binplacing model (like "publish
+        msbuild.exe to a folder") it should be removed. This whole project file should be removed. :)
+  -->
+  <Target Name="CopyDependenciesFromNugetNeededByVsix"
+          AfterTargets="DeployRuntime">
+
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition=
+          "'%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Collections.Immutable' or
+          '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Threading.Tasks.Dataflow' or
+          '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Runtime.InteropServices.RuntimeInformation'"
           />
   </Target>
 
