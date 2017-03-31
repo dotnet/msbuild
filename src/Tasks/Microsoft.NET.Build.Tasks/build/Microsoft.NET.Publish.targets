@@ -26,6 +26,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- publishing self-contained apps should publish the native host as $(AssemblyName).exe -->
     <DeployAppHost Condition=" '$(DeployAppHost)' == '' and '$(OutputType)' == 'Exe' and '$(RuntimeIdentifier)' != ''">true</DeployAppHost>
+
+    <IsPublishable Condition="'$(IsPublishable)'==''">true</IsPublishable>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -35,6 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemDefinitionGroup>
 
   <Target Name="Publish"
+          Condition="$(IsPublishable) == 'true'"
           DependsOnTargets="Build;
                             PrepareForPublish;
                             ComputeAndCopyFilesToPublishDirectory;
