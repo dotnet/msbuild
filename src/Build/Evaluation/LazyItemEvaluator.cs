@@ -55,7 +55,7 @@ namespace Microsoft.Build.Evaluation
         // it's unneeded (at least by the 16.0 timeframe).
         private Dictionary<string, LazyItemList> _itemLists = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
             new Dictionary<string, LazyItemList>() :
-            new Dictionary<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
+            new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
         {
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Evaluation
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
-                ImmutableDictionary.CreateBuilder<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
+                ImmutableDictionary.CreateBuilder<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
             public bool ConditionResult { get; set; }
 
