@@ -1400,7 +1400,6 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
             appExt.InternalOption("--type", "--type", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
             appExt.InternalOption("--force", "--force", LocalizableStrings.ForcesTemplateCreation, CommandOptionType.NoValue);
-            appExt.InternalOption("--allow-scripts", "--allow-scripts", LocalizableStrings.WhetherToAllowScriptsToRun, CommandOptionType.SingleValue);
 
             // hidden
             appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
@@ -1410,10 +1409,14 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.HiddenInternalOption("-i|--install", "--install", CommandOptionType.MultipleValue);
             appExt.HiddenInternalOption("-all|--show-all", "--show-all", CommandOptionType.NoValue);
 
+            // this will never be exposed directly. It gets implicitly added to template detailed help when the template has script running post-actions
+            appExt.HiddenInternalOption("--allow-scripts", "--allow-scripts", CommandOptionType.SingleValue);
+
             // reserved but not currently used
             appExt.HiddenInternalOption("-up|--update", "--update", CommandOptionType.MultipleValue);
             appExt.HiddenInternalOption("-u|--uninstall", "--uninstall", CommandOptionType.MultipleValue);
             appExt.HiddenInternalOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
+
         }
 
         private void ShowConfig()
