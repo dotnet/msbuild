@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -29,7 +30,17 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (string request in installationRequests)
             {
-                if (Package.TryParse(request, out Package package))
+                string req = request;
+
+                //If the request string doesn't have any wild cards or probable path indicators,
+                //  and doesn't have a "::" delimiter either, try to convert it to "latest package"
+                //  form
+                if (req.IndexOfAny(new[] { '*', '?', '/', '\\' }) < 0 && req.IndexOf("::", StringComparison.Ordinal) < 0)
+                {
+                    req += "::*";
+                }
+
+                if (Package.TryParse(req, out Package package))
                 {
                     packages.Add(package);
                 }
