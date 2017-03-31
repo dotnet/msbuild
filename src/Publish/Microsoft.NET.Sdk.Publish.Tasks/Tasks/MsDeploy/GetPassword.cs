@@ -5,7 +5,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    public class GetCredentials : Task
+    public class GetPassword : Task
     {
         public string EncryptedPassword { get; set; }
 
