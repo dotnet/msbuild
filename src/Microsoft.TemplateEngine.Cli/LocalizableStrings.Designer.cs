@@ -252,6 +252,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not find something to uninstall called &apos;{0}&apos;..
+        /// </summary>
+        public static string CouldntUninstall {
+            get {
+                return ResourceManager.GetString("CouldntUninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creates an alias for the specified template..
         /// </summary>
         public static string CreateAliasHelp {

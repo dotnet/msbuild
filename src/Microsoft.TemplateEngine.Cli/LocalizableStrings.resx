@@ -427,4 +427,7 @@
   <data name="UninstallHelp" xml:space="preserve">
     <value>Uninstalls a source or a template pack.</value>
   </data>
+  <data name="CouldntUninstall" xml:space="preserve">
+    <value>Could not find something to uninstall called '{0}'.</value>
+  </data>
 </root>

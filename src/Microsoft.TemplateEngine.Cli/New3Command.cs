@@ -66,6 +66,57 @@ namespace Microsoft.TemplateEngine.Cli
 
         public string TemplateName => _commandInput.TemplateName;
 
+        public IList<string> Install => _app.InternalParamValueList("--install");
+
+        public IList<string> Uninstall => _app.InternalParamValueList("--uninstall");
+
+        public static IInstaller Installer { get; set; }
+
+        public bool IsForceFlagSpecified => _app.InternalParamHasValue("--force");
+
+        public bool InstallHasValue => _app.InternalParamHasValue("--install");
+
+        public bool UninstallHasValue => _app.InternalParamHasValue("--uninstall");
+
+        public bool IsHelpFlagSpecified => _app.InternalParamHasValue("--help");
+
+        public bool IsListFlagSpecified => _app.InternalParamHasValue("--list");
+
+        public bool IsQuietFlagSpecified => _app.InternalParamHasValue("--quiet");
+
+        public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
+
+        public string TypeFilter => _app.InternalParamValue("--type");
+
+        public string Language => _app.InternalParamValue("--language");
+
+        public string Locale => _app.InternalParamValue("--locale");
+
+        public bool LocaleHasValue => _app.InternalParamHasValue("--locale");
+
+        public string Name
+        {
+            get
+            {
+                string specifiedName = _app.InternalParamValue("--name");
+
+                if (string.IsNullOrWhiteSpace(specifiedName))
+                {
+                    return null;
+                }
+
+                return specifiedName;
+            }
+        }
+
+        public string OutputPath => _app.InternalParamValue("--output");
+
+        public string TemplateName => _templateNameArgument.Value;
+
+        public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
+
+        public bool AllowScriptsToRunHasValue => _app.InternalParamHasValue("--allow-scripts");
+
         public string OutputPath => _commandInput.OutputPath;
 
         private static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
@@ -615,6 +666,90 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
+        private void ProcessUninstallRequests(IEnumerable<string> uninstallRequests, bool warnOnFailure)
+        {
+            foreach (string uninstall in uninstallRequests)
+            {
+                string prefix = Path.Combine(_paths.User.Packages, uninstall);
+                IReadOnlyList<MountPointInfo> rootMountPoints = EnvironmentSettings.SettingsLoader.MountPoints.Where(x =>
+                {
+                    if (x.ParentMountPointId != Guid.Empty)
+                    {
+                        return false;
+                    }
+
+                    if (uninstall.IndexOfAny(new[] { '/', '\\' }) < 0)
+                    {
+                        if (x.Place.StartsWith(prefix + ".", StringComparison.OrdinalIgnoreCase) && x.Place.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    if(string.Equals(x.Place, uninstall, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                    else if (x.Place.Length > uninstall.Length)
+                    {
+                        string place = x.Place.Replace('\\', '/');
+                        string match = uninstall.Replace('\\', '/');
+
+                        if(match[match.Length - 1] != '/')
+                        {
+                            match += "/";
+                        }
+
+                        return place.StartsWith(match, StringComparison.OrdinalIgnoreCase);
+                    }
+
+                    return false;
+                }).ToList();
+
+                if (rootMountPoints.Count == 0)
+                {
+                    if (warnOnFailure)
+                    {
+                        Console.WriteLine(LocalizableStrings.CouldntUninstall, uninstall);
+                    }
+
+                    continue;
+                }
+
+                HashSet<Guid> mountPoints = new HashSet<Guid>(rootMountPoints.Select(x => x.MountPointId));
+                bool isSearchComplete = false;
+                while (!isSearchComplete)
+                {
+                    isSearchComplete = true;
+                    foreach (MountPointInfo possibleChild in EnvironmentSettings.SettingsLoader.MountPoints)
+                    {
+                        if (mountPoints.Contains(possibleChild.ParentMountPointId))
+                        {
+                            isSearchComplete &= !mountPoints.Add(possibleChild.MountPointId);
+                        }
+                    }
+                }
+
+                //Find all of the things that refer to any of the mount points we've got
+                EnvironmentSettings.SettingsLoader.RemoveMountPoints(mountPoints);
+                _settingsLoader.Save();
+
+                foreach (MountPointInfo mountPoint in rootMountPoints)
+                {
+                    if (mountPoint.Place.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            EnvironmentSettings.Host.FileSystem.FileDelete(mountPoint.Place);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+            }
+        }
+
         private CreationResultStatus EnterMaintenanceFlow()
         {
             if (!ValidateRemainingParameters())
@@ -630,6 +765,17 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 return CreationResultStatus.InvalidParamValues;
+            }
+
+            if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
+            {
+                ProcessUninstallRequests(Install.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]), false);
+            }
+
+            if (UninstallHasValue &&
+                ((Uninstall.Count > 0) && (Uninstall[0] != null)))
+            {
+                ProcessUninstallRequests(Uninstall, true);
             }
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
@@ -1032,7 +1178,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool reinitFlag = _commandInput.HasDebuggingFlag("--debug:reinit");
             if (reinitFlag)
             {
-                _paths.Delete(_paths.User.FirstRunCookie);
+                _paths.Delete(_paths.User.BaseDir);
             }
 
             // Note: this leaves things in a weird state. Might be related to the localized caches.
@@ -1326,7 +1472,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {
-            if (EnvironmentSettings.SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file))
+            if (EnvironmentSettings.SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file, out IMountPoint mountPoint))
             {
                 JObject jsonData;
                 using (Stream s = file.OpenRead())
@@ -1336,6 +1482,7 @@ namespace Microsoft.TemplateEngine.Cli
                     jsonData = JObject.Load(r);
                 }
 
+                EnvironmentSettings.SettingsLoader.ReleaseMountPoint(mountPoint);
                 return jsonData.ToObject<HostSpecificTemplateData>();
             }
 
