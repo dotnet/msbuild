@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 if (commandResult.ExitCode != 0)
                 {
                     settings.Host.LogMessage(LocalizableStrings.RestoreFailed);
-                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdErr));
+                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
                     settings.Host.LogMessage(string.Empty);
                     allSucceeded = false;
                 }

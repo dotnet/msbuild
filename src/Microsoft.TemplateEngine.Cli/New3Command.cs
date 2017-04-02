@@ -416,6 +416,7 @@ namespace Microsoft.TemplateEngine.Cli
             allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _commandInput.AllTemplateParams, out userParamsWithInvalidValues);
             hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template);
+            _templateCreator.ReleaseMountPoints(template);
 
             List<InvalidParameterInfo> invalidParameters = new List<InvalidParameterInfo>();
 
