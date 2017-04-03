@@ -83,9 +83,10 @@
     -->
     <PropertyGroup>
       <WebSdkBuildVersion Condition="'$(WebSdkVersion)' == ''">$(CoreSdkBuildVersion)</WebSdkBuildVersion>
-      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</CiBuildPostfix>
-      <CiBuildPostfix Condition="'$(CiBuildPostfix)' == ''">1</CiBuildPostfix>
-      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-build$(CiBuildPostfix)</WebSdkVersion>
+      <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
+      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">-$(BUILD_NUMBER)</CiBuildPostfix>
+      <CiBuildPostfix Condition="'$(CiBuildPostfix)' == ''">-1</CiBuildPostfix>
+      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-rel$(CurrentDate)$(CiBuildPostfix)</WebSdkVersion>
     </PropertyGroup>
   </Target>
   

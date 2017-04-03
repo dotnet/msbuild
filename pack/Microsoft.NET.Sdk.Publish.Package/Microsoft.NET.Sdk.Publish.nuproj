@@ -10,8 +10,8 @@
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
     <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
-    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0-final</CoreSdkVersion>
-    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
+    <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">1.0.0-rel$(CurrentDate)-1</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
