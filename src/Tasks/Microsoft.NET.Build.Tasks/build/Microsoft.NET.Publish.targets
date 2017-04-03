@@ -201,6 +201,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
         <RelativePath>%(ResolvedAssembliesToPublish.DestinationSubPath)</RelativePath>
       </ResolvedFileToPublish>
+
+      <!-- Copy the xml documentation (if enabled) -->
+      <ResolvedFileToPublish Include="@(FinalDocFile)"
+                              Condition="'$(PublishDocumentationFile)' == 'true'">
+        <RelativePath>@(FinalDocFile->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>
@@ -211,7 +217,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- TODO perform any preprocess transforms on the files -->
 
     <ItemGroup>
-      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)" Exclude="@(ResolvedAssembliesToPublish)">
+      <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)"
+                                   Exclude="@(ResolvedAssembliesToPublish)"
+                                   Condition="'$(PublishProjectReferenceDocumentationFiles)' == 'true' or '%(Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
       </ResolvedAssembliesToPublish>
     </ItemGroup>

@@ -13,6 +13,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -195,6 +196,54 @@ namespace Microsoft.NET.Publish.Tests
 
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
+
+
+        [Theory]
+        [MemberData(nameof(PublishDocumentationExpectations))]
+        public void It_publishes_documentation_files(string properties, bool expectAppDocPublished, bool expectLibDocPublished)
+        {
+            var kitchenSinkAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink")
+                .WithSource();
+            kitchenSinkAsset.Restore("TestApp");
+
+            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishResult = publishCommand.Execute(properties);
+
+            publishResult.Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory();
+
+            if (expectAppDocPublished)
+            {
+                publishDirectory.Should().HaveFile("TestApp.xml");
+            }
+            else
+            {
+                publishDirectory.Should().NotHaveFile("TestApp.xml");
+            }
+
+            if (expectLibDocPublished)
+            {
+                publishDirectory.Should().HaveFile("TestLibrary.xml");
+            }
+            else
+            {
+                publishDirectory.Should().NotHaveFile("TestLibrary.xml");
+            }
+        }
+
+        public static IEnumerable<object[]> PublishDocumentationExpectations
+        {
+            get
+            {
+                yield return new object[] { "/p:GenerateDocumentationFile=true", true, true };
+                yield return new object[] { "/p:GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true };
+                yield return new object[] { "/p:GenerateDocumentationFile=true;PublishProjectReferenceDocumentationFiles=false", true, false };
+                yield return new object[] { "/p:GenerateDocumentationFile=true;PublishDocumentationFiles=false", false, false };
+            }
+        }
+
         private static JObject ReadJson(string path)
         {
             using (JsonTextReader jsonReader = new JsonTextReader(File.OpenText(path)))
