@@ -37,6 +37,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string[] FilterProjectFiles { get; set; }
 
+        public bool IsSelfContained { get; set; }
+
         /// <summary>
         /// All the assemblies to publish.
         /// </summary>
@@ -80,7 +82,8 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                IsSelfContained);
 
             projectContext.PackagesToBeFiltered = packagestoBeFiltered;
 

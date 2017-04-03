@@ -67,6 +67,12 @@ namespace Microsoft.NET.TestFramework
             get { return Path.Combine(BinPath, Configuration, "Packages"); }
         }
 
+        public static string NuGetCachePath
+        {
+            get { return Path.Combine(RepoRoot, "Packages"); }
+        }
+
+
         public static string SdksPath
         {
             get { return Path.Combine(BinPath, Configuration, "Sdks"); }
@@ -108,7 +114,7 @@ namespace Microsoft.NET.TestFramework
             return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
 
-        private static string GetBaseDirectory()
+        public static string GetBaseDirectory()
         {
 #if NET451
             string directory = AppDomain.CurrentDomain.BaseDirectory;
