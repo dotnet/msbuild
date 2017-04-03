@@ -25,7 +25,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             this.packageRank = packageRank;
         }
 
-        public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey, Action<TConflictItem> foundConflict, bool commitWinner = true)
+        public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey, Action<TConflictItem> foundConflict, bool commitWinner = true,
+            Action<TConflictItem> unresolvedConflict = null)
         {
             if (conflictItems == null)
             {
@@ -52,6 +53,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     {
                         // no winner, skip it.
                         // don't add to conflict list and just use the existing item for future conflicts.
+
+                        //  Report unresolved conflict (currently just used as a test hook)
+                        unresolvedConflict?.Invoke(conflictItem);
+
                         continue;
                     }
 
