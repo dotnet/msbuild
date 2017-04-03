@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
     {
         class UpdateOperation : LazyItemOperation
         {
-            private readonly ImmutableList<PartiallyEvaluatedMetadata> _metadata;
+            private readonly ImmutableList<ProjectMetadataElement> _metadata;
 
             public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
