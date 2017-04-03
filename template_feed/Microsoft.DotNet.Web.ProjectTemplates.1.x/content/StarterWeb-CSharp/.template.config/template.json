@@ -18,23 +18,51 @@
     {
       "modifiers": [
         {
-          "condition": "NoAuth",
+          "condition": "(NoAuth)",
           "exclude": [
-            "Data/**",
-            "Models/**",
-            "Services/**",
             "Controllers/AccountController.cs",
-            "Controllers/ManageController.cs",
             "Views/Account/**",
             "Views/Manage/**",
-            "Views/Shared/_LoginPartial.cshtml",
-            "Views/Shared/_ValidationScriptsPartial.cshtml"
+            "Views/Shared/_LoginPartial.cshtml"
           ]
         },
         {
-          "condition": "UseLocalDB || NoAuth",
+          "condition": "(UseLocalDB || !IndividualAuth)",
           "exclude": [
             "*.db"
+          ]
+        },
+        {
+          "condition": "(!IndividualAuth)",
+          "exclude": [
+            "Controllers/ManageController.cs",
+            "Views/Account/ConfirmEmail.cshtml",
+            "Views/Account/ExternalLoginConfirmation.cshtml",
+            "Views/Account/ExternalLoginFailure.cshtml",
+            "Views/Account/ForgotPassword.cshtml",
+            "Views/Account/ForgotPasswordConfirmation.cshtml",
+            "Views/Account/Lockout.cshtml",
+            "Views/Account/Login.cshtml",
+            "Views/Account/Register.cshtml",
+            "Views/Account/ResetPassword.cshtml",
+            "Views/Account/ResetPasswordConfirmation.cshtml",
+            "Views/Account/SendCode.cshtml",
+            "Views/Account/VerifyCode.cshtml",
+            "Views/Manage/AddPhoneNumber.cshtml",
+            "Views/Manage/ChangePassword.cshtml",
+            "Views/Manage/Index.cshtml",
+            "Views/Manage/ManageLogins.cshtml",
+            "Views/Manage/SetPassword.cshtml",
+            "Views/Manage/VerifyPhoneNumber.cshtml",
+            "Services/**",
+            "Data/**",
+            "Models/**",
+          ]
+        },
+        {
+          "condition": "(IndividualAuth)",
+          "exclude": [
+            "Views/Account/SignedOut.cshtml"
           ]
         }
       ]
@@ -52,18 +80,77 @@
         {
           "choice": "Individual",
           "description": "Individual authentication"
+        },
+        {
+          "choice": "SingleOrg",
+          "description": "Organizational authentication for a single tenant"
+        },
+        {
+          "choice": "MultiOrg",
+          "description": "Organizational authentication for multiple tenants"
+        },
+        {
+          "choice": "Windows",
+          "description": "Windows authentication"
         }
       ],
       "defaultValue": "None",
       "description": "The type of authentication to use"
     },
+    "AADInstance": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "AADInstance",
+      "replaces": "AADInstance",
+      "description": "The Azure Active Directory instance to connect to (use with Single-org or Multi-org auth types)."
+    },
+    "ClientId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "11111111-1111-1111-11111111111111111",
+      "description": "The Client ID for this project (use with Single-org or Multi-org auth types)."
+    },
+    "Domain": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "qualified.domain.name",
+      "description": "The domain owning the directory (use with Single-org auth)."
+    },
+    "TenantId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "22222222-2222-2222-2222-222222222222",
+      "description": "The TenantId ID of the directory to connect to (use with Single-org auth)."
+    },
+    "OrgReadAccess": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to allow this application read access to the directory (only applies to SingleOrg or MultiOrg auth types)."
+    },
+    "OrganizationalAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\" || auth == \"MultiOrg\")"
+    },
+    "WindowsAuth": {
+      "type": "computed",
+      "value": "(auth == \"Windows\")"
+    },
+    "MultiOrgAuth": {
+      "type": "computed",
+      "value": "(auth == \"MultiOrg\")"
+    },
+    "SingleOrgAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\")"
+    },
     "IndividualAuth": {
       "type": "computed",
-      "value": "auth == \"Individual\""
+      "value": "(auth == \"Individual\")"
     },
     "NoAuth": {
       "type": "computed",
-      "value": "!IndividualAuth"
+      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth))"
     },
     "UseLocalDB": {
       "type": "parameter",
@@ -121,7 +208,7 @@
   "defaultName": "WebApplication1",
   "postActions": [
     {
-      "condition": "!skipRestore",
+      "condition": "(!skipRestore)",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
         { "text": "Run 'dotnet restore'" }

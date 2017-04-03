@@ -6,6 +6,22 @@
     "UseLocalDB": {
       "longName": "use-local-db"
     },
+    "OrgReadAccess": {
+      "longName": "org-read-access",
+      "shortName": "r"
+    },
+    "ClientId": {
+      "longName": "client-id",
+      "shortName": ""
+    },
+    "Domain": {
+      "longName": "domain",
+      "shortName": ""
+    },
+    "TenantId": {
+      "longName": "tenant-id",
+      "shortName": ""
+    },
     "Framework": {
       "longName": "framework"
     },

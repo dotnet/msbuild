@@ -40,8 +40,10 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                 </ul>
-@*#if (IndividualAuth)
+@*#if (IndividualAuth || OrganizationalAuth)
                 @await Html.PartialAsync("_LoginPartial")
+#elseif (WindowsAuth)
+                <p class="nav navbar-text navbar-right">Hello, @User.Identity.Name!</p>
 #endif*@
             </div>
         </div>
