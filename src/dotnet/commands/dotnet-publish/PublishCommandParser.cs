@@ -20,17 +20,17 @@ namespace Microsoft.DotNet.Cli
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
-                              Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.OutputOption)
+                          .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
-                    "--filter", 
+                    "--filter",
                     LocalizableStrings.FilterProjOptionDescription,
-                              Accept.OneOrMoreArguments()
-                        .With(name: LocalizableStrings.FilterProjOption)
-                        .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
+                    Accept.OneOrMoreArguments()
+                          .With(name: LocalizableStrings.FilterProjOption)
+                          .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
                 CommonOptions.VerbosityOption());
     }
 }
