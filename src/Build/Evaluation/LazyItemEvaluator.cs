@@ -391,7 +391,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<PartiallyEvaluatedMetadata>.Builder Metadata = ImmutableList.CreateBuilder<PartiallyEvaluatedMetadata>();
+            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
@@ -521,6 +521,8 @@ namespace Microsoft.Build.Evaluation
         {
             if (itemElement.HasMetadata)
             {
+                operationBuilder.Metadata.AddRange(itemElement.Metadata);
+
                 var values = new List<string>(itemElement.Metadata.Count * 2);
 
                 // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
@@ -536,14 +538,6 @@ namespace Microsoft.Build.Evaluation
                         metadatumElement.Condition,
                         ExpanderOptions.ExpandProperties,
                         metadatumElement.ConditionLocation);
-
-                    operationBuilder.Metadata.Add(
-                        new PartiallyEvaluatedMetadata
-                        {
-                            ValueWithPropertiesExpanded = valueWithPropertiesExpanded,
-                            ConditionWithPropertiesExpanded = conditionWithPropertiesExpanded,
-                            Element = metadatumElement
-                        });
 
                     values.Add(valueWithPropertiesExpanded);
                     values.Add(conditionWithPropertiesExpanded);
@@ -601,14 +595,6 @@ namespace Microsoft.Build.Evaluation
                     AddReferencedItemLists(operationBuilder, subMatch);
                 }
             }
-        }
-
-        // todo: replace with value tuples when we move to C# 7
-        private struct PartiallyEvaluatedMetadata
-        {
-            public ProjectMetadataElement Element { get; set; }
-            public string ConditionWithPropertiesExpanded { get; set; }
-            public string ValueWithPropertiesExpanded { get; set; }
         }
     }
 }
