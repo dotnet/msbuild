@@ -1298,12 +1298,8 @@ namespace Microsoft.Build.BackEnd
             {
                 return null;
             }
-
-            return new HashSet<string>(
-                warnings.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Where(i => !String.IsNullOrWhiteSpace(i))
-                    .Select(i => i.Trim()),
-                StringComparer.OrdinalIgnoreCase);
+            
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
         }
     }
 }
