@@ -1325,6 +1325,55 @@ namespace Microsoft.Build.Execution
         Success = (byte)1,
     }
 }
+namespace Microsoft.Build.Globbing
+{
+    public partial class CompositeGlob : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        public CompositeGlob(params Microsoft.Build.Globbing.IMSBuildGlob[] globs) { }
+        public CompositeGlob(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { }
+        public System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> Globs { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+    }
+    public partial interface IMSBuildGlob
+    {
+        bool IsMatch(string stringToMatch);
+    }
+    public partial class MSBuildGlob : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        internal MSBuildGlob() { }
+        public string FilenamePart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FixedDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsLegal { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string WildcardDirectoryPart { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+        public Microsoft.Build.Globbing.MSBuildGlob.MatchInfoResult MatchInfo(string stringToMatch) { throw null; }
+        public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }
+        public static Microsoft.Build.Globbing.MSBuildGlob Parse(string globRoot, string fileSpec) { throw null; }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct MatchInfoResult
+        {
+            public string FilenamePartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public string FixedDirectoryPartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public bool IsMatch { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public string WildcardDirectoryPartMatchGroup { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        }
+    }
+    public partial class MSBuildGlobWithGaps : Microsoft.Build.Globbing.IMSBuildGlob
+    {
+        public MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, params Microsoft.Build.Globbing.IMSBuildGlob[] gaps) { }
+        public MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> gaps) { }
+        public Microsoft.Build.Globbing.IMSBuildGlob Gaps { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Globbing.IMSBuildGlob MainGlob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IsMatch(string stringToMatch) { throw null; }
+    }
+}
+namespace Microsoft.Build.Globbing.Extensions
+{
+    public static partial class MSBuildGlobExtensions
+    {
+        public static System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.MSBuildGlob> GetParsedGlobs(this Microsoft.Build.Globbing.IMSBuildGlob glob) { throw null; }
+    }
+}
 namespace Microsoft.Build.Logging
 {
     public delegate void ColorResetter();
