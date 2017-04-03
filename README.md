@@ -5,7 +5,7 @@ Core functionality needed to create .NET Core projects, that is shared between V
 * MSBuild tasks can be found under [/src/Tasks/Microsoft.NET.Build.Tasks/](src/Tasks/Microsoft.NET.Build.Tasks).
 * Project templates are under [src/Templates/ProjectTemplates/](src/Templates/ProjectTemplates)
 
-Please refer to [dotnet/cli](https://github.com/dotnet/cli) for .NET Core CLI source code, and to [dotnet/roslyn-system](https://github.com/dotnet/project-system) for the project system work that is specific to Visual Studio 2017.
+Please refer to [dotnet/cli](https://github.com/dotnet/cli) for .NET Core CLI source code, and to [dotnet/project-system](https://github.com/dotnet/project-system) for the project system work that is specific to Visual Studio 2017.
 
 ## Build Status
 
