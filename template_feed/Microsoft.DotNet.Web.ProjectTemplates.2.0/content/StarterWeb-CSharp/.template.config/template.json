@@ -4,7 +4,7 @@
   "name": "ASP.NET Core Web App",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Mvc",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Web.Mvc.CSharp.2.0",
   "shortName": "mvc",
   "tags": {

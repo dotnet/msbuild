@@ -4,7 +4,7 @@
   "name": "Class library",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Library",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Common.Library.CSharp.2.0",
   "shortName": "classlib",
   "tags": {

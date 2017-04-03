@@ -4,7 +4,7 @@
   "name": "xUnit Test Project",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Test.xUnit",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Test.xUnit.CSharp.2.0",
   "shortName": "xunit",
   "tags": {

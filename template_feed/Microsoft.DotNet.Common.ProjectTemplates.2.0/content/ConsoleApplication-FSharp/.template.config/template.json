@@ -4,7 +4,7 @@
   "name": "Console Application",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Common.Console",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Common.Console.FSharp.2.0",
   "shortName": "console",
   "tags": {
