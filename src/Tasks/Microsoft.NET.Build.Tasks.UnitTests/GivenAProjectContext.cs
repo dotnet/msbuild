@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                FrameworkConstants.CommonFrameworks.NetStandard16,
                null,
                Constants.DefaultPlatformLibrary,
-               false);
+               isSelfContained: false);
 
             IEnumerable<string> privateAssetPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
             IDictionary<string, LockFileTargetLibrary> libraryLookup =
