@@ -3,8 +3,32 @@
     "IncludeApplicationInsights": {
       "isHidden": "true"
     },
+    "AADInstance": {
+      "longName": "aad-instance",
+      "shortName": "s"
+    },
+    "OrgReadAccess": {
+      "longName": "org-read-access",
+      "shortName": "r"
+    },
+    "ClientId": {
+      "longName": "client-id",
+      "shortName": ""
+    },
+    "Domain": {
+      "longName": "domain",
+      "shortName": ""
+    },
+    "TenantId": {
+      "longName": "tenant-id",
+      "shortName": ""
+    },
     "Framework": {
       "longName": "framework"
+    },
+    "NoTools": {
+      "isHidden": "true",
+      "longName": "no-tools"
     },
     "skipRestore": {
       "longName": "skip-restore",

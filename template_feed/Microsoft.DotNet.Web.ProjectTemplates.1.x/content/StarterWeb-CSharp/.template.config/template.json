@@ -126,7 +126,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "Whether or not to allow this application read access to the directory (only applies to SingleOrg or MultiOrg auth types)."
+      "description": "Whether or not to allow this application read access to the directory (only applies to Single-org or Multi-org auth types)."
     },
     "OrganizationalAuth": {
       "type": "computed",
@@ -150,7 +150,7 @@
     },
     "NoAuth": {
       "type": "computed",
-      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth))"
+      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth || WindowsAuth))"
     },
     "UseLocalDB": {
       "type": "parameter",

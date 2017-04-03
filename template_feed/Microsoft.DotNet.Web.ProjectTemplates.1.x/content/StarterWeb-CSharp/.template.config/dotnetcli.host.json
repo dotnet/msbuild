@@ -6,6 +6,10 @@
     "UseLocalDB": {
       "longName": "use-local-db"
     },
+    "AADInstance": {
+      "longName": "aad-instance",
+      "shortName": "s"
+    },
     "OrgReadAccess": {
       "longName": "org-read-access",
       "shortName": "r"

@@ -13,7 +13,75 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
+  "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
   "symbols": {
+    "auth": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "None",
+          "description": "No authentication"
+        },
+        {
+          "choice": "SingleOrg",
+          "description": "Organizational authentication for a single tenant"
+        },
+        {
+          "choice": "Windows",
+          "description": "Windows authentication"
+        }
+      ],
+      "defaultValue": "None",
+      "description": "The type of authentication to use"
+    },
+    "AADInstance": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "AADInstance",
+      "replaces": "AADInstance",
+      "description": "The Azure Active Directory instance to connect to (use with Single-org auth)."
+    },
+    "ClientId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "11111111-1111-1111-11111111111111111",
+      "description": "The Client ID for this project (use with Single-org auth)."
+    },
+    "Domain": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "qualified.domain.name",
+      "description": "The domain owning the directory (use with Single-org auth)."
+    },
+    "TenantId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "22222222-2222-2222-2222-222222222222",
+      "description": "The TenantId ID of the directory to connect to (use with Single-org auth)."
+    },
+    "OrgReadAccess": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to allow this application read access to the directory (only applies to Single-org auth)."
+    },
+    "OrganizationalAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\")"
+    },
+    "WindowsAuth": {
+      "type": "computed",
+      "value": "(auth == \"Windows\")"
+    },
+    "SingleOrgAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\")"
+    },
+    "NoAuth": {
+      "type": "computed",
+      "value": "(!SingleOrgAuth && !WindowsAuth)"
+    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",

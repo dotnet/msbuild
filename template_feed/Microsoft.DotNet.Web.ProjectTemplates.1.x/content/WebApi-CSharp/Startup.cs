@@ -17,8 +17,20 @@ namespace Company.WebApplication1
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+#if (!OrganizationalAuth)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+#else
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            if (env.IsDevelopment())
+            {
+                // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
+                builder.AddUserSecrets<Startup>();
+            }
+
+            builder.AddEnvironmentVariables();
+#endif
             Configuration = builder.Build();
         }
 
@@ -36,6 +48,14 @@ namespace Company.WebApplication1
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+#if (OrganizationalAuth)
+
+            app.UseJwtBearerAuthentication(new JwtBearerOptions
+            {
+                Authority = Configuration["Authentication:AzureAd:AADInstance"] + Configuration["Authentication:AzureAd:TenantId"],
+                Audience = Configuration["Authentication:AzureAd:Audience"]
+            });
+#endif
 
             app.UseMvc();
         }
