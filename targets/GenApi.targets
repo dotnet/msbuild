@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true'">
-    <GenApiVersion Condition="'$(GenApiVersion)' == ''">1.0.0-beta2-00731-01</GenApiVersion>
+    <GenApiVersion Condition="'$(GenApiVersion)' == ''">1.0.0-beta3-01902-02</GenApiVersion>
     <GenApiDir Condition="'$(GenApiDir)' == ''">$(ToolPackagesDir)\Microsoft.DotNet.BuildTools.GenApi\$(GenApiVersion)\</GenApiDir>
     <GenApiTFM Condition="'$(GenApiTFM)' == '' And '$(NetCoreBuild)' != 'true'">net46</GenApiTFM>
     <GenApiTFM Condition="'$(GenApiTFM)' == '' And '$(NetCoreBuild)' == 'true'">netstandard1.3</GenApiTFM>
