@@ -179,7 +179,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (!isPlatform1 && isPlatform2)
             {
                 log.LogMessage($"{conflictMessage}.  Choosing {item2.DisplayName} because it is a platform item.");
-                return item1;
+                return item2;
             }
 
             log.LogMessage($"{conflictMessage}.  Could not determine winner due to equal file and assembly versions.");
