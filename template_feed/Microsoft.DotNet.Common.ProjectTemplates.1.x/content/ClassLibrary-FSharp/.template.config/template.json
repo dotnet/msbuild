@@ -25,7 +25,7 @@
   "defaultName": "ClassLibrary1",
   "postActions": [
     {
-      "condition": "!skipRestore",
+      "condition": "(!skipRestore)",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
         { "text": "Run 'dotnet restore'" }
