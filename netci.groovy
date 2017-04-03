@@ -1,5 +1,6 @@
 // Import the utility functionality.
 import jobs.generation.Utilities;
+import jobs.generation.JobReport;
 
 // The input project name
 def project = GithubProject
