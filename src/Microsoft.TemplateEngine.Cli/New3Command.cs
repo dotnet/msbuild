@@ -667,90 +667,6 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-        private void ProcessUninstallRequests(IEnumerable<string> uninstallRequests, bool warnOnFailure)
-        {
-            foreach (string uninstall in uninstallRequests)
-            {
-                string prefix = Path.Combine(_paths.User.Packages, uninstall);
-                IReadOnlyList<MountPointInfo> rootMountPoints = EnvironmentSettings.SettingsLoader.MountPoints.Where(x =>
-                {
-                    if (x.ParentMountPointId != Guid.Empty)
-                    {
-                        return false;
-                    }
-
-                    if (uninstall.IndexOfAny(new[] { '/', '\\' }) < 0)
-                    {
-                        if (x.Place.StartsWith(prefix + ".", StringComparison.OrdinalIgnoreCase) && x.Place.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
-
-                    if(string.Equals(x.Place, uninstall, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                    else if (x.Place.Length > uninstall.Length)
-                    {
-                        string place = x.Place.Replace('\\', '/');
-                        string match = uninstall.Replace('\\', '/');
-
-                        if(match[match.Length - 1] != '/')
-                        {
-                            match += "/";
-                        }
-
-                        return place.StartsWith(match, StringComparison.OrdinalIgnoreCase);
-                    }
-
-                    return false;
-                }).ToList();
-
-                if (rootMountPoints.Count == 0)
-                {
-                    if (warnOnFailure)
-                    {
-                        Console.WriteLine(LocalizableStrings.CouldntUninstall, uninstall);
-                    }
-
-                    continue;
-                }
-
-                HashSet<Guid> mountPoints = new HashSet<Guid>(rootMountPoints.Select(x => x.MountPointId));
-                bool isSearchComplete = false;
-                while (!isSearchComplete)
-                {
-                    isSearchComplete = true;
-                    foreach (MountPointInfo possibleChild in EnvironmentSettings.SettingsLoader.MountPoints)
-                    {
-                        if (mountPoints.Contains(possibleChild.ParentMountPointId))
-                        {
-                            isSearchComplete &= !mountPoints.Add(possibleChild.MountPointId);
-                        }
-                    }
-                }
-
-                //Find all of the things that refer to any of the mount points we've got
-                EnvironmentSettings.SettingsLoader.RemoveMountPoints(mountPoints);
-                _settingsLoader.Save();
-
-                foreach (MountPointInfo mountPoint in rootMountPoints)
-                {
-                    if (mountPoint.Place.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        try
-                        {
-                            EnvironmentSettings.Host.FileSystem.FileDelete(mountPoint.Place);
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-            }
-        }
-
         private CreationResultStatus EnterMaintenanceFlow()
         {
             if (!ValidateRemainingParameters())
@@ -770,13 +686,18 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
             {
-                ProcessUninstallRequests(Install.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]), false);
+                Installer.Uninstall(Install.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
             }
 
             if (UninstallHasValue &&
                 ((Uninstall.Count > 0) && (Uninstall[0] != null)))
             {
-                ProcessUninstallRequests(Uninstall, true);
+                IEnumerable<string> failures = Installer.Uninstall(Uninstall);
+
+                foreach (string failure in failures)
+                {
+                    Console.WriteLine(LocalizableStrings.CouldntUninstall, failure);
+                }
             }
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)

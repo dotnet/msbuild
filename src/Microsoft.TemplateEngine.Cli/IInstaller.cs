@@ -8,5 +8,7 @@ namespace Microsoft.TemplateEngine.Cli
     public interface IInstaller
     {
         void InstallPackages(IEnumerable<string> installationRequests);
+
+        IEnumerable<string> Uninstall(IEnumerable<string> uninstallRequests);
     }
 }
