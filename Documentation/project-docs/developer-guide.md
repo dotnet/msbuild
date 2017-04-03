@@ -44,10 +44,10 @@ Using the `dotnet` built in the previous step:
 
 The dotnet CLI supports several models for adding new commands:
 
-0. In the CLI itself via `dotnet.dll`
-1. Through a `tool` NuGet package
-2. Through MSBuild tasks & targets in a NuGet package
-3. Via the user's `PATH`
+1. In the CLI itself via `dotnet.dll`
+2. Through a `tool` NuGet package
+3. Through MSBuild tasks & targets in a NuGet package
+4. Via the user's `PATH`
 
 ### Commands in dotnet.dll
 Developers are generally encouraged to avoid adding commands to `dotnet.dll` or the CLI installer directly. This is appropriate for very general commands such as restore, build, publish, test, and clean, but is generally too broad of a distribution mechanism for new commands. Please create an issue and engage the team if you feel there is a missing core command that you would like to add.
