@@ -24,7 +24,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
-                Constants.DefaultPlatformLibrary);
+                Constants.DefaultPlatformLibrary,
+                isSelfContained: false);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
                 .Resolve(projectContext);
@@ -42,7 +43,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
-                Constants.DefaultPlatformLibrary);
+                Constants.DefaultPlatformLibrary,
+                isSelfContained: false);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
                 .WithPreserveCacheLayout(true)

@@ -43,6 +43,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
 
+        public bool IsSelfContained { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -57,7 +59,8 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                IsSelfContained);
 
             WriteRuntimeConfig(projectContext);
 
@@ -86,7 +89,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddFramework(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
-            if (projectContext.IsPortable)
+            if (projectContext.IsFrameworkDependent)
             {
                 var platformLibrary = projectContext.PlatformLibrary;
                 if (platformLibrary != null)

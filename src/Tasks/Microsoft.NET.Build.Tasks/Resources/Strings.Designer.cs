@@ -11,7 +11,8 @@
 namespace Microsoft.NET.Build.Tasks {
     using System;
     using System.Reflection;
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -59,7 +60,7 @@ namespace Microsoft.NET.Build.Tasks {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Unable to use &apos;{0}&apos; as application host executable as it does not contain the expected placeholder byte sequence &apos;{1}&apos; that would mark where the application name would be written..
         /// </summary>
@@ -120,6 +121,15 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string CannotFindProjectInfo {
             get {
                 return ResourceManager.GetString("CannotFindProjectInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false..
+        /// </summary>
+        internal static string CannotHaveSelfContainedWithoutRuntimeIdentifier {
+            get {
+                return ResourceManager.GetString("CannotHaveSelfContainedWithoutRuntimeIdentifier", resourceCulture);
             }
         }
         
@@ -205,13 +215,14 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Duplicate {0} items were included. The .NET SDK includes {0} items from your project directory by default. You can either remove these items from your project file, or set the &apos;{1}&apos; property to &apos;{2}&apos; if you want to explicitly include them in your project file. The duplicate items were: {3}.
+        ///   Looks up a localized string similar to Duplicate &apos;{0}&apos; items were included. The .NET SDK includes &apos;{0}&apos; items from your project directory by default. You can either remove these items from your project file, or set the &apos;{1}&apos; property to &apos;{2}&apos; if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}.
         /// </summary>
         internal static string DuplicateItemsError {
             get {
                 return ResourceManager.GetString("DuplicateItemsError", resourceCulture);
             }
         }
+        
         /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
@@ -229,7 +240,7 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("ErrorsOccurredWhenEmittingSatelliteAssembly", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Given file name &apos;{0}&apos; is longer than 1024 bytes.
         /// </summary>
@@ -247,16 +258,16 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("FolderAlreadyExists", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to The filter profile &apos;{0}&apos; provided is of not the correct format.
+        ///   Looks up a localized string similar to The filter profile {0} provided is of not the correct format.
         /// </summary>
         internal static string IncorrectFilterFormat {
             get {
                 return ResourceManager.GetString("IncorrectFilterFormat", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
@@ -303,7 +314,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Project &apos;{0}&apos; has no target framework compatible with &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Project &apos;{0}&apos; targets &apos;{2}&apos;. It cannot be referenced by a project that targets &apos;{1}&apos;..
         /// </summary>
         internal static string NoCompatibleTargetFramework {
             get {
@@ -392,17 +403,15 @@ namespace Microsoft.NET.Build.Tasks {
             }
         }
         
-         /// <summary>
+        /// <summary>
         ///   Looks up a localized string similar to Package Name=&apos;{0}&apos;, Version=&apos;{1}&apos; was parsed.
         /// </summary>
-        internal static string PackageInfoLog
-        {
-            get
-            {
+        internal static string PackageInfoLog {
+            get {
                 return ResourceManager.GetString("PackageInfoLog", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to A PackageReference for &apos;{0}&apos; was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}.
         /// </summary>
@@ -412,17 +421,15 @@ namespace Microsoft.NET.Build.Tasks {
             }
         }
         
-         /// <summary>
+        /// <summary>
         ///   Looks up a localized string similar to Parsing the Files : &apos;{0}&apos;.
         /// </summary>
-        internal static string ParsingFiles
-        {
-            get
-            {
+        internal static string ParsingFiles {
+            get {
                 return ResourceManager.GetString("ParsingFiles", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Assets are consumed from project &apos;{0}&apos;, but no corresponding MSBuild project path was  found in &apos;{1}&apos;..
         /// </summary>
@@ -431,9 +438,9 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("ProjectAssetsConsumedWithoutMSBuildProjectPath", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64..
+        ///   Looks up a localized string similar to Specify a RuntimeIdentifier.
         /// </summary>
         internal static string RuntimeIdentifierWasNotSpecified {
             get {

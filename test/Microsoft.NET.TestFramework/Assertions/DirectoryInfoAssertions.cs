@@ -93,5 +93,15 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
+
+        public AndConstraint<DirectoryInfoAssertions> NotHaveSubDirectories()
+        {
+            var subDirectories = _dirInfo.EnumerateDirectories();
+
+            Execute.Assertion.ForCondition(!subDirectories.Any())
+                .FailWith("Directory {0} should not have any sub directories.", _dirInfo.FullName);
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
     }
 }

@@ -255,4 +255,7 @@
   <data name="FileNameIsTooLong" xml:space="preserve">
     <value>Given file name '{0}' is longer than 1024 bytes</value>
   </data>
+  <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
+    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+  </data>
 </root>

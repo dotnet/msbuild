@@ -173,19 +173,13 @@ namespace Microsoft.NET.Publish.Tests
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(runtimeIdentifier: rid);
 
-            string libPrefix = "";
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libPrefix = "lib";
-            }
-
             publishDirectory.Should().HaveFiles(new[] {
                 $"{project}.dll",
                 $"{project}.pdb",
                 $"{project}.deps.json",
                 $"{project}.runtimeconfig.json",
                 "System.Collections.NonGeneric.dll",
-                $"{libPrefix}coreclr{Constants.DynamicLibSuffix}"
+                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}"
             });
 
             publishDirectory.Should().NotHaveFiles(new[] {

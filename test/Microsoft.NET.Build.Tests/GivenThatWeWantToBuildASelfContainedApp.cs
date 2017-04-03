@@ -3,14 +3,11 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
-using System;
+using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
@@ -47,8 +44,6 @@ namespace Microsoft.NET.Build.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-            var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
-
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 selfContainedExecutable,
                 "HelloWorld.dll",
@@ -56,8 +51,8 @@ namespace Microsoft.NET.Build.Tests
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.dev.json",
                 "HelloWorld.runtimeconfig.json",
-                $"{libPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{libPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
