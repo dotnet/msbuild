@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tests
                 .WithWorkingDirectory(testDirectory);
             command.Environment["HOME"] = testNuGetHome;
             command.Environment["USERPROFILE"] = testNuGetHome;
+            command.Environment["APPDATA"] = testNuGetHome;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
