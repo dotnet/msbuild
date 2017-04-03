@@ -35,12 +35,22 @@
   <Import Project="$(RepoRoot)\targets\OverrideGetReferenceAssemblyPaths.targets"
           Condition="'$(NetCoreBuild)' == 'true'"/>
 
-  <!-- OSS sign assemblies after compile runs. -->
-  <Import Condition="Exists('$(ToolsDir)\sign.targets')" Project="$(ToolsDir)\sign.targets" />
+  <PropertyGroup Condition="'$(IsTestProject)' != 'true'">
+    <!-- When we build internally we need to use DelaySign, otherwise use PublicSign -->
+    <PublicSign Condition="'$(UseOpenSourceSign)' != 'false'">true</PublicSign>
+    <DelaySign Condition="'$(UseOpenSourceSign)' == 'false'">true</DelaySign>
+    <KeyOriginatorFile>$(SourceDir)MSFT.snk</KeyOriginatorFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <SignAssembly>true</SignAssembly>
+    <PublicSign>true</PublicSign>
+    <AssemblyOriginatorKeyFile>$(SourceDir)Test.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
   <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
 
-    <!-- Targets from buildtools that restore packages before building. -->
+  <!-- Targets from buildtools that restore packages before building. -->
   <!-- TODO: ideally replaced by a standard "dotnet restore" over the solution. -->
   <Import Condition="Exists('$(ToolsDir)\packageresolve.targets')" Project="$(ToolsDir)\packageresolve.targets" />
 
