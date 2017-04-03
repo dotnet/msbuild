@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("/p:SkipInvalidConfigurations=true")
+                .Execute()
                 .Should().Pass();
 
             new PublishCommand()
@@ -62,9 +62,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithFramework("netcoreapp2.0")
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
-                //Workaround for https://github.com/dotnet/cli/issues/4501
-                .WithEnvironmentVariable("SkipInvalidConfigurations", "true")
-                .Execute("/p:SkipInvalidConfigurations=true")
+                .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
@@ -81,6 +79,65 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItPublishesAnAppExplicitlySpecifyingSelfContained(bool selfContained)
+        {
+            var testAppName = "MSBuildTestApp";
+
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance($"PublishesSelfContained{selfContained}")
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            new PublishCommand()
+                .WithRuntime(rid)
+                .WithSelfContained(selfContained)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var outputPath = testProjectDirectory
+                    .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish")
+                    .FullName;
+            var selfContainedProgram = Path.Combine(outputPath, $"{testAppName}{Constants.ExeSuffix}");
+            var selfContainedProgramFile = new FileInfo(selfContainedProgram);
+
+            TestCommand testCommand;
+            string testArgs;
+            if (selfContained)
+            {
+                selfContainedProgramFile.Should().Exist();
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    //Workaround for https://github.com/dotnet/corefx/issues/15516
+                    Process.Start("chmod", $"u+x {selfContainedProgram}").WaitForExit();
+                }
+
+                testCommand = new TestCommand(selfContainedProgram);
+                testArgs = null;
+            }
+            else
+            {
+                selfContainedProgramFile.Should().NotExist();
+
+                testCommand = new DotnetCommand();
+                testArgs = Path.Combine(outputPath, $"{testAppName}.dll");
+            }
+
+            testCommand
+                .ExecuteWithCapturedOutput(testArgs)
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }

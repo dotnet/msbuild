@@ -20,5 +20,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public const string FilterProjOption = "profile.xml";
 
         public const string FilterProjOptionDescription = "The XML file that contains the list of packages to be excluded from publish step.";
+
+        public const string SelfContainedOptionDescription = "Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.";
     }
 }

@@ -21,16 +21,26 @@ namespace Microsoft.DotNet.Cli
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.OutputOption)
-                          .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                        .With(name: LocalizableStrings.OutputOption)
+                        .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--filter",
                     LocalizableStrings.FilterProjOptionDescription,
                     Accept.OneOrMoreArguments()
-                          .With(name: LocalizableStrings.FilterProjOption)
-                          .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
+                        .With(name: LocalizableStrings.FilterProjOption)
+                        .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
+                Create.Option(
+                    "--self-contained",
+                    LocalizableStrings.SelfContainedOptionDescription,
+                    Accept.ZeroOrOneArgument()
+                        .WithSuggestionsFrom("true", "false")
+                        .ForwardAsSingle(o =>
+                        {
+                            string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
+                            return $"/p:SelfContained={value}";
+                        })),
                 CommonOptions.VerbosityOption());
     }
 }
