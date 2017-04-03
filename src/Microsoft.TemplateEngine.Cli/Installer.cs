@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -91,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
-            Command.CreateDotNet("restore", new[] { proj, "--packages", restored }).ForwardStdErr().Execute();
+            Dotnet.Restore(proj, "--packages", restored).ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))

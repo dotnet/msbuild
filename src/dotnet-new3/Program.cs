@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
@@ -35,7 +34,7 @@ namespace dotnet_new3
 
             try
             {
-                string versionString = Command.CreateDotNet("", new[] { "--version" }).CaptureStdOut().Execute().StdOut;
+                string versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
                 if (!string.IsNullOrWhiteSpace(versionString))
                 {
                     preferences["dotnet-cli-version"] = versionString.Trim();
