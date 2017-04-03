@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0">
+<Project ToolsVersion="15.0" DefaultTargets="Build">
   <Import Project="..\Version.props" />
 
   <PropertyGroup>
@@ -17,9 +17,8 @@
     <TemplatePack Include="Microsoft.DotNet.Test.ProjectTemplates.2.0" />
   </ItemGroup>
 
-  <Target Name="Build">
-    <MakeDir Directories="$(TemplatesFolder)" />
-    <MakeDir Directories="$(TemplatesNoTimestampFolder)" />
-    <Exec Command="$(NuGet) pack &quot;$(MSBuildThisFileDirectory)%(TemplatePack.Identity)\Templates.nuspec&quot; -properties &quot;version=$(PackageVersion)&quot; -NoDefaultExcludes" WorkingDirectory="$(PackOutput)" />
+  <Target Name="Build" Outputs="%(TemplatePack.Identity)">
+    <MSBuild Targets="Restore;Pack" Projects="%(TemplatePack.FullPath)\build.csproj" Properties="NoWarn=2008" />
+    <RemoveDir Directories="..\artifacts\scratch;..\artifacts\templates\netstandard1.0" />
   </Target>
 </Project>

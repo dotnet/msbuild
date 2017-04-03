@@ -11,8 +11,8 @@
     <packageTypes>
       <packageType name="Template" />
     </packageTypes>
-    <!-- dependencies>
-      <dependency id="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" version="1.0.0-beta1-*" />
-    </dependencies -->
   </metadata>
+  <files>
+    <file src="content/**" target="" />
+  </files>
 </package>
