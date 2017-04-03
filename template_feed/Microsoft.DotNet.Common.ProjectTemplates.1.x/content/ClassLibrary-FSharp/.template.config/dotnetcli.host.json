@@ -1,5 +1,8 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "skipRestore": {
       "longName": "skip-restore",
       "shortName": ""

@@ -1,5 +1,8 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "IncludeApplicationInsights": {
       "isHidden": "true"
     },

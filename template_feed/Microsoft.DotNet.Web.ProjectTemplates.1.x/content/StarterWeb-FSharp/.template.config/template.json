@@ -14,6 +14,13 @@
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols":{
+    "TargetFrameworkOverride": {
+      "type": "parameter",
+      "description": "Overrides the target framework",
+      "replaces": "TargetFrameworkOverride",
+      "datatype": "string",
+      "defaultValue": ""
+    },
     "Framework": {
       "type": "parameter",
       "description": "The target framework for the project.",
