@@ -175,9 +175,13 @@ namespace Microsoft.TemplateEngine.Cli
                     _matchedTemplatesWithSecondaryMatchInfo = FilterTemplatesOnParameters(_matchedTemplates).Where(x => x.IsMatch).ToList();
 
                     IReadOnlyList<IFilteredTemplateInfo> matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo.Where(x => x.IsParameterMatch).ToList();
+                    if (_matchedTemplatesWithSecondaryMatchInfo.Any(x => x.HasAmbiguousParameterMatch))
+                    {
+                        matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo;
+                    }
 
                     if (matchesAfterParameterChecks.Count == 0)
-                    {   // no param matches, continue additional matching with the list from before param checking.
+                    {   // no param matches, continue additional matching with the list from before param checking (but with the param match dispositions)
                         matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo;
                     }
 
@@ -188,8 +192,19 @@ namespace Microsoft.TemplateEngine.Cli
                     else if (string.IsNullOrEmpty(_commandInput.Language) && EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
                     {
                         IReadOnlyList<IFilteredTemplateInfo> languageFiltered = FindTemplatesExplicitlyMatchingLanguage(matchesAfterParameterChecks, defaultLanguage);
-                        if (languageFiltered.Count == 1 || AreAllTemplatesSameGroupIdentity(languageFiltered))
+
+                        if (languageFiltered.Count == 1)
                         {
+                            return _secondaryFilteredUnambiguousTemplateGroupToUse = languageFiltered;
+                        }
+                        else if (AreAllTemplatesSameGroupIdentity(languageFiltered))
+                        {
+                            IReadOnlyList<IFilteredTemplateInfo> languageFilteredMatchesAfterParameterChecks = languageFiltered.Where(x => x.IsParameterMatch).ToList();
+                            if (languageFilteredMatchesAfterParameterChecks.Count > 0 && !languageFiltered.Any(x => x.HasAmbiguousParameterMatch))
+                            {
+                                return _secondaryFilteredUnambiguousTemplateGroupToUse = languageFilteredMatchesAfterParameterChecks;
+                            }
+
                             return _secondaryFilteredUnambiguousTemplateGroupToUse = languageFiltered;
                         }
                     }
@@ -202,7 +217,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             return _secondaryFilteredUnambiguousTemplateGroupToUse;
         }
-        
+
         public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
@@ -849,7 +864,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             PerformCoreTemplateQuery();
 
-            if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Any())
+            if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Any()
+                && !UnambiguousTemplateGroupToUse.Any(x => x.HasAmbiguousParameterMatch))
             {
                 // unambiguous templates should all have the same dispositions
                 if (UnambiguousTemplateGroupToUse[0].MatchDisposition.Any(x => x.Kind == MatchKind.Exact && x.Location != MatchLocation.Context && x.Location != MatchLocation.Language))
@@ -1234,13 +1250,29 @@ namespace Microsoft.TemplateEngine.Cli
                         string paramName = matchedParamInfo.Key;
                         string paramValue = matchedParamInfo.Value;
 
-                        if (templateWithFilterInfo.Info.Tags.TryGetValue(paramName, out ICacheTag paramDetails)
-                                && (
-                                    paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue)
-                                    || paramDetails.ChoicesAndDescriptions.Any(x => x.Value.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase))
-                                ))
+                        if (templateWithFilterInfo.Info.Tags.TryGetValue(paramName, out ICacheTag paramDetails))
                         {
-                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
+                            // key is the value user should provide, value is description
+                            if (paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue))
+                            {
+                                dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
+                            }
+                            else
+                            {
+                                int startsWithCount = paramDetails.ChoicesAndDescriptions.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
+                                if (startsWithCount == 1)
+                                {
+                                    dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
+                                }
+                                else if (startsWithCount > 1)
+                                {
+                                    dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.AmbiguousParameterValue, ChoiceIfLocationIsOtherChoice = paramName });
+                                }
+                                else
+                                {
+                                    dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName });
+                                }
+                            }
                         }
                         else if (templateWithFilterInfo.Info.CacheParameters.ContainsKey(paramName))
                         {
@@ -1355,11 +1387,15 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (string preferredName in preferredNameList)
             {
                 ITemplateInfo template = templateList.FirstOrDefault(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase));
-                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
-                if (template != null && usedGroupIds.Add(identity))
+
+                if (template != null)
                 {
-                    GenerateUsageForTemplate(template);
-                    numShown++;
+                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
+                    if (usedGroupIds.Add(identity))
+                    {
+                        GenerateUsageForTemplate(template);
+                        numShown++;
+                    }
                 }
 
                 templateList.Remove(template);  // remove it so it won't get chosen again
