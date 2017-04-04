@@ -52,6 +52,7 @@ namespace Microsoft.NET.Publish.Tests
             });
 
             Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
+                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should().Pass()
