@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Configurer
         {
             try
             {
-                if(!Directory.Exists(_nugetCachePath))
+                if (!Directory.Exists(_nugetCachePath))
                 {
                     Directory.CreateDirectory(_nugetCachePath);
                 }

@@ -23,12 +23,7 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        public string NuGetUserSettingsDirectory
-        {
-            get
-            {
-                return NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
-            }
-        }
+        public string NuGetUserSettingsDirectory =>
+            NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
     }
 }
