@@ -18,7 +18,7 @@
     {
       "modifiers": [
         {
-          "condition": "(NoAuth)",
+          "condition": "(!IndividualAuth && !OrganizationalAuth)",
           "exclude": [
             "Controllers/AccountController.cs",
             "Views/Account/**",
@@ -100,8 +100,8 @@
     "AADInstance": {
       "type": "parameter",
       "datatype": "string",
-      "defaultValue": "AADInstance",
-      "replaces": "AADInstance",
+      "defaultValue": "https://login.microsoftonline.com/",
+      "replaces": "https:////login.microsoftonline.com/",
       "description": "The Azure Active Directory instance to connect to (use with Single-org or Multi-org auth types)."
     },
     "ClientId": {
@@ -150,7 +150,7 @@
     },
     "NoAuth": {
       "type": "computed",
-      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth))"
+      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth || WindowsAuth))"
     },
     "UseLocalDB": {
       "type": "parameter",
