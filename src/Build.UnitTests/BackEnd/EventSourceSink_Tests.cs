@@ -288,6 +288,10 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(expectedBuildEvent.BuildEventContext, actualBuildEvent.BuildEventContext);
             Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
             Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectFinished);
+
+            Assert.Equal(0, eventSourceSink.WarningsAsErrorsByProject.Keys.Count);
         }
 
         /// <summary>
@@ -426,6 +430,10 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(expectedBuildEvent.Subcategory, actualBuildEvent.Subcategory);
             Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
             Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectFinished);
+
+            Assert.Equal(0, eventSourceSink.WarningsAsMessagesByProject.Keys.Count);
         }
 
         /// <summary>
@@ -1178,7 +1186,10 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Project Finished Event
             /// </summary>
-            private static ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
+            private static ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true)
+            {
+                BuildEventContext = s_buildWarning.BuildEventContext
+            };
 
             /// <summary>
             /// External Project Started Event

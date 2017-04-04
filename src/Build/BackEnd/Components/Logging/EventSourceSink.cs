@@ -228,6 +228,12 @@ namespace Microsoft.Build.BackEnd.Logging
             else if (buildEvent is ProjectFinishedEventArgs)
             {
                 this.RaiseProjectFinishedEvent(null, (ProjectFinishedEventArgs)buildEvent);
+
+                if (buildEvent.BuildEventContext != null && buildEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+                {
+                    WarningsAsErrorsByProject?.Remove(buildEvent.BuildEventContext.ProjectInstanceId);
+                    WarningsAsMessagesByProject?.Remove(buildEvent.BuildEventContext.ProjectInstanceId);
+                }
             }
             else if (buildEvent is BuildStartedEventArgs)
             {
