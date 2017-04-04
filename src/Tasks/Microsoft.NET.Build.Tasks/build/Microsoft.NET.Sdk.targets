@@ -80,7 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildDependencyFile"
-          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;HandlePackageFileConflicts"
           BeforeTargets="_CheckForCompileOutputs"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
@@ -102,6 +102,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                      Conflicts="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       IsSelfContained="$(SelfContained)">
     </GenerateDepsFile>

@@ -72,20 +72,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <PropertyGroup>
-    <_RemoveDepsFileConflictsSemaphore>$(IntermediateOutputPath)\RemoveDepsFileConflicts.semaphore</_RemoveDepsFileConflictsSemaphore>
-  </PropertyGroup>
-  <UsingTask TaskName="RemoveDepsFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="RemoveDepsFileConflicts" AfterTargets="GenerateBuildDependencyFile"
-          Inputs="$(ProjectDepsFilePath)" Outputs="$(_RemoveDepsFileConflictsSemaphore)"
-          Condition="'$(GenerateDependencyFile)'=='true'">
-    <RemoveDepsFileConflicts DepsFilePath="$(ProjectDepsFilePath)" Conflicts="@(_ConflictPackageFiles)" />
-
-    <Touch Files="$(_RemoveDepsFileConflictsSemaphore)" AlwaysCreate="true">
-      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
-    </Touch>
-  </Target>
-
   <Target Name="HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies">
     <HandlePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
                                 PlatformManifests="@(PackageConflictPlatformManifests)"
@@ -97,18 +83,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedAssembliesToPublish Remove="@(ResolvedAssembliesToPublish)" />
       <ResolvedAssembliesToPublish Include="@(_ResolvedAssembliesToPublishWithoutConflicts)" />
     </ItemGroup>
-  </Target>
-
-  <PropertyGroup>
-    <_RemovePublishDepsFileConflictsSemaphore>$(IntermediateOutputPath)\RemovePublishDepsFileConflicts.semaphore</_RemovePublishDepsFileConflictsSemaphore>
-  </PropertyGroup>
-  <Target Name="RemovePublishDepsFileConflicts" AfterTargets="GeneratePublishDependencyFile"
-          Inputs="$(PublishDepsFilePath)" Outputs="$(_RemovePublishDepsFileConflictsSemaphore)">
-    <RemoveDepsFileConflicts DepsFilePath="$(PublishDepsFilePath)" Conflicts="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)" />
-
-    <Touch Files="$(_RemovePublishDepsFileConflictsSemaphore)" AlwaysCreate="true">
-      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
-    </Touch>
   </Target>
 
   <Import Project="Microsoft.Packaging.Tools.Trimming.targets" Condition="'$(_supportsTrimming)' == 'true' AND '$(TrimUnusedDependencies)' == 'true'" />
