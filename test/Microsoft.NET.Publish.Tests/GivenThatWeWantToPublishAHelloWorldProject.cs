@@ -201,7 +201,7 @@ public static class Program
     }
 }
 ";
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, "SelfContainedPublishConflicts")
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                 .WithProjectChanges(p =>
                 {
 
