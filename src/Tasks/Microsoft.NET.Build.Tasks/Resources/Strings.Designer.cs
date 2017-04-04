@@ -143,6 +143,51 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choosing &apos;{0}&apos; because AssemblyVersion &apos;{1}&apos; is greater than &apos;{2}&apos;..
+        /// </summary>
+        internal static string ChoosingAssemblyVersion {
+            get {
+                return ResourceManager.GetString("ChoosingAssemblyVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choosing &apos;{0}&apos; because file version &apos;{1}&apos; is greater than &apos;{2}&apos;..
+        /// </summary>
+        internal static string ChoosingFileVersion {
+            get {
+                return ResourceManager.GetString("ChoosingFileVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choosing &apos;{0}&apos; because it is a platform item..
+        /// </summary>
+        internal static string ChoosingPlatformItem {
+            get {
+                return ResourceManager.GetString("ChoosingPlatformItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choosing &apos;{0}&apos; because it comes from a package that is preferred..
+        /// </summary>
+        internal static string ChoosingPreferredPackage {
+            get {
+                return ResourceManager.GetString("ChoosingPreferredPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine winner due to equal file and assembly versions..
+        /// </summary>
+        internal static string ConflictCouldNotDetermineWinner {
+            get {
+                return ResourceManager.GetString("ConflictCouldNotDetermineWinner", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Content file &apos;{0}&apos; does not contain expected parent package information..
         /// </summary>
         internal static string ContentFileDoesNotContainExpectedParentPackageInformation {
@@ -166,6 +211,42 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string ContentPreproccessorParameterRequired {
             get {
                 return ResourceManager.GetString("ContentPreproccessorParameterRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine winner because &apos;{0}&apos; does not exist..
+        /// </summary>
+        internal static string CouldNotDetermineWinner_DoesntExist {
+            get {
+                return ResourceManager.GetString("CouldNotDetermineWinner_DoesntExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine a winner because &apos;{0}&apos; has no file version..
+        /// </summary>
+        internal static string CouldNotDetermineWinner_FileVersion {
+            get {
+                return ResourceManager.GetString("CouldNotDetermineWinner_FileVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not determine a winner because &apos;{0}&apos; is not an assembly..
+        /// </summary>
+        internal static string CouldNotDetermineWinner_NotAnAssembly {
+            get {
+                return ResourceManager.GetString("CouldNotDetermineWinner_NotAnAssembly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not load PlatformManifest from &apos;{0}&apos; because it did not exist..
+        /// </summary>
+        internal static string CouldNotLoadPlatformManifest {
+            get {
+                return ResourceManager.GetString("CouldNotLoadPlatformManifest", resourceCulture);
             }
         }
         
@@ -229,6 +310,33 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string DuplicatePreprocessorToken {
             get {
                 return ResourceManager.GetString("DuplicatePreprocessorToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encountered conflict between &apos;{0}&apos; and &apos;{1}&apos;..
+        /// </summary>
+        internal static string EncounteredConflict {
+            get {
+                return ResourceManager.GetString("EncounteredConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error parsing PlatformManifest from &apos;{0}&apos; line {1}.  Lines must have the format {2}..
+        /// </summary>
+        internal static string ErrorParsingPlatformManifest {
+            get {
+                return ResourceManager.GetString("ErrorParsingPlatformManifest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error parsing PlatformManifest from &apos;{0}&apos; line {1}.  {2} &apos;{3}&apos; was invalid..
+        /// </summary>
+        internal static string ErrorParsingPlatformManifestInvalidValue {
+            get {
+                return ResourceManager.GetString("ErrorParsingPlatformManifestInvalidValue", resourceCulture);
             }
         }
         

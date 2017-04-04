@@ -4,6 +4,7 @@
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 //  Notes on functionality and how to test it
 //  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
@@ -85,9 +86,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
         }
 
+        readonly string SENTENCE_SPACING = "  ";
+
         private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2)
         {
-            var conflictMessage = $"Encountered conflict between {item1.DisplayName} and {item2.DisplayName}.";
+            string conflictMessage = string.Format(CultureInfo.CurrentCulture, Strings.EncounteredConflict,
+                item1.DisplayName,
+                item2.DisplayName);
+
 
             var exists1 = item1.Exists;
             var exists2 = item2.Exists;
@@ -100,13 +106,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (!exists1 || !exists2)
             {
-                var fileMessage = !exists1 ?
-                                    !exists2 ?
-                                      "both files do" :
-                                      $"{item1.DisplayName} does" :
-                                  $"{item2.DisplayName} does";
+                string fileMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_DoesntExist,
+                    !exists1 ? item1.DisplayName : item2.DisplayName);
 
-                log.LogMessage($"{conflictMessage}.  Could not determine winner because {fileMessage} not exist.");
+                log.LogMessage(fileMessage);
                 return null;
             }
 
@@ -117,22 +120,47 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (assemblyVersion1 == null ^ assemblyVersion2 == null)
             {
                 var nonAssembly = assemblyVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                log.LogMessage($"{conflictMessage}. Could not determine a winner because {nonAssembly} is not an assembly.");
+                string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_NotAnAssembly,
+                    nonAssembly);
+                
+                log.LogMessage(assemblyMessage);
                 return null;
             }
 
             // only handle cases where assembly version is different, and not null (implicit here due to xor above)
             if (assemblyVersion1 != assemblyVersion2)
             {
+                string winningDisplayName;
+                Version winningVersion;
+                Version losingVersion;
                 if (assemblyVersion1 > assemblyVersion2)
                 {
-                    log.LogMessage($"{conflictMessage}.  Choosing {item1.DisplayName} because AssemblyVersion {assemblyVersion1} is greater than {assemblyVersion2}.");
+                    winningDisplayName = item1.DisplayName;
+                    winningVersion = assemblyVersion1;
+                    losingVersion = assemblyVersion2;
+                }
+                else
+                {
+                    winningDisplayName = item2.DisplayName;
+                    winningVersion = assemblyVersion2;
+                    losingVersion = assemblyVersion1;
+                }
+
+
+                string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingAssemblyVersion,
+                    winningDisplayName,
+                    winningVersion,
+                    losingVersion);
+
+                log.LogMessage(assemblyMessage);
+
+                if (assemblyVersion1 > assemblyVersion2)
+                {
                     return item1;
                 }
 
                 if (assemblyVersion2 > assemblyVersion1)
                 {
-                    log.LogMessage($"{conflictMessage}.  Choosing {item2.DisplayName} because AssemblyVersion {assemblyVersion2} is greater than {assemblyVersion1}.");
                     return item2;
                 }
             }
@@ -144,21 +172,44 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (fileVersion1 == null ^ fileVersion2 == null)
             {
                 var nonVersion = fileVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                log.LogMessage($"{conflictMessage}. Could not determine a winner because {nonVersion} has no file version.");
+                string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_FileVersion,
+                    nonVersion);
                 return null;
             }
 
             if (fileVersion1 != fileVersion2)
             {
+                string winningDisplayName;
+                Version winningVersion;
+                Version losingVersion;
                 if (fileVersion1 > fileVersion2)
                 {
-                    log.LogMessage($"{conflictMessage}.  Choosing {item1.DisplayName} because file version {fileVersion1} is greater than {fileVersion2}.");
+                    winningDisplayName = item1.DisplayName;
+                    winningVersion = fileVersion1;
+                    losingVersion = fileVersion2;
+                }
+                else
+                {
+                    winningDisplayName = item2.DisplayName;
+                    winningVersion = fileVersion2;
+                    losingVersion = fileVersion1;
+                }
+
+
+                string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingFileVersion,
+                    winningDisplayName,
+                    winningVersion,
+                    losingVersion);
+
+                log.LogMessage(fileVersionMessage);
+
+                if (fileVersion1 > fileVersion2)
+                {
                     return item1;
                 }
 
                 if (fileVersion2 > fileVersion1)
                 {
-                    log.LogMessage($"{conflictMessage}.  Choosing {item2.DisplayName} because file version {fileVersion2} is greater than {fileVersion1}.");
                     return item2;
                 }
             }
@@ -168,13 +219,16 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (packageRank1 < packageRank2)
             {
-                log.LogMessage($"{conflictMessage}.  Choosing {item1.DisplayName} because package it comes from a package that is preferred.");
+                string packageRankMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPreferredPackage,
+                    item1.DisplayName);
+                log.LogMessage(packageRankMessage);
                 return item1;
             }
 
             if (packageRank2 < packageRank1)
             {
-                log.LogMessage($"{conflictMessage}.  Choosing {item2.DisplayName} because package it comes from a package that is preferred.");
+                string packageRankMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPreferredPackage,
+                    item2.DisplayName);
                 return item2;
             }
 
@@ -183,17 +237,23 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (isPlatform1 && !isPlatform2)
             {
-                log.LogMessage($"{conflictMessage}.  Choosing {item1.DisplayName} because it is a platform item.");
+                string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
+                    item1.DisplayName);
+                log.LogMessage(platformMessage);
                 return item1;
             }
 
             if (!isPlatform1 && isPlatform2)
             {
-                log.LogMessage($"{conflictMessage}.  Choosing {item2.DisplayName} because it is a platform item.");
+                string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
+                    item2.DisplayName);
+                log.LogMessage(platformMessage);
                 return item2;
             }
 
-            log.LogMessage($"{conflictMessage}.  Could not determine winner due to equal file and assembly versions.");
+            string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.InvariantCulture, Strings.ConflictCouldNotDetermineWinner);
+
+            log.LogMessage(message);
             return null;
         }
     }

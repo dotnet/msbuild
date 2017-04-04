@@ -4,6 +4,7 @@
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
@@ -20,7 +21,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (!File.Exists(manifestPath))
             {
-                log.LogError($"Could not load PlatformManifest from {manifestPath} because it did not exist");
+                string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.CouldNotLoadPlatformManifest,
+                    manifestPath);
+                log.LogError(errorMessage);
                 yield break;
             }
 
@@ -40,7 +43,11 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (lineParts.Length != 4)
                     {
-                        log.LogError($"Error parsing PlatformManifest from {manifestPath} line {lineNumber}.  Lines must have the format fileName|packageId|assemblyVersion|fileVersion");
+                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifest,
+                            manifestPath,
+                            lineNumber,
+                            "fileName|packageId|assemblyVersion|fileVersion");
+                        log.LogError(errorMessage);
                         yield break;
                     }
 
@@ -53,12 +60,22 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (assemblyVersionString.Length != 0 && !Version.TryParse(assemblyVersionString, out assemblyVersion))
                     {
-                        log.LogError($"Error parsing PlatformManfiest from {manifestPath} line {lineNumber}.  AssemblyVersion {assemblyVersionString} was invalid.");
+                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
+                            manifestPath,
+                            lineNumber,
+                            "AssemblyVersion",
+                            assemblyVersionString);
+                        log.LogError(errorMessage);
                     }
 
                     if (fileVersionString.Length != 0 && !Version.TryParse(fileVersionString, out fileVersion))
                     {
-                        log.LogError($"Error parsing PlatformManifest from {manifestPath} line {lineNumber}.  FileVersion {fileVersionString} was invalid.");
+                        string errorMessage = string.Format(CultureInfo.InvariantCulture, Strings.ErrorParsingPlatformManifestInvalidValue,
+                            manifestPath,
+                            lineNumber,
+                            "FileVersion",
+                            fileVersionString);
+                        log.LogError(errorMessage);
                     }
 
                     yield return new ConflictItem(fileName, packageId, assemblyVersion, fileVersion);
