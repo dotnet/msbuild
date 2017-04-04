@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("/p:SkipInvalidConfigurations=true")
+                .Execute()
                 .Should().Pass();
 
             new PublishCommand()
@@ -62,9 +62,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithFramework("netcoreapp2.0")
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
-                //Workaround for https://github.com/dotnet/cli/issues/4501
-                .WithEnvironmentVariable("SkipInvalidConfigurations", "true")
-                .Execute("/p:SkipInvalidConfigurations=true")
+                .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
@@ -73,16 +71,79 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
                 .FullName;
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                //Workaround for https://github.com/dotnet/corefx/issues/15516
-                Process.Start("chmod", $"u+x {outputProgram}").WaitForExit();
-            }
+            EnsureProgramIsRunnable(outputProgram);
 
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItPublishesARidSpecificAppSettingSelfContainedToTrue()
+        {
+            var testAppName = "MSBuildTestApp";
+            var outputDirectory = PublishAppWithSelfContained(testAppName, true);
+
+            var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
+
+            EnsureProgramIsRunnable(outputProgram);
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItPublishesARidSpecificAppSettingSelfContainedToFalse()
+        {
+            var testAppName = "MSBuildTestApp";
+            var outputDirectory = PublishAppWithSelfContained(testAppName, false);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}.dll",
+                $"{testAppName}.pdb",
+                $"{testAppName}.deps.json",
+                $"{testAppName}.runtimeconfig.json",
+            });
+
+            new DotnetCommand()
+                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        private DirectoryInfo PublishAppWithSelfContained(string testAppName, bool selfContained)
+        {
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance($"PublishesSelfContained{selfContained}")
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            new PublishCommand()
+                .WithRuntime(rid)
+                .WithSelfContained(selfContained)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            return testProjectDirectory
+                    .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish");
+        }
+
+        private static void EnsureProgramIsRunnable(string path)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //Workaround for https://github.com/dotnet/corefx/issues/15516
+                Process.Start("chmod", $"u+x {path}").WaitForExit();
+            }
         }
 
         [Fact]

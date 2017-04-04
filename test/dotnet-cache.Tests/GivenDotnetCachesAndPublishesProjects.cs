@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profileFilter)
+                .WithProfileProject(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profileFilter)
+                .WithProfileProject(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -153,8 +153,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProFileProject(profileFilter)
-                .WithProFileProject(profileFilter1)
+                .WithProfileProject(profileFilter)
+                .WithProfileProject(profileFilter1)
                 .Execute()
                 .Should().Pass();
 
