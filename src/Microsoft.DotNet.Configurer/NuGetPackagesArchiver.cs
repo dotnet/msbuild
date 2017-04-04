@@ -10,33 +10,15 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetPackagesArchiver : INuGetPackagesArchiver
     {
-        private ITemporaryDirectory _temporaryDirectory;
-
         public string NuGetPackagesArchive =>
             Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "nuGetPackagesArchive.lzma"));
 
-        public NuGetPackagesArchiver() : this(FileSystemWrapper.Default.Directory)
-        {
-        }
-
-        internal NuGetPackagesArchiver(IDirectory directory)
-        {
-            _temporaryDirectory = directory.CreateTemporaryDirectory();
-        }
-
-        public string ExtractArchive()
+        public void ExtractArchive(string archiveDestination)
         {
             var progress = new ConsoleProgressReport();
             var archive = new IndexedArchive();
 
-            archive.Extract(NuGetPackagesArchive, _temporaryDirectory.DirectoryPath, progress);
-
-            return _temporaryDirectory.DirectoryPath;
-        }
-
-        public void Dispose()
-        {
-            _temporaryDirectory.Dispose();
+            archive.Extract(NuGetPackagesArchive, archiveDestination, progress);
         }
     }
 }

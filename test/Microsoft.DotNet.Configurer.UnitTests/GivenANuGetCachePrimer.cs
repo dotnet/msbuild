@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -21,13 +22,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private const string PACKAGES_ARCHIVE_PATH = "some other path";
 
         private IFileSystem _fileSystemMock;
-        private ITemporaryDirectoryMock _temporaryDirectoryMock;
 
-        private Mock<ICommandFactory> _commandFactoryMock;
-        private Mock<ICommand> _dotnetNewCommandMock;
-        private Mock<ICommand> _dotnetRestoreCommandMock;
         private Mock<INuGetPackagesArchiver> _nugetPackagesArchiverMock;
         private Mock<INuGetCacheSentinel> _nugetCacheSentinel;
+        private Mock<INuGetConfig> _nugetConfigMock;
+        private CliFallbackFolderPathCalculator _cliFallbackFolderPathCalculator;
 
         public GivenANuGetCachePrimer()
         {
@@ -35,57 +34,24 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             fileSystemMockBuilder.TemporaryFolder = TEMPORARY_FOLDER_PATH;
             fileSystemMockBuilder.AddFile(COMPRESSED_ARCHIVE_PATH);
             _fileSystemMock = fileSystemMockBuilder.Build();
-            _temporaryDirectoryMock = (ITemporaryDirectoryMock)_fileSystemMock.Directory.CreateTemporaryDirectory();
-
-            _commandFactoryMock = SetupCommandFactoryMock();
-
+            
             _nugetPackagesArchiverMock = new Mock<INuGetPackagesArchiver>();
-            _nugetPackagesArchiverMock.Setup(n => n.ExtractArchive()).Returns(PACKAGES_ARCHIVE_PATH);
             _nugetPackagesArchiverMock.Setup(n => n.NuGetPackagesArchive).Returns(COMPRESSED_ARCHIVE_PATH);
 
             _nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
 
+            _nugetConfigMock = new Mock<INuGetConfig>();
+
+            _cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
+
             var nugetCachePrimer = new NuGetCachePrimer(
-                _commandFactoryMock.Object,
                 _nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _fileSystemMock.Directory,
+                _nugetConfigMock.Object,
+                _cliFallbackFolderPathCalculator,
                 _fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
-        }
-
-        private Mock<ICommandFactory> SetupCommandFactoryMock()
-        {
-            var commandFactoryMock = new Mock<ICommandFactory>();
-
-            _dotnetNewCommandMock = new Mock<ICommand>();
-            SetupCommandMock(_dotnetNewCommandMock);
-
-            commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "console", "--debug:ephemeral-hive" }, null, Constants.DefaultConfiguration))
-                .Returns(_dotnetNewCommandMock.Object);
-
-            _dotnetRestoreCommandMock = new Mock<ICommand>();
-            SetupCommandMock(_dotnetRestoreCommandMock);
-            commandFactoryMock
-                .Setup(c => c.Create(
-                    "restore",
-                    It.IsAny<IEnumerable<string>>(),
-                    null,
-                    Constants.DefaultConfiguration))
-                .Returns(_dotnetRestoreCommandMock.Object);
-
-            return commandFactoryMock;
-        }
-
-        private void SetupCommandMock(Mock<ICommand> commandMock)
-        {
-            commandMock
-                .Setup(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH))
-                .Returns(commandMock.Object);
-            commandMock.Setup(c => c.CaptureStdOut()).Returns(commandMock.Object);
-            commandMock.Setup(c => c.CaptureStdErr()).Returns(commandMock.Object);
         }
 
         [Fact]
@@ -94,116 +60,35 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var fileSystemMockBuilder = FileSystemMockBuilder.Create();
             var fileSystemMock = fileSystemMockBuilder.Build();
 
-            var commandFactoryMock = SetupCommandFactoryMock();
-
             var nugetPackagesArchiverMock = new Mock<INuGetPackagesArchiver>();            
             nugetPackagesArchiverMock.Setup(n => n.NuGetPackagesArchive).Returns(COMPRESSED_ARCHIVE_PATH);
 
             var nugetCachePrimer = new NuGetCachePrimer(
-                commandFactoryMock.Object,
                 nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                fileSystemMock.Directory,
+                _nugetConfigMock.Object,
+                _cliFallbackFolderPathCalculator,
                 fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
 
-            nugetPackagesArchiverMock.Verify(n => n.ExtractArchive(), Times.Never);
-            commandFactoryMock.Verify(c => c.Create(
-                It.IsAny<string>(),
-                It.IsAny<IEnumerable<string>>(),
-                null,
-                Constants.DefaultConfiguration), Times.Never);
+            nugetPackagesArchiverMock.Verify(n => n.ExtractArchive(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
-        public void It_disposes_the_temporary_directory_created_for_the_temporary_project_used_to_prime_the_cache()
+        public void It_adds_the_fallback_folder_to_NuGet_Config()
         {
-            _temporaryDirectoryMock.DisposedTemporaryDirectory.Should().BeTrue();
-        }
-
-        [Fact]
-        public void It_runs_dotnet_new_using_the_temporary_folder()
-        {
-            _dotnetNewCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_runs_dotnet_new_capturing_stdout()
-        {
-            _dotnetNewCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_runs_dotnet_new_capturing_stderr()
-        {
-            _dotnetNewCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_actually_runs_dotnet_new()
-        {
-            _dotnetNewCommandMock.Verify(c => c.Execute(), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_uses_the_packages_archive_with_dotnet_restore()
-        {
-            _commandFactoryMock.Verify(
-                c => c.Create(
-                    "restore",
-                    new[] { "-s", $"{PACKAGES_ARCHIVE_PATH}" },
-                    null,
-                    Constants.DefaultConfiguration),
+            _nugetConfigMock.Verify(n =>
+                n.AddCliFallbackFolder(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
                 Times.Exactly(1));
         }
 
         [Fact]
-        public void It_does_not_run_restore_if_dotnet_new_fails()
+        public void It_extracts_the_archive_to_the_fallback_folder()
         {
-            var commandFactoryMock = SetupCommandFactoryMock();
-            _dotnetNewCommandMock.Setup(c => c.Execute()).Returns(new CommandResult(null, -1, null, null));
-
-            var nugetCachePrimer = new NuGetCachePrimer(
-                commandFactoryMock.Object,
-                _nugetPackagesArchiverMock.Object,
-                _nugetCacheSentinel.Object,
-                _fileSystemMock.Directory,
-                _fileSystemMock.File);
-
-            nugetCachePrimer.PrimeCache();
-
-            commandFactoryMock.Verify(
-                c => c.Create(
-                    "restore",
-                    It.IsAny<IEnumerable<string>>(),
-                    It.IsAny<NuGetFramework>(),
-                    It.IsAny<string>()),
-                Times.Never);
-        }
-
-        [Fact]
-        public void It_runs_dotnet_restore_using_the_temporary_folder()
-        {
-            _dotnetRestoreCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_runs_dotnet_restore_capturing_stdout()
-        {
-            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_runs_dotnet_restore_capturing_stderr()
-        {
-            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(1));
-        }
-
-        [Fact]
-        public void It_actually_runs_dotnet_restore()
-        {
-            _dotnetRestoreCommandMock.Verify(c => c.Execute(), Times.Exactly(1));
+            _nugetPackagesArchiverMock.Verify(n =>
+                n.ExtractArchive(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
+                Times.Exactly(1));
         }
 
         [Fact]
@@ -213,20 +98,22 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_does_not_create_a_sentinel_when_restore_fails()
+        public void It_does_not_create_a_sentinel_when_extracting_the_archive_fails()
         {
             var nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
-            _dotnetRestoreCommandMock.Setup(c => c.Execute()).Returns(new CommandResult(null, -1, null, null));
+            var nugetPackagesArchiveMock = new Mock<INuGetPackagesArchiver>();
+            nugetPackagesArchiveMock.Setup(n => n.ExtractArchive(It.IsAny<string>())).Throws<Exception>();
 
             var nugetCachePrimer = new NuGetCachePrimer(
-                _commandFactoryMock.Object,
-                _nugetPackagesArchiverMock.Object,
+                nugetPackagesArchiveMock.Object,
                 nugetCacheSentinel.Object,
-                _fileSystemMock.Directory,
+                _nugetConfigMock.Object,
+                _cliFallbackFolderPathCalculator,
                 _fileSystemMock.File);
 
-            nugetCachePrimer.PrimeCache();
+            Action action = () => nugetCachePrimer.PrimeCache();
 
+            action.ShouldThrow<Exception>();
             nugetCacheSentinel.Verify(n => n.CreateIfNotExists(), Times.Never);
         }
     }

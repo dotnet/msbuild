@@ -17,25 +17,13 @@ namespace Microsoft.DotNet.Configurer
 
         private string _nugetCachePath;
 
-        private string NuGetCachePath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_nugetCachePath))
-                {
-                    _nugetCachePath = NuGetPathContext.Create(new NullSettings()).UserPackageFolder;
-                }
-
-                return _nugetCachePath;
-            }
-        }
-
-        private string SentinelPath => Path.Combine(NuGetCachePath, SENTINEL);
-        private string InProgressSentinelPath => Path.Combine(NuGetCachePath, INPROGRESS_SENTINEL);
+        private string SentinelPath => Path.Combine(_nugetCachePath, SENTINEL);
+        private string InProgressSentinelPath => Path.Combine(_nugetCachePath, INPROGRESS_SENTINEL);
 
         private Stream InProgressSentinel { get; set; }
 
-        public NuGetCacheSentinel() : this(string.Empty, FileSystemWrapper.Default.File)
+        public NuGetCacheSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
+            this(cliFallbackFolderPathCalculator.CliFallbackFolderPath, FileSystemWrapper.Default.File)
         {
         }
 
@@ -74,9 +62,9 @@ namespace Microsoft.DotNet.Configurer
         {
             try
             {
-                if(!Directory.Exists(NuGetCachePath))
+                if (!Directory.Exists(_nugetCachePath))
                 {
-                    Directory.CreateDirectory(NuGetCachePath);
+                    Directory.CreateDirectory(_nugetCachePath);
                 }
 
                 // open an exclusive handle to the in-progress sentinel and mark it for delete on close.

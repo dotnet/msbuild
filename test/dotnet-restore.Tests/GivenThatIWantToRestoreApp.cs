@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Restore.Tests
 {
     public class GivenThatIWantToRestoreApp : TestBase
     {
+        private static string RepoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
+
         [Fact]
         public void ItRestoresAppToSpecificDirectory()
         {
@@ -29,7 +31,7 @@ namespace Microsoft.DotNet.Restore.Tests
                 .Should()
                 .Pass();
 
-            string args = $"--packages \"{dir}\"";
+            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
             new RestoreCommand()
                  .WithWorkingDirectory(rootPath)
                  .ExecuteWithCapturedOutput(args)
@@ -56,7 +58,7 @@ namespace Microsoft.DotNet.Restore.Tests
                 .Should()
                 .Pass();
 
-            string args = $"--packages \"{dir}\"";
+            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput(args)
@@ -76,7 +78,7 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string args = $"--packages \"{dir}\"";
+            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput(args)

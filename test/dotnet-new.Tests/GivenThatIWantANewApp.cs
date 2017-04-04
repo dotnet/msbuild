@@ -60,6 +60,8 @@ namespace Microsoft.DotNet.New.Tests
             string projectFolder,
             string packagesDirectory)
         {
+            var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
+
             new NewCommand()
                 .WithWorkingDirectory(projectFolder)
                 .Execute($"{projectType} --debug:ephemeral-hive")
@@ -67,7 +69,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"--packages {packagesDirectory}")
+                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory}")
                 .Should().Pass();
         }
 
@@ -80,6 +82,7 @@ namespace Microsoft.DotNet.New.Tests
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
             var expectedVersion = GetFrameworkPackageVersion();
+            var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
@@ -88,7 +91,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"--packages {packagesDirectory}")
+                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory}")
                 .Should().Pass();
 
             new DirectoryInfo(Path.Combine(packagesDirectory, packageName))
