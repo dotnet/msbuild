@@ -1,5 +1,9 @@
 {
   "symbolInfo": {
+    "AADInstance": {
+      "longName": "aad-instance",
+      "shortName": "s"
+    },
     "TargetFrameworkOverride": {
       "isHidden": true
     },
