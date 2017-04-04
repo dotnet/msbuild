@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private Mock<INuGetPackagesArchiver> _nugetPackagesArchiverMock;
         private Mock<INuGetCacheSentinel> _nugetCacheSentinel;
         private Mock<INuGetConfig> _nugetConfigMock;
-        private CLIFallbackFolderPathCalculator _cliFallbackFolderPathCalculator;
+        private CliFallbackFolderPathCalculator _cliFallbackFolderPathCalculator;
 
         public GivenANuGetCachePrimer()
         {
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _nugetConfigMock = new Mock<INuGetConfig>();
 
-            _cliFallbackFolderPathCalculator = new CLIFallbackFolderPathCalculator();
+            _cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
 
             var nugetCachePrimer = new NuGetCachePrimer(
                 _nugetPackagesArchiverMock.Object,
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void It_adds_the_fallback_folder_to_NuGet_Config()
         {
             _nugetConfigMock.Verify(n =>
-                n.AddCLIFallbackFolder(_cliFallbackFolderPathCalculator.CLIFallbackFolderPath),
+                n.AddCliFallbackFolder(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
                 Times.Exactly(1));
         }
 
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void It_extracts_the_archive_to_the_fallback_folder()
         {
             _nugetPackagesArchiverMock.Verify(n =>
-                n.ExtractArchive(_cliFallbackFolderPathCalculator.CLIFallbackFolderPath),
+                n.ExtractArchive(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
                 Times.Exactly(1));
         }
 

@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.Configurer
 {
     public interface INuGetConfig
     {
-        void AddCLIFallbackFolder(string fallbackFolderPath);
+        void AddCliFallbackFolder(string fallbackFolderPath);
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Configurer
 
         private ISettings _settings;
 
-        public NuGetConfig(CLIFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
+        public NuGetConfig(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
         {
             _settings = new Settings(cliFallbackFolderPathCalculator.NuGetUserSettingsDirectory);
         }
@@ -23,15 +23,15 @@ namespace Microsoft.DotNet.Configurer
             _settings = settings;
         }
 
-        public void AddCLIFallbackFolder(string fallbackFolderPath)
+        public void AddCliFallbackFolder(string fallbackFolderPath)
         {
-            if (!IsCLIFallbackFolderSet(fallbackFolderPath))
+            if (!IsCliFallbackFolderSet(fallbackFolderPath))
             {
-                _settings.SetValue(FallbackPackageFolders, "CLIFallbackFolder", fallbackFolderPath);
+                _settings.SetValue(FallbackPackageFolders, "CliFallbackFolder", fallbackFolderPath);
             }
         }
 
-        private bool IsCLIFallbackFolderSet(string fallbackFolderPath)
+        private bool IsCliFallbackFolderSet(string fallbackFolderPath)
         {
             return _settings.GetSettingValues(FallbackPackageFolders).Any(s => s.Value == fallbackFolderPath);
         }

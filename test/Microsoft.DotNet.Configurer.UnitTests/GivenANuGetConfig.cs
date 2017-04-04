@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 .Setup(s => s.GetSettingValues(NuGetConfig.FallbackPackageFolders, false))
                 .Returns(new List<SettingValue>()
                 {
-                    new SettingValue("CLIFallbackFolder", PathToFallbackFolderAlreadySet, false)
+                    new SettingValue("CliFallbackFolder", PathToFallbackFolderAlreadySet, false)
                 });
 
             _nugetConfig = new NuGetConfig(_settingsMock.Object);
@@ -33,20 +33,20 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void ItAddsACliFallbackFolderIfOneIsNotPresentAlready()
         {
             const string FallbackFolderNotAlreadySet = "some path not already set";
-            _nugetConfig.AddCLIFallbackFolder(FallbackFolderNotAlreadySet);
+            _nugetConfig.AddCliFallbackFolder(FallbackFolderNotAlreadySet);
 
             _settingsMock.Verify(s =>
-                s.SetValue(NuGetConfig.FallbackPackageFolders, "CLIFallbackFolder", FallbackFolderNotAlreadySet),
+                s.SetValue(NuGetConfig.FallbackPackageFolders, "CliFallbackFolder", FallbackFolderNotAlreadySet),
                 Times.Exactly(1));
         }
 
         [Fact]
         public void ItDoesNotAddTheCliFallbackFolderIfItIsAlreadyPresent()
         {
-            _nugetConfig.AddCLIFallbackFolder(PathToFallbackFolderAlreadySet);
+            _nugetConfig.AddCliFallbackFolder(PathToFallbackFolderAlreadySet);
 
             _settingsMock.Verify(s => 
-                s.SetValue(NuGetConfig.FallbackPackageFolders, "CLIFallbackFolder", PathToFallbackFolderAlreadySet),
+                s.SetValue(NuGetConfig.FallbackPackageFolders, "CliFallbackFolder", PathToFallbackFolderAlreadySet),
                 Times.Never);
         }
     }

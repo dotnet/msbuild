@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-            var cliFallbackFolderPathCalculator = new CLIFallbackFolderPathCalculator();
+            var cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
             using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
             {
                 for (; lastArg < args.Length; lastArg++)
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Cli
 
         private static void ConfigureDotNetForFirstTimeUse(
             INuGetCacheSentinel nugetCacheSentinel,
-            CLIFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
+            CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
         {
             using (PerfTrace.Current.CaptureTiming())
             {

@@ -342,7 +342,8 @@ namespace Microsoft.DotNet.Tests
 
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance()
-                .WithSourceFiles();
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
 
@@ -378,13 +379,14 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void ItXXXWhenTheToolDllIsNotFound()
+        public void ItShowsAnErrorWhenTheToolDllIsNotFound()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance()
-                .WithSourceFiles();
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
 
@@ -415,9 +417,10 @@ namespace Microsoft.DotNet.Tests
 
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
         {
+            var nugetConfigPath = Path.Combine(testProjectDirectory, "NuGet.Config");
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"--packages {fallbackFolder}")
+                .Execute($"--configfile {nugetConfigPath} --packages {fallbackFolder}")
                 .Should()
                 .Pass();
 

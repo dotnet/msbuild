@@ -10,9 +10,9 @@ using NuGet.Common;
 
 namespace Microsoft.DotNet.Configurer
 {
-    public class CLIFallbackFolderPathCalculator
+    public class CliFallbackFolderPathCalculator
     {
-        public string CLIFallbackFolderPath
+        public string CliFallbackFolderPath
         {
             get
             {

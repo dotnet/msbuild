@@ -110,6 +110,7 @@ namespace Microsoft.DotNet.TestFramework
             var content = @"<?xml version=""1.0"" encoding=""utf-8""?>
             <configuration>
               <packageSources>
+                <add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
                 <add key=""test-packages"" value=""$fullpath$"" />
               </packageSources>
             </configuration>";

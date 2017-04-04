@@ -13,7 +13,8 @@
 
       <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
       <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
-      <LZMANuGetConfigFilePath>$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
+      <LZMANuGetConfigFilePath Condition=" '$(CLI_LZMA_PACKAGE_SOURCE)' != '' ">$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
+      <LZMANuGetConfigFilePath Condition=" '$(LZMANuGetConfigFilePath)' == '' ">$(RepoRoot)/NuGet.Config</LZMANuGetConfigFilePath>
       <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
       <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
@@ -96,6 +97,7 @@
 
       <DotNetRestore ToolPath="$(OutputDirectory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
+                     ConfigFile="$(LZMANuGetConfigFilePath)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
