@@ -71,11 +71,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
                 .FullName;
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                //Workaround for https://github.com/dotnet/corefx/issues/15516
-                Process.Start("chmod", $"u+x {outputProgram}").WaitForExit();
-            }
+            EnsureProgramIsRunnable(outputProgram);
 
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
@@ -83,13 +79,43 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                      .And.HaveStdOutContaining("Hello World");
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ItPublishesAnAppExplicitlySpecifyingSelfContained(bool selfContained)
+        [Fact]
+        public void ItPublishesARidSpecificAppSettingSelfContainedToTrue()
         {
             var testAppName = "MSBuildTestApp";
+            var outputDirectory = PublishAppWithSelfContained(testAppName, true);
 
+            var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
+
+            EnsureProgramIsRunnable(outputProgram);
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItPublishesARidSpecificAppSettingSelfContainedToFalse()
+        {
+            var testAppName = "MSBuildTestApp";
+            var outputDirectory = PublishAppWithSelfContained(testAppName, false);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}.dll",
+                $"{testAppName}.pdb",
+                $"{testAppName}.deps.json",
+                $"{testAppName}.runtimeconfig.json",
+            });
+
+            new DotnetCommand()
+                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        private DirectoryInfo PublishAppWithSelfContained(string testAppName, bool selfContained)
+        {
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance($"PublishesSelfContained{selfContained}")
                 .WithSourceFiles()
@@ -107,39 +133,17 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputPath = testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish")
-                    .FullName;
-            var selfContainedProgram = Path.Combine(outputPath, $"{testAppName}{Constants.ExeSuffix}");
-            var selfContainedProgramFile = new FileInfo(selfContainedProgram);
+            return testProjectDirectory
+                    .GetDirectory("bin", configuration, "netcoreapp2.0", rid, "publish");
+        }
 
-            TestCommand testCommand;
-            string testArgs;
-            if (selfContained)
+        private static void EnsureProgramIsRunnable(string path)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                selfContainedProgramFile.Should().Exist();
-
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    //Workaround for https://github.com/dotnet/corefx/issues/15516
-                    Process.Start("chmod", $"u+x {selfContainedProgram}").WaitForExit();
-                }
-
-                testCommand = new TestCommand(selfContainedProgram);
-                testArgs = null;
+                //Workaround for https://github.com/dotnet/corefx/issues/15516
+                Process.Start("chmod", $"u+x {path}").WaitForExit();
             }
-            else
-            {
-                selfContainedProgramFile.Should().NotExist();
-
-                testCommand = new DotnetCommand();
-                testArgs = Path.Combine(outputPath, $"{testAppName}.dll");
-            }
-
-            testCommand
-                .ExecuteWithCapturedOutput(testArgs)
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
