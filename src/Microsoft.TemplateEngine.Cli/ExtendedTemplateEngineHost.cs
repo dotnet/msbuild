@@ -115,6 +115,11 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
+        public void LogDiagnosticMessage(string message, string category, params string[] details)
+        {
+            _baseHost.LogDiagnosticMessage(message, category, details);
+        }
+
         private bool GlobalJsonFileExistsInPath
         {
             get

@@ -101,5 +101,14 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             return true;
         }
+
+        public void LogDiagnosticMessage(string message, string category, params string[] details)
+        {
+            Console.WriteLine("Diag: " + message + " (" + category + ")");
+            foreach (string detail in details)
+            {
+                Console.WriteLine("      " + detail);
+            }
+        }
     }
 }
