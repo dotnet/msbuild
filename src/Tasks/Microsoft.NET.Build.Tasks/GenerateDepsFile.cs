@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ReferenceSatellitePaths { get; set; }
 
         [Required]
-        public ITaskItem[] Conflicts { get; set; }
+        public ITaskItem[] FilesToSkip { get; set; }
 
         public ITaskItem CompilerOptions { get; set; }
 
@@ -69,12 +69,12 @@ namespace Microsoft.NET.Build.Tasks
             get { return _filesWritten.ToArray(); }
         }
 
-        Dictionary<string, HashSet<string>> compileConflicts = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, HashSet<string>> runtimeConflicts = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
         protected override void ExecuteCore()
         {
-            LoadConflicts();
+            LoadFilesToSkip();
 
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
@@ -113,9 +113,9 @@ namespace Microsoft.NET.Build.Tasks
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .Build();
 
-            if (compileConflicts.Any() || runtimeConflicts.Any())
+            if (compileFilesToSkip.Any() || runtimeFilesToSkip.Any())
             {
-                dependencyContext = TrimConflicts(dependencyContext);
+                dependencyContext = TrimFilesToSkip(dependencyContext);
             }
 
             var writer = new DependencyContextWriter();
@@ -127,32 +127,32 @@ namespace Microsoft.NET.Build.Tasks
 
         }
 
-        private void LoadConflicts()
+        private void LoadFilesToSkip()
         {
-            foreach (var conflict in Conflicts)
+            foreach (var fileToSkip in FilesToSkip)
             {
                 string packageId, packageSubPath;
-                ConflictResolution.NuGetUtilities.GetPackageParts(conflict.ItemSpec, out packageId, out packageSubPath);
+                ConflictResolution.NuGetUtilities.GetPackageParts(fileToSkip.ItemSpec, out packageId, out packageSubPath);
 
                 if (String.IsNullOrEmpty(packageId) || String.IsNullOrEmpty(packageSubPath))
                 {
                     continue;
                 }
 
-                var itemType = conflict.GetMetadata(nameof(ConflictResolution.ConflictItemType));
-                var conflictPackages = (itemType == nameof(ConflictResolution.ConflictItemType.Reference)) ? compileConflicts : runtimeConflicts;
+                var itemType = fileToSkip.GetMetadata(nameof(ConflictResolution.ConflictItemType));
+                var packagesWithFilesToSkip = (itemType == nameof(ConflictResolution.ConflictItemType.Reference)) ? compileFilesToSkip : runtimeFilesToSkip;
 
-                HashSet<string> conflictFiles;
-                if (!conflictPackages.TryGetValue(packageId, out conflictFiles))
+                HashSet<string> filesToSkipForPackage;
+                if (!packagesWithFilesToSkip.TryGetValue(packageId, out filesToSkipForPackage))
                 {
-                    conflictPackages[packageId] = conflictFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    packagesWithFilesToSkip[packageId] = filesToSkipForPackage = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 }
 
-                conflictFiles.Add(packageSubPath);
+                filesToSkipForPackage.Add(packageSubPath);
             }
         }
 
-        private DependencyContext TrimConflicts(DependencyContext sourceDeps)
+        private DependencyContext TrimFilesToSkip(DependencyContext sourceDeps)
         {
             return new DependencyContext(sourceDeps.Target,
                                          sourceDeps.CompilationOptions,
@@ -165,16 +165,16 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var runtimeLibrary in runtimeLibraries)
             {
-                HashSet<string> conflictFiles;
-                if (runtimeConflicts.TryGetValue(runtimeLibrary.Name, out conflictFiles))
+                HashSet<string> filesToSkip;
+                if (runtimeFilesToSkip.TryGetValue(runtimeLibrary.Name, out filesToSkip))
                 {
                     yield return new RuntimeLibrary(runtimeLibrary.Type,
                                               runtimeLibrary.Name,
                                               runtimeLibrary.Version,
                                               runtimeLibrary.Hash,
-                                              TrimAssetGroups(runtimeLibrary.RuntimeAssemblyGroups, conflictFiles).ToArray(),
-                                              TrimAssetGroups(runtimeLibrary.NativeLibraryGroups, conflictFiles).ToArray(),
-                                              TrimResourceAssemblies(runtimeLibrary.ResourceAssemblies, conflictFiles),
+                                              TrimAssetGroups(runtimeLibrary.RuntimeAssemblyGroups, filesToSkip).ToArray(),
+                                              TrimAssetGroups(runtimeLibrary.NativeLibraryGroups, filesToSkip).ToArray(),
+                                              TrimResourceAssemblies(runtimeLibrary.ResourceAssemblies, filesToSkip),
                                               runtimeLibrary.Dependencies,
                                               runtimeLibrary.Serviceable);
                 }
@@ -185,19 +185,19 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IEnumerable<RuntimeAssetGroup> TrimAssetGroups(IEnumerable<RuntimeAssetGroup> assetGroups, ISet<string> conflicts)
+        private IEnumerable<RuntimeAssetGroup> TrimAssetGroups(IEnumerable<RuntimeAssetGroup> assetGroups, ISet<string> filesToTrim)
         {
             foreach (var assetGroup in assetGroups)
             {
-                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimAssemblies(assetGroup.AssetPaths, conflicts));
+                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimAssemblies(assetGroup.AssetPaths, filesToTrim));
             }
         }
 
-        private IEnumerable<ResourceAssembly> TrimResourceAssemblies(IEnumerable<ResourceAssembly> resourceAssemblies, ISet<string> conflicts)
+        private IEnumerable<ResourceAssembly> TrimResourceAssemblies(IEnumerable<ResourceAssembly> resourceAssemblies, ISet<string> filesToTrim)
         {
             foreach (var resourceAssembly in resourceAssemblies)
             {
-                if (!conflicts.Contains(resourceAssembly.Path))
+                if (!filesToTrim.Contains(resourceAssembly.Path))
                 {
                     yield return resourceAssembly;
                 }
@@ -208,14 +208,14 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var compileLibrary in compileLibraries)
             {
-                HashSet<string> conflictFiles;
-                if (compileConflicts.TryGetValue(compileLibrary.Name, out conflictFiles))
+                HashSet<string> filesToSkip;
+                if (compileFilesToSkip.TryGetValue(compileLibrary.Name, out filesToSkip))
                 {
                     yield return new CompilationLibrary(compileLibrary.Type,
                                               compileLibrary.Name,
                                               compileLibrary.Version,
                                               compileLibrary.Hash,
-                                              TrimAssemblies(compileLibrary.Assemblies, conflictFiles),
+                                              TrimAssemblies(compileLibrary.Assemblies, filesToSkip),
                                               compileLibrary.Dependencies,
                                               compileLibrary.Serviceable);
                 }
@@ -226,11 +226,11 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IEnumerable<string> TrimAssemblies(IEnumerable<string> assemblies, ISet<string> conflicts)
+        private IEnumerable<string> TrimAssemblies(IEnumerable<string> assemblies, ISet<string> filesToTrim)
         {
             foreach (var assembly in assemblies)
             {
-                if (!conflicts.Contains(assembly))
+                if (!filesToTrim.Contains(assembly))
                 {
                     yield return assembly;
                 }

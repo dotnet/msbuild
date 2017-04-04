@@ -464,7 +464,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                      Conflicts="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
+                      FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
                       IsSelfContained="$(SelfContained)" />

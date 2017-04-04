@@ -102,7 +102,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                      Conflicts="@(_ConflictPackageFiles)"
+                      FilesToSkip="@(_ConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       IsSelfContained="$(SelfContained)">
     </GenerateDepsFile>
