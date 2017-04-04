@@ -10,9 +10,7 @@
     <MakeDir Directories="$(OutputDirectory)"/>
 
     <!-- Publish DotNet -->
-    <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Verbosity="normal"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(RootProject)" />
+    <MSBuild Projects="$(SrcDirectory)/redist/redist.csproj"
+             Targets="Publish" />
   </Target>
 </Project>

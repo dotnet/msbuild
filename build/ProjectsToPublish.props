@@ -1,5 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <RootProject>$(SrcDirectory)/redist/redist.csproj</RootProject>
-  </PropertyGroup>
-</Project>

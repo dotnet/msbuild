@@ -50,7 +50,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
 		build\Prepare.targets = build\Prepare.targets
-		build\ProjectsToPublish.props = build\ProjectsToPublish.props
 		build\Publish.targets = build\Publish.targets
 		build\Run.targets = build\Run.targets
 		build\sdks\sdks.csproj = build\sdks\sdks.csproj
