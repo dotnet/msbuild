@@ -30,6 +30,13 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> NotExist()
+        {
+            Execute.Assertion.ForCondition(!_dirInfo.Exists)
+                .FailWith("Expected directory {0} not to exist.", _dirInfo.FullName);
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> HaveFile(string expectedFile)
         {
             var file = _dirInfo.EnumerateFiles(expectedFile, SearchOption.TopDirectoryOnly).SingleOrDefault();
