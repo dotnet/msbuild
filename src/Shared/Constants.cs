@@ -32,6 +32,21 @@ namespace Microsoft.Build.Shared
         internal const string SdksPath = "MSBuildSDKsPath";
 
         /// <summary>
+        /// Name of the property that indicates that all warnings should be treated as errors.
+        /// </summary>
+        internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates a list of warnings to treat as errors.
+        /// </summary>
+        internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates the list of warnings to treat as messages.
+        /// </summary>
+        internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
+
+        /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD

@@ -91,9 +91,27 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// This property is ignored by this event sink and relies on the receiver to treat warnings as errors.
+        /// </summary>
+        public IDictionary<int, ISet<string>> WarningsAsErrorsByProject
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// This property is ignored by this event sink and relies on the receiver to treat warnings as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// This property is ignored by this event sink and relies on the receiver to treat warnings as low importance messages.
+        /// </summary>
+        public IDictionary<int, ISet<string>> WarningsAsMessagesByProject
         {
             get;
             set;

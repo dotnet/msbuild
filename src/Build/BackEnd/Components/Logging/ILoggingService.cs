@@ -174,6 +174,20 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         /// <summary>
+        /// Adds a set of warning codes to treat as low importance messages for the specified project instance ID.
+        /// </summary>
+        /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
+        /// <param name="codes">The list of warning codes to treat as low importance messsages.</param>
+        void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes);
+
+        /// <summary>
+        /// Adds a set of warning codes to treat as errors for the specified project instance ID.
+        /// </summary>
+        /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
+        /// <param name="codes">The list of warning codes to treat as errors.</param>
+        void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes);
+
+        /// <summary>
         /// Determines if the specified submission has logged an errors.
         /// </summary>
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
@@ -482,9 +496,27 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.
+        /// </summary>
+        IDictionary<int, ISet<string>> WarningsAsErrorsByProject
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.
+        /// </summary>
+        IDictionary<int, ISet<string>> WarningsAsMessagesByProject
         {
             get;
             set;

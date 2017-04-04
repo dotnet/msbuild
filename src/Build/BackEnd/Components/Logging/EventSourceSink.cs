@@ -141,9 +141,27 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.  If the set associated with a ProjectInstanceId is null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
+        /// </summary>
+        public IDictionary<int, ISet<string>> WarningsAsErrorsByProject
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.
+        /// </summary>
+        public IDictionary<int, ISet<string>> WarningsAsMessagesByProject
         {
             get;
             set;
@@ -210,6 +228,12 @@ namespace Microsoft.Build.BackEnd.Logging
             else if (buildEvent is ProjectFinishedEventArgs)
             {
                 this.RaiseProjectFinishedEvent(null, (ProjectFinishedEventArgs)buildEvent);
+
+                if (buildEvent.BuildEventContext != null && buildEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+                {
+                    WarningsAsErrorsByProject?.Remove(buildEvent.BuildEventContext.ProjectInstanceId);
+                    WarningsAsMessagesByProject?.Remove(buildEvent.BuildEventContext.ProjectInstanceId);
+                }
             }
             else if (buildEvent is BuildStartedEventArgs)
             {
@@ -233,7 +257,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 BuildWarningEventArgs warningEvent = (BuildWarningEventArgs) buildEvent;
 
-                if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
+                if (ShouldTreatWarningAsMessage(warningEvent))
                 {
                     // Treat this warning as a message with low importance if its in the list
                     BuildMessageEventArgs errorEvent = new BuildMessageEventArgs(
@@ -257,7 +281,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     this.RaiseMessageEvent(null, errorEvent);
 
                 }
-                else if (WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code)))
+                else if (ShouldTreatWarningAsError(warningEvent))
                 {
                     // Treat this warning as an error if an empty set of warnings was specified or this code was specified
                     BuildErrorEventArgs errorEvent = new BuildErrorEventArgs(
@@ -968,6 +992,75 @@ namespace Microsoft.Build.BackEnd.Logging
                     InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines if the specified warning should be treated as an error.
+        /// </summary>
+        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <returns><code>true</code> if the warning should be treated as an error, otherwise <code>false</code>.</returns>
+        private bool ShouldTreatWarningAsError(BuildWarningEventArgs warningEvent)
+        {
+            // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
+            //
+            if (WarningsAsErrors != null)
+            {
+                // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
+                //
+                if (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code))
+                {
+                    return true;
+                }
+            }
+
+            // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
+            // and there is a valid ProjectInstanceId for the warning.
+            //
+            if (WarningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            {
+                ISet<string> codesByProject;
+
+                // Attempt to get the list of warnings to treat as errors for the current project
+                //
+                if (WarningsAsErrorsByProject.TryGetValue(warningEvent.BuildEventContext.ProjectInstanceId, out codesByProject) && codesByProject != null)
+                {
+                    // We create an empty set if all warnings should be treated as errors so that should be checked first.
+                    // If the set is not empty, check the specific code.
+                    //
+                    return codesByProject.Count == 0 || codesByProject.Contains(warningEvent.Code);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if the specified warning should be treated as a low importance message.
+        /// </summary>
+        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <returns><code>true</code> if the warning should be treated as a low importance message, otherwise <code>false</code>.</returns>
+        private bool ShouldTreatWarningAsMessage(BuildWarningEventArgs warningEvent)
+        {
+            // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
+            //
+            if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
+            {
+                return true;
+            }
+
+            // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
+            //
+            if (WarningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            {
+                ISet<string> codesByProject;
+
+                if (WarningsAsMessagesByProject.TryGetValue(warningEvent.BuildEventContext.ProjectInstanceId, out codesByProject) && codesByProject != null)
+                {
+                    return codesByProject.Contains(warningEvent.Code);
+                }
+            }
+
+            return false;
         }
 
         #endregion

@@ -183,6 +183,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set;
         }
 
+        public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Registers a distributed logger.
         /// </summary>

@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
@@ -170,6 +171,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.IsType<BuildErrorEventArgs>(eventHandlerHelper.RaisedEvent);
         }
 
+
         /// <summary>
         /// Verifies that a warning is logged as a low importance message when it's warning code is specified.
         /// </summary>
@@ -229,6 +231,264 @@ namespace Microsoft.Build.UnitTests.Logging
                     "123",
                     "ABC",
                 },
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are treated as an error for a particular project when codes are specified.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorByProjectWhenSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrorsByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        RaiseEventHelper.Warning.BuildEventContext.ProjectInstanceId,
+                        new HashSet<string>
+                        {
+                            "123",
+                            expectedBuildEvent.Code,
+                            "ABC"
+                        }
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildErrorEventArgs>(eventHandlerHelper.RaisedEvent);
+
+            BuildErrorEventArgs actualBuildEvent = (BuildErrorEventArgs)eventHandlerHelper.RaisedEvent;
+
+            Assert.Equal(expectedBuildEvent.Code, actualBuildEvent.Code);
+            Assert.Equal(expectedBuildEvent.File, actualBuildEvent.File);
+            Assert.Equal(expectedBuildEvent.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(expectedBuildEvent.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(expectedBuildEvent.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(expectedBuildEvent.Message, actualBuildEvent.Message);
+            Assert.Equal(expectedBuildEvent.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(expectedBuildEvent.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(expectedBuildEvent.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(expectedBuildEvent.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
+            Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectFinished);
+
+            Assert.Equal(0, eventSourceSink.WarningsAsErrorsByProject.Keys.Count);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are not treated as errors for a particular project even though a matching code was added for another project.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsErrorByProjectWhenProjectNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrorsByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        expectedBuildEvent.BuildEventContext.ProjectInstanceId + 100,
+                        new HashSet<string>
+                        {
+                            "123",
+                            expectedBuildEvent.Code,
+                            "ABC"
+                        }
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are not treated as errors for a particular project when a code does not match.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsErrorByProjectWhenCodeNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrorsByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        expectedBuildEvent.BuildEventContext.ProjectInstanceId,
+                        new HashSet<string>
+                        {
+                            "123",
+                            "ABC"
+                        }
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that all warnings are treated as errors for a particular project.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorByProjectWhenAllSpecified()
+        {
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrorsByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        RaiseEventHelper.Warning.BuildEventContext.ProjectInstanceId,
+                        new HashSet<string>()
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildErrorEventArgs>(eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are treated as messages for a particular project.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsMessagesByProjectWhenSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsMessagesByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        expectedBuildEvent.BuildEventContext.ProjectInstanceId,
+                        new HashSet<string>
+                        {
+                            "FOO",
+                            expectedBuildEvent.Code,
+                            "BAR"
+                        }
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildMessageEventArgs>(eventHandlerHelper.RaisedEvent);
+
+            BuildMessageEventArgs actualBuildEvent = (BuildMessageEventArgs)eventHandlerHelper.RaisedEvent;
+
+            Assert.Equal(expectedBuildEvent.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(expectedBuildEvent.Code, actualBuildEvent.Code);
+            Assert.Equal(expectedBuildEvent.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(expectedBuildEvent.File, actualBuildEvent.File);
+            Assert.Equal(expectedBuildEvent.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(MessageImportance.Low, actualBuildEvent.Importance);
+            Assert.Equal(expectedBuildEvent.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(expectedBuildEvent.Message, actualBuildEvent.Message);
+            Assert.Equal(expectedBuildEvent.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(expectedBuildEvent.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(expectedBuildEvent.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
+            Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectFinished);
+
+            Assert.Equal(0, eventSourceSink.WarningsAsMessagesByProject.Keys.Count);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are not treated as messages for a particular project when a code does not match.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsMessagesByProjectWhenCodeNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsMessagesByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        expectedBuildEvent.BuildEventContext.ProjectInstanceId,
+                        new HashSet<string>
+                        {
+                            "FOO",
+                            "BAR"
+                        }
+                    }
+                }
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that warnings are not treated as messages for a particular project even though a matching code was added for another project.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsMessagesByProjectWhenProjectNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsMessagesByProject = new Dictionary<int, ISet<string>>
+                {
+                    {
+                        expectedBuildEvent.BuildEventContext.ProjectInstanceId + 100, // Ensures that the project instance ID doesn't match
+                        new HashSet<string>
+                        {
+                            "FOO",
+                            expectedBuildEvent.Code,
+                            "BAR"
+                        }
+                    }
+                }
             };
 
             RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
@@ -898,7 +1158,10 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Build Warning Event
             /// </summary>
-            private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender")
+            {
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6)
+            };
 
             /// <summary>
             /// Build Error Event
@@ -923,7 +1186,10 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Project Finished Event
             /// </summary>
-            private static ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
+            private static ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true)
+            {
+                BuildEventContext = s_buildWarning.BuildEventContext
+            };
 
             /// <summary>
             /// External Project Started Event
