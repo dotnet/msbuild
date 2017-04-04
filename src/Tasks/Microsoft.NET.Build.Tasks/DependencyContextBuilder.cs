@@ -8,7 +8,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyModel;
-using NuGet.Frameworks;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
@@ -125,7 +124,9 @@ namespace Microsoft.NET.Build.Tasks
                 _projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
                 _projectContext.LockFileTarget.RuntimeIdentifier,
                 runtimeSignature,
-                _projectContext.IsPortable);
+                // DependencyContext's IsPortable strictly means it doesn't have a runtime dependency,
+                // not whether it is FrameworkDependent or !SelfContained.
+                isPortable: string.IsNullOrEmpty(_projectContext.LockFileTarget.RuntimeIdentifier));
 
             return new DependencyContext(
                 targetInfo,

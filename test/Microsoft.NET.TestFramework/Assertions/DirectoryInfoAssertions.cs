@@ -30,6 +30,13 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> NotExist()
+        {
+            Execute.Assertion.ForCondition(!_dirInfo.Exists)
+                .FailWith("Expected directory {0} not to exist.", _dirInfo.FullName);
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> HaveFile(string expectedFile)
         {
             var file = _dirInfo.EnumerateFiles(expectedFile, SearchOption.TopDirectoryOnly).SingleOrDefault();
@@ -90,6 +97,16 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             Execute.Assertion.ForCondition(!extraFiles.Any())
                 .FailWith($"Following extra files are found inside directory {_dirInfo.FullName} {nl} {string.Join(nl, extraFiles)}");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotHaveSubDirectories()
+        {
+            var subDirectories = _dirInfo.EnumerateDirectories();
+
+            Execute.Assertion.ForCondition(!subDirectories.Any())
+                .FailWith("Directory {0} should not have any sub directories.", _dirInfo.FullName);
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
