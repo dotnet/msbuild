@@ -1042,9 +1042,20 @@ namespace Microsoft.TemplateEngine.Cli
             return filteredParams;
         }
 
-        private void GenerateUsageForTemplate(ITemplateInfo templateInfo)
+        private bool GenerateUsageForTemplate(ITemplateInfo templateInfo)
         {
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(templateInfo);
+
+            if(hostTemplateData.UsageExamples != null)
+            {
+                if(hostTemplateData.UsageExamples.Count == 0)
+                {
+                    return false;
+                }
+
+                Reporter.Output.WriteLine($"    dotnet {CommandName} {templateInfo.ShortName} {hostTemplateData.UsageExamples[0]}");
+                return true;
+            }
 
             Reporter.Output.Write($"    dotnet {CommandName} {templateInfo.ShortName}");
             IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
@@ -1069,6 +1080,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Reporter.Output.WriteLine();
+            return true;
         }
 
         private bool Initialize()
@@ -1458,11 +1470,12 @@ namespace Microsoft.TemplateEngine.Cli
 
             List<ITemplateInfo> templateList = _matchedTemplates.Select(x => x.Info).ToList();
             Reporter.Output.WriteLine("Examples:");
+            HashSet<string> usedGroupIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string preferredName in preferredNameList)
             {
                 ITemplateInfo template = templateList.FirstOrDefault(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase));
-                if (template != null)
+                if (template != null && usedGroupIds.Add(template.GroupIdentity ?? string.Empty))
                 {
                     GenerateUsageForTemplate(template);
                     numShown++;
@@ -1473,11 +1486,16 @@ namespace Microsoft.TemplateEngine.Cli
 
             // show up to 2 examples (total, including the above)
             Random rnd = new Random();
-            for (int i = numShown; i < ExamplesToShow && templateList.Any(); i++)
+            for (int i = numShown; i < ExamplesToShow && templateList.Count > 0; i++)
             {
                 int index = rnd.Next(0, templateList.Count - 1);
                 ITemplateInfo template = templateList[index];
-                GenerateUsageForTemplate(template);
+
+                if (usedGroupIds.Add(template.GroupIdentity ?? string.Empty) && !GenerateUsageForTemplate(template))
+                {
+                    --i;
+                }
+
                 templateList.Remove(template);  // remove it so it won't get chosen again
             }
 

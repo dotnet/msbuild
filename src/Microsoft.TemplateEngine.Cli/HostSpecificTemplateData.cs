@@ -20,6 +20,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         [JsonProperty]
+        public List<string> UsageExamples { get; set; }
+
+        [JsonProperty]
         public Dictionary<string, Dictionary<string, string>> SymbolInfo { get; }
 
         public HashSet<string> HiddenParameterNames
