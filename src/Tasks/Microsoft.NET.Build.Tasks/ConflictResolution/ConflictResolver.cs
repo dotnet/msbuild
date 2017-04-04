@@ -92,6 +92,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var exists1 = item1.Exists;
             var exists2 = item2.Exists;
 
+            if (!exists1 && !exists2)
+            {
+                //  If neither file exists, then don't report a conflict, as both items should be resolved (or not) to the same reference assembly
+                return null;
+            }
+
             if (!exists1 || !exists2)
             {
                 var fileMessage = !exists1 ?
