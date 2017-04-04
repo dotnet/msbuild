@@ -59,7 +59,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
                 // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,

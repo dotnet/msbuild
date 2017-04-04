@@ -110,7 +110,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "Hello",
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework,
-                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
                 RuntimeIdentifier = rid,
                 IsExe = true,
             };
@@ -179,8 +178,7 @@ public static class Program
         [Fact]
         public void Conflicts_are_resolved_when_publishing_a_rid_specific_shared_framework_app()
         {
-            //  Test needs to be disabled until SDK updates to CLI 2.0.0-preview1-005722 or higher
-            //Conflicts_are_resolved_when_publishing(selfContained: false, ridSpecific: true);
+            Conflicts_are_resolved_when_publishing(selfContained: false, ridSpecific: true);
         }
 
         void Conflicts_are_resolved_when_publishing(bool selfContained, bool ridSpecific, [CallerMemberName] string callingMethod = "")
@@ -196,7 +194,7 @@ public static class Program
             TestProject testProject = new TestProject()
             {
                 Name = selfContained ? "SelfContainedWithConflicts" :
-                    (ridSpecific ? "RidSpecificSharedFrameworkAppWithConflicts" : "PortableWithConflicts"),
+                    (ridSpecific ? "RidSpecificSharedConflicts" : "PortableWithConflicts"),
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,

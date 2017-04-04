@@ -86,28 +86,6 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public static string NetCoreApp20Version { get; } = ReadNetCoreApp20Version();
-
-        private static string ReadNetCoreApp20Version()
-        {
-            var dependencyVersionsPath = Path.Combine(RepoRoot, "build", "DependencyVersions.props");
-            var root = XDocument.Load(dependencyVersionsPath).Root;
-            var ns = root.Name.Namespace;
-
-            var version = root
-                .Elements(ns + "PropertyGroup")
-                .Elements(ns + "MicrosoftNETCoreApp20Version")
-                .FirstOrDefault()
-                ?.Value;
-
-            if (string.IsNullOrEmpty(version))
-            {
-                throw new InvalidOperationException($"Could not find a property named 'MicrosoftNETCoreApp20Version' in {dependencyVersionsPath}");
-            }
-
-            return version;
-        }
-
         private static string FindConfigurationInBasePath()
         {
             // assumes tests are always executed from the "bin/$Configuration/Tests" directory
