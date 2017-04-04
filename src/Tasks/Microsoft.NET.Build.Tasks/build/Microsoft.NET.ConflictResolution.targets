@@ -84,6 +84,4 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedAssembliesToPublish Include="@(_ResolvedAssembliesToPublishWithoutConflicts)" />
     </ItemGroup>
   </Target>
-
-  <Import Project="Microsoft.Packaging.Tools.Trimming.targets" Condition="'$(_supportsTrimming)' == 'true' AND '$(TrimUnusedDependencies)' == 'true'" />
 </Project>
