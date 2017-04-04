@@ -13,6 +13,7 @@ using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
+using System;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -166,23 +167,36 @@ public static class Program
         [Fact]
         public void Conflicts_are_resolved_when_publishing_a_portable_app()
         {
-            Conflicts_are_resolved_when_publishing(false);
+            Conflicts_are_resolved_when_publishing(selfContained: false, ridSpecific: false);
         }
 
         [Fact]
         public void Conflicts_are_resolved_when_publishing_a_self_contained_app()
         {
-            Conflicts_are_resolved_when_publishing(true);
+            Conflicts_are_resolved_when_publishing(selfContained: true, ridSpecific: true);
         }
 
-        void Conflicts_are_resolved_when_publishing(bool selfContained, [CallerMemberName] string callingMethod = "")
+        [Fact]
+        public void Conflicts_are_resolved_when_publishing_a_rid_specific_shared_framework_app()
         {
+            //  Test needs to be disabled until SDK updates to CLI 2.0.0-preview1-005722 or higher
+            //Conflicts_are_resolved_when_publishing(selfContained: false, ridSpecific: true);
+        }
+
+        void Conflicts_are_resolved_when_publishing(bool selfContained, bool ridSpecific, [CallerMemberName] string callingMethod = "")
+        {
+            if (selfContained && !ridSpecific)
+            {
+                throw new ArgumentException("Self-contained apps must be rid specific");
+            }
+
             var targetFramework = "netcoreapp2.0";
-            var rid = selfContained ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
+            var rid = ridSpecific ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
             TestProject testProject = new TestProject()
             {
-                Name = selfContained ? "SelfContainedWithConflicts" : "PortableWithConflicts",
+                Name = selfContained ? "SelfContainedWithConflicts" :
+                    (ridSpecific ? "RidSpecificSharedFrameworkAppWithConflicts" : "PortableWithConflicts"),
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,
@@ -218,6 +232,15 @@ public static class Program
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),
                             new XAttribute("Version", dependency.Item2)));
+                    }
+
+                    if (!selfContained && ridSpecific)
+                    {
+                        var propertyGroup = new XElement(ns + "PropertyGroup");
+                        p.Root.Add(propertyGroup);
+
+                        propertyGroup.Add(new XElement(ns + "SelfContained",
+                            "false"));
                     }
                 })
                 .Restore(testProject.Name);
@@ -257,7 +280,6 @@ public static class Program
                 runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { })
                     .EnsureExecutable();
             }
-
             else
             {
                 publishDirectory.Should().OnlyHaveFiles(new[] {
