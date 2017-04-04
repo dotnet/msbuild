@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.0-preview1-001887-00</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.0.0-preview1-001907-00</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.2.0-preview-000093-02</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc4-61325-08</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>2.0.0-alpha-20170323-1</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-beta1-2418</CLI_NuGet_Version>
-    <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>1.0.0-rel-20170403-420</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.1.0-preview-20170316-05</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
