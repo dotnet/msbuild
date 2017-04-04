@@ -167,7 +167,7 @@
     <None Include="build\Microsoft.PackageDependencyResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\Microsoft.Packaging.Tools.targets">
+    <None Include="build\Microsoft.NET.ConflictResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="sdk\Sdk.props">

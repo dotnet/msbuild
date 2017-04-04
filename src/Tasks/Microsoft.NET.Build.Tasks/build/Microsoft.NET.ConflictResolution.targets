@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.Packaging.Tools.targets
+Microsoft.NET.ConflictResolution.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
