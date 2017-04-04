@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -38,26 +37,32 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 longNameFound = true;
             }
 
-            if (!string.IsNullOrEmpty(shortNameOverride))
-            {   // short name starting point was explicitly specified
-                string fullShortNameOverride = "-" + shortNameOverride;
+            if (shortNameOverride == string.Empty)
+            {   // it was explicitly empty string in the host file. If it wasn't specified, it'll be null
+                shortNameFound = true;
+            }
+            else if (shortNameOverride != null)
+            {
+                if (!string.IsNullOrEmpty(shortNameOverride))
+                {   // short name starting point was explicitly specified
+                    string fullShortNameOverride = "-" + shortNameOverride;
 
-                if (!isAliasTaken(shortNameOverride))
-                {
-                    aliasAssignments.Add(fullShortNameOverride);
-                    shortNameFound = true;
-                }
+                    if (!isAliasTaken(shortNameOverride))
+                    {
+                        aliasAssignments.Add(fullShortNameOverride);
+                        shortNameFound = true;
+                    }
 
-                string qualifiedShortNameOverride = "-p:" + shortNameOverride;
-                if (!shortNameFound && !isAliasTaken(qualifiedShortNameOverride))
-                {
-                    aliasAssignments.Add(qualifiedShortNameOverride);
-                    shortNameFound = true;
+                    string qualifiedShortNameOverride = "-p:" + shortNameOverride;
+                    if (!shortNameFound && !isAliasTaken(qualifiedShortNameOverride))
+                    {
+                        aliasAssignments.Add(qualifiedShortNameOverride);
+                        shortNameFound = true;
+                    }
                 }
             }
             else
             {   // no explicit short name specification, try generating one
-
                 // always unless taken
                 string shortName = GetFreeShortName(isAliasTaken, flagFullText);
                 if (!isAliasTaken(shortName))

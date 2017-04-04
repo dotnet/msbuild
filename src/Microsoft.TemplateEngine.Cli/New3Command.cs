@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
@@ -332,7 +331,8 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    string invalidParamsError = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
+                    IReadOnlyList<InvalidParameterInfo> invalidParameterList = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
+                    string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(invalidParameterList);
                     Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     break;
@@ -343,7 +343,7 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.Status;
         }
 
-        private string GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner)
+        private IReadOnlyList<InvalidParameterInfo> GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner)
         {
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
             ParseTemplateArgs(templateInfo);
@@ -351,22 +351,22 @@ namespace Microsoft.TemplateEngine.Cli
             _templateCreator.ResolveUserParameters(template, allParams, _commandInput.AllTemplateParams, out userParamsWithInvalidValues);
             hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template);
 
+            List<InvalidParameterInfo> invalidParameters = new List<InvalidParameterInfo>();
+
             if (userParamsWithInvalidValues.Any())
             {
-                string invalidParamsErrorText = LocalizableStrings.InvalidTemplateParameterValues;
                 // Lookup the input param formats - userParamsWithInvalidValues has canonical.
                 IList<string> inputParamFormats = new List<string>();
                 foreach (string canonical in userParamsWithInvalidValues)
                 {
                     _commandInput.AllTemplateParams.TryGetValue(canonical, out string specifiedValue);
                     string inputFormat = _commandInput.TemplateParamInputFormat(canonical);
-                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFormat, specifiedValue, canonical);
+                    InvalidParameterInfo invalidParam = new InvalidParameterInfo(inputFormat, specifiedValue, canonical);
+                    invalidParameters.Add(invalidParam);
                 }
-
-                return invalidParamsErrorText;
             }
 
-            return null;
+            return invalidParameters;
         }
 
         private bool CheckIfTemplateHasScriptRunningPostActions(ITemplate template)
@@ -535,20 +535,8 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Output.WriteLine();
                 ShowInvocationExamples();
-
-                bool firstDetails = true;
                 IList<ITemplateInfo> templatesToShow = TemplatesToShowDetailedHelpAbout.ToList();
-
-                foreach (ITemplateInfo template in templatesToShow)
-                {
-                    if (firstDetails)
-                    {
-                        Reporter.Output.WriteLine();
-                        firstDetails = false;
-                    }
-
-                    ShowTemplateHelp(template, templatesToShow.Count > 1);
-                }
+                ShowTemplateGroupHelp(templatesToShow);
             }
         }
 
@@ -715,6 +703,8 @@ namespace Microsoft.TemplateEngine.Cli
             ShowUsageHelp();
             bool showImplicitlyHiddenParams = UnambiguousTemplateGroupToUse.Count > 1;
 
+            IList<ITemplateInfo> templatesToShowHelpOn = new List<ITemplateInfo>();
+
             foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
             {
                 bool argsError = false;
@@ -740,10 +730,12 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
                 }
 
-                ShowTemplateHelp(templateInfo.Info, showImplicitlyHiddenParams);
-
+                templatesToShowHelpOn.Add(templateInfo.Info);
                 anyArgsErrors |= argsError;
             }
+
+            // maybe
+            ShowTemplateGroupHelp(templatesToShowHelpOn, showImplicitlyHiddenParams);
 
             return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
         }
@@ -1392,42 +1384,82 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Output.WriteLine($"    dotnet {CommandName} --help");
         }
 
-        private void ShowTemplateHelp(ITemplateInfo templateInfo, bool showImplicitlyHiddenParams = false)
+        private void ShowTemplateGroupHelp(IList<ITemplateInfo> templateGroup, bool showImplicitlyHiddenParams = false)
         {
-            IList<string> languages = null;
-
-            if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out ICacheTag languageTag))
+            if (templateGroup.Count == 0)
             {
-                languages = languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                return;
+            }
+
+            // Use the highest precedence template for most of the output
+            ITemplateInfo preferredTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
+
+            // use all templates to get the language choices
+            HashSet<string> languages = new HashSet<string>();
+            foreach (ITemplateInfo templateInfo in templateGroup)
+            {
+                if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out ICacheTag languageTag))
+                {
+                    languages.UnionWith(languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x)).ToList());
+                }
             }
 
             if (languages != null && languages.Any())
             {
-                Reporter.Output.WriteLine($"{templateInfo.Name} ({string.Join(", ", languages)})");
+                Reporter.Output.WriteLine($"{preferredTemplate.Name} ({string.Join(", ", languages)})");
             }
             else
             {
-                Reporter.Output.WriteLine(templateInfo.Name);
+                Reporter.Output.WriteLine(preferredTemplate.Name);
             }
 
-            if (!string.IsNullOrWhiteSpace(templateInfo.Author))
+            if (!string.IsNullOrWhiteSpace(preferredTemplate.Author))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, templateInfo.Author));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, preferredTemplate.Author));
             }
 
-            if (!string.IsNullOrWhiteSpace(templateInfo.Description))
+            if (!string.IsNullOrWhiteSpace(preferredTemplate.Description))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, preferredTemplate.Description));
             }
 
-            if (!string.IsNullOrEmpty(templateInfo.ThirdPartyNotices))
+            if (!string.IsNullOrEmpty(preferredTemplate.ThirdPartyNotices))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, templateInfo.ThirdPartyNotices));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, preferredTemplate.ThirdPartyNotices));
             }
 
-            string additionalInfo = GetTemplateUsageInformation(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
-            HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
-            ShowParameterHelp(_commandInput.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, parametersToExplicitlyHide, showImplicitlyHiddenParams, hasPostActionScriptRunner);
+            HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>();
+            HashSet<string> groupParametersToExplicitlyHide = new HashSet<string>();
+            bool groupHasPostActionScriptRunner = false;
+            List<IParameterSet> parameterSetsForAllTemplatesInGroup = new List<IParameterSet>();
+            IDictionary<string, InvalidParameterInfo> invalidParametersForGroup = new Dictionary<string, InvalidParameterInfo>();
+            bool firstInList = true;
+
+            foreach (ITemplateInfo templateInfo in templateGroup)
+            {
+                IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
+
+                if (firstInList)
+                {
+                    invalidParametersForGroup = invalidParamsForTemplate.ToDictionary(x => x.Canonical, x => x);
+                    firstInList = false;
+                }
+                else
+                {
+                    invalidParametersForGroup = InvalidParameterInfo.IntersectWithExisting(invalidParametersForGroup, invalidParamsForTemplate);
+                }
+
+                HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
+
+                groupUserParamsWithInvalidValues.IntersectWith(userParamsWithInvalidValues);    // intersect because if the value is valid for any version, it's valid.
+                groupParametersToExplicitlyHide.UnionWith(parametersToExplicitlyHide);
+                groupHasPostActionScriptRunner |= hasPostActionScriptRunner;
+                parameterSetsForAllTemplatesInGroup.Add(allParamsForTemplate);
+            }
+
+            IParameterSet allGroupParameters = new TemplateGroupParameterSet(parameterSetsForAllTemplatesInGroup);
+            string parameterErrors = InvalidParameterInfo.InvalidParameterListToString(invalidParametersForGroup.Values.ToList());
+            ShowParameterHelp(_commandInput.AllTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), groupParametersToExplicitlyHide, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
         }
 
         // Returns true if any partial matches were displayed, false otherwise
