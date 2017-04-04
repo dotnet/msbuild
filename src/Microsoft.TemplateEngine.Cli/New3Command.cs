@@ -1475,7 +1475,8 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (string preferredName in preferredNameList)
             {
                 ITemplateInfo template = templateList.FirstOrDefault(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase));
-                if (template != null && usedGroupIds.Add(template.GroupIdentity ?? string.Empty))
+                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
+                if (template != null && usedGroupIds.Add(identity))
                 {
                     GenerateUsageForTemplate(template);
                     numShown++;
@@ -1490,8 +1491,8 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 int index = rnd.Next(0, templateList.Count - 1);
                 ITemplateInfo template = templateList[index];
-
-                if (usedGroupIds.Add(template.GroupIdentity ?? string.Empty) && !GenerateUsageForTemplate(template))
+                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
+                if (usedGroupIds.Add(identity) && !GenerateUsageForTemplate(template))
                 {
                     --i;
                 }
