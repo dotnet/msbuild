@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using Microsoft.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,14 +12,26 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal static class AppExtensions
     {
-        public static CommandOption Help(this CommandLineApplication app)
+        public static IReadOnlyList<string> CreateArgListFromAdditionalFiles(IList<string> extraArgFileNames)
         {
-            return app.Option("-h|--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
+            IReadOnlyDictionary<string, IReadOnlyList<string>> argsDict = ParseArgsFromFile(extraArgFileNames);
+
+            List<string> argsFlattened = new List<string>();
+            foreach (KeyValuePair<string, IReadOnlyList<string>> oneArg in argsDict)
+            {
+                argsFlattened.Add(oneArg.Key);
+                if (oneArg.Value.Count > 0)
+                {
+                    argsFlattened.AddRange(oneArg.Value);
+                }
+            }
+
+            return argsFlattened;
         }
 
-        public static IReadOnlyDictionary<string, IList<string>> ParseExtraArgs(this CommandLineApplication app, IList<string> extraArgFileNames)
+        public static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseArgsFromFile(IList<string> extraArgFileNames)
         {
-            Dictionary<string, IList<string>> parameters = new Dictionary<string, IList<string>>();
+            Dictionary<string, IReadOnlyList<string>> parameters = new Dictionary<string, IReadOnlyList<string>>();
 
             // Note: If the same param is specified multiple times across the files, last-in-wins
             // TODO: consider another course of action.
@@ -46,10 +56,10 @@ namespace Microsoft.TemplateEngine.Cli
                             {
                                 if (property.Value.Type == JTokenType.String)
                                 {
-                                    IList<string> values = new List<string>
-                                {
-                                    property.Value.ToString()
-                                };
+                                    IReadOnlyList<string> values = new List<string>
+                                    {
+                                        property.Value.ToString()
+                                    };
 
                                     // adding 2 dashes to the file-based params
                                     // won't work right if there's a param that should have 1 dash
@@ -65,61 +75,6 @@ namespace Microsoft.TemplateEngine.Cli
                         throw new CommandParserException(string.Format(LocalizableStrings.ArgsFileWrongFormat, argFile), argFile, ex);
                     }
                 }
-            }
-
-            for (int i = 0; i < app.RemainingArguments.Count; ++i)
-            {
-                string key = app.RemainingArguments[i];
-                CommandOption arg = app.Options.FirstOrDefault(x => x.Template.Split('|').Any(y => string.Equals(y, key, StringComparison.OrdinalIgnoreCase)));
-                bool handled = false;
-
-                if (arg != null)
-                {
-                    if (arg.OptionType != CommandOptionType.NoValue)
-                    {
-                        handled = arg.TryParse(app.RemainingArguments[i + 1]);
-                        ++i;
-                    }
-                    else
-                    {
-                        handled = arg.TryParse(null);
-                    }
-                }
-
-                if (handled)
-                {
-                    continue;
-                }
-
-                if (!key.StartsWith("-", StringComparison.Ordinal))
-                {
-                    throw new CommandParserException(string.Format(LocalizableStrings.MultipleArgsSpecifiedError, key), key);
-                }
-
-                // Check the next value. If it doesn't start with a '-' then it's a value for the current param.
-                // Otherwise it's its own param.
-                string value = null;
-                if (app.RemainingArguments.Count > i + 1)
-                {
-                    value = app.RemainingArguments[i + 1];
-
-                    if (value.StartsWith("-", StringComparison.Ordinal))
-                    {
-                        value = null;
-                    }
-                    else
-                    {
-                        ++i;
-                    }
-                }
-
-                if (!parameters.TryGetValue(key, out IList<string> valueList))
-                {
-                    valueList = new List<string>();
-                    parameters.Add(key, valueList);
-                }
-
-                valueList.Add(value);
             }
 
             return parameters;

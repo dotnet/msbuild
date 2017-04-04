@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal class HostSpecificTemplateData
+    public class HostSpecificTemplateData
     {
         private static readonly string IsHiddenKey = "isHidden";
         private static readonly string LongNameKey = "longName";

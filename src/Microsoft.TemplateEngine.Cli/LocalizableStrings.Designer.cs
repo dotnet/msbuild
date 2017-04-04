@@ -921,6 +921,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Uninstalls a source or a template pack..
+        /// </summary>
+        public static string UninstallHelp {
+            get {
+                return ResourceManager.GetString("UninstallHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown Change.
         /// </summary>
         public static string UnknownChangeKind {
