@@ -68,6 +68,12 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdNoBuildDescription,
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "/p:VSTestNoBuild=true")),
+                  Create.Option(
+                        "-r|--results-directory",
+                        LocalizableStrings.CmdResultsDirectoryDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.CmdPathToResultsDirectory)
+                              .ForwardAsSingle(o => $"/p:VSTestResultsDirectory={o.Arguments.Single()}")),
                   CommonOptions.VerbosityOption());
 
         private static string GetSemiColonEsacpedstring(string arg)
