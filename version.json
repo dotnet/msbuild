@@ -1,6 +1,6 @@
 {
   "version": "15.1",
-  "buildNumberOffset": "452",
+  "buildNumberOffset": "1440",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
     "^refs/heads/xplat$"
