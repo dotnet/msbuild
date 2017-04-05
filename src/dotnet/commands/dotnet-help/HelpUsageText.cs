@@ -3,7 +3,7 @@ using Microsoft.DotNet.Tools.Help;
 internal static class HelpUsageText
 {
     public static readonly string UsageText =
-        $@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [common-options]
+$@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [common-options]
 
 {LocalizableStrings.Arguments}:
   [command]             {LocalizableStrings.CommandDefinition}
@@ -13,7 +13,7 @@ internal static class HelpUsageText
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbose          {LocalizableStrings.VerboseDefinition}
-  -h|--help             {LocalizableStrings.HelpDefinition} 
+  -h|--help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.HostOptions}:
   -d|--diagnostics      {LocalizableStrings.DiagnosticsDefinition}
@@ -42,3 +42,4 @@ Project modification commands:
   msbuild       {LocalizableStrings.MsBuildDefinition}
   vstest        {LocalizableStrings.VsTestDefinition}";
 }
+

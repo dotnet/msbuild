@@ -25,7 +25,7 @@ Arguments:
 
 Common options:
   -v|--verbose          Enable verbose output
-  -h|--help             Show help 
+  -h|--help             Show help
 
 Host options (passed before the command):
   -d|--diagnostics      Enable diagnostic output
@@ -68,11 +68,20 @@ Advanced Commands:
         }
 
         [Fact]
+        public void WhenHelpCommandIsPassedToDotnetItPrintsUsage()
+        {
+            var cmd = new HelpCommand()
+                .ExecuteWithCapturedOutput();
+            cmd.Should().Pass();
+            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+        }
+
+        [Fact]
         public void WhenInvalidCommandIsPassedToDotnetHelpItPrintsError()
         {
           var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("help invalid");
-          
+
           cmd.Should().Fail();
           cmd.StdErr.Should().ContainVisuallySameFragment($"Specified command 'invalid' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.");
           cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
@@ -92,7 +101,7 @@ Advanced Commands:
           var proc = HelpActual.HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
           Assert.Equal("xdg-open", proc.StartInfo.FileName);
           Assert.Equal("https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
-        
+
         }
         [MacOsOnlyFact]
         public void WhenRunOnMacOsDotnetHelpCommandShouldContainProperProcessInformation()

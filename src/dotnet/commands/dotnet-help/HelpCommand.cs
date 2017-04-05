@@ -1,68 +1,66 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics;
-using System.Reflection;
+using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli;
-using static HelpUsageText;
+using Command = Microsoft.DotNet.Cli.CommandLine.Command;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
+        private readonly AppliedOption _appliedOption;
+
+        public HelpCommand(AppliedOption appliedOption)
+        {
+            _appliedOption = appliedOption;
+        }
+
         public static int Run(string[] args)
         {
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Name = "dotnet help";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandArgument commandNameArgument = app.Argument($"<{LocalizableStrings.CommandArgumentName}>", LocalizableStrings.CommandArgumentDescription);
+            var parser = Parser.Instance;
+            var result = parser.ParseFrom("dotnet help", args);
+            var helpAppliedOption = result["dotnet"]["help"];
 
-            app.OnExecute(() => 
+            result.ShowHelpIfRequested();
+
+            HelpCommand cmd;
+            try
             {
-                BuiltInCommandMetadata builtIn;
-                if (BuiltInCommandsCatalog.Commands.TryGetValue(commandNameArgument.Value, out builtIn))
-                {
-                    var process = ConfigureProcess(builtIn.DocLink);
-                    process.Start();
-                    process.WaitForExit();
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(String.Format(LocalizableStrings.CommandDoesNotExist, commandNameArgument.Value));
-                    Reporter.Output.WriteLine(UsageText);
-                    return 1;
-                }
-                return 0;
-            });
-            
-            if (args.Length == 0)
+                cmd = new HelpCommand(helpAppliedOption);
+            }
+            catch (CommandCreationException e)
             {
-                PrintHelp();
-                return 0;
+                return e.ExitCode;
+            }
+
+            if (helpAppliedOption.Arguments.Any())
+            {
+                return cmd.Execute();
             }
             else
             {
-                return app.Execute(args);
+                PrintHelp();
+                return 0;
             }
         }
 
         public static void PrintHelp()
         {
             PrintVersionHeader();
-            Reporter.Output.WriteLine(UsageText);
+            Reporter.Output.WriteLine(HelpUsageText.UsageText);
         }
 
         public static void PrintVersionHeader()
         {
-            var versionString = string.IsNullOrEmpty(Product.Version) ?
-                string.Empty :
-                $" ({Product.Version})";
+            var versionString = string.IsNullOrEmpty(Product.Version) ? string.Empty : $" ({Product.Version})";
             Reporter.Output.WriteLine(Product.LongName + versionString);
         }
 
@@ -93,11 +91,34 @@ namespace Microsoft.DotNet.Tools.Help
                     Arguments = docUrl
                 };
             }
-            
+
             return new Process
             {
                 StartInfo = psInfo
             };
         }
+
+        public int Execute()
+        {
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(
+                _appliedOption.Arguments.Single(),
+                out BuiltInCommandMetadata builtIn))
+            {
+                var process = ConfigureProcess(builtIn.DocLink);
+                process.Start();
+                process.WaitForExit();
+                return 0;
+            }
+            else
+            {
+                Reporter.Error.WriteLine(
+                    string.Format(
+                        LocalizableStrings.CommandDoesNotExist,
+                        _appliedOption.Arguments.Single()));
+                Reporter.Output.WriteLine(HelpUsageText.UsageText);
+                return 1;
+            }
+        }
     }
 }
+
