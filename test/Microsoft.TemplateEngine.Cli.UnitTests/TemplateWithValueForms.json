@@ -1,0 +1,7 @@
+﻿[
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "Test_Value!"
+  }
+]
