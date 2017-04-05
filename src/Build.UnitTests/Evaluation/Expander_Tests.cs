@@ -730,26 +730,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(0, items[5].Metadata.Count());
         }
 
-        [Fact]
-        public void ExpandItemMetadataWithPropertyFunctionReferencingItemMetadata()
-        {
-            string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
-        <ItemGroup>
-            <Item Include='dir\itemFoo'>
-              <MD>$([System.String]::new('%(RelativeDir)').TrimEnd('\'))</MD>
-            </Item>
-        </ItemGroup>
-        <Target Name='t'>
-                <Message Text='MD: %(Item.MD)' />
-        </Target>
-</Project>";
-
-            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
-
-            log.AssertLogContains("MD: dir");
-        }
-
         /// <summary>
         /// Creates an expander populated with some ProjectPropertyInstances and ProjectPropertyItems.
         /// </summary>
