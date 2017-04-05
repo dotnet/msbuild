@@ -1,0 +1,17 @@
+{
+  "name": {
+    "text": "Web API",
+    "package": "{0CD94836-1526-4E85-87D3-FB5274C5AFC9}",
+    "id": "1013"
+  },
+  "description": {
+    "text": "A project template for creating an ASP.NET Core application with an example Controller for a RESTful HTTP service. This template can also be used for ASP.NET MVC Views and Controllers.",
+    "package": "{0CD94836-1526-4E85-87D3-FB5274C5AFC9}",
+    "id": "1014"
+  },
+  "order": 200,
+  "icon": "vs-2017.3/WebAPI.png",
+  "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784882",
+  "uiFilters": [ "oneaspnet" ],
+  "supportsDocker": true
+}

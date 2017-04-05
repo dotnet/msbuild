@@ -1,11 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -29,7 +31,17 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (string request in installationRequests)
             {
-                if (Package.TryParse(request, out Package package))
+                string req = request;
+
+                //If the request string doesn't have any wild cards or probable path indicators,
+                //  and doesn't have a "::" delimiter either, try to convert it to "latest package"
+                //  form
+                if (req.IndexOfAny(new[] { '*', '?', '/', '\\' }) < 0 && req.IndexOf("::", StringComparison.Ordinal) < 0)
+                {
+                    req += "::*";
+                }
+
+                if (Package.TryParse(req, out Package package))
                 {
                     packages.Add(package);
                 }
@@ -50,6 +62,89 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _environmentSettings.SettingsLoader.Save();
+        }
+
+        public IEnumerable<string> Uninstall(IEnumerable<string> uninstallRequests)
+        {
+            List<string> uninstallFailures = new List<string>();
+            foreach (string uninstall in uninstallRequests)
+            {
+                string prefix = Path.Combine(_paths.User.Packages, uninstall);
+                IReadOnlyList<MountPointInfo> rootMountPoints = _environmentSettings.SettingsLoader.MountPoints.Where(x =>
+                {
+                    if (x.ParentMountPointId != Guid.Empty)
+                    {
+                        return false;
+                    }
+
+                    if (uninstall.IndexOfAny(new[] { '/', '\\' }) < 0)
+                    {
+                        if (x.Place.StartsWith(prefix + ".", StringComparison.OrdinalIgnoreCase) && x.Place.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (string.Equals(x.Place, uninstall, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                    else if (x.Place.Length > uninstall.Length)
+                    {
+                        string place = x.Place.Replace('\\', '/');
+                        string match = uninstall.Replace('\\', '/');
+
+                        if (match[match.Length - 1] != '/')
+                        {
+                            match += "/";
+                        }
+
+                        return place.StartsWith(match, StringComparison.OrdinalIgnoreCase);
+                    }
+
+                    return false;
+                }).ToList();
+
+                if (rootMountPoints.Count == 0)
+                {
+                    uninstallFailures.Add(uninstall);
+                    continue;
+                }
+
+                HashSet<Guid> mountPoints = new HashSet<Guid>(rootMountPoints.Select(x => x.MountPointId));
+                bool isSearchComplete = false;
+                while (!isSearchComplete)
+                {
+                    isSearchComplete = true;
+                    foreach (MountPointInfo possibleChild in _environmentSettings.SettingsLoader.MountPoints)
+                    {
+                        if (mountPoints.Contains(possibleChild.ParentMountPointId))
+                        {
+                            isSearchComplete &= !mountPoints.Add(possibleChild.MountPointId);
+                        }
+                    }
+                }
+
+                //Find all of the things that refer to any of the mount points we've got
+                _environmentSettings.SettingsLoader.RemoveMountPoints(mountPoints);
+                _environmentSettings.SettingsLoader.Save();
+
+                foreach (MountPointInfo mountPoint in rootMountPoints)
+                {
+                    if (mountPoint.Place.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            _environmentSettings.Host.FileSystem.FileDelete(mountPoint.Place);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+            }
+
+            return uninstallFailures;
         }
 
         private void InstallRemotePackages(List<Package> packages)
@@ -80,7 +175,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
-            Command.CreateDotNet("restore", new[] { proj, "--packages", restored }).ForwardStdErr().Execute();
+            Dotnet.Restore(proj, "--packages", restored).ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))

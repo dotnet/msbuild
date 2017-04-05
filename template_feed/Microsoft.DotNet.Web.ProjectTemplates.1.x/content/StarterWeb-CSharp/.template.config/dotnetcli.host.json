@@ -1,10 +1,33 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "IncludeApplicationInsights": {
       "isHidden": "true"
     },
     "UseLocalDB": {
       "longName": "use-local-db"
+    },
+    "AADInstance": {
+      "longName": "aad-instance",
+      "shortName": "s"
+    },
+    "OrgReadAccess": {
+      "longName": "org-read-access",
+      "shortName": "r"
+    },
+    "ClientId": {
+      "longName": "client-id",
+      "shortName": ""
+    },
+    "Domain": {
+      "longName": "domain",
+      "shortName": ""
+    },
+    "TenantId": {
+      "longName": "tenant-id",
+      "shortName": ""
     },
     "Framework": {
       "longName": "framework"
@@ -12,6 +35,13 @@
     "NoTools": {
       "isHidden": "true",
       "longName": "no-tools"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "--framework netcoreapp1.1 --auth Individual"
+  ]
 }

@@ -14,8 +14,16 @@
   "sourceName": "Company.TestProject1",
   "preferNameDirectory": true,
   "symbols": {
+    "TargetFrameworkOverride": {
+      "type": "parameter",
+      "description": "Overrides the target framework",
+      "replaces": "TargetFrameworkOverride",
+      "datatype": "string",
+      "defaultValue": ""
+    },
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "datatype": "choice",
       "choices": [
         {
@@ -34,8 +42,25 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.TestProject1.fsproj" } ],
-  "defaultName": "TestProject1"
+  "defaultName": "TestProject1",
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
 }

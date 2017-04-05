@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal class HostSpecificTemplateData
+    public class HostSpecificTemplateData
     {
         private static readonly string IsHiddenKey = "isHidden";
         private static readonly string LongNameKey = "longName";
@@ -18,6 +18,9 @@ namespace Microsoft.TemplateEngine.Cli
         {
             SymbolInfo = new Dictionary<string, Dictionary<string, string>>();
         }
+
+        [JsonProperty]
+        public List<string> UsageExamples { get; set; }
 
         [JsonProperty]
         public Dictionary<string, Dictionary<string, string>> SymbolInfo { get; }

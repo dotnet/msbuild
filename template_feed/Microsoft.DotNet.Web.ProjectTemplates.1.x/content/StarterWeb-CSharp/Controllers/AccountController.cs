@@ -1,23 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if (IndividualAuth)
 using System.Security.Claims;
+#endif
 using System.Threading.Tasks;
+#if (OrganizationalAuth)
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http.Authentication;
+#endif
+#if (IndividualAuth)
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+#endif
 using Microsoft.AspNetCore.Mvc;
+#if (IndividualAuth)
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Company.WebApplication1.Models;
 using Company.WebApplication1.Models.AccountViewModels;
 using Company.WebApplication1.Services;
+#endif
 
 namespace Company.WebApplication1.Controllers
 {
+#if (IndividualAuth)
     [Authorize]
+#endif
     public class AccountController : Controller
     {
+#if (OrganizationalAuth)
+        //
+        // GET: /Account/SignIn
+        [HttpGet]
+        public IActionResult SignIn()
+        {
+            return Challenge(
+                new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
+        //
+        // GET: /Account/SignOut
+        [HttpGet]
+        public IActionResult SignOut()
+        {
+            var callbackUrl = Url.Action(nameof(SignedOut), "Account", values: null, protocol: Request.Scheme);
+            return SignOut(new AuthenticationProperties { RedirectUri = callbackUrl },
+                CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
+        //
+        // GET: /Account/SignedOut
+        [HttpGet]
+        public IActionResult SignedOut()
+        {
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                // Redirect to home page if the user is authenticated.
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+
+            return View();
+        }
+#endif
+#if (IndividualAuth)
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
@@ -442,14 +490,16 @@ namespace Company.WebApplication1.Controllers
                 return View(model);
             }
         }
+#endif
 
         //
-        // GET /Account/AccessDenied
+        // GET: /Account/AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
+#if (IndividualAuth)
 
         #region Helpers
 
@@ -474,5 +524,6 @@ namespace Company.WebApplication1.Controllers
         }
 
         #endregion
+#endif
     }
 }

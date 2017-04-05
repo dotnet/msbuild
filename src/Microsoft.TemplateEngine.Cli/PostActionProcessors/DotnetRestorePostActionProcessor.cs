@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
@@ -28,17 +27,17 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             foreach (ICreationPath output in templateCreationResult.PrimaryOutputs)
             {
                 string pathToRestore = !string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, output.Path) : output.Path;
-                Command restoreCommand = Command.CreateDotNet("restore", new[] { pathToRestore });
+                Dotnet restoreCommand = Dotnet.Restore(pathToRestore);
                 restoreCommand.CaptureStdOut();
                 restoreCommand.CaptureStdErr();
 
                 settings.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
-                CommandResult commandResult = restoreCommand.Execute();
+                Dotnet.Result commandResult = restoreCommand.Execute();
 
                 if (commandResult.ExitCode != 0)
                 {
                     settings.Host.LogMessage(LocalizableStrings.RestoreFailed);
-                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdErr));
+                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
                     settings.Host.LogMessage(string.Empty);
                     allSucceeded = false;
                 }

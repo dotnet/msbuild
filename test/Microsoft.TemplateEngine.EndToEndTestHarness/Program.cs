@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli;
-using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json.Linq;
 
@@ -57,7 +55,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(Path.Combine(profileDir, ".templateengine"));
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.Run(CommandName, host, FirstRun, passthroughArgs);
+            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), FirstRun, passthroughArgs);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)
@@ -189,7 +187,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             try
             {
-                string versionString = Command.CreateDotNet("", new[] { "--version" }).CaptureStdOut().Execute().StdOut;
+                string versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
                 if (!string.IsNullOrWhiteSpace(versionString))
                 {
                     preferences["dotnet-cli-version"] = versionString.Trim();

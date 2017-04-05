@@ -1,10 +1,20 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "IncludeApplicationInsights": {
       "isHidden": "true"
     },
     "Framework": {
       "longName": "framework"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "--framework netcoreapp1.1"
+  ]
 }

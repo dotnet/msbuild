@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
@@ -114,6 +113,11 @@ namespace Microsoft.TemplateEngine.Cli
         public bool OnConfirmPartialMatch(string name)
         {
             return true;
+        }
+
+        public void LogDiagnosticMessage(string message, string category, params string[] details)
+        {
+            _baseHost.LogDiagnosticMessage(message, category, details);
         }
 
         private bool GlobalJsonFileExistsInPath

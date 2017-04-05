@@ -1,7 +1,17 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "Framework": {
       "longName": "framework"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "--framework netcoreapp2.0"
+  ]
 }

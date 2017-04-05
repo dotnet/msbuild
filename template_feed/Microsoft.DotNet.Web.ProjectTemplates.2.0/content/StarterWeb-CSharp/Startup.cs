@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+#if (OrganizationalAuth)
+using Microsoft.AspNetCore.Authentication.Cookies;
+#endif
+#if (MultiOrgAuth)
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+#endif
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 #if (IndividualAuth)
@@ -11,6 +17,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+#if (OrganizationalAuth && OrgReadAccess)
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+#endif
+#if (MultiOrgAuth)
+using Microsoft.IdentityModel.Tokens;
+#endif
 #if (IndividualAuth)
 using Company.WebApplication1.Data;
 using Company.WebApplication1.Models;
@@ -23,7 +35,7 @@ namespace Company.WebApplication1
     {
         public Startup(IHostingEnvironment env)
         {
-#if (IndividualAuth)
+#if (IndividualAuth || OrganizationalAuth)
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -34,7 +46,6 @@ namespace Company.WebApplication1
                 // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
                 builder.AddUserSecrets<Startup>();
             }
-
 #else
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -42,7 +53,8 @@ namespace Company.WebApplication1
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 #endif
-#if (IndividualAuth)
+#if (IndividualAuth || MultiOrgAuth || SingleOrgAuth)
+
             builder.AddEnvironmentVariables();
 #endif
             Configuration = builder.Build();
@@ -73,6 +85,10 @@ namespace Company.WebApplication1
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+#elseif (OrganizationalAuth)
+
+            services.AddAuthentication(
+                SharedOptions => SharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 #endif
         }
 
@@ -101,6 +117,68 @@ namespace Company.WebApplication1
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+
+#elseif (OrganizationalAuth)
+            app.UseCookieAuthentication();
+
+            app.UseOpenIdConnectAuthentication(new OpenIdConnectOptions
+            {
+                ClientId = Configuration["Authentication:AzureAd:ClientId"],
+    #if (OrgReadAccess)
+                ClientSecret = Configuration["Authentication:AzureAd:ClientSecret"],
+    #endif
+    #if (MultiOrgAuth)
+                Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common",
+    #elseif (SingleOrgAuth)
+                Authority = Configuration["Authentication:AzureAd:AADInstance"] + Configuration["Authentication:AzureAd:TenantId"],
+    #endif
+#endif
+#if (MultiOrgAuth)
+                CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"],
+    #if (OrgReadAccess)
+                ResponseType = OpenIdConnectResponseType.CodeIdToken,
+    #endif
+
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    // Instead of using the default validation (validating against a single issuer value, as we do in line of business apps),
+                    // we inject our own multitenant validation logic
+                    ValidateIssuer = false,
+
+                    // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
+                    //IssuerValidator = (issuer, securityToken, validationParameters) => {
+                    //    if (myIssuerValidationLogic(issuer)) return issuer;
+                    //}
+                },
+                Events = new OpenIdConnectEvents
+                {
+                    OnTicketReceived = (context) =>
+                    {
+                        // If your authentication logic is based on users then add your logic here
+                        return Task.FromResult(0);
+                    },
+                    OnAuthenticationFailed = (context) =>
+                    {
+                        context.Response.Redirect("/Home/Error");
+                        context.HandleResponse(); // Suppress the exception
+                        return Task.FromResult(0);
+                    },
+                    // If your application needs to do authenticate single users, add your user validation below.
+                    //OnTokenValidated = (context) =>
+                    //{
+                    //    return myUserValidationLogic(context.Ticket.Principal);
+                    //}
+                }
+#elseif (SingleOrgAuth)
+    #if (OrgReadAccess)
+                CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"],
+                ResponseType = OpenIdConnectResponseType.CodeIdToken
+    #else
+                CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"]
+    #endif
+#endif
+#if (OrganizationalAuth)
+            });
 
 #endif
             app.UseMvc(routes =>

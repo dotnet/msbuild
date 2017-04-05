@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
@@ -16,8 +15,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));
+            Console.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
+            Console.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));
 
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string executable))
             {

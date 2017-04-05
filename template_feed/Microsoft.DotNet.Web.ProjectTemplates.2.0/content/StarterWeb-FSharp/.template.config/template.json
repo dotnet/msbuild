@@ -4,7 +4,7 @@
   "name": "ASP.NET Core Web App",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Mvc",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Web.Mvc.FSharp.2.0",
   "shortName": "mvc",
   "tags": {
@@ -14,8 +14,16 @@
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols":{
+    "TargetFrameworkOverride": {
+      "type": "parameter",
+      "description": "Overrides the target framework",
+      "replaces": "TargetFrameworkOverride",
+      "datatype": "string",
+      "defaultValue": ""
+    },
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "datatype": "choice",
       "choices": [
         {
@@ -33,8 +41,25 @@
       "parameters": {
         "format": "yyyy"
       }
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ],
-  "defaultName": "WebApplication1"
+  "defaultName": "WebApplication1",
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
 }

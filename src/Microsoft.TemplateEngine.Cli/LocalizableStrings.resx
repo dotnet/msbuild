@@ -398,7 +398,7 @@
     <value>Do you want to run this action (Y|N)?</value>
   </data>
   <data name="ProcessingPostActions" xml:space="preserve">
-    <value>Processing Post Actions</value>
+    <value>Processing post-creation actions...</value>
   </data>
   <data name="WhetherToAllowScriptsToRun" xml:space="preserve">
     <value>Specify if post action scripts should run.</value>
@@ -420,5 +420,14 @@
   </data>
   <data name="PostActionInstructions" xml:space="preserve">
     <value>Manual instructions: {0}</value>
+  </data>
+  <data name="ThirdPartyNotices" xml:space="preserve">
+    <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
+  </data>
+  <data name="UninstallHelp" xml:space="preserve">
+    <value>Uninstalls a source or a template pack.</value>
+  </data>
+  <data name="CouldntUninstall" xml:space="preserve">
+    <value>Could not find something to uninstall called '{0}'.</value>
   </data>
 </root>

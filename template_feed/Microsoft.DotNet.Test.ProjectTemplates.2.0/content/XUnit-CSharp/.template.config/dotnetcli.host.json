@@ -1,11 +1,21 @@
 {
   "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": true
+    },
     "Framework": {
       "longName": "framework"
     },
     "EnablePack": {
       "shortName": "p",
       "longName": "enable-pack"
+    },
+    "skipRestore": {
+      "longName": "skip-restore",
+      "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "--framework netcoreapp2.0"
+  ]
 }

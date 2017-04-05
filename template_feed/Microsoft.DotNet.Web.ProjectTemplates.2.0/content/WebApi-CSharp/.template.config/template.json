@@ -4,7 +4,7 @@
   "name": "ASP.NET Core Web API",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.WebApi",
-  "precedence": "200",
+  "precedence": "2000",
   "identity": "Microsoft.Web.WebApi.CSharp.2.0",
   "shortName": "webapi",
   "tags": {
@@ -13,15 +13,91 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
+  "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
   "symbols": {
+    "auth": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "None",
+          "description": "No authentication"
+        },
+        {
+          "choice": "SingleOrg",
+          "description": "Organizational authentication for a single tenant"
+        },
+        {
+          "choice": "Windows",
+          "description": "Windows authentication"
+        }
+      ],
+      "defaultValue": "None",
+      "description": "The type of authentication to use"
+    },
+    "AADInstance": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "https://login.microsoftonline.com/",
+      "replaces": "https:////login.microsoftonline.com/",
+      "description": "The Azure Active Directory instance to connect to (use with Single-org auth)."
+    },
+    "ClientId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "11111111-1111-1111-11111111111111111",
+      "description": "The Client ID for this project (use with Single-org auth)."
+    },
+    "Domain": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "qualified.domain.name",
+      "description": "The domain owning the directory (use with Single-org auth)."
+    },
+    "TenantId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "22222222-2222-2222-2222-222222222222",
+      "description": "The TenantId ID of the directory to connect to (use with Single-org auth)."
+    },
+    "OrgReadAccess": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to allow this application read access to the directory (only applies to Single-org auth)."
+    },
+    "OrganizationalAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\")"
+    },
+    "WindowsAuth": {
+      "type": "computed",
+      "value": "(auth == \"Windows\")"
+    },
+    "SingleOrgAuth": {
+      "type": "computed",
+      "value": "(auth == \"SingleOrg\")"
+    },
+    "NoAuth": {
+      "type": "computed",
+      "value": "(!SingleOrgAuth && !WindowsAuth)"
+    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to include Application Insights in the project"
     },
+    "TargetFrameworkOverride": {
+      "type": "parameter",
+      "description": "Overrides the target framework",
+      "replaces": "TargetFrameworkOverride",
+      "datatype": "string",
+      "defaultValue": ""
+    },
     "Framework": {
       "type": "parameter",
+      "description": "The target framework for the project.",
       "datatype": "choice",
       "choices": [
         {
@@ -39,8 +115,25 @@
       "parameters": {
         "format": "yyyy"
       }
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
-  "defaultName": "WebApplication1"
+  "defaultName": "WebApplication1",
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
 }

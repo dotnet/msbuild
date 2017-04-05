@@ -252,6 +252,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not find something to uninstall called &apos;{0}&apos;..
+        /// </summary>
+        public static string CouldntUninstall {
+            get {
+                return ResourceManager.GetString("CouldntUninstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creates an alias for the specified template..
         /// </summary>
         public static string CreateAliasHelp {
@@ -750,7 +759,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing Post Actions.
+        ///   Looks up a localized string similar to Processing post-creation actions....
         /// </summary>
         public static string ProcessingPostActions {
             get {
@@ -903,11 +912,29 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This template contains technologies from parties other than Microsoft, see {0} for details..
+        /// </summary>
+        public static string ThirdPartyNotices {
+            get {
+                return ResourceManager.GetString("ThirdPartyNotices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
         public static string Type {
             get {
                 return ResourceManager.GetString("Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstalls a source or a template pack..
+        /// </summary>
+        public static string UninstallHelp {
+            get {
+                return ResourceManager.GetString("UninstallHelp", resourceCulture);
             }
         }
         
