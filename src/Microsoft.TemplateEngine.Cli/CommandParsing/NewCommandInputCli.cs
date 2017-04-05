@@ -147,6 +147,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public IList<string> ToInstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "install" }).ToList();
 
+        public IList<string> ToUninstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "uninstall" }).ToList();
+
         public bool IsForceFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "force" });
 
         public bool IsHelpFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "help" });

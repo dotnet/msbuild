@@ -60,62 +60,11 @@ namespace Microsoft.TemplateEngine.Cli
             _commandInput = commandInput;
         }
 
+        public static IInstaller Installer { get; set; }
+
         public string CommandName { get; }
 
-        public static IInstaller Installer { get; set; }
-
         public string TemplateName => _commandInput.TemplateName;
-
-        public IList<string> Install => _app.InternalParamValueList("--install");
-
-        public IList<string> Uninstall => _app.InternalParamValueList("--uninstall");
-
-        public static IInstaller Installer { get; set; }
-
-        public bool IsForceFlagSpecified => _app.InternalParamHasValue("--force");
-
-        public bool InstallHasValue => _app.InternalParamHasValue("--install");
-
-        public bool UninstallHasValue => _app.InternalParamHasValue("--uninstall");
-
-        public bool IsHelpFlagSpecified => _app.InternalParamHasValue("--help");
-
-        public bool IsListFlagSpecified => _app.InternalParamHasValue("--list");
-
-        public bool IsQuietFlagSpecified => _app.InternalParamHasValue("--quiet");
-
-        public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
-
-        public string TypeFilter => _app.InternalParamValue("--type");
-
-        public string Language => _app.InternalParamValue("--language");
-
-        public string Locale => _app.InternalParamValue("--locale");
-
-        public bool LocaleHasValue => _app.InternalParamHasValue("--locale");
-
-        public string Name
-        {
-            get
-            {
-                string specifiedName = _app.InternalParamValue("--name");
-
-                if (string.IsNullOrWhiteSpace(specifiedName))
-                {
-                    return null;
-                }
-
-                return specifiedName;
-            }
-        }
-
-        public string OutputPath => _app.InternalParamValue("--output");
-
-        public string TemplateName => _templateNameArgument.Value;
-
-        public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
-
-        public bool AllowScriptsToRunHasValue => _app.InternalParamHasValue("--allow-scripts");
 
         public string OutputPath => _commandInput.OutputPath;
 
@@ -686,13 +635,12 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
             {
-                Installer.Uninstall(Install.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
+                Installer.Uninstall(_commandInput.ToInstallList.Select(x => x.Split(new[] { "::" }, StringSplitOptions.None)[0]));
             }
 
-            if (UninstallHasValue &&
-                ((Uninstall.Count > 0) && (Uninstall[0] != null)))
+            if (_commandInput.ToUninstallList != null && _commandInput.ToUninstallList.Count > 0 && _commandInput.ToUninstallList[0] != null)
             {
-                IEnumerable<string> failures = Installer.Uninstall(Uninstall);
+                IEnumerable<string> failures = Installer.Uninstall(_commandInput.ToUninstallList);
 
                 foreach (string failure in failures)
                 {
