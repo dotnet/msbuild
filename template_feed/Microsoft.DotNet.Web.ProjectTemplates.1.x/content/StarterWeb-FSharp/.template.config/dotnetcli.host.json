@@ -10,5 +10,8 @@
       "longName": "skip-restore",
       "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "-f netcoreapp1.1 --skip-restore"
+  ]
 }

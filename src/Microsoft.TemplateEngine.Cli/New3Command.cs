@@ -568,8 +568,9 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.NotFound;
             }
 
-            if (!ValidateRemainingParameters() || (!_commandInput.IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
+            if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams) || (!_commandInput.IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
             {
+                DisplayInvalidParameters(invalidParams);
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
                 DisplayTemplateList();
                 return CreationResultStatus.NotFound;
@@ -618,8 +619,9 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterMaintenanceFlow()
         {
-            if (!ValidateRemainingParameters())
+            if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams))
             {
+                DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
                 {
                     _telemetryLogger.TrackEvent(CommandName + "-Help");
@@ -735,6 +737,8 @@ namespace Microsoft.TemplateEngine.Cli
             bool showImplicitlyHiddenParams = UnambiguousTemplateGroupToUse.Count > 1;
 
             IList<ITemplateInfo> templatesToShowHelpOn = new List<ITemplateInfo>();
+            HashSet<string> argsInvalidForAllTemplatesInGroup = new HashSet<string>();
+            bool firstTemplate = true;
 
             foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
             {
@@ -752,8 +756,19 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 if (!argsError)
-                {   // Validate outputs the invalid switch errors.
-                    argsError = !ValidateRemainingParameters();
+                {
+                    argsError = !ValidateRemainingParameters(out IReadOnlyList<string> invalidParamsForTemplate);
+                    if (argsError)
+                    {
+                        if (firstTemplate)
+                        {
+                            argsInvalidForAllTemplatesInGroup.UnionWith(invalidParamsForTemplate);
+                        }
+                        else
+                        {
+                            argsInvalidForAllTemplatesInGroup.IntersectWith(invalidParamsForTemplate);
+                        }
+                    }
                 }
 
                 if (commandParseFailureMessage != null)
@@ -763,9 +778,14 @@ namespace Microsoft.TemplateEngine.Cli
 
                 templatesToShowHelpOn.Add(templateInfo.Info);
                 anyArgsErrors |= argsError;
+                firstTemplate = false;
             }
 
-            // maybe
+            if (argsInvalidForAllTemplatesInGroup.Count > 0)
+            {
+                DisplayInvalidParameters(argsInvalidForAllTemplatesInGroup.ToList());
+            }
+
             ShowTemplateGroupHelp(templatesToShowHelpOn, showImplicitlyHiddenParams);
 
             return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
@@ -802,7 +822,15 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!argsError)
             {
-                argsError = !ValidateRemainingParameters();
+                if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams))
+                {
+                    DisplayInvalidParameters(invalidParams);
+                    argsError = true;
+                }
+                else
+                {
+                    argsError = false;
+                }
             }
 
             highestPrecedenceTemplate.Info.Tags.TryGetValue("language", out ICacheTag language);
@@ -905,7 +933,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_commandInput.HasParseError)
             {
-                ValidateRemainingParameters();
+                ValidateRemainingParameters(out IReadOnlyList<string> invalidParams);
+                DisplayInvalidParameters(invalidParams);
 
                 // TODO: get a meaningful error message from the parser
                 if (_commandInput.IsHelpFlagSpecified)
@@ -1018,6 +1047,10 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
                     && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                else if (string.Equals(parameter.DataType, "string", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -1342,18 +1375,25 @@ namespace Microsoft.TemplateEngine.Cli
 
         private HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {
-            if (EnvironmentSettings.SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file, out IMountPoint mountPoint))
+            try
             {
-                JObject jsonData;
-                using (Stream s = file.OpenRead())
-                using (TextReader tr = new StreamReader(s, true))
-                using (JsonReader r = new JsonTextReader(tr))
+                if (EnvironmentSettings.SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file, out IMountPoint mountPoint))
                 {
-                    jsonData = JObject.Load(r);
-                }
+                    JObject jsonData;
+                    using (Stream s = file.OpenRead())
+                    using (TextReader tr = new StreamReader(s, true))
+                    using (JsonReader r = new JsonTextReader(tr))
+                    {
+                        jsonData = JObject.Load(r);
+                    }
 
-                EnvironmentSettings.SettingsLoader.ReleaseMountPoint(mountPoint);
-                return jsonData.ToObject<HostSpecificTemplateData>();
+                    EnvironmentSettings.SettingsLoader.ReleaseMountPoint(mountPoint);
+                    return jsonData.ToObject<HostSpecificTemplateData>();
+                }
+            }
+            catch
+            {
+                // ignore malformed host files.
             }
 
             return HostSpecificTemplateData.Default;
@@ -1590,20 +1630,32 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private bool ValidateRemainingParameters()
+        private bool ValidateRemainingParameters(out IReadOnlyList<string> invalidParams)
         {
+            List<string> badParams = new List<string>();
+
             if (AnyRemainingParameters)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 foreach (string flag in _commandInput.RemainingParameters.Keys)
+                {
+                    badParams.Add(flag);
+                }
+            }
+
+            invalidParams = badParams;
+            return !invalidParams.Any();
+        }
+
+        private void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
+        {
+            if (invalidParams.Count > 0)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
+                foreach (string flag in invalidParams)
                 {
                     Reporter.Error.WriteLine($"  {flag}".Bold().Red());
                 }
-
-                return false;
             }
-
-            return true;
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)

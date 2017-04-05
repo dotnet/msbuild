@@ -37,5 +37,8 @@
       "longName": "skip-restore",
       "shortName": ""
     }
-  }
+  },
+  "UsageExamples": [
+    "-f netcoreapp2.0 --skip-restore"
+  ]
 }
