@@ -90,6 +90,12 @@ while [[ $# > 0 ]]; do
             args=( "${args[@]/$2}" )
             shift
             ;;
+        --runtime-id)
+            CUSTOM_BUILD_ARGS="/p:Rid=\"$2\""
+            args=( "${args[@]/$1}" )
+            args=( "${args[@]/$2}" )
+            shift
+            ;;
         # This is here just to eat away this parameter because CI still passes this in.
         --targets)            
             args=( "${args[@]/$1}" )
