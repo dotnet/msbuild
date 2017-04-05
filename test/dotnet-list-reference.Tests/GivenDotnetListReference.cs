@@ -195,7 +195,7 @@ Options:
 
             try
             {
-                string newArgs = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive";
+                string newArgs = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive --skip-restore";
                 new NewCommandShim()
                     .WithWorkingDirectory(dir.Path)
                     .ExecuteWithCapturedOutput(newArgs)

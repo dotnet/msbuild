@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string newArgs = $"console -o \"{rootPath}\"";
+            string newArgs = $"console -o \"{rootPath}\" --skip-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string newArgs = $"classlib -o \"{rootPath}\"";
+            string newArgs = $"classlib -o \"{rootPath}\" --skip-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
