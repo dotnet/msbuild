@@ -25,6 +25,10 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// A value indicating that this project is portable across operating systems, processor architectures, etc.
         /// </summary>
+        /// <remarks>
+        /// Returns <c>true</c> for projects running on shared frameworks (<see cref="IsFrameworkDependent" />)
+        /// that do not target a specific RID.
+        /// </remarks>
         public bool IsPortable => IsFrameworkDependent && string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier);
 
         public LockFileTargetLibrary PlatformLibrary { get; }
