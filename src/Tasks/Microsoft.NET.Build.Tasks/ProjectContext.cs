@@ -16,7 +16,21 @@ namespace Microsoft.NET.Build.Tasks
         private readonly LockFileTarget _lockFileTarget;
         internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
 
+        /// <summary>
+        /// A value indicating that this project runs on a shared system-wide framework.
+        /// (ex. Microsoft.NETCore.App for .NET Core)
+        /// </summary>
         public bool IsFrameworkDependent { get; }
+
+        /// <summary>
+        /// A value indicating that this project is portable across operating systems, processor architectures, etc.
+        /// </summary>
+        /// <remarks>
+        /// Returns <c>true</c> for projects running on shared frameworks (<see cref="IsFrameworkDependent" />)
+        /// that do not target a specific RID.
+        /// </remarks>
+        public bool IsPortable => IsFrameworkDependent && string.IsNullOrEmpty(_lockFileTarget.RuntimeIdentifier);
+
         public LockFileTargetLibrary PlatformLibrary { get; }
 
         public LockFile LockFile => _lockFile;
