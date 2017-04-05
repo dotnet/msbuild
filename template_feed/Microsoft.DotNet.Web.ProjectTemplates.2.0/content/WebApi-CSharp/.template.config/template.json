@@ -7,6 +7,7 @@
   "precedence": "2000",
   "identity": "Microsoft.Web.WebApi.CSharp.2.0",
   "shortName": "webapi",
+  "thirdPartyNotices": "https://github.com/dotnet/templating/blob/rel/vs2017/post-rtw/template_feed/THIRD-PARTY-NOTICES",
   "tags": {
     "language": "C#",
     "type": "project"

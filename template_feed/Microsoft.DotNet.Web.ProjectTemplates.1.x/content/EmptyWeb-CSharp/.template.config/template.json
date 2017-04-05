@@ -7,6 +7,7 @@
   "precedence": "100",
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",
+  "thirdPartyNotices": "https://github.com/dotnet/templating/blob/rel/vs2017/post-rtw/template_feed/THIRD-PARTY-NOTICES",
   "tags": {
     "language": "C#",
     "type": "project"
