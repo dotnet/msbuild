@@ -104,14 +104,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
     -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(SelfContained)' == ''">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe' and '$(SelfContained)' == ''">
     <SelfContained Condition="'$(RuntimeIdentifier)' == ''">false</SelfContained>
     <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
   </PropertyGroup>
 
-  <Target Name="_CheckForUnsupportedSelfContained" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+  <Target Name="_CheckForUnsupportedSelfContained"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
+    
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
+    
   </Target>
 
   <PropertyGroup>
