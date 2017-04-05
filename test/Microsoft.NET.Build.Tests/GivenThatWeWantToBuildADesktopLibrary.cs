@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -83,6 +84,31 @@ public class NETFramework
                 .Should()
                 .Pass();
 
+        }
+
+        [Fact]
+        public void It_can_preserve_compilation_context_and_reference_netstandard_library()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopReferencingNetStandardLibrary")
+                .WithSource()
+                .Restore();
+
+            var buildCommand = new BuildCommand(MSBuildTest.Stage0MSBuild, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should().Pass();
+
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "Library.deps.json")))
+            {
+                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+                dependencyContext.CompileLibraries.Should().NotBeEmpty();
+            }
         }
     }
 }

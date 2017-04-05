@@ -124,9 +124,7 @@ namespace Microsoft.NET.Build.Tasks
                 _projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
                 _projectContext.LockFileTarget.RuntimeIdentifier,
                 runtimeSignature,
-                // DependencyContext's IsPortable strictly means it doesn't have a runtime dependency,
-                // not whether it is FrameworkDependent or !SelfContained.
-                isPortable: string.IsNullOrEmpty(_projectContext.LockFileTarget.RuntimeIdentifier));
+                _projectContext.IsPortable);
 
             return new DependencyContext(
                 targetInfo,
