@@ -114,19 +114,19 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 return new[]
                 {
+                    Create.Option("-h|--help", LocalizableStrings.DisplaysHelp, Accept.NoArguments()),
                     Create.Option("-l|--list", LocalizableStrings.ListsTemplates, Accept.NoArguments()),
+                    Create.Option("-n|--name", LocalizableStrings.NameOfOutput, Accept.ExactlyOneArgument()),
+                    Create.Option("-o|--output", LocalizableStrings.OutputPath, Accept.ExactlyOneArgument()),
+                    Create.Option("-i|--install", LocalizableStrings.InstallHelp, Accept.OneOrMoreArguments()),
+                    Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.OneOrMoreArguments()),
+                    Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
+                    Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
                     Create.Option("-lang|--language", LocalizableStrings.LanguageParameter,
                                     // TODO: dynamically get the language set for all installed templates.
                                     Accept.ExactlyOneArgument()
                                         .WithSuggestionsFrom("C#", "F#")
                                         .With(defaultValue: () => "C#")),
-                    Create.Option("-n|--name", LocalizableStrings.NameOfOutput, Accept.ExactlyOneArgument()),
-                    Create.Option("-o|--output", LocalizableStrings.OutputPath, Accept.ExactlyOneArgument()),
-                    Create.Option("-h|--help", LocalizableStrings.DisplaysHelp, Accept.NoArguments()),
-                    Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
-                    Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
-                    Create.Option("-i|--install", LocalizableStrings.InstallHelp, Accept.OneOrMoreArguments()),
-                    Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.OneOrMoreArguments()),
                 };
             }
         }
