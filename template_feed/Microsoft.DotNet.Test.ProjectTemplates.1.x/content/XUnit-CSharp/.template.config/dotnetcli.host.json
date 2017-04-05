@@ -16,6 +16,6 @@
     }
   },
   "UsageExamples": [
-    "-f netcoreapp1.0"
+    "--framework netcoreapp1.1"
   ]
 }
