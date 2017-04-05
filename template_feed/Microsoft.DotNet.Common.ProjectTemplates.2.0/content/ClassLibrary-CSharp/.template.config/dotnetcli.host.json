@@ -12,6 +12,6 @@
     }
   },
   "UsageExamples": [
-    "--framework netcoreapp2.0 --auth Individual"
+    "--framework netcoreapp2.0"
   ]
 }
