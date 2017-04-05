@@ -101,6 +101,13 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             var targetFramework = "netcoreapp2.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
@@ -183,6 +190,13 @@ public static class Program
 
         void Conflicts_are_resolved_when_publishing(bool selfContained, bool ridSpecific, [CallerMemberName] string callingMethod = "")
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             if (selfContained && !ridSpecific)
             {
                 throw new ArgumentException("Self-contained apps must be rid specific");
