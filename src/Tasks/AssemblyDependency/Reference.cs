@@ -353,15 +353,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A dependency may be removed because it may not be referenced any more due this reference being in the black list or being removed due to it depending on something in the black list
-        /// </summary>
-        internal void RemoveDependency(Reference dependencyToRemove)
-        {
-            _dependencies.Remove(dependencyToRemove);
-        }
-
-
-        /// <summary>
         /// Get the dependee references for this reference.
         ///  This is collection of References.
         /// </summary>
@@ -1360,11 +1351,6 @@ namespace Microsoft.Build.Tasks
             private ReferenceTable.LogExclusionReason _exclusionReasonLogDelegate;
 
             /// <summary>
-            /// What is the target framework moniker of the highest redist list on the system.
-            /// </summary>
-            private string _highestRedistListMonkier;
-
-            /// <summary>
             /// Is this reference in an exclusion list
             /// </summary>
             private bool _isInExclusionList;
@@ -1386,15 +1372,6 @@ namespace Microsoft.Build.Tasks
             {
                 get { return _highestVersionInRedist; }
                 set { _highestVersionInRedist = value; }
-            }
-
-            /// <summary>
-            /// What is the highest versioned redist list on the machine
-            /// </summary>
-            internal string HighestRedistListMonkier
-            {
-                get { return _highestRedistListMonkier; }
-                set { _highestRedistListMonkier = value; }
             }
 
             /// <summary>

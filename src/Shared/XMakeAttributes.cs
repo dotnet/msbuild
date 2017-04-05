@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared
         internal const string condition = "Condition";
         internal const string executeTargets = "ExecuteTargets";
         internal const string name = "Name";
-        internal const string msbuildVersion = "MSBuildVersion";
+
         internal const string xmlns = "xmlns";
         internal const string defaultTargets = "DefaultTargets";
         internal const string initialTargets = "InitialTargets";
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Shared
         internal const string parameterType = "ParameterType";
         internal const string required = "Required";
         internal const string output = "Output";
-        internal const string defaultValue = "DefaultValue";
+
         internal const string evaluate = "Evaluate";
         internal const string label = "Label";
         internal const string returns = "Returns";

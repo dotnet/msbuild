@@ -73,14 +73,11 @@ namespace Microsoft.Build.Conversion
         internal const string link                = "Link";
         internal const string buildAction         = "BuildAction";
         internal const string buildActionNone     = "None";
-        internal const string buildActionResource = "EmbeddedResource";
         internal const string webReferences       = "WebReferences";
         internal const string webReferenceUrl     = "WebReferenceUrl";
         internal const string projectGuid         = "ProjectGuid";
         internal const string preBuildEvent       = "PreBuildEvent";
         internal const string postBuildEvent      = "PostBuildEvent";
-        internal const string productVersion      = "ProductVersion";
-        internal const string schemaVersion       = "SchemaVersion";
         internal const string outputPath          = "OutputPath";
         internal const string officeDocumentPath  = "OfficeDocumentPath";
         internal const string officeDocumentType  = "OfficeProjectType";
@@ -107,7 +104,6 @@ namespace Microsoft.Build.Conversion
     {
         internal const string project                     = "Project";
         internal const string defaultTargets              = "Build";
-        internal const string msbuildVersion              = "MSBuildVersion";
         internal const string xmlns                       = "xmlns";
         internal const string importPrefix                = "$(MSBuildToolsPath)\\";
         internal const string importSuffix                = ".targets";
@@ -115,7 +111,6 @@ namespace Microsoft.Build.Conversion
         internal const string csharpTargets               = "CSharp";
         internal const string visualBasicTargets          = "VisualBasic";
         internal const string visualJSharpTargets         = "VisualJSharp";
-        internal const string triumphImport               = "$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v9.0\\OfficeTools\\Microsoft.VisualStudio.OfficeTools.targets";
         internal const string officeTargetsVS2005Import   = @"$(MSBuildExtensionsPath)\Microsoft.VisualStudio.OfficeTools.targets";
         internal const string officeTargetsVS2005Import2  = @"$(MSBuildExtensionsPath)\Microsoft.VisualStudio.OfficeTools2.targets";
         internal const string officeTargetsVS2005Repair   = @"OfficeTools\Microsoft.VisualStudio.Tools.Office.targets";
@@ -139,7 +134,6 @@ namespace Microsoft.Build.Conversion
         internal const string service                     = "Service";
         internal const string folder                      = "Folder";
         internal const string link                        = "Link";
-        internal const string autogen                     = "AutoGen";
         internal const string webReferences               = "WebReferences";
         internal const string webReferenceUrl             = "WebReferenceUrl";
         internal const string relPath                     = "RelPath";
@@ -147,7 +141,6 @@ namespace Microsoft.Build.Conversion
         internal const string webRefEnableProperties      = "WebReference_EnableProperties";
         internal const string webRefEnableSqlTypes        = "WebReference_EnableSQLTypes";
         internal const string webRefEnableLegacyEventing  = "WebReference_EnableLegacyEventingModel";
-        internal const string xmlNamespace                = "http://schemas.microsoft.com/developer/msbuild/2003";
 
         internal const string cSharpGuid                  = "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC";
         internal const string visualBasicGuid             = "F184B08F-C81C-45F6-A57F-5ABD9991F28F";
@@ -178,7 +171,6 @@ namespace Microsoft.Build.Conversion
         internal const string csprojFileExtension         = ".csproj";
         internal const string vbprojFileExtension         = ".vbproj";
         internal const string myType                      = "MyType";
-        internal const string web                         = "Web";
         internal const string windowsFormsWithCustomSubMain = "WindowsFormsWithCustomSubMain";
         internal const string windows                     = "Windows";
         internal const string codeAnalysisRuleAssemblies  = "CodeAnalysisRuleAssemblies";

@@ -87,7 +87,6 @@ namespace Microsoft.Build.BuildEngine
             this.nodeIndex = EngineCallback.invalidNode;
             this.projectFileName = projectFileName;
             this.targetNames = targetNames;
-            this.parentEngine = null;
             this.outputsByTarget = null;
             this.resultByTarget = new Hashtable(StringComparer.OrdinalIgnoreCase);
             this.globalPropertiesPassedByTask = null;
@@ -128,20 +127,6 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        /// <summary>
-        /// The engine is set inside the proxy prior to enqueing the request
-        /// </summary>
-        internal Engine ParentEngine
-        {
-            get
-            {
-                return this.parentEngine;
-            }
-            set
-            {
-                this.parentEngine = value;
-            }
-        }
         /// <summary>
         /// The outputs of the build request
         /// </summary>
@@ -825,7 +810,6 @@ namespace Microsoft.Build.BuildEngine
         private bool buildSucceeded;
         private Hashtable globalPropertiesPassedByTask;
         private int nodeIndex;
-        private Engine parentEngine;
         private Project projectToBuild;
         private bool fireProjectStartedFinishedEvents;
         private BuildSettings buildSettings;

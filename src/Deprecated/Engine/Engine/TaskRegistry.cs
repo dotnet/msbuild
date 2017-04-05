@@ -53,20 +53,6 @@ namespace Microsoft.Build.BuildEngine
         }
         #endregion
 
-        #region Properties
-        /// <summary>
-        /// Gets the collection of task declarations created by parsing the &lt;UsingTask&gt; XML.
-        /// Used for unit tests only.
-        /// </summary>
-        internal Hashtable AllTaskDeclarations
-        {
-            get
-            {
-                return registeredTasks;
-            }
-        }
-        #endregion
-
         #region Methods
         /// <summary>
         /// Removes all entries from the registry.

@@ -46,32 +46,15 @@ namespace System.Deployment.Internal.CodeSigning
         internal const int NTE_BAD_KEY = unchecked((int)0x80090003);
 
         // Trust errors.
-        internal const int TRUST_E_SYSTEM_ERROR = unchecked((int)0x80096001);
-        internal const int TRUST_E_NO_SIGNER_CERT = unchecked((int)0x80096002);
-        internal const int TRUST_E_COUNTER_SIGNER = unchecked((int)0x80096003);
         internal const int TRUST_E_CERT_SIGNATURE = unchecked((int)0x80096004);
         internal const int TRUST_E_TIME_STAMP = unchecked((int)0x80096005);
         internal const int TRUST_E_BAD_DIGEST = unchecked((int)0x80096010);
-        internal const int TRUST_E_BASIC_CONSTRAINTS = unchecked((int)0x80096019);
-        internal const int TRUST_E_FINANCIAL_CRITERIA = unchecked((int)0x8009601E);
-        internal const int TRUST_E_PROVIDER_UNKNOWN = unchecked((int)0x800B0001);
-        internal const int TRUST_E_ACTION_UNKNOWN = unchecked((int)0x800B0002);
         internal const int TRUST_E_SUBJECT_FORM_UNKNOWN = unchecked((int)0x800B0003);
         internal const int TRUST_E_SUBJECT_NOT_TRUSTED = unchecked((int)0x800B0004);
         internal const int TRUST_E_NOSIGNATURE = unchecked((int)0x800B0100);
-        internal const int CERT_E_UNTRUSTEDROOT = unchecked((int)0x800B0109);
         internal const int TRUST_E_FAIL = unchecked((int)0x800B010B);
         internal const int TRUST_E_EXPLICIT_DISTRUST = unchecked((int)0x800B0111);
-        internal const int CERT_E_CHAINING = unchecked((int)0x800B010A);
 
-
-        // Values for dwFlags of CertVerifyAuthenticodeLicense.
-        internal const int AXL_REVOCATION_NO_CHECK = unchecked((int)0x00000001);
-        internal const int AXL_REVOCATION_CHECK_END_CERT_ONLY = unchecked((int)0x00000002);
-        internal const int AXL_REVOCATION_CHECK_ENTIRE_CHAIN = unchecked((int)0x00000004);
-        internal const int AXL_URL_CACHE_ONLY_RETRIEVAL = unchecked((int)0x00000008);
-        internal const int AXL_LIFETIME_SIGNING = unchecked((int)0x00000010);
-        internal const int AXL_TRUST_MICROSOFT_ROOT_ONLY = unchecked((int)0x00000020);
 
         // Wintrust Policy Flag
         //  These are set during install and can be modified by the user
@@ -193,20 +176,6 @@ namespace System.Deployment.Internal.CodeSigning
             _verify = verify;
         }
 
-        private static XmlElement FindIdElement(XmlElement context, string idValue)
-        {
-            if (context == null)
-                return null;
-
-            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            return context.SelectSingleNode("//*[@ID=\"" + idValue + "\"]") as XmlElement;
-        }
-
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
         {
             // We only care about Id references inside of the KeyInfo section
@@ -223,7 +192,6 @@ namespace System.Deployment.Internal.CodeSigning
     internal class SignedCmiManifest
     {
         private XmlDocument _manifestDom = null;
-        private CmiStrongNameSignerInfo _strongNameSignerInfo = null;
         private CmiAuthenticodeSignerInfo _authenticodeSignerInfo = null;
 
         private SignedCmiManifest() { }
@@ -235,15 +203,9 @@ namespace System.Deployment.Internal.CodeSigning
             _manifestDom = manifestDom;
         }
 
-        internal void Sign(CmiManifestSigner signer)
-        {
-            Sign(signer, null);
-        }
-
         internal void Sign(CmiManifestSigner signer, string timeStampUrl)
         {
             // Reset signer infos.
-            _strongNameSignerInfo = null;
             _authenticodeSignerInfo = null;
 
             // Signer cannot be null.
@@ -274,190 +236,6 @@ namespace System.Deployment.Internal.CodeSigning
                 AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl);
             }
             StrongNameSignManifestDom(_manifestDom, licenseDom, signer);
-        }
-
-        // throw cryptographic exception for any verification errors.
-        internal void Verify(CmiManifestVerifyFlags verifyFlags)
-        {
-            // Reset signer infos.
-            _strongNameSignerInfo = null;
-            _authenticodeSignerInfo = null;
-
-            XmlNamespaceManager nsm = new XmlNamespaceManager(_manifestDom.NameTable);
-            nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
-            XmlElement signatureNode = _manifestDom.SelectSingleNode("//ds:Signature", nsm) as XmlElement;
-            if (signatureNode == null)
-            {
-                throw new CryptographicException(Win32.TRUST_E_NOSIGNATURE);
-            }
-
-            // Make sure it is indeed SN signature, and it is an enveloped signature.
-            string snIdName = "Id";
-            if (!signatureNode.HasAttribute(snIdName))
-            {
-                snIdName = "id";
-                if (!signatureNode.HasAttribute(snIdName))
-                {
-                    snIdName = "ID";
-                    if (!signatureNode.HasAttribute(snIdName))
-                    {
-                        throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-                    }
-                }
-            }
-
-            string snIdValue = signatureNode.GetAttribute(snIdName);
-            if (snIdValue == null ||
-                String.Compare(snIdValue, "StrongNameSignature", StringComparison.Ordinal) != 0)
-            {
-                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-            }
-
-            // Make sure it is indeed an enveloped signature.
-            bool oldFormat = false;
-            bool validFormat = false;
-            XmlNodeList referenceNodes = signatureNode.SelectNodes("ds:SignedInfo/ds:Reference", nsm);
-            foreach (XmlNode referenceNode in referenceNodes)
-            {
-                XmlElement reference = referenceNode as XmlElement;
-                if (reference != null && reference.HasAttribute("URI"))
-                {
-                    string uriValue = reference.GetAttribute("URI");
-                    if (uriValue != null)
-                    {
-                        // We expect URI="" (empty URI value which means to hash the entire document).
-                        if (uriValue.Length == 0)
-                        {
-                            XmlNode transformsNode = reference.SelectSingleNode("ds:Transforms", nsm);
-                            if (transformsNode == null)
-                            {
-                                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-                            }
-
-                            // Make sure the transforms are what we expected.
-                            XmlNodeList transforms = transformsNode.SelectNodes("ds:Transform", nsm);
-                            if (transforms.Count < 2)
-                            {
-                                // We expect at least:
-                                //  <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-                                //  <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /> 
-                                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-                            }
-
-                            bool c14 = false;
-                            bool enveloped = false;
-                            for (int i = 0; i < transforms.Count; i++)
-                            {
-                                XmlElement transform = transforms[i] as XmlElement;
-                                string algorithm = transform.GetAttribute("Algorithm");
-                                if (algorithm == null)
-                                {
-                                    break;
-                                }
-                                else if (String.Compare(algorithm, SignedXml.XmlDsigExcC14NTransformUrl, StringComparison.Ordinal) != 0)
-                                {
-                                    c14 = true;
-                                    if (enveloped)
-                                    {
-                                        validFormat = true;
-                                        break;
-                                    }
-                                }
-                                else if (String.Compare(algorithm, SignedXml.XmlDsigEnvelopedSignatureTransformUrl, StringComparison.Ordinal) != 0)
-                                {
-                                    enveloped = true;
-                                    if (c14)
-                                    {
-                                        validFormat = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else if (String.Compare(uriValue, "#StrongNameKeyInfo", StringComparison.Ordinal) == 0)
-                        {
-                            oldFormat = true;
-
-                            XmlNode transformsNode = referenceNode.SelectSingleNode("ds:Transforms", nsm);
-                            if (transformsNode == null)
-                            {
-                                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-                            }
-
-                            // Make sure the transforms are what we expected.
-                            XmlNodeList transforms = transformsNode.SelectNodes("ds:Transform", nsm);
-                            if (transforms.Count < 1)
-                            {
-                                // We expect at least:
-                                //  <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-                                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-                            }
-
-                            for (int i = 0; i < transforms.Count; i++)
-                            {
-                                XmlElement transform = transforms[i] as XmlElement;
-                                string algorithm = transform.GetAttribute("Algorithm");
-                                if (algorithm == null)
-                                {
-                                    break;
-                                }
-                                else if (String.Compare(algorithm, SignedXml.XmlDsigExcC14NTransformUrl, StringComparison.Ordinal) != 0)
-                                {
-                                    validFormat = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!validFormat)
-            {
-                throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
-            }
-
-            // It is the DSig we want, now make sure the public key matches the token.
-            string publicKeyToken = VerifyPublicKeyToken();
-
-            // OK. We found the SN signature with matching public key token, so
-            // instantiate the SN signer info property.
-            _strongNameSignerInfo = new CmiStrongNameSignerInfo(Win32.TRUST_E_FAIL, publicKeyToken);
-
-            // Now verify the SN signature, and Authenticode license if available.
-            ManifestSignedXml signedXml = new ManifestSignedXml(_manifestDom, true);
-            signedXml.LoadXml(signatureNode);
-
-            AsymmetricAlgorithm key = null;
-            bool dsigValid = signedXml.CheckSignatureReturningKey(out key);
-            _strongNameSignerInfo.PublicKey = key;
-            if (!dsigValid)
-            {
-                _strongNameSignerInfo.ErrorCode = Win32.TRUST_E_BAD_DIGEST;
-                throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-            }
-
-            // Verify license as well if requested.
-            if ((verifyFlags & CmiManifestVerifyFlags.StrongNameOnly) != CmiManifestVerifyFlags.StrongNameOnly)
-            {
-                VerifyLicense(verifyFlags, oldFormat);
-            }
-        }
-
-        internal CmiStrongNameSignerInfo StrongNameSignerInfo
-        {
-            get
-            {
-                return _strongNameSignerInfo;
-            }
-        }
-
-        internal CmiAuthenticodeSignerInfo AuthenticodeSignerInfo
-        {
-            get
-            {
-                return _authenticodeSignerInfo;
-            }
         }
 
         //
@@ -1273,14 +1051,6 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
-        internal X509Certificate2Collection ExtraStore
-        {
-            get
-            {
-                return _certificates;
-            }
-        }
-
         internal X509IncludeOption IncludeOption
         {
             get
@@ -1428,17 +1198,6 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
-        internal uint HashAlgId
-        {
-            get
-            {
-                return _algHash;
-            }
-            set
-            {
-                _algHash = value;
-            }
-        }
 
         internal string Hash
         {
@@ -1476,14 +1235,6 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
-        internal CmiAuthenticodeTimestamperInfo TimestamperInfo
-        {
-            get
-            {
-                return _timestamperInfo;
-            }
-        }
-
         internal X509Chain SignerChain
         {
             get
@@ -1518,37 +1269,6 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
-        internal int ErrorCode
-        {
-            get
-            {
-                return _error;
-            }
-        }
-
-        internal uint HashAlgId
-        {
-            get
-            {
-                return _algHash;
-            }
-        }
-
-        internal DateTime TimestampTime
-        {
-            get
-            {
-                return _timestampTime;
-            }
-        }
-
-        internal X509Chain TimestamperChain
-        {
-            get
-            {
-                return _timestamperChain;
-            }
-        }
     }
 }
 

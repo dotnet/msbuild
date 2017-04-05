@@ -42,9 +42,11 @@ namespace Microsoft.Build.Tasks
 
         #region Fields
 
+#if FEATURE_OSVERSION
         private const string UseUtf8Always = "ALWAYS";
         private const string UseUtf8Never = "NEVER";
         private const string UseUtf8Detect = "DETECT";
+#endif
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;

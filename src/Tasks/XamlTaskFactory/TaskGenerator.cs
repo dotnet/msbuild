@@ -23,29 +23,9 @@ namespace Microsoft.Build.Tasks.Xaml
         // ---------------------------------------------
 
         /// <summary>
-        /// The base class for the task
-        /// </summary>
-        private const string BaseClass = "DataDrivenToolTask";
-
-        /// <summary>
-        /// The namespace for the task.
-        /// </summary>
-        private const string NamespaceOfGeneratedTask = "MyDataDrivenTasks";
-
-        /// <summary>
         /// The property for the tool name.
         /// </summary>
         private const string ToolNamePropertyName = "ToolName";
-
-        /// <summary>
-        /// The property for the tool exe.
-        /// </summary>
-        private const string ToolExePropertyName = "ToolExe";
-
-        /// <summary>
-        /// The field for the tool exe.
-        /// </summary>
-        private const string ToolExeFieldName = "toolExe";
 
         /// <summary>
         /// IsOn
@@ -58,11 +38,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string IsOff = "false";
 
         /// <summary>
-        /// AlwaysType
-        /// </summary>
-        private const string AlwaysType = "always";
-
-        /// <summary>
         /// The value attribute.
         /// </summary>
         private const string ValueAttribute = "value";
@@ -70,11 +45,6 @@ namespace Microsoft.Build.Tasks.Xaml
         // --------------------
         // ToolSwitchType types
         // --------------------
-
-        /// <summary>
-        /// The always type
-        /// </summary>
-        private const string TypeAlways = "always";
 
         /// <summary>
         /// The boolean type
@@ -95,21 +65,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The string array type
         /// </summary>
         private const string TypeStringArray = "StringArray";
-
-        /// <summary>
-        /// The file type
-        /// </summary>
-        private const string TypeFile = "File";
-
-        /// <summary>
-        /// The directory type
-        /// </summary>
-        private const string TypeDirectory = "Directory";
-
-        /// <summary>
-        /// The ITaskItem type
-        /// </summary>
-        private const string TypeITaskItem = "ITaskItem";
 
         /// <summary>
         /// The ITaskItemArray type
@@ -140,16 +95,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private const string TypeToolSwitchType = "CommandLineToolSwitchType";
 
-        /// <summary>
-        /// The AlwaysAppend type.
-        /// </summary>
-        private const string TypeAlwaysAppend = "AlwaysAppend";
-
-        /// <summary>
-        /// The ArgumentRelation type.
-        /// </summary>
-        private const string TypeArgumentRelation = "CommandLineArgumentRelation";
-
         // ----------------
         // Common variables
         // ----------------
@@ -165,11 +110,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string DictionaryOfSwitches = "ActiveToolSwitches";
 
         /// <summary>
-        /// The ActiveToolSwitchesValues property.
-        /// </summary>
-        private const string DictionaryOfSwitchesValues = "ActiveToolSwitchesValues";
-
-        /// <summary>
         /// The switchMap field.
         /// </summary>
         private const string SwitchMap = "switchMap";
@@ -179,29 +119,14 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private const string MultiValues = "AllowMultipleValues";
 
-        /// <summary>
-        /// The relation field.
-        /// </summary>
-        private const string Relation = "relation";
-
         // --------------
         // Common methods
         // --------------
 
         /// <summary>
-        /// The Add method.
-        /// </summary>
-        private const string AddMethod = "Add";
-
-        /// <summary>
         /// The AddLast method.
         /// </summary>
         private const string AddLastMethod = "AddLast";
-
-        /// <summary>
-        /// The AlwaysAppend method.
-        /// </summary>
-        private const string AppendAlwaysMethod = "AlwaysAppend";
 
         /// <summary>
         /// The ValidateInteger method.
@@ -214,11 +139,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string ReadSwitchMapMethod = "ReadSwitchMap2";
 
         /// <summary>
-        /// The Remove method.
-        /// </summary>
-        private const string RemoveMethod = "Remove";
-
-        /// <summary>
         /// The IsPropertySet method.
         /// </summary>
         private const string IsPropertySetMethod = "IsPropertySet";
@@ -227,11 +147,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The IsSwitchValueSet method.
         /// </summary>
         private const string IsSwitchValueSetMethod = "IsSwitchValueSet";
-
-        /// <summary>
-        /// The EnsureTrailingSlash method.
-        /// </summary>
-        private const string EnsureTrailingSlashMethod = "EnsureTrailingSlash";
 
         /// <summary>
         /// The AddDefaultsToActiveSwitchList method.
@@ -252,11 +167,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The ReplaceToolSwitch method.
         /// </summary>
         private const string ReplaceToolSwitchMethod = "ReplaceToolSwitch";
-
-        /// <summary>
-        /// The AddActiveSwitchToolValue method.
-        /// </summary>
-        private const string AddActiveSwitchToolValueMethod = "AddActiveSwitchToolValue";
 
         /// <summary>
         /// The Overrides method.
@@ -281,11 +191,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The FileName property
         /// </summary>
         private const string FileNameProperty = "Value";
-
-        /// <summary>
-        /// The TaskItem property
-        /// </summary>
-        private const string TaskItemProperty = "TaskItem";
 
         /// <summary>
         /// The TaskItemArray property
@@ -333,11 +238,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string ArgumentProperty = "ArgumentParameter";
 
         /// <summary>
-        /// The ArgumentRequired property
-        /// </summary>
-        private const string ArgumentRequiredProperty = "ArgumentRequired";
-
-        /// <summary>
         /// The Required property
         /// </summary>
         private const string PropertyRequiredProperty = "Required";
@@ -368,11 +268,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string RequiredProperty = "Required";
 
         /// <summary>
-        /// The ArgumentRelationList property
-        /// </summary>
-        private const string ArgumentRelationList = "ArgumentRelationList";
-
-        /// <summary>
         /// The DisplayName property
         /// </summary>
         private const string DisplayNameProperty = "DisplayName";
@@ -391,11 +286,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The IsValid property
         /// </summary>
         private const string IsValidProperty = "IsValid";
-
-        /// <summary>
-        /// The Type property
-        /// </summary>
-        private const string TypeProperty = "Type";
 
         /// <summary>
         /// Types to ignore.
@@ -1348,17 +1238,6 @@ namespace Microsoft.Build.Tasks.Xaml
             get
             {
                 return _errorCount;
-            }
-        }
-
-        /// <summary>
-        /// Returns the log of errors
-        /// </summary>
-        internal LinkedList<string> ErrorLog
-        {
-            get
-            {
-                return _errorLog;
             }
         }
     }

@@ -44,13 +44,6 @@ namespace Microsoft.Build.BuildEngine
                 return this.callNumber;
             }
         }
-        internal LocalCallType CallType
-        {
-            get
-            {
-                return this.callType;
-            }
-        }
         virtual internal bool NeedsReply
         {
             get
@@ -154,14 +147,6 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 return requestingCallNumber;
-            }
-        }
-
-        internal object ReplyData
-        {
-            get
-            {
-                return replyData;
             }
         }
         #endregion
@@ -307,17 +292,6 @@ namespace Microsoft.Build.BuildEngine
         private BuildRequest[] buildRequests;
         #endregion
 
-        // For testing
-        #region Properties
-        internal BuildRequest[] BuildRequests
-        {
-            get
-            {
-                return buildRequests;
-            }
-        }
-        #endregion 
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -380,17 +354,6 @@ namespace Microsoft.Build.BuildEngine
         private BuildResult buildResult;
         #endregion
 
-        // For testing
-        #region Properties
-        internal BuildResult ResultOfBuild
-        {
-            get
-            {
-                return buildResult;
-            }
-        }
-        #endregion
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -432,17 +395,6 @@ namespace Microsoft.Build.BuildEngine
 
         #region Data
         private NodeLoggingEvent[] buildEvents;
-        #endregion
-
-        // For testing
-        #region Properties
-        internal NodeLoggingEvent[] BuildEvents
-        {
-            get
-            {
-                return buildEvents;
-            }
-        }
         #endregion
 
         #region CustomSerializationToStream
@@ -532,33 +484,6 @@ namespace Microsoft.Build.BuildEngine
         private bool useBreadthFirstTraversal;
         #endregion
 
-        // For testing
-        #region Properties
-        internal bool LogOnlyCriticalEvents
-        {
-            get
-            {
-                return logOnlyCriticalEvents;
-            }
-        }
-
-        internal bool CentralizedLogging
-        {
-            get
-            {
-                return centralizedLogging;
-            }
-        }
-
-        internal bool UseBreadthFirstTraversal
-        {
-            get
-            {
-                return useBreadthFirstTraversal;
-            }
-        }
-        #endregion
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -608,25 +533,6 @@ namespace Microsoft.Build.BuildEngine
         private Node.NodeShutdownLevel shutdownLevel;
         #endregion
 
-        // For testing
-        #region Properties
-        internal bool ExitProcess
-        {
-            get
-            {
-                return exitProcess;
-            }
-        }
-
-        internal Node.NodeShutdownLevel ShutdownLevel
-        {
-            get
-            {
-                return shutdownLevel;
-            }
-        }
-        #endregion
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -673,16 +579,6 @@ namespace Microsoft.Build.BuildEngine
         private int totalTaskTime;
         #endregion
 
-        // For testing
-        #region Properties
-        internal Node.NodeShutdownLevel ShutdownLevel
-        {
-            get
-            {
-                return shutdownLevel;
-            }
-        }
-        #endregion
 
 
         #region CustomSerializationToStream
@@ -764,39 +660,11 @@ namespace Microsoft.Build.BuildEngine
                 return environmentVariables;
             }
         }
-        internal LoggerDescription[] NodeLoggers
-        {
-            get
-            {
-                    return nodeLoggers;
-            }
-        }
         internal int NodeId
         {
             get
             {
                 return nodeId;
-            }
-        }
-        internal BuildPropertyGroup ParentGlobalProperties
-        {
-            get
-            {
-                return parentGlobalProperties;
-            }
-        }
-        internal ToolsetDefinitionLocations ToolsetSearchLocations
-        {
-            get
-            {
-                return toolsetSearchLocations;
-            }
-        }
-        internal int ParentProcessId
-        {
-            get
-            {
-                return parentProcessId;
             }
         }
         #endregion
@@ -921,17 +789,6 @@ namespace Microsoft.Build.BuildEngine
         private int processId = 0;
         #endregion
 
-        //For Testing
-        #region Properties
-        internal int ProcessId
-        {
-            get
-            {
-                return processId;
-            }
-        }
-        #endregion
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -975,17 +832,6 @@ namespace Microsoft.Build.BuildEngine
         private int requestId = 0;
         #endregion
 
-        // For testing
-        #region Properties
-        internal int RequestId
-        {
-            get
-            {
-                return requestId;
-            }
-        }
-        #endregion
-
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -1026,17 +872,6 @@ namespace Microsoft.Build.BuildEngine
 
         #region Data
         private NodeStatus nodeStatus;
-        #endregion
-
-        // For testing
-        #region Properties
-        internal NodeStatus StatusOfNode
-        {
-            get
-            {
-                return nodeStatus;
-            }
-        }
         #endregion
 
         #region CustomSerializationToStream
@@ -1144,41 +979,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal CacheEntry[] Entries
-        {
-            get
-            {
-                return entries;
-            }
-        }
-        internal string ScopeName
-        {
-            get
-            {
-                return scopeName;
-            }
-        }
-        internal CacheContentType ContentType
-        {
-            get
-            {
-                return cacheContentType;
-            }
-        }
-        internal BuildPropertyGroup ScopeProperties
-        {
-            get
-            {
-                return scopeProperties;
-            }
-        }
-        internal string ScopeToolsVersion
-        {
-            get
-            {
-                return scopeToolsVersion;
-            }
-        }
         #endregion
 
         #region Methods
@@ -1340,45 +1140,6 @@ namespace Microsoft.Build.BuildEngine
                 return true;
             }
         }
-        internal string[] Names
-        {
-            get
-            {
-                return names;
-            }
-        }
-        internal string ScopeName
-        {
-            get
-            {
-                return scopeName;
-            }
-        }
-
-        internal BuildPropertyGroup ScopeProperties
-        {
-            get
-            {
-                return scopeProperties;
-            }
-        }
-
-        internal CacheContentType ContentType
-        {
-            get
-            {
-                return cacheContentType;
-            }
-        }
-
-        internal string ScopeToolsVersion
-        {
-            get
-            {
-                return scopeToolsVersion;
-            }
-        }
-
         #endregion
 
         #region Methods

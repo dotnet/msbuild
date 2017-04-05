@@ -546,21 +546,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         #region VerifyThrowArgumentXXX
 
         /// <summary>
-        /// Throws an ArgumentOutOfRangeException using the given parameter name
-        /// if the condition is false.
-        /// </summary>
-        /// <owner>SumedhK</owner>
-        /// <param name="condition"></param>
-        /// <param name="parameterName"></param>
-        internal static void VerifyThrowArgumentOutOfRange(bool condition, string parameterName)
-        {
-            if (!condition)
-            {
-                throw new ArgumentOutOfRangeException(parameterName);
-            }
-        }
-
-        /// <summary>
         /// Throws an ArgumentNullException if the given string parameter is null
         /// and ArgumentException if it has zero length.
         /// </summary>

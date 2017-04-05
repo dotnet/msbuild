@@ -56,18 +56,6 @@ namespace Microsoft.Build.BuildEngine
 
         #endregion
 
-        #region Properties
-        /// <summary>
-        /// Gets the event context in which the remote exception occured
-        /// </summary>
-        internal BuildEventContext BuildEventContext
-        {
-            get
-            {
-                return buildEventContext;
-            }
-        }
-        #endregion
 
         #region Methods
         internal static void Throw(Exception innerException, BuildEventContext buildEventContext, string messageResourceName, params string[] messageArgs)

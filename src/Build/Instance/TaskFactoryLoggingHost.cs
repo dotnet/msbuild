@@ -138,16 +138,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Sets or retrieves the logging context
-        /// </summary>
-        internal BaseLoggingContext LoggingContext
-        {
-            [DebuggerStepThrough]
-            get
-            { return _loggingContext; }
-        }
-
         #region IBuildEngine Members
 
         /// <summary>

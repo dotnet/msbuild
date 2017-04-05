@@ -1580,12 +1580,6 @@ namespace Microsoft.Build.BackEnd.Logging
             private Dictionary<BuildEventContext, object> _startedEvent;
             private int _messageIdentLevel = 2;
 
-            internal int MessageIdentLevel
-            {
-                get { return _messageIdentLevel; }
-                set { _messageIdentLevel = value; }
-            }
-
             internal MPPerformanceCounter(string scopeName)
                 : base(scopeName)
             {

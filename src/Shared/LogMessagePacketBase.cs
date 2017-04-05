@@ -113,8 +113,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 #else
-        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
-
         private static int GetDefaultPacketVersion()
         {
             Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;

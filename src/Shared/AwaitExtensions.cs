@@ -52,28 +52,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Provides await functionality for ordinary <see cref="WaitHandle"/>s.
-        /// </summary>
-        /// <param name="handle">The handle to wait on.</param>
-        /// <returns>The awaiter.</returns>
-        internal static TaskAwaiter GetAwaiter(this WaitHandle handle)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(handle, "handle");
-            return handle.ToTask().GetAwaiter();
-        }
-
-        /// <summary>
-        /// Provides await functionality for an array of ordinary <see cref="WaitHandle"/>s.
-        /// </summary>
-        /// <param name="handles">The handles to wait on.</param>
-        /// <returns>The awaiter.</returns>
-        internal static TaskAwaiter<int> GetAwaiter(this WaitHandle[] handles)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(handles, "handle");
-            return handles.ToTask().GetAwaiter();
-        }
-
-        /// <summary>
         /// Creates a TPL Task that is marked as completed when a <see cref="WaitHandle"/> is signaled.
         /// </summary>
         /// <param name="handle">The handle whose signal triggers the task to be completed.  Do not use a <see cref="Mutex"/> here.</param>

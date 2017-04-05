@@ -103,8 +103,6 @@ namespace Microsoft.Build.Collections
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
-        // cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
-        private const int StackAllocThreshold = 100;
         // when constructing a hashset from an existing collection, it may contain duplicates, 
         // so this is used as the max acceptable excess ratio of capacity to count. Note that
         // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
@@ -1714,13 +1712,6 @@ namespace Microsoft.Build.Collections
         }
 
         #endregion
-
-        // used for set checking operations (using enumerables) that rely on counting
-        internal struct ElementCount
-        {
-            internal int uniqueCount;
-            internal int unfoundCount;
-        }
 
         internal struct Slot
         {

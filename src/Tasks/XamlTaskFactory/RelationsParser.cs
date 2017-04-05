@@ -274,15 +274,10 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string importType = "IMPORT";
         private const string tasksAttribute = "TASKS";
         private const string parameterType = "PARAMETER";
-        private const string parameterGroupType = "PARAMETERGROUP";
-        private const string enumType = "VALUE";
         private const string task = "TASK";
         private const string nameProperty = "NAME";
         private const string status = "STATUS";
         private const string switchName = "SWITCH";
-        private const string reverseSwitchName = "REVERSESWITCH";
-        private const string oldName = "OLDNAME";
-        private const string argumentType = "ARGUMENT";
         private const string argumentValueName = "ARGUMENTVALUE";
         private const string relations = "RELATIONS";
         private const string switchGroupType = "SWITCHGROUP";
@@ -290,32 +285,11 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string includedPlatformType = "INCLUDEDPLATFORM";
         private const string excludedPlatformType = "EXCLUDEDPLATFORM";
         private const string overridesType = "OVERRIDES";
-        private const string conflictsType = "CONFLICTS";
         private const string requiresType = "REQUIRES";
-        private const string externalOverridesType = "EXTERNALOVERRIDES";
-        private const string externalConflictsType = "EXTERNALCONFLICTS";
-        private const string externalRequiresType = "EXTERNALREQUIRES";
         private const string toolAttribute = "TOOL";
         private const string switchAttribute = "SWITCH";
 
         // properties
-        private const string typeProperty = "TYPE";
-        private const string typeAlways = "ALWAYS";
-        private const string trueProperty = "TRUE";
-        private const string falseProperty = "FALSE";
-        private const string minProperty = "MIN";
-        private const string maxProperty = "MAX";
-        private const string separatorProperty = "SEPARATOR";
-        private const string defaultProperty = "DEFAULT";
-        private const string fallbackProperty = "FALLBACKARGUMENTPARAMETER";
-        private const string outputProperty = "OUTPUT";
-        private const string argumentProperty = "ARGUMENTPARAMETER";
-        private const string argumentRequiredProperty = "REQUIRED";
-        private const string propertyRequiredProperty = "REQUIRED";
-        private const string reversibleProperty = "REVERSIBLE";
-        private const string categoryProperty = "CATEGORY";
-        private const string displayNameProperty = "DISPLAYNAME";
-        private const string descriptionProperty = "DESCRIPTION";
         #endregion
 
         /// <summary>

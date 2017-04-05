@@ -136,22 +136,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        /// <summary>
-        /// Provide access to the write hander delegate so that it can be redirected
-        /// if necessary (e.g. to a file)
-        /// </summary>
-        protected WriteHandler WriteHandler
-        {
-            get
-            {
-                return write;
-            }
-
-            set
-            {
-                write = value;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -844,13 +828,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 get { return scopeName; }
             }
 
-            /// <summary>
-            /// Total number of calls so far.
-            /// </summary>
-            internal int Calls
-            {
-                get { return calls; }
-            }
 
             /// <summary>
             /// Total accumalated time so far.

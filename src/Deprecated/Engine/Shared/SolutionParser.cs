@@ -117,17 +117,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         #region Properties
 
         /// <summary>
-        /// This property returns the list of warnings that were generated during solution parsing
-        /// </summary>
-        internal ArrayList SolutionParserWarnings
-        {
-            get
-            {
-                return solutionParserWarnings;
-            }
-        }
-
-        /// <summary>
         /// This property returns the list of comments that were generated during the solution parsing
         /// </summary>
         internal ArrayList SolutionParserComments
@@ -135,18 +124,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             get
             {
                 return solutionParserComments;
-            }
-        }
-
-        /// <summary>
-        /// This property returns the list of error codes for warnings/errors that were generated during solution parsing. 
-        /// UNIT TESTING ONLY
-        /// </summary>
-        internal ArrayList SolutionParserErrorCodes
-        {
-            get
-            {
-                return solutionParserErrorCodes;
             }
         }
 
@@ -235,36 +212,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             set
             {
                 this.solutionFileDirectory = value;
-            }
-        }
-
-        /// <summary>
-        /// For unit-testing only.
-        /// </summary>
-        /// <value></value>
-        /// <owner>RGoel</owner>
-        internal StreamReader SolutionReader
-        {
-            get
-            {
-                return reader;
-            }
-
-            set
-            {
-                reader = value;
-            }
-        }
-
-        /// <summary>
-        /// For unit-testing only.
-        /// </summary>
-        /// <value></value>
-        internal ProjectInSolution[] Projects
-        {
-            get
-            {
-                return (ProjectInSolution[]) this.projectsInOrder.ToArray(typeof(ProjectInSolution));
             }
         }
 
@@ -1329,11 +1276,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <param name="projectGuid"></param>
         /// <returns></returns>
         /// <owner>RGoel</owner>
-        internal string GetProjectRelativePathByGuid(string projectGuid)
-        {
-            ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.RelativePath;
-        }
 
         #endregion
     } // class SolutionParser

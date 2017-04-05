@@ -64,18 +64,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the current assembly version 
-        /// </summary>
-        internal static string MSBuildAssemblyVersion
-        {
-            get
-            {
-                return s_msbuildAssemblyVersion;
-            }
-        }
-
-
-        /// <summary>
         /// Helper method to tell us whether a particular metadata name is an MSBuild well-known metadata
         /// (e.g., "RelativeDir", "FullPath", etc.)
         /// </summary>
@@ -97,25 +85,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         internal delegate void MethodUnderTest();
-
-        /// <summary>
-        /// Gets an item list from the project and assert that it contains
-        /// exactly one item with the supplied name.
-        /// </summary>
-        static internal ProjectItem AssertSingleItem(Project p, string type, string itemInclude)
-        {
-            ProjectItem[] items = p.GetItems(type).ToArray();
-            int count = 0;
-            foreach (ProjectItem item in items)
-            {
-                Assert.Equal(itemInclude.ToUpperInvariant(), item.EvaluatedInclude.ToUpperInvariant());
-                ++count;
-            }
-
-            Assert.Equal(1, count);
-
-            return items[0];
-        }
 
         /// <summary>
         /// Helper that asserts if an exception of type specified is 
@@ -677,35 +646,6 @@ namespace Microsoft.Build.UnitTests
             Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
         }
 
-        /// <summary>
-        /// This helper method compares the final project contents with the expected
-        /// value.
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="newExpectedProjectContents"></param>
-        internal static void CompareProjectContents
-            (
-            Project project,
-            string newExpectedProjectContents
-            )
-        {
-            // Get the new XML for the project, normalizing the whitespace.
-            string newActualProjectContents = project.Xml.RawXml;
-
-            // Replace single-quotes with double-quotes, and normalize whitespace.
-            newExpectedProjectContents = NormalizeXmlWhitespace(CleanupFileContents(newExpectedProjectContents));
-
-            // Compare the actual XML with the expected XML.
-            Console.WriteLine("================================= EXPECTED ===========================================");
-            Console.WriteLine(newExpectedProjectContents);
-            Console.WriteLine();
-            Console.WriteLine("================================== ACTUAL ============================================");
-            Console.WriteLine(newActualProjectContents);
-            Console.WriteLine();
-            Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
-        }
-
-
         private static string s_tempProjectDir = null;
 
         /// <summary>
@@ -850,19 +790,6 @@ namespace Microsoft.Build.UnitTests
         {
             MockLogger logger = new MockLogger();
             bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
-        }
-
-        /// <summary>
-        /// Builds a project file from disk, and asserts if the build succeeds.
-        /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectFailure(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
-        {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
 
             Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
 
@@ -1124,27 +1051,6 @@ namespace Microsoft.Build.UnitTests
             {
                 Assert.True(one.Contains(item));
             }
-        }
-
-        /// <summary>
-        /// Verify that the two enumerables are value identical
-        /// </summary>
-        internal static void AssertEnumerationsValueEqual<T>(IEnumerable<T> one, IEnumerable<T> two)
-        {
-            List<T> listOne = new List<T>();
-            List<T> listTwo = new List<T>();
-
-            foreach (T item in one)
-            {
-                listOne.Add(item);
-            }
-
-            foreach (T item in two)
-            {
-                listTwo.Add(item);
-            }
-
-            AssertCollectionsValueEqual(listOne, listTwo);
         }
 
         /// <summary>

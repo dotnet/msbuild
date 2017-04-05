@@ -494,19 +494,6 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Removes the specified properties from this dictionary
-        /// </summary>
-        /// <param name="other">An enumerator over the properties to remove.</param>
-        internal void RemoveProperties(IEnumerable<T> other)
-        {
-            // Properties are locked in the remove method
-            foreach (T property in other)
-            {
-                Remove(property.Key);
-            }
-        }
-
-        /// <summary>
         /// Helper to convert into a read-only dictionary of string, string.
         /// </summary>
         internal IDictionary<string, string> ToDictionary()

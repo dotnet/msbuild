@@ -60,20 +60,6 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256DigestMethod);
         }
 
-        private static XmlElement FindIdElement(XmlElement context, string idValue)
-        {
-            if (context == null)
-                return null;
-
-            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            return context.SelectSingleNode("//*[@ID=\"" + idValue + "\"]") as XmlElement;
-        }
-
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
         {
             // We only care about Id references inside of the KeyInfo section
@@ -90,7 +76,6 @@ namespace System.Deployment.Internal.CodeSigning
     internal class SignedCmiManifest2
     {
         private XmlDocument _manifestDom = null;
-        private CmiStrongNameSignerInfo _strongNameSignerInfo = null;
         private CmiAuthenticodeSignerInfo _authenticodeSignerInfo = null;
         private bool _useSha256;
 
@@ -118,7 +103,6 @@ namespace System.Deployment.Internal.CodeSigning
         internal void Sign(CmiManifestSigner2 signer, string timeStampUrl)
         {
             // Reset signer infos.
-            _strongNameSignerInfo = null;
             _authenticodeSignerInfo = null;
 
             // Signer cannot be null.
@@ -149,70 +133,6 @@ namespace System.Deployment.Internal.CodeSigning
                 AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl, _useSha256);
             }
             StrongNameSignManifestDom(_manifestDom, licenseDom, signer, _useSha256);
-        }
-
-        // throw cryptographic exception for any verification errors.
-        internal void Verify(CmiManifestVerifyFlags verifyFlags)
-        {
-            // Reset signer infos.
-            _strongNameSignerInfo = null;
-            _authenticodeSignerInfo = null;
-
-            XmlNamespaceManager nsm = new XmlNamespaceManager(_manifestDom.NameTable);
-            nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
-            XmlElement signatureNode = _manifestDom.SelectSingleNode("//ds:Signature", nsm) as XmlElement;
-            if (signatureNode == null)
-            {
-                throw new CryptographicException(Win32.TRUST_E_NOSIGNATURE);
-            }
-
-            // Make sure it is indeed SN signature, and it is an enveloped signature.
-            bool oldFormat = VerifySignatureForm(signatureNode, "StrongNameSignature", nsm);
-
-            // It is the DSig we want, now make sure the public key matches the token.
-            string publicKeyToken = VerifyPublicKeyToken();
-
-            // OK. We found the SN signature with matching public key token, so
-            // instantiate the SN signer info property.
-            _strongNameSignerInfo = new CmiStrongNameSignerInfo(Win32.TRUST_E_FAIL, publicKeyToken);
-
-            // Now verify the SN signature, and Authenticode license if available.
-            ManifestSignedXml2 signedXml = new ManifestSignedXml2(_manifestDom, true);
-            signedXml.LoadXml(signatureNode);
-            if (_useSha256)
-            {
-                signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
-            }
-
-            AsymmetricAlgorithm key = null;
-            bool dsigValid = signedXml.CheckSignatureReturningKey(out key);
-            _strongNameSignerInfo.PublicKey = key;
-            if (!dsigValid)
-            {
-                _strongNameSignerInfo.ErrorCode = Win32.TRUST_E_BAD_DIGEST;
-                throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-            }
-
-            // Verify license as well if requested.
-            if ((verifyFlags & CmiManifestVerifyFlags.StrongNameOnly) != CmiManifestVerifyFlags.StrongNameOnly)
-            {
-                if (_useSha256)
-                {
-                    VerifyLicenseNew(verifyFlags, oldFormat);
-                }
-                else
-                {
-                    VerifyLicense(verifyFlags, oldFormat);
-                }
-            }
-        }
-
-        internal CmiStrongNameSignerInfo StrongNameSignerInfo
-        {
-            get
-            {
-                return _strongNameSignerInfo;
-            }
         }
 
         internal CmiAuthenticodeSignerInfo AuthenticodeSignerInfo
@@ -1686,14 +1606,6 @@ namespace System.Deployment.Internal.CodeSigning
             set
             {
                 _url = value;
-            }
-        }
-
-        internal X509Certificate2Collection ExtraStore
-        {
-            get
-            {
-                return _certificates;
             }
         }
 

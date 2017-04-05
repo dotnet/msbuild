@@ -464,12 +464,5 @@ namespace Microsoft.Build.Construction
         }
 
         #endregion
-
-        #region Constants
-
-        internal const int DependencyLevelUnknown = -1;
-        internal const int DependencyLevelBeingDetermined = -2;
-
-        #endregion
     }
 }

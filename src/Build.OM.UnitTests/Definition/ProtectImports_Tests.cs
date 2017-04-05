@@ -70,16 +70,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private const string ProjectMetadataValue = "ProjectMetadataValue";
 
         /// <summary>
-        /// Same item type
-        /// </summary>
-        private const string SameItemType = "SameItemType";
-
-        /// <summary>
-        /// Same item value in project
-        /// </summary>
-        private const string SameItemValueInProject = "SameItemValueInProject";
-
-        /// <summary>
         /// Same property name
         /// </summary>
         private const string PropertyName = "ImportedProperty";

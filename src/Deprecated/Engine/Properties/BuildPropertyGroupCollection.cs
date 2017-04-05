@@ -202,20 +202,6 @@ namespace Microsoft.Build.BuildEngine
         {
             this.groupingCollection.InsertAtEnd(newPropertyGroup);
         }
-
-        /// <summary>
-        /// Removes a BuildPropertyGroup from our collection.  This method does nothing
-        /// to manipulate the project's XML content.
-        /// </summary>
-        /// <owner>RGoel</owner>
-        internal void RemovePropertyGroup
-        (
-            BuildPropertyGroup propertyGroup
-        )
-        {
-            this.groupingCollection.RemovePropertyGroup(propertyGroup);
-        }
-
         #endregion
     }
 }

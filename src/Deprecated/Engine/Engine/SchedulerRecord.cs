@@ -117,17 +117,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        /// <summary>
-        /// Targets being build in the project
-        /// </summary>
-        internal string[] TargetsBuild
-        {
-            get
-            {
-                return targetsBuild;
-            }
-        }
-
         #endregion
 
         #region Methods

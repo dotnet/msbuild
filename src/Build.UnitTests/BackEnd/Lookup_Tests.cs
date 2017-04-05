@@ -1414,22 +1414,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookupPassedBetweenThreads.SetProperty(ProjectPropertyInstance.Create("x", "y"));
         }
 #endif
-
-        /// <summary>
-        /// No ideal but simple way to get the lookup from another thread
-        /// </summary>
-        private static Lookup s_lookupPassedBetweenThreads;
-
-        /// <summary>
-        /// Pass scope to other thread
-        /// </summary>
-        private static Lookup.Scope s_scopePassedBetweenThreads;
-
-        private void CreateLookupAndEnterScope()
-        {
-            s_lookupPassedBetweenThreads = LookupHelpers.CreateEmptyLookup();
-            s_scopePassedBetweenThreads = s_lookupPassedBetweenThreads.EnterScope("x");
-        }
     }
 
     internal class LookupHelpers

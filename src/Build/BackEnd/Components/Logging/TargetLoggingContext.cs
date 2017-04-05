@@ -70,16 +70,6 @@ namespace Microsoft.Build.BackEnd.Logging
             set { s_enableTargetOutputLogging = value; }
         }
 
-        /// <summary>
-        /// Retrieves the project logging context.
-        /// </summary>
-        internal ProjectLoggingContext ProjectLoggingContext
-        {
-            get
-            {
-                return _projectLoggingContext;
-            }
-        }
 
         /// <summary>
         /// Retrieves the target.

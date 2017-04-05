@@ -95,22 +95,6 @@ namespace Microsoft.Build.BuildEngine
             
         }
 
-        [DllImport("advapi32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool InitializeSecurityDescriptor(IntPtr pSecurityDescriptor, int dwRevision);
-
-        [DllImport("advapi32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetSecurityDescriptorDacl
-        (
-            IntPtr pSecurityDescriptor,
-            [In, MarshalAs(UnmanagedType.Bool)]
-            bool bDaclPresent,
-            IntPtr pDacl,
-            [In, MarshalAs(UnmanagedType.Bool)]
-            bool bDaclDefaulted
-        );
-
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern SafeFileHandle CreateFileMapping
         (

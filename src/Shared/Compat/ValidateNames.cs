@@ -222,16 +222,6 @@ namespace System.Xml {
         }
 
         /// <summary>
-        /// Calls parseName and throws exception if the resulting name is not a valid NCName.
-        /// Returns the input string if there is no error.
-        /// </summary>
-        internal static string ParseNCNameThrow(string s) {
-            // throwOnError = true
-            ParseNCNameInternal(s, true);
-            return s;
-        }
-
-        /// <summary>
         /// Calls parseName and returns false or throws exception if the resulting name is not
         /// a valid NCName.  Returns the input string if there is no error.
         /// </summary>
@@ -285,87 +275,6 @@ namespace System.Xml {
         }
 
         /// <summary>
-        /// Calls parseQName and throws exception if the resulting name is not a valid QName.
-        /// Returns the prefix and local name parts.
-        /// </summary>
-        internal static void ParseQNameThrow(string s, out string prefix, out string localName) {
-            int colonOffset;
-            int len = ParseQName(s, 0, out colonOffset);
-
-            if (len == 0 || len != s.Length) {
-                // If the string is not a valid QName, then throw
-                ThrowInvalidName(s, 0, len);
-            }
-
-            if (colonOffset != 0) {
-                prefix = s.Substring(0, colonOffset);
-                localName = s.Substring(colonOffset + 1);
-            }
-            else {
-                prefix = "";
-                localName = s;
-            }
-        }
-
-#if !SILVERLIGHT
-        /// <summary>
-        /// Parses the input string as a NameTest (see the XPath spec), returning the prefix and
-        /// local name parts.  Throws an exception if the given string is not a valid NameTest.
-        /// If the NameTest contains a star, null values for localName (case NCName':*'), or for
-        /// both localName and prefix (case '*') are returned.
-        /// </summary>
-        internal static void ParseNameTestThrow(string s, out string prefix, out string localName) {
-            int len, lenLocal, offset;
-
-            if (s.Length != 0 && s[0] == '*') {
-                // '*' as a NameTest
-                prefix = localName = null;
-                len = 1;
-            }
-            else {
-                // Parse NCName (may be prefix, may be local name)
-                len = ParseNCName(s, 0);
-                if (len != 0) {
-
-                    // Non-empty NCName, so look for colon if there are any characters left
-                    localName = s.Substring(0, len);
-                    if (len < s.Length && s[len] == ':') {
-
-                        // First NCName was prefix, so look for local name part
-                        prefix = localName;
-                        offset = len + 1;
-                        if (offset < s.Length && s[offset] == '*') {
-                            // '*' as a local name part, add 2 to len for colon and star
-                            localName = null;
-                            len += 2;
-                        }
-                        else {
-                            lenLocal = ParseNCName(s, offset);
-                            if (lenLocal != 0) {
-                                // Local name part found, so increase total NameTest length
-                                localName = s.Substring(offset, lenLocal);
-                                len += lenLocal + 1;
-                            }
-                        }
-                    }
-                    else {
-                        prefix = string.Empty;
-                    }
-                }
-                else {
-                    // Make the compiler happy
-                    prefix = localName = null;
-                }
-            }
-
-            if (len == 0 || len != s.Length) {
-                // If the string is not a valid NameTest, then throw
-                ThrowInvalidName(s, 0, len);
-            }
-        }
-#endif
-
-        /// <summary>
         /// Throws an invalid name exception.
         /// </summary>
         /// <param name="s">String that was parsed.</param>
@@ -403,51 +312,6 @@ namespace System.Xml {
         }
 
 #if !SILVERLIGHT
-        internal static Exception GetInvalidNameException(string s, int offsetStartChar, int offsetBadChar) {
-            // If the name is empty, throw an exception
-            if (offsetStartChar >= s.Length)
-                return new XmlException("Res.Xml_EmptyName");
-
-            Debug.Assert(offsetBadChar < s.Length);
-
-            if (xmlCharType.IsNCNameSingleChar(s[offsetBadChar]) && !xmlCharType.IsStartNCNameSingleChar(s[offsetBadChar])) {
-                // The error character is a valid name character, but is not a valid start name character
-                //return new XmlException(Res.Xml_BadStartNameChar, XmlException.BuildCharExceptionArgs(s, offsetBadChar));
-                return new XmlException("Xml_BadStartNameChar");
-            }
-            else {
-                // The error character is an invalid name character
-                //return new XmlException(Res.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(s, offsetBadChar));
-                return new XmlException("Xml_BadNameChar");
-            }
-        }
-
-        /// <summary>
-        /// Returns true if "prefix" starts with the characters 'x', 'm', 'l' (case-insensitive).
-        /// </summary>
-        internal static bool StartsWithXml(string s) {
-            if (s.Length < 3)
-                return false;
-
-            if (s[0] != 'x' && s[0] != 'X')
-                return false;
-
-            if (s[1] != 'm' && s[1] != 'M')
-                return false;
-
-            if (s[2] != 'l' && s[2] != 'L')
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Returns true if "s" is a namespace that is reserved by Xml 1.0 or Namespace 1.0.
-        /// </summary>
-        internal static bool IsReservedNamespace(string s) {
-            return s.Equals(XmlReservedNs.NsXml) || s.Equals(XmlReservedNs.NsXmlNs);
-        }
-
 #if FEATURE_XPATH
         /// <summary>
         /// Throw if the specified name parts are not valid according to the rules of "nodeKind".  Check only rules that are
@@ -592,41 +456,8 @@ namespace System.Xml {
         }
 #endif
 
-        /// <summary>
-        /// Creates a colon-delimited qname from prefix and local name parts.
-        /// </summary>
-        private static string CreateName(string prefix, string localName) {
-            return (prefix.Length != 0) ? prefix + ":" + localName : localName;
-        }
 #endif
 
-
-#if !SILVERLIGHT || SILVERLIGHT_XPATH
-        /// <summary>
-        /// Split a QualifiedName into prefix and localname, w/o any checking.
-        /// (Used for XmlReader/XPathNavigator MoveTo(name) methods)
-        /// </summary>
-        internal static void SplitQName(string name, out string prefix, out string lname) {
-            int colonPos = name.IndexOf(':');
-            if (-1 == colonPos) {
-                prefix = string.Empty;
-                lname = name;
-            }
-            else if (0 == colonPos || (name.Length-1) == colonPos) {
-#if !SILVERLIGHT_XPATH
-                //throw new ArgumentException(Res.GetString(Res.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(':', '\0')), "name");
-                throw new ArgumentException("Xml_BadNameChar");
-#else
-                throw new ArgumentException(Res.GetString(Res.Xml_BadNameChar, XmlExceptionHelper.BuildCharExceptionArgs(':', '\0')), "name");
-#endif
-            }
-            else {
-                prefix = name.Substring(0, colonPos);
-                colonPos++; // move after colon
-                lname = name.Substring(colonPos, name.Length - colonPos);
-            }
-        }
-#endif
     }
 
 #if SILVERLIGHT_XPATH

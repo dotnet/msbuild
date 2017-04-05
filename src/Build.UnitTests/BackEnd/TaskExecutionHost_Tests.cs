@@ -1226,18 +1226,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Helper method for tests
         /// </summary>
-        private void ValidateOutputItem(string outputName, ITaskItem value)
-        {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
-
-            Assert.Equal(1, _bucket.Lookup.GetItems("output").Count);
-            Assert.Equal(0, TaskItemComparer.Instance.Compare(value, new TaskItem(_bucket.Lookup.GetItems("output").First())));
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
         private void ValidateOutputItems(string outputName, string[] values)
         {
             Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
@@ -1414,14 +1402,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
             parameters["ExecuteReturnParam"] = new Tuple<string, ElementLocation>(returnParam ? "true" : "false", ElementLocation.Create("foo.proj"));
             return parameters;
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
-        private IElementLocation GetParameterLocation(string name)
-        {
-            return ElementLocation.Create(".", 1, 1);
         }
 
         /// <summary>

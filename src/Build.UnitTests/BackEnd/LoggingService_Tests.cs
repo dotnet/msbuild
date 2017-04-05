@@ -776,19 +776,6 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Log a message every 10ms, this is used to verify 
-        /// the shutdown is not waiting forever for events as it 
-        /// shutsdown.
-        /// </summary>
-        private void TightLoopLogEvents()
-        {
-            while (!_shutdownComplete.WaitOne(10))
-            {
-                _initializedService.LogBuildEvent(new BuildMessageEventArgs("Message", "Help", "Sender", MessageImportance.High));
-            }
-        }
-
-        /// <summary>
         /// Register the correct logger and then call the shutdownComponent method. 
         /// This will call shutdown on the loggers, we should expect to see certain exceptions.
         /// </summary>

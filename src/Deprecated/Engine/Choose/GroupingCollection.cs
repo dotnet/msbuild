@@ -267,14 +267,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal GroupEnumeratorHelper ChoosesTopLevel
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ChoosesTopLevel);
-            }
-        }
-
         #endregion
 
         #region Methods
@@ -490,26 +482,6 @@ namespace Microsoft.Build.BuildEngine
             }
             else if (newGroup is Choose)
                 this.chooseCount++;
-        }
-
-        /// <summary>
-        /// Removes a Choose block from the list.  This method does nothing to manipulate
-        /// the project's XML content.
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        /// <owner>DavidLe</owner>
-        /// <param name="choose"></param>
-        internal void RemoveChoose
-        (
-            Choose choose
-        )
-        {
-            error.VerifyThrow(this.combinedGroupList != null, "Arraylist not initialized!");
-
-            this.combinedGroupList.Remove(choose);
-            this.chooseCount--;
-            error.VerifyThrow(this.chooseCount >= 0, "Too many calls to RemoveChoose().");
         }
 
         /// <summary>

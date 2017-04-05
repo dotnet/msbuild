@@ -121,19 +121,6 @@ namespace Microsoft.Build.Tasks
             set { _targetFrameworkMoniker = value; }
         }
 
-        protected internal AssemblyReference AddAssemblyNameFromItem(ITaskItem item, AssemblyReferenceType referenceType)
-        {
-            AssemblyReference assembly = new AssemblyReference();
-            assembly.AssemblyIdentity = AssemblyIdentity.FromAssemblyName(item.ItemSpec);
-            assembly.ReferenceType = referenceType;
-            _manifest.AssemblyReferences.Add(assembly);
-            string hintPath = item.GetMetadata("HintPath");
-            if (!String.IsNullOrEmpty(hintPath))
-                assembly.SourcePath = hintPath;
-            SetItemAttributes(item, assembly);
-            return assembly;
-        }
-
         protected internal AssemblyReference AddAssemblyFromItem(ITaskItem item)
         {
             // if the assembly is a no-pia assembly and embed interop is turned on, then we don't write it to the manifest.

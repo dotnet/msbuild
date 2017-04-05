@@ -26,9 +26,6 @@ namespace Microsoft.Build.Shared
         // Note that the pattern is more strict than the rules for valid XML element names.
         internal const string itemTypeOrMetadataNameSpecification = @"[A-Za-z_][A-Za-z_0-9\-]*";
 
-        // the portion of an item transform that is the function that we wish to execute on the item
-        internal const string itemFunctionNameSpecification = @"[A-Za-z]*";
-
         // description of an item vector transform, including the optional separator specification
         private const string itemVectorTransformSpecification =
             @"(?<PREFIX>@\(\s*)

@@ -66,17 +66,6 @@ namespace Microsoft.Build.BuildEngine
 
         #region Properties
         /// <summary>
-        /// Associated Toolset (version name, toolset path, optional associated properties)
-        /// </summary>
-        internal Toolset Toolset
-        {
-            get
-            {
-                return this.toolset;
-            }
-        }
-
-        /// <summary>
         /// Tools version for this toolset
         /// </summary>
         internal string ToolsVersion
@@ -138,17 +127,6 @@ namespace Microsoft.Build.BuildEngine
         {
             RegisterDefaultTasks(buildEventContext);
             return defaultTaskRegistry;
-        }
-
-        /// <summary>
-        /// Sets the default task registry to the provided value.
-        /// </summary>
-        /// <param name="taskRegistry"></param>
-        internal void SetTaskRegistry(ITaskRegistry taskRegistry)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(taskRegistry, "taskRegistry");
-            defaultTasksRegistrationAttempted = true;
-            defaultTaskRegistry = taskRegistry;
         }
 
         /// <summary>

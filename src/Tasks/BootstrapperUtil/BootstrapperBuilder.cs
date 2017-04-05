@@ -448,28 +448,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return a;
         }
 
-        internal bool ContainsCulture(string culture)
-        {
-            if (!_fInitialized)
-                Refresh();
-            return _cultures.Contains(culture);
-        }
-
-        internal string[] Cultures
-        {
-            get
-            {
-                if (!_fInitialized)
-                    Refresh();
-
-                ArrayList list = new ArrayList(_cultures.Values);
-                list.Sort();
-                string[] a = new string[list.Count];
-                list.CopyTo(a, 0);
-                return a;
-            }
-        }
-
         internal bool Validate
         {
             get { return _fValidate; }
@@ -1944,11 +1922,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             Stream s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(BootstrapperBuilder).Namespace, name));
             Debug.Assert(s != null, String.Format(CultureInfo.CurrentCulture, "EmbeddedResource '{0}' not found", name));
             return s;
-        }
-
-        private string GetAssemblyPath()
-        {
-            return System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
         private void DumpXmlToFile(XmlNode node, string fileName)

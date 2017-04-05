@@ -363,14 +363,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal int ProjectId
-        {
-            get
-            {
-                return projectId;
-            }
-        }
-
         internal string ProjectFile
         {
             get

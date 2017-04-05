@@ -22,11 +22,6 @@ namespace Microsoft.Build.Shared
         internal const string ToolsPath = "MSBuildToolsPath";
 
         /// <summary>
-        /// Name of the property that indicates the X64 tools path
-        /// </summary>
-        internal const string ToolsPath64 = "MSBuildToolsPath64";
-
-        /// <summary>
         /// Name of the property that indicates the root of the SDKs folder
         /// </summary>
         internal const string SdksPath = "MSBuildSDKsPath";
@@ -102,8 +97,6 @@ namespace Microsoft.Build.Shared
         internal const string fusionName = "FusionName";
         internal const string hintPath = "HintPath";
         internal const string assemblyFolderKey = "AssemblyFolderKey";
-        internal const string alias = "Alias";
-        internal const string aliases = "Aliases";
         internal const string parentFile = "ParentFile";
         internal const string privateMetadata = "Private";
         internal const string copyLocal = "CopyLocal";

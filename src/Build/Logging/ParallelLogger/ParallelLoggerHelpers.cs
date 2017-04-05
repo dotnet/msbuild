@@ -363,14 +363,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        internal int ProjectId
-        {
-            get
-            {
-                return _projectId;
-            }
-        }
-
         internal string ProjectFile
         {
             get

@@ -137,13 +137,5 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
-
-        private static string[] StringToIdentityList(string s)
-        {
-            string[] a = s.Split(';');
-            for (int i = 0; i < a.Length; ++i)
-                a[i] = a[i].Trim();
-            return a;
-        }
     }
 }

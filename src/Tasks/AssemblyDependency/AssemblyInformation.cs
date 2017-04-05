@@ -40,9 +40,11 @@ namespace Microsoft.Build.Tasks
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
         // Borrowed from genman.
+#if FEATURE_ASSEMBLY_LOADFROM
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
+#endif
 
 #if FEATURE_ASSEMBLY_LOADFROM
         static AssemblyInformation()
@@ -204,18 +206,6 @@ namespace Microsoft.Build.Tasks
                 dependencies = import.Dependencies;
                 frameworkName = import.FrameworkNameAttribute;
                 scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
-            }
-        }
-
-        /// <summary>
-        /// Given an assembly name, crack it open and retrieve the TargetFrameworkAttribute
-        /// assemblies and  the list of scatter files.
-        /// </summary>
-        internal static FrameworkName GetTargetFrameworkAttribute(string path)
-        {
-            using (AssemblyInformation import = new AssemblyInformation(path))
-            {
-                return import.FrameworkNameAttribute;
             }
         }
 

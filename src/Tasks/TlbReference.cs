@@ -106,18 +106,6 @@ namespace Microsoft.Build.Tasks
         /// TlbReference.GetWrapperFileName from outside
         /// </summary>
         /// <param name="typeLibName">The typelib to generate the wrapper name for</param>
-        /// <returns>The appropriate wrapper filename</returns>
-        internal static string GetWrapperFileName(string typeLibName)
-        {
-            return GetWrapperFileName(typeLibName, false /* don't include version in name */, 1, 0 /* v1.0 = some random version that won't be used */);
-        }
-
-        /// <summary>
-        /// Static version of GetWrapperFileName, as it really doesn't depend on
-        /// anything specific to the class, and this way it can be called using
-        /// TlbReference.GetWrapperFileName from outside
-        /// </summary>
-        /// <param name="typeLibName">The typelib to generate the wrapper name for</param>
         /// <param name="includeTypeLibVersionInName">True if the interop name should include the typelib's version</param>
         /// <param name="majorVerNum">Major version number to append to the interop DLL's name</param>
         /// <param name="minorVerNum">Minor version number to append to the interop DLL's name</param>

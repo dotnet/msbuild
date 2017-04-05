@@ -117,14 +117,6 @@ namespace Microsoft.Build.BuildEngine
         #region Members
         
         /// <summary>
-        /// Read-only accessor for the Project instance that this ImportCollection belongs to.
-        /// </summary>
-        internal Project ParentProject
-        {
-            get { return parentProject; }
-        }
-
-        /// <summary>
         /// Removes all Imports from this collection. Does not alter the parent project's XML.
         /// </summary>
         /// <owner>LukaszG</owner>

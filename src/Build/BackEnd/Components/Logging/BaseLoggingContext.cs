@@ -166,19 +166,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
         #endregion
 
-        #region Log events
-        /// <summary>
-        /// Will Log a build Event. Will also take into account OnlyLogCriticalEvents when determining if to drop the event or to log it.
-        /// </summary>
-        /// <param name="buildEvent">The event to log</param>
-        internal void LogBuildEvent(BuildEventArgs buildEvent)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogBuildEvent(buildEvent);
-        }
-
-        #endregion
-
         #region Log errors
         /// <summary>
         /// Log an error
@@ -190,33 +177,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
-        }
-
-        /// <summary>
-        /// Log an error
-        /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
-        /// <param name="messageResourceName">The resource name for the error</param>
-        /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogErrorWithSubcategory(BuildEventFileInfo file, string subcategoryResourceName, string messageResourceName, params object[] messageArgs)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
-        }
-
-        /// <summary>
-        /// Log an error
-        /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
-        /// <param name="errorCode"> Error code</param>
-        /// <param name="helpKeyword">Help keyword</param>
-        /// <param name="message">Error message</param>
-        internal void LogErrorFromText(BuildEventFileInfo file, string subcategoryResourceName, string errorCode, string helpKeyword, string message)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
         }
 
         /// <summary>

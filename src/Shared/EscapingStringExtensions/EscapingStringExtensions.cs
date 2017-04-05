@@ -26,10 +26,5 @@ namespace Microsoft.Build.Shared.EscapingStringExtensions
         {
             return EscapingUtilities.Escape(unescapedString);
         }
-
-        internal static bool ContainsEscapedWildcards(this string escapedString)
-        {
-            return EscapingUtilities.ContainsEscapedWildcards(escapedString);
-        }
     }
 }

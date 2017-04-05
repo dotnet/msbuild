@@ -191,43 +191,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Clear a particular scope
-        /// </summary>
-        /// <param name="projectName"></param>
-        /// <param name="buildPropertyGroup"></param>
-        /// <param name="toolsVersion"></param>
-        internal void ClearCacheScope(string projectName, BuildPropertyGroup buildPropertyGroup, string toolsVersion, CacheContentType cacheContentType)
-        {
-            // Retrieve list of scopes by this name
-            if (cacheContents[(int)cacheContentType].ContainsKey(projectName))
-            {
-                List<CacheScope> scopesByName = (List<CacheScope>)cacheContents[(int)cacheContentType][projectName];
-
-                // If the list exists search for matching scope properties otherwise create the list
-                if (scopesByName != null)
-                {
-                    // If the version is not specified default to the engine version
-                    if (toolsVersion == null)
-                    {
-                        toolsVersion = defaultToolsVersion;
-                    }
-
-                    lock (cacheManagerLock)
-                    {
-                        for (int i = 0; i < scopesByName.Count; i++)
-                        {
-                            if (scopesByName[i].ScopeProperties.IsEquivalent(buildPropertyGroup) && (String.Compare(toolsVersion, scopesByName[i].ScopeToolsVersion, StringComparison.OrdinalIgnoreCase) == 0))
-                            {
-                                scopesByName.RemoveAt(i);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Clears the whole contents of the cache.
         /// </summary>
         internal void ClearCache()

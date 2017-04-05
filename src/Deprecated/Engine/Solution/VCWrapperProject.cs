@@ -132,62 +132,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This method generates an XmlDocument representing an MSBuild project wrapper for a VC project
-        /// </summary>
-        /// <owner>LukaszG</owner>
-        static internal XmlDocument GenerateVCWrapperProject(Engine parentEngine, string vcProjectFilename, string toolsVersion)
-        {
-            string projectPath = Path.GetFullPath(vcProjectFilename);
-            Project msbuildProject = null;
-
-            try
-            {
-                msbuildProject = new Project(parentEngine, toolsVersion);
-            }
-            catch (InvalidOperationException)
-            {
-                BuildEventFileInfo fileInfo = new BuildEventFileInfo(projectPath);
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "UnrecognizedToolsVersion", toolsVersion);
-                throw new InvalidProjectFileException(projectPath, fileInfo.Line, fileInfo.Column, fileInfo.EndLine, fileInfo.EndColumn, message, null, errorCode, helpKeyword);
-            }
-
-            msbuildProject.IsLoadedByHost = false;
-            msbuildProject.DefaultTargets = "Build";
-
-            string wrapperProjectToolsVersion = SolutionWrapperProject.DetermineWrapperProjectToolsVersion(toolsVersion);
-            msbuildProject.DefaultToolsVersion = wrapperProjectToolsVersion;
-
-            BuildPropertyGroup propertyGroup = msbuildProject.AddNewPropertyGroup(true /* insertAtEndOfProject = true */);
-            propertyGroup.Condition = " ('$(Configuration)' != '') and ('$(Platform)' == '') ";
-            propertyGroup.AddNewProperty("ConfigurationName", "$(Configuration)");
-
-            propertyGroup = msbuildProject.AddNewPropertyGroup(true /* insertAtEndOfProject = true */);
-            propertyGroup.Condition = " ('$(Configuration)' != '') and ('$(Platform)' != '') ";
-            propertyGroup.AddNewProperty("ConfigurationName", "$(Configuration)|$(Platform)");
-
-            // only use PlatformName if we only have the platform part
-            propertyGroup = msbuildProject.AddNewPropertyGroup(true /* insertAtEndOfProject = true */);
-            propertyGroup.Condition = " ('$(Configuration)' == '') and ('$(Platform)' != '') ";
-            propertyGroup.AddNewProperty("PlatformName", "$(Platform)");
-
-            AddVCBuildTarget(msbuildProject, projectPath, "Build", null);
-            AddVCBuildTarget(msbuildProject, projectPath, "Clean", "Clean");
-            AddVCBuildTarget(msbuildProject, projectPath, "Rebuild", "Rebuild");
-            AddVCBuildTarget(msbuildProject, projectPath, "Publish", "Publish");
-
-            // Special environment variable to allow people to see the in-memory MSBuild project generated
-            // to represent the VC project.
-            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
-            {
-                msbuildProject.Save(vcProjectFilename + ".proj");
-            }
-
-            return msbuildProject.XmlDocument;
-        }
-
-        /// <summary>
         /// Hint to give the VCBuild task to help it find vcbuild.exe.
         /// </summary>
         static private string path;

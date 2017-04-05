@@ -193,16 +193,6 @@ namespace Microsoft.Build.Tasks
                 get { return this.runtimeVersion; }
                 set { this.runtimeVersion = value; }
             }
-
-            /// <summary>
-            /// Get or set the framework name the file was built against
-            /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
-            internal FrameworkName FrameworkNameAttribute
-            {
-                get { return this.frameworkName; }
-                set { this.frameworkName = value; }
-            }
         }
 
         /// <summary>

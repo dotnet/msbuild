@@ -165,14 +165,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Creates a ProjectExtensionsElement parented by a project
-        /// </summary>
-        internal static ProjectExtensionsElement CreateParented(XmlElementWithLocation element, ProjectRootElement parent, ProjectRootElement containingProject)
-        {
-            return new ProjectExtensionsElement(element, parent, containingProject);
-        }
-
-        /// <summary>
         /// Creates an unparented ProjectExtensionsElement, wrapping an unparented XmlElement.
         /// Caller should then ensure the element is added to a parent
         /// </summary>

@@ -130,18 +130,6 @@ namespace Microsoft.Build.BuildEngine
                 this.stringComparer = that.stringComparer;
             }
         }
-
-        /// <summary>
-        /// Whether or not this CopyOnWriteHashtable is currently a shallow or deep copy.
-        /// This state can change from true->false when this hashtable is written to.
-        /// </summary>
-        internal bool IsShallowCopy
-        {
-            get
-            {
-                return this.readonlyData != null;
-            }
-        }
 #endregion
 #region Pass-through Hashtable methods.
         public bool Contains(Object key) {return ReadOperation.Contains(key);}

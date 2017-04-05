@@ -243,24 +243,6 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Initialize the logger
-        /// </summary>
-        internal void InitializeLogger(List<ILogger> loggerList, ILogger logger, IEventSource sourceForLogger)
-        {
-            // Node loggers are central /l loggers which can understand how many CPU's the build is running with, they are only different in that
-            // they can take a number of CPU
-            INodeLogger nodeLogger = logger as INodeLogger;
-            if (null != nodeLogger)
-            {
-                nodeLogger.Initialize(sourceForLogger, 1);
-            }
-            else
-            {
-                logger.Initialize(sourceForLogger);
-            }
-        }
-
-        /// <summary>
         /// Receives the build started event for the whole build.
         /// </summary>
         private void BuildStarted(object sender, BuildStartedEventArgs e)

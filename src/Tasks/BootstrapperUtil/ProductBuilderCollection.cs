@@ -46,10 +46,5 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             return (ProductBuilder)_list[index];
         }
-
-        internal void Insert(int index, ProductBuilder builder)
-        {
-            _list.Insert(index, builder);
-        }
     }
 }

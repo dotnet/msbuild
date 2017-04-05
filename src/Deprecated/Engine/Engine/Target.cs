@@ -359,18 +359,6 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Read-only accessor for accessing the XML attribute for "Condition".  Callers should
-        /// never try and modify this.  Go through this.Condition to change the condition.
-        /// </summary>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
-
-        /// <summary>
         /// Gets the XML representing this target.
         /// </summary>
         /// <value>The XmlElement for the target.</value>

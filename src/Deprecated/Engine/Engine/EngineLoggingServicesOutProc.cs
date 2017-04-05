@@ -123,13 +123,6 @@ namespace Microsoft.Build.BuildEngine
             // Do nothing
         }
 
-        /// <summary>
-        /// Reports an exception thrown while sending logging event to the node
-        /// </summary>
-        internal void ReportLoggingFailure(Exception e)
-        {
-            parentNode.ReportUnhandledError(e);
-        }
 
         #endregion
 

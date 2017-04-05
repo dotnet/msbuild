@@ -40,10 +40,5 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             get { return _product.Name; }
         }
-
-        internal string ProductCode
-        {
-            get { return _product.ProductCode; }
-        }
     }
 }

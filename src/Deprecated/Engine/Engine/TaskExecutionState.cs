@@ -96,14 +96,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal string ExecutionDirectory
-        {
-            get
-            {
-                return this.executionDirectory;
-            }
-        }
-
         internal bool ProfileExecution
         {
             get
