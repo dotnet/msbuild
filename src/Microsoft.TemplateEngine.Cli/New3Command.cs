@@ -232,11 +232,7 @@ namespace Microsoft.TemplateEngine.Cli
                 telemetryLogger.TrackEvent(commandName + "-CalledWithNoArgs");
             }
 
-            // new parser
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
-            // old parser
-            //INewCommandInput commandInput = ExtendedCommandParserSupport.SetupParser(commandName);
-
             New3Command instance = new New3Command(commandName, host, telemetryLogger, onFirstRun, commandInput);
 
             commandInput.OnExecute(instance.ExecuteAsync);
