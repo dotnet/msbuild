@@ -42,6 +42,6 @@
     }
   },
   "UsageExamples": [
-    "-f netcoreapp2.0 --skip-restore"
+    "--framework netcoreapp2.0 --auth Individual"
   ]
 }
