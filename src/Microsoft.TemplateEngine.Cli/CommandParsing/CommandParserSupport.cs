@@ -170,7 +170,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--debug:ephemeral-hive", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:reinit", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:reset-config", string.Empty, Accept.NoArguments()),
-                    Create.Option("--debug:showconfig", string.Empty, Accept.NoArguments())
+                    Create.Option("--debug:showconfig", string.Empty, Accept.NoArguments()),
+                    Create.Option("--debug:emit-timings", string.Empty, Accept.NoArguments()),
                 };
             }
         }

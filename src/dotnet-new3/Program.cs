@@ -22,10 +22,11 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            return New3Command.Run(CommandName, CreateHost(), new TelemetryLogger(null), FirstRun, args);
+            bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
+            return New3Command.Run(CommandName, CreateHost(emitTimings), new TelemetryLogger(null), FirstRun, args);
         }
 
-        private static ITemplateEngineHost CreateHost()
+        private static ITemplateEngineHost CreateHost(bool emitTimings)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -43,7 +44,18 @@ namespace dotnet_new3
             catch
             { }
 
-            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, new[] { "dotnetcli" });
+            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, new[] { "dotnetcli" });
+
+            if (emitTimings)
+            {
+                host.OnLogTiming = (label, duration, depth) =>
+                {
+                    string indent = string.Join("", Enumerable.Repeat("  ", depth));
+                    Console.WriteLine($"{indent} {label} {duration.TotalMilliseconds}");
+                };
+            }
+
+            return host;
         }
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)

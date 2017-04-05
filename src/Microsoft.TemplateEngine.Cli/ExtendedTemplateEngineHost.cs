@@ -50,9 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         public virtual void OnSymbolUsed(string symbol, object value) => _baseHost.OnSymbolUsed(symbol, value);
-
-        public virtual void OnTimingCompleted(string label, TimeSpan timing) => _baseHost.OnTimingCompleted(label, timing);
-
+        
         public virtual bool TryGetHostParamDefault(string paramName, out string value)
         {
             switch (paramName)
@@ -118,6 +116,11 @@ namespace Microsoft.TemplateEngine.Cli
         public void LogDiagnosticMessage(string message, string category, params string[] details)
         {
             _baseHost.LogDiagnosticMessage(message, category, details);
+        }
+
+        public virtual void LogTiming(string label, TimeSpan duration, int depth)
+        {
+            _baseHost.LogTiming(label, duration, depth);
         }
 
         private bool GlobalJsonFileExistsInPath
