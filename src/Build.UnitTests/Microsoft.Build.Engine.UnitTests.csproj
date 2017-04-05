@@ -163,7 +163,6 @@
     <Compile Include="Evaluation\ImportFromMSBuildExtensionsPath_Tests.cs" />
     <Compile Include="Evaluation\Preprocessor_Tests.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache_Tests.cs" />
-    <Compile Include="Evaluation\ItemSpec_Tests.cs" />
     <Compile Include="Evaluation\ProjectStringCache_Tests.cs" />
     <Compile Include="EventArgsFormatting_Tests.cs" />
     <Compile Include="ExpressionTreeExpression_Tests.cs" />
