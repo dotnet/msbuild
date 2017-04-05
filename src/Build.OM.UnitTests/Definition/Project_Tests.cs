@@ -19,13 +19,12 @@ using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 
 using Task = System.Threading.Tasks.Task;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
-using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Immutable.ImmutableHashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -3570,21 +3569,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetAllGlobsShouldNotFindGlobsIfThereAreNoItemElements()
-        {
-            var project =
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                  </ItemGroup>
-                </Project>
-                ";
-
-            var expected = new GlobResultList();
-
-            AssertGlobResult(expected, project);
-        }
-
-        [Fact]
         public void GetAllGlobsShouldNotFindGlobsIfThereAreNone()
         {
             var project =
@@ -3621,6 +3605,32 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetAllGlobsResultsShouldBeInItemElementOrder()
+        {
+            var itemElements = Environment.ProcessorCount * 5;
+            var expected = new GlobResultList();
+
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < itemElements; i++)
+            {
+                sb.AppendLine($"<i_{i} Include=\"*\"/>");
+                expected.Add(Tuple.Create($"i_{i}", "*", ImmutableHashSet<string>.Empty));
+            }
+
+            project = string.Format(project, sb);
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Fact]
         public void GetAllGlobsShouldFindDirectlyReferencedGlobs()
         {
             var project =
@@ -3632,99 +3642,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
-            var expectedIncludes = new[] { "*.a", "*", "**", "?a" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet.Create<string>())
+                Tuple.Create("A", "*.a", expectedExcludes),
+                Tuple.Create("A", "*", expectedExcludes),
+                Tuple.Create("A", "**", expectedExcludes),
+                Tuple.Create("A", "?a", expectedExcludes)
             };
 
             AssertGlobResult(expected, project);
-        }
-
-        [Fact]
-        public void GetAllGlobsShouldFindAllExcludesAndRemoves()
-        {
-            var project =
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    <A Include=`*` Exclude=`e*`/>
-                    <A Remove=`a`/>
-                    <A Remove=`b`/>
-                    <A Include=`**` Exclude=`e**`/>
-                    <A Remove=`c`/>
-                  </ItemGroup>
-                </Project>
-                ";
-
-            var expected = new GlobResultList
-            {
-                Tuple.Create("A", new []{"**"}, new [] {"e**"}.ToImmutableHashSet(), new [] {"c"}.ToImmutableHashSet()),
-                Tuple.Create("A", new []{"*"}, new [] {"e*"}.ToImmutableHashSet(), new [] {"c", "b", "a"}.ToImmutableHashSet()),
-            };
-
-            AssertGlobResult(expected, project);
-        }
-
-        [Theory]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//<A Remove=`e*;f*`/>
-//",
-//        new[] {"ba"},
-//        new[] {"a", "ca", "da", "ea", "fa"}
-//        )]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//",
-//        new[] {"ba", "ea", "fa"},
-//        new[] {"a", "ca", "da"}
-//        )]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*`/>
-//",
-//        new[] {"ba", "ca", "da", "ea", "fa"},
-//        new[] {"a"}
-//        )]
-        [InlineData(
-            @"
-<E Include=`b`/>
-<R Include=`c`/>
-
-<A Include=`a*;b*;c*` Exclude=`@(E)`/>
-<A Remove=`@(R)`/>
-",
-        new[] {"aa", "bb", "cc"},
-        new[] {"b", "c"}
-        )]
-        public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
-        {
-            var projectTemplate =
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    {0}
-                  </ItemGroup>
-                </Project>
-                ";
-
-            var projectContents = string.Format(projectTemplate, itemContents);
-
-            var getAllGlobsResult = ObjectModelHelpers.CreateInMemoryProject(projectContents).GetAllGlobs();
-
-            var uberGlob = new CompositeGlob(getAllGlobsResult.Select(r => r.MsBuildGlob).ToImmutableArray());
-
-            foreach (var matchingString in stringsThatShouldMatch)
-            {
-                Assert.True(uberGlob.IsMatch(matchingString));
-            }
-
-            foreach (var nonMatchingString in stringsThatShouldNotMatch)
-            {
-                Assert.False(uberGlob.IsMatch(nonMatchingString));
-            }
         }
 
         [Fact]
@@ -3739,15 +3666,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
-            var expectedIncludes = new[] { "*.a", "*", "**" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet<string>.Empty)
+                Tuple.Create("A", "*.a", expectedExcludes),
+                Tuple.Create("A", "*", expectedExcludes),
+                Tuple.Create("A", "**", expectedExcludes)
             };
 
             AssertGlobResult(expected, project, "A");
-            AssertGlobResult(new GlobResultList(), project, "NotExistent");
+            AssertGlobResult(new GlobResultList(), project, "NotExistant");
         }
 
         [Fact]
@@ -3766,7 +3694,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", new []{"*"}, new[] {"*"}.ToImmutableHashSet(), ImmutableHashSet<string>.Empty),
+                Tuple.Create("A", "*", new[] {"*"}.ToImmutableHashSet()),
             };
 
             AssertGlobResult(expected, project);
@@ -3781,24 +3709,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <A Include=`*`/>
                     <B Include=`@(A)`/>
                     <C Include=`**` Exclude=`@(A)`/>
-                    <C Remove=`@(A)` />
                   </ItemGroup>
                 </Project>
                 ";
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(project, new[] { "a", "b" }))
-            using (var projectCollection = new ProjectCollection())
+            var expected = new GlobResultList
             {
-                var globResult = new Project(testFiles.ProjectFile, null, MSBuildConstants.CurrentToolsVersion, projectCollection).GetAllGlobs();
+                Tuple.Create("A", "*", ImmutableHashSet<string>.Empty),
+                Tuple.Create("C", "**", ImmutableHashSet<string>.Empty),
+            };
 
-                var expected = new GlobResultList
-                {
-                    Tuple.Create("C", new []{"**"}, new [] {"build.proj", "a", "b"}.ToImmutableHashSet(), new [] {"build.proj", "a", "b"}.ToImmutableHashSet()),
-                    Tuple.Create("A", new []{"*"}, ImmutableHashSet<string>.Empty, ImmutableHashSet<string>.Empty)
-                };
-
-                AssertGlobResultsEqual(expected, globResult);
-            }
+            AssertGlobResult(expected, project);
         }
 
         private static void AssertGlobResult(GlobResultList expected, string project)
@@ -3820,9 +3741,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             for (var i = 0; i < expected.Count; i++)
             {
                 Assert.Equal(expected[i].Item1, globs[i].ItemElement.ItemType);
-                Assert.Equal(expected[i].Item2, globs[i].IncludeGlobs);
+                Assert.Equal(expected[i].Item2, globs[i].Glob);
                 Assert.Equal(expected[i].Item3, globs[i].Excludes);
-                Assert.Equal(expected[i].Item4, globs[i].Removes);
             }
         }
 

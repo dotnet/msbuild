@@ -500,12 +500,10 @@ namespace Microsoft.Build.Evaluation
 {
     public partial class GlobResult
     {
-        internal GlobResult() { }
+        public GlobResult(Microsoft.Build.Construction.ProjectItemElement itemElement, string glob, System.Collections.Generic.IEnumerable<string> excludes) { }
         public System.Collections.Generic.IEnumerable<string> Excludes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Collections.Generic.IEnumerable<string> IncludeGlobs { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Glob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectItemElement ItemElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public Microsoft.Build.Globbing.IMSBuildGlob MsBuildGlob { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.Collections.Generic.IEnumerable<string> Removes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     [System.FlagsAttribute]
     public enum NewProjectFileOptions
