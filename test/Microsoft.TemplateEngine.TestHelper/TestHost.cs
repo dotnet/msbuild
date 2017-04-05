@@ -110,5 +110,10 @@ namespace Microsoft.TemplateEngine.TestHelper
                 Console.WriteLine("      " + detail);
             }
         }
+
+        public void LogTiming(string label, TimeSpan duration, int depth)
+        {
+            OnTimingCompleted(label, duration);
+        }
     }
 }

@@ -244,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
             int result;
             try
             {
-                using (Timing.Over("Execute"))
+                using (Timing.Over(host, "Execute"))
                 {
                     result = commandInput.Execute(args);
                 }
