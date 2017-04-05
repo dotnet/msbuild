@@ -12,6 +12,6 @@
     }
   },
   "UsageExamples": [
-    "-f netcoreapp1.1 --skip-restore"
+    "--framework netcoreapp1.1"
   ]
 }
