@@ -5,16 +5,18 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class InvalidParameterInfo
     {
-        public InvalidParameterInfo(string inputFormat, string specifiedValue, string canonical)
+        public InvalidParameterInfo(string inputFormat, string specifiedValue, string canonical, bool invalidDefault = false)
         {
             InputFormat = inputFormat;
             SpecifiedValue = specifiedValue;
             Canonical = canonical;
+            InvalidDefault = invalidDefault;
         }
 
         public string InputFormat { get; }
         public string SpecifiedValue { get; }
         public string Canonical { get; }
+        public bool InvalidDefault { get; }
 
         public static string InvalidParameterListToString(IReadOnlyList<InvalidParameterInfo> invalidParameterList)
         {
@@ -27,7 +29,14 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (InvalidParameterInfo invalidParam in invalidParameterList)
             {
-                invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, invalidParam.InputFormat, invalidParam.SpecifiedValue, invalidParam.Canonical);
+                if (!invalidParam.InvalidDefault)
+                {
+                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, invalidParam.InputFormat, invalidParam.SpecifiedValue, invalidParam.Canonical);
+                }
+                else
+                {
+                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDefault, invalidParam.Canonical, invalidParam.SpecifiedValue);
+                }
             }
 
             return invalidParamsErrorText;
