@@ -157,7 +157,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     if (packageId.Length == 0)
                     {
-                        packageId = NuGetUtilities.GetPackageIdFromSourcePath(SourcePath) ?? String.Empty;
+                        packageId = NuGetUtils.GetPackageIdFromSourcePath(SourcePath) ?? String.Empty;
                     }
                 }
 

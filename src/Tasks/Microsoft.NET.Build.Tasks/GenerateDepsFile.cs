@@ -132,7 +132,7 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var fileToSkip in FilesToSkip)
             {
                 string packageId, packageSubPath;
-                ConflictResolution.NuGetUtilities.GetPackageParts(fileToSkip.ItemSpec, out packageId, out packageSubPath);
+                NuGetUtils.GetPackageParts(fileToSkip.ItemSpec, out packageId, out packageSubPath);
 
                 if (String.IsNullOrEmpty(packageId) || String.IsNullOrEmpty(packageSubPath))
                 {
