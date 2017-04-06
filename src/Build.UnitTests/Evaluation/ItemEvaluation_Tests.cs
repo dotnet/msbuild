@@ -361,12 +361,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
             <A Include=`1` />
             <B Include=`B`>
                <M>$([System.String]::new(`%(Identity)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
             </B>
             <C Include=`C`>
                <M>$([System.String]::new(`$(P)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
             </C>
             <D Include=`D`>
                <M>$([System.String]::new(`@(A)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
             </D>
         </ItemGroup>
 
@@ -382,15 +385,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new Dictionary<string, string>(),
                 new Dictionary<string, string>
                 {
-                    {"M", "B"}
+                    {"M", "B"},
+                    {"M2", "B"}
                 },
                 new Dictionary<string, string>
                 {
-                    {"M", "@(A)"}
+                    {"M", "@(A)"},
+                    {"M2", "@(A)"}
                 },
                 new Dictionary<string, string>
                 {
-                    {"M", "@(A)"}
+                    {"M", "@(A)"},
+                    {"M2", "@(A)"}
                 }
             };
 
