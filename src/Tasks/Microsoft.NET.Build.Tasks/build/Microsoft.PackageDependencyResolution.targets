@@ -252,7 +252,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
     </CollectSDKReferencesDesignTime>
   </Target>
-          
+
   <!--
     ============================================================
                      RunProduceContentAssets
