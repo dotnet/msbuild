@@ -2002,6 +2002,19 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine(Path.Combine(s_exePath, s_exeName) + " " + equivalentCommandLine + " " + projectFile);
                     }
 
+                    // cpuCount > 1 not supported on mono/unix yet
+                    if (cpuCount > 1 && NativeMethodsShared.IsMono && !NativeMethodsShared.IsWindows)
+                    {
+                        cpuCount = 1;
+
+                        if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+                            !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
+                            verbosity != LoggerVerbosity.Minimal && verbosity != LoggerVerbosity.Quiet)
+                        {
+                            Console.WriteLine($"Parallel builds (/m: or /maxcpucount:) are not yet supported on Mono/Unix. Defaulting to /m:1");
+                        }
+                    }
+
 #if FEATURE_XML_SCHEMA_VALIDATION
                     // figure out if the project needs to be validated against a schema
                     needToValidateProject = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Validate);
