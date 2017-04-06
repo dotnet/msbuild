@@ -1,0 +1,57 @@
+<Project>
+  <PropertyGroup Condition=" '$(IncludeLegacySharedFramework)' == 'true' ">
+    <Legacy110CoreSetupChannel>release/1.1.0</Legacy110CoreSetupChannel>
+    <Legacy110SharedFrameworkVersion>1.1.1</Legacy110SharedFrameworkVersion>
+    <Legacy110SharedHostVersion>1.1.0</Legacy110SharedHostVersion>
+    <Legacy110HostFxrVersion>1.1.0</Legacy110HostFxrVersion>
+
+    <Legacy110DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(Legacy110SharedHostVersion)$(InstallerExtension)</Legacy110DownloadedSharedHostInstallerFileName>
+    <Legacy110DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(Legacy110DownloadedSharedHostInstallerFileName)</Legacy110DownloadedSharedHostInstallerFile>
+
+    <Legacy110DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(Legacy110HostFxrVersion)$(InstallerExtension)</Legacy110DownloadedHostFxrInstallerFileName>
+    <Legacy110DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(Legacy110DownloadedHostFxrInstallerFileName)</Legacy110DownloadedHostFxrInstallerFile>
+
+    <Legacy110DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(Legacy110SharedFrameworkVersion)$(InstallerExtension)</Legacy110DownloadedSharedFrameworkInstallerFileName>
+    <Legacy110DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(Legacy110DownloadedSharedFrameworkInstallerFileName)</Legacy110DownloadedSharedFrameworkInstallerFile>
+
+    <Legacy110CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(Legacy110SharedFrameworkVersion)$(ArchiveExtension)</Legacy110CombinedFrameworkHostCompressedFileName>
+
+    <Legacy110CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(Legacy110CoreSetupChannel)</Legacy110CoreSetupBlobRootUrlWithChannel>
+    <Legacy110SharedFrameworkArchiveBlobRootUrl>$(Legacy110CoreSetupBlobRootUrlWithChannel)/Binaries/$(Legacy110SharedFrameworkVersion)</Legacy110SharedFrameworkArchiveBlobRootUrl>
+    <Legacy110CoreSetupInstallerBlobRootUrl>$(Legacy110CoreSetupBlobRootUrlWithChannel)/Installers</Legacy110CoreSetupInstallerBlobRootUrl>
+    <Legacy110CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(Legacy110SharedFrameworkVersion)</Legacy110CoreSetupDownloadDirectory>
+    <Legacy110CombinedSharedHostAndFrameworkArchive>$(Legacy110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</Legacy110CombinedSharedHostAndFrameworkArchive>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(IncludeLegacySharedFramework)' == 'true' ">
+    <_DownloadAndExtractItem Include="Legacy110CombinedSharedHostAndFrameworkArchive"
+                             Condition="!Exists('$(Legacy110CombinedSharedHostAndFrameworkArchive)')">
+      <Url>$(Legacy110SharedFrameworkArchiveBlobRootUrl)/$(Legacy110CombinedFrameworkHostCompressedFileName)</Url>
+      <DownloadFileName>$(Legacy110CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+      <ExtractDestination>$(LegacySharedFrameworkPublishDirectory)</ExtractDestination>
+      <!-- don't overwrite the destination because there can be multiple shared fx's and they need to be combined -->
+      <OverwriteDestination>False</OverwriteDestination>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="Legacy110DownloadedSharedFrameworkInstallerFile"
+                             Condition="!Exists('$(Legacy110DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(Legacy110CoreSetupInstallerBlobRootUrl)/$(Legacy110SharedFrameworkVersion)/$(Legacy110DownloadedSharedFrameworkInstallerFileName)</Url>
+      <DownloadFileName>$(Legacy110DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="Legacy110DownloadedSharedHostInstallerFile"
+                             Condition="!Exists('$(Legacy110DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(Legacy110CoreSetupInstallerBlobRootUrl)/$(Legacy110SharedHostVersion)/$(Legacy110DownloadedSharedHostInstallerFileName)</Url>
+      <DownloadFileName>$(Legacy110DownloadedSharedHostInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="Legacy110DownloadedHostFxrInstallerFile"
+                             Condition="!Exists('$(Legacy110DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(Legacy110CoreSetupInstallerBlobRootUrl)/$(Legacy110HostFxrVersion)/$(Legacy110DownloadedHostFxrInstallerFileName)</Url>
+      <DownloadFileName>$(Legacy110DownloadedHostFxrInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
+</Project>

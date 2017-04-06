@@ -223,4 +223,21 @@
 
     <Delete Files="@(PdbsToClean)" />
   </Target>
+
+  <Target Name="PublishStage2WithLegacyRuntime"
+          AfterTargets="RemovePdbsFromPublishDir;">
+    <ItemGroup>
+      <LegacySharedFramework Remove="*" />
+      <LegacySharedFramework Include="$(LegacySharedFrameworkPublishDirectory)/**/*" />
+
+      <Stage2Cli Remove="*" />
+      <Stage2Cli Include="$(OutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(LegacySharedFramework)"
+          DestinationFiles="@(LegacySharedFramework->'$(Stage2WithLegacyRuntimeOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(Stage2Cli)"
+          DestinationFiles="@(Stage2Cli->'$(Stage2WithLegacyRuntimeOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

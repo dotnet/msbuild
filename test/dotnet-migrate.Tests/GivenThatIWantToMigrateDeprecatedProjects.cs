@@ -431,13 +431,7 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
-            {
-                // running the app requires netcoreapp1.1
-                return;
-            }
-
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithLegacyRuntime)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
@@ -454,7 +448,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Root
                 .GetDirectory("project");
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithLegacyRuntime)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("migrate");
 
@@ -489,13 +483,7 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
-            {
-                // running the app requires netcoreapp1.1
-                return;
-            }
-
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithLegacyRuntime)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
@@ -546,13 +534,7 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
-            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
-            {
-                // running the app requires netcoreapp1.1
-                return;
-            }
-
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithLegacyRuntime)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
