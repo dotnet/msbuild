@@ -219,7 +219,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <ResolvedAssembliesToPublish Include="@(ReferenceCopyLocalPaths)"
                                    Exclude="@(ResolvedAssembliesToPublish)"
-                                   Condition="'$(PublishProjectReferenceDocumentationFiles)' == 'true' or '%(Extension)' != '.xml'">
+                                   Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
       </ResolvedAssembliesToPublish>
     </ItemGroup>

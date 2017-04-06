@@ -140,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <PublishDocumentationFiles Condition="'$(PublishDocumentationFiles)' == ''">true</PublishDocumentationFiles>
     <PublishDocumentationFile Condition="'$(PublishDocumentationFile)' == '' and '$(PublishDocumentationFiles)' == 'true'">true</PublishDocumentationFile>
-    <PublishProjectReferenceDocumentationFiles Condition="'$(PublishProjectReferenceDocumentationFiles)' == '' and '$(PublishDocumentationFiles)' == 'true'">true</PublishProjectReferenceDocumentationFiles>
+    <PublishReferencesDocumentationFiles Condition="'$(PublishReferencesDocumentationFiles)' == '' and '$(PublishDocumentationFiles)' == 'true'">true</PublishReferencesDocumentationFiles>
   </PropertyGroup>
 
   <!-- Add a project capability so that the project properties in the IDE can show the option to generate an XML documentation file without specifying the filename -->
