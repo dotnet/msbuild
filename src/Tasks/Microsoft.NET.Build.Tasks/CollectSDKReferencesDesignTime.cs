@@ -64,6 +64,7 @@ namespace Microsoft.NET.Build.Tasks
                     var newTaskItem = new TaskItem(packageReference.ItemSpec);
                     newTaskItem.SetMetadata(MetadataKeys.SDKPackageItemSpec, string.Empty);
                     newTaskItem.SetMetadata(MetadataKeys.Name, packageReference.ItemSpec);
+                    newTaskItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "True");
 
                     implicitPackages.Add(newTaskItem);
                 }

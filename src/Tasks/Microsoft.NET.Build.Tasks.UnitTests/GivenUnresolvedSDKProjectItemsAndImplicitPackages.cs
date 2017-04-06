@@ -83,17 +83,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             VerifyTaskItem(sdkReference1, task.SDKReferencesDesignTime[0]);
             VerifyTaskItem(sdkReference2, task.SDKReferencesDesignTime[1]);
-            VerifyTaskItem(packageReference1, task.SDKReferencesDesignTime[2]);
-            VerifyTaskItem(defaultImplicitPackage1, task.SDKReferencesDesignTime[3]);
+            VerifyTaskItem(packageReference1, task.SDKReferencesDesignTime[2], true);
+            VerifyTaskItem(defaultImplicitPackage1, task.SDKReferencesDesignTime[3], true);
         }
 
-        private void VerifyTaskItem(ITaskItem input, ITaskItem output)
+        private void VerifyTaskItem(ITaskItem input, ITaskItem output, bool checkImplicit = false)
         {
             // remove unnecessary metadata to keep only ones that would be in result task items
             var removeMetadata = new[] { MetadataKeys.IsImplicitlyDefined };
             foreach (var rm in removeMetadata)
             {
-                output.RemoveMetadata(rm);
                 input.RemoveMetadata(rm);
             }
 
@@ -101,6 +100,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             foreach (var metadata in input.MetadataNames)
             {
                 input.GetMetadata(metadata.ToString()).Should().Be(output.GetMetadata(metadata.ToString()));
+            }
+
+            if (checkImplicit)
+            {
+                output.GetMetadata(MetadataKeys.IsImplicitlyDefined).Should().Be("True");
             }
         }
     }
