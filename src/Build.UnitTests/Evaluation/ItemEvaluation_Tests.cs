@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var projectContent =
 @"<Project>
         <ItemGroup>
-            <A Include=`1;$(P)` Exclude=`$(P)`/>
+            <A Include=`1`/>
             <B Include=`$([System.String]::new('@(A)'))`/>
             <C Include=`$([System.String]::new('$(P)'))`/>
         </ItemGroup>
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var projectContent =
 @"<Project>
         <ItemGroup>
-            <A Include=`1;$(P)` Exclude=`$(P)`/>
+            <A Include=`1` />
             <B Include=`B`>
                <M>$([System.String]::new(`%(Identity)`))</M>
             </B>
@@ -373,12 +373,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         <PropertyGroup>
             <P>@(A)</P>
         </PropertyGroup>
-
-        <Target Name=`Main`>
-                <Message Text=`B: %(B.M)`/>
-                <Message Text=`C: %(C.M)`/>
-                <Message Text=`D: %(D.M)`/>
-        </Target>
 </Project>";
 
             var items = ObjectModelHelpers.GetItems(projectContent, allItems: true);
