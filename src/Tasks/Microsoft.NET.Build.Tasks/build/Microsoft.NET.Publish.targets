@@ -42,7 +42,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                             PrepareForPublish;
                             ComputeAndCopyFilesToPublishDirectory;
                             GeneratePublishDependencyFile;
-                            GeneratePublishRuntimeConfigurationFile" />
+                            GeneratePublishRuntimeConfigurationFile">
+
+    <!-- Ensure there is minimal verbosity output pointing to the publish directory and not just the
+         build step's minimal output. Otherwise there is no indication at minimal verbosity of where
+         the published assets were copied. -->
+    <Message Importance="High" Text="$(MSBuildProjectName) -&gt; $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
+  </Target>
 
   <!--
     ============================================================
