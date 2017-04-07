@@ -102,6 +102,13 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_trims_conflicts_from_the_deps_file()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject project = new TestProject()
             {
                 Name = "NetCore2App",
