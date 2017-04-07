@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.New
 
         public static int Run(string[] args)
         {
-            return New3Command.Run(CommandName, CreateHost(), FirstRun, args);
+            return New3Command.Run(CommandName, CreateHost(), new TelemetryLogger(null), FirstRun, args);
         }
 
         private static ITemplateEngineHost CreateHost()

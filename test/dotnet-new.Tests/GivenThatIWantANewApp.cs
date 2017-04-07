@@ -21,13 +21,13 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"console --debug:ephemeral-hive");
+                .Execute($"console --debug:ephemeral-hive --skip-restore");
 
             DateTime expectedState = Directory.GetLastWriteTime(rootPath);
 
             var result = new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput($"console --debug:ephemeral-hive");
+                .ExecuteWithCapturedOutput($"console --debug:ephemeral-hive --skip-restore");
 
             DateTime actualState = Directory.GetLastWriteTime(rootPath);
 
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"{projectType} --debug:ephemeral-hive")
+                .Execute($"{projectType} --debug:ephemeral-hive --skip-restore")
                 .Should().Pass();
 
             new RestoreCommand()
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive")
+                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive --skip-restore")
                 .Should().Pass();
 
             new RestoreCommand()

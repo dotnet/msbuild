@@ -42,6 +42,6 @@
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="xunit.netcore.extensions" Version="1.0.0-prerelease-00206" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="0.1.0-alpha-132" />
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(CliCommandLineParserVersion)" />
   </ItemGroup>
 </Project>

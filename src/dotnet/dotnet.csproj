@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="0.1.0-alpha-132" />
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(CliCommandLineParserVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(TemplateEngineVersion)" />

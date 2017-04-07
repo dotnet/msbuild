@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.New.Tests
             string rootPath = TestAssets.CreateTestDirectory(identifier: $"{language}_{projectType}").FullName;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive")
+                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive --skip-restore")
                 .Should().Pass();
 
             if (useNuGetConfigForAspNet)

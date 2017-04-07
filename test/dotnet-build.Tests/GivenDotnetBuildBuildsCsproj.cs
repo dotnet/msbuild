@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -f netcoreapp2.0 -o \"{rootPath}\" --debug:ephemeral-hive";
+            string newArgs = $"console -f netcoreapp2.0 -o \"{rootPath}\" --debug:ephemeral-hive --skip-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
