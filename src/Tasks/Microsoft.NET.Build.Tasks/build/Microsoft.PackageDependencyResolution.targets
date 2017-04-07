@@ -208,7 +208,8 @@ Copyright (c) .NET Foundation. All rights reserved.
          AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="CollectSDKReferencesDesignTime"
-          Returns="@(_SDKReference)">
+          Returns="@(_SDKReference)"
+          DependsOnTargets="CollectPackageReferences">
 
     <CollectSDKReferencesDesignTime
           SdkReferences="@(SdkReference)"
@@ -229,7 +230,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="CollectResolvedSDKReferencesDesignTime"
           Returns="@(_ResolvedSDKReference)"
-		  DependsOnTargets="ResolveSDKReferencesDesignTime">
+          DependsOnTargets="ResolveSDKReferencesDesignTime;CollectPackageReferences">
 
     <CollectSDKReferencesDesignTime
           SdkReferences="@(ResolvedSdkReference)"
