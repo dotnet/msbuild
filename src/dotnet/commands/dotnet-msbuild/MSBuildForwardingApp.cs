@@ -72,11 +72,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return GetProcessStartInfo().Execute();
         }
 
-        internal static CommandOption AddVerbosityOption(CommandLineApplication app)
-        {
-            return app.Option("-v|--verbosity", LocalizableStrings.VerbosityOptionDescription, CommandOptionType.SingleValue);
-        }
-
         private static string Escape(string arg) =>
             // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
              (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?

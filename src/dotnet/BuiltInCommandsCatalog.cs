@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Clean;
@@ -15,9 +16,10 @@ using Microsoft.DotNet.Tools.Remove;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Sln;
+using Microsoft.DotNet.Tools.Store;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
-using Microsoft.DotNet.Tools.Cache;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -36,12 +38,6 @@ namespace Microsoft.DotNet.Cli
                 Command = BuildCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-build
                 DocLink = "https://aka.ms/dotnet-build"
-            },
-            ["cache"] = new BuiltInCommandMetadata
-            {
-                Command = CacheCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-cache
-                DocLink = "https://aka.ms/dotnet-cache"
             },
             ["clean"] = new BuiltInCommandMetadata 
             {
@@ -121,6 +117,12 @@ namespace Microsoft.DotNet.Cli
                 Command = SlnCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-sln
                 DocLink = "https://aka.ms/dotnet-sln"
+            },
+            ["store"] = new BuiltInCommandMetadata
+            {
+                Command = StoreCommand.Run,
+                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-store
+                DocLink = "https://aka.ms/dotnet-store"
             },
             ["test"] = new BuiltInCommandMetadata
             {

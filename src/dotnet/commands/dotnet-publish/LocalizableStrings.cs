@@ -5,8 +5,6 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     internal class LocalizableStrings
     {
-        public const string AppFullName = ".NET Publisher";
-
         public const string AppDescription = "Publisher for the .NET Platform";
 
         public const string FrameworkOption = "FRAMEWORK";
@@ -17,9 +15,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public const string OutputOptionDescription = "Output directory in which to place the published artifacts.";
 
-        public const string FilterProjOption = "profile.xml";
+        public const string TargetOption = "target.xml";
 
-        public const string FilterProjOptionDescription = "The XML file that contains the list of packages to be excluded from publish step.";
+        public const string TargetOptionDescription = "The path to a target manifest file that contains the list of packages to be excluded from the publish step.";
 
         public const string SelfContainedOptionDescription = "Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.";
     }

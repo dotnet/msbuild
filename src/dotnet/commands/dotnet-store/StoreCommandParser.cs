@@ -4,23 +4,23 @@
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
-using LocalizableStrings = Microsoft.DotNet.Tools.Cache.LocalizableStrings;
+using LocalizableStrings = Microsoft.DotNet.Tools.Store.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class CacheCommandParser
+    internal static class StoreCommandParser
     {
-        public static Command Cache() =>
+        public static Command Store() =>
             Create.Command(
-                "cache",
+                "store",
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option(
-                    "-e|--entries",
-                    LocalizableStrings.ProjectEntryDescription,
+                    "-m|--manifest",
+                    LocalizableStrings.ProjectManifestDescription,
                     Accept.OneOrMoreArguments()
-                          .With(name: LocalizableStrings.ProjectEntries)
+                          .With(name: LocalizableStrings.ProjectManifest)
                           .ForwardAsMany(o =>
                           {
                               var materializedString = $"{o.Arguments.First()}";
