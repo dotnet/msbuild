@@ -39,7 +39,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="test_templates\TemplateWithValueForms\.template.config\template.json" />
+    <None Include="test_templates\TemplateWithValueForms\bar.2.cs" />
+    <None Include="test_templates\TemplateWithValueForms\bar2.cs" />
     <None Include="test_templates\TemplateWithValueForms\bar.cs" />
+    <None Include="test_templates\TemplateWithValueForms\bar_2.cs" />
   </ItemGroup>
 
 </Project>

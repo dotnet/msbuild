@@ -12,8 +12,9 @@
       "type": "parameter",
       "dataType": "string",
       "replaces": "test.value1",
+      "fileRename": "bar.2",
       "forms": {
-        "global": [ "chained" ]
+        "global": [ "chained", "chained2", "dotToUnderscore" ]
       }
     }
   },
@@ -21,6 +22,10 @@
     "chained": {
       "identifier": "chain",
       "steps": [ "dotToUnderscore", "digitToBang" ]
+    },
+    "chained2": {
+      "identifier": "chain",
+      "steps": [ "dotToQuestionMark", "digitToBang" ]
     },
     "digitToBang": {
       "identifier": "replace",
@@ -31,6 +36,11 @@
       "identifier": "replace",
       "pattern": "\\.",
       "replacement": "_"
+    },
+    "dotToQuestionMark": {
+      "identifier": "replace",
+      "pattern": "\\.",
+      "replacement": "?"
     }
   }
 }
