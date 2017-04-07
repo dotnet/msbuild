@@ -42,6 +42,7 @@
                        ProductName="$(var.Crt_ProductName)" 
                        Size="$(var.Crt_Size)" 
                        Version="$(var.Crt_Version)" />
+        <ExitCode Behavior="success" Value="1638" />
       </ExePackage>
       <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
