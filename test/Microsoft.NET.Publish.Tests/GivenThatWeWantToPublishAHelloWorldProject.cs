@@ -14,6 +14,7 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -266,6 +267,17 @@ public static class Program
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid ?? string.Empty);
 
+            DependencyContext dependencyContext;
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, $"{testProject.Name}.deps.json")))
+            {
+                dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+            }
+
+            dependencyContext.Should()
+                .HaveNoDuplicateRuntimeAssemblies(rid ?? "")
+                .And
+                .HaveNoDuplicateNativeAssets(rid ?? "");
+
             ICommand runCommand;
 
             if (selfContained)
@@ -289,6 +301,11 @@ public static class Program
                     $"System.Private.CoreLib.dll",
                 });
 
+                dependencyContext.Should()
+                    .OnlyHaveRuntimeAssembliesWhichAreInFolder(rid, publishDirectory.FullName)
+                    .And
+                    .OnlyHaveNativeAssembliesWhichAreInFolder(rid, publishDirectory.FullName, testProject.Name);
+
                 runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { })
                     .EnsureExecutable();
             }
@@ -300,6 +317,9 @@ public static class Program
                     $"{testProject.Name}.deps.json",
                     $"{testProject.Name}.runtimeconfig.json"
                 });
+
+                dependencyContext.Should()
+                    .OnlyHaveRuntimeAssemblies(rid ?? "", testProject.Name);
 
                 runCommand = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, $"{testProject.Name}.dll") });
             }
