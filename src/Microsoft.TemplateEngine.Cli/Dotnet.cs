@@ -27,6 +27,44 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
+        public static Dotnet AddProjectToProjectReference(string projectFile, params string[] args)
+        {
+            return new Dotnet
+            {
+                _info = new ProcessStartInfo("dotnet", ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "reference" }.Concat(args)))
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                }
+            };
+        }
+
+        public static Dotnet AddPackageReference(string projectFile, string packageName, string version = null)
+        {
+            string argString;
+            if (version == null)
+            {
+                argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName });
+            }
+            else
+            {
+                argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName, "-v", version });
+            }
+
+            return new Dotnet
+            {
+                _info = new ProcessStartInfo("dotnet", argString)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                }
+            };
+        }
+
         public Dotnet ForwardStdErr()
         {
             _errorDataReceived = ForwardStreamStdErr;

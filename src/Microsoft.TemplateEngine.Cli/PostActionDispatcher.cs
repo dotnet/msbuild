@@ -68,6 +68,11 @@ namespace Microsoft.TemplateEngine.Cli
                 else
                 {
                     result = ProcessAction(action, actionProcessor);
+                    if (!result && !string.IsNullOrEmpty(action.ManualInstructions))
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);
+                        DisplayInstructionsForAction(action);
+                    }
                 }
 
                 if (!result && !action.ContinueOnError)
