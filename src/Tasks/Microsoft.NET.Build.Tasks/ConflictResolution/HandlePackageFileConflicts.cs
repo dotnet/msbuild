@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    public partial class HandlePackageFileConflicts : Task
+    public class HandlePackageFileConflicts : TaskBase
     {
-        HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
-        HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();
-        HashSet<ConflictItem> allConflicts = new HashSet<ConflictItem>();
+        private HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
+        private HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();
+        private HashSet<ConflictItem> allConflicts = new HashSet<ConflictItem>();
 
         public ITaskItem[] References { get; set; }
 
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         [Output]
         public ITaskItem[] Conflicts { get; set; }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             var log = new MSBuildLog(Log);
             var packageRanks = new PackageRank(PreferredPackages);
@@ -93,8 +93,6 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             ReferencesWithoutConflicts = RemoveConflicts(References, referenceConflicts);
             ReferenceCopyLocalPathsWithoutConflicts = RemoveConflicts(ReferenceCopyLocalPaths, copyLocalConflicts);
             Conflicts = CreateConflictTaskItems(allConflicts);
-
-            return !Log.HasLoggedErrors;
         }
 
         private ITaskItem[] CreateConflictTaskItems(ICollection<ConflictItem> conflicts)

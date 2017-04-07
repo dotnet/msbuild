@@ -6,14 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-//  Notes on functionality and how to test it
-//  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
-
-
-
-
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
+    //  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
     internal class ConflictResolver<TConflictItem> where TConflictItem : class, IConflictItem
     {
         private Dictionary<string, TConflictItem> winningItemsByKey = new Dictionary<string, TConflictItem>();
@@ -26,7 +21,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             this.packageRank = packageRank;
         }
 
-        public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey, Action<TConflictItem> foundConflict, bool commitWinner = true,
+        public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey,
+            Action<TConflictItem> foundConflict, bool commitWinner = true,
             Action<TConflictItem> unresolvedConflict = null)
         {
             if (conflictItems == null)

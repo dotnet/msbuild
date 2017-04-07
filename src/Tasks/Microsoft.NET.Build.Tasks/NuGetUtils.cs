@@ -62,7 +62,8 @@ namespace Microsoft.NET.Build.Tasks
             packageSubPath = null;
             try
             {
-                // this method is just a temporary heuristic until we get metadata added to items created by the .NETCore SDK
+                // this method is just a temporary heuristic until we flow the NuGet metadata through the right items
+                // https://github.com/dotnet/sdk/issues/1091
                 for (var dir = Directory.GetParent(fullPath); dir != null; dir = dir.Parent)
                 {
                     var nuspecs = dir.GetFiles("*.nuspec");

@@ -15,7 +15,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 {
     public class GivenAConflictResolver
     {
-        //      - Different keys (same metadata) should not result in a conflict
         [Fact]
         public void ItemsWithDifferentKeysDontConflict()
         {
@@ -28,7 +27,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - One item doesn't resolve to a file that exists
         [Fact]
         public void WhenOnlyOneItemExistsAWinnerCannotBeDetermined()
         {
@@ -41,7 +39,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().Equal(item2);
         }
 
-        //      - Neither item resolves to a file that exists
         [Fact]
         public void WhenNeitherItemExistsAWinnerCannotBeDetermined()
         {
@@ -68,7 +65,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Neither has an assembly version
         [Fact]
         public void WhenItemsConflictAndDontHaveAssemblyVersionsTheFileVersionIsUsedToResolveTheConflict()
         {
@@ -82,7 +78,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Only one item has an assembly version
         [Fact]
         public void WhenItemsConflictAndOnlyOneHasAnAssemblyVersionAWinnerCannotBeDetermined()
         {
@@ -95,7 +90,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().Equal(item2);
         }
 
-        //      - Assembly versions match
         [Fact]
         public void WhenItemsConflictAndAssemblyVersionsMatchTheFileVersionIsUsedToResolveTheConflict()
         {
@@ -109,7 +103,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Assembly versions differ
         [Fact]
         public void WhenItemsConflictTheAssemblyVersionIsUsedToResolveTheConflict()
         {
@@ -123,7 +116,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Neither has a file version
         [Fact]
         public void WhenItemsConflictAndDontHaveFileVersionsThePackageRankIsUsedToResolveTheConflict()
         {
@@ -137,7 +129,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Only one item has a file version
         [Fact]
         public void WhenItemsConflictAndOnlyOneHasAFileVersionAWinnerCannotBeDetermined()
         {
@@ -150,7 +141,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().Equal(item2);
         }
 
-        //      - File versions match
         [Fact]
         public void WhenItemsConflictAndFileVersionsMatchThePackageRankIsUsedToResolveTheConflict()
         {
@@ -164,7 +154,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - File versions differ
         [Fact]
         public void WhenItemsConflictTheFileVersionIsUsedToResolveTheConflict()
         {
@@ -178,7 +167,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Neither item has a package rank
         [Fact]
         public void WhenItemsConflictAndDontHaveAPackageRankTheItemTypeIsUsedToResolveTheConflict()
         {
@@ -191,7 +179,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Only one item has a package rank
         [Fact]
         public void WhenItemsConflictAndOnlyOneHasAPackageRankItWins()
         {
@@ -204,7 +191,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Package ranks match
         [Fact]
         public void WhenItemsConflictAndPackageRanksMatchTheItemTypeIsUsedToResolveTheConflict()
         {
@@ -218,7 +204,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         
-        //      - Package ranks differ
         [Fact]
         public void WhenItemsConflictThePackageRankIsUsedToResolveTheConflict()
         {
@@ -232,7 +217,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().BeEmpty();
         }
 
-        //      - Both are platform items
         [Fact]
         public void WhenItemsConflictAndBothArePlatformItemsTheConflictCannotBeResolved()
         {
@@ -245,7 +229,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().Equal(item2);
         }
 
-        //      - Neither are platform items
         [Fact]
         public void WhenItemsConflictAndNeitherArePlatformItemsTheConflictCannotBeResolved()
         {
@@ -258,7 +241,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             result.UnresolvedConflicts.Should().Equal(item2);
         }
 
-        //      - One item is a platform item
         [Fact]
         public void WhenItemsConflictAPlatformItemWins()
         {

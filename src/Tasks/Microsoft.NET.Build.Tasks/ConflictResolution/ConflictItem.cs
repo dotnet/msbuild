@@ -46,153 +46,153 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             FileVersion = fileVersion;
         }
 
-        private bool hasAssemblyVersion;
-        private Version assemblyVersion;
+        private bool _hasAssemblyVersion;
+        private Version _assemblyVersion;
         public Version AssemblyVersion
         {
             get
             {
-                if (!hasAssemblyVersion)
+                if (!_hasAssemblyVersion)
                 {
-                    assemblyVersion = null;
+                    _assemblyVersion = null;
 
                     var assemblyVersionString = OriginalItem?.GetMetadata(nameof(AssemblyVersion)) ?? String.Empty;
 
                     if (assemblyVersionString.Length != 0)
                     {
-                        Version.TryParse(assemblyVersionString, out assemblyVersion);
+                        Version.TryParse(assemblyVersionString, out _assemblyVersion);
                     }
                     else
                     {
-                        assemblyVersion = FileUtilities.TryGetAssemblyVersion(SourcePath);
+                        _assemblyVersion = FileUtilities.TryGetAssemblyVersion(SourcePath);
                     }
 
                     // assemblyVersion may be null but don't try to recalculate it
-                    hasAssemblyVersion = true;
+                    _hasAssemblyVersion = true;
                 }
 
-                return assemblyVersion;
+                return _assemblyVersion;
             }
             private set
             {
-                assemblyVersion = value;
-                hasAssemblyVersion = true;
+                _assemblyVersion = value;
+                _hasAssemblyVersion = true;
             }
         }
 
         public ConflictItemType ItemType { get; }
 
-        private bool? exists;
+        private bool? _exists;
         public bool Exists
         {
             get
             {
-                if (exists == null)
+                if (_exists == null)
                 {
-                    exists = ItemType == ConflictItemType.Platform || File.Exists(SourcePath);
+                    _exists = ItemType == ConflictItemType.Platform || File.Exists(SourcePath);
                 }
 
-                return exists.Value;
+                return _exists.Value;
             }
         }
 
-        private string fileName;
+        private string _fileName;
         public string FileName
         {
             get
             {
-                if (fileName == null)
+                if (_fileName == null)
                 {
-                    fileName = OriginalItem == null ? String.Empty : OriginalItem.GetMetadata(MetadataNames.FileName) + OriginalItem.GetMetadata(MetadataNames.Extension);
+                    _fileName = OriginalItem == null ? String.Empty : OriginalItem.GetMetadata(MetadataNames.FileName) + OriginalItem.GetMetadata(MetadataNames.Extension);
                 }
-                return fileName;
+                return _fileName;
             }
-            private set { fileName = value; }
+            private set { _fileName = value; }
         }
 
-        private bool hasFileVersion;
-        private Version fileVersion;
+        private bool _hasFileVersion;
+        private Version _fileVersion;
         public Version FileVersion
         {
             get
             {
-                if (!hasFileVersion)
+                if (!_hasFileVersion)
                 {
-                    fileVersion = null;
+                    _fileVersion = null;
 
                     var fileVersionString = OriginalItem?.GetMetadata(nameof(FileVersion)) ?? String.Empty;
 
                     if (fileVersionString.Length != 0)
                     {
-                        Version.TryParse(fileVersionString, out fileVersion);
+                        Version.TryParse(fileVersionString, out _fileVersion);
                     }
                     else
                     {
-                        fileVersion = FileUtilities.GetFileVersion(SourcePath);
+                        _fileVersion = FileUtilities.GetFileVersion(SourcePath);
                     }
 
                     // fileVersion may be null but don't try to recalculate it
-                    hasFileVersion = true;
+                    _hasFileVersion = true;
                 }
 
-                return fileVersion;
+                return _fileVersion;
             }
             private set
             {
-                fileVersion = value;
-                hasFileVersion = true;
+                _fileVersion = value;
+                _hasFileVersion = true;
             }
         }
 
         public ITaskItem OriginalItem { get; }
 
-        private string packageId;
+        private string _packageId;
         public string PackageId
         {
             get
             {
-                if (packageId == null)
+                if (_packageId == null)
                 {
-                    packageId = OriginalItem?.GetMetadata(MetadataNames.NuGetPackageId) ?? String.Empty;
+                    _packageId = OriginalItem?.GetMetadata(MetadataNames.NuGetPackageId) ?? String.Empty;
 
-                    if (packageId.Length == 0)
+                    if (_packageId.Length == 0)
                     {
-                        packageId = NuGetUtils.GetPackageIdFromSourcePath(SourcePath) ?? String.Empty;
+                        _packageId = NuGetUtils.GetPackageIdFromSourcePath(SourcePath) ?? String.Empty;
                     }
                 }
 
-                return packageId.Length == 0 ? null : packageId;
+                return _packageId.Length == 0 ? null : _packageId;
             }
-            private set { packageId = value; }
+            private set { _packageId = value; }
         }
         
 
-        private string sourcePath;
+        private string _sourcePath;
         public string SourcePath
         {
             get
             {
-                if (sourcePath == null)
+                if (_sourcePath == null)
                 {
-                    sourcePath = ItemUtilities.GetSourcePath(OriginalItem) ?? String.Empty;
+                    _sourcePath = ItemUtilities.GetSourcePath(OriginalItem) ?? String.Empty;
                 }
 
-                return sourcePath.Length == 0 ? null : sourcePath;
+                return _sourcePath.Length == 0 ? null : _sourcePath;
             }
-            private set { sourcePath = value; }
+            private set { _sourcePath = value; }
         }
         
-        public string displayName;
+        private string _displayName;
         public string DisplayName
         {
             get
             {
-                if (displayName == null)
+                if (_displayName == null)
                 {
                     var itemSpec = OriginalItem == null ? FileName : OriginalItem.ItemSpec;
-                    displayName = $"{ItemType}:{itemSpec}";
+                    _displayName = $"{ItemType}:{itemSpec}";
                 }
-                return displayName;
+                return _displayName;
             }
         }
     }

@@ -35,10 +35,9 @@
       <Version>$(MsBuildPackagesVersion)</Version>
       <ExcludeAssets>Runtime</ExcludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
 
-    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0"
-                      Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System" />

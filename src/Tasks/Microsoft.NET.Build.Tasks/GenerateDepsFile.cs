@@ -1,14 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using NuGet.ProjectModel;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
@@ -69,8 +69,8 @@ namespace Microsoft.NET.Build.Tasks
             get { return _filesWritten.ToArray(); }
         }
 
-        Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
         protected override void ExecuteCore()
         {
