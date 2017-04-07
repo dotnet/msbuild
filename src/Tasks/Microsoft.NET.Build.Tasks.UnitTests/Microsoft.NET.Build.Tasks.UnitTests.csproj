@@ -46,7 +46,6 @@
     <Compile Include="GivenACompilationOptionsConverter.cs" />
     <Compile Include="GivenAProduceContentsAssetsTask.cs" />
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
-    <Compile Include="GivenResolvedSDKProjectItemsAndImplicitPackages.cs" />
     <Compile Include="GivenUnresolvedSDKProjectItemsAndImplicitPackages.cs" />
     <Compile Include="LockFileSnippets.cs" />
     <Compile Include="Mocks\MockContentAssetPreprocessor.cs" />
