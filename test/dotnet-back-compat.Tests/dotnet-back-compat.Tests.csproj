@@ -6,7 +6,6 @@
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>dotnet-back-compat.Tests</AssemblyName>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +16,5 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
-    <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
   </ItemGroup>
 </Project>
