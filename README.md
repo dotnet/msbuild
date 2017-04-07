@@ -2,14 +2,14 @@
 
 [![.NET Slack Status](https://aspnetcoreslack.herokuapp.com/badge.svg?2)](http://tattoocoder.com/aspnet-slack-sign-up/) [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation. 
+This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation.
 
 Looking for V1 of the .NET Core tooling?
 ----------------------------------------
 If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
 
-> **Note:** the master branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the 
-> v1 of the tools. 
+> **Note:** the master branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
+> v1 of the tools.
 
 Found an issue?
 ---------------
@@ -60,7 +60,33 @@ You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, 
 
 In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
 
-> **Note:** please be aware that below installers are the **latest bits**. If you 
+# Debian daily feed
+
+Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
+
+## Obtaining binaries
+
+Add debian feed:
+
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+Install:
+```
+sudo apt-get install <DebianPackageName>=<Version>
+```
+
+To list available packages:
+```
+apt-cache search dotnet-sdk | grep 2.0.0
+```
+
+> **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
 | Platform | master<br>[![][version-badge]][version] |
@@ -128,20 +154,20 @@ When you have the .NET Command Line Interface installed on your OS of choice, yo
 
 
 First, you will need to restore the packages:
-	
+
 	dotnet restore
-	
+
 This will restore all of the packages that are specified in the project.json file of the given sample.
 
 Then you can either run from source or compile the sample. Running from source is straightforward:
-	
+
 	dotnet run
-	
+
 Compiling to IL is done using:
-	
+
 	dotnet build
 
-This will drop an IL assembly in `./bin/[configuration]/[framework]/[binary name]` 
+This will drop an IL assembly in `./bin/[configuration]/[framework]/[binary name]`
 that you can run using `dotnet bin/[configuration]/[framework]/[binaryname.dll]`.
 
 For more details, please refer to the [documentation](https://aka.ms/dotnet-cli-docs).
@@ -149,14 +175,14 @@ For more details, please refer to the [documentation](https://aka.ms/dotnet-cli-
 Building from source
 --------------------
 
-If you are building from source, take note that the build depends on NuGet packages hosted on MyGet, so if it is down, the build may fail. If that happens, you can always see the [MyGet status page](http://status.myget.org/) for more info. 
+If you are building from source, take note that the build depends on NuGet packages hosted on MyGet, so if it is down, the build may fail. If that happens, you can always see the [MyGet status page](http://status.myget.org/) for more info.
 
 Read over the [contributing guidelines](CONTRIBUTING.md) and [developer documentation](Documentation) for prerequisites for building from source.
 
 Questions & Comments
 --------------------
 
-For any and all feedback, please use the Issues on this repository. 
+For any and all feedback, please use the Issues on this repository.
 
 License
 -------
