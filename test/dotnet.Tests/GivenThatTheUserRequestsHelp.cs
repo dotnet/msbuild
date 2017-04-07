@@ -16,7 +16,6 @@ namespace dotnet.Tests
         [InlineData("add package -h")]
         [InlineData("add reference -h")]
         [InlineData("build -h")]
-        [InlineData("cache -h")]
         [InlineData("clean -h")]
         [InlineData("list -h")]
         [InlineData("migrate -h")]
@@ -32,6 +31,7 @@ namespace dotnet.Tests
         [InlineData("sln add -h")]
         [InlineData("sln list -h")]
         [InlineData("sln remove -h")]
+        [InlineData("store -h")]
         [InlineData("test -h")]
         public void TheResponseIsNotAnError(string commandLine)
         {

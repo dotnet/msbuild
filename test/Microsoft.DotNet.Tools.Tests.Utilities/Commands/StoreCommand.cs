@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class CacheCommand : DotnetCommand
+    public sealed class StoreCommand : DotnetCommand
     {
         private List<string> _profileProject = new List<string>();
         private string _framework;
@@ -16,42 +16,42 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _frameworkVersion;
         private string _intermediateWorkingDirectory;
 
-        public CacheCommand WithEntries(string profileProject)
+        public StoreCommand WithManifest(string profileProject)
         {
-            _profileProject.Add($"--entries {profileProject}");
+            _profileProject.Add($"--manifest {profileProject}");
 
             return this;
         }
-        public CacheCommand WithFramework(string framework)
+        public StoreCommand WithFramework(string framework)
         {
             _framework = framework;
             return this;
         }
 
-        public CacheCommand WithFramework(NuGetFramework framework)
+        public StoreCommand WithFramework(NuGetFramework framework)
         {
             return WithFramework(framework.GetShortFolderName());
         }
 
-        public CacheCommand WithOutput(string output)
+        public StoreCommand WithOutput(string output)
         {
             _output = output;
             return this;
         }
 
-        public CacheCommand WithRuntime(string runtime)
+        public StoreCommand WithRuntime(string runtime)
         {
             _runtime = runtime;
             return this;
         }
 
-        public CacheCommand WithRuntimeFrameworkVersion(string frameworkVersion)
+        public StoreCommand WithRuntimeFrameworkVersion(string frameworkVersion)
         {
             _frameworkVersion = frameworkVersion;
             return this;
         }
 
-        public CacheCommand WithIntermediateWorkingDirectory(string intermediateWorkingDirectory)
+        public StoreCommand WithIntermediateWorkingDirectory(string intermediateWorkingDirectory)
         {
             _intermediateWorkingDirectory = intermediateWorkingDirectory;
             return this;
@@ -59,13 +59,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"cache {BuildArgs()} {args}";
+            args = $"store {BuildArgs()} {args}";
             return base.Execute(args);
         }
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"cache {BuildArgs()} {args}";
+            args = $"store {BuildArgs()} {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
 

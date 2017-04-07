@@ -209,7 +209,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Cli.Sln.In
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Cli.Sln.Internal.Tests", "test\Microsoft.DotNet.Cli.Sln.Internal.Tests\Microsoft.DotNet.Cli.Sln.Internal.Tests.csproj", "{56F1E090-B80F-4BDF-8991-4B0F9B5B8C9A}"
 EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-cache.Tests", "test\dotnet-cache.Tests\dotnet-cache.Tests.csproj", "{CACA427D-5A71-45E6-88DC-3E2DB6C4D52D}"
+Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-store.Tests", "test\dotnet-store.Tests\dotnet-store.Tests.csproj", "{CACA427D-5A71-45E6-88DC-3E2DB6C4D52D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdk", "sdk", "{3275D006-54C8-4C64-A537-B9941C5D2F0C}"
 	ProjectSection(SolutionItems) = preProject

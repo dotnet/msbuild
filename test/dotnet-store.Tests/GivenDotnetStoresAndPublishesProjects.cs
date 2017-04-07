@@ -1,14 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
@@ -18,6 +14,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         private static string _tfm = "netcoreapp2.0";
         private static string _frameworkVersion = Microsoft.DotNet.TestFramework.TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
+
         [Fact]
         public void ItPublishesARunnablePortableApp()
         {
@@ -41,8 +38,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            new CacheCommand()
-                .WithEntries(profileProject)
+            new StoreCommand()
+                .WithManifest(profileProject)
                 .WithFramework(_tfm)
                 .WithRuntime(rid)
                 .WithOutput(localAssemblyCache)
@@ -57,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProfileProject(profileFilter)
+                .WithTargetManifest(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -95,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProfileProject(profileFilter)
+                .WithTargetManifest(profileFilter)
                 .Execute()
                 .Should().Pass();
 
@@ -137,9 +134,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            new CacheCommand()
-                .WithEntries(profileProject)
-                .WithEntries(profileProject1)
+            new StoreCommand()
+                .WithManifest(profileProject)
+                .WithManifest(profileProject1)
                 .WithFramework(_tfm)
                 .WithRuntime(rid)
                 .WithOutput(localAssemblyCache)
@@ -153,8 +150,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new PublishCommand()
                 .WithFramework(_tfm)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithProfileProject(profileFilter)
-                .WithProfileProject(profileFilter1)
+                .WithTargetManifest(profileFilter)
+                .WithTargetManifest(profileFilter1)
                 .Execute()
                 .Should().Pass();
 
