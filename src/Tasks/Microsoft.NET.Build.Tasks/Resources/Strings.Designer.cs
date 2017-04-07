@@ -260,20 +260,20 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The filter profile {0} provided is of not the correct format.
-        /// </summary>
-        internal static string IncorrectFilterFormat {
-            get {
-                return ResourceManager.GetString("IncorrectFilterFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
         internal static string IncorrectPackageRoot {
             get {
                 return ResourceManager.GetString("IncorrectPackageRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The target manifest {0} provided is of not the correct format.
+        /// </summary>
+        internal static string IncorrectTargetFormat {
+            get {
+                return ResourceManager.GetString("IncorrectTargetFormat", resourceCulture);
             }
         }
         

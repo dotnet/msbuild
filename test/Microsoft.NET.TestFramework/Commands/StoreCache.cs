@@ -1,20 +1,18 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
+using System.IO;
+using System.Linq;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class ComposeCache : TestCommand
+    public sealed class ComposeStore : TestCommand
     {
         private const string PublishSubfolderName = "packages";
 
-        public ComposeCache(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
+        public ComposeStore(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
             : base(msbuild, projectPath, relativePathToProject)
         {
         }
@@ -25,7 +23,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.Insert(0, FullPathProjectFile);
 
-            var command = MSBuild.CreateCommandForTarget("ComposeCache", newArgs.ToArray());
+            var command = MSBuild.CreateCommandForTarget("ComposeStore", newArgs.ToArray());
 
             return command.Execute();
         }

@@ -15,7 +15,7 @@ namespace Microsoft.NET.Build.Tasks
         private  HashSet<PackageIdentity> _allResolvedPackages = new HashSet<PackageIdentity>();
         private readonly IPackageResolver _packageResolver;
         private IEnumerable<string> _privateAssetPackageIds;
-        private bool _preserveCacheLayout;
+        private bool _preserveStoreLayout;
 
         public PublishAssembliesResolver(IPackageResolver packageResolver)
         {
@@ -27,9 +27,9 @@ namespace Microsoft.NET.Build.Tasks
             _privateAssetPackageIds = privateAssetPackageIds;
             return this;
         }
-        public PublishAssembliesResolver WithPreserveCacheLayout(bool preserveCacheLayout)
+        public PublishAssembliesResolver WithPreserveStoreLayout(bool preserveStoreLayout)
         {
-            _preserveCacheLayout = preserveCacheLayout;
+            _preserveStoreLayout = preserveStoreLayout;
             return this;
         }
         public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext)
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GetDestinationSubDirectory(string libraryPath, string pkgRoot, string destpath = null)
         {
-            if (_preserveCacheLayout && pkgRoot != null)
+            if (_preserveStoreLayout && pkgRoot != null)
             {
                 if (! libraryPath.StartsWith(pkgRoot))
                 {

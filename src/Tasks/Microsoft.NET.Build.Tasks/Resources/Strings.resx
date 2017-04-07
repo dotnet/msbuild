@@ -237,8 +237,8 @@
   <data name="FolderAlreadyExists" xml:space="preserve">
     <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
   </data>
-  <data name="IncorrectFilterFormat" xml:space="preserve">
-    <value>The filter profile {0} provided is of not the correct format</value>
+  <data name="IncorrectTargetFormat" xml:space="preserve">
+    <value>The target manifest {0} provided is of not the correct format</value>
   </data>
   <data name="ParsingFiles" xml:space="preserve">
     <value>Parsing the Files : '{0}'</value>

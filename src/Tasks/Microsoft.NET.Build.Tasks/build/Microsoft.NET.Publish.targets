@@ -238,7 +238,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="ComputePrivateAssetsPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary">
     <ItemGroup>
-      <FilterProjectFileList Include="$(FilterProjectFiles.Split('%3B'))"/>
+      <TargetManifestFileList Include="$(TargetManifestFiles.Split('%3B'))"/>
     </ItemGroup>
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
@@ -246,8 +246,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
-                              FilterProjectFiles="@(FilterProjectFileList)"
-                              PreserveCacheLayout="$(PreserveCacheLayout)"
+                              TargetManifestFiles="@(TargetManifestFileList)"
+                              PreserveStoreLayout="$(PreserveStoreLayout)"
                               IsSelfContained="$(SelfContained)" >
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
