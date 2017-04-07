@@ -462,6 +462,16 @@ namespace Microsoft.TemplateEngine.Cli {
         
         /// <summary>
         ///   Looks up a localized string similar to {0} {1}
+        ///    The default value &apos;{1}&apos; is not a valid value for {0}..
+        /// </summary>
+        public static string InvalidParameterDefault {
+            get {
+                return ResourceManager.GetString("InvalidParameterDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1}
         ///    &apos;{1}&apos; is not a valid value for {0} ({2})..
         /// </summary>
         public static string InvalidParameterDetail {

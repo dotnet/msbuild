@@ -1,7 +1,9 @@
 {
   "symbolInfo": {
     "TargetFrameworkOverride": {
-      "isHidden": true
+      "isHidden": "true",
+      "longName": "target-framework-override",
+      "shortName": ""
     },
     "IncludeApplicationInsights": {
       "isHidden": "true"

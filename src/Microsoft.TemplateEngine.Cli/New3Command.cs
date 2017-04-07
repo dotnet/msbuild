@@ -358,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
             ParseTemplateArgs(templateInfo);
-            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IList<string> defaultParamsWithInvalidValues);
+            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _commandInput.AllTemplateParams, out userParamsWithInvalidValues);
             hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template);
             _templateCreator.ReleaseMountPoints(template);
@@ -368,13 +368,34 @@ namespace Microsoft.TemplateEngine.Cli
             if (userParamsWithInvalidValues.Any())
             {
                 // Lookup the input param formats - userParamsWithInvalidValues has canonical.
-                IList<string> inputParamFormats = new List<string>();
                 foreach (string canonical in userParamsWithInvalidValues)
                 {
                     _commandInput.AllTemplateParams.TryGetValue(canonical, out string specifiedValue);
                     string inputFormat = _commandInput.TemplateParamInputFormat(canonical);
                     InvalidParameterInfo invalidParam = new InvalidParameterInfo(inputFormat, specifiedValue, canonical);
                     invalidParameters.Add(invalidParam);
+                }
+            }
+
+            if (_templateCreator.AnyParametersWithInvalidDefaultsUnresolved(defaultParamsWithInvalidValues, userParamsWithInvalidValues, _commandInput.AllTemplateParams, out IReadOnlyList<string> defaultsWithUnresolvedInvalidValues))
+            {
+                IParameterSet templateParams = template.Generator.GetParametersForTemplate(EnvironmentSettings, template);
+
+                foreach (string defaultParamName in defaultsWithUnresolvedInvalidValues)
+                {
+                    ITemplateParameter param = templateParams.ParameterDefinitions.FirstOrDefault(x => string.Equals(x.Name, defaultParamName, StringComparison.Ordinal));
+
+                    if (param != null)
+                    {
+                        // Get the best input format available. 
+                        IReadOnlyList<string> inputVariants = _commandInput.VariantsForCanonical(param.Name);
+                        string displayName = inputVariants.FirstOrDefault(x => x.Contains(param.Name))
+                            ?? inputVariants.Aggregate("", (max, cur) => max.Length > cur.Length ? max : cur)
+                            ?? param.Name;
+
+                        InvalidParameterInfo invalidParam = new InvalidParameterInfo(displayName, param.DefaultValue, displayName, true);
+                        invalidParameters.Add(invalidParam);
+                    }
                 }
             }
 
@@ -385,7 +406,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             // use a throwaway set of params for getting the creation effects - it makes changes to them.
             string targetDir = _commandInput.OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
-            IParameterSet paramsForCreationEffects = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IList<string> throwaway);
+            IParameterSet paramsForCreationEffects = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> throwaway);
             _templateCreator.ResolveUserParameters(template, paramsForCreationEffects, _commandInput.AllTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
             ICreationEffects creationEffects = template.Generator.GetCreationEffects(EnvironmentSettings, template, paramsForCreationEffects, EnvironmentSettings.SettingsLoader.Components, targetDir);
             return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
@@ -1203,7 +1224,9 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string realValue = configuredValue;
 
-                        if (invalidParams.Contains(param.Name))
+                        if (invalidParams.Contains(param.Name) ||
+                            (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase)
+                                && !param.Choices.ContainsKey(configuredValue)))
                         {
                             realValue = realValue.Bold().Red();
                         }
