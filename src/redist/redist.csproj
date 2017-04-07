@@ -225,7 +225,7 @@
   </Target>
 
   <Target Name="PublishStage2WithLegacyRuntime"
-          AfterTargets="RemovePdbsFromPublishDir;">
+          AfterTargets="PublishLzmaArchive;">
     <ItemGroup>
       <LegacySharedFramework Remove="*" />
       <LegacySharedFramework Include="$(LegacySharedFrameworkPublishDirectory)/**/*" />
