@@ -5,9 +5,6 @@
       "longName": "target-framework-override",
       "shortName": ""
     },
-    "IncludeApplicationInsights": {
-      "isHidden": "true"
-    },
     "AADInstance": {
       "longName": "aad-instance",
       "shortName": "s"

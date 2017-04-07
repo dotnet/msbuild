@@ -5,9 +5,6 @@
       "longName": "target-framework-override",
       "shortName": ""
     },
-    "IncludeApplicationInsights": {
-      "isHidden": "true"
-    },
     "Framework": {
       "longName": "framework"
     },
