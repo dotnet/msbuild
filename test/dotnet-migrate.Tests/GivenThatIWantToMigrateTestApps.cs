@@ -759,7 +759,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             foreach (var dll in runnableDlls)
             {
-                new DotnetCommand(DotnetUnderTest.WithLegacyRuntime).ExecuteWithCapturedOutput($"\"{dll.FullName}\"").Should().Pass();
+                new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes).ExecuteWithCapturedOutput($"\"{dll.FullName}\"").Should().Pass();
             }
         }
 

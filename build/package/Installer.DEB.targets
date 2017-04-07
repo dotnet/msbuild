@@ -35,13 +35,6 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-
-      <AdditionalSharedFxDebianPackageVersion>$(AdditionalSharedFrameworkVersion)</AdditionalSharedFxDebianPackageVersion>
-      <AdditionalSharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(AdditionalSharedFxDebianPackageVersion)</AdditionalSharedFxDebianPackageName>
-      <AdditionalSharedFxDebianPackageName>$(AdditionalSharedFxDebianPackageName.ToLower())</AdditionalSharedFxDebianPackageName>
-      <AdditionalHostFxrDebianPackageVersion>$(AdditionalHostFxrVersion)</AdditionalHostFxrDebianPackageVersion>
-      <AdditionalHostFxrDebianPackageName>dotnet-hostfxr-$(AdditionalHostFxrDebianPackageVersion)</AdditionalHostFxrDebianPackageName>
-      <AdditionalHostFxrDebianPackageName>$(AdditionalHostFxrDebianPackageName.ToLower())</AdditionalHostFxrDebianPackageName>
     </PropertyGroup>
 
     <!-- Inputs -->

@@ -24,11 +24,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        public static string WithLegacyRuntime
+        public static string WithBackwardsCompatibleRuntimes
         {
             get
             {
-                return Path.Combine(new RepoDirectoriesProvider().Stage2WithLegacyRuntimeDirectory, "dotnet");
+                return Path.Combine(
+                    new RepoDirectoriesProvider().Stage2WithBackwardsCompatibleRuntimesDirectory,
+                    "dotnet");
             }
         }
     }

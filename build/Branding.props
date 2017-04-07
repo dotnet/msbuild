@@ -5,10 +5,6 @@
     <SharedHostBrandName>Microsoft .NET Core 2.0.0 - Host</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core 2.0.0 - Host FX Resolver</HostFxrBrandName>
     
-    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</AdditionalSharedFrameworkBrandName>
-    <AdditionalSharedHostBrandName>Microsoft .NET Core 1.0.1 - Host</AdditionalSharedHostBrandName>
-    <AdditionalHostFxrBrandName>Microsoft .NET Core 1.0.1 - Host FX Resolver</AdditionalHostFxrBrandName>
-
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
 

@@ -10,10 +10,6 @@
     <SdkComponentId>com.microsoft.dotnet.dev.$(SdkVersion).component.osx.x64</SdkComponentId>
     <SdkProductArchiveId>com.microsoft.dotnet.dev.$(SdkVersion).osx.x64</SdkProductArchiveId>
 
-    <AdditionalSharedHostComponentId>com.microsoft.dotnet.sharedhost.$(AdditionalSharedHostVersion).component.osx.x64</AdditionalSharedHostComponentId>
-    <AdditionalHostFxrComponentId>com.microsoft.dotnet.hostfxr.$(AdditionalHostFxrVersion).component.osx.x64</AdditionalHostFxrComponentId>
-    <AdditionalSharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(AdditionalSharedFrameworkVersion).component.osx.x64</AdditionalSharedFrameworkComponentId>
-
     <PkgInstallDirectory>/usr/local/share/dotnet</PkgInstallDirectory>
 
     <SdkPkgSourcesRootDirectory>$(RepoRoot)/packaging/osx/clisdk</SdkPkgSourcesRootDirectory>
@@ -21,17 +17,12 @@
     <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
 
     <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
-    <SdkProductArchiveDistributionTemplateFile Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">$(SdkPkgSourcesRootDirectory)/Distribution-TemplateWithAdditionalRuntime</SdkProductArchiveDistributionTemplateFile>
     <SdkProductArchiveDistributionFile>$(PkgIntermediateDirectory)/CLI-SDK-Formatted-Distribution-Template.xml</SdkProductArchiveDistributionFile>
 
     <SdkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SdkComponentId).pkg</SdkPkgIntermediatePath>
     <SharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedFrameworkComponentId).pkg</SharedFrameworkPkgIntermediatePath>
     <SharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedHostComponentId).pkg</SharedHostPkgIntermediatePath>
     <HostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(HostFxrComponentId).pkg</HostFxrPkgIntermediatePath>
-
-    <AdditionalSharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedFrameworkComponentId).pkg</AdditionalSharedFrameworkPkgIntermediatePath>
-    <AdditionalSharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedHostComponentId).pkg</AdditionalSharedHostPkgIntermediatePath>
-    <AdditionalHostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalHostFxrComponentId).pkg</AdditionalHostFxrPkgIntermediatePath>
   </PropertyGroup>
   
     <Target Name="SetupPkgInputsOutputs">
@@ -64,28 +55,6 @@
           <ReplacementString>$(HostFxrBrandName)</ReplacementString>
         </DistributionTemplateReplacement>
       </ItemGroup>
-
-
-      <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">
-        <DistributionTemplateReplacement Include="{AdditionalSharedFxComponentId}">
-          <ReplacementString>$(AdditionalSharedFrameworkComponentId)</ReplacementString>
-        </DistributionTemplateReplacement>
-        <DistributionTemplateReplacement Include="{AdditionalSharedHostComponentId}">
-          <ReplacementString>$(AdditionalSharedHostComponentId)</ReplacementString>
-        </DistributionTemplateReplacement>
-        <DistributionTemplateReplacement Include="{AdditionalHostFxrComponentId}">
-          <ReplacementString>$(AdditionalHostFxrComponentId)</ReplacementString>
-        </DistributionTemplateReplacement>
-        <DistributionTemplateReplacement Include="{AdditionalSharedFxBrandName}">
-          <ReplacementString>$(AdditionalSharedFrameworkBrandName)</ReplacementString>
-        </DistributionTemplateReplacement>
-        <DistributionTemplateReplacement Include="{AdditionalSharedHostBrandName}">
-          <ReplacementString>$(AdditionalSharedHostBrandName)</ReplacementString>
-        </DistributionTemplateReplacement>
-        <DistributionTemplateReplacement Include="{AdditionalHostFxrBrandName}">
-          <ReplacementString>$(AdditionalHostFxrBrandName)</ReplacementString>
-        </DistributionTemplateReplacement>
-      </ItemGroup>
       
       <!-- Consumed By Publish -->
       <ItemGroup>
@@ -102,12 +71,6 @@
         <GenerateSdkProductArchiveInputs Include="$(DownloadedSharedHostInstallerFile)" />
         <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveDistributionTemplateFile)" />
         <GenerateSdkProductArchiveInputs Include="$(SdkProductArchiveResourcesDirectory)/**/*" />
-      </ItemGroup>
-
-      <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">
-        <GenerateSdkProductArchiveInputs Include="$(AdditionalDownloadedSharedFrameworkInstallerFile)" />
-        <GenerateSdkProductArchiveInputs Include="$(AdditionalDownloadedHostFxrInstallerFile)" />
-        <GenerateSdkProductArchiveInputs Include="$(AdditionalDownloadedSharedHostInstallerFile)" />
       </ItemGroup>
     </Target>
 
@@ -140,15 +103,6 @@
                                                 $(SharedFrameworkPkgIntermediatePath);
                                                 $(HostFxrPkgIntermediatePath);
                                                 $(SharedHostPkgIntermediatePath)" />
-      </ItemGroup>
-
-      <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' == 'true' ">
-        <PkgComponentsSourceFiles Include="$(AdditionalDownloadedSharedFrameworkInstallerFile);
-                                           $(AdditionalDownloadedHostFxrInstallerFile);
-                                           $(AdditionalDownloadedSharedHostInstallerFile)" />
-        <PkgComponentsDestinationFiles Include="$(AdditionalSharedFrameworkPkgIntermediatePath);
-                                                $(AdditionalHostFxrPkgIntermediatePath);
-                                                $(AdditionalSharedHostPkgIntermediatePath)" />
       </ItemGroup>
 
       <!-- Move ProductArchive pkg components into place with component ids in the filenames -->

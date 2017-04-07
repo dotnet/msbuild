@@ -78,11 +78,6 @@
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
 
-      <Exec Command="sudo dpkg -r $(AdditionalSharedFxDebianPackageName)" 
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-      <Exec Command="sudo dpkg -r $(AdditionalHostFxrDebianPackageName)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
 
@@ -95,13 +90,6 @@
       Outputs="$(DebianTestResultsXmlFile)" >
 
       <!-- Install Dependencies and SDK Packages -->
-      <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedHostInstallerFile)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-      <Exec Command="sudo dpkg -i $(AdditionalDownloadedHostFxrInstallerFile)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-      <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedFrameworkInstallerFile)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-
       <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
@@ -120,11 +108,6 @@
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-
-      <Exec Command="sudo dpkg -r $(AdditionalSharedFxDebianPackageName)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
-      <Exec Command="sudo dpkg -r $(AdditionalHostFxrDebianPackageName)"
-            Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'" />
 
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
