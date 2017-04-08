@@ -2,6 +2,7 @@
   <PropertyGroup>
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
+      <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/stage2WithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
       <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
       <SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsDirectory>
       <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
@@ -9,6 +10,7 @@
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
+      <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
       <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
       <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>

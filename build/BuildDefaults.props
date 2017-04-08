@@ -2,11 +2,9 @@
   <PropertyGroup>
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <HasAdditionalSharedFramework Condition="'$(Rid)' != 'linux-x64'">true</HasAdditionalSharedFramework>
-    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' AND '$(HasAdditionalSharedFramework)' == 'true' ">true</IncludeAdditionalSharedFrameworks>
-    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' ">false</IncludeAdditionalSharedFrameworks>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
     <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
+    <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' ">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
   </PropertyGroup>
 </Project>

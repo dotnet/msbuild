@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _builtDotnet;
         private string _nugetPackages;
         private string _stage2Sdk;
+        private string _stage2WithBackwardsCompatibleRuntimesDirectory;
         private string _testPackages;
         private string _pjDotnet;
 
@@ -82,6 +83,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public string NugetPackages => _nugetPackages;
         public string PjDotnet => _pjDotnet;
         public string Stage2Sdk => _stage2Sdk;
+        public string Stage2WithBackwardsCompatibleRuntimesDirectory => _stage2WithBackwardsCompatibleRuntimesDirectory;
         public string TestPackages => _testPackages;
 
         public RepoDirectoriesProvider(
@@ -97,6 +99,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
             _stage2Sdk = Directory.EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk")).First();
+            _stage2WithBackwardsCompatibleRuntimesDirectory =
+                Path.Combine(_artifacts, "stage2WithBackwardsCompatibleRuntimes");
             _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
         }
 

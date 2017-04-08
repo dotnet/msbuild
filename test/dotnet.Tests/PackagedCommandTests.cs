@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
 
-            new DependencyToolInvokerCommand()
+            new DependencyToolInvokerCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testInstance.Root)
                 .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
                 .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            new DependencyContextTestCommand()
+            new DependencyContextTestCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute("")
                 .Should().Pass();
@@ -417,7 +417,7 @@ namespace Microsoft.DotNet.Tests
 
         class DependencyContextTestCommand : DotnetCommand
         {
-            public DependencyContextTestCommand()
+            public DependencyContextTestCommand(string dotnetUnderTest) : base(dotnetUnderTest)
             {
             }
 

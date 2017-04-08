@@ -223,4 +223,21 @@
 
     <Delete Files="@(PdbsToClean)" />
   </Target>
+
+  <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"
+          AfterTargets="PublishLzmaArchive;">
+    <ItemGroup>
+      <BackwardsCompatibleSharedFrameworks Remove="*" />
+      <BackwardsCompatibleSharedFrameworks Include="$(BackwardsCompatibleSharedFrameworksPublishDirectory)/**/*" />
+
+      <Stage2Cli Remove="*" />
+      <Stage2Cli Include="$(OutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(BackwardsCompatibleSharedFrameworks)"
+          DestinationFiles="@(BackwardsCompatibleSharedFrameworks->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(Stage2Cli)"
+          DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

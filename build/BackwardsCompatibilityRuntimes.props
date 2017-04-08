@@ -1,0 +1,57 @@
+<Project>
+  <PropertyGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">
+    <BackwardsCompatibility110CoreSetupChannel>release/1.1.0</BackwardsCompatibility110CoreSetupChannel>
+    <BackwardsCompatibility110SharedFrameworkVersion>1.1.1</BackwardsCompatibility110SharedFrameworkVersion>
+    <BackwardsCompatibility110SharedHostVersion>1.1.0</BackwardsCompatibility110SharedHostVersion>
+    <BackwardsCompatibility110HostFxrVersion>1.1.0</BackwardsCompatibility110HostFxrVersion>
+
+    <BackwardsCompatibility110DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(BackwardsCompatibility110SharedHostVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedSharedHostInstallerFileName>
+    <BackwardsCompatibility110DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)</BackwardsCompatibility110DownloadedSharedHostInstallerFile>
+
+    <BackwardsCompatibility110DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(BackwardsCompatibility110HostFxrVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedHostFxrInstallerFileName>
+    <BackwardsCompatibility110DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)</BackwardsCompatibility110DownloadedHostFxrInstallerFile>
+
+    <BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(BackwardsCompatibility110SharedFrameworkVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName>
+    <BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)</BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile>
+
+    <BackwardsCompatibility110CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(BackwardsCompatibility110SharedFrameworkVersion)$(ArchiveExtension)</BackwardsCompatibility110CombinedFrameworkHostCompressedFileName>
+
+    <BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(BackwardsCompatibility110CoreSetupChannel)</BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel>
+    <BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Binaries/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl>
+    <BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Installers</BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>
+    <BackwardsCompatibility110CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110CoreSetupDownloadDirectory>
+    <BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>$(BackwardsCompatibility110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">
+    <_DownloadAndExtractItem Include="BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive"
+                             Condition="!Exists('$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)')">
+      <Url>$(BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl)/$(BackwardsCompatibility110CombinedFrameworkHostCompressedFileName)</Url>
+      <DownloadFileName>$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+      <ExtractDestination>$(BackwardsCompatibleSharedFrameworksPublishDirectory)</ExtractDestination>
+      <!-- don't overwrite the destination because there can be multiple shared fx's and they need to be combined -->
+      <OverwriteDestination>False</OverwriteDestination>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile"
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedFrameworkVersion)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)</Url>
+      <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedSharedHostInstallerFile"
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110SharedHostVersion)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)</Url>
+      <DownloadFileName>$(BackwardsCompatibility110DownloadedSharedHostInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+
+    <_DownloadAndExtractItem Include="BackwardsCompatibility110DownloadedHostFxrInstallerFile"
+                             Condition="!Exists('$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(BackwardsCompatibility110CoreSetupInstallerBlobRootUrl)/$(BackwardsCompatibility110HostFxrVersion)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)</Url>
+      <DownloadFileName>$(BackwardsCompatibility110DownloadedHostFxrInstallerFile)</DownloadFileName>
+      <ExtractDestintation></ExtractDestintation>
+    </_DownloadAndExtractItem>
+  </ItemGroup>
+</Project>

@@ -437,7 +437,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 return;
             }
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
@@ -454,7 +454,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Root
                 .GetDirectory("project");
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("migrate");
 
@@ -495,7 +495,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 return;
             }
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
@@ -552,7 +552,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 return;
             }
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
