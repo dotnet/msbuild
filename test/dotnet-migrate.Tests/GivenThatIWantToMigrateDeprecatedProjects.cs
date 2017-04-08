@@ -406,7 +406,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 "The 'resourceFiles' option is deprecated. Use 'embed' in 'buildOptions' instead.");
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.0")]
+        [Fact]
         public void MigratingDeprecatedResource()
         {
             var projectDirectory = TestAssets
@@ -430,6 +430,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .WithWorkingDirectory(projectDirectory)
                  .Execute("build -c Debug")
                  .Should().Pass();
+
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
+            {
+                // running the app requires netcoreapp1.1
+                return;
+            }
 
             var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
@@ -458,7 +464,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 "The 'resourceBuiltIn' option is deprecated. Use 'embed' in 'buildOptions' instead.");
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.0")]
+        [Fact]
         public void MigratingDeprecatedResourceBuiltIn()
         {
             var projectDirectory = TestAssets
@@ -482,6 +488,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .WithWorkingDirectory(projectDirectory)
                  .Execute("build -c Debug")
                  .Should().Pass();
+
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
+            {
+                // running the app requires netcoreapp1.1
+                return;
+            }
 
             var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)
@@ -510,7 +522,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 "The 'resourceExclude' option is deprecated. Use 'embed' in 'buildOptions' instead.");
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.0")]
+        [Fact]
         public void MigratingDeprecatedResourceExclude()
         {
             var projectDirectory = TestAssets
@@ -533,6 +545,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .WithWorkingDirectory(projectDirectory)
                  .Execute("build -c Debug")
                  .Should().Pass();
+
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.1"))
+            {
+                // running the app requires netcoreapp1.1
+                return;
+            }
 
             var cmd = new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                  .WithWorkingDirectory(projectDirectory)

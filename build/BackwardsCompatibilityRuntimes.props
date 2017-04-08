@@ -28,7 +28,7 @@
                              Condition="!Exists('$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)')">
       <Url>$(BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl)/$(BackwardsCompatibility110CombinedFrameworkHostCompressedFileName)</Url>
       <DownloadFileName>$(BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
-      <ExtractDestination>$(BackwardsCompatibilitySharedFrameworksPublishDirectory)</ExtractDestination>
+      <ExtractDestination>$(BackwardsCompatibleSharedFrameworksPublishDirectory)</ExtractDestination>
       <!-- don't overwrite the destination because there can be multiple shared fx's and they need to be combined -->
       <OverwriteDestination>False</OverwriteDestination>
     </_DownloadAndExtractItem>

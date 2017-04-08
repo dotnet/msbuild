@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
             _stage2Sdk = Directory.EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk")).First();
             _stage2WithBackwardsCompatibleRuntimesDirectory =
-                Path.Combine(_artifacts, "stage2WithBackwardsCompatibilityRuntimes");
+                Path.Combine(_artifacts, "stage2WithBackwardsCompatibleRuntimes");
             _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
         }
 
