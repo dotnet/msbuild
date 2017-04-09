@@ -57,9 +57,6 @@ namespace Microsoft.NET.Build.Tests
                 {
                     var ns = p.Root.Name.Namespace;
 
-                    //  Note: if you want to see how this fails when conflicts are not resolved, set the DisableHandlePackageFileConflicts property to true, like this:
-                    //  p.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "DisableHandlePackageFileConflicts", "True"));
-
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
