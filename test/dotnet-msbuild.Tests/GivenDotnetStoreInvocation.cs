@@ -1,18 +1,17 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Store;
 using FluentAssertions;
-using Xunit;
-using System;
-using System.Linq;
+using Microsoft.DotNet.Tools.Store;
 using System.IO;
+using System.Linq;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetStoreInvocation
     {
-        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:ComposeCache <project>";
+        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:ComposeStore <project>";
         static readonly string[] ArgsPrefix = { "-m", "<project>" };
 
         [Theory]
