@@ -438,7 +438,7 @@
     <value>Failed to add reference {0} to project file {1}</value>
   </data>
   <data name="AddRefPostActionMultipleProjFiles" xml:space="preserve">
-    <value>Found multiple possible project files in the same directory. Could not determine which to add a reference to. Files:</value>
+    <value>Found multiple project files in the same directory. Could not determine which to add a reference to. Files:</value>
   </data>
   <data name="AddRefPostActionNoProjFileFound" xml:space="preserve">
     <value>Unable to add reference {0}. Could not find an appropriate project file.</value>
@@ -458,12 +458,15 @@
     <value>Post action failed.</value>
   </data>
   <data name="AddRefPostActionAddPackageRef" xml:space="preserve">
-    <value>Adding a package reference. Running dotnet add {0} reference {1}</value>
+    <value>Adding a package reference. Running dotnet add {0} package {1}</value>
   </data>
   <data name="AddRefPostActionMisconfigured" xml:space="preserve">
-    <value>Add reference action is misconfigured in the template.</value>
+    <value>Add reference action is not configured correctly in the template.</value>
   </data>
   <data name="AddRefPostActionUnsupportedRefType" xml:space="preserve">
     <value>Adding reference type {0} is not supported.</value>
+  </data>
+  <data name="AddRefPostActionAddPackageRefWithVersion" xml:space="preserve">
+    <value>Adding a package reference. Running dotnet add {0} package {1} -v {2}</value>
   </data>
 </root>

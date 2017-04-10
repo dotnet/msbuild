@@ -67,7 +67,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     Dotnet addReferenceCommand = Dotnet.AddPackageReference(projectFile, referenceToAdd, version);
                     addReferenceCommand.CaptureStdOut();
                     addReferenceCommand.CaptureStdErr();
-                    environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionAddPackageRef, projectFile, referenceToAdd));
+                    if (string.IsNullOrEmpty(version))
+                    {
+                        environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionAddPackageRef, projectFile, referenceToAdd));
+                    }
+                    else
+                    {
+                        environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionAddPackageRefWithVersion, projectFile, referenceToAdd, version));
+                    }
                     commandResult = addReferenceCommand.Execute();
                 }
                 else

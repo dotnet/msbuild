@@ -62,11 +62,20 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} reference {1}.
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
         /// </summary>
         public static string AddRefPostActionAddPackageRef {
             get {
                 return ResourceManager.GetString("AddRefPostActionAddPackageRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} -v {2}.
+        /// </summary>
+        public static string AddRefPostActionAddPackageRefWithVersion {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddPackageRefWithVersion", resourceCulture);
             }
         }
         
@@ -89,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add reference action is misconfigured in the template..
+        ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
         /// </summary>
         public static string AddRefPostActionMisconfigured {
             get {
@@ -98,7 +107,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Found multiple possible project files in the same directory. Could not determine which to add a reference to. Files:.
+        ///   Looks up a localized string similar to Found multiple project files in the same directory. Could not determine which to add a reference to. Files:.
         /// </summary>
         public static string AddRefPostActionMultipleProjFiles {
             get {
