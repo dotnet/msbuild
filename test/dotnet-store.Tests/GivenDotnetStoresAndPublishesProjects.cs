@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
 
             new DotnetCommand()
-                .WithEnvironmentVariable("DOTNET_SHARED_PACKAGES", localAssemblyCache)
+                .WithEnvironmentVariable("DOTNET_SHARED_STORE", localAssemblyCache)
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()
                 .And.HaveStdOutContaining("{}");
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, _tfm, "publish", $"{testAppName}.dll");
 
             new DotnetCommand()
-                .WithEnvironmentVariable("DOTNET_SHARED_PACKAGES", localAssemblyCache)
+                .WithEnvironmentVariable("DOTNET_SHARED_STORE", localAssemblyCache)
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Pass()
                 .And.HaveStdOutContaining("{}");
