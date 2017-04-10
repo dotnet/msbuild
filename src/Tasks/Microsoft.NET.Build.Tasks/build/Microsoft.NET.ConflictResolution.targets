@@ -16,41 +16,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-    <!-- The condition on this target causes it to be skipped during design-time builds if
-        the restore operation hasn't run yet.  This is to avoid displaying an error in
-        the Visual Studio error list when a project is created before NuGet restore has
-        run and created the assets file. -->
   <Target Name="_GetLockFileAssemblies"
-          DependsOnTargets="ComputePrivateAssetsPackageReferences;
-                            _DefaultMicrosoftNETPlatformLibrary"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
-    <!-- Essentially a copy of the SDKs RunResolvePublishAssemblies.
-         We need to find all the files that will be loaded from deps for conflict resolution.
-         Note that the RuntimeIdentifier is not passed to this task, as we want to process the
-         rid-less assets which will be passed to the compiler.
+          DependsOnTargets="_ComputeLockFileCopyLocal">
+    <!-- We need to find all the files that will be loaded from deps for conflict resolution.
+         To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true
          -->
-    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
-                              AssetsFilePath="$(ProjectAssetsFile)"
-                              TargetFramework="$(TargetFrameworkMoniker)"
-                              RuntimeIdentifier=""
-                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
-                              IsSelfContained="$(SelfContained)">
-
-      <Output TaskParameter="AssembliesToPublish" ItemName="_LockFileAssemblies" />
-
-    </ResolvePublishAssemblies>
+    <ItemGroup>
+      <_LockFileAssemblies Include="@(NativeCopyLocalItems)" />
+      <_LockFileAssemblies Include="@(RuntimeCopyLocalItems)" />
+      <_LockFileAssemblies Include="@(ResourceCopyLocalItems)" />
+    </ItemGroup>
   </Target>
 
   <UsingTask TaskName="HandlePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <PropertyGroup>
-    <!-- If SelfContained is not true the host will run from packages,
-             but we still need to consider those package items for conflicts -->
-    <HandlePackageFileConflictsDependsOn Condition="'$(SelfContained)' != 'true'">_GetLockFileAssemblies</HandlePackageFileConflictsDependsOn>
-  </PropertyGroup>
   
-  <Target Name="HandlePackageFileConflicts" AfterTargets="ResolvePackageDependenciesForBuild" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">
+  <Target Name="HandlePackageFileConflicts" AfterTargets="ResolvePackageDependenciesForBuild" DependsOnTargets="_GetLockFileAssemblies">
     <HandlePackageFileConflicts References="@(Reference)"
                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                 OtherRuntimeItems="@(_LockFileAssemblies)"
