@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-c", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "/p:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--filter", "<filterprojectfiles>" }, "/p:FilterProjectFiles=<filterprojectfiles>")]
+        [InlineData(new string[] { "--target", "<targetfiles>" }, "/p:FilterProjectFiles=<targetfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "/verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "/verbosity:minimal")]
         [InlineData(new string[] { "<project>" }, "<project>")]
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-c", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "/p:Configuration=<config>")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "/p:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--filter", "<filterprojectfiles>" }, "/p:FilterProjectFiles=<filterprojectfiles>")]
+        [InlineData(new string[] { "--target", "<targetfiles>" }, "/p:FilterProjectFiles=<targetfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "/verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "/verbosity:minimal")]
         public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)

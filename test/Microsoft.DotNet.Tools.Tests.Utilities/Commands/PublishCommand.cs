@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _framework;
         private string _output;
         private string _runtime;
-        private List<string> _profileFilterProject = new List<string>();
+        private List<string> _targetManifests = new List<string>();
         private bool? _selfContained;
 
         public PublishCommand WithFramework(string framework)
@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return this;
         }
 
-        public PublishCommand WithProfileProject(string profileproj)
+        public PublishCommand WithTargetManifest(string target)
         {
-            _profileFilterProject.Add( $" --filter {profileproj}");
+            _targetManifests.Add( $"--target {target}");
             return this;
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return string.Join(" ", 
                 FrameworkOption,
                 OutputOption,
-                ProfileProjOption,
+                TargetOption,
                 RuntimeOption,
                 SelfContainedOption);
         }
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string RuntimeOption => string.IsNullOrEmpty(_runtime) ? "" : $"-r {_runtime}";
 
-        private string ProfileProjOption => string.Join(" ", _profileFilterProject);
+        private string TargetOption => string.Join(" ", _targetManifests);
 
         private string SelfContainedOption => _selfContained.HasValue ? $"--self-contained:{_selfContained.Value}" : "";
     }

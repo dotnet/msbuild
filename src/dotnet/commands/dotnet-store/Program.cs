@@ -1,41 +1,37 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
-using Microsoft.DotNet.Cli;
-using System.Diagnostics;
-using System;
-using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
-namespace Microsoft.DotNet.Tools.Cache
+namespace Microsoft.DotNet.Tools.Store
 {
-    public partial class CacheCommand : MSBuildForwardingApp
+    public class StoreCommand : MSBuildForwardingApp
     {
-        private CacheCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+        private StoreCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
             : base(msbuildArgs, msbuildPath)
         {
         }
 
-        public static CacheCommand FromArgs(string[] args, string msbuildPath = null)
+        public static StoreCommand FromArgs(string[] args, string msbuildPath = null)
         {
             var msbuildArgs = new List<string>();
 
             var parser = Parser.Instance;
 
-            var result = parser.ParseFrom("dotnet cache", args);
+            var result = parser.ParseFrom("dotnet store", args);
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            var appliedBuildOptions = result["dotnet"]["cache"];
+            var appliedBuildOptions = result["dotnet"]["store"];
 
-            if (!appliedBuildOptions.HasOption("-e"))
+            if (!appliedBuildOptions.HasOption("-m"))
             {
-                throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
+                throw new GracefulException(LocalizableStrings.SpecifyManifests);
             }
 
             msbuildArgs.Add("/t:ComposeCache");
@@ -44,14 +40,14 @@ namespace Microsoft.DotNet.Tools.Cache
 
             msbuildArgs.AddRange(appliedBuildOptions.Arguments);
 
-            return new CacheCommand(msbuildArgs, msbuildPath);
+            return new StoreCommand(msbuildArgs, msbuildPath);
         }
 
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CacheCommand cmd;
+            StoreCommand cmd;
             try
             {
                 cmd = FromArgs(args);

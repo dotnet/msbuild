@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli
                                     RemoveCommandParser.Remove(),
                                     ListCommandParser.List(),
                                     NuGetCommandParser.NuGet(),
-                                    CacheCommandParser.Cache(),
+                                    StoreCommandParser.Store(),
                                     Create.Command("msbuild", ""),
                                     Create.Command("vstest", ""),
                                     CompleteCommandParser.Complete(),

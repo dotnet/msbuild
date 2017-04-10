@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-add-reference.Tests", "dotnet-add-reference.Tests\dotnet-add-reference.Tests.csproj", "{AB63A3E5-76A3-4EE9-A380-8E0C7B7644DC}"
 EndProject
@@ -72,7 +72,7 @@ Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-sln-remove.Tests", "
 EndProject
 Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-add-package.Tests", "dotnet-add-package.Tests\dotnet-add-package.Tests.csproj", "{3501AB72-3E05-45EE-9000-9515F5A139AC}"
 EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "dotnet-cache.Tests", "dotnet-cache.Tests\dotnet-cache.Tests.csproj", "{7CA9ECD0-9284-496B-890F-94B63ECB37EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-store.Tests", "dotnet-store.Tests\dotnet-store.Tests.csproj", "{04B21F0F-E645-44E3-868B-3C97E435FB74}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-back-compat.Tests", "dotnet-back-compat.Tests\dotnet-back-compat.Tests.csproj", "{27351B2F-325B-4843-9F4C-BC53FD06A7B5}"
 EndProject
@@ -470,6 +470,18 @@ Global
 		{3501AB72-3E05-45EE-9000-9515F5A139AC}.Release|x64.Build.0 = Release|Any CPU
 		{3501AB72-3E05-45EE-9000-9515F5A139AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{3501AB72-3E05-45EE-9000-9515F5A139AC}.Release|x86.Build.0 = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|x64.Build.0 = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Debug|x86.Build.0 = Debug|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|x64.ActiveCfg = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|x64.Build.0 = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|x86.ActiveCfg = Release|Any CPU
+		{04B21F0F-E645-44E3-868B-3C97E435FB74}.Release|x86.Build.0 = Release|Any CPU
 		{7CA9ECD0-9284-496B-890F-94B63ECB37EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7CA9ECD0-9284-496B-890F-94B63ECB37EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CA9ECD0-9284-496B-890F-94B63ECB37EC}.Debug|x64.ActiveCfg = Debug|Any CPU
