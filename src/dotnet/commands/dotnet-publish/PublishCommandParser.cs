@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.TargetOptionDescription,
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.TargetOption)
-                        .ForwardAsSingle(o => $"/p:FilterProjectFiles={string.Join("%3B", o.Arguments)}")),
+                        .ForwardAsSingle(o => $"/p:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--self-contained",
                     LocalizableStrings.SelfContainedOptionDescription,
