@@ -437,12 +437,6 @@
   <data name="AddRefPostActionFailed" xml:space="preserve">
     <value>Failed to add reference {0} to project file {1}</value>
   </data>
-  <data name="AddRefPostActionMultipleProjFiles" xml:space="preserve">
-    <value>Found multiple project files in the same directory. Could not determine which to add a reference to. Files:</value>
-  </data>
-  <data name="AddRefPostActionNoProjFileFound" xml:space="preserve">
-    <value>Unable to add reference {0}. Could not find an appropriate project file.</value>
-  </data>
   <data name="AddRefPostActionNoRefConfigured" xml:space="preserve">
     <value>No references configured to be added to a project.</value>
   </data>
@@ -468,5 +462,11 @@
   </data>
   <data name="AddRefPostActionAddPackageRefWithVersion" xml:space="preserve">
     <value>Adding a package reference. Running dotnet add {0} package {1} -v {2}</value>
+  </data>
+  <data name="AddRefPostActionUnresolvedProjFile" xml:space="preserve">
+    <value>Unable to determine which project file to add the reference to.</value>
+  </data>
+  <data name="AddRefPostActionProjFileListHeader" xml:space="preserve">
+    <value>Project files found:</value>
   </data>
 </root>

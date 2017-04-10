@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             if (string.IsNullOrEmpty(outputBasePath))
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionNoProjFileFound, referenceToAdd));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
             }
 
             HashSet<string> extensionLimiters = new HashSet<string>(StringComparer.Ordinal);
@@ -99,13 +99,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             else if (nearestProjectFilesFound.Count == 0)
             {
                 // no projects found. Error.
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionNoProjFileFound, referenceToAdd));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
                 return false;
             }
             else
             {
                 // multiple projects at the same level. Error.
-                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMultipleProjFiles);
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionProjFileListHeader);
                 foreach (string projectFile in nearestProjectFilesFound)
                 {
                     environment.Host.LogMessage(string.Format("\t{0}", projectFile));

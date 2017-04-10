@@ -107,29 +107,20 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Found multiple project files in the same directory. Could not determine which to add a reference to. Files:.
-        /// </summary>
-        public static string AddRefPostActionMultipleProjFiles {
-            get {
-                return ResourceManager.GetString("AddRefPostActionMultipleProjFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to add reference {0}. Could not find an appropriate project file..
-        /// </summary>
-        public static string AddRefPostActionNoProjFileFound {
-            get {
-                return ResourceManager.GetString("AddRefPostActionNoProjFileFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No references configured to be added to a project..
         /// </summary>
         public static string AddRefPostActionNoRefConfigured {
             get {
                 return ResourceManager.GetString("AddRefPostActionNoRefConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project files found:.
+        /// </summary>
+        public static string AddRefPostActionProjFileListHeader {
+            get {
+                return ResourceManager.GetString("AddRefPostActionProjFileListHeader", resourceCulture);
             }
         }
         
@@ -141,6 +132,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string AddRefPostActionSucceeded {
             get {
                 return ResourceManager.GetString("AddRefPostActionSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
+        /// </summary>
+        public static string AddRefPostActionUnresolvedProjFile {
+            get {
+                return ResourceManager.GetString("AddRefPostActionUnresolvedProjFile", resourceCulture);
             }
         }
         
