@@ -129,7 +129,7 @@ get_current_linux_name() {
     fi
 
     # Cannot determine Linux distribution, assuming Ubuntu 14.04.
-    echo "ubuntu"
+    echo "ubuntu.14.04"
     return 0
 }
 
