@@ -18,8 +18,9 @@ namespace Company.WebApplication1
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureConfiguration((context, configBuilder) => {
 #if (OrganizationalAuth)
-                    configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
+                    configBuilder
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
 
                     if (context.HostingEnvironment.IsDevelopment())
                     {
@@ -29,9 +30,10 @@ namespace Company.WebApplication1
 
                     configBuilder.AddEnvironmentVariables();
 #else
-                    configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true)
-                    .AddEnvironmentVariables();
+                    configBuilder
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true)
+                        .AddEnvironmentVariables();
 #endif
                 })
                 .ConfigureLogging(loggerFactory => loggerFactory
