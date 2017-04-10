@@ -1,0 +1,30 @@
+﻿{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithPortsAndCoalesce",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithPortsAndCoalesce",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithPortsAndCoalesce",
+  "shortName": "TestAssets.TemplateWithPortsAndCoalesce",
+  "sourceName": "bar",
+  "symbols": {
+    "userPort1": {
+      "type": "parameter",
+      "dataType": "integer"
+    },
+    "generatedPort": {
+      "type": "generated",
+      "generator": "port"
+    },
+    "port": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "userPort1",
+        "fallbackVariableName": "generatedPort"
+      },
+      "replaces": "1234"
+    }
+  }
+}

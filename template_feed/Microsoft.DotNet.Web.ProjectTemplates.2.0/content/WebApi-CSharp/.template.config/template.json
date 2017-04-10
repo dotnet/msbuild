@@ -14,6 +14,14 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
+  "sources": [
+    {
+      "modifiers": {
+        "condition": "(windir == 'C:\\Windows')",
+        "exclude": "Properties/launchSettings.json"
+      }
+    }
+  ],
   "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
   "symbols": {
     "auth": {
@@ -122,6 +130,30 @@
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false"
+    },
+    "iisExpressHttpPort": {
+      "type": "generated",
+      "generator": "port",
+      "replaces": "5000",
+      "parameters": {
+        "fallback": 5000
+      }
+    },
+    "iisExpressHttpsPort": {
+      "type": "generated",
+      "generator": "port",
+      "replaces": "5001",
+      "parameters": {
+        "fallback": 5001
+      }
+    },
+    "applicationUrlPort": {
+      "type": "generated",
+      "generator": "port",
+      "replaces": "5002",
+      "parameters": {
+        "fallback": 5002
+      }
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
