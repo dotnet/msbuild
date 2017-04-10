@@ -1,20 +1,23 @@
 <Project>
   <PropertyGroup>
+    <ArchivePortableSuffix Condition=" '$(UsePortableSharedFramework)' == 'true' ">-portable</ArchivePortableSuffix>
+    <InstallerPortableSuffix Condition=" '$(UsePortableSharedFramework)' == 'true' AND '$(OSName)' != 'ubuntu' ">-portable</InstallerPortableSuffix>
+
     <!-- Downloaded Installers + Archives -->
-    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
+    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerPortableSuffix)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
-    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
+    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(HostFxrVersion)$(InstallerPortableSuffix)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
     <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
 
-    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
+    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerPortableSuffix)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
     <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
     <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
          NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
     <SharedFrameworkRid>$(ProductMonikerRid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
-    <CombinedFrameworkHostCompressedFileName>dotnet-$(SharedFrameworkRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
+    <CombinedFrameworkHostCompressedFileName>dotnet-$(SharedFrameworkRid).$(SharedFrameworkVersion)$(ArchivePortableSuffix)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
   </PropertyGroup>
 
   <PropertyGroup>
