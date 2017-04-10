@@ -124,13 +124,13 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .Restore();
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("FilterProfiles");
-            string filterProjFile1 = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
-            string filterProjFile2 = Path.Combine(filterProjDir, "NewtonsoftMultipleVersions.xml");
+            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
+            string manifestFile1 = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
+            string manifestFile2 = Path.Combine(filterProjDir, "NewtonsoftMultipleVersions.xml");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute( $"/p:FilterProjectFiles={filterProjFile1}%3b{filterProjFile2}")
+                .Execute( $"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
                 .Should()
                 .Pass();
 
@@ -161,13 +161,13 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .Restore("", $"/p:RuntimeIdentifier={rid}");
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("FilterProfiles");
-            string filterProjFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
+            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
+            string manifestFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
             
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:FilterProjectFiles={filterProjFile}")
+                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetManifestFiles={manifestFile}")
                 .Should()
                 .Pass();
 

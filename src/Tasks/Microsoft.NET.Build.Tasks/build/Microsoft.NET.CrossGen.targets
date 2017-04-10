@@ -89,7 +89,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <Target Name="_RunOptimizer"
           DependsOnTargets="_InitializeBasicProps;
-                            _ComputeResolvedFilesToCacheTypes;
+                            _ComputeResolvedFilesToStoreTypes;
                             _SetupStageForCrossgen"
           Condition="$(SkipOptimization) != 'true' ">
     <ItemGroup>
@@ -101,7 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           CrossgenOutputAssembly=$(_RuntimeOptimizedDir)$(DirectorySeparatorChar)%(FileName)%(Extension);
           CrossgenSubOutputPath=%(DestinationSubPath);
           _RuntimeOptimizedDir=$(_RuntimeOptimizedDir);
-          PublishDir=$(CacheStagingDir);
+          PublishDir=$(StoreStagingDir);
           CrossgenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);
         </Properties>
       </AssembliestoCrossgen>
@@ -222,8 +222,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_SetupStageForCrossgen"
           DependsOnTargets="_GetCrossgenProps;_FilterOutFXFromResolvedCandidates;_PopulateUnFilteredResolvedCandidates">
     <PropertyGroup>
-      <_RuntimeRefDir>$([System.IO.Path]::Combine($(CacheWorkerWorkingDir), "runtimeref"))</_RuntimeRefDir>  <!-- flat app managed assemblies -->
-      <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(CacheWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
+      <_RuntimeRefDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimeref"))</_RuntimeRefDir>  <!-- flat app managed assemblies -->
+      <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
     </PropertyGroup>
 
     <MakeDir  Directories="$(_RuntimeOptimizedDir)"/>
@@ -288,7 +288,7 @@ Restores netcoreapp and publishes it to a temp directory
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
-                              PreserveCacheLayout="false">
+                              PreserveStoreLayout="false">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="CrossgenResolvedAssembliesToPublish" />
     </ResolvePublishAssemblies>

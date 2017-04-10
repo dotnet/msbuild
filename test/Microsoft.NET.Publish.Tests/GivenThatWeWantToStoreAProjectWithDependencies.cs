@@ -20,7 +20,7 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Publish.Tests
 {
-    public class GivenThatWeWantToCacheAProjectWithDependencies : SdkTest
+    public class GivenThatWeWantToStoreAProjectWithDependencies : SdkTest
     {
         private static readonly string _libPrefix = FileConstants.DynamicLibPrefix;
         private static string _runtimeOs;
@@ -29,7 +29,7 @@ namespace Microsoft.NET.Publish.Tests
         private static string _testArch;
         private static string _tfm = "netcoreapp1.0";
 
-        static GivenThatWeWantToCacheAProjectWithDependencies()
+        static GivenThatWeWantToStoreAProjectWithDependencies()
         {
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -65,19 +65,19 @@ namespace Microsoft.NET.Publish.Tests
         public void compose_dependencies()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
-                .CopyTestAsset("SimpleCache")
+                .CopyTestAsset("SimpleStore")
                 .WithSource();
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
+            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
-            cacheCommand
+            storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
-            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
             List<string> files_on_disk = new List < string > {
                "artifact.xml",
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Publish.Tests
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
-            cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
             //valid artifact.xml
            var knownpackage = new HashSet<PackageIdentity>();
@@ -109,13 +109,13 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
-            HashSet<PackageIdentity> packagescomposed = ParseCacheArtifacts(artifact);
+            HashSet<PackageIdentity> packagescomposed = ParseStoreArtifacts(artifact);
 
             packagescomposed.Count.Should().Be(knownpackage.Count);
 
             foreach(var pkg in packagescomposed)
             {
-                knownpackage.Should().Contain(elem => elem.Equals(pkg),"package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
+                knownpackage.Should().Contain(elem => elem.Equals(pkg),"package {0}, version {1} was not expected to be stored", pkg.Id, pkg.Version);
             }
             
         }
@@ -123,21 +123,21 @@ namespace Microsoft.NET.Publish.Tests
         public void compose_with_fxfiles()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
-                .CopyTestAsset("SimpleCache")
+                .CopyTestAsset("SimpleStore")
                 .WithSource();
 
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
+            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
-            cacheCommand
+            storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
                 .Should()
                 .Pass();
 
-            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
@@ -150,28 +150,28 @@ namespace Microsoft.NET.Publish.Tests
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
-            cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [Fact]
         public void compose_dependencies_noopt()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
-                .CopyTestAsset("SimpleCache")
+                .CopyTestAsset("SimpleStore")
                 .WithSource();
 
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleCache.xml");
+            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
-            cacheCommand
+            storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipOptimization=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
 
-            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
@@ -186,26 +186,26 @@ namespace Microsoft.NET.Publish.Tests
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
 
-            cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [Fact]
-        public void cache_nativeonlyassets()
+        public void store_nativeonlyassets()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
-                .CopyTestAsset("UnmanagedCache")
+                .CopyTestAsset("UnmanagedStore")
                 .WithSource();
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
-            cacheCommand
+            storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeWorkingDir={WorkingDir}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
 
-            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
@@ -213,28 +213,28 @@ namespace Microsoft.NET.Publish.Tests
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
                };
 
-            cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [Fact]
         public void compose_multifile()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
-                .CopyTestAsset("ProfileLists")
+                .CopyTestAsset("TargetManifests", "multifile")
                 .WithSource();
 
-            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
             var additonalproj1 = Path.Combine(simpleDependenciesAsset.TestRoot, "NewtonsoftMultipleVersions.xml");
             var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertions.xml");
 
-            cacheCommand
+            storeCommand
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
-            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+            DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
@@ -243,7 +243,7 @@ namespace Microsoft.NET.Publish.Tests
                @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
                };
 
-            cacheDirectory.Should().HaveFiles(files_on_disk);
+            storeDirectory.Should().HaveFiles(files_on_disk);
 
             var knownpackage = new HashSet<PackageIdentity>();
 
@@ -252,35 +252,35 @@ namespace Microsoft.NET.Publish.Tests
             knownpackage.Add(new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0")));
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
-            var packagescomposed = ParseCacheArtifacts(artifact);
+            var packagescomposed = ParseStoreArtifacts(artifact);
 
             packagescomposed.Count.Should().BeGreaterThan(0);
 
             foreach (var pkg in knownpackage)
             {
-                packagescomposed.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
+                packagescomposed.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be stored", pkg.Id, pkg.Version);
             }
         }
 
         [Fact]
         public void It_uses_star_versions_correctly()
         {
-            TestAsset profileListsAsset = _testAssetsManager
-                .CopyTestAsset("ProfileLists")
+            TestAsset targetManifestsAsset = _testAssetsManager
+                .CopyTestAsset("TargetManifests")
                 .WithSource();
 
-            var outputFolder = Path.Combine(profileListsAsset.TestRoot, "o");
-            var workingDir = Path.Combine(profileListsAsset.TestRoot, "w");
+            var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
+            var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeCache(Stage0MSBuild, profileListsAsset.TestRoot, "StarVersion.xml")
+            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "StarVersion.xml")
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
 
             var artifactFile = Path.Combine(outputFolder, "artifact.xml");
-            var cacheArtifacts = ParseCacheArtifacts(artifactFile);
+            var storeArtifacts = ParseStoreArtifacts(artifactFile);
 
-            var nugetPackage = cacheArtifacts.Single(p => string.Equals(p.Id, "NuGet.Common", StringComparison.OrdinalIgnoreCase));
+            var nugetPackage = storeArtifacts.Single(p => string.Equals(p.Id, "NuGet.Common", StringComparison.OrdinalIgnoreCase));
 
             // nuget.org/packages/NuGet.Common currently contains:
             // 4.0.0
@@ -296,14 +296,14 @@ namespace Microsoft.NET.Publish.Tests
             nugetPackage.Version.Should().BeGreaterThan(NuGetVersion.Parse("4.0.0-rc2"));
 
             // work around https://github.com/dotnet/sdk/issues/1045. The unnecessary assets getting
-            // put in the cache folder cause long path issues, so delete them
+            // put in the store folder cause long path issues, so delete them
             foreach (var runtimeFolder in new DirectoryInfo(outputFolder).GetDirectories("runtime.*"))
             {
                 runtimeFolder.Delete(true);
             }
         }
 
-        private static HashSet<PackageIdentity> ParseCacheArtifacts(string path)
+        private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)
         {
             return new HashSet<PackageIdentity>(
                 from element in XDocument.Load(path).Root.Elements("Package")

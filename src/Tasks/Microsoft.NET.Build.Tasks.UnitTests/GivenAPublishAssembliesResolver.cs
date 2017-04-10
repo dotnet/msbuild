@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         [Theory]
         [MemberData("ProjectData1")]
-        public void ItResolvesAssembliesFromProjectLockFilesWithCacheLayout(string projectName, string runtime, object[] expectedResolvedFiles)
+        public void ItResolvesAssembliesFromProjectLockFilesWithStoreLayout(string projectName, string runtime, object[] expectedResolvedFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
             ProjectContext projectContext = lockFile.CreateProjectContext(
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 isSelfContained: false);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
-                .WithPreserveCacheLayout(true)
+                .WithPreserveStoreLayout(true)
                 .Resolve(projectContext);
 
             resolvedFiles
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "all.asset.types",
                         "osx.10.11-x64",
                         new object[] {
-                            CreateNativeResolvedFile("Libuv", "1.9.0", "runtimes/osx/native/libuv.dylib", destinationSubDirectory: null, preserveCacheLayout: false),
+                            CreateNativeResolvedFile("Libuv", "1.9.0", "runtimes/osx/native/libuv.dylib", destinationSubDirectory: null, preserveStoreLayout: false),
                             CreateResolvedFileForTFM("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa"),
                             CreateResourceResolvedFile("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa", "de"),
                             CreateResourceResolvedFile("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa", "zh-Hant"),
@@ -136,7 +136,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "all.asset.types",
                         "osx.10.11-x64",
                         new object[] {
-                            CreateNativeResolvedFile("Libuv", "1.9.0", "runtimes/osx/native/libuv.dylib", destinationSubDirectory: null, preserveCacheLayout: true),
+                            CreateNativeResolvedFile("Libuv", "1.9.0", "runtimes/osx/native/libuv.dylib", destinationSubDirectory: null, preserveStoreLayout: true),
                             CreateResolvedFileForTFM("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa", true),
                             CreateResourceResolvedFile("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa", "de", true),
                             CreateResourceResolvedFile("System.Spatial", "5.7.0", "portable-net45+wp8+win8+wpa", "zh-Hant", true),
@@ -145,19 +145,19 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 };
             }
         }
-        private static ResolvedFile CreateResolvedFileForTFM(string packageId, string version, string tfm, bool preserveCacheLayout = false)
+        private static ResolvedFile CreateResolvedFileForTFM(string packageId, string version, string tfm, bool preserveStoreLayout = false)
         {
-            return CreateResolvedFile(packageId, version, $"lib/{tfm}/{packageId}.dll", null, preserveCacheLayout, AssetType.Runtime);
+            return CreateResolvedFile(packageId, version, $"lib/{tfm}/{packageId}.dll", null, preserveStoreLayout, AssetType.Runtime);
         }
 
-        private static ResolvedFile CreateResourceResolvedFile(string packageId, string version, string tfm, string locale, bool preserveCacheLayout = false)
+        private static ResolvedFile CreateResourceResolvedFile(string packageId, string version, string tfm, string locale, bool preserveStoreLayout = false)
         {
-            return CreateResolvedFile(packageId, version, $"lib/{tfm}/{locale}/{packageId}.resources.dll", locale, preserveCacheLayout, AssetType.Resources);
+            return CreateResolvedFile(packageId, version, $"lib/{tfm}/{locale}/{packageId}.resources.dll", locale, preserveStoreLayout, AssetType.Resources);
         }
 
-        private static ResolvedFile CreateNativeResolvedFile(string packageId, string version, string filePath, bool preserveCacheLayout = false)
+        private static ResolvedFile CreateNativeResolvedFile(string packageId, string version, string filePath, bool preserveStoreLayout = false)
         {
-            return CreateNativeResolvedFile(packageId, version, filePath, Path.GetDirectoryName(filePath), preserveCacheLayout);
+            return CreateNativeResolvedFile(packageId, version, filePath, Path.GetDirectoryName(filePath), preserveStoreLayout);
         }
 
         private static ResolvedFile CreateNativeResolvedFile(
@@ -165,9 +165,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string version,
             string filePath,
             string destinationSubDirectory,
-            bool preserveCacheLayout)
+            bool preserveStoreLayout)
         {
-            return CreateResolvedFile(packageId, version, filePath, destinationSubDirectory, preserveCacheLayout, AssetType.Native);
+            return CreateResolvedFile(packageId, version, filePath, destinationSubDirectory, preserveStoreLayout, AssetType.Native);
         }
 
         private static ResolvedFile CreateResolvedFile(
@@ -175,7 +175,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string version,
             string filePath,
             string destinationSubDirectory,
-            bool preserveCacheLayout,
+            bool preserveStoreLayout,
             AssetType assetType)
         {
             string packageRoot;
@@ -186,7 +186,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             string sourcepath = Path.Combine(packageDirectory, filePath);
             string sourcedir = Path.GetDirectoryName(sourcepath);
-            string destinationSubDirPath = preserveCacheLayout ? sourcedir.Substring(packageRoot.Length): destinationSubDirectory;
+            string destinationSubDirPath = preserveStoreLayout ? sourcedir.Substring(packageRoot.Length): destinationSubDirectory;
             return new ResolvedFile(
                 sourcepath,
                 destinationSubDirPath,
