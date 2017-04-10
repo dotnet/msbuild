@@ -43,14 +43,4 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Context>BrowseObject</Context>
     </PropertyPageSchema>
   </ItemGroup>
-  
-  <!-- Enables IIS settings by copiing non framework assemblies to the bin folder -->
-  <Target Name="CopyAssembliesToOutput" AfterTargets="Build" DependsOnTargets="RunResolvePublishAssemblies" Condition="'$(CreateLocalDeployment)' == 'true' And '$(IsInnerBuild)' == 'true'">
-    <Copy SourceFiles="@(ResolvedAssembliesToPublish)" DestinationFiles="$(TargetDir)%(ResolvedAssembliesToPublish.DestinationSubPath)" SkipUnchangedFiles="true" />
-  </Target>
-
-  <!-- Clean target to remove the extra assemblies that were copied to the bin folder -->
-  <Target Name="CleanCopiedAssemblies" AfterTargets="Clean" DependsOnTargets="RunResolvePublishAssemblies" Condition="'$(IsInnerBuild)' == 'true'">
-    <Delete Files="$(TargetDir)%(ResolvedAssembliesToPublish.DestinationSubPath)" ContinueOnError="true" />
-  </Target>
 </Project>
