@@ -15,6 +15,7 @@ namespace Company.WebApplication1
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseIISIntegration()
                 .ConfigureLogging(loggerFactory => loggerFactory.AddConsole())
                 .UseStartup<Startup>()
                 .Build();
