@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    public class HandlePackageFileConflicts : TaskBase
+    public class ResolvePackageFileConflicts : TaskBase
     {
         private HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
         private HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();
