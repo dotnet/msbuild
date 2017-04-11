@@ -113,7 +113,7 @@ namespace Microsoft.NET.Build.Tasks
             return sourcePath;
         }
 
-        static readonly string[] s_targetPathMetadata = new[] { MetadataNames.TargetPath, MetadataNames.DestinationSubPath, MetadataNames.Path };
+        static readonly string[] s_targetPathMetadata = new[] { MetadataNames.TargetPath, MetadataNames.DestinationSubPath };
         public static string GetTargetPath(ITaskItem item)
         {
             // first use TargetPath, DestinationSubPath, then Path, then fallback to filename+extension alone
