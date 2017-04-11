@@ -163,15 +163,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alias names cannot begin with dashes (&apos;-&apos;)..
-        /// </summary>
-        public static string AliasCannotBeginWithDashes {
-            get {
-                return ResourceManager.GetString("AliasCannotBeginWithDashes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Alias &apos;{0}&apos; is a template short name, and therefore cannot be aliased..
         /// </summary>
         public static string AliasCannotBeShortName {
@@ -191,11 +182,20 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alias creation successful..
+        ///   Looks up a localized string similar to Successfully created alias named &apos;{0}&apos; with value &apos;{1}&apos;.
         /// </summary>
         public static string AliasCreated {
             get {
                 return ResourceManager.GetString("AliasCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias not created. It would have created an alias cycle, resulting in infinite expansion..
+        /// </summary>
+        public static string AliasCycleError {
+            get {
+                return ResourceManager.GetString("AliasCycleError", resourceCulture);
             }
         }
         
@@ -236,11 +236,84 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alias names can only contain letters, numbers, underscores, and periods..
+        /// </summary>
+        public static string AliasNameContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("AliasNameContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias not created. The input was invalid..
+        /// </summary>
+        public static string AliasNotCreatedInvalidInput {
+            get {
+                return ResourceManager.GetString("AliasNotCreatedInvalidInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully removed alias named &apos;{0}&apos; whose value was &apos;{1}&apos;..
+        /// </summary>
+        public static string AliasRemoved {
+            get {
+                return ResourceManager.GetString("AliasRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to remove alias &apos;{0}&apos;. It did not exist..
+        /// </summary>
+        public static string AliasRemoveNonExistentFailed {
+            get {
+                return ResourceManager.GetString("AliasRemoveNonExistentFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All Aliases:.
+        /// </summary>
+        public static string AliasShowAllAliasesHeader {
+            get {
+                return ResourceManager.GetString("AliasShowAllAliasesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown alias name &apos;{0}&apos;.
+        ///Run &apos;dotnet --show-aliases&apos; with no args to show all aliases..
+        /// </summary>
+        public static string AliasShowErrorUnknownAlias {
+            get {
+                return ResourceManager.GetString("AliasShowErrorUnknownAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully updated alias named &apos;{0}&apos; to value &apos;{1}&apos;..
+        /// </summary>
+        public static string AliasUpdated {
+            get {
+                return ResourceManager.GetString("AliasUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alias Value.
         /// </summary>
         public static string AliasValue {
             get {
                 return ResourceManager.GetString("AliasValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First argument of an alias value must be a letter or digit..
+        /// </summary>
+        public static string AliasValueFirstArgError {
+            get {
+                return ResourceManager.GetString("AliasValueFirstArgError", resourceCulture);
             }
         }
         

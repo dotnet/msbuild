@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -28,38 +30,107 @@ namespace Microsoft.TemplateEngine.Cli
             return AliasExpansionStatus.ExpansionError;
         }
 
-        public static CreationResultStatus ManipulateAliasValue(INewCommandInput commandInput, AliasRegistry aliasRegistry)
+        // Matches on any non-word character (letter, number, or underscore)
+        // Almost the same as \W, except \W has some quirks with unicode characters, and we allow '.'
+        private static readonly Regex InvalidAliasRegex = new Regex("[^a-z0-9_.]", RegexOptions.IgnoreCase);
+        // The first token must be a valid template short name. This naively tests for it by checking the first character.
+        // TODO: make this test more robust.
+        private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
+
+        public static CreationResultStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
         {
-            List<string> inputTokens = commandInput.Tokens.ToList();
+            if (reservedAliasNames.Contains(aliasName))
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCannotBeShortName, aliasName));
+                return CreationResultStatus.CreateFailed;
+            }
+            else if (InvalidAliasRegex.IsMatch(aliasName))
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.AliasNameContainsInvalidCharacters);   // TODO - change this string
+                return CreationResultStatus.InvalidParamValues;
+            }
+
             inputTokens.RemoveAt(0);    // remove the command name
-            AliasManipulationResult result = aliasRegistry.TryCreateOrRemoveAlias(inputTokens);
+            IReadOnlyList<string> aliasTokens = FilterForAliasTokens(inputTokens); // remove '-a' or '--alias', and the alias name
+
+            // The first token refers to a template name, or another alias.
+            if (aliasTokens.Count > 0 && !ValidFirstTokenRegex.IsMatch(aliasTokens[0]))
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.AliasValueFirstArgError);
+                return CreationResultStatus.InvalidParamValues;
+            }
+
+            // create, update, or delete an alias.
+            return ManipulateAliasValue(aliasName, aliasTokens, aliasRegistry);
+        }
+
+        private static CreationResultStatus ManipulateAliasValue(string aliasName, IReadOnlyList<string> aliasTokens, AliasRegistry aliasRegistry)
+        {
+            AliasManipulationResult result = aliasRegistry.TryCreateOrRemoveAlias(aliasName, aliasTokens);
             CreationResultStatus returnStatus = CreationResultStatus.OperationNotSpecified;
 
             switch (result.Status)
             {
                 case AliasManipulationStatus.Created:
-                    Reporter.Output.WriteLine(string.Format("Successfully created alias named '{0}' with value '{1}'", result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCreated, result.AliasName, result.AliasValue));
                     returnStatus = CreationResultStatus.Success;
                     break;
                 case AliasManipulationStatus.Removed:
-                    Reporter.Output.WriteLine(string.Format("Successfully removed alias named '{0}' whose value was '{1}'", result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoved, result.AliasName, result.AliasValue));
                     returnStatus = CreationResultStatus.Success;
                     break;
+                case AliasManipulationStatus.RemoveNonExistentFailed:
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoveNonExistentFailed, result.AliasName));
+                    break;
                 case AliasManipulationStatus.Updated:
-                    Reporter.Output.WriteLine(string.Format("Successfully updated alias named '{0}' to value '{1}'", result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasUpdated, result.AliasName, result.AliasValue));
                     returnStatus = CreationResultStatus.Success;
                     break;
                 case AliasManipulationStatus.WouldCreateCycle:
-                    Reporter.Output.WriteLine(string.Format("Alias not created. It would have created an alias cycle, resulting in infinite expansion."));
+                    Reporter.Output.WriteLine(LocalizableStrings.AliasCycleError);
                     returnStatus = CreationResultStatus.CreateFailed;
                     break;
                 case AliasManipulationStatus.InvalidInput:
-                    Reporter.Output.WriteLine(string.Format("Alias not created. The input was invalid"));
+                    Reporter.Output.WriteLine(LocalizableStrings.AliasNotCreatedInvalidInput);
                     returnStatus = CreationResultStatus.InvalidParamValues;
                     break;
             }
 
             return returnStatus;
+        }
+
+        private static IReadOnlyList<string> FilterForAliasTokens(IReadOnlyList<string> inputTokens)
+        {
+            List<string> aliasTokens = new List<string>();
+            bool nextIsAliasName = false;
+            string aliasName = null;
+
+            foreach (string token in inputTokens)
+            {
+                if (nextIsAliasName)
+                {
+                    aliasName = token;
+                    nextIsAliasName = false;
+                }
+                else if (string.Equals(token, "-a", StringComparison.Ordinal) || string.Equals(token, "--alias", StringComparison.Ordinal))
+                {
+                    if (!string.IsNullOrEmpty(aliasName))
+                    {
+                        // found multiple alias names, which is invalid.
+                        aliasTokens.Clear();
+                        aliasName = null;
+                        return aliasTokens;
+                    }
+
+                    nextIsAliasName = true;
+                }
+                else if (!token.StartsWith("--debug:", StringComparison.Ordinal))
+                {
+                    aliasTokens.Add(token);
+                }
+            }
+
+            return aliasTokens;
         }
 
         public static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry)
@@ -77,14 +148,14 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(string.Format("Unknown alias name '{0}'\nRun 'dotnet --show-aliases' with no args to show all aliases.", commandInput.ShowAliasesAliasName));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName));
                     return CreationResultStatus.InvalidParamValues;
                 }
             }
             else
             {
                 aliasesToShow = aliasRegistry.AllAliases;
-                Reporter.Output.WriteLine("All Aliases:");
+                Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
             }
 
             HelpFormatter<KeyValuePair<string, string>> formatter = new HelpFormatter<KeyValuePair<string, string>>(environment, aliasesToShow, 2, '-', false)

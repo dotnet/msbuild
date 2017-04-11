@@ -968,22 +968,8 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!string.IsNullOrEmpty(_commandInput.Alias) && !_commandInput.IsHelpFlagSpecified)
                 {
-                    // Check that the alias name is not the short name of a template.
-                    if (AllTemplateShortNames.Contains(_commandInput.Alias))
-                    {
-                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCannotBeShortName, _commandInput.Alias));
-                        return CreationResultStatus.CreateFailed;
-                    }
-                    else if (_commandInput.Alias.StartsWith("-"))
-                    {
-                        Reporter.Output.WriteLine(LocalizableStrings.AliasCannotBeginWithDashes);
-                        return CreationResultStatus.InvalidParamValues;
-                    }
-
-                    // create, update, or delete an alias.
-                    return AliasSupport.ManipulateAliasValue(_commandInput, _aliasRegistry);
+                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), AllTemplateShortNames);
                 }
-                // TODO try expanding aliases... then redo everything except checking for alias expansion.
 
                 if (string.IsNullOrWhiteSpace(TemplateName))
                 {

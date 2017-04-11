@@ -121,7 +121,7 @@
     <value>Alias</value>
   </data>
   <data name="AliasCreated" xml:space="preserve">
-    <value>Alias creation successful.</value>
+    <value>Successfully created alias named '{0}' with value '{1}'</value>
   </data>
   <data name="AmbiguousInputTemplateName" xml:space="preserve">
     <value>Unable to determine the desired template from the input template name: {0}.</value>
@@ -478,8 +478,8 @@
   <data name="ShowAliasesHelp" xml:space="preserve">
     <value>Displays the value of the named alias, or all aliases if no name is specified.</value>
   </data>
-  <data name="AliasCannotBeginWithDashes" xml:space="preserve">
-    <value>Alias names cannot begin with dashes ('-').</value>
+  <data name="AliasNameContainsInvalidCharacters" xml:space="preserve">
+    <value>Alias names can only contain letters, numbers, underscores, and periods.</value>
   </data>
   <data name="AliasCannotBeShortName" xml:space="preserve">
     <value>Alias '{0}' is a template short name, and therefore cannot be aliased.</value>
@@ -497,5 +497,30 @@
   <data name="ExtraArgsCommandAfterExpansion" xml:space="preserve">
     <value>After expanding the extra args files, the command is:
     dotnet {0}</value>
+  </data>
+  <data name="AliasCycleError" xml:space="preserve">
+    <value>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</value>
+  </data>
+  <data name="AliasNotCreatedInvalidInput" xml:space="preserve">
+    <value>Alias not created. The input was invalid.</value>
+  </data>
+  <data name="AliasRemoved" xml:space="preserve">
+    <value>Successfully removed alias named '{0}' whose value was '{1}'.</value>
+  </data>
+  <data name="AliasShowAllAliasesHeader" xml:space="preserve">
+    <value>All Aliases:</value>
+  </data>
+  <data name="AliasShowErrorUnknownAlias" xml:space="preserve">
+    <value>Unknown alias name '{0}'.
+Run 'dotnet --show-aliases' with no args to show all aliases.</value>
+  </data>
+  <data name="AliasUpdated" xml:space="preserve">
+    <value>Successfully updated alias named '{0}' to value '{1}'.</value>
+  </data>
+  <data name="AliasValueFirstArgError" xml:space="preserve">
+    <value>First argument of an alias value must be a letter or digit.</value>
+  </data>
+  <data name="AliasRemoveNonExistentFailed" xml:space="preserve">
+    <value>Unable to remove alias '{0}'. It did not exist.</value>
   </data>
 </root>
