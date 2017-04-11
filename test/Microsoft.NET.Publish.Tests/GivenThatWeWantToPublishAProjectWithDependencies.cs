@@ -13,6 +13,8 @@ using Microsoft.DotNet.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -189,6 +191,98 @@ namespace Microsoft.NET.Publish.Tests
 
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
+
+
+        [Theory]
+        [InlineData("GenerateDocumentationFile=true", true, true)]
+        [InlineData("GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true)]
+        [InlineData("GenerateDocumentationFile=true;PublishReferencesDocumentationFiles=false", true, false)]
+        [InlineData("GenerateDocumentationFile=true;PublishDocumentationFiles=false", false, false)]
+        public void It_publishes_documentation_files(string properties, bool expectAppDocPublished, bool expectLibProjectDocPublished)
+        {
+            var kitchenSinkAsset = _testAssetsManager
+                .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
+                .WithSource();
+            kitchenSinkAsset.Restore("TestApp");
+            
+            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishResult = publishCommand.Execute("/p:" + properties);
+
+            publishResult.Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory();
+
+            if (expectAppDocPublished)
+            {
+                publishDirectory.Should().HaveFile("TestApp.xml");
+            }
+            else
+            {
+                publishDirectory.Should().NotHaveFile("TestApp.xml");
+            }
+
+            if (expectLibProjectDocPublished)
+            {
+                publishDirectory.Should().HaveFile("TestLibrary.xml");
+            }
+            else
+            {
+                publishDirectory.Should().NotHaveFile("TestLibrary.xml");
+            }
+        }
+
+        [Theory]
+        [InlineData("PublishReferencesDocumentationFiles=false", false)]
+        [InlineData("PublishReferencesDocumentationFiles=true", true)]
+        public void It_publishes_referenced_assembly_documentation(string property, bool expectAssemblyDocumentationFilePublished)
+        {
+            var identifier = property.Replace("=", "");
+
+            var libProject = new TestProject
+            {
+                Name = "NetStdLib",
+                IsSdkProject = true,
+                TargetFrameworks = "netstandard1.0"
+            };
+
+            var libAsset = _testAssetsManager.CreateTestProject(libProject, identifier: identifier)
+                .Restore("NetStdLib");
+
+            var libPublishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(libAsset.TestRoot, "NetStdLib"));
+            var libPublishResult = libPublishCommand.Execute("/t:Publish", "/p:GenerateDocumentationFile=true");
+            libPublishResult.Should().Pass();
+            var publishedLibPath = Path.Combine(libPublishCommand.GetOutputDirectory("netstandard1.0").FullName, "NetStdLib.dll");
+
+            var appProject = new TestProject
+            {
+                Name = "TestApp",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = "netcoreapp2.0",
+                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
+                References = { publishedLibPath }
+            };
+
+            var appAsset = _testAssetsManager.CreateTestProject(appProject, identifier: identifier);
+            var appSourcePath  = Path.Combine(appAsset.TestRoot, "TestApp");
+
+            new RestoreCommand(Stage0MSBuild, appSourcePath).Execute().Should().Pass();
+            var appPublishCommand = new PublishCommand(Stage0MSBuild, appSourcePath);
+            var appPublishResult = appPublishCommand.Execute("/p:" + property);
+            appPublishResult.Should().Pass();
+
+            var appPublishDirectory = appPublishCommand.GetOutputDirectory("netcoreapp2.0");
+
+            if (expectAssemblyDocumentationFilePublished)
+            {
+                appPublishDirectory.Should().HaveFile("NetStdLib.xml");
+            }
+            else
+            {
+                appPublishDirectory.Should().NotHaveFile("NetStdLib.xml");
+            }
+        }
+
         private static JObject ReadJson(string path)
         {
             using (JsonTextReader jsonReader = new JsonTextReader(File.OpenText(path)))
