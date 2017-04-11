@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Company.WebApplication1
 {
@@ -15,10 +16,8 @@ namespace Company.WebApplication1
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
+                .ConfigureLogging(loggerFactory => loggerFactory.AddConsole())
                 .UseStartup<Startup>()
-#if (IncludeApplicationInsights)
-                .UseApplicationInsights()
-#endif
                 .Build();
 
             host.Run();

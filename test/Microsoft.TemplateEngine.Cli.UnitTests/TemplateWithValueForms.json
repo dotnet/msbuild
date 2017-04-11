@@ -1,0 +1,25 @@
+﻿[
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "Test.Value6"
+  },
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "Test_Value!"
+  },
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "Test?Value!"
+  },
+  {
+    "kind": "file_exists",
+    "path": "Test.Value6.cs"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "bar2.cs"
+  }
+]

@@ -32,12 +32,17 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="test_templates\ConfigurationKitchenSink\Test.json" />
+    <None Include="test_templates\TemplateWithPortsAndCoalesce\.template.config\template.json" />
+    <None Include="test_templates\TemplateWithPortsAndCoalesce\bar.cs" />
     <None Include="test_templates\TemplateWithRenames\bar\bar.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="test_templates\TemplateWithSourceName\bar\bar.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="test_templates\TemplateWithValueForms\.template.config\template.json" />
+    <None Include="test_templates\TemplateWithValueForms\bar.2.cs" />
+    <None Include="test_templates\TemplateWithValueForms\bar.cs" />
   </ItemGroup>
 
 </Project>

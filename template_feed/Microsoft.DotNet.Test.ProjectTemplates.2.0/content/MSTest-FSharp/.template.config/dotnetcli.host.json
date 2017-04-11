@@ -13,7 +13,7 @@
       "longName": "enable-pack"
     },
     "skipRestore": {
-      "longName": "skip-restore",
+      "longName": "no-restore",
       "shortName": ""
     }
   },

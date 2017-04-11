@@ -6,7 +6,7 @@
       "shortName": ""
     },
     "skipRestore": {
-      "longName": "skip-restore",
+      "longName": "no-restore",
       "shortName": ""
     }
   }
