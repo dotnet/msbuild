@@ -1,0 +1,36 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Web", "ASP.NET"],
+  "name": "Razor Page",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "Microsoft.AspNetCore.Mvc.RazorPage",
+  "precedence": "100",
+  "identity": "Microsoft.AspNetCore.Mvc.RazorPage",
+  "shortName": "page",
+  "sourceName": "Index",
+  "primaryOutputs": [ { "path": "Index.cshtml"}, { "path": "Index.cs" } ],
+  "defaultName": "Index",
+  "sources": {
+    "modifiers": [
+      {
+        "condition": "(no-pagemodel)",
+        "exclude": [
+          "Index.cs"
+        ]
+      }
+    ]
+  },
+  "symbols": {
+    "namespace": {
+      "description": "namespace for the generated code",
+      "replaces": "MyApp.Namespace",
+      "type": "parameter"
+     },
+     "no-pagemodel": {
+      "description": "create page without a PageModel",
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false"
+     }
+  }
+}
