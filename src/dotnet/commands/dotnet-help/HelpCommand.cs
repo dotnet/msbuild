@@ -1,107 +1,66 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics;
-using System.Reflection;
+using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli;
+using Command = Microsoft.DotNet.Cli.CommandLine.Command;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
-        private static readonly string UsageText = $@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [common-options]
+        private readonly AppliedOption _appliedOption;
 
-{LocalizableStrings.Arguments}:
-  [command]             {LocalizableStrings.CommandDefinition}
-  [arguments]           {LocalizableStrings.ArgumentsDefinition}
-  [host-options]        {LocalizableStrings.HostOptionsDefinition}
-  [common-options]      {LocalizableStrings.OptionsDescription}
-
-{LocalizableStrings.CommonOptions}:
-  -v|--verbose          {LocalizableStrings.VerboseDefinition}
-  -h|--help             {LocalizableStrings.HelpDefinition} 
-
-{LocalizableStrings.HostOptions}:
-  -d|--diagnostics      {LocalizableStrings.DiagnosticsDefinition}
-  --version             {LocalizableStrings.VersionDescription}
-  --info                {LocalizableStrings.InfoDescription}
-
-{LocalizableStrings.Commands}:
-  new           {LocalizableStrings.NewDefinition}
-  restore       {LocalizableStrings.RestoreDefinition}
-  build         {LocalizableStrings.BuildDefinition}
-  publish       {LocalizableStrings.PublishDefinition}
-  run           {LocalizableStrings.RunDefinition}
-  test          {LocalizableStrings.TestDefinition}
-  pack          {LocalizableStrings.PackDefinition}
-  migrate       {LocalizableStrings.MigrateDefinition}
-  clean         {LocalizableStrings.CleanDefinition}
-  sln           {LocalizableStrings.SlnDefinition}
-
-Project modification commands:
-  add           Add items to the project
-  remove        Remove items from the project
-  list          List items in the project
-
-{LocalizableStrings.AdvancedCommands}:
-  nuget         {LocalizableStrings.NugetDefinition}
-  msbuild       {LocalizableStrings.MsBuildDefinition}
-  vstest        {LocalizableStrings.VsTestDefinition}";
+        public HelpCommand(AppliedOption appliedOption)
+        {
+            _appliedOption = appliedOption;
+        }
 
         public static int Run(string[] args)
         {
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Name = "dotnet help";
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
+            var parser = Parser.Instance;
+            var result = parser.ParseFrom("dotnet help", args);
+            var helpAppliedOption = result["dotnet"]["help"];
 
-            CommandArgument commandNameArgument = app.Argument($"<{LocalizableStrings.CommandArgumentName}>", LocalizableStrings.CommandArgumentDescription);
+            result.ShowHelpIfRequested();
 
-            app.OnExecute(() => 
+            HelpCommand cmd;
+            try
             {
-                BuiltInCommandMetadata builtIn;
-                if (BuiltInCommandsCatalog.Commands.TryGetValue(commandNameArgument.Value, out builtIn))
-                {
-                    var process = ConfigureProcess(builtIn.DocLink);
-                    process.Start();
-                    process.WaitForExit();
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(String.Format(LocalizableStrings.CommandDoesNotExist, commandNameArgument.Value));
-                    Reporter.Output.WriteLine(UsageText);
-                    return 1;
-                }
-                return 0;
-            });
-            
-            if (args.Length == 0)
+                cmd = new HelpCommand(helpAppliedOption);
+            }
+            catch (CommandCreationException e)
             {
-                PrintHelp();
-                return 0;
+                return e.ExitCode;
+            }
+
+            if (helpAppliedOption.Arguments.Any())
+            {
+                return cmd.Execute();
             }
             else
             {
-                return app.Execute(args);
+                PrintHelp();
+                return 0;
             }
         }
 
         public static void PrintHelp()
         {
             PrintVersionHeader();
-            Reporter.Output.WriteLine(UsageText);
+            Reporter.Output.WriteLine(HelpUsageText.UsageText);
         }
 
         public static void PrintVersionHeader()
         {
-            var versionString = string.IsNullOrEmpty(Product.Version) ?
-                string.Empty :
-                $" ({Product.Version})";
+            var versionString = string.IsNullOrEmpty(Product.Version) ? string.Empty : $" ({Product.Version})";
             Reporter.Output.WriteLine(Product.LongName + versionString);
         }
 
@@ -132,11 +91,34 @@ Project modification commands:
                     Arguments = docUrl
                 };
             }
-            
+
             return new Process
             {
                 StartInfo = psInfo
             };
         }
+
+        public int Execute()
+        {
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(
+                _appliedOption.Arguments.Single(),
+                out BuiltInCommandMetadata builtIn))
+            {
+                var process = ConfigureProcess(builtIn.DocLink);
+                process.Start();
+                process.WaitForExit();
+                return 0;
+            }
+            else
+            {
+                Reporter.Error.WriteLine(
+                    string.Format(
+                        LocalizableStrings.CommandDoesNotExist,
+                        _appliedOption.Arguments.Single()));
+                Reporter.Output.WriteLine(HelpUsageText.UsageText);
+                return 1;
+            }
+        }
     }
 }
+

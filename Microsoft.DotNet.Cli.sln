@@ -166,6 +166,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet.Tests", "test\dotnet
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-build.Tests", "test\dotnet-build.Tests\dotnet-build.Tests.csproj", "{BBB5A4C8-CD2D-4A6A-9159-0FEAF84B745E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-help.Tests", "test\dotnet-help.Tests\dotnet-help.Tests.csproj", "{8AA88E83-6A98-4AD6-86EB-2ED4F6EDA17F}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-migrate.Tests", "test\dotnet-migrate.Tests\dotnet-migrate.Tests.csproj", "{726D2CB9-80E5-4496-9C86-910AC452C45E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-msbuild.Tests", "test\dotnet-msbuild.Tests\dotnet-msbuild.Tests.csproj", "{EF745C56-0350-4C42-AA22-86D592E1D8D5}"
