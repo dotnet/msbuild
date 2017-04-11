@@ -1,4 +1,4 @@
-using Microsoft.DotNet.Tools.Help;
+﻿using Microsoft.DotNet.Tools.Help;
 
 internal static class HelpUsageText
 {
@@ -35,7 +35,7 @@ $@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [comm
 {LocalizableStrings.ProjectModificationCommands}:
   add           {LocalizableStrings.AddDefinition}
   remove        {LocalizableStrings.RemoveDefinition}
-  list          {LocalizableStrings.RemoveDefinition}
+  list          {LocalizableStrings.ListDefinition}
 
 {LocalizableStrings.AdvancedCommands}:
   nuget         {LocalizableStrings.NugetDefinition}

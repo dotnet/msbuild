@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -47,7 +47,7 @@ Commands:
 Project modification commands:
   add           Add items to the project.
   remove        Remove items from the project.
-  list          Remove items from the project.
+  list          List items in the project.
 
 Advanced Commands:
   nuget         Provides additional NuGet commands.
