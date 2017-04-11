@@ -92,7 +92,7 @@
 
       <DotNetNew ToolPath="$(OutputDirectory)"
                  TemplateType="console"
-                 TemplateArgs="--debug:ephemeral-hive --skip-restore"
+                 TemplateArgs="--debug:ephemeral-hive --no-restore"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
       <DotNetRestore ToolPath="$(OutputDirectory)"
