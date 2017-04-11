@@ -163,11 +163,30 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specified alias &quot;{0}&quot; already exists. Please specify a different alias..
+        ///   Looks up a localized string similar to Alias names cannot begin with dashes (&apos;-&apos;)..
         /// </summary>
-        public static string AliasAlreadyExists {
+        public static string AliasCannotBeginWithDashes {
             get {
-                return ResourceManager.GetString("AliasAlreadyExists", resourceCulture);
+                return ResourceManager.GetString("AliasCannotBeginWithDashes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias &apos;{0}&apos; is a template short name, and therefore cannot be aliased..
+        /// </summary>
+        public static string AliasCannotBeShortName {
+            get {
+                return ResourceManager.GetString("AliasCannotBeShortName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After expanding aliases, the command is:
+        ///    dotnet {0}.
+        /// </summary>
+        public static string AliasCommandAfterExpansion {
+            get {
+                return ResourceManager.GetString("AliasCommandAfterExpansion", resourceCulture);
             }
         }
         
@@ -177,6 +196,51 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string AliasCreated {
             get {
                 return ResourceManager.GetString("AliasCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Command is invalid after expanding aliases..
+        /// </summary>
+        public static string AliasExpandedCommandParseError {
+            get {
+                return ResourceManager.GetString("AliasExpandedCommandParseError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error expanding aliases on input params..
+        /// </summary>
+        public static string AliasExpansionError {
+            get {
+                return ResourceManager.GetString("AliasExpansionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creates, updates, or deletes the named alias. The alias value is the remainder of the command. If extra args files are specified, the alias value includes their expansions..
+        /// </summary>
+        public static string AliasHelp {
+            get {
+                return ResourceManager.GetString("AliasHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias Name.
+        /// </summary>
+        public static string AliasName {
+            get {
+                return ResourceManager.GetString("AliasName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias Value.
+        /// </summary>
+        public static string AliasValue {
+            get {
+                return ResourceManager.GetString("AliasValue", resourceCulture);
             }
         }
         
@@ -440,6 +504,16 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string DisplaysHelp {
             get {
                 return ResourceManager.GetString("DisplaysHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After expanding the extra args files, the command is:
+        ///    dotnet {0}.
+        /// </summary>
+        public static string ExtraArgsCommandAfterExpansion {
+            get {
+                return ResourceManager.GetString("ExtraArgsCommandAfterExpansion", resourceCulture);
             }
         }
         
@@ -947,6 +1021,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string ShortName {
             get {
                 return ResourceManager.GetString("ShortName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays the value of the named alias, or all aliases if no name is specified..
+        /// </summary>
+        public static string ShowAliasesHelp {
+            get {
+                return ResourceManager.GetString("ShowAliasesHelp", resourceCulture);
             }
         }
         

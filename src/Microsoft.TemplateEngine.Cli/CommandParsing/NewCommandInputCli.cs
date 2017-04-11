@@ -29,6 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             _commandName = commandName;
             _noTemplateCommand = CommandParserSupport.CreateNewCommandWithoutTemplateInfo(_commandName);
             _currentCommand = _noTemplateCommand;
+            ExpandedExtraArgsFiles = false;
         }
 
         public bool HasParseError
@@ -39,6 +40,15 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        public void ResetArgs(params string[] args)
+        {
+            _args = args;
+            ExpandedExtraArgsFiles = false;
+            ParseArgs();
+        }
+
+        public bool ExpandedExtraArgsFiles { get; private set; }
+
         public int Execute(params string[] args)
         {
             _args = args;
@@ -47,24 +57,17 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
             if (ExtraArgsFileNames != null && ExtraArgsFileNames.Count > 0)
             {   // add the extra args to the _args and force a reparse
+                // This cannot adjust the template name, so no need to re-check here.
                 IReadOnlyList<string> extraArgs = AppExtensions.CreateArgListFromAdditionalFiles(ExtraArgsFileNames);
-                List<string> allArgs = new List<string>(_args);
+                List<string> allArgs = RemoveExtraArgsTokens(_args);
                 allArgs.AddRange(extraArgs);
                 _args = allArgs;
                 needsReparse = true;
+                ExpandedExtraArgsFiles = true;
             }
 
-            IList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName }).ToList();
-            if ((templateNameList.Count > 0) &&
-                !templateNameList[0].StartsWith("-", StringComparison.Ordinal)
-                && (_parseResult.Tokens.Count >= 2)
-                && string.Equals(templateNameList[0], _parseResult.Tokens.ElementAt(1), StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(_templateNameArg))
             {
-                _templateNameArg = templateNameList[0];
-            }
-            else
-            {
-                _templateNameArg = string.Empty;
                 _currentCommand = CommandParserSupport.CreateNewCommandForNoTemplateName(_commandName);
                 needsReparse = true;
             }
@@ -75,6 +78,33 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
 
             return _invoke.Invoke().Result;
+        }
+
+        private List<string> RemoveExtraArgsTokens(IReadOnlyList<string> originalArgs)
+        {
+            List<string> modifiedArgs = new List<string>();
+            bool inExtraArgsContext = false;
+
+            foreach (string token in originalArgs)
+            {
+                if (string.Equals(token, "-x", StringComparison.Ordinal) || string.Equals(token, "--extra-args", StringComparison.Ordinal))
+                {
+                   inExtraArgsContext = true;
+                }
+                else if (inExtraArgsContext && ExtraArgsFileNames.Contains(token, StringComparer.Ordinal))
+                {
+                    // Do nothing (there can be multiple extra args files).
+                    // inExtraArgsContext guards against the slim possibility of a different arg having the same value as an args filename.
+                    // There can be multiple extra args files - finding one doesn't change the state of things.
+                }
+                else
+                {
+                    modifiedArgs.Add(token);
+                    inExtraArgsContext = false;
+                }
+            }
+
+            return modifiedArgs;
         }
 
         public void OnExecute(Func<Task<CreationResultStatus>> invoke)
@@ -90,6 +120,19 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             Parser parser = new Parser(parseConfig);
             _parseResult = parser.Parse(argsWithCommand.ToArray());
             _templateParamCanonicalToVariantMap = null;
+
+            IList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName }).ToList();
+            if ((templateNameList.Count > 0) &&
+                !templateNameList[0].StartsWith("-", StringComparison.Ordinal)
+                && (_parseResult.Tokens.Count >= 2)
+                && string.Equals(templateNameList[0], _parseResult.Tokens.ElementAt(1), StringComparison.Ordinal))
+            {
+                _templateNameArg = templateNameList[0];
+            }
+            else
+            {
+                _templateNameArg = string.Empty;
+            }
         }
 
         public void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData)
@@ -139,9 +182,26 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        public IReadOnlyList<string> Tokens
+        {
+            get
+            {
+                if (_parseResult == null)
+                {
+                    return new List<string>();
+                }
+
+                return _parseResult.Tokens.ToList();
+            }
+        }
+
         public string TemplateName => _templateNameArg;
 
         public string Alias => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "alias" });
+
+        public bool ShowAliasesSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "show-alias" });
+
+        public string ShowAliasesAliasName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "show-alias" });
 
         public IList<string> ExtraArgsFileNames => _parseResult.GetArgumentListAtPath(new[] { _commandName, "extra-args" }).ToList();
 
