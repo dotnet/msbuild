@@ -460,7 +460,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="GeneratePublishDependencyFile"
           DependsOnTargets="ComputePrivateAssetsPackageReferences;
-                            _DefaultMicrosoftNETPlatformLibrary"
+                            _DefaultMicrosoftNETPlatformLibrary;
+                            _HandlePackageFileConflicts;
+                            _HandlePublishFileConflicts"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>
@@ -479,6 +481,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                      FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
                       IsSelfContained="$(SelfContained)" />

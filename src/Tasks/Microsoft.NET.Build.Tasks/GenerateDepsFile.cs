@@ -1,13 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using NuGet.ProjectModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -50,6 +52,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] ReferenceSatellitePaths { get; set; }
 
+        [Required]
+        public ITaskItem[] FilesToSkip { get; set; }
+
         public ITaskItem CompilerOptions { get; set; }
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
@@ -64,8 +69,13 @@ namespace Microsoft.NET.Build.Tasks
             get { return _filesWritten.ToArray(); }
         }
 
+        private Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
         protected override void ExecuteCore()
         {
+            LoadFilesToSkip();
+
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
@@ -103,6 +113,11 @@ namespace Microsoft.NET.Build.Tasks
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .Build();
 
+            if (compileFilesToSkip.Any() || runtimeFilesToSkip.Any())
+            {
+                dependencyContext = TrimFilesToSkip(dependencyContext);
+            }
+
             var writer = new DependencyContextWriter();
             using (var fileStream = File.Create(DepsFilePath))
             {
@@ -110,6 +125,116 @@ namespace Microsoft.NET.Build.Tasks
             }
             _filesWritten.Add(new TaskItem(DepsFilePath));
 
+        }
+
+        private void LoadFilesToSkip()
+        {
+            foreach (var fileToSkip in FilesToSkip)
+            {
+                string packageId, packageSubPath;
+                NuGetUtils.GetPackageParts(fileToSkip.ItemSpec, out packageId, out packageSubPath);
+
+                if (String.IsNullOrEmpty(packageId) || String.IsNullOrEmpty(packageSubPath))
+                {
+                    continue;
+                }
+
+                var itemType = fileToSkip.GetMetadata(nameof(ConflictResolution.ConflictItemType));
+                var packagesWithFilesToSkip = (itemType == nameof(ConflictResolution.ConflictItemType.Reference)) ? compileFilesToSkip : runtimeFilesToSkip;
+
+                HashSet<string> filesToSkipForPackage;
+                if (!packagesWithFilesToSkip.TryGetValue(packageId, out filesToSkipForPackage))
+                {
+                    packagesWithFilesToSkip[packageId] = filesToSkipForPackage = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                filesToSkipForPackage.Add(packageSubPath);
+            }
+        }
+
+        private DependencyContext TrimFilesToSkip(DependencyContext sourceDeps)
+        {
+            return new DependencyContext(sourceDeps.Target,
+                                         sourceDeps.CompilationOptions,
+                                         TrimCompilationLibraries(sourceDeps.CompileLibraries),
+                                         TrimRuntimeLibraries(sourceDeps.RuntimeLibraries),
+                                         sourceDeps.RuntimeGraph);
+        }
+
+        private IEnumerable<RuntimeLibrary> TrimRuntimeLibraries(IReadOnlyList<RuntimeLibrary> runtimeLibraries)
+        {
+            foreach (var runtimeLibrary in runtimeLibraries)
+            {
+                HashSet<string> filesToSkip;
+                if (runtimeFilesToSkip.TryGetValue(runtimeLibrary.Name, out filesToSkip))
+                {
+                    yield return new RuntimeLibrary(runtimeLibrary.Type,
+                                              runtimeLibrary.Name,
+                                              runtimeLibrary.Version,
+                                              runtimeLibrary.Hash,
+                                              TrimAssetGroups(runtimeLibrary.RuntimeAssemblyGroups, filesToSkip).ToArray(),
+                                              TrimAssetGroups(runtimeLibrary.NativeLibraryGroups, filesToSkip).ToArray(),
+                                              TrimResourceAssemblies(runtimeLibrary.ResourceAssemblies, filesToSkip),
+                                              runtimeLibrary.Dependencies,
+                                              runtimeLibrary.Serviceable);
+                }
+                else
+                {
+                    yield return runtimeLibrary;
+                }
+            }
+        }
+
+        private IEnumerable<RuntimeAssetGroup> TrimAssetGroups(IEnumerable<RuntimeAssetGroup> assetGroups, ISet<string> filesToTrim)
+        {
+            foreach (var assetGroup in assetGroups)
+            {
+                yield return new RuntimeAssetGroup(assetGroup.Runtime, TrimAssemblies(assetGroup.AssetPaths, filesToTrim));
+            }
+        }
+
+        private IEnumerable<ResourceAssembly> TrimResourceAssemblies(IEnumerable<ResourceAssembly> resourceAssemblies, ISet<string> filesToTrim)
+        {
+            foreach (var resourceAssembly in resourceAssemblies)
+            {
+                if (!filesToTrim.Contains(resourceAssembly.Path))
+                {
+                    yield return resourceAssembly;
+                }
+            }
+        }
+
+        private IEnumerable<CompilationLibrary> TrimCompilationLibraries(IReadOnlyList<CompilationLibrary> compileLibraries)
+        {
+            foreach (var compileLibrary in compileLibraries)
+            {
+                HashSet<string> filesToSkip;
+                if (compileFilesToSkip.TryGetValue(compileLibrary.Name, out filesToSkip))
+                {
+                    yield return new CompilationLibrary(compileLibrary.Type,
+                                              compileLibrary.Name,
+                                              compileLibrary.Version,
+                                              compileLibrary.Hash,
+                                              TrimAssemblies(compileLibrary.Assemblies, filesToSkip),
+                                              compileLibrary.Dependencies,
+                                              compileLibrary.Serviceable);
+                }
+                else
+                {
+                    yield return compileLibrary;
+                }
+            }
+        }
+
+        private IEnumerable<string> TrimAssemblies(IEnumerable<string> assemblies, ISet<string> filesToTrim)
+        {
+            foreach (var assembly in assemblies)
+            {
+                if (!filesToTrim.Contains(assembly))
+                {
+                    yield return assembly;
+                }
+            }
         }
     }
 }

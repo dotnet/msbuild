@@ -35,6 +35,9 @@
       <Version>$(MsBuildPackagesVersion)</Version>
       <ExcludeAssets>Runtime</ExcludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System" />
@@ -61,7 +64,7 @@
     <Compile Include="IContentAssetPreprocessor.cs" />
     <Compile Include="ProduceContentAssets.cs" />
     <Compile Include="GetNearestTargetFramework.cs" />
-    <Compile Include="ITaskItemExtensions.cs" />
+    <Compile Include="ItemUtilities.cs" />
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
     <Compile Include="GetAssemblyVersion.cs" />
@@ -90,6 +93,7 @@
     <Compile Include="StoreArtifactParser.cs" />
     <Compile Include="EmbedAppNameInHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConflictResolution\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
@@ -159,6 +163,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\Microsoft.PackageDependencyResolution.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\Microsoft.NET.ConflictResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="sdk\Sdk.props">

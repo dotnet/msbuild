@@ -236,6 +236,13 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("PublishReferencesDocumentationFiles=true", true)]
         public void It_publishes_referenced_assembly_documentation(string property, bool expectAssemblyDocumentationFilePublished)
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             var identifier = property.Replace("=", "");
 
             var libProject = new TestProject
@@ -259,7 +266,6 @@ namespace Microsoft.NET.Publish.Tests
                 IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp2.0",
-                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
                 References = { publishedLibPath }
             };
 

@@ -38,13 +38,21 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0", true, true)]
         [InlineData("netcoreapp1.1", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1", true, true)]
         [InlineData("netcoreapp2.0", "PartialM1", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
-        //  Fullframework NuGet versioning on Jenkins infrastructure issue
-        //        https://github.com/dotnet/sdk/issues/1041
-        //[InlineData("netcoreapp2.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
+        [InlineData("netcoreapp2.0", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
 
         public void Project_reference_compat(string referencerTarget, string testIDPostFix, string rawDependencyTargets, 
                 bool restoreSucceeds, bool buildSucceeds)
         {
+            if (UsingFullFrameworkMSBuild && referencerTarget == "netcoreapp2.0")
+            {
+                //  Fullframework NuGet versioning on Jenkins infrastructure issue
+                //        https://github.com/dotnet/sdk/issues/1041
+
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             string identifier = "_TestID_" + referencerTarget + "_" + testIDPostFix;
 
             TestProject referencerProject = GetTestProject("Referencer", referencerTarget, true);

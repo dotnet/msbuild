@@ -142,12 +142,6 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     propertyGroup.Add(new XElement(ns + "TargetFramework", this.TargetFrameworks));
                 }
-                //  Workaround for .NET Core 2.0
-                //
-                if (this.TargetFrameworks.Contains("netcoreapp2.0") && this.RuntimeFrameworkVersion == null)
-                {
-                    this.RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version;
-                }
 
                 if (!string.IsNullOrEmpty(this.RuntimeFrameworkVersion))
                 {

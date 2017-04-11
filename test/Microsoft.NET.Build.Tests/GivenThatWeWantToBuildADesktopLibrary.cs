@@ -110,5 +110,57 @@ public class NETFramework
                 dependencyContext.CompileLibraries.Should().NotBeEmpty();
             }
         }
+
+        [Fact]
+        public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            TestProject project = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(project)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NETStandard.Library"),
+                        new XAttribute("Version", "$(BundledNETStandardPackageVersion)")));
+
+                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    {
+                        itemGroup.Add(new XElement(ns + "PackageReference",
+                            new XAttribute("Include", dependency.Item1),
+                            new XAttribute("Version", dependency.Item2)));
+                    }
+
+                })
+                .Restore(project.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var buildCommand = new BuildCommand(MSBuildTest.Stage0MSBuild, projectFolder);
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("warning")
+                .And
+                .NotHaveStdOutContaining("MSB3243");
+        }
     }
 }

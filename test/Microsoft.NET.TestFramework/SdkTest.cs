@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.NET.TestFramework
@@ -22,8 +23,8 @@ namespace Microsoft.NET.TestFramework
         {
             //  Skip path length validation if running on full framework MSBuild.  We do the path length validation
             //  to avoid getting path to long errors when copying the test drop in our build infrastructure.  However,
-            //  those builds are only built with .NET Core MSBuild.
-            if (!UsingFullFrameworkMSBuild)
+            //  those builds are only built with .NET Core MSBuild running on Windows
+            if (!UsingFullFrameworkMSBuild && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _testAssetsManager.ValidateDestinationDirectories();
             }

@@ -111,7 +111,16 @@ namespace Microsoft.NET.TestFramework
 #else
             string baseDirectory = AppContext.BaseDirectory;
 #endif
-            string ret = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+            string ret;
+            if (testProjectName == callingMethod)
+            {
+                //  If testProjectName and callingMethod are the same, don't duplicate it in the test path
+                ret = Path.Combine(baseDirectory, callingMethod + identifier);
+            }
+            else
+            {
+                ret = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+            }
 
             TestDestinationDirectories.Add(ret);
 

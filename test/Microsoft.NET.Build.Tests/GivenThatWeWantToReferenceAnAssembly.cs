@@ -26,6 +26,13 @@ namespace Microsoft.NET.Build.Tests
             string referencerTarget,
             string dependencyTarget)
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dependencyProject = new TestProject()
@@ -59,7 +66,6 @@ public class Class1
                 Name = "Referencer",
                 IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
-                RuntimeFrameworkVersion = RepoInfo.NetCoreApp20Version,
                 // Need to use a self-contained app for now because we don't use a CLI that has a "2.0" shared framework
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(referencerTarget),
                 IsExe = true,

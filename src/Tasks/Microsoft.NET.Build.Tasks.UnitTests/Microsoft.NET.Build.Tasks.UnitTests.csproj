@@ -42,6 +42,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GivenAConflictResolver.cs" />
     <Compile Include="GivenAProjectContext.cs" />
     <Compile Include="GivenACompilationOptionsConverter.cs" />
     <Compile Include="GivenAProduceContentsAssetsTask.cs" />

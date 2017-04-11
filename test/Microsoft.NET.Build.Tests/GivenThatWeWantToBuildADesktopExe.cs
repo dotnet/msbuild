@@ -309,6 +309,45 @@ namespace DefaultReferences
         }
 
         [Fact]
+        public void It_does_not_report_conflicts_if_the_same_framework_assembly_is_referenced_multiple_times()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateFrameworkReferences",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute("/v:diag")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Fact]
         public void It_generates_binding_redirects_if_needed()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

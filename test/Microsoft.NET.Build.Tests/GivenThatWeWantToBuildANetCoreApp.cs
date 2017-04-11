@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -96,6 +98,163 @@ namespace Microsoft.NET.Build.Tests
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
             targetDefs.Should().Contain(".NETCoreApp,Version=v1.1");
+        }
+
+        [Fact]
+        public void It_runs_the_app_from_the_output_folder()
+        {
+            RunAppFromOutputFolder("RunFromOutputFolder", false, false);
+        }
+
+        [Fact]
+        public void It_runs_a_rid_specific_app_from_the_output_folder()
+        {
+            RunAppFromOutputFolder("RunFromOutputFolderWithRID", true, false);
+        }
+
+        [Fact]
+        public void It_runs_the_app_with_conflicts_from_the_output_folder()
+        {
+            RunAppFromOutputFolder("RunFromOutputFolderConflicts", false, true);
+        }
+
+        [Fact]
+        public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder()
+        {
+            RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts", true, true);
+        }
+
+        public void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
+        {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
+            var targetFramework = "netcoreapp2.0";
+            var runtimeIdentifier = useRid ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
+
+            TestProject project = new TestProject()
+            {
+                Name = testName,
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                RuntimeIdentifier = runtimeIdentifier,
+                IsExe = true,
+            };
+
+            string outputMessage = $"Hello from {project.Name}!";
+
+            project.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(""" + outputMessage + @""");
+    }
+}
+";
+            var testAsset = _testAssetsManager.CreateTestProject(project, project.Name)
+                .WithProjectChanges(p =>
+                {
+                    if (includeConflicts)
+                    {
+                        var ns = p.Root.Name.Namespace;
+
+                        var itemGroup = new XElement(ns + "ItemGroup");
+                        p.Root.Add(itemGroup);
+
+                        foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                        {
+                            itemGroup.Add(new XElement(ns + "PackageReference",
+                                new XAttribute("Include", dependency.Item1),
+                                new XAttribute("Version", dependency.Item2)));
+                        }
+                    }
+                })
+                .Restore(project.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier ?? "").FullName;
+
+            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputFolder, project.Name + ".dll") })
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(outputMessage);
+
+        }
+
+        [Fact]
+        public void It_trims_conflicts_from_the_deps_file()
+        {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
+            TestProject project = new TestProject()
+            {
+                Name = "NetCore2App",
+                TargetFrameworks = "netcoreapp2.0",
+                IsExe = true,
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(project)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    {
+                        itemGroup.Add(new XElement(ns + "PackageReference",
+                            new XAttribute("Include", dependency.Item1),
+                            new XAttribute("Version", dependency.Item2)));
+                    }
+
+                })
+                .Restore(project.Name);
+
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks).FullName;
+
+            using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json")))
+            {
+                var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+                dependencyContext.Should()
+                    .OnlyHaveRuntimeAssemblies("", project.Name)
+                    .And
+                    .HaveNoDuplicateRuntimeAssemblies("")
+                    .And
+                    .HaveNoDuplicateNativeAssets(""); ;
+            }
         }
     }
 }
