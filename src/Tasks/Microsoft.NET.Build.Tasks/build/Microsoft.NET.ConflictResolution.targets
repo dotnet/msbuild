@@ -16,21 +16,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Target Name="_GetLockFileAssemblies"
-          DependsOnTargets="_ComputeLockFileCopyLocal">
-    <!-- We need to find all the files that will be loaded from deps for conflict resolution.
-         To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true
-         -->
-    <ItemGroup>
-      <_LockFileAssemblies Include="@(NativeCopyLocalItems)" />
-      <_LockFileAssemblies Include="@(RuntimeCopyLocalItems)" />
-      <_LockFileAssemblies Include="@(ResourceCopyLocalItems)" />
-    </ItemGroup>
-  </Target>
-
   <UsingTask TaskName="HandlePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
-  <Target Name="HandlePackageFileConflicts" AfterTargets="ResolvePackageDependenciesForBuild" DependsOnTargets="_GetLockFileAssemblies">
+  <Target Name="_HandlePackageFileConflicts">
+    
+    <ItemGroup>
+      <!-- We need to find all the files that will be loaded from deps for conflict resolution.
+          To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true
+          -->
+      <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))" />
+    </ItemGroup>    
+    
     <HandlePackageFileConflicts References="@(Reference)"
                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                 OtherRuntimeItems="@(_LockFileAssemblies)"
@@ -53,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies">
+  <Target Name="_HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies">
     <HandlePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
                                 PlatformManifests="@(PackageConflictPlatformManifests)"
                                 PreferredPackages="$(PackageConflictPreferredPackages)">

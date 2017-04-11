@@ -447,8 +447,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GeneratePublishDependencyFile"
           DependsOnTargets="ComputePrivateAssetsPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary;
-                            HandlePackageFileConflicts;
-                            HandlePublishFileConflicts"
+                            _HandlePackageFileConflicts;
+                            _HandlePublishFileConflicts"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>

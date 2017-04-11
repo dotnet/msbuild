@@ -120,6 +120,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
       IncludeTransitiveProjectReferences;
+      _HandlePackageFileConflicts
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"

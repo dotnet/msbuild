@@ -80,7 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildDependencyFile"
-          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;HandlePackageFileConflicts"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;_HandlePackageFileConflicts"
           BeforeTargets="_CheckForCompileOutputs"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
