@@ -31,6 +31,8 @@
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+      <InstalledSdks Include="$(MSBuildExtensionsPath)\Sdks\**\*.*" />
+      <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
       <ShimTargets Include="Microsoft.Data.Entity.targets" />
       <ShimTargets Include="Microsoft.ServiceModel.targets" />
@@ -60,6 +62,10 @@
           DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
           DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledSdks)"
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
+          DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <Copy SourceFiles="@(InstalledNuGetFiles)"
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />

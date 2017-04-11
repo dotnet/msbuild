@@ -130,7 +130,7 @@ if /i "%TARGET%"=="CoreCLR" (
 if /i "%TARGET%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap-NetCore\MSBuild.dll"
 ) else (
-    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
+    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild\15.0\Bin\MSBuild.exe"
 )
 
 :: The set of warnings to suppress for now
