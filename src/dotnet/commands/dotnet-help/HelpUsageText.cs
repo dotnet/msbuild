@@ -32,10 +32,10 @@ $@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [comm
   clean         {LocalizableStrings.CleanDefinition}
   sln           {LocalizableStrings.SlnDefinition}
 
-Project modification commands:
-  add           Add items to the project
-  remove        Remove items from the project
-  list          List items in the project
+{LocalizableStrings.ProjectModificationCommands}:
+  add           {LocalizableStrings.AddDefinition}
+  remove        {LocalizableStrings.RemoveDefinition}
+  list          {LocalizableStrings.RemoveDefinition}
 
 {LocalizableStrings.AdvancedCommands}:
   nuget         {LocalizableStrings.NugetDefinition}

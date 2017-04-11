@@ -45,9 +45,9 @@ Commands:
   sln           Modify solution (SLN) files.
 
 Project modification commands:
-  add           Add items to the project
-  remove        Remove items from the project
-  list          List items in the project
+  add           Add items to the project.
+  remove        Remove items from the project.
+  list          Remove items from the project.
 
 Advanced Commands:
   nuget         Provides additional NuGet commands.
