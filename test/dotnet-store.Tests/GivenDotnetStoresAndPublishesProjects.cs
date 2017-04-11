@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Fail()
-                .And.HaveStdErrContaining("assembly specified in the dependencies manifest was not found -- package: 'newtonsoft.json',");
+                .And.HaveStdErrContaining("assembly specified in the dependencies manifest was not found -- package: 'Newtonsoft.Json',");
         }
 
         [Fact]
