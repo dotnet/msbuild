@@ -29,6 +29,7 @@
                        Channel="$(Channel)"
                        CommitHash="$(CommitHash)" />
 
-    <UpdateVersionsRepo BranchName="$(BranchName)" />
+    <UpdateVersionsRepo BranchName="$(BranchName)"
+                        Condition=" '$(GITHUB_PASSWORD)' != '' " />
   </Target>
 </Project>
