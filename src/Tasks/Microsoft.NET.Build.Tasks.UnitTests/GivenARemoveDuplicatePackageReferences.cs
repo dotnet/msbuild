@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             foreach (var pkg in uniquePackages)
             {
-                packagelistWithoutDups.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be cached", pkg.Id, pkg.Version);
+                packagelistWithoutDups.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be stored", pkg.Id, pkg.Version);
             }
         }
 

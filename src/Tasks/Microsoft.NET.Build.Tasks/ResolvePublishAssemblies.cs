@@ -33,9 +33,9 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
-        public bool PreserveCacheLayout { get; set; }
+        public bool PreserveStoreLayout { get; set; }
 
-        public string[] FilterProjectFiles { get; set; }
+        public string[] TargetManifestFiles { get; set; }
 
         public bool IsSelfContained { get; set; }
 
@@ -63,13 +63,13 @@ namespace Microsoft.NET.Build.Tasks
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
             HashSet<PackageIdentity> packagestoBeFiltered = null;
 
-            if (FilterProjectFiles != null && FilterProjectFiles.Length > 0)
+            if (TargetManifestFiles != null && TargetManifestFiles.Length > 0)
             {
                 packagestoBeFiltered = new HashSet<PackageIdentity>();
-                foreach (var filterProjectFile in FilterProjectFiles)
+                foreach (var manifestFile in TargetManifestFiles)
                 {
-                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, filterProjectFile));
-                    var packagesSpecified = CacheArtifactParser.Parse(filterProjectFile);
+                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, manifestFile));
+                    var packagesSpecified = StoreArtifactParser.Parse(manifestFile);
 
                     foreach (var pkg in packagesSpecified)
                     {
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks
             var assemblyResolver =
                 new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
-                    .WithPreserveCacheLayout(PreserveCacheLayout);
+                    .WithPreserveStoreLayout(PreserveStoreLayout);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = assemblyResolver.Resolve(projectContext);
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)

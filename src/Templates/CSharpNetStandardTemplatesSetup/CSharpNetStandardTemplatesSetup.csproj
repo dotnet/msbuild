@@ -48,12 +48,6 @@
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ProjectSelector.pkgdef">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ProjectTemplates\CSharp\.NETStandard\CSharpNetStandardClassLibrary\CSharpNetStandardClassLibrary.csproj">
       <Project>{440F1724-1830-4C7A-9500-8D9323A7FE71}</Project>
       <Name>CSharpNetStandardClassLibrary</Name>
