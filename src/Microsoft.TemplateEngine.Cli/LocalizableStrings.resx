@@ -434,4 +434,39 @@
     <value>{0} {1}
     The default value '{1}' is not a valid value for {0}.</value>
   </data>
+  <data name="AddRefPostActionFailed" xml:space="preserve">
+    <value>Failed to add reference {0} to project file {1}</value>
+  </data>
+  <data name="AddRefPostActionNoRefConfigured" xml:space="preserve">
+    <value>No references configured to be added to project.</value>
+  </data>
+  <data name="AddRefPostActionAddProjectRef" xml:space="preserve">
+    <value>Adding a project reference. Running dotnet add {0} reference {1}</value>
+  </data>
+  <data name="AddRefPostActionSucceeded" xml:space="preserve">
+    <value>Successfully added
+    reference: {0}
+    to project file: {1}</value>
+  </data>
+  <data name="PostActionFailedInstructionHeader" xml:space="preserve">
+    <value>Post action failed.</value>
+  </data>
+  <data name="AddRefPostActionAddPackageRef" xml:space="preserve">
+    <value>Adding a package reference. Running dotnet add {0} package {1}</value>
+  </data>
+  <data name="AddRefPostActionMisconfigured" xml:space="preserve">
+    <value>Add reference action is not configured correctly in the template.</value>
+  </data>
+  <data name="AddRefPostActionUnsupportedRefType" xml:space="preserve">
+    <value>Adding reference type {0} is not supported.</value>
+  </data>
+  <data name="AddRefPostActionAddPackageRefWithVersion" xml:space="preserve">
+    <value>Adding a package reference. Running dotnet add {0} package {1} --version {2}</value>
+  </data>
+  <data name="AddRefPostActionUnresolvedProjFile" xml:space="preserve">
+    <value>Unable to determine which project file to add the reference to.</value>
+  </data>
+  <data name="AddRefPostActionProjFileListHeader" xml:space="preserve">
+    <value>Project files found:</value>
+  </data>
 </root>

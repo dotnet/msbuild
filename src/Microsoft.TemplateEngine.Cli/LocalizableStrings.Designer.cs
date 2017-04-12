@@ -62,6 +62,98 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
+        /// </summary>
+        public static string AddRefPostActionAddPackageRef {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddPackageRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} --version {2}.
+        /// </summary>
+        public static string AddRefPostActionAddPackageRefWithVersion {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddPackageRefWithVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a project reference. Running dotnet add {0} reference {1}.
+        /// </summary>
+        public static string AddRefPostActionAddProjectRef {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddProjectRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add reference {0} to project file {1}.
+        /// </summary>
+        public static string AddRefPostActionFailed {
+            get {
+                return ResourceManager.GetString("AddRefPostActionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
+        /// </summary>
+        public static string AddRefPostActionMisconfigured {
+            get {
+                return ResourceManager.GetString("AddRefPostActionMisconfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No references configured to be added to project..
+        /// </summary>
+        public static string AddRefPostActionNoRefConfigured {
+            get {
+                return ResourceManager.GetString("AddRefPostActionNoRefConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project files found:.
+        /// </summary>
+        public static string AddRefPostActionProjFileListHeader {
+            get {
+                return ResourceManager.GetString("AddRefPostActionProjFileListHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully added
+        ///    reference: {0}
+        ///    to project file: {1}.
+        /// </summary>
+        public static string AddRefPostActionSucceeded {
+            get {
+                return ResourceManager.GetString("AddRefPostActionSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
+        /// </summary>
+        public static string AddRefPostActionUnresolvedProjFile {
+            get {
+                return ResourceManager.GetString("AddRefPostActionUnresolvedProjFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding reference type {0} is not supported..
+        /// </summary>
+        public static string AddRefPostActionUnsupportedRefType {
+            get {
+                return ResourceManager.GetString("AddRefPostActionUnsupportedRefType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alias.
         /// </summary>
         public static string Alias {
@@ -729,6 +821,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string PostActionDescription {
             get {
                 return ResourceManager.GetString("PostActionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post action failed..
+        /// </summary>
+        public static string PostActionFailedInstructionHeader {
+            get {
+                return ResourceManager.GetString("PostActionFailedInstructionHeader", resourceCulture);
             }
         }
         
