@@ -260,6 +260,18 @@
                         }
                     }
                 }
+#else
+                if (string.IsNullOrEmpty(m_exePath))
+                {
+                    string programFilesX86 = System.Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
+                    string msdeployExePath = System.IO.Path.Combine("IIS", "Microsoft Web Deploy V3");
+                    m_exePath = IO.Path.Combine(programFilesX86, msdeployExePath);
+                    if (!IO.File.Exists(IO.Path.Combine(m_exePath, ToolName)))
+                    {
+                        string programFiles = System.Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+                        m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                    }
+                }
 #endif
                 return m_exePath; 
             }

@@ -65,6 +65,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- UserAgent string sent to msdeploy -->
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
       <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
+      <!-- MsDeploy Api is not supported for core yet -->
+      <UseMsDeployExe Condition="'$(UseMsDeployExe)' == '' And '$(MSBuildRuntimeType)' == 'Core'">true</UseMsDeployExe>
     </PropertyGroup>
 
     <!--  Data Passed to MSDeploy -->
