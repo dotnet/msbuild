@@ -1546,11 +1546,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <ItemGroup>
-      <_MSBuildProjectReferenceWithDesiredProperties Include="@(_MSBuildProjectReferenceWithDesiredPropertiesResults->'%(OriginalItemSpec)')"
-                                              Condition="'%(_MSBuildProjectReferenceWithDesiredPropertiesResults.Identity)' == 'true'" />
-      <_MSBuildProjectReferenceNoCrossTargeting Include="@(_MSBuildProjectReferenceExistent)"
-                                                Exclude="@(_MSBuildProjectReferenceWithDesiredProperties)" />
+      <!-- Transform the list so that its Identity correlates with that of _MSBuildProjectReferenceExistent. -->
+      <_MSBuildProjectReferenceWithDesiredProperties Include="@(_MSBuildProjectReferenceWithDesiredPropertiesResults->'%(OriginalItemSpec)')" />
 
+      <!-- Update refs to remove any properties that the reference knows (without the referring TF) it doesn't want. -->
+      <_MSBuildProjectReferenceExistent Condition="'@(_MSBuildProjectReferenceWithDesiredProperties)' == '%(Identity)' and '@(_MSBuildProjectReferenceWithDesiredProperties->'%(QueryForProperties)')' == 'false'">
+        <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');@(_MSBuildProjectReferenceWithDesiredProperties->'%(UndefineProperties)')</UndefineProperties>
+      </_MSBuildProjectReferenceExistent>
     </ItemGroup>
   </Target>
 
@@ -1587,7 +1589,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceWithDesiredProperties.SetConfiguration); %(_MSBuildProjectReferenceWithDesiredProperties.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceWithDesiredProperties.GlobalPropertiesToRemove);$(PropertiesToRemoveWhenQueryingForDesiredProperties)"
-        Condition="'%(_MSBuildProjectReferenceWithDesiredProperties.SkipGetTargetFrameworkProperties)' != 'true'">
+        Condition="'%(_MSBuildProjectReferenceWithDesiredProperties.SkipGetTargetFrameworkProperties)' != 'true' and '%(_MSBuildProjectReferenceWithDesiredProperties.QueryForProperties)' == 'true'">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
@@ -1597,12 +1599,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ProjectReferencesWithTargetFrameworkProperties Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')" />
 
       <!-- Set the project's returned TargetFramework -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' != 'true'">
+      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(SetDesiredProperties)')' != ''">
         <SetDesiredProperties>@(_ProjectReferencesWithTargetFrameworkProperties->'%(SetDesiredProperties)')</SetDesiredProperties>
       </_MSBuildProjectReferenceExistent>
 
       <!-- Remove any properties that the reference didn't want. -->
-      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' == 'true'">
+      <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(UndefineProperties)')' != ''">
         <UndefineProperties>@(_MSBuildProjectReferenceExistent->'%(UndefineProperties)');@(_ProjectReferencesWithTargetFrameworkProperties->'%(UndefineProperties)')</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
@@ -1613,12 +1615,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                     GetDesiredProperties
 
     Overrridden by cross-targeting projects to return the set of
-    properties (in the form "key1=value1;...keyN=valueN") needed
-    to build it with the best target for the referring project's
-    target framework.
+    properties (in the metadatum SetDesiredProperties` in the
+    form "key1=value1;...keyN=valueN") needed to build against
+    the target framework that best matches the referring
+    project's target framework.
 
-    The referring project's $(TargetFrameworkMoniker) is passed 
-    in as $(ReferringTargetFramework)
+    The referring project's $(TargetFrameworkMoniker) is passed
+    in as $(ReferringTargetFramework).
   -->
   <Target Name="GetDesiredProperties" />
 
@@ -1626,12 +1629,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         ShouldQueryForProperties
 
-    Overrridden by cross-targeting projects to return "true" if
-    the project should have its GetDesiredProperties
-    target called with a ReferringTargetFramework. If "false",
-    the single output of the project is used.
+    Overrridden by cross-targeting projects to return an item
+    with QueryForProperties metadata that is a boolean set to
+    "true" if the project should have its GetDesiredProperties
+    target called with a ReferringTargetFramework.
+
+    If the returned QueryForProperties is false, the project
+    will be built with the returned UndefineProperties metadata
+    removed from its global properties.
   -->
-  <Target Name="ShouldQueryForProperties" Returns="false" />
+  <Target Name="ShouldQueryForProperties" />
 
   <!--
     ============================================================
