@@ -5,11 +5,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
+using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -59,6 +62,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
+        public string[] TargetManifestFileList { get; set; }
+
         public bool IsSelfContained { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
@@ -71,6 +76,38 @@ namespace Microsoft.NET.Build.Tasks
 
         private Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+        private Dictionary<PackageIdentity, StringBuilder>  GetFilteredPackages()
+        {
+            Dictionary<PackageIdentity, StringBuilder> filteredPackages = null;
+
+            if (TargetManifestFileList != null && TargetManifestFileList.Length > 0)
+            {
+                filteredPackages = new Dictionary<PackageIdentity, StringBuilder>();
+
+                foreach (var targetManifestFile in TargetManifestFileList)
+                {
+                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, targetManifestFile));
+                    var packagesSpecified = StoreArtifactParser.Parse(targetManifestFile);
+                    var targetManifestFileName = Path.GetFileName(targetManifestFile);
+
+                    foreach (var pkg in packagesSpecified)
+                    {
+                        Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.PackageInfoLog, pkg.Id, pkg.Version));
+                        StringBuilder fileList;
+                        if (filteredPackages.TryGetValue(pkg, out fileList))
+                        {
+                            fileList.Append($";{targetManifestFileName}");
+                        }
+                        else
+                        {
+                            filteredPackages.Add(pkg, new StringBuilder(targetManifestFileName));
+                        }
+                    }
+                }
+            }
+            return filteredPackages;
+        }
 
         protected override void ExecuteCore()
         {
@@ -111,6 +148,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithPrivateAssets(privateAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
+                .WithPackagesThatWhereFiltered(GetFilteredPackages())
                 .Build();
 
             if (compileFilesToSkip.Any() || runtimeFilesToSkip.Any())
