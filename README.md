@@ -30,7 +30,7 @@ To get started on **Visual Studio 2017**:
   - _Desktop development with C++_
     - Optional, build warnings may occur without it.
   - _.NET Core cross-platform development_
-    - Otional, not strictly required (yet) but used to develop .NET Core applications.
+    - Optional, not strictly required (yet) but used to develop .NET Core applications.
 2. Clone the source code (see above).
 3. Build the code using the `cibuild.cmd` script.
 5. Open src/MSBuild.sln solution in Visual Studio 2017.
