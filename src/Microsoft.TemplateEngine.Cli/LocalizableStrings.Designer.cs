@@ -282,7 +282,7 @@ namespace Microsoft.TemplateEngine.Cli {
         
         /// <summary>
         ///   Looks up a localized string similar to Unknown alias name &apos;{0}&apos;.
-        ///Run &apos;dotnet --show-aliases&apos; with no args to show all aliases..
+        ///Run &apos;dotnet {1} --show-aliases&apos; with no args to show all aliases..
         /// </summary>
         public static string AliasShowErrorUnknownAlias {
             get {
@@ -309,7 +309,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to First argument of an alias value must be a letter or digit..
+        ///   Looks up a localized string similar to First argument of an alias value must begin with a letter or digit..
         /// </summary>
         public static string AliasValueFirstArgError {
             get {

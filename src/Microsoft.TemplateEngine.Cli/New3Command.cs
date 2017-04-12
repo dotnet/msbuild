@@ -924,7 +924,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.ShowAliasesSpecified)
             {
-                return AliasSupport.DisplayAliasValues(EnvironmentSettings, _commandInput, _aliasRegistry);
+                return AliasSupport.DisplayAliasValues(EnvironmentSettings, _commandInput, _aliasRegistry, CommandName);
             }
 
             if (_commandInput.ExpandedExtraArgsFiles && string.IsNullOrEmpty(_commandInput.Alias))

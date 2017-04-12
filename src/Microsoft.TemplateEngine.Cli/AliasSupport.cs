@@ -133,7 +133,7 @@ namespace Microsoft.TemplateEngine.Cli
             return aliasTokens;
         }
 
-        public static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry)
+        public static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
         {
             IReadOnlyDictionary<string, string> aliasesToShow;
 
@@ -148,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName, commandName));
                     return CreationResultStatus.InvalidParamValues;
                 }
             }
