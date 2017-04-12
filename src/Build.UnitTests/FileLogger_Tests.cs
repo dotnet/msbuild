@@ -448,14 +448,14 @@ namespace Microsoft.Build.UnitTests
                                                           + "mylogfile.log");
 
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.True(
-                              string.Compare(
-                                             fileLogger.InternalFilelogger.Parameters,
-                                             ";ShowCommandLine;logfile="
-                                             + Path.Combine(
-                                                            Directory.GetCurrentDirectory(),
-                                                            Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"),
-                                             StringComparison.OrdinalIgnoreCase) == 0);
+
+                Assert.Equal(
+                    fileLogger.InternalFilelogger.Parameters,
+                    ";ShowCommandLine;logfile="
+                        + Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"), 
+                    StringComparer.OrdinalIgnoreCase);
             }
            );
         }
