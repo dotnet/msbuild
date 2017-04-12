@@ -201,7 +201,7 @@
 
   <!-- Configure bootstrapping -->
   <PropertyGroup>
-    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)MSBuild$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
     <BootstrapDestination Condition="'$(NetCoreBuild)' == 'true'">$(BinDir)Bootstrap-NetCore$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
 
     <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
@@ -368,6 +368,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
 
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
   </PropertyGroup>
 

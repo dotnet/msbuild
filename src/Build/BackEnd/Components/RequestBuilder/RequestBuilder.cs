@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Globalization;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -1079,6 +1080,10 @@ namespace Microsoft.Build.BackEnd
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
 
+            // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
+            //
+            ConfigureWarningsAsErrorsAndMessages();
+
             // See comment on ProjectItemInstance.Initialize for full details
             // We have been asked to build with a tools verison that we don't know about
             // so we'll report that we're building as if the project had been marked with a known toolsversion instead
@@ -1245,6 +1250,56 @@ namespace Microsoft.Build.BackEnd
         private void VerifyIsNotZombie()
         {
             ErrorUtilities.VerifyThrow(!_isZombie, "RequestBuilder has been zombied.");
+        }
+
+        /// <summary>
+        /// Configure warnings as messages and errors based on properties defined in the project.
+        /// </summary>
+        private void ConfigureWarningsAsErrorsAndMessages()
+        {
+            // Gather needed objects
+            //
+            ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
+            BuildEventContext buildEventContext = _projectLoggingContext?.BuildEventContext;
+            ILoggingService loggingService = _projectLoggingContext?.LoggingService;
+
+            // Ensure everything that is required is available at this time
+            //
+            if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            {
+                if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
+                    //
+                    loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, new HashSet<string>());
+                }
+                else
+                {
+                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsErrors));
+
+                    if (warningsAsErrors?.Count > 0)
+                    {
+                        loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, warningsAsErrors);
+                    }
+                }
+
+                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
+
+                if (warningsAsMessages?.Count > 0)
+                {
+                    loggingService.AddWarningsAsMessages(buildEventContext.ProjectInstanceId, warningsAsMessages);
+                }
+            }
+        }
+
+        private ISet<string> ParseWarningCodes(string warnings)
+        {
+            if (String.IsNullOrWhiteSpace(warnings))
+            {
+                return null;
+            }
+            
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
         }
     }
 }

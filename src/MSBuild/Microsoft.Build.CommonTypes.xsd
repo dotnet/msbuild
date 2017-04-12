@@ -1474,6 +1474,21 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="MyType" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MSBuildAllProjects" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="MSBuildTreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildTreatWarningsAsErrors" _locComment="" -->Indicates whether to treat all warnings as errors when building a project.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="MSBuildWarningsAsMessages" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildWarningsAsMessages" _locComment="" -->Indicates a semicolon delimited list of warnings to treat as low importance messages when building a project.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="MSBuildWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildWarningsAsErrors" _locComment="" -->Indicates a semicolon delimited list of warnings to treat as errors when building a project.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="NoConfig" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
     <xs:element name="NoStandardLibraries" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="NoStdLib" type="msb:StringPropertyType" substitutionGroup="msb:Property">

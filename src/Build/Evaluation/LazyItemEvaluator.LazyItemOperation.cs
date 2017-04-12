@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<PartiallyEvaluatedMetadata> metadata)
+            protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
                 if (metadata.Any())
                 {
@@ -110,14 +110,14 @@ namespace Microsoft.Build.Evaluation
 
                     // Do not expand properties as they have been already expanded by the lazy evaluator upon item operation construction.
                     // Prior to lazy evaluation ExpanderOptions.ExpandAll was used.
-                    const ExpanderOptions metadataExpansionOptions = ExpanderOptions.ExpandMetadata | ExpanderOptions.ExpandItems;
+                    const ExpanderOptions metadataExpansionOptions = ExpanderOptions.ExpandAll;
 
                     List<string> values = new List<string>(metadata.Count * 2);
 
-                    foreach (var metadatum in metadata)
+                    foreach (var metadataElement in metadata)
                     {
-                        values.Add(metadatum.ValueWithPropertiesExpanded);
-                        values.Add(metadatum.ConditionWithPropertiesExpanded);
+                        values.Add(metadataElement.Value);
+                        values.Add(metadataElement.Condition);
                     }
 
                     ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
@@ -153,23 +153,23 @@ namespace Microsoft.Build.Evaluation
                         {
                             _expander.Metadata = item;
 
-                            foreach (var metadatum in metadata)
+                            foreach (var metadataElement in metadata)
                             {
 #if FEATURE_MSBUILD_DEBUGGER
                                 //if (DebuggerManager.DebuggingEnabled)
                                 //{
-                                //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
+                                //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
                                 //}
 #endif
 
-                                if (!EvaluateCondition(metadatum.ConditionWithPropertiesExpanded, metadatum.Element, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                                if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                                 {
                                     continue;
                                 }
 
-                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatum.ValueWithPropertiesExpanded, metadataExpansionOptions, metadatum.Element.Location);
+                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                item.SetMetadata(metadatum.Element, evaluatedValue);
+                                item.SetMetadata(metadataElement, evaluatedValue);
                             }
                         }
 
@@ -190,11 +190,11 @@ namespace Microsoft.Build.Evaluation
                         // Also keep a list of everything so we can get the predecessor objects correct.
                         List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>();
 
-                        foreach (var metadatum in metadata)
+                        foreach (var metadataElement in metadata)
                         {
                             // Because of the checking above, it should be safe to expand metadata in conditions; the condition
                             // will be true for either all the items or none
-                            if (!EvaluateCondition(metadatum.ConditionWithPropertiesExpanded, metadatum.Element, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                            if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
                             {
                                 continue;
                             }
@@ -202,14 +202,14 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_MSBUILD_DEBUGGER
                             //if (DebuggerManager.DebuggingEnabled)
                             //{
-                            //    DebuggerManager.PulseState(metadatumElement.Location, _itemPassLocals);
+                            //    DebuggerManager.PulseState(metadataElementElement.Location, _itemPassLocals);
                             //}
 #endif
 
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatum.ValueWithPropertiesExpanded, metadataExpansionOptions, metadatum.Element.Location);
+                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                            metadataTable.SetValue(metadatum.Element, evaluatedValue);
-                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadatum.Element, evaluatedValue));
+                            metadataTable.SetValue(metadataElement, evaluatedValue);
+                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
                         }
 
                         // Apply those metadata to each item

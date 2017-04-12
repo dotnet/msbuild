@@ -53,7 +53,6 @@
       </group>
       <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
-        <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0" />
       </group>
     </dependencies>
   </metadata>

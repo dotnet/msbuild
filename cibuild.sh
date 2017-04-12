@@ -20,14 +20,14 @@ restoreBuildTools(){
 # home is not defined on CI machines
 setHome()
 {
-    if [ -z ${HOME+x} ]
+    if [ -z "${HOME+x}" ]
     then
         export HOME=$HOME_DEFAULT
-        mkdir -p $HOME_DEFAULT
+        mkdir -p "$HOME_DEFAULT"
 
         # Use a different temp directory in CI so that hopefully things are a little more stable
         export TMPDIR=$TEMP_DEFAULT
-        mkdir -p $TEMP_DEFAULT
+        mkdir -p "$TEMP_DEFAULT"
     fi
 }
 
@@ -35,14 +35,14 @@ downloadMSBuildForMono()
 {
     if [ ! -e "$MSBUILD_EXE" ]
     then
-        mkdir -p $PACKAGES_DIR # Create packages dir if it doesn't exist.
+        mkdir -p "$PACKAGES_DIR" # Create packages dir if it doesn't exist.
 
         echo "** Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
-        curl -sL -o $MSBUILD_ZIP "$MSBUILD_DOWNLOAD_URL"
+        curl -sL -o "$MSBUILD_ZIP" "$MSBUILD_DOWNLOAD_URL"
 
-        unzip -q $MSBUILD_ZIP -d $PACKAGES_DIR
+        unzip -q "$MSBUILD_ZIP" -d "$PACKAGES_DIR"
         find "$PACKAGES_DIR/msbuild" -name "*.exe" -exec chmod "+x" '{}' ';'
-        rm $MSBUILD_ZIP
+        rm "$MSBUILD_ZIP"
     fi
 }
 
@@ -64,13 +64,13 @@ runMSBuildWith()
 
     echo
     echo "** Build completed. Exit code: $?"
-    egrep "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
+    grep -E "Warning\(s\)|Error\(s\)|Time Elapsed" "$logPath"
     echo "** Log: $logPath"
 }
 
 setMonoDir(){
     if [[ "$MONO_BIN_DIR" = "" ]]; then
-                MONO_BIN_DIR=`dirname \`which mono\``
+                MONO_BIN_DIR=$(dirname "$(which mono)")
                 MONO_BIN_DIR=${MONO_BIN_DIR}/
     fi
 }
@@ -99,7 +99,7 @@ get_current_linux_name() {
         echo "centos"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-        if [ "$(cat /etc/os-release | grep -cim1 'VERSION_ID="7\.')" -eq 1 ]; then
+        if [ "$(grep -cim1 'VERSION_ID="7\.' /etc/os-release)" -eq 1 ]; then
             echo "rhel.7"
             return 0
         fi
@@ -146,7 +146,6 @@ TEMP_DEFAULT="$WORKSPACE/tmp"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
-BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 
 # Default msbuild arguments
 TARGET_ARG="Build"
@@ -228,9 +227,9 @@ fi
 
 if [ "$host" = "Mono" ]; then
     # check if mono is available
-    echo "debug: which mono: `which mono`"
+    echo "debug: which mono: $(which mono)"
     echo "MONO_BIN_DIR: $MONO_BIN_DIR"
-    if [ "`which mono`" = "" -a "$MONO_BIN_DIR" = "" ]; then
+    if [ "$(which mono)" = "" ] && [ "$MONO_BIN_DIR" = "" ]; then
         echo "** Error: Building with host Mono, requires Mono to be installed."
         exit 1
     fi
@@ -291,10 +290,10 @@ case $host in
         ;;
 esac
 
-BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build-$host.log"
-LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
-LOCAL_BUILD_BINLOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_rebuild-$host.binlog"
-MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
+BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/msbuild_bootstrap_build-"$host".log
+LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/msbuild_local_build-"$host".log
+LOCAL_BUILD_BINLOG_PATH="$THIS_SCRIPT_PATH"/msbuild_rebuild-"$host".binlog
+MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/msbuild_move_bootstrap-"$host".log
 
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
@@ -322,7 +321,7 @@ fi
 # Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
 if [ "$host" = "Mono" ]; then
         CSC_EXE="$PACKAGES_DIR/Microsoft.Net.Compilers/2.0.0-rc3-61110-06/tools/csc.exe"
-        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$(dirname "$CSC_EXE") /p:DebugType=portable"
 fi
 
 # The set of warnings to suppress for now
