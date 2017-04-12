@@ -438,7 +438,7 @@
     <value>Failed to add reference {0} to project file {1}</value>
   </data>
   <data name="AddRefPostActionNoRefConfigured" xml:space="preserve">
-    <value>No references configured to be added to a project.</value>
+    <value>No references configured to be added to project.</value>
   </data>
   <data name="AddRefPostActionAddProjectRef" xml:space="preserve">
     <value>Adding a project reference. Running dotnet add {0} reference {1}</value>
@@ -461,7 +461,7 @@
     <value>Adding reference type {0} is not supported.</value>
   </data>
   <data name="AddRefPostActionAddPackageRefWithVersion" xml:space="preserve">
-    <value>Adding a package reference. Running dotnet add {0} package {1} -v {2}</value>
+    <value>Adding a package reference. Running dotnet add {0} package {1} --version {2}</value>
   </data>
   <data name="AddRefPostActionUnresolvedProjFile" xml:space="preserve">
     <value>Unable to determine which project file to add the reference to.</value>

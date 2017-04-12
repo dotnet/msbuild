@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} -v {2}.
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} --version {2}.
         /// </summary>
         public static string AddRefPostActionAddPackageRefWithVersion {
             get {
@@ -107,7 +107,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No references configured to be added to a project..
+        ///   Looks up a localized string similar to No references configured to be added to project..
         /// </summary>
         public static string AddRefPostActionNoRefConfigured {
             get {

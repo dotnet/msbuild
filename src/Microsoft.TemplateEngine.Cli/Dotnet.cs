@@ -50,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName, "-v", version });
+                argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName, "--version", version });
             }
 
             return new Dotnet
