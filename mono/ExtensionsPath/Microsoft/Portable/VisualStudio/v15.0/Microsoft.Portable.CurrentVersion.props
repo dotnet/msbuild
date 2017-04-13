@@ -1,0 +1,10 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- This is taken from Microsoft.Portable.CurrentVersion.props installed with VS2017 -->
+    <PropertyGroup>
+        <!-- PCLs targeting NetStandard will have "NetPortable,Version=v5.0" in their TargetFrameworkAttribute.
+             This leads to an error from RAR about mismatched versions if referenced by a profile based PCL (4.6 or lower).
+             Simply disable that check from RAR -->
+        <ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>true</ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>
+    </PropertyGroup>
+</Project>
