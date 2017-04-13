@@ -13,5 +13,39 @@
   "icon": "vs-2017.3/WebAPI.png",
   "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784882",
   "uiFilters": [ "oneaspnet" ],
-  "supportsDocker": true
+  "supportsDocker": true,
+  "isApi": true,
+  "usesOidc": true,
+  "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.WebAPI",
+  "supportedAuthentications": [
+    {
+      "auth": "None",
+      "authenticationType": "NoAuth"
+    },
+    {
+      "auth": "SingleOrg",
+      "authenticationType": "OrgAuth",
+      "orgAuthenticationOptions": "SSO"
+    },
+    {
+      "auth": "Windows",
+      "authenticationType": "WindowsAuth"
+    }
+  ],
+  "ports": [
+    {
+      "name": "IISExpressPort",
+      "useHttps": false
+    },
+    {
+      "name": "KestrelPort",
+      "useHttps": false
+    },
+    {
+      "name": "HttpsPort",
+      "useHttps": true
+    }
+  ],
+  "azureReplyUrlPortName": "HttpsPort",
+  "includeLaunchSettings": true
 }
