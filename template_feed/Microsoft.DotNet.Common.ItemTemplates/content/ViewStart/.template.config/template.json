@@ -1,0 +1,20 @@
+{
+  "author": "Microsoft",
+  "classifications": [
+    "Web",
+    "ASP.NET"
+  ],
+  "name": "MVC ViewStart",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "Microsoft.AspNetCore.Mvc.ViewStart",
+  "precedence": "100",
+  "identity": "Microsoft.AspNetCore.Mvc.ViewStart",
+  "shortName": "viewstart",
+  "sourceName": "_ViewStart",
+  "primaryOutputs": [
+    {
+      "path": "_ViewStart.cshtml"
+    }
+  ],
+  "defaultName": "_ViewStart"
+}
