@@ -27,6 +27,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -58,12 +59,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// SetUp
         /// </summary>
-        public BuildManager_Tests()
+        public BuildManager_Tests(ITestOutputHelper output)
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
 
-            _logger = new MockLogger();
+            _logger = new MockLogger(output);
             _parameters = new BuildParameters
             {
                 ShutdownInProcNodeOnBuildFinish = true,
@@ -328,7 +329,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 projectFullPath = project.FullPath;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[0], _projectCollection.HostServices);
-                BuildParameters customparameters = new BuildParameters { EnableNodeReuse = false };
+                BuildParameters customparameters = new BuildParameters { EnableNodeReuse = false, Loggers = new ILogger[] { _logger } };
                 buildParametersModifier(customparameters);
 
                 BuildResult result = _buildManager.Build(customparameters, data);
