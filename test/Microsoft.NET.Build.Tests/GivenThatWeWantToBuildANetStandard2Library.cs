@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tests
 using System;
 public static class {project.Name}
 {{
-    {TestAsset.ConflictResolutionTestMethod}
+    {ConflictResolutionAssets.ConflictResolutionTestMethod}
 }}";
 
             var testAsset = _testAssetsManager.CreateTestProject(project)
@@ -66,7 +66,7 @@ public static class {project.Name}
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    foreach (var dependency in TestAsset.ConflictResolutionDependencies)
+                    foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),

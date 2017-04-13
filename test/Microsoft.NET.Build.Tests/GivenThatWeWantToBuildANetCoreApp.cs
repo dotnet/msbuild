@@ -156,7 +156,7 @@ public static class Program
         TestConflictResolution();
         Console.WriteLine(""" + outputMessage + @""");
     }
-" + TestAsset.ConflictResolutionTestMethod + @"
+" + ConflictResolutionAssets.ConflictResolutionTestMethod + @"
 }
 ";
             var testAsset = _testAssetsManager.CreateTestProject(project, project.Name)
@@ -169,7 +169,7 @@ public static class Program
                         var itemGroup = new XElement(ns + "ItemGroup");
                         p.Root.Add(itemGroup);
 
-                        foreach (var dependency in TestAsset.ConflictResolutionDependencies)
+                        foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                         {
                             itemGroup.Add(new XElement(ns + "PackageReference",
                                 new XAttribute("Include", dependency.Item1),
@@ -227,7 +227,7 @@ public static class Program
         TestConflictResolution();
         Console.WriteLine(""Hello, World!"");
     }
-" + TestAsset.ConflictResolutionTestMethod + @"
+" + ConflictResolutionAssets.ConflictResolutionTestMethod + @"
 }
 ";
 
@@ -239,7 +239,7 @@ public static class Program
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    foreach (var dependency in TestAsset.ConflictResolutionDependencies)
+                    foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),
