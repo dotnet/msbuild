@@ -201,7 +201,7 @@
 
   <!-- Configure bootstrapping -->
   <PropertyGroup>
-    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)MSBuild$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
     <BootstrapDestination Condition="'$(NetCoreBuild)' == 'true'">$(BinDir)Bootstrap-NetCore$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
 
     <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
