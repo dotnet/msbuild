@@ -464,6 +464,12 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
+            // Check for actual files or directories under / that get missed by the above logic
+            if (firstSlash == 0 && value[0] == '/' && (Directory.Exists(value) || File.Exists(value)))
+            {
+                return true;
+            }
+
             return false;
         }
 
