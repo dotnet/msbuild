@@ -6,6 +6,7 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 
 Looking for V1 of the .NET Core tooling?
 ----------------------------------------
+
 If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
 
 > **Note:** the master branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
