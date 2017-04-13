@@ -153,8 +153,10 @@ public static class Program
 {
     public static void Main()
     {
+        TestConflictResolution();
         Console.WriteLine(""" + outputMessage + @""");
     }
+" + ConflictResolutionAssets.ConflictResolutionTestMethod + @"
 }
 ";
             var testAsset = _testAssetsManager.CreateTestProject(project, project.Name)
@@ -167,7 +169,7 @@ public static class Program
                         var itemGroup = new XElement(ns + "ItemGroup");
                         p.Root.Add(itemGroup);
 
-                        foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                        foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                         {
                             itemGroup.Add(new XElement(ns + "PackageReference",
                                 new XAttribute("Include", dependency.Item1),
@@ -216,6 +218,19 @@ public static class Program
                 IsSdkProject = true
             };
 
+            project.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        TestConflictResolution();
+        Console.WriteLine(""Hello, World!"");
+    }
+" + ConflictResolutionAssets.ConflictResolutionTestMethod + @"
+}
+";
+
             var testAsset = _testAssetsManager.CreateTestProject(project)
                 .WithProjectChanges(p =>
                 {
@@ -224,7 +239,7 @@ public static class Program
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),

@@ -25,6 +25,21 @@ Copyright (c) .NET Foundation. All rights reserved.
           To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true
           -->
       <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))" />
+
+      
+      <!-- Also include RuntimeTarget items, which aren't included in AllCopyLocalItems, but need to be considered
+           for conflict resolution -->
+      <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
+      <__RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(_RuntimeTargetItems)" />
+      <_RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(__RuntimeTargetPublishItems)" />
+
+      <_LockFileAssemblies Include="@(_RuntimeTargetPublishItems->WithMetadataValue('Type', 'assembly')->'%(ResolvedPath)')">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
+      </_LockFileAssemblies>
     </ItemGroup>    
     
     <ResolvePackageFileConflicts References="@(Reference)"

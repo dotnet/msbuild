@@ -58,6 +58,7 @@ project.lock.json
 .builds
 *.pidb
 *.log
+*.binlog
 *.scc
 
 # Template Manifests generated as part of VSIX build

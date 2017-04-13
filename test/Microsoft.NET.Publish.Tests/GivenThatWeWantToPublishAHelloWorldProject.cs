@@ -224,8 +224,10 @@ public static class Program
 {
     public static void Main()
     {
+        TestConflictResolution();
         Console.WriteLine(""" + outputMessage + @""");
     }
+" + ConflictResolutionAssets.ConflictResolutionTestMethod + @"
 }
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
@@ -237,7 +239,7 @@ public static class Program
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),
