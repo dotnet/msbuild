@@ -3315,7 +3315,7 @@ namespace Microsoft.Build.Evaluation
             private static Type GetTypeFromAssemblyUsingNamespace(string typeName)
             {
                 string baseName = typeName;
-                int assemblyNameEnd = baseName.LastIndexOf('.');
+                int assemblyNameEnd = baseName.Length;
                 Type foundType = null;
 
                 // If the string has no dot, or is nothing but a dot, we have no
@@ -3328,9 +3328,7 @@ namespace Microsoft.Build.Evaluation
                 // We will work our way up the namespace looking for an assembly that matches
                 while (assemblyNameEnd > 0)
                 {
-                    string candidateAssemblyName = null;
-
-                    candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
+                    string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
 
                     // Try to load the assembly with the computed name
                     foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);
