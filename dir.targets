@@ -160,6 +160,11 @@
       -->
       <EditBinCommand Condition="'$(VSINSTALLDIR)' != ''">call &quot;$(VSINSTALLDIR)\Common7\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
       <EditBinCommand Condition="'$(VsInstallRoot)' != '' and '$(EditBinCommand)' == ''">call &quot;$(VsInstallRoot)\Common7\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
+
+      <!--
+        But sometimes, on Microbuild, VS140COMNTOOLS is defined instead of VsInstallRoot.
+      -->
+      <EditBinCommand Condition="'$(VS140COMNTOOLS)' != '' and '$(EditBinCommand)' == ''">call &quot;$(VsInstallRoot)\VsDevCmd.bat&quot; &amp;&amp; editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)</EditBinCommand>
     </PropertyGroup>
 
     <Exec Condition="'$(EditBinFlags)'!=''"
