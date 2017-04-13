@@ -176,7 +176,7 @@ namespace Microsoft.NET.TestFramework
                   || path.Contains(objFolderWithTrailingSlash);
         }
 
-        public static IEnumerable<Tuple<string, string>> NetStandard1_3Dependencies
+        public static IEnumerable<Tuple<string, string>> ConflictResolutionDependencies
         {
             get
             {
@@ -234,6 +234,20 @@ namespace Microsoft.NET.TestFramework
                 {
                     yield return Tuple.Create(dependency.Attribute("id").Value, dependency.Attribute("version").Value);
                 }
+
+                yield return Tuple.Create("System.Diagnostics.TraceSource", "4.0.0");
+            }
+        }
+
+        public static string ConflictResolutionTestMethod
+        {
+            get
+            {
+                return @"
+    public static void TestConflictResolution()
+    {
+        new System.Diagnostics.TraceSource(""ConflictTest"");
+    }";
             }
         }
     }

@@ -51,6 +51,12 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true
             };
 
+            project.SourceFiles[project.Name + ".cs"] = $@"
+using System;
+public static class {project.Name}
+{{
+    {TestAsset.ConflictResolutionTestMethod}
+}}";
 
             var testAsset = _testAssetsManager.CreateTestProject(project)
                 .WithProjectChanges(p =>
@@ -60,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    foreach (var dependency in TestAsset.NetStandard1_3Dependencies)
+                    foreach (var dependency in TestAsset.ConflictResolutionDependencies)
                     {
                         itemGroup.Add(new XElement(ns + "PackageReference",
                             new XAttribute("Include", dependency.Item1),
