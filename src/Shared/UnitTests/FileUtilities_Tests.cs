@@ -833,7 +833,11 @@ namespace Microsoft.Build.UnitTests
         [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
+            var secondSlash = SystemSpecificAbsolutePath.Substring(1).IndexOf(Path.DirectorySeparatorChar) + 1;
+            var rootLevelPath = SystemSpecificAbsolutePath.Substring(0, secondSlash);
+
             Assert.True(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
+            Assert.True(FileUtilities.LooksLikeUnixFilePath(rootLevelPath));
         }
 
         [Fact]
@@ -842,6 +846,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
             Assert.False(FileUtilities.LooksLikeUnixFilePath("/path/that/looks/unixy"));
+            Assert.False(FileUtilities.LooksLikeUnixFilePath("/root"));
         }
 
         private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
