@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the system before this method was called.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1975")]
 #elif MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
