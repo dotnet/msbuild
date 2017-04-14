@@ -22,8 +22,6 @@
       "launchBrowser": true,
 //#if (RequiresHttps)
       "launchUrl": "https://localhost:43434/",
-//#else
-      "launchUrl": "api/values",
 //#endif
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -32,7 +30,6 @@
     "Company.WebApplication1": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/values",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

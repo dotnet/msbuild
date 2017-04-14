@@ -13,5 +13,17 @@
   "icon": "vs-2017.3/Empty.png",
   "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784883",
   "uiFilters": [ "oneaspnet" ],
-  "supportsDocker": true
+  "supportsDocker": true,
+  "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.EmptyWeb",
+  "ports": [
+    {
+      "name": "IISExpressPort",
+      "useHttps": false
+    },
+    {
+      "name": "KestrelPort",
+      "useHttps": false
+    }
+  ],
+  "includeLaunchSettings": true
 }

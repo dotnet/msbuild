@@ -38,6 +38,21 @@
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
+    },
+    "HttpsPort": {
+      "isHidden": true
+    },
+    "KestrelPort": {
+      "isHidden": true
+    },
+    "IISExpressPort": {
+      "isHidden": true
+    },
+    "IncludeLaunchSettings": {
+      "isHidden": true
+    },
+    "UserSecretsId": {
+      "isHidden": true
     }
   },
   "UsageExamples": [

@@ -11,6 +11,15 @@
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
+    },
+    "KestrelPort": {
+      "isHidden": true
+    },
+    "IISExpressPort": {
+      "isHidden": true
+    },
+    "IncludeLaunchSettings": {
+      "isHidden": true
     }
   },
   "UsageExamples": [

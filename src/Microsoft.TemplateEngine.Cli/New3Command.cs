@@ -689,33 +689,6 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-        // Setup the alias for the templates in the unambiguous group which don't have parameter problems.
-        private CreationResultStatus SetupTemplateAlias()
-        {
-            _telemetryLogger.TrackEvent(CommandName + "-CreateAlias");
-            bool anyValid = false;
-
-            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
-            {
-                ParseTemplateArgs(templateInfo.Info);
-
-                if (AnyRemainingParameters)
-                {
-                    anyValid = true;
-                    _aliasRegistry.SetTemplateAlias(_commandInput.Alias, templateInfo.Info);
-                }
-            }
-
-            if (!anyValid)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
-                return CreationResultStatus.InvalidParamValues;
-            }
-
-            Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
-            return CreationResultStatus.Success;
-        }
-
         private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid()
         {
             bool anyValid = false;
@@ -810,11 +783,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<CreationResultStatus> EnterSingularTemplateManipulationFlowAsync()
         {
-            if (!string.IsNullOrWhiteSpace(_commandInput.Alias))
-            {
-                return SetupTemplateAlias();
-            }
-            else if (_commandInput.IsListFlagSpecified)
+            if (_commandInput.IsListFlagSpecified)
             {
                 return SingularGroupDisplayTemplateListIfAnyAreValid();
             }
@@ -950,21 +919,40 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_commandInput.HasParseError)
             {
-                ValidateRemainingParameters(out IReadOnlyList<string> invalidParams);
-                DisplayInvalidParameters(invalidParams);
+                return HandleParseError();
+            }
 
-                // TODO: get a meaningful error message from the parser
-                if (_commandInput.IsHelpFlagSpecified)
-                {
-                    _telemetryLogger.TrackEvent(CommandName + "-Help");
-                    ShowUsageHelp();
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-                }
+            if (_commandInput.ShowAliasesSpecified)
+            {
+                return AliasSupport.DisplayAliasValues(EnvironmentSettings, _commandInput, _aliasRegistry, CommandName);
+            }
 
-                return CreationResultStatus.InvalidParamValues;
+            if (_commandInput.ExpandedExtraArgsFiles && string.IsNullOrEmpty(_commandInput.Alias))
+            {   // Only show this if there was no alias expansion.
+                // ExpandedExtraArgsFiles must be checked before alias expansion - it'll get reset if there's an alias.
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ExtraArgsCommandAfterExpansion, string.Join(" ", _commandInput.Tokens)));
+            }
+
+            if (string.IsNullOrEmpty(_commandInput.Alias))
+            {   // The --alias param is for creating / updating / deleting aliases.
+                // If it's not present, try expanding aliases now.
+                AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(_commandInput, _aliasRegistry);
+                if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.AliasExpansionError);
+                    return CreationResultStatus.InvalidParamValues;
+                }
+                else if (aliasExpansionStatus == AliasExpansionStatus.Expanded)
+                {
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", _commandInput.Tokens)));
+
+                    if (_commandInput.HasParseError)
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
+                        return HandleParseError();
+                    }
+                }
+                // else NoChange... no special action necessary
             }
 
             if (!ConfigureLocale())
@@ -978,6 +966,11 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
+                if (!string.IsNullOrEmpty(_commandInput.Alias) && !_commandInput.IsHelpFlagSpecified)
+                {
+                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), AllTemplateShortNames);
+                }
+
                 if (string.IsNullOrWhiteSpace(TemplateName))
                 {
                     return EnterMaintenanceFlow();
@@ -990,6 +983,25 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
                 return CreationResultStatus.CreateFailed;
             }
+        }
+
+        private CreationResultStatus HandleParseError()
+        {
+            ValidateRemainingParameters(out IReadOnlyList<string> invalidParams);
+            DisplayInvalidParameters(invalidParams);
+
+            // TODO: get a meaningful error message from the parser
+            if (_commandInput.IsHelpFlagSpecified)
+            {
+                _telemetryLogger.TrackEvent(CommandName + "-Help");
+                ShowUsageHelp();
+            }
+            else
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+            }
+
+            return CreationResultStatus.InvalidParamValues;
         }
 
         private bool ConfigureLocale()
@@ -1273,7 +1285,6 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyCollection<IFilteredTemplateInfo> templates = _settingsLoader.UserTemplateCache.List
             (
                 false,
-                WellKnownSearchFilters.AliasFilter(TemplateName),
                 WellKnownSearchFilters.NameFilter(TemplateName),
                 WellKnownSearchFilters.ClassificationsFilter(TemplateName),
                 WellKnownSearchFilters.LanguageFilter(_commandInput.Language),
@@ -1386,6 +1397,30 @@ namespace Microsoft.TemplateEngine.Cli
             (
                 false,
                 WellKnownSearchFilters.ContextFilter(context),
+                WellKnownSearchFilters.NameFilter(string.Empty)
+            );
+
+            return templates;
+        }
+
+        private HashSet<string> AllTemplateShortNames
+        {
+            get
+            {
+                IReadOnlyCollection<IFilteredTemplateInfo> allTemplates = PerformAllTemplatesQuery();
+                HashSet<string> allShortNames = new HashSet<string>(allTemplates.Select(x => x.Info.ShortName));
+                return allShortNames;
+            }
+        }
+
+        // Lists all the templates, unfiltered
+        private IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery()
+        {
+            string context = DetermineTemplateContext();
+
+            IReadOnlyCollection<IFilteredTemplateInfo> templates = _settingsLoader.UserTemplateCache.List
+            (
+                false,
                 WellKnownSearchFilters.NameFilter(string.Empty)
             );
 
@@ -1613,7 +1648,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (template.Info.Tags != null && template.Info.Tags.TryGetValue("type", out ICacheTag typeTag))
                 {
-                    MatchInfo? matchInfo = WellKnownSearchFilters.ContextFilter(DetermineTemplateContext())(template.Info, null);
+                    MatchInfo? matchInfo = WellKnownSearchFilters.ContextFilter(DetermineTemplateContext())(template.Info);
                     if ((matchInfo?.Kind ?? MatchKind.Mismatch) == MatchKind.Mismatch)
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateNotValidGivenTheSpecifiedFilter, template.Info.Name).Bold().Red());

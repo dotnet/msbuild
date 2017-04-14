@@ -137,7 +137,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 return new[]
                 {
+                    //Create.Option("-a|--alias", LocalizableStrings.AliasHelp, Accept.ExactlyOneArgument()),
+                    //Create.Option("--show-alias", LocalizableStrings.ShowAliasesHelp, Accept.ZeroOrOneArgument()),
+                    // When these are un-hidden, be sure to set their help values like above.
                     Create.Option("-a|--alias", string.Empty, Accept.ExactlyOneArgument()),
+                    Create.Option("--show-alias", string.Empty, Accept.ZeroOrOneArgument()),
                     Create.Option("-x|--extra-args", string.Empty, Accept.OneOrMoreArguments()),
                     Create.Option("--locale", string.Empty, Accept.ExactlyOneArgument()),
                     Create.Option("--quiet", string.Empty, Accept.NoArguments()),

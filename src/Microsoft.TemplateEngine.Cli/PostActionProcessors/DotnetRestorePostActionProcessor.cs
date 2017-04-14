@@ -14,11 +14,11 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
         }
 
-        public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
             if (templateCreationResult.PrimaryOutputs.Count == 0)
             {
-                settings.Host.LogMessage(LocalizableStrings.NoPrimaryOutputsToRestore);
+                environment.Host.LogMessage(LocalizableStrings.NoPrimaryOutputsToRestore);
                 return true;
             }
 
@@ -31,19 +31,19 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 restoreCommand.CaptureStdOut();
                 restoreCommand.CaptureStdErr();
 
-                settings.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
                 Dotnet.Result commandResult = restoreCommand.Execute();
 
                 if (commandResult.ExitCode != 0)
                 {
-                    settings.Host.LogMessage(LocalizableStrings.RestoreFailed);
-                    settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
-                    settings.Host.LogMessage(string.Empty);
+                    environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
+                    environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
+                    environment.Host.LogMessage(string.Empty);
                     allSucceeded = false;
                 }
                 else
                 {
-                    settings.Host.LogMessage(LocalizableStrings.RestoreSucceeded);
+                    environment.Host.LogMessage(LocalizableStrings.RestoreSucceeded);
                 }
             }
 

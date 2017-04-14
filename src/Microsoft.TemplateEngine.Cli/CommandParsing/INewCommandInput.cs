@@ -10,7 +10,13 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     {
         string TemplateName { get; }
 
+        IReadOnlyList<string> Tokens { get; }
+
         string Alias { get; }
+
+        bool ShowAliasesSpecified { get; }
+
+        string ShowAliasesAliasName { get; }
 
         IList<string> ExtraArgsFileNames { get; }
 
@@ -69,5 +75,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         void OnExecute(Func<Task<CreationResultStatus>> invoke);
 
         bool HasParseError { get; }
+
+        void ResetArgs(params string[] args);
+
+        bool ExpandedExtraArgsFiles { get; }
     }
 }

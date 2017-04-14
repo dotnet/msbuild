@@ -62,6 +62,98 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
+        /// </summary>
+        public static string AddRefPostActionAddPackageRef {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddPackageRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} --version {2}.
+        /// </summary>
+        public static string AddRefPostActionAddPackageRefWithVersion {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddPackageRefWithVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a project reference. Running dotnet add {0} reference {1}.
+        /// </summary>
+        public static string AddRefPostActionAddProjectRef {
+            get {
+                return ResourceManager.GetString("AddRefPostActionAddProjectRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add reference {0} to project file {1}.
+        /// </summary>
+        public static string AddRefPostActionFailed {
+            get {
+                return ResourceManager.GetString("AddRefPostActionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
+        /// </summary>
+        public static string AddRefPostActionMisconfigured {
+            get {
+                return ResourceManager.GetString("AddRefPostActionMisconfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No references configured to be added to project..
+        /// </summary>
+        public static string AddRefPostActionNoRefConfigured {
+            get {
+                return ResourceManager.GetString("AddRefPostActionNoRefConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project files found:.
+        /// </summary>
+        public static string AddRefPostActionProjFileListHeader {
+            get {
+                return ResourceManager.GetString("AddRefPostActionProjFileListHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully added
+        ///    reference: {0}
+        ///    to project file: {1}.
+        /// </summary>
+        public static string AddRefPostActionSucceeded {
+            get {
+                return ResourceManager.GetString("AddRefPostActionSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
+        /// </summary>
+        public static string AddRefPostActionUnresolvedProjFile {
+            get {
+                return ResourceManager.GetString("AddRefPostActionUnresolvedProjFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding reference type {0} is not supported..
+        /// </summary>
+        public static string AddRefPostActionUnsupportedRefType {
+            get {
+                return ResourceManager.GetString("AddRefPostActionUnsupportedRefType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alias.
         /// </summary>
         public static string Alias {
@@ -71,20 +163,157 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specified alias &quot;{0}&quot; already exists. Please specify a different alias..
+        ///   Looks up a localized string similar to Alias &apos;{0}&apos; is a template short name, and therefore cannot be aliased..
         /// </summary>
-        public static string AliasAlreadyExists {
+        public static string AliasCannotBeShortName {
             get {
-                return ResourceManager.GetString("AliasAlreadyExists", resourceCulture);
+                return ResourceManager.GetString("AliasCannotBeShortName", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alias creation successful..
+        ///   Looks up a localized string similar to After expanding aliases, the command is:
+        ///    dotnet {0}.
+        /// </summary>
+        public static string AliasCommandAfterExpansion {
+            get {
+                return ResourceManager.GetString("AliasCommandAfterExpansion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully created alias named &apos;{0}&apos; with value &apos;{1}&apos;.
         /// </summary>
         public static string AliasCreated {
             get {
                 return ResourceManager.GetString("AliasCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias not created. It would have created an alias cycle, resulting in infinite expansion..
+        /// </summary>
+        public static string AliasCycleError {
+            get {
+                return ResourceManager.GetString("AliasCycleError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Command is invalid after expanding aliases..
+        /// </summary>
+        public static string AliasExpandedCommandParseError {
+            get {
+                return ResourceManager.GetString("AliasExpandedCommandParseError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error expanding aliases on input params..
+        /// </summary>
+        public static string AliasExpansionError {
+            get {
+                return ResourceManager.GetString("AliasExpansionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creates, updates, or deletes the named alias. The alias value is the remainder of the command. If extra args files are specified, the alias value includes their expansions..
+        /// </summary>
+        public static string AliasHelp {
+            get {
+                return ResourceManager.GetString("AliasHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias Name.
+        /// </summary>
+        public static string AliasName {
+            get {
+                return ResourceManager.GetString("AliasName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias names can only contain letters, numbers, underscores, and periods..
+        /// </summary>
+        public static string AliasNameContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("AliasNameContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias not created. The input was invalid..
+        /// </summary>
+        public static string AliasNotCreatedInvalidInput {
+            get {
+                return ResourceManager.GetString("AliasNotCreatedInvalidInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully removed alias named &apos;{0}&apos; whose value was &apos;{1}&apos;..
+        /// </summary>
+        public static string AliasRemoved {
+            get {
+                return ResourceManager.GetString("AliasRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to remove alias &apos;{0}&apos;. It did not exist..
+        /// </summary>
+        public static string AliasRemoveNonExistentFailed {
+            get {
+                return ResourceManager.GetString("AliasRemoveNonExistentFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All Aliases:.
+        /// </summary>
+        public static string AliasShowAllAliasesHeader {
+            get {
+                return ResourceManager.GetString("AliasShowAllAliasesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown alias name &apos;{0}&apos;.
+        ///Run &apos;dotnet {1} --show-aliases&apos; with no args to show all aliases..
+        /// </summary>
+        public static string AliasShowErrorUnknownAlias {
+            get {
+                return ResourceManager.GetString("AliasShowErrorUnknownAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully updated alias named &apos;{0}&apos; to value &apos;{1}&apos;..
+        /// </summary>
+        public static string AliasUpdated {
+            get {
+                return ResourceManager.GetString("AliasUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias Value.
+        /// </summary>
+        public static string AliasValue {
+            get {
+                return ResourceManager.GetString("AliasValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First argument of an alias value must begin with a letter or digit..
+        /// </summary>
+        public static string AliasValueFirstArgError {
+            get {
+                return ResourceManager.GetString("AliasValueFirstArgError", resourceCulture);
             }
         }
         
@@ -348,6 +577,16 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string DisplaysHelp {
             get {
                 return ResourceManager.GetString("DisplaysHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After expanding the extra args files, the command is:
+        ///    dotnet {0}.
+        /// </summary>
+        public static string ExtraArgsCommandAfterExpansion {
+            get {
+                return ResourceManager.GetString("ExtraArgsCommandAfterExpansion", resourceCulture);
             }
         }
         
@@ -733,6 +972,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Post action failed..
+        /// </summary>
+        public static string PostActionFailedInstructionHeader {
+            get {
+                return ResourceManager.GetString("PostActionFailedInstructionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manual instructions: {0}.
         /// </summary>
         public static string PostActionInstructions {
@@ -846,6 +1094,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string ShortName {
             get {
                 return ResourceManager.GetString("ShortName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays the value of the named alias, or all aliases if no name is specified..
+        /// </summary>
+        public static string ShowAliasesHelp {
+            get {
+                return ResourceManager.GetString("ShowAliasesHelp", resourceCulture);
             }
         }
         
