@@ -131,20 +131,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
-        public static HashSet<string> ValidTypeValues
-        {
-            get
-            {
-                if (_validTypeValues == null)
-                {
-                    _validTypeValues = new HashSet<string>(new[] { "project", "item", "other" });
-                }
-
-                return _validTypeValues;
-            }
-        }
-        private static HashSet<string> _validTypeValues;
-
         private static Option[] NewCommandHiddenArgs
         {
             get
