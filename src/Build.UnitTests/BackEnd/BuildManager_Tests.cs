@@ -533,7 +533,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1976")]
 #elif MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
@@ -596,7 +596,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1976")]
 #elif MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
