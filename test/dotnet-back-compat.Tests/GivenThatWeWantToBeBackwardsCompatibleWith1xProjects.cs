@@ -78,6 +78,25 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .Should().Pass();
         }
 
+        [Theory]
+        [InlineData("netcoreapp1.0")]
+        public void ItRunsABackwardsVersionedTool(string target)
+        {
+            var testInstance = TestAssets.Get("TestAppWithCLIToolReferences")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("outputsframeworkversion-" + target)
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(target);
+        }
 
         void ChangeProjectTargetFramework(FileInfo projectFile, string target)
         {
