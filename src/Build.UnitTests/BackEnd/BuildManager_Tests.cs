@@ -3992,5 +3992,71 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
         }
+		
+		[Fact]
+        public void Test1()
+        {
+            var mainProject =
+@"<Project>
+  <PropertyGroup>
+    <ImportIt>true</ImportIt>
+  </PropertyGroup>
+
+  <Import Project=""{0}"" Condition=""'$(ImportIt)' == 'true'""/>
+
+  <Target Name=""Bazz"">
+    <Message Text=""Buzz"" Importance=""High"" />
+  </Target>
+
+</Project>";
+
+
+            var importProject =
+@"<Project>
+  <Target Name=""Foo"">
+    <Message Text=""Bar"" Importance=""High"" />
+  </Target>
+</Project>";
+
+            string importPath = Path.GetTempFileName();
+            File.WriteAllText(importPath, importProject);
+
+            var collection = new ProjectCollection();
+            var root = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), collection);
+
+            root.FullPath = Path.GetTempFileName();
+            root.Save();
+
+            var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
+            var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
+
+            var manager = new BuildManager();
+
+            var request = new BuildRequestData(instance, new[] { "Foo" });
+            var parameters = new BuildParameters()
+            {
+                DisableInProcNode = true,
+            };
+
+            manager.BeginBuild(parameters);
+            var submission = manager.PendBuildRequest(request);
+
+            var results = submission.Execute();
+            Assert.True(results.OverallResult == BuildResultCode.Success);
+
+            manager.EndBuild();
+            manager.ResetCaches();
+
+            project.SetProperty("ImportIt", "false");
+            project.Save();
+
+            manager.BeginBuild(parameters);
+            request = new BuildRequestData(instance, new[] { "Foo" }, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
+            submission = manager.PendBuildRequest(request);
+            results = submission.Execute();
+            Assert.True(results.OverallResult == BuildResultCode.Success);
+
+            manager.EndBuild();
+        }
     }
 }
