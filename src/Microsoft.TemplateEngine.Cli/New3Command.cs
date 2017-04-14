@@ -415,7 +415,7 @@ namespace Microsoft.TemplateEngine.Cli
         private string GetLanguageMismatchErrorMessage(string inputLanguage)
         {
             string inputFlagForm;
-            if (_commandInput.RemainingArguments.Contains("-lang"))
+            if (_commandInput.Tokens.Contains("-lang"))
             {
                 inputFlagForm = "-lang";
             }
@@ -499,7 +499,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     templateList = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
                 }
-                else if (_matchedTemplates != null && _matchedTemplates.Any(X => X.IsPartialMatch))
+                else if (_matchedTemplates != null && _matchedTemplates.Any(x => x.IsPartialMatch))
                 {
                     templateList = _matchedTemplates.Where(x => x.IsPartialMatch).Select(x => x.Info);
                 }

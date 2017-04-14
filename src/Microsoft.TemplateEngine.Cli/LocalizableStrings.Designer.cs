@@ -1116,7 +1116,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shows a subset of the available templates. Valid values are &quot;project&quot;, &quot;item&quot; or &quot;other&quot;..
+        ///   Looks up a localized string similar to Filters templates based on available types. Predefined values are &quot;project&quot;, &quot;item&quot; or &quot;other&quot;..
         /// </summary>
         public static string ShowsFilteredTemplates {
             get {
