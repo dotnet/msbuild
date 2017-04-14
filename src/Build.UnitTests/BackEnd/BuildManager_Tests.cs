@@ -269,9 +269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -284,9 +282,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -464,11 +460,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen 
         /// even if the msbuildforwardpropertiesfromchild is set to something.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#else
         [Fact]
-#endif
         public void MsBuildForwardAllPropertiesFromChildLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -686,9 +678,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -823,9 +813,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2057,9 +2045,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2101,11 +2087,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#else
         [Fact]
-#endif
         public void Regress239661_NodeUnavailable()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2134,9 +2116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2211,9 +2191,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2731,9 +2709,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2842,9 +2818,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping 
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -2983,9 +2957,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but 
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -3096,9 +3068,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still 
         /// exit as though the target that those targets run after has already run. 
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
@@ -3459,9 +3429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc 
         /// node.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#elif MONO
+#if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]
 #else
         [Fact]
@@ -3565,12 +3533,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This differs from transferring a project instance to an out-of-proc node because in this case the project
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
-#else
         [Fact]
         [Trait("Category", "mono-osx-failing")]
-#endif
         public void Regress265010()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
