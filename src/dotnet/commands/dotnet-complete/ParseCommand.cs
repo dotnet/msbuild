@@ -24,9 +24,10 @@ namespace Microsoft.DotNet.Cli
 
             Console.WriteLine(result.Diagram());
 
-            if (result.UnparsedTokens.Any()) {
+            if (result.UnparsedTokens.Any())
+            {
                 Console.WriteLine("Unparsed Tokens: ");
-                Console.WriteLine(string.Join(" ", (result.UnparsedTokens)));
+                Console.WriteLine(string.Join(" ", result.UnparsedTokens));
             }
 
             var optionValuesToBeForwarded = result.AppliedCommand()
