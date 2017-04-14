@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return this;
         }
 
-        public PublishCommand WithTargetManifest(string target)
+        public PublishCommand WithTargetManifest(string manifest)
         {
-            _targetManifests.Add( $"--target {target}");
+            _targetManifests.Add( $"--manifest {manifest}");
             return this;
         }
 
