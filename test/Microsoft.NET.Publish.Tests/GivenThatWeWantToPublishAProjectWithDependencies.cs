@@ -127,8 +127,10 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore();
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
-            string manifestFile1 = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
-            string manifestFile2 = Path.Combine(filterProjDir, "NewtonsoftMultipleVersions.xml");
+            string manifestFileName1 = "NewtonsoftFilterProfile.xml";
+            string manifestFileName2 = "NewtonsoftMultipleVersions.xml";
+            string manifestFile1 = Path.Combine(filterProjDir, manifestFileName1);
+            string manifestFile2 = Path.Combine(filterProjDir, manifestFileName2);
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
@@ -147,9 +149,11 @@ namespace Microsoft.NET.Publish.Tests
             });
 
            var runtimeConfig = ReadJson(System.IO.Path.Combine(publishDirectory.ToString(), $"{project}.runtimeconfig.json"));
-
            runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be("netcoreapp1.1");
-            
+
+            var depsJson = ReadJson(System.IO.Path.Combine(publishDirectory.ToString(), $"{project}.deps.json"));
+            depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
+
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
 

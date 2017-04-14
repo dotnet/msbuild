@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -25,6 +26,7 @@ namespace Microsoft.NET.Build.Tasks
         private IEnumerable<string> _privateAssetPackageIds;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
+        private Dictionary<PackageIdentity, StringBuilder> _filteredPackages;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
         {
@@ -70,6 +72,12 @@ namespace Microsoft.NET.Build.Tasks
         public DependencyContextBuilder WithReferenceAssembliesPath(string referenceAssembliesPath)
         {
             _referenceAssembliesPath = EnsureTrailingSlash(referenceAssembliesPath);
+            return this;
+        }
+
+        public DependencyContextBuilder WithPackagesThatWhereFiltered(Dictionary<PackageIdentity, StringBuilder> packagesThatWhereFiltered)
+        {
+            _filteredPackages = packagesThatWhereFiltered;
             return this;
         }
 
@@ -185,6 +193,41 @@ namespace Microsoft.NET.Build.Tasks
             return dependencies;
         }
 
+        private RuntimeLibrary CreateRuntimeLibrary(
+            string type,
+            string name,
+            string version,
+            string hash,
+            IReadOnlyList<RuntimeAssetGroup> runtimeAssemblyGroups,
+            IReadOnlyList<RuntimeAssetGroup> nativeLibraryGroups,
+            IEnumerable<ResourceAssembly> resourceAssemblies,
+            IEnumerable<Dependency> dependencies,
+            bool serviceable,
+            string path = null,
+            string hashPath = null)
+        {
+            string runtimeStoreManifestName = null;
+            var pkg = new PackageIdentity(name, NuGetVersion.Parse(version));
+            StringBuilder listofManifests = null;
+            if (_filteredPackages?.TryGetValue(pkg, out listofManifests) == true)
+            {
+                runtimeStoreManifestName = listofManifests.ToString();
+            }
+
+            return new RuntimeLibrary(
+                type,
+                name: name,
+                version: version,
+                hash: hash,
+                runtimeAssemblyGroups: runtimeAssemblyGroups,
+                nativeLibraryGroups: nativeLibraryGroups,
+                resourceAssemblies: resourceAssemblies,
+                dependencies: dependencies,
+                path: path,
+                hashPath: hashPath,
+                runtimeStoreManifestName: runtimeStoreManifestName,
+                serviceable: serviceable);
+        }
         private RuntimeLibrary GetProjectRuntimeLibrary(
             SingleProjectInfo projectInfo,
             ProjectContext projectContext,
@@ -194,7 +237,7 @@ namespace Microsoft.NET.Build.Tasks
 
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
 
-            return new RuntimeLibrary(
+            return CreateRuntimeLibrary(
                 type: "project",
                 name: projectInfo.Name,
                 version: projectInfo.Version,
@@ -280,7 +323,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (runtime)
             {
-                return new RuntimeLibrary(
+                return CreateRuntimeLibrary(
                     type.ToLowerInvariant(),
                     export.Name,
                     export.Version.ToString(),
@@ -429,7 +472,7 @@ namespace Microsoft.NET.Build.Tasks
         private IEnumerable<RuntimeLibrary> GetDirectReferenceRuntimeLibraries()
         {
             return _directReferences
-                ?.Select(r => new RuntimeLibrary(
+                ?.Select(r => CreateRuntimeLibrary(
                     type: "reference",
                     name: r.Name,
                     version: r.Version,

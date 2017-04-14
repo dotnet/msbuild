@@ -11,13 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!--
-    ============================================================
-                                        Publish
- 
-    The main publish entry point.
-    ============================================================
-    -->
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     
@@ -36,6 +29,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolvedFileToPublish>
   </ItemDefinitionGroup>
 
+  <ItemGroup>
+    <TargetManifestFileList Include="$(TargetManifestFiles.Split('%3B'))"/>
+  </ItemGroup>
+
+  <!--
+    ============================================================
+                                        Publish
+ 
+    The main publish entry point.
+    ============================================================
+    -->
   <Target Name="Publish"
           Condition="$(IsPublishable) == 'true'"
           DependsOnTargets="Build;
@@ -245,9 +249,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunResolvePublishAssemblies"
           DependsOnTargets="ComputePrivateAssetsPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary">
-    <ItemGroup>
-      <TargetManifestFileList Include="$(TargetManifestFiles.Split('%3B'))"/>
-    </ItemGroup>
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
@@ -484,6 +485,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
+                      TargetManifestFileList="@(TargetManifestFileList)"
                       IsSelfContained="$(SelfContained)" />
 
   </Target>

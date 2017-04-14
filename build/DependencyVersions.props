@@ -8,8 +8,8 @@
   
   <PropertyGroup>
     <MsBuildPackagesVersion>15.1.548</MsBuildPackagesVersion>
-    <DependencyModelVersion>1.0.3</DependencyModelVersion>
-    <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.0.0-preview1-001960</DependencyModelVersion>
+    <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
     <NuGetVersion>4.3.0-beta1-2418</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <NewtonsoftJsonSideBySideVersion>6.0.4</NewtonsoftJsonSideBySideVersion>
