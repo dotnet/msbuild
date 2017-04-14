@@ -10,7 +10,7 @@
   "precedence": "100",
   "identity": "Microsoft.AspNetCore.Mvc.ViewStart",
   "shortName": "viewstart",
-  "sourceName": "_ViewStart",
+  "sourceName": "ignoreme",
   "primaryOutputs": [
     {
       "path": "_ViewStart.cshtml"

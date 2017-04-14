@@ -10,7 +10,7 @@
   "precedence": "100",
   "identity": "Microsoft.AspNetCore.Mvc.ViewImports",
   "shortName": "viewimports",
-  "sourceName": "_ViewImports",
+  "sourceName": "ignoreme",
   "primaryOutputs": [
     {
       "path": "_ViewImports.cshtml"
