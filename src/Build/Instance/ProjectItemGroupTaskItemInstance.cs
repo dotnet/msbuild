@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -21,87 +22,87 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
-    public class ProjectItemGroupTaskItemInstance
+    public class ProjectItemGroupTaskItemInstance: INodePacketTranslatable
     {
         /// <summary>
         /// Item type, for example "Compile"
         /// </summary>
-        private readonly string _itemType;
+        private string _itemType;
 
         /// <summary>
         /// Unevaluated include
         /// </summary>
-        private readonly string _include;
+        private string _include;
 
         /// <summary>
         /// Unevaluated exclude
         /// </summary>
-        private readonly string _exclude;
+        private string _exclude;
 
         /// <summary>
         /// Unevaluated remove
         /// </summary>
-        private readonly string _remove;
+        private string _remove;
 
         /// <summary>
         /// The list of metadata to keep.
         /// </summary>
-        private readonly string _keepMetadata;
+        private string _keepMetadata;
 
         /// <summary>
         /// The list of metadata to remove.
         /// </summary>
-        private readonly string _removeMetadata;
+        private string _removeMetadata;
 
         /// <summary>
         /// True to remove duplicates during the add.
         /// </summary>
-        private readonly string _keepDuplicates;
+        private string _keepDuplicates;
 
         /// <summary>
         /// Unevaluated condition
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the include, if any
         /// </summary>
-        private readonly ElementLocation _includeLocation;
+        private ElementLocation _includeLocation;
 
         /// <summary>
         /// Location of the exclude, if any
         /// </summary>
-        private readonly ElementLocation _excludeLocation;
+        private ElementLocation _excludeLocation;
 
         /// <summary>
         /// Location of the remove, if any
         /// </summary>
-        private readonly ElementLocation _removeLocation;
+        private ElementLocation _removeLocation;
 
         /// <summary>
         /// Location of keepMetadata, if any
         /// </summary>
-        private readonly ElementLocation _keepMetadataLocation;
+        private ElementLocation _keepMetadataLocation;
 
         /// <summary>
         /// Location of removeMetadata, if any
         /// </summary>
-        private readonly ElementLocation _removeMetadataLocation;
+        private ElementLocation _removeMetadataLocation;
 
         /// <summary>
         /// Location of keepDuplicates, if any
         /// </summary>
-        private readonly ElementLocation _keepDuplicatesLocation;
+        private ElementLocation _keepDuplicatesLocation;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Ordered collection of unevaluated metadata.
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Execution
         /// walks through all metadata sequentially.
         /// Lazily created, as so many items have no metadata at all.
         /// </remarks>
-        private ICollection<ProjectItemGroupTaskMetadataInstance> _metadata;
+        private List<ProjectItemGroupTaskMetadataInstance> _metadata;
 
         /// <summary>
         /// Constructor called by the Evaluator.
@@ -138,7 +139,7 @@ namespace Microsoft.Build.Execution
             ElementLocation removeMetadataLocation,
             ElementLocation keepDuplicatesLocation,
             ElementLocation conditionLocation,
-            IEnumerable<ProjectItemGroupTaskMetadataInstance> metadata
+            List<ProjectItemGroupTaskMetadataInstance> metadata
             )
         {
             ErrorUtilities.VerifyThrowInternalNull(itemType, "itemType");
@@ -167,13 +168,12 @@ namespace Microsoft.Build.Execution
             _removeMetadataLocation = removeMetadataLocation;
             _keepDuplicatesLocation = keepDuplicatesLocation;
             _conditionLocation = conditionLocation;
+            _metadata = metadata;
+        }
 
-            if (metadata != null)
-            {
-                _metadata = (metadata is ICollection<ProjectItemGroupTaskMetadataInstance>) ?
-                    ((ICollection<ProjectItemGroupTaskMetadataInstance>)metadata) :
-                    new List<ProjectItemGroupTaskMetadataInstance>(metadata);
-            }
+        private ProjectItemGroupTaskItemInstance()
+        {
+            
         }
 
         /// <summary>
@@ -374,6 +374,35 @@ namespace Microsoft.Build.Execution
         internal ProjectItemGroupTaskItemInstance DeepClone()
         {
             return new ProjectItemGroupTaskItemInstance(this);
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _itemType);
+            translator.Translate(ref _include);
+            translator.Translate(ref _exclude);
+            translator.Translate(ref _remove);
+            translator.Translate(ref _keepMetadata);
+            translator.Translate(ref _removeMetadata);
+            translator.Translate(ref _keepDuplicates);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _includeLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _excludeLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _removeLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _keepMetadataLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _removeMetadataLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _keepDuplicatesLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _metadata, ProjectItemGroupTaskMetadataInstance.FactoryForDeserialization);
+        }
+
+        internal static ProjectItemGroupTaskItemInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new ProjectItemGroupTaskItemInstance();
+            ((INodePacketTranslatable)instance).Translate(translator);
+
+            return instance;
         }
     }
 }

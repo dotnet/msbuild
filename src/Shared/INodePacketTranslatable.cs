@@ -5,12 +5,14 @@
 // <summary>Interface for objects which can be serialized to packets for inter-node communication.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Delegate for users that want to translate an arbitrary structure that cannot implement <see cref="INodePacketTranslatable"/> (e.g. translating a complex collection)
+    /// </summary>
+    /// <param name="translator"></param>
+    internal delegate void Translator<T>(ref T obj, INodePacketTranslator translator);
+
     /// <summary>
     /// An interface representing an object which may be serialized by the node packet serializer.
     /// </summary>

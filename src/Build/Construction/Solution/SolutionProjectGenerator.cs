@@ -2338,7 +2338,7 @@ namespace Microsoft.Build.Construction
                                                             string.Empty,
                                                             initialTarget.Location,
                                                             initialTarget.Location,
-                                                            new ProjectPropertyGroupTaskPropertyInstance[] { property }));
+                                                            new List<ProjectPropertyGroupTaskPropertyInstance> { property }));
         }
 
         #endregion // Methods
