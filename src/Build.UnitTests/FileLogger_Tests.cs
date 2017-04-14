@@ -321,6 +321,28 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Logging to a file in a directory that doesn't exists
+        /// </summary>
+        [Fact]
+        public void BasicNoExistingDirectory()
+        {
+            string directory = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
+            string log = Path.Combine(directory, "build.log");
+            Assert.False(Directory.Exists(directory));
+            Assert.False(File.Exists(log));
+
+            try
+            {
+                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
+                VerifyFileContent(log, "message here");
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteDirectory(directory);
+            }
+        }
+
+        /// <summary>
         /// Gets a filename for a nonexistent temporary file.
         /// </summary>
         /// <returns></returns>
@@ -429,35 +451,6 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log"));
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile4.log"));
             }
-        }
-
-        [Fact]
-        public void DistributedLoggerBadPath()
-        {
-            Assert.Throws<LoggerException>(() =>
-            {
-                DistributedFileLogger fileLogger = new DistributedFileLogger();
-                fileLogger.NodeId = 0;
-                fileLogger.Initialize(new EventSourceSink());
-
-                fileLogger.NodeId = 1;
-                fileLogger.Parameters = "logfile="
-                                        + Path.Combine(
-                                                          Directory.GetCurrentDirectory(),
-                                                          Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar
-                                                          + "mylogfile.log");
-
-                fileLogger.Initialize(new EventSourceSink());
-                Assert.True(
-                              string.Compare(
-                                             fileLogger.InternalFilelogger.Parameters,
-                                             ";ShowCommandLine;logfile="
-                                             + Path.Combine(
-                                                            Directory.GetCurrentDirectory(),
-                                                            Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"),
-                                             StringComparison.OrdinalIgnoreCase) == 0);
-            }
-           );
         }
 
         [Fact]

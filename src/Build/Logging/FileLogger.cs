@@ -86,6 +86,22 @@ namespace Microsoft.Build.Logging
 
             try
             {
+                string logDirectory = null;
+                try
+                {
+                    logDirectory = Path.GetDirectoryName(Path.GetFullPath(_logFileName));
+                }
+                catch
+                {
+                    // Directory creation is best-effort; if finding its path fails don't create the directory
+                    // and possibly let OpenWrite() below report the failure
+                }
+
+                if (logDirectory != null)
+                {
+                    Directory.CreateDirectory(logDirectory);
+                }
+
                 _fileWriter = FileUtilities.OpenWrite(_logFileName, _append, _encoding);
 
                 _fileWriter.AutoFlush = _autoFlush;
