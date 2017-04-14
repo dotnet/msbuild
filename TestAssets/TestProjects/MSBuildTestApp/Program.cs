@@ -9,6 +9,10 @@ namespace MSBuildTestApp
     {
         public static void Main(string[] args)
         {
+            if (args.Length > 0)
+            {
+                Console.WriteLine("echo args:" + string.Join(";", args));
+            }
             Console.WriteLine("Hello World!");
         }
     }

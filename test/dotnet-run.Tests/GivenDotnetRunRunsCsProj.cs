@@ -181,5 +181,24 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should().Fail()
                     .And.HaveStdErrContaining("--framework");
         }
+
+        [Fact]
+        public void ItCanPassArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("-- foo bar baz")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
     }
 }

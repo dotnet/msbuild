@@ -15,14 +15,14 @@ namespace Microsoft.DotNet.Cli
                 LocalizableStrings.AppFullName,
                 treatUnmatchedTokensAsErrors: false,
                 arguments: Accept.ZeroOrMoreArguments()
-                                 .MaterializeAs(o => new RunCommand
-                                 {
-                                     Configuration = o.SingleArgumentOrDefault("--configuration"),
-                                     Framework = o.SingleArgumentOrDefault("--framework"),
-                                     NoBuild = o.HasOption("--no-build"),
-                                     Project = o.SingleArgumentOrDefault("--project"),
-                                     Args = o.Arguments
-                                 }),
+                    .MaterializeAs(o => new RunCommand
+                    (
+                        configuration: o.SingleArgumentOrDefault("--configuration"),
+                        framework: o.SingleArgumentOrDefault("--framework"),
+                        noBuild: o.HasOption("--no-build"),
+                        project: o.SingleArgumentOrDefault("--project"),
+                        args: o.Arguments
+                    )),
                 options: new[]
                 {
                     CommonOptions.HelpOption(),
