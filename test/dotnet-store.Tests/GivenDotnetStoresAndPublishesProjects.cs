@@ -72,6 +72,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         {
             var testAppName = "NewtonSoftDependentProject";
             var profileProjectName = "NewtonsoftProfile";
+            var targetManifestFileName = "NewtonsoftFilterProfile.xml";
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
@@ -80,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var testProjectDirectory = testInstance.Root.ToString();
             var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
-            var profileFilter = Path.Combine(profileProjectPath, "NewtonsoftFilterProfile.xml");
+            var profileFilter = Path.Combine(profileProjectPath, targetManifestFileName);
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -101,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Fail()
-                .And.HaveStdErrContaining("assembly specified in the dependencies manifest was not found -- package: 'Newtonsoft.Json',");
+                .And.HaveStdErrContaining($"Error: assembly specified in the dependencies manifest was not found probably due to missing runtime store associated with {targetManifestFileName} -- package: 'Newtonsoft.Json',");
         }
 
         [Fact]
