@@ -228,9 +228,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
 
+#if !MONO
             return GetCurrentCLRPermissions(targetZone);
+#else
+            throw new NotImplementedException();
+#endif
         }
 
+#if !MONO
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlElement GetCurrentCLRPermissions(string targetZone)
         {
@@ -264,6 +269,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             return null;
         }
+#endif
 
         private static XmlElement GetXmlElement(string targetZone, int majorVersion)
         {
@@ -365,6 +371,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return extensibleNamedPermissionSetRegistryInfo;
         }
 
+#if !MONO
         private static PermissionSet RemoveNonReferencedPermissions(string[] setToFilter, ITaskItem[] dependencies)
         {
             PermissionSet retSet = new PermissionSet(PermissionState.None);
@@ -399,6 +406,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             retSet = new ReadOnlyPermissionSet(retSetElement);
             return retSet;
         }
+#endif
 
         internal static bool ParseElementForAssemblyIdentification(SecurityElement el,
                                                                    out String className,
@@ -528,6 +536,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The converted permission set.</returns>
         public static PermissionSet XmlToPermissionSet(XmlElement element)
         {
+#if !MONO
             if (element == null)
                 return null;
 
@@ -547,6 +556,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return null;
             }
             return ps;
+#else
+            throw new NotImplementedException();
+#endif
         }
 
         /// <summary>

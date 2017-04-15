@@ -180,16 +180,25 @@ namespace Microsoft.Build.Tasks
 
         protected override bool OnManifestLoaded(Manifest manifest)
         {
+#if !MONO
             return BuildApplicationManifest(manifest as ApplicationManifest);
+#else
+            throw new NotImplementedException();
+#endif
         }
 
         protected override bool OnManifestResolved(Manifest manifest)
         {
+#if !MONO
             if (UseApplicationTrust)
                 return BuildResolvedSettings(manifest as ApplicationManifest);
             return true;
+#else
+            throw new NotImplementedException();
+#endif
         }
 
+#if !MONO
         private bool BuildApplicationManifest(ApplicationManifest manifest)
         {
             if (Dependencies != null)
@@ -258,6 +267,7 @@ namespace Microsoft.Build.Tasks
             Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateApplicationManifest.AddIsolatedComReferences t={0}", Environment.TickCount - t1));
             return success;
         }
+#endif
 
         private bool AddClickOnceFileAssociations(ApplicationManifest manifest)
         {
