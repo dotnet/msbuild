@@ -47,6 +47,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get { return _comClasses; }
         }
 
+#if !MONO
         internal bool ImportComComponent(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
             ComImporter importer = new ComImporter(path, outputMessages, outputDisplayName);
@@ -71,6 +72,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             return importer.Success;
         }
+#endif
 
         /// <summary>
         /// Specifies whether the file is a data file.
