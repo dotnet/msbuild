@@ -1,0 +1,57 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="..\..\dir.props" />
+
+	<ItemGroup>
+		<Facades Include="Microsoft.Build.Tasks">
+			<Version>v4.0</Version>
+			<Sources>AssemblyInfo.Tasks.%(Version).cs;TypeForwarders.Tasks.cs;Tasks.Hack.cs</Sources>
+			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
+			<References>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutputPath)\Microsoft.Build.Utilities.Core.dll</References>
+		</Facades>
+
+		<Facades Include="Microsoft.Build.Tasks">
+			<Version>v12.0</Version>
+			<Sources>AssemblyInfo.Tasks.%(Version).cs;TypeForwarders.Tasks.cs;Tasks.Hack.cs</Sources>
+			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
+			<References>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll;$(OutputPath)\Microsoft.Build.Utilities.Core.dll</References>
+		</Facades>
+
+		<Facades Include="Microsoft.Build.Utilities">
+			<Version>v4.0</Version>
+			<Sources>AssemblyInfo.Utilities.%(Version).cs;TypeForwarders.Utilities.cs</Sources>
+			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
+			<References/>
+		</Facades>
+
+		<Facades Include="Microsoft.Build.Utilities">
+			<Version>v12.0</Version>
+			<Sources>AssemblyInfo.Utilities.%(Version).cs;TypeForwarders.Utilities.cs</Sources>
+			<OutputAssembly>%(Identity).%(Version).dll</OutputAssembly>
+			<References/>
+		</Facades>
+	</ItemGroup>
+
+	<Target Name="Build"
+		Inputs="%(Facades.Sources)"
+		Outputs="$(DeploymentDir)\%(Facades.OutputAssembly)"
+		Condition="'$(MonoBuild)' == 'true'">
+
+		<!-- Disabled CS1701, as Microsoft.Build.Tasks.CodeAnalysis.dll from roslyn
+			 is built against Microsoft.Build.* 14.0 assemblies, are we are referencing
+			 15.1.x -->
+		<Csc
+			DisabledWarnings="1701"
+			OutputAssembly="$(DeploymentDir)\%(Facades.OutputAssembly)"
+			References="$(OutputPath)\%(Facades.Identity).Core.dll;%(References)"
+			Sources="%(Facades.Sources)"
+			TargetType="Library"
+			ToolExe="$(CscToolExe)"
+			ToolPath="$(CscToolPath)"
+			/>
+	</Target>
+
+	<Target Name="Test" DependsOnTargets="Build">
+		<MSBuild Projects="tests/build.csproj" Targets="Test" Properties="AsmVersion=v4.0" />
+        <MSBuild Projects="tests/build.csproj" Targets="Test" Properties="AsmVersion=v12.0" />
+	</Target>
+</Project>
