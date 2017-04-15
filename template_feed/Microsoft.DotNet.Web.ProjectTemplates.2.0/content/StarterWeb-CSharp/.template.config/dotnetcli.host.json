@@ -10,7 +10,15 @@
     },
     "AADInstance": {
       "longName": "aad-instance",
-      "shortName": "s"
+      "shortName": ""
+    },
+    "AAdB2CInstance": {
+      "longName": "aad-b2c-instance",
+      "shortName": ""
+    },
+    "SignUpSignInPolicyId": {
+      "longName": "susi-policy-id",
+      "shortName": "susi"
     },
     "OrgReadAccess": {
       "longName": "org-read-access",

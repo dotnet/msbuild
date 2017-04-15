@@ -89,6 +89,10 @@
           "description": "Individual authentication"
         },
         {
+          "choice": "IndividualB2C",
+          "description": "Individual authentication with Azure AD B2C"
+        },
+        {
           "choice": "SingleOrg",
           "description": "Organizational authentication for a single tenant"
         },
@@ -104,6 +108,19 @@
       "defaultValue": "None",
       "description": "The type of authentication to use"
     },
+    "AAdB2CInstance": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "https://login.microsoftonline.com/tfp/",
+      "replaces": "https:////login.microsoftonline.com/tfp/",
+      "description": "The Azure Active Directory B2C instance to connect to (use with IndividualB2C auth type)."
+    },
+    "SignUpSignInPolicyId": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "MySignUpSignInPolicyId",
+      "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
+    },
     "AADInstance": {
       "type": "parameter",
       "datatype": "string",
@@ -115,19 +132,19 @@
       "type": "parameter",
       "datatype": "string",
       "replaces": "11111111-1111-1111-11111111111111111",
-      "description": "The Client ID for this project (use with Single-org or Multi-org auth types)."
+      "description": "The Client ID for this project (use with Single-org, Multi-org, or IndividualB2C auth types)."
     },
     "Domain": {
       "type": "parameter",
       "datatype": "string",
       "replaces": "qualified.domain.name",
-      "description": "The domain owning the directory (use with Single-org auth)."
+      "description": "The domain for the directory tenant (use with Single-org or IndividualB2C auth types)."
     },
     "TenantId": {
       "type": "parameter",
       "datatype": "string",
       "replaces": "22222222-2222-2222-2222-222222222222",
-      "description": "The TenantId ID of the directory to connect to (use with Single-org auth)."
+      "description": "The TenantId ID of the directory to connect to (use with Single-org auth types)."
     },
     "OrgReadAccess": {
       "type": "parameter",
@@ -221,6 +238,10 @@
     "IndividualAuth": {
       "type": "computed",
       "value": "(auth == \"Individual\")"
+    },
+    "IndividualB2CAuth": {
+      "type": "computed",
+      "value": "(auth == \"IndividualB2C\")"
     },
     "NoAuth": {
       "type": "computed",
