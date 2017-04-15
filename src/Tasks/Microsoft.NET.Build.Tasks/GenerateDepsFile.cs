@@ -50,6 +50,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
 
         [Required]
+        public bool IncludeMainProject { get; set; }
+
+        [Required]
         public ITaskItem[] ReferencePaths { get; set; }
 
         [Required]
@@ -116,12 +119,17 @@ namespace Microsoft.NET.Build.Tasks
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
-            SingleProjectInfo mainProject = SingleProjectInfo.Create(
-                ProjectPath,
-                AssemblyName,
-                AssemblyExtension,
-                AssemblyVersion,
-                AssemblySatelliteAssemblies);
+            SingleProjectInfo mainProject = null;
+
+            if (IncludeMainProject)
+            {
+                mainProject = SingleProjectInfo.Create(
+                    ProjectPath,
+                    AssemblyName,
+                    AssemblyExtension,
+                    AssemblyVersion,
+                    AssemblySatelliteAssemblies);
+            }
 
             IEnumerable<ReferenceInfo> frameworkReferences =
                 ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
@@ -141,7 +149,8 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName,
                 IsSelfContained);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(projectContext)
+                .WithMainProject(mainProject)
                 .WithFrameworkReferences(frameworkReferences)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)

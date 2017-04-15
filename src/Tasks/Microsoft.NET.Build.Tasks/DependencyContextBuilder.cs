@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks
     internal class DependencyContextBuilder
     {
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
-        private readonly SingleProjectInfo _mainProjectInfo;
+        private SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
         private IEnumerable<ReferenceInfo> _frameworkReferences;
         private IEnumerable<ReferenceInfo> _directReferences;
@@ -28,13 +28,18 @@ namespace Microsoft.NET.Build.Tasks
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, StringBuilder> _filteredPackages;
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
+        public DependencyContextBuilder(ProjectContext projectContext)
         {
-            _mainProjectInfo = mainProjectInfo;
             _projectContext = projectContext;
 
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+        }
+
+        public DependencyContextBuilder WithMainProject(SingleProjectInfo mainProjectInfo)
+        {
+            _mainProjectInfo = mainProjectInfo;
+            return this;
         }
 
         public DependencyContextBuilder WithFrameworkReferences(IEnumerable<ReferenceInfo> frameworkReferences)
@@ -106,7 +111,7 @@ namespace Microsoft.NET.Build.Tasks
                 _projectContext,
                 dependencyLookup);
             IEnumerable<RuntimeLibrary> runtimeLibraries =
-                new[] { projectRuntimeLibrary }
+                (projectRuntimeLibrary == null ? Enumerable.Empty<RuntimeLibrary>() : new[] { projectRuntimeLibrary })
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
                 .Concat(GetDirectReferenceRuntimeLibraries());
 
@@ -118,7 +123,7 @@ namespace Microsoft.NET.Build.Tasks
                     _projectContext,
                     dependencyLookup);
                 compilationLibraries =
-                    new[] { projectCompilationLibrary }
+                    (projectCompilationLibrary == null ? Enumerable.Empty<CompilationLibrary>() : new[] { projectCompilationLibrary })
                     .Concat(GetFrameworkLibraries())
                     .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>())
                     .Concat(GetDirectReferenceCompilationLibraries());
@@ -233,6 +238,11 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
+            if (projectInfo == null)
+            {
+                return null;
+            }
+
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
 
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
@@ -254,6 +264,11 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
+            if (projectInfo == null)
+            {
+                return null;
+            }
+
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
 
             return new CompilationLibrary(
@@ -523,8 +538,16 @@ namespace Microsoft.NET.Build.Tasks
                 throw new BuildErrorException(Strings.CannotFindProjectInfo, library.Name);
             }
 
-            string mainProjectDirectory = Path.GetDirectoryName(_mainProjectInfo.ProjectPath);
-            string fullProjectPath = Path.GetFullPath(Path.Combine(mainProjectDirectory, projectPath));
+            string fullProjectPath;
+            if (_mainProjectInfo != null)
+            {
+                string mainProjectDirectory = Path.GetDirectoryName(_mainProjectInfo.ProjectPath);
+                fullProjectPath = Path.GetFullPath(Path.Combine(mainProjectDirectory, projectPath));
+            }
+            else
+            {
+                fullProjectPath = Path.GetFullPath(projectPath);
+            }
 
             SingleProjectInfo referenceProjectInfo = null;
             if (_referenceProjectInfos?.TryGetValue(fullProjectPath, out referenceProjectInfo) != true ||
