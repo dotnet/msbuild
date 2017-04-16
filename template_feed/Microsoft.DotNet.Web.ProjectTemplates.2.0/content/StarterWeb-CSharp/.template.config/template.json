@@ -1,7 +1,7 @@
 {
   "author": "Microsoft",
   "classifications": ["Web", "MVC"],
-  "name": "ASP.NET Core Web App",
+  "name": "ASP.NET Core Web App (Model-View-Controller)",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.Mvc",
   "precedence": "2000",
