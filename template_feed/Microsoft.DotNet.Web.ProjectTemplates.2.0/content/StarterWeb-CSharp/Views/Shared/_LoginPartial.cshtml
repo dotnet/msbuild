@@ -1,22 +1,22 @@
-﻿@*#if (IndividualAuth) *@
+﻿@*#if (IndividualLocalAuth) *@
 @using Microsoft.AspNetCore.Identity
 @using Company.WebApplication1.Models
 @*#else
 @using System.Security.Principal
 #endif *@
 
-@*#if (IndividualAuth) *@
+@*#if (IndividualLocalAuth) *@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @*#endif *@
-@*#if (IndividualAuth) *@
+@*#if (IndividualLocalAuth) *@
 
 @if (SignInManager.IsSignedIn(User))
 @*#else
 @if (User.Identity.IsAuthenticated)
 #endif *@
 {
-@*#if (IndividualAuth) *@
+@*#if (IndividualLocalAuth) *@
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
@@ -37,7 +37,7 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-@*#if (IndividualAuth) *@
+@*#if (IndividualLocalAuth) *@
         <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
         <li><a asp-area="" asp-controller="Account" asp-action="Login">Log in</a></li>
 @*#else

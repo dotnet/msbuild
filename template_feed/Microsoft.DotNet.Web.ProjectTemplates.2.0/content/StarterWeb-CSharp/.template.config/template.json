@@ -28,13 +28,13 @@
           ]
         },
         {
-          "condition": "(UseLocalDB || !IndividualAuth)",
+          "condition": "(UseLocalDB || !IndividualLocalAuth)",
           "exclude": [
             "*.db"
           ]
         },
         {
-          "condition": "(!IndividualAuth)",
+          "condition": "(!IndividualLocalAuth)",
           "exclude": [
             "Controllers/ManageController.cs",
             "Views/Account/ConfirmEmail.cshtml",
@@ -57,7 +57,7 @@
             "Views/Manage/VerifyPhoneNumber.cshtml",
             "Services/**",
             "Data/**",
-            "Models/**",
+            "Models/**"
           ]
         },
         {
@@ -67,9 +67,16 @@
           ]
         },
         {
-          "condition": "(IndividualAuth)",
+          "condition": "(IndividualLocalAuth)",
           "exclude": [
             "Views/Account/SignedOut.cshtml"
+          ]
+        },
+        {
+          "condition": "(!IndividualB2CAuth)",
+          "exclude": [
+            "OpenIdConnectOptionsSetup.cs",
+            "AzureAdB2COptions.cs"
           ]
         }
       ]
@@ -118,8 +125,23 @@
     "SignUpSignInPolicyId": {
       "type": "parameter",
       "datatype": "string",
+      "defaultValue": "",
       "replaces": "MySignUpSignInPolicyId",
       "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
+    },
+    "ResetPasswordPolicyId": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "",
+      "replaces": "MyResetPasswordPolicyId",
+      "description": "The reset password policy ID for this project (use with IndividualB2C auth type)."
+    },
+    "EditProfilePolicyId": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "",
+      "replaces": "MyEditProfilePolicyId",
+      "description": "The edit profile policy ID for this project (use with IndividualB2C auth type)."
     },
     "AADInstance": {
       "type": "parameter",
@@ -235,9 +257,13 @@
       "type": "computed",
       "value": "(auth == \"SingleOrg\")"
     },
-    "IndividualAuth": {
+    "IndividualLocalAuth": {
       "type": "computed",
       "value": "(auth == \"Individual\")"
+    },
+    "IndividualAuth": {
+      "type": "computed",
+      "value": "(auth == \"Individual\" || auth == \"IndividualB2C\")"
     },
     "IndividualB2CAuth": {
       "type": "computed",
