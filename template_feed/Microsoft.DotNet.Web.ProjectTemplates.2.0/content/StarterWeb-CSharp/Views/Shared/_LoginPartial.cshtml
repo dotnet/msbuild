@@ -27,7 +27,12 @@
             </li>
         </ul>
     </form>
-@*#else
+@*#elseif (IndividualB2CAuth)
+    <ul class="nav navbar-nav navbar-right">
+        <li><a asp-area="" asp-controller="Account" asp-action="EditProfile">Hello @User.Identity.Name!</a></li>
+        <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
+    </ul>
+#else
     <ul class="nav navbar-nav navbar-right">
         <li class="navbar-text">Hello @User.Identity.Name!</li>
         <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
