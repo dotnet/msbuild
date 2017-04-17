@@ -78,6 +78,24 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .Should().Pass();
         }
 
+        [RequiresSpecificFrameworkFact("netcoreapp1.0")] // https://github.com/dotnet/cli/issues/6087
+        public void ItRunsABackwardsVersionedTool()
+        {
+            var testInstance = TestAssets.Get("11TestAppWith10CLIToolReferences")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("outputsframeworkversion-netcoreapp1.0")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("netcoreapp1.0");
+        }
 
         void ChangeProjectTargetFramework(FileInfo projectFile, string target)
         {

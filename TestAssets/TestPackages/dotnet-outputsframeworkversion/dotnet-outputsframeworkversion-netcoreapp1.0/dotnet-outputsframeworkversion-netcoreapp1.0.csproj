@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <AssemblyName>dotnet-outputsframeworkversion-netcoreapp1.0</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
+  </ItemGroup> 
+</Project>
