@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 #endif
-#if (IndividualB2CAuth)
+#if (IndividualAuth)
 using Microsoft.Extensions.Options;
 #endif
 #if (IndividualLocalAuth)
