@@ -2,15 +2,22 @@
 @using Microsoft.AspNetCore.Identity
 @using Company.WebApplication1.Models
 @*#else
+@*#if (IndividualB2CAuth)
+@using Microsoft.Extensions.Options
+#endif
 @using System.Security.Principal
 #endif *@
 
 @*#if (IndividualLocalAuth) *@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-@*#endif *@
-@*#if (IndividualLocalAuth) *@
 
+@*#endif *@
+@*#if (IndividualB2CAuth)
+@inject IOptions<AzureAdB2COptions> AzureAdB2COptions
+
+#endif *@
+@*#if (IndividualLocalAuth) *@
 @if (SignInManager.IsSignedIn(User))
 @*#else
 @if (User.Identity.IsAuthenticated)
@@ -29,7 +36,14 @@
     </form>
 @*#elseif (IndividualB2CAuth)
     <ul class="nav navbar-nav navbar-right">
-        <li><a asp-area="" asp-controller="Account" asp-action="EditProfile">Hello @User.Identity.Name!</a></li>
+        @if (!string.IsNullOrEmpty(AzureAdB2COptions.Value.EditProfilePolicyId))
+        {
+            <li><a asp-area="" asp-controller="Account" asp-action="EditProfile">Hello @User.Identity.Name!</a></li>
+        }
+        else
+        {
+            <li class="navbar-text">Hello @User.Identity.Name!</li>
+        }
         <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
     </ul>
 #else
