@@ -10,7 +10,23 @@
     },
     "AADInstance": {
       "longName": "aad-instance",
-      "shortName": "s"
+      "shortName": ""
+    },
+    "AAdB2CInstance": {
+      "longName": "aad-b2c-instance",
+      "shortName": ""
+    },
+    "SignUpSignInPolicyId": {
+      "longName": "susi-policy-id",
+      "shortName": "ssp"
+    },
+    "ResetPasswordPolicyId": {
+      "longName": "reset-password-policy-id",
+      "shortName": "rp"
+    },
+    "EditProfilePolicyId": {
+      "longName": "edit-profile-policy-id",
+      "shortName": "ep"
     },
     "OrgReadAccess": {
       "longName": "org-read-access",

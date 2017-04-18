@@ -23,7 +23,7 @@ textarea {
     line-height: 1.4;
 }
 
-/*#if (IndividualAuth)
+/*#if (IndividualLocalAuth)
 /* buttons and links extension to use brackets: [ click me ] */
 .btn-bracketed::before {
     display: inline-block;

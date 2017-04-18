@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using System.Security.Claims;
 #endif
 using System.Threading.Tasks;
-#if (OrganizationalAuth)
+#if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Authentication;
+using Microsoft.AspNetCore.Http.Features.Authentication;
 #endif
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 #endif
 using Microsoft.AspNetCore.Mvc;
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+#endif
+#if (IndividualAuth)
 using Microsoft.Extensions.Options;
+#endif
+#if (IndividualLocalAuth)
 using Company.WebApplication1.Models;
 using Company.WebApplication1.Models.AccountViewModels;
 using Company.WebApplication1.Services;
@@ -26,12 +31,21 @@ using Company.WebApplication1.Services;
 
 namespace Company.WebApplication1.Controllers
 {
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
     [Authorize]
 #endif
     public class AccountController : Controller
     {
-#if (OrganizationalAuth)
+#if (IndividualB2CAuth)
+        public AccountController(IOptions<AzureAdB2COptions> b2cOptions)
+        {
+            AzureAdB2COptions = b2cOptions.Value;
+        }
+
+        public AzureAdB2COptions AzureAdB2COptions { get; set; }
+
+#endif
+#if (OrganizationalAuth || IndividualB2CAuth)
         //
         // GET: /Account/SignIn
         [HttpGet]
@@ -40,7 +54,26 @@ namespace Company.WebApplication1.Controllers
             return Challenge(
                 new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectDefaults.AuthenticationScheme);
         }
+    
+    #if (IndividualB2CAuth)
+        [HttpGet]
+        public IActionResult ResetPassword()
+        {
+            var properties = new AuthenticationProperties() { RedirectUri = "/" };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = AzureAdB2COptions.ResetPasswordPolicyId;
+            return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
+        }
 
+        [HttpGet]
+        public async Task EditProfile()
+        {
+            var properties = new AuthenticationProperties() { RedirectUri = "/" };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = AzureAdB2COptions.EditProfilePolicyId;
+            await HttpContext.Authentication.ChallengeAsync(
+                OpenIdConnectDefaults.AuthenticationScheme, properties, ChallengeBehavior.Unauthorized);
+        }
+        
+    #endif
         //
         // GET: /Account/SignOut
         [HttpGet]
@@ -65,7 +98,7 @@ namespace Company.WebApplication1.Controllers
             return View();
         }
 #endif
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
@@ -499,7 +532,7 @@ namespace Company.WebApplication1.Controllers
         {
             return View();
         }
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 
         #region Helpers
 

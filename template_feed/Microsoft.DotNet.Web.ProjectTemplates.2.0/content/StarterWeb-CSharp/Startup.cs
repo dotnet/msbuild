@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if (OrganizationalAuth)
+#if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Cookies;
 #endif
 #if (MultiOrgAuth)
@@ -10,19 +10,22 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+#if (IndividualB2CAuth)
+using Microsoft.Extensions.Options;
+#endif
 #if (OrganizationalAuth && OrgReadAccess)
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 #endif
 #if (MultiOrgAuth)
 using Microsoft.IdentityModel.Tokens;
 #endif
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using Company.WebApplication1.Data;
 using Company.WebApplication1.Models;
 using Company.WebApplication1.Services;
@@ -43,7 +46,7 @@ namespace Company.WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
             services.AddDbContext<ApplicationDbContext>(options =>
   #if (UseLocalDB)
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -57,15 +60,21 @@ namespace Company.WebApplication1
 
 #endif
             services.AddMvc();
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
-#elseif (OrganizationalAuth)
+#endif
+#if (OrganizationalAuth || IndividualB2CAuth)
 
             services.AddAuthentication(
-                SharedOptions => SharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+                sharedOptions => sharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+#endif
+#if (IndividualB2CAuth)
+
+            services.Configure<AzureAdB2COptions>(Configuration.GetSection("Authentication:AzureAdB2C"));
+            services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OpenIdConnectOptionsSetup>();
 #endif
         }
 
@@ -75,7 +84,7 @@ namespace Company.WebApplication1
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
                 app.UseDatabaseErrorPage();
 #endif
                 app.UseBrowserLink();
@@ -87,24 +96,29 @@ namespace Company.WebApplication1
 
             app.UseStaticFiles();
 
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
-#elseif (OrganizationalAuth)
+#elseif (OrganizationalAuth || IndividualB2CAuth)
             app.UseCookieAuthentication();
 
+    #if (OrganizationalAuth)
             app.UseOpenIdConnectAuthentication(new OpenIdConnectOptions
             {
                 ClientId = Configuration["Authentication:AzureAd:ClientId"],
-    #if (OrgReadAccess)
+        #if (OrgReadAccess)
                 ClientSecret = Configuration["Authentication:AzureAd:ClientSecret"],
-    #endif
-    #if (MultiOrgAuth)
+        #endif
+        #if (MultiOrgAuth)
                 Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common",
-    #elseif (SingleOrgAuth)
+        #elseif (SingleOrgAuth)
                 Authority = Configuration["Authentication:AzureAd:AADInstance"] + Configuration["Authentication:AzureAd:TenantId"],
+        #endif
+    #else
+            app.UseOpenIdConnectAuthentication();
+            
     #endif
 #endif
 #if (MultiOrgAuth)

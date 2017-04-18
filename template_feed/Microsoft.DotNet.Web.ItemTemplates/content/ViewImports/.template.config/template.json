@@ -1,0 +1,27 @@
+{
+  "author": "Microsoft",
+  "classifications": [
+    "Web",
+    "ASP.NET"
+  ],
+  "name": "MVC ViewImports",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "Microsoft.AspNetCore.Mvc.ViewImports",
+  "precedence": "100",
+  "identity": "Microsoft.AspNetCore.Mvc.ViewImports",
+  "shortName": "viewimports",
+  "sourceName": "ignoreme",
+  "primaryOutputs": [
+    {
+      "path": "_ViewImports.cshtml"
+    }
+  ],
+  "defaultName": "_ViewImports",
+  "symbols": {
+    "namespace": {
+      "description": "namespace for the generated code",
+      "replaces": "MyApp.Namespace",
+      "type": "parameter"
+    }
+  }
+}
