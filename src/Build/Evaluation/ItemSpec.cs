@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.EscapingStringExtensions;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -30,6 +32,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The expander needs to have a default item factory set.
         /// </summary>
+        // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
         public Expander<P, I> Expander { get; set; }
 
         /// <summary>
@@ -155,7 +158,6 @@ namespace Microsoft.Build.Evaluation
         /// Return true if the given <paramref name="item"/> matches this itemspec
         /// </summary>
         /// <param name="item">The item to attempt to find a match for.</param>
-        /// <returns></returns>
         public bool MatchesItem(I item)
         {
             return Fragments.Any(f => f.MatchCount(item.EvaluatedInclude) > 0);
@@ -186,8 +188,43 @@ namespace Microsoft.Build.Evaluation
 
             return result;
         }
+
+        /// <summary>
+        /// Return an MSBuildGlob that represents this ItemSpec.
+        /// </summary>
+        public IMSBuildGlob ToMSBuildGlob()
+        {
+            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
+        }
+
+        /// <summary>
+        ///     Returns all the fragment strings that represent it.
+        ///     "1;*;2;@(foo)" gets returned as ["1", "2", "*", "a", "b"], given that @(foo)=["a", "b"]
+        /// 
+        ///     Order is not preserved. Globs are not expanded. Item expressions get replaced with their referring item instances.
+        /// </summary>
+        public IEnumerable<string> FlattenFragmentsAsStrings()
+        {
+            foreach (var valueString in Fragments.OfType<ValueFragment>().Select(v => v.ItemSpecFragment))
+            {
+                yield return valueString;
+            }
+
+            foreach (var globString in Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment))
+            {
+                yield return globString;
+            }
+
+            foreach (
+                var referencedItemString in
+                Fragments.OfType<ItemExpressionFragment<P, I>>().SelectMany(f => f.ReferencedItems).Select(v => v.ItemSpecFragment)
+            )
+            {
+                yield return referencedItemString;
+            }
+        }
 		
-		public override string ToString()
+        public override string ToString()
         {
             return ItemSpecString;
         }
@@ -209,6 +246,9 @@ namespace Microsoft.Build.Evaluation
         /// Function that checks if a given string matches the <see cref="ItemSpecFragment"/>
         /// </summary>
         protected Lazy<Func<string, bool>> FileMatcher { get; }
+
+        private readonly Lazy<IMSBuildGlob> _msbuildGlob;
+        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob.Value;
 
         protected ItemFragment(string itemSpecFragment, string projectPath)
             : this(
@@ -234,12 +274,24 @@ namespace Microsoft.Build.Evaluation
             ItemSpecFragment = itemSpecFragment;
             ProjectPath = projectPath;
             FileMatcher = fileMatcher;
+
+            _msbuildGlob = new Lazy<IMSBuildGlob>(CreateMsBuildGlob);
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
             return FileMatcher.Value(itemToMatch) ? 1 : 0;
+        }
+
+        public virtual IMSBuildGlob ToMSBuildGlob()
+        {
+            return MsBuildGlob;
+        }
+
+        protected virtual IMSBuildGlob CreateMsBuildGlob()
+        {
+            return Globbing.MSBuildGlob.Parse(ProjectPath, ItemSpecFragment.Unescape());
         }
     }
 
@@ -266,10 +318,33 @@ namespace Microsoft.Build.Evaluation
         public ExpressionShredder.ItemExpressionCapture Capture { get; }
 
         private readonly ItemSpec<P, I> _containingItemSpec;
-        private IList<ValueFragment> _itemValueFragments;
         private Expander<P, I> _expander;
 
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec) 
+        private IList<ValueFragment> _referencedItems;
+        public IList<ValueFragment> ReferencedItems
+        {
+            get
+            {
+                InitReferencedItemsIfNecessary();
+                return _referencedItems;
+            }
+        }
+
+        private IMSBuildGlob _msbuildGlob;
+        protected override IMSBuildGlob MsBuildGlob
+        {
+            get
+            {
+                if (InitReferencedItemsIfNecessary() || _msbuildGlob == null)
+                {
+                    _msbuildGlob = CreateMsBuildGlob();
+                }
+
+                return _msbuildGlob;
+            }
+        }
+
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec)
             : base(itemSpecFragment, containingItemSpec.ItemSpecLocation.File)
         {
             Capture = capture;
@@ -280,19 +355,43 @@ namespace Microsoft.Build.Evaluation
 
         public override int MatchCount(string itemToMatch)
         {
+
+            return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
+        }
+
+        public override IMSBuildGlob ToMSBuildGlob()
+        {
+            return MsBuildGlob;
+        }
+
+        protected override IMSBuildGlob CreateMsBuildGlob()
+        {
+            return new CompositeGlob(ReferencedItems.Select(i => i.ToMSBuildGlob()));
+        }
+
+        private bool InitReferencedItemsIfNecessary()
+        {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
-            if (_itemValueFragments == null || _expander != _containingItemSpec.Expander)
+            if (_referencedItems == null || _expander != _containingItemSpec.Expander)
             {
                 _expander = _containingItemSpec.Expander;
 
                 IList<Tuple<string, I>> itemsFromCapture;
                 bool throwaway;
-                _expander.ExpandExpressionCapture(Capture, _containingItemSpec.ItemSpecLocation, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, out itemsFromCapture);
-                _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+                _expander.ExpandExpressionCapture(
+                    Capture,
+                    _containingItemSpec.ItemSpecLocation,
+                    ExpanderOptions.ExpandItems,
+                    false /* do not include null expansion results */,
+                    out throwaway,
+                    out itemsFromCapture);
+                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
+
+                return true;
             }
 
-            return _itemValueFragments.Count(v => v.MatchCount(itemToMatch) > 0);
+            return false;
         }
     }
 }

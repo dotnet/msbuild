@@ -4,6 +4,7 @@
 
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Microsoft.Build.Globbing
@@ -21,17 +22,23 @@ namespace Microsoft.Build.Globbing
         /// <summary>
         ///     Constructor
         /// </summary>
-        /// <param name="globs">Children globs</param>
+        /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
         {
-            Globs = globs;
+            // ImmutableArray also does this check, but copied it here just in case they remove it
+            if (globs is ImmutableArray<IMSBuildGlob>)
+            {
+                Globs = (ImmutableArray<IMSBuildGlob>)globs;
+            }
+
+            Globs = globs.ToImmutableArray();
         }
 
         /// <summary>
         ///     Constructor
         /// </summary>
-        /// <param name="globs">children globs</param>
-        public CompositeGlob(params IMSBuildGlob[] globs) : this(globs.AsEnumerable())
+        /// <param name="globs">Children globs. Input gets shallow cloned</param>
+        public CompositeGlob(params IMSBuildGlob[] globs) : this(globs.ToImmutableArray())
         {}
 
         /// <inheritdoc />
