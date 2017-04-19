@@ -8,22 +8,14 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public interface IPackagedCommandSpecFactory
     {
-        CommandSpec CreateCommandSpecFromLibrary(
-            LockFileTargetLibrary toolLibrary,
-            string commandName,
-            IEnumerable<string> commandArguments,
-            IEnumerable<string> allowedExtensions,
-            string nugetPackagesRoot,
-            CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath,
-            string runtimeConfigPath);
+        //  Code review TODO: Is it OK to make breaking changes to the CLI Utils API surface?
 
         CommandSpec CreateCommandSpecFromLibrary(
             LockFileTargetLibrary toolLibrary,
             string commandName,
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
-            IEnumerable<string> packageFolders,
+            LockFile lockFile,
             CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath);

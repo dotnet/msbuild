@@ -27,28 +27,7 @@ namespace Microsoft.DotNet.Cli.Utils
             string commandName,
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
-            string nugetPackagesRoot,
-            CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath,
-            string runtimeConfigPath)
-        {
-            return CreateCommandSpecFromLibrary(
-                toolLibrary,
-                commandName,
-                commandArguments,
-                allowedExtensions,
-                new List<string> { nugetPackagesRoot },
-                commandResolutionStrategy,
-                depsFilePath,
-                runtimeConfigPath);
-        }
-
-        public CommandSpec CreateCommandSpecFromLibrary(
-            LockFileTargetLibrary toolLibrary,
-            string commandName,
-            IEnumerable<string> commandArguments,
-            IEnumerable<string> allowedExtensions,
-            IEnumerable<string> packageFolders,
+            LockFile lockFile,
             CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath)
@@ -72,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var commandPath = GetCommandFilePath(packageFolders, toolLibrary, toolAssembly);
+            var commandPath = GetCommandFilePath(lockFile, toolLibrary, toolAssembly);
 
             if (!File.Exists(commandPath))
             {
@@ -89,21 +68,16 @@ namespace Microsoft.DotNet.Cli.Utils
                 commandArguments,
                 depsFilePath,
                 commandResolutionStrategy,
-                packageFolders,
+                lockFile.GetNormalizedPackageFolders(),
                 runtimeConfigPath);
         }
 
         private string GetCommandFilePath(
-            IEnumerable<string> packageFolders,
+            LockFile lockFile,
             LockFileTargetLibrary toolLibrary,
             LockFileItem runtimeAssembly)
         {
-            var packageFoldersCount = packageFolders.Count();
-            var userPackageFolder = packageFoldersCount == 1 ? string.Empty : packageFolders.First();
-            var fallbackPackageFolders = packageFoldersCount > 1 ? packageFolders.Skip(1) : packageFolders;
-
-            var packageDirectory = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders)
-                .GetPackageDirectory(toolLibrary.Name, toolLibrary.Version);
+            var packageDirectory = lockFile.GetPackageDirectory(toolLibrary);
 
             if (packageDirectory == null)
             {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools
 {

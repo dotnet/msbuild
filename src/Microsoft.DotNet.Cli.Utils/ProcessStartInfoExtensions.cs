@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class ProcessStartInfoExtensions
     {

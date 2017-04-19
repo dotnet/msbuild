@@ -170,10 +170,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolLibraryRange,
                 toolPackageFramework,
                 toolLockFile,
-                depsFileRoot);
-
-            var packageFolders = toolLockFile.PackageFolders.Select(p =>
-                PathUtility.EnsureNoTrailingDirectorySeparator(p.Path));
+                depsFileRoot,
+                project.ToolDepsJsonGeneratorProject);
 
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.AttemptingToCreateCommandSpec,
@@ -184,7 +182,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandName,
                     args,
                     _allowedCommandExtensions,
-                    packageFolders,
+                    toolLockFile,
                     s_commandResolutionStrategy,
                     depsFilePath,
                     null);
@@ -281,7 +279,8 @@ namespace Microsoft.DotNet.Cli.Utils
             SingleProjectInfo toolLibrary,
             NuGetFramework framework,
             LockFile toolLockFile,
-            string depsPathRoot)
+            string depsPathRoot,
+            string toolDepsJsonGeneratorProject)
         {
             var depsJsonPath = Path.Combine(
                 depsPathRoot,
@@ -292,7 +291,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 ProjectToolsCommandResolverName,
                 depsJsonPath));
 
-            EnsureToolJsonDepsFileExists(toolLockFile, framework, depsJsonPath, toolLibrary);
+            EnsureToolJsonDepsFileExists(toolLockFile, framework, depsJsonPath, toolLibrary, toolDepsJsonGeneratorProject);
 
             return depsJsonPath;
         }
@@ -301,11 +300,12 @@ namespace Microsoft.DotNet.Cli.Utils
             LockFile toolLockFile,
             NuGetFramework framework,
             string depsPath,
-            SingleProjectInfo toolLibrary)
+            SingleProjectInfo toolLibrary,
+            string toolDepsJsonGeneratorProject)
         {
             if (!File.Exists(depsPath))
             {
-                GenerateDepsJsonFile(toolLockFile, framework, depsPath, toolLibrary);
+                GenerateDepsJsonFile(toolLockFile, framework, depsPath, toolLibrary, toolDepsJsonGeneratorProject);
             }
         }
 
@@ -313,7 +313,8 @@ namespace Microsoft.DotNet.Cli.Utils
             LockFile toolLockFile,
             NuGetFramework framework,
             string depsPath,
-            SingleProjectInfo toolLibrary)
+            SingleProjectInfo toolLibrary,
+            string toolDepsJsonGeneratorProject)
         {
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.GeneratingDepsJson,
@@ -323,11 +324,52 @@ namespace Microsoft.DotNet.Cli.Utils
                 .Build(toolLibrary, null, toolLockFile, framework, null);
 
             var tempDepsFile = Path.GetTempFileName();
-            using (var fileStream = File.Open(tempDepsFile, FileMode.Open, FileAccess.Write))
-            {
-                var dependencyContextWriter = new DependencyContextWriter();
 
-                dependencyContextWriter.Write(dependencyContext, fileStream);
+            var args = new List<string>();
+
+            args.Add(toolDepsJsonGeneratorProject);
+            args.Add($"/p:ProjectAssetsFile=\"{toolLockFile.Path}\"");
+            args.Add($"/p:ToolName={toolLibrary.Name}");
+            args.Add($"/p:ProjectDepsFilePath={tempDepsFile}");
+
+
+            //  Look for the .props file in the Microsoft.NETCore.App package, until NuGet
+            //  generates .props and .targets files for tool restores (https://github.com/NuGet/Home/issues/5037)
+            var platformLibrary = toolLockFile.Targets
+                .FirstOrDefault(t => framework == t.TargetFramework)
+                ?.GetPlatformLibrary();
+
+            if (platformLibrary != null)
+            {
+                string buildRelativePath = platformLibrary.Build.FirstOrDefault()?.Path;
+
+                var platformLibraryPath = toolLockFile.GetPackageDirectory(platformLibrary);
+
+                if (platformLibraryPath != null && buildRelativePath != null)
+                {
+                    //  Get rid of "_._" filename
+                    buildRelativePath = Path.GetDirectoryName(buildRelativePath);
+
+                    string platformLibraryBuildFolderPath = Path.Combine(platformLibraryPath, buildRelativePath);
+                    var platformLibraryPropsFile = Directory.GetFiles(platformLibraryBuildFolderPath, "*.props").FirstOrDefault();
+
+                    if (platformLibraryPropsFile != null)
+                    {
+                        args.Add($"/p:AdditionalImport={platformLibraryPropsFile}");
+                    }
+                }
+            }
+
+            //  Delete temporary file created by Path.GetTempFileName(), otherwise the GenerateBuildDependencyFile target
+            //  will think the deps file is up-to-date and skip executing
+            File.Delete(tempDepsFile);
+
+            var result = new MSBuildForwardingAppWithoutLogging(args).Execute();
+
+            if (result != 0)
+            {
+                //  TODO: Can / should we show the MSBuild output if there is a failure?
+                throw new GracefulException(string.Format(LocalizableStrings.UnableToGenerateDepsJson, toolDepsJsonGeneratorProject));
             }
 
             try
