@@ -13,9 +13,7 @@ namespace Company.WebApplication1
         public string AzureAdB2CInstance { get; set; }
         public string Domain { get; set; }
         public string SignUpSignInPolicyId { get; set; }
-        public string ResetPasswordPolicyId { get; set; }
         public string EditProfilePolicyId { get; set; }
-
         public string DefaultPolicy => SignUpSignInPolicyId;
         public string Authority => $"{AzureAdB2CInstance}/{Domain}/{DefaultPolicy}/v2.0";
     }

@@ -73,12 +73,17 @@
           ]
         },
         {
+          "condition": "(!OrganizationalAuth && !IndividualB2CAuth)",
+          "exclude": "OpenIdConnectOptionsSetup.cs"
+        },
+        {
           "condition": "(!IndividualB2CAuth)",
-          "exclude": [
-            "OpenIdConnectOptionsSetup.cs",
-            "AzureAdB2COptions.cs"
-          ]
-        }
+          "exclude": "AzureAdB2COptions.cs"
+        },
+        {
+          "condition": "(!OrganizationalAuth)",
+          "exclude": "AzureAdOptions.cs"
+        },
       ]
     }
   ],
@@ -128,13 +133,6 @@
       "defaultValue": "",
       "replaces": "MySignUpSignInPolicyId",
       "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
-    },
-    "ResetPasswordPolicyId": {
-      "type": "parameter",
-      "datatype": "string",
-      "defaultValue": "",
-      "replaces": "MyResetPasswordPolicyId",
-      "description": "The reset password policy ID for this project (use with IndividualB2C auth type)."
     },
     "EditProfilePolicyId": {
       "type": "parameter",

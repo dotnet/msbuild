@@ -13,21 +13,71 @@ namespace Company.WebApplication1
 {
     public class OpenIdConnectOptionsSetup : IConfigureOptions<OpenIdConnectOptions>
     {
+#if (IndividualB2CAuth)
         public OpenIdConnectOptionsSetup(IOptions<AzureAdB2COptions> b2cOptions)
+#else
+        public OpenIdConnectOptionsSetup(IOptions<AzureAdOptions> b2cOptions)
+#endif
         {
-            AzureAdB2COptions = b2cOptions.Value;
+            Options = b2cOptions.Value;
         }
 
-        public AzureAdB2COptions AzureAdB2COptions { get; set; }
+#if (IndividualB2CAuth)
+        public AzureAdB2COptions Options { get; set; }
+#else
+        public AzureAdOptions Options { get; set; }
+#endif
 
-        public void Configure(OpenIdConnectOptions options)
+        public void Configure(OpenIdConnectOptions oidcOptions)
         {
-            options.ClientId = AzureAdB2COptions.ClientId;
-            options.Authority = AzureAdB2COptions.Authority;
-            
-            options.TokenValidationParameters = new TokenValidationParameters() { NameClaimType = "name" };
+            oidcOptions.ClientId = Options.ClientId;
+            oidcOptions.Authority = Options.Authority;
+            oidcOptions.UseTokenLifetime = true;
+#if (OrganizationalAuth)
+            oidcOptions.CallbackPath = Options.CallbackPath;
+    #if (OrgReadAccess)
+            oidcOptions.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+    #endif
+    #if (MultiOrgAuth)
 
-            options.Events = new OpenIdConnectEvents()
+            oidcOptions.TokenValidationParameters = new TokenValidationParameters
+            {
+                // Instead of using the default validation (validating against a single issuer value, as we do in line of business apps),
+                // we inject our own multitenant validation logic
+                ValidateIssuer = false,
+
+                // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
+                //IssuerValidator = (issuer, securityToken, validationParameters) => {
+                //    if (myIssuerValidationLogic(issuer)) return issuer;
+                //}
+            };
+
+            oidcOptions.Events = new OpenIdConnectEvents
+            {
+                OnTicketReceived = (context) =>
+                {
+                    // If your authentication logic is based on users then add your logic here
+                    return Task.FromResult(0);
+                },
+                OnAuthenticationFailed = (context) =>
+                {
+                    context.Response.Redirect("/Home/Error");
+                    context.HandleResponse(); // Suppress the exception
+                    return Task.FromResult(0);
+                },
+                // If your application needs to do authenticate single users, add your user validation below.
+                //OnTokenValidated = (context) =>
+                //{
+                //    return myUserValidationLogic(context.Ticket.Principal);
+                //}
+            };
+    #endif
+        }
+#else
+
+            oidcOptions.TokenValidationParameters = new TokenValidationParameters() { NameClaimType = "name" };
+
+            oidcOptions.Events = new OpenIdConnectEvents()
             {
                 OnRedirectToIdentityProvider = OnRedirectToIdentityProvider,
                 OnRemoteFailure = OnRemoteFailure
@@ -68,5 +118,7 @@ namespace Company.WebApplication1
             }
             return Task.FromResult(0);
         }
+#endif
     }
 }
+

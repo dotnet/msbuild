@@ -20,10 +20,6 @@
       "longName": "susi-policy-id",
       "shortName": "ssp"
     },
-    "ResetPasswordPolicyId": {
-      "longName": "reset-password-policy-id",
-      "shortName": "rp"
-    },
     "EditProfilePolicyId": {
       "longName": "edit-profile-policy-id",
       "shortName": "ep"
