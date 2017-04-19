@@ -1083,6 +1083,10 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     continue;
                 }
+                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices.Count == 1)
+                {
+                    continue;
+                }
 
                 string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
 
