@@ -8,6 +8,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--no-build");
 
             // Verify
-            result.StdOut.Should().Contain(expectedError); 
+            result.StdErr.Should().Contain(expectedError);
         }
 
         [Fact]
@@ -185,11 +186,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
-        private string CopyAndRestoreVSTestDotNetCoreTestApp(){
+        private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
+        {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
             var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
+                            .CreateInstance(callingMethod)
                             .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
