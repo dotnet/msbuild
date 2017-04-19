@@ -33,6 +33,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
+        public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
+
         private static string GetShortTargetFrameworkIdentifier(string targetFramework)
         {
             int identifierLength = 0;
@@ -166,6 +168,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 var targetFrameworkVersionElement = propertyGroup.Element(ns + "TargetFrameworkVersion");
                 targetFrameworkVersionElement.SetValue(this.TargetFrameworkVersion);
+            }
+
+            foreach (var additionalProperty in AdditionalProperties)
+            {
+                propertyGroup.Add(new XElement($"{ns}{additionalProperty.Key}", additionalProperty.Value));
             }
 
             if (this.IsExe)

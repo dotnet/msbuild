@@ -17,19 +17,92 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantNet461ToBeAnImplicitPackageTargetFallback : SdkTest
+    public class GivenThatWeWantNet461ToBeAnImplicitPackageTargetFallback : SdkTest, IClassFixture<DeleteNuGetArtifactsFixture>
     {
-        [Fact]
-        public void Net461_is_implicit_for_Netstandard20()
+        private TestPackageReference _net461PackageReference;
+
+        [WindowsOnlyTheoryAttribute]
+        [InlineData("netstandard2.0")]
+        [InlineData("netcoreapp2.0")]
+        public void Net461_is_implicit_for_Netstandard_and_Netcore_20(string targetFramework)
         {
-            var netstandard20Project =
+            var testProjectName = targetFramework.Replace(".", "_");
+
+            var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
+
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            restoreCommand.Execute().Should().Pass();
+
+            var buildCommand = new BuildCommand(
+                Stage0MSBuild,
+                Path.Combine(testProjectTestAsset.TestRoot, testProjectName));
+            buildCommand.Execute().Should().Pass();
+        }
+
+        [WindowsOnlyTheoryAttribute]
+        [InlineData("netstandard1.6")]
+        [InlineData("netcoreapp1.1")]
+        public void Net461_is_not_implicit_for_Netstandard_and_Netcore_less_than_20(string targetFramework)
+        {
+            var testProjectName = targetFramework.Replace(".", "_");
+
+            var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
+
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            restoreCommand.Execute().Should().Fail();
+        }
+
+        [WindowsOnlyFact]
+        public void It_is_possible_to_disabled_net461_implicit_package_target_fallback()
+        {
+            const string testProjectName = "netstandard20";
+
+            var testProjectTestAsset = CreateTestAsset(
+                testProjectName,
+                "netstandard2.0",
+                new Dictionary<string, string> { {"DisableImplicitPackageTargetFallback", "true" } });
+
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            restoreCommand.Execute().Should().Fail();
+        }
+
+        private TestAsset CreateTestAsset(
+            string testProjectName,
+            string targetFramework,
+            Dictionary<string, string> additionalProperties = null)
+        {
+            _net461PackageReference = CreateNet461Package();
+
+            var testProject =
                 new TestProject
                 {
-                    Name = "netstandard20",
-                    TargetFrameworks = "netstandard2.0",
+                    Name = testProjectName,
+                    TargetFrameworks = targetFramework,
                     IsSdkProject = true
                 };
 
+            if (additionalProperties != null)
+            {
+                foreach (var additionalProperty in additionalProperties)
+                {
+                    testProject.AdditionalProperties.Add(additionalProperty.Key, additionalProperty.Value);    
+                }
+            }
+            
+            testProject.PackageReferences.Add(_net461PackageReference);
+
+            var testProjectTestAsset = _testAssetsManager.CreateTestProject(
+                testProject,
+                ConstantStringValues.TestDirectoriesNamePrefix, $"_{testProjectName}_net461");
+
+            return testProjectTestAsset;
+        }
+
+        private TestPackageReference CreateNet461Package()
+        {
             var net461Project = 
                 new TestProject
                 {
@@ -44,8 +117,6 @@ namespace Microsoft.NET.Build.Tests
                     "1.0.0",
                     ConstantStringValues.ConstructNuGetPackageReferencePath(net461Project));
 
-            netstandard20Project.PackageReferences.Add(net461PackageReference);
-
             var net461PackageTestAsset = _testAssetsManager.CreateTestProject(
                 net461Project,
                 ConstantStringValues.TestDirectoriesNamePrefix,
@@ -53,25 +124,10 @@ namespace Microsoft.NET.Build.Tests
             var packageRestoreCommand =
                 net461PackageTestAsset.GetRestoreCommand(relativePath: net461Project.Name).Execute().Should().Pass();
             var dependencyProjectDirectory = Path.Combine(net461PackageTestAsset.TestRoot, net461Project.Name);
-            var packagePackCommand = new PackCommand(Stage0MSBuild, dependencyProjectDirectory).Execute().Should().Pass();
+            var packagePackCommand =
+                new PackCommand(Stage0MSBuild, dependencyProjectDirectory).Execute().Should().Pass();
 
-            var netstandard20TestAsset = _testAssetsManager.CreateTestProject(
-                netstandard20Project,
-                ConstantStringValues.TestDirectoriesNamePrefix, "_netstandard20_net461");
-            var restoreCommand = netstandard20TestAsset.GetRestoreCommand(relativePath: netstandard20Project.Name);
-
-            foreach (TestPackageReference packageReference in netstandard20Project.PackageReferences)
-            {
-                restoreCommand.AddSource(Path.GetDirectoryName(packageReference.NupkgPath));
-            }
-
-            restoreCommand.Execute().Should().Pass();
-
-            var buildCommand = new BuildCommand(
-                Stage0MSBuild,
-                Path.Combine(netstandard20TestAsset.TestRoot, netstandard20Project.Name));
-
-            buildCommand.Execute().Should().Pass();
+            return net461PackageReference;
         }
     }
 }
