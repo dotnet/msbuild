@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if (OrganizationalAuth || WindowsAuth)
+#if (!NoAuth)
 using Microsoft.AspNetCore.Authorization;
 #endif
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.WebApplication1.Controllers
 {
-#if (OrganizationalAuth || WindowsAuth)
+#if (!NoAuth)
     [Authorize]
 #endif
     [Route("api/[controller]")]
