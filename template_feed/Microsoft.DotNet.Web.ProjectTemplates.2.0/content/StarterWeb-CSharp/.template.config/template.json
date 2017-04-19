@@ -7,7 +7,7 @@
   "precedence": "2000",
   "identity": "Microsoft.Web.Mvc.CSharp.2.0",
   "shortName": "mvc",
-  "thirdPartyNotices": "https://github.com/dotnet/templating/blob/rel/vs2017/post-rtw/template_feed/THIRD-PARTY-NOTICES",
+  "thirdPartyNotices": "https://aka.ms/template-3pn",
   "tags": {
     "language": "C#",
     "type": "project"
@@ -73,12 +73,17 @@
           ]
         },
         {
+          "condition": "(!OrganizationalAuth && !IndividualB2CAuth)",
+          "exclude": "OpenIdConnectOptionsSetup.cs"
+        },
+        {
           "condition": "(!IndividualB2CAuth)",
-          "exclude": [
-            "OpenIdConnectOptionsSetup.cs",
-            "AzureAdB2COptions.cs"
-          ]
-        }
+          "exclude": "AzureAdB2COptions.cs"
+        },
+        {
+          "condition": "(!OrganizationalAuth)",
+          "exclude": "AzureAdOptions.cs"
+        },
       ]
     }
   ],
@@ -128,13 +133,6 @@
       "defaultValue": "",
       "replaces": "MySignUpSignInPolicyId",
       "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
-    },
-    "ResetPasswordPolicyId": {
-      "type": "parameter",
-      "datatype": "string",
-      "defaultValue": "",
-      "replaces": "MyResetPasswordPolicyId",
-      "description": "The reset password policy ID for this project (use with IndividualB2C auth type)."
     },
     "EditProfilePolicyId": {
       "type": "parameter",

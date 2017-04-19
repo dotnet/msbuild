@@ -7,31 +7,37 @@
   "precedence": "2000",
   "identity": "Microsoft.Web.WebApi.CSharp.2.0",
   "shortName": "webapi",
-  "thirdPartyNotices": "https://github.com/dotnet/templating/blob/rel/vs2017/post-rtw/template_feed/THIRD-PARTY-NOTICES",
+  "thirdPartyNotices": "https://aka.ms/template-3pn",
   "tags": {
     "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "sources": [
-    {
-      "modifiers": {
-        "condition": "(windir == 'C:\\Windows')",
-        "exclude": "Properties/launchSettings.json"
-      }
-    }
-  ],
   "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
   "sources": [
     {
-       "modifiers": [
+      "modifiers": [
+        {
+          "condition": "(windir == 'C:\\Windows')",
+          "exclude": "Properties/launchSettings.json"
+        },
         {
           "condition": "(!IncludeLaunchSettings)",
-          "exclude": [
-            "Properties/launchSettings.json"
-          ]
+          "exclude": "Properties/launchSettings.json"
         },
+        {
+          "condition": "(!IndividualB2CAuth && !OrganizationalAuth)",
+          "exclude": "JwtBearerOptionsSetup.cs"
+        },
+        {
+          "condition": "(!IndividualB2CAuth)",
+          "exclude": "AzureAdB2COptions.cs"
+        },
+        {
+          "condition": "(!OrganizationalAuth)",
+          "exclude": "AzureAdOptions.cs"
+        }
       ]
     }
   ],
@@ -45,6 +51,10 @@
           "description": "No authentication"
         },
         {
+          "choice": "IndividualB2C",
+          "description": "Individual authentication with Azure AD B2C"
+        },
+        {
           "choice": "SingleOrg",
           "description": "Organizational authentication for a single tenant"
         },
@@ -56,12 +66,26 @@
       "defaultValue": "None",
       "description": "The type of authentication to use"
     },
+    "AAdB2CInstance": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "https://login.microsoftonline.com/tfp/",
+      "replaces": "https:////login.microsoftonline.com/tfp/",
+      "description": "The Azure Active Directory B2C instance to connect to (use with IndividualB2C auth type)."
+    },
+    "SignUpSignInPolicyId": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "",
+      "replaces": "MySignUpSignInPolicyId",
+      "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
+    },
     "AADInstance": {
       "type": "parameter",
       "datatype": "string",
       "defaultValue": "https://login.microsoftonline.com/",
       "replaces": "https:////login.microsoftonline.com/",
-      "description": "The Azure Active Directory instance to connect to (use with Single-org auth)."
+      "description": "The Azure Active Directory instance to connect to (use with Single-org auth type)."
     },
     "Audience": {
       "type": "parameter",
@@ -73,13 +97,13 @@
       "type": "parameter",
       "datatype": "string",
       "replaces": "11111111-1111-1111-11111111111111111",
-      "description": "The Client ID for this project (use with Single-org auth)."
+      "description": "The Client ID for this project (use with Single-org or IndividualB2C auth types)."
     },
     "Domain": {
       "type": "parameter",
       "datatype": "string",
       "replaces": "qualified.domain.name",
-      "description": "The domain owning the directory (use with Single-org auth)."
+      "description": "The domain owning the directory (use with Single-org or IndividualB2C auth types)."
     },
     "TenantId": {
       "type": "parameter",
@@ -160,6 +184,14 @@
       },
       "replaces": "55555"
     },
+    "IndividualB2CAuth": {
+      "type": "computed",
+      "value": "(auth == \"IndividualB2C\")"
+    },
+    "IndividualAuth": {
+      "type": "computed",
+      "value": "(auth == \"IndividualB2C\")"
+    },
     "OrganizationalAuth": {
       "type": "computed",
       "value": "(auth == \"SingleOrg\")"
@@ -174,7 +206,7 @@
     },
     "NoAuth": {
       "type": "computed",
-      "value": "(!SingleOrgAuth && !WindowsAuth)"
+      "value": "(!(SingleOrgAuth || WindowsAuth || IndividualAuth))"
     },
     "RequiresHttps": {
       "type": "computed",

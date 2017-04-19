@@ -26,7 +26,7 @@ namespace Company.WebApplication1
                     if (context.HostingEnvironment.IsDevelopment())
                     {
                         // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
-                        builder.AddUserSecrets<Startup>();
+                        configBuilder.AddUserSecrets<Startup>();
                     }
 
                     configBuilder.AddEnvironmentVariables();

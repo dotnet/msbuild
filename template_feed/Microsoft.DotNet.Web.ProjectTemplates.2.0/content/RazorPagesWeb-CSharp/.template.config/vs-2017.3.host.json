@@ -13,5 +13,6 @@
   "icon": "vs-2017.3/WebApplication.png",
   "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784881",
   "uiFilters": [ "oneaspnet" ],
-  "supportsDocker": true
+  "supportsDocker": true,
+  "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.RazorPages",
 }
