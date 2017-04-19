@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<PackageIdentity, StringBuilder>  GetFilteredPackages()
+        private Dictionary<PackageIdentity, StringBuilder> GetFilteredPackages()
         {
             Dictionary<PackageIdentity, StringBuilder> filteredPackages = null;
 
@@ -214,7 +214,10 @@ namespace Microsoft.NET.Build.Tasks
                                               TrimAssetGroups(runtimeLibrary.NativeLibraryGroups, filesToSkip).ToArray(),
                                               TrimResourceAssemblies(runtimeLibrary.ResourceAssemblies, filesToSkip),
                                               runtimeLibrary.Dependencies,
-                                              runtimeLibrary.Serviceable);
+                                              runtimeLibrary.Serviceable,
+                                              runtimeLibrary.Path,
+                                              runtimeLibrary.HashPath,
+                                              runtimeLibrary.RuntimeStoreManifestName);
                 }
                 else
                 {
@@ -255,7 +258,9 @@ namespace Microsoft.NET.Build.Tasks
                                               compileLibrary.Hash,
                                               TrimAssemblies(compileLibrary.Assemblies, filesToSkip),
                                               compileLibrary.Dependencies,
-                                              compileLibrary.Serviceable);
+                                              compileLibrary.Serviceable,
+                                              compileLibrary.Path,
+                                              compileLibrary.HashPath);
                 }
                 else
                 {

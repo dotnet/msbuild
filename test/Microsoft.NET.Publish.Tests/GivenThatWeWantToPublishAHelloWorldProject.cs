@@ -275,7 +275,9 @@ public static class Program
             dependencyContext.Should()
                 .HaveNoDuplicateRuntimeAssemblies(rid ?? "")
                 .And
-                .HaveNoDuplicateNativeAssets(rid ?? "");
+                .HaveNoDuplicateNativeAssets(rid ?? "")
+                .And
+                .OnlyHavePackagesWithPathProperties();
 
             ICommand runCommand;
 
