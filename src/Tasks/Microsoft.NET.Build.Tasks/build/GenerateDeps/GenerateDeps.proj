@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</TargetFramework>
 
     <ToolFolder>$([System.IO.Path]::GetDirectoryName($(ProjectAssetsFile)))</ToolFolder>
-    <ProjectDepsFilePath>$(ToolFolder)\$(ToolName).deps.json</ProjectDepsFilePath>
+    <ProjectDepsFilePath Condition="'$(ProjectDepsFilePath)' == ''">$(ToolFolder)\$(ToolName).deps.json</ProjectDepsFilePath>
     
     <OutputType>Exe</OutputType>
     <IncludeMainProjectInDepsFile>false</IncludeMainProjectInDepsFile>

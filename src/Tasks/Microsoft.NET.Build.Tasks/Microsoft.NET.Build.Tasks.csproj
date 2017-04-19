@@ -189,7 +189,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="build\GenerateDeps\GenerateDeps.proj" />
+    <None Include="build\GenerateDeps\GenerateDeps.proj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
   <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
