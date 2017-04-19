@@ -9,3 +9,8 @@ There are multiple tools to investigate and fix broken incrementality. Start wit
  * [MSDN: How to build incrementally](https://msdn.microsoft.com/en-us/library/ms171483.aspx)
 
 Consider using https://github.com/KirillOsenkov/MSBuildStructuredLog and search the build log for "Building target completely" and "out-of-date" messages.
+
+Strings to search for in the build logs:
+ * `Building target "CoreCompile" completely`
+ * `is newer than output`
+ * `out-of-date`
