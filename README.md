@@ -61,32 +61,6 @@ You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, 
 
 In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
 
-# Debian daily feed
-
-Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
-
-## Obtaining binaries
-
-Add debian feed:
-
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-Install:
-```
-sudo apt-get install <DebianPackageName>=<Version>
-```
-
-To list available packages:
-```
-apt-cache search dotnet-sdk | grep 2.0.0
-```
-
 > **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
@@ -142,6 +116,32 @@ apt-cache search dotnet-sdk | grep 2.0.0
 
 [linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-linux-x64.latest.tar.gz
 [linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-linux-x64.latest.tar.gz.sha
+
+# Debian daily feed
+
+Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
+
+## Obtaining binaries
+
+Add debian feed:
+
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+Install:
+```
+sudo apt-get install <DebianPackageName>=<Version>
+```
+
+To list available packages:
+```
+apt-cache search dotnet-sdk | grep 2.0.0
+```
 
 Docker
 ------
