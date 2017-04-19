@@ -83,5 +83,20 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             return new AndConstraint<DependencyContextAssertions>(this);
         }
+
+        public AndConstraint<DependencyContextAssertions> OnlyHavePackagesWithPathProperties()
+        {
+            var packageLibraries = _dependencyContext.RuntimeLibraries
+                .Union<Library>(_dependencyContext.CompileLibraries)
+                .Where(l => string.Equals(l.Type, "package", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var packageLibrary in packageLibraries)
+            {
+                packageLibrary.Path.Should().NotBeNullOrEmpty($"Every Library with Type='package' should have a Path, but {packageLibrary.Name} does not.");
+                packageLibrary.HashPath.Should().NotBeNullOrEmpty($"Every Library with Type='package' should have a HashPath, but {packageLibrary.Name} does not.");
+            }
+
+            return new AndConstraint<DependencyContextAssertions>(this);
+        }
     }
 }
