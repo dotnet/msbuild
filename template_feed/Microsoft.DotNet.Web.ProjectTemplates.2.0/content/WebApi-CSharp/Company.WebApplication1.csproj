@@ -13,14 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview1-*" />
-=======
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview1-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.0-preview1-*" Condition="'$(OrganizationalAuth)' == 'True' OR '$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview1-*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.0-preview1-*" Condition="'$(OrganizationalAuth)' == 'True'" />
->>>>>>> Add Web API IndividualB2C auth template
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview1-*" />
   </ItemGroup>
 
