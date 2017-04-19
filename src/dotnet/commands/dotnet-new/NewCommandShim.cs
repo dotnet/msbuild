@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
@@ -24,7 +27,16 @@ namespace Microsoft.DotNet.Tools.New
 
         public static int Run(string[] args)
         {
-            return New3Command.Run(CommandName, CreateHost(), new TelemetryLogger(null), FirstRun, args);
+            var sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
+            var telemetry = new Telemetry(new NuGetCacheSentinel(new CliFallbackFolderPathCalculator()), sessionId);
+            var logger = new TelemetryLogger((name, props, measures) =>
+            {
+                if (telemetry.Enabled)
+                {
+                    telemetry.TrackEvent(name, props, measures);
+                }
+            });
+            return New3Command.Run(CommandName, CreateHost(), logger, FirstRun, args);
         }
 
         private static ITemplateEngineHost CreateHost()

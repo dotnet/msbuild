@@ -13,11 +13,11 @@ namespace Microsoft.DotNet.Tools.Run
 {
     public partial class RunCommand
     {
-        public string Configuration { get; set; }
-        public string Framework { get; set; }
-        public bool NoBuild { get; set; }
-        public string Project { get; set; }
-        public IReadOnlyCollection<string> Args { get; set; }
+        public string Configuration { get; private set; }
+        public string Framework { get; private set; }
+        public bool NoBuild { get; private set; }
+        public string Project { get; private set; }
+        public IReadOnlyCollection<string> Args { get; private set; }
 
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
@@ -36,6 +36,34 @@ namespace Microsoft.DotNet.Tools.Run
             return runCommand
                 .Execute()
                 .ExitCode;
+        }
+
+        public RunCommand(string configuration,
+            string framework,
+            bool noBuild,
+            string project,
+            IReadOnlyCollection<string> args)
+        {
+            Configuration = configuration;
+            Framework = framework;
+            NoBuild = noBuild;
+            Project = project;
+            Args = args;
+        }
+
+        public RunCommand MakeNewWithReplaced(string configuration = null,
+            string framework = null,
+            bool? noBuild = null,
+            string project = null,
+            IReadOnlyCollection<string> args = null)
+        {
+            return new RunCommand(
+                configuration ?? this.Configuration,
+                framework ?? this.Framework,
+                noBuild ?? this.NoBuild,
+                project ?? this.Project,
+                args ?? this.Args
+            );
         }
 
         private void EnsureProjectIsBuilt()

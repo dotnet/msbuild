@@ -5,10 +5,9 @@
     <background file="dotnetbackground.png" mime-type="image/png"/>
     <options customize="never" require-scripts="false" />
     <welcome file="welcome.html" mime-type="text/html" />
-    <conclusion file="conclusion.html" mime-type="text/html" />
     <volume-check>
         <allowed-os-version>
-                <os-version min="10.10" />
+                <os-version min="10.12" />
         </allowed-os-version>
     </volume-check>
     

@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public const string OutputOptionDescription = "Output directory in which to place the published artifacts.";
 
-        public const string TargetOption = "target.xml";
+        public const string ManifestOption = "manifest.xml";
 
-        public const string TargetOptionDescription = "The path to a target manifest file that contains the list of packages to be excluded from the publish step.";
+        public const string ManifestOptionDescription = "The path to a target manifest file that contains the list of packages to be excluded from the publish step.";
 
         public const string SelfContainedOptionDescription = "Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.";
     }

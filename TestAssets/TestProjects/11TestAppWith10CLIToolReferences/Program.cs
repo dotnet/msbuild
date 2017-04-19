@@ -3,16 +3,12 @@
 
 using System;
 
-namespace MSBuildTestApp
+namespace ConsoleApplication
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            if (args.Length > 0)
-            {
-                Console.WriteLine("echo args:" + string.Join(";", args));
-            }
             Console.WriteLine("Hello World!");
         }
     }
