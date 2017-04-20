@@ -86,7 +86,7 @@ namespace Company.WebApplication1
 
         public Task OnRedirectToIdentityProvider(RedirectContext context)
         {
-            var defaultPolicy = AzureAdB2COptions.DefaultPolicy;
+            var defaultPolicy = Options.DefaultPolicy;
             if (context.Properties.Items.TryGetValue(AzureAdB2COptions.PolicyAuthenticationProperty, out var policy) && 
                 !policy.Equals(defaultPolicy))
             {
