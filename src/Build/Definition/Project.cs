@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -29,6 +30,9 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
+using Microsoft.Build.Globbing;
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -1072,31 +1076,39 @@ namespace Microsoft.Build.Evaluation
         /// <code>
         ///<P>*.txt</P>
         /// 
+        ///<Bar Include="bar"/> (both outside and inside project cone)
         ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
-        ///<Foo Include="*.a" Exclude="3.a"/>
+        ///<Foo Include="*.a;*.b" Exclude="3.a"/>
+        ///<Foo Remove="2.a" />
         ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
         ///<Foo Include="$(P)"/> 
         ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
-        ///<Foo Include="*.cs" Exclude="@(Bar)"/> (out of project cone glob)
+        ///<Foo Include="*.cs" Exclude="@(Bar)"/>
         ///</code>
         /// 
         ///Example result: 
         ///[
         ///GlobResult(glob: "C:\**\*.foo", exclude: []),
-        ///GlobResult(glob: "*.a", exclude=["3.a"]),
+        ///GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
         ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
         ///GlobResult(glob: "*.txt", exclude=[]),
         ///GlobResult(glob: "*.a", exclude=[]),
-        ///GlobResult(glob: "*.cs", exclude=[])
+        ///GlobResult(glob: "*.cs", exclude=["bar"])
         ///]
         /// </example>
         /// <remarks>
-        /// Sources of innacuracies: 
-        /// - <code>GlobResult.Excludes</code> does not contain information from item references (e.g. Exclude="@(Item)")
-        /// (it sees items as they are at the end of evaluation)
+        /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
+        /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
+        /// 
+        /// Users can construct a composite glob that incorporates all the globs in the Project:
+        /// <code>
+        /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
+        /// uberGlob.IsMatch("foo.cs");
+        /// </code>
+        /// 
         /// </remarks>
         /// <returns>
-        /// List of <see cref="GlobResult"/>. Sorted in project evaluation order.
+        /// List of <see cref="GlobResult"/>.
         /// </returns>
         public List<GlobResult> GetAllGlobs()
         {
@@ -1117,33 +1129,169 @@ namespace Microsoft.Build.Evaluation
             return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(), itemType));
         }
 
-        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+        // represents cumulated remove information for a particular item type
+        private struct CumulativeRemoveElementData
         {
-            return projectItemElements
-                .AsParallel()
-                .AsOrdered()
-                .SelectMany(GetAllGlobs)
-                .ToList();
+            private ImmutableList<IMSBuildGlob>.Builder _globs;
+            private ImmutableHashSet<string>.Builder _fragmentStrings;
+
+            public IEnumerable<IMSBuildGlob> Globs => _globs.ToImmutable();
+            public IEnumerable<string> FragmentStrings => _fragmentStrings.ToImmutable();
+
+            public static CumulativeRemoveElementData Create()
+            {
+                return new CumulativeRemoveElementData
+                {
+                    _globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
+                    _fragmentStrings = ImmutableHashSet.CreateBuilder<string>()
+                };
+            }
+
+            public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+            {
+                var removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
+                var removeGlob = removeSpec.ToMSBuildGlob();
+
+                _globs.Add(removeGlob);
+
+                foreach (var removeFragment in removeSpecFragmentStrings)
+                {
+                    _fragmentStrings.Add(removeFragment);
+                }
+            }
         }
 
-        private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
+        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
         {
-            var includeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
-            var excludeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
-
-            var excludeSet =
-                new Lazy<IEnumerable<string>>(
-                    () =>
-                        excludeItemspec.Fragments.Where(
-                            // take out item references, we can't reason about them
-                            f => !(f is ItemExpressionFragment<ProjectProperty, ProjectItem>))
-                            .Select(f => f.ItemSpecFragment)
-                            .ToImmutableHashSet());
-
-            foreach (var globFragment in includeItemspec.Fragments.Where(f => f is GlobFragment))
+            if (projectItemElements.Count == 0)
             {
-                yield return new GlobResult(itemElement, globFragment.ItemSpecFragment, excludeSet.Value);
+                return new List<GlobResult>();
             }
+
+            // Scan the project elements in reverse order and build globbing information for each include element.
+            // Based on the fact that relevant removes for a particular include element (xml element A) consist of:
+            // - all the removes seen by the next include statement of A's type (xml element B which appears after A in file order)
+            // - new removes between A and B (removes that apply to A but not to B. Spacially, these are placed between A's element and B's element)
+
+            // Example:
+            // 1. <I Include="A"/>
+            // 2. <I Remove="..."/> // this remove applies to the include at 1
+            // 3. <I Include="B"/>
+            // 4. <I Remove="..."/> // this remove applies to the includes at 1, 3
+            // 5. <I Include="C"/>
+            // 6. <I Remove="..."/> // this remove applies to the includes at 1, 3, 5
+            // So A's applicable removes are composed of:
+            // 
+            // The applicable removes for the element at position 1 (xml element A) are composed of:
+            // - all the removes seen by the next include statement of I's type (xml element B, position 3, which appears after A in file order). In this example that's Removes at positions 4 and 6.
+            // - new removes between A and B. In this example that's Remove 2.
+
+            // use immutable builders because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
+            // item type -> aggregated information about all removes seen so far for that item type
+            var removeElementCache = new Dictionary<string, CumulativeRemoveElementData>(projectItemElements.Count);
+            var globResults = new List<GlobResult>(projectItemElements.Count);
+
+            for (var i = projectItemElements.Count - 1; i >= 0; i--)
+            {
+                var itemElement = projectItemElements[i];
+
+                if (!string.IsNullOrEmpty(itemElement.Include))
+                {
+                    var globResult = BuildGlobResultFromIncludeItem(itemElement, removeElementCache);
+
+                    if (globResult != null)
+                    {
+                        globResults.Add(globResult);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(itemElement.Remove))
+                {
+                    CacheInformationFromRemoveItem(itemElement, removeElementCache);
+                }
+            }
+
+            globResults.TrimExcess();
+
+            return globResults;
+        }
+
+        private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulativeRemoveElementData> removeElementCache)
+        {
+            var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
+
+            var includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+
+            if (includeGlobFragments.Length == 0)
+            {
+                return null;
+            }
+
+            var includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
+            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+
+            IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
+            IMSBuildGlob excludeGlob = null;
+
+            if (!string.IsNullOrEmpty(itemElement.Exclude))
+            {
+                var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
+
+                excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
+                excludeGlob = excludeItemspec.ToMSBuildGlob();
+            }
+
+            IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
+            IMSBuildGlob removeGlob = null;
+
+            if (removeElementCache.ContainsKey(itemElement.ItemType))
+            {
+                removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings;
+                removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
+            }
+
+            var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
+
+            return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
+        }
+
+        private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
+        {
+            if (excludeGlob != null && removeGlob != null)
+            {
+                return new MSBuildGlobWithGaps(
+                    includeGlob,
+                    new CompositeGlob(
+                        excludeGlob,
+                        removeGlob
+                    ));
+            }
+
+            if (excludeGlob != null || removeGlob != null)
+            {
+                var gapGlob = excludeGlob ?? removeGlob;
+
+                return new MSBuildGlobWithGaps(
+                    includeGlob,
+                    gapGlob
+                );
+            }
+
+            return includeGlob;
+        }
+
+        private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
+        {
+            CumulativeRemoveElementData cumulativeRemoveElementData;
+            if (!removeElementCache.TryGetValue(itemElement.ItemType, out cumulativeRemoveElementData))
+            {
+                cumulativeRemoveElementData = CumulativeRemoveElementData.Create();
+
+                removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
+            }
+
+            var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation);
+
+            cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec);
         }
 
         /// <summary>
@@ -1245,7 +1393,7 @@ namespace Microsoft.Build.Evaluation
 
         private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
         {
-            var relevantElementsAfterInclude =  evaluatedItemElements
+            var relevantElementsAfterInclude = evaluatedItemElements
                 // Skip until we encounter the element that produced the item because
                 // there are no item operations that can affect future items
                 .SkipWhile((i => i != item.Xml))
@@ -1259,7 +1407,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.RemoveLocation == null);
 
             // add the include operation that created the project item element
-            return new[] {item.Xml}.Concat(relevantElementsAfterInclude);
+            return new[] { item.Xml }.Concat(relevantElementsAfterInclude);
         }
 
         private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
@@ -1267,7 +1415,7 @@ namespace Microsoft.Build.Evaluation
             return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
         }
 
-        private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
+        private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements)
         {
             if (string.IsNullOrEmpty(itemToMatch))
             {
@@ -1344,7 +1492,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // expand the properties
-            var expandedItemSpec = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
+            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, expandProperties: true);
             var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
 
             // Result is inconclusive if properties are present
@@ -1356,7 +1504,7 @@ namespace Microsoft.Build.Evaluation
             return numberOfMatches;
         }
 
-        private int ItemMatchesInItemSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
+        private int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
         {
             provenance = Provenance.Undefined;
 
@@ -1373,7 +1521,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     provenance |= Provenance.Glob;
                 }
-                else if (fragment is ItemExpressionFragment<ProjectProperty, ProjectItem>)
+                else if (fragment is EvaluationItemExpressionFragment)
                 {
                     provenance |= Provenance.Inconclusive;
                 }
@@ -3543,34 +3691,48 @@ namespace Microsoft.Build.Evaluation
     }
     /// <summary>
     /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
-    /// This represents a glob found in an item include together with the item element it came from
-    /// and the excludes that were present on that item.
+    /// This represents all globs found in an item include together with the item element it came from,
+    /// the excludes that were present on that item, and all the Remove item elements pertaining to the Include item element.
     /// </summary>
     public class GlobResult
     {
         /// <summary>
-        /// Gets the original glob used to generate the result.
-        /// </summary>
-        public string Glob { get; private set; }
-
-        /// <summary>
-        /// Gets an <see cref="ISet{String}"/> containing paths that were excluded.
-        /// </summary>
-        public IEnumerable<string> Excludes{ get; private set; }
-
-        /// <summary>
-        /// Gets the original <see cref="ProjectItemElement"/> that contained the glob.
+        /// Gets the original <see cref="ProjectItemElement"/> that contained the globs.
         /// </summary>
         public ProjectItemElement ItemElement { get; private set; }
 
         /// <summary>
-        /// Initializes an instance of the GlobResult class.
+        /// Gets all the evaluated glob strings (properties expanded) from the include.
         /// </summary>
-        public GlobResult(ProjectItemElement itemElement, string glob, IEnumerable<string> excludes)
+        public IEnumerable<string> IncludeGlobs { get; private set; }
+
+        /// <summary>
+        /// A <see cref="IMSBuildGlob"/> representing the include globs. It also takes the excludes and relevant removes into consideration.
+        /// </summary>
+        public IMSBuildGlob MsBuildGlob { get; set; }
+
+        /// <summary>
+        /// Gets an <see cref="ISet{String}"/> containing strings that were excluded.
+        /// </summary>
+        public IEnumerable<string> Excludes { get; private set; }
+
+        /// <summary>
+        /// Gets an <see cref="ISet{String}"/> containing strings that were later removed via the Remove element.
+        /// </summary>
+        public IEnumerable<string> Removes { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GlobResult(ProjectItemElement itemElement, IEnumerable<string> includeGlobStrings, IMSBuildGlob globWithGaps, IEnumerable<string> excludeFragmentStrings, IEnumerable<string> removeFragmentStrings)
         {
             ItemElement = itemElement;
-            Glob = glob;
-            Excludes = excludes;
+
+            IncludeGlobs = includeGlobStrings;
+            MsBuildGlob = globWithGaps;
+
+            Excludes = excludeFragmentStrings;
+            Removes = removeFragmentStrings;
         }
     }
 

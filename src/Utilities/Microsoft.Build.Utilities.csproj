@@ -23,7 +23,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
-  <ItemGroup >
+  <ItemGroup>
     <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
@@ -88,6 +88,9 @@
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
+      <Link>EscapingStringExtensions\EscapingStringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
@@ -253,7 +256,7 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-    <!-- Assemblies Files we depend on -->
+  <!-- Assemblies Files we depend on -->
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
