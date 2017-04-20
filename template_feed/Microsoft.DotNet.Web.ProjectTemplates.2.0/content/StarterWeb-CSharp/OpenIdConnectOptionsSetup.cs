@@ -33,8 +33,8 @@ namespace Company.WebApplication1
             oidcOptions.ClientId = Options.ClientId;
             oidcOptions.Authority = Options.Authority;
             oidcOptions.UseTokenLifetime = true;
-#if (OrganizationalAuth)
             oidcOptions.CallbackPath = Options.CallbackPath;
+#if (OrganizationalAuth)
     #if (OrgReadAccess)
             oidcOptions.ResponseType = OpenIdConnectResponseType.CodeIdToken;
     #endif

@@ -12,6 +12,7 @@ namespace Company.WebApplication1
         public string ClientId { get; set; }
         public string AzureAdB2CInstance { get; set; }
         public string Domain { get; set; }
+        public string CallbackPath { get; set; }
         public string SignUpSignInPolicyId { get; set; }
         public string ResetPasswordPolicyId { get; set; }
         public string EditProfilePolicyId { get; set; }
