@@ -40,6 +40,8 @@
 			 is built against Microsoft.Build.* 14.0 assemblies, are we are referencing
 			 15.1.x -->
 		<Csc
+			DelaySign="true"
+			KeyFile="msfinal.pub"
 			DisabledWarnings="1701"
 			OutputAssembly="$(DeploymentDir)\%(Facades.OutputAssembly)"
 			References="$(OutputPath)\%(Facades.Identity).Core.dll;%(References)"
@@ -48,6 +50,8 @@
 			ToolExe="$(CscToolExe)"
 			ToolPath="$(CscToolPath)"
 			/>
+
+		<Exec Command="sn -R $(DeploymentDir)\%(Facades.OutputAssembly) mono.snk" />
 	</Target>
 
 	<Target Name="Test" DependsOnTargets="Build">
