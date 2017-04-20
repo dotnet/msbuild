@@ -306,7 +306,7 @@ namespace Company.WebApplication1.Controllers
         public async Task<IActionResult> LinkLogin(string provider)
         {
             // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.Authentication.SignOutAsync(IdentityCookieOptions.ExternalScheme);
+            await HttpContext.SignOutAsync(IdentityCookieOptions.ExternalScheme);
 
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Action(nameof(LinkLoginCallback), "Manage");
@@ -335,7 +335,7 @@ namespace Company.WebApplication1.Controllers
             {
                 message = ManageMessageId.AddLoginSuccess;
                 // Clear the existing external cookie to ensure a clean login process
-                await HttpContext.Authentication.SignOutAsync(IdentityCookieOptions.ExternalScheme);
+                await HttpContext.SignOutAsync(IdentityCookieOptions.ExternalScheme);
             }
             return RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
