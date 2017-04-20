@@ -17,7 +17,7 @@ namespace Company.WebApplication1
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .ConfigureConfiguration((context, configBuilder) => {
+                .ConfigureAppConfiguration((context, configBuilder) => {
 #if (IndividualAuth || OrganizationalAuth)
                     configBuilder
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
