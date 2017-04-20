@@ -68,8 +68,12 @@ namespace Company.WebApplication1
 #endif
 #if (OrganizationalAuth || IndividualB2CAuth)
 
-            services.AddAuthentication(
-                sharedOptions => sharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddAuthentication(sharedOptions => 
+            {
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            });
 #endif
 #if (IndividualB2CAuth)
 
@@ -81,6 +85,81 @@ namespace Company.WebApplication1
 #if (IndividualB2CAuth || OrganizationalAuth)
             services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OpenIdConnectOptionsSetup>();
 #endif
+
+#if (IndividualLocalAuth)
+
+            // Add external authentication handlers below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+
+#elseif (OrganizationalAuth || IndividualB2CAuth)
+            services.AddCookieAuthentication();
+
+    #if (OrganizationalAuth || IndividualB2CAuth)
+            services.AddOpenIdConnectAuthentication(options =>
+            {
+                options.ClientId = Configuration["Authentication:AzureAd:ClientId"];
+        #if (OrgReadAccess)
+                options.ClientSecret = Configuration["Authentication:AzureAd:ClientSecret"];
+        #endif
+        #if (MultiOrgAuth)
+                options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common";
+        #elseif (SingleOrgAuth)
+                options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + Configuration["Authentication:AzureAd:TenantId"];
+        #endif
+    #else
+            services.AddOpenIdConnectAuthentication();
+            
+    #endif
+#endif
+#if (MultiOrgAuth)
+                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
+    #if (OrgReadAccess)
+                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+    #endif
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    // Instead of using the default validation (validating against a single issuer value, as we do in line of business apps),
+                    // we inject our own multitenant validation logic
+                    ValidateIssuer = false,
+
+                    // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
+                    //IssuerValidator = (issuer, securityToken, validationParameters) => {
+                    //    if (myIssuerValidationLogic(issuer)) return issuer;
+                    //}
+                };
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnTicketReceived = (context) =>
+                    {
+                        // If your authentication logic is based on users then add your logic here
+                        return Task.FromResult(0);
+                    },
+                    OnAuthenticationFailed = (context) =>
+                    {
+                        context.Response.Redirect("/Home/Error");
+                        context.HandleResponse(); // Suppress the exception
+                        return Task.FromResult(0);
+                    },
+                    // If your application needs to do authenticate single users, add your user validation below.
+                    //OnTokenValidated = (context) =>
+                    //{
+                    //    return myUserValidationLogic(context.Ticket.Principal);
+                    //}
+                };
+#elseif (SingleOrgAuth)
+    #if (OrgReadAccess)
+                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
+                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+    #else
+                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
+    #endif
+#endif
+#if (OrganizationalAuth)
+            });
+>>>>>>> Fixes
+
+#endif
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,15 +180,8 @@ namespace Company.WebApplication1
 
             app.UseStaticFiles();
 
-#if (IndividualLocalAuth)
-            app.UseIdentity();
-
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
-
-#elseif (OrganizationalAuth || IndividualB2CAuth)
-            app.UseCookieAuthentication();
-
-            app.UseOpenIdConnectAuthentication();
+#if (IndividualLocalAuth || OrganizationalAuth || IndividualB2CAuth)
+            app.UseAuthentication();
 
 #endif
             app.UseMvc(routes =>
