@@ -19,7 +19,6 @@ namespace Company.WebApplication1.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IAuthenticationSchemeProvider _schemes;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
@@ -27,14 +26,12 @@ namespace Company.WebApplication1.Controllers
         public ManageController(
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
-          IAuthenticationSchemeProvider schemes,
           IEmailSender emailSender,
           ISmsSender smsSender,
           ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _schemes = schemes;
             _emailSender = emailSender;
             _smsSender = smsSender;
             _logger = loggerFactory.CreateLogger<ManageController>();
@@ -292,7 +289,7 @@ namespace Company.WebApplication1.Controllers
                 return View("Error");
             }
             var userLogins = await _userManager.GetLoginsAsync(user);
-            var schemes = await _schemes.GetAllSchemesAsync();
+            var schemes = await _signInManager.GetExternalAuthenticationSchemesAsync();
             var otherLogins = schemes.Where(auth => userLogins.All(ul => auth.Name != ul.LoginProvider)).ToList();
             ViewData["ShowRemoveButton"] = user.PasswordHash != null || userLogins.Count > 1;
             return View(new ManageLoginsViewModel
