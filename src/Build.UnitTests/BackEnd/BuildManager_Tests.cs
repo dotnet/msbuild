@@ -3904,5 +3904,93 @@ namespace Microsoft.Build.UnitTests.BackEnd
             rootProject.Save();
             return new ProjectInstance(rootProject);
         }
+
+        [Fact]
+        public void ShouldBuildMutatedProjectInstanceWhoseProjectWasPreviouslyBuiltAsAP2PDependency()
+        {
+            var mainProjectContents =
+@"<Project>
+
+  <Target Name=""BuildOther"" Outputs=""@(ReturnValue)"">
+    <MSBuild Projects=""{0}"" Targets=""Foo"">
+      <Output TaskParameter=""TargetOutputs"" ItemName=""ReturnValue"" />
+    </MSBuild>
+  </Target>
+
+</Project>";
+
+
+            var p2pProjectContents =
+@"<Project>
+
+  <PropertyGroup>
+    <P>InitialValue</P>
+  </PropertyGroup>
+
+  <Target Name=""Foo"" Outputs=""$(P)""/>
+
+</Project>";
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] { "p2p", "main" }))
+            using (var collection = new ProjectCollection())
+            using (var manager = new BuildManager())
+            {
+                try
+                {
+                    var p2pProjectPath = testFiles.CreatedFiles[0];
+                    File.WriteAllText(p2pProjectPath, p2pProjectContents);
+
+                    var mainRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath))), collection);
+
+                    mainRootElement.FullPath = testFiles.CreatedFiles[1];
+                    mainRootElement.Save();
+
+                    // build p2p project as a real p2p dependency of some other project. This loads the p2p into msbuild's caches
+
+                    var mainProject = new Project(mainRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
+                    var mainInstance = mainProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
+
+                    var request = new BuildRequestData(mainInstance, new[] { "BuildOther" });
+
+                    var parameters = new BuildParameters()
+                    {
+                        DisableInProcNode = true,
+                    };
+
+                    manager.BeginBuild(parameters);
+
+                    var submission = manager.PendBuildRequest(request);
+
+                    var results = submission.Execute();
+                    Assert.Equal(BuildResultCode.Success, results.OverallResult);
+                    Assert.Equal("InitialValue", results.ResultsByTarget["BuildOther"].Items.First().ItemSpec);
+
+                    // build p2p directly via mutated ProjectInstances based of the same Project.
+                    // This should rebuild and the result shold reflect the in-memory changes and not reuse stale cache info
+
+                    var p2pProject = new Project(p2pProjectPath, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
+
+                    for (var i = 0; i < 2; i++)
+                    {
+                        var p2pInstance = p2pProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
+
+                        var newPropertyValue = $"NewValue_{i}";
+
+                        p2pInstance.SetProperty("P", newPropertyValue);
+
+                        request = new BuildRequestData(p2pInstance, new[] { "Foo" });
+                        submission = manager.PendBuildRequest(request);
+                        results = submission.Execute();
+
+                        Assert.Equal(BuildResultCode.Success, results.OverallResult);
+                        Assert.Equal(newPropertyValue, results.ResultsByTarget["Foo"].Items.First().ItemSpec);
+                    }
+                }
+                finally
+                {
+                    manager.EndBuild();
+                }
+            }
+        }
     }
 }
