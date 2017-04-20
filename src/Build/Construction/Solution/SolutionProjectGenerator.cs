@@ -41,6 +41,11 @@ namespace Microsoft.Build.Construction
         #region Private Fields
 
         /// <summary>
+        /// Name of the property used to store the path to the solution being built.
+        /// </summary>
+        internal const string SolutionPathPropertyName = "SolutionPath";
+        
+        /// <summary>
         /// The path node to add in when the output directory for a website is overridden.
         /// </summary>
         private const string WebProjectOverrideFolder = "_PublishedWebsites";
@@ -88,7 +93,7 @@ namespace Microsoft.Build.Construction
             new Tuple<string, string>("SolutionExt", null),
             new Tuple<string, string>("SolutionFileName", null),
             new Tuple<string, string>("SolutionName", null),
-            new Tuple<string, string>("SolutionPath", null)
+            new Tuple<string, string>(SolutionPathPropertyName, null)
         };
 
         /// <summary>
@@ -2194,7 +2199,7 @@ namespace Microsoft.Build.Construction
             globalProperties.AddProperty("SolutionFileName", EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.FullPath)));
 
-            globalProperties.AddProperty("SolutionPath", EscapingUtilities.Escape(Path.Combine(_solutionFile.SolutionFileDirectory, Path.GetFileName(_solutionFile.FullPath))));
+            globalProperties.AddProperty(SolutionPathPropertyName, EscapingUtilities.Escape(Path.Combine(_solutionFile.SolutionFileDirectory, Path.GetFileName(_solutionFile.FullPath))));
 
             // Add other global properties
             ProjectPropertyGroupElement frameworkVersionProperties = traversalProject.CreatePropertyGroupElement();

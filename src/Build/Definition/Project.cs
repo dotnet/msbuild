@@ -2492,7 +2492,7 @@ namespace Microsoft.Build.Evaluation
 
         private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
         {
-            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
+            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */, _projectCollection.SdkResolution);
 
             // We have to do this after evaluation, because evaluation might have changed
             // the imports being pulled in.
