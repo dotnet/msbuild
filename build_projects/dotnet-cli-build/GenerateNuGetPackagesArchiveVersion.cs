@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string[][] _templatesAndArgs = new string[][]
         {
-            new string[] { "console", "" },
             new string[] { "mvc", "-au individual" },
         };
 

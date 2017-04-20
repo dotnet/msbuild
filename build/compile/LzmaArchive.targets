@@ -78,7 +78,6 @@
         <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
         <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
 
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Console" />
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/MvcIndividual" />
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
       </ItemGroup>
@@ -90,17 +89,6 @@
       <WriteLinesToFile Condition=" '$(CLI_LZMA_PACKAGE_SOURCE)' != '' "
                         File="$(LZMANuGetConfigFilePath)" 
                         Lines="$(NuGetConfigContent)" />
-
-      <DotNetNew ToolPath="$(OutputDirectory)"
-                 TemplateType="console"
-                 TemplateArgs="--debug:ephemeral-hive --no-restore"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
-
-      <DotNetRestore ToolPath="$(OutputDirectory)"
-                     Packages="$(NuGetPackagesArchiveFolder)"
-                     ConfigFile="$(LZMANuGetConfigFilePath)"
-                     SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
       <DotNetNew ToolPath="$(OutputDirectory)"
                  TemplateType="mvc"

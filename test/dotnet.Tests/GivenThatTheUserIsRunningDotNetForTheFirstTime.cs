@@ -112,17 +112,9 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.visualstudio.web.browserlink",
             };
 
-            List<string> unexpectedDirectories = new List<string>()
-            {
-            };
-
             _nugetFallbackFolder
                 .Should()
                 .HaveDirectories(expectedDirectories);
-
-            _nugetFallbackFolder
-                .Should()
-                .NotHaveDirectories(unexpectedDirectories);
         }
 
         private string GetDotnetVersion()
