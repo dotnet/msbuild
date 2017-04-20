@@ -134,6 +134,13 @@
       "replaces": "MySignUpSignInPolicyId",
       "description": "The sign-in and sign-up policy ID for this project (use with IndividualB2C auth type)."
     },
+    "ResetPasswordPolicyId": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "",
+      "replaces": "MyResetPasswordPolicyId",
+      "description": "The reset password policy ID for this project (use with IndividualB2C auth type)."
+    },
     "EditProfilePolicyId": {
       "type": "parameter",
       "datatype": "string",

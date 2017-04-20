@@ -57,6 +57,14 @@ namespace Company.WebApplication1.Controllers
     
     #if (IndividualB2CAuth)
         [HttpGet]
+        public IActionResult ResetPassword()
+        {
+            var properties = new AuthenticationProperties() { RedirectUri = "/" };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = AzureAdB2COptions.ResetPasswordPolicyId;
+            return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
         public async Task EditProfile()
         {
             var properties = new AuthenticationProperties() { RedirectUri = "/" };
