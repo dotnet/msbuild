@@ -126,7 +126,7 @@ namespace Company.WebApplication1.Controllers
         public async Task<IActionResult> Login(string returnUrl = null)
         {
             // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.Authentication.SignOutAsync(IdentityCookieOptions.ExternalScheme);
+            await HttpContext.SignOutAsync(IdentityCookieOptions.ExternalScheme);
 
             ViewData["ReturnUrl"] = returnUrl;
             return View();
