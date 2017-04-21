@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="2.0.0-preview1-24566" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview1-24566" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview1-24566" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-preview1-24566" />
+    <!-- PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-preview1-24566" / -->
   </ItemGroup>
 
   <ItemGroup Condition="'$(NoTools)' != 'True'">

@@ -109,7 +109,7 @@ namespace Company.WebApplication1
 #if (IndividualLocalAuth)
                 app.UseDatabaseErrorPage();
 #endif
-                app.UseBrowserLink();
+                //app.UseBrowserLink();
             }
             else
             {
