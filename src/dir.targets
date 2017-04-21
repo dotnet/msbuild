@@ -48,6 +48,19 @@
     <AssemblyOriginatorKeyFile>$(SourceDir)Test.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <Target Name="FakeDelaySignForAL" BeforeTargets="GenerateSatelliteAssemblies">
+    <PropertyGroup>
+      <_OriginalDelaySign>$(DelaySign)</_OriginalDelaySign>
+      <DelaySign>true</DelaySign>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="RestoreDelaySignAfterAL" AfterTargets="GenerateSatelliteAssemblies">
+    <PropertyGroup>
+      <DelaySign>$(_OriginalDelaySign)</DelaySign>
+    </PropertyGroup>
+  </Target>
+
   <Import Project="$(MicroBuildDir)\MicroBuild.Core.targets" Condition="Exists('$(MicroBuildDir)\MicroBuild.Core.targets')" />
 
   <!-- Targets from buildtools that restore packages before building. -->
