@@ -951,6 +951,8 @@ namespace Microsoft.Build.Execution
             { return _properties; }
         }
 
+        internal ICollection<ProjectPropertyInstance> TestEnvironmentalProperties => new ReadOnlyCollection<ProjectPropertyInstance>(_environmentVariableProperties);
+
         /// <summary>
         /// Actual collection of items in this project,
         /// for the build to start with.
@@ -1730,45 +1732,23 @@ namespace Microsoft.Build.Execution
                 ProjectTargetInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectTargetInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
 
-            TranslateTargetSpecificationDictionary(translator, ref _beforeTargets);
-            TranslateTargetSpecificationDictionary(translator, ref _afterTargets);
+            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
+            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
 
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _initialTargets);
         }
 
-        private void TranslateTargetSpecificationDictionary(INodePacketTranslator translator, ref IDictionary<string, List<TargetSpecification>> targetSpecificationDictionary)
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, INodePacketTranslator translator)
         {
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                var count = targetSpecificationDictionary.Count;
-                translator.Translate(ref count);
+            translator.Translate(ref key);
+        }
 
-                foreach (var pair in targetSpecificationDictionary)
-                {
-                    var key = pair.Key;
-                    translator.Translate(ref key);
-
-                    var list = pair.Value;
-                    translator.Translate(ref list, TargetSpecification.FactoryForDeserialization);
-                }
-            }
-            else
-            {
-                var count = default(int);
-                targetSpecificationDictionary = new Dictionary<string, List<TargetSpecification>>(count);
-
-                for (int i = 0; i < count; i++)
-                {
-                    var key = default(string);
-                    translator.Translate(ref key);
-
-                    List<TargetSpecification> list = null;
-                    translator.Translate(ref list, TargetSpecification.FactoryForDeserialization);
-
-                    targetSpecificationDictionary[key] = list;
-                }
-            }
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, INodePacketTranslator translator)
+        {
+            translator.Translate(ref value, TargetSpecification.FactoryForDeserialization);
         }
 
         private void TranslateItems(INodePacketTranslator translator)
@@ -1788,7 +1768,7 @@ namespace Microsoft.Build.Execution
                     for (int i = 0; i < itemCount; i++)
                     {
                         ProjectItemInstance item = null;
-                        translator.Translate(ref item, delegate (INodePacketTranslator outerTranslator) { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
+                        translator.Translate(ref item, delegate { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
                         _items.Add(item);
                     }
                 }

@@ -305,7 +305,16 @@ namespace Microsoft.Build.Evaluation
         /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         /// <param name="importSearchPathsTable">Map of parameter name to property search paths for use during Import.</param>
-        internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
+        internal Toolset(
+            string toolsVersion,
+            string toolsPath,
+            PropertyDictionary<ProjectPropertyInstance> buildProperties,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            PropertyDictionary<ProjectPropertyInstance> globalProperties,
+            IDictionary<string, SubToolset> subToolsets,
+            string msbuildOverrideTasksPath,
+            string defaultOverrideToolsVersion,
+            Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
             if (_properties == null)

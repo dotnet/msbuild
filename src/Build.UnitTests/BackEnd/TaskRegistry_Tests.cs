@@ -15,6 +15,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -1827,6 +1828,146 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
         #endregion
 
+        #region SerializationTests
+
+        public static IEnumerable<object[]> TaskRegistryTranslationTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new List<ProjectUsingTaskElement>(),
+                    null
+                };
+
+                var toolsetBuildProperties = new[]
+                {
+                    ProjectPropertyInstance.Create("bp1", "v1"),
+                    ProjectPropertyInstance.Create("bp2", "v2")
+                };
+
+                var toolsetEnvironmentProperties = new[]
+                {
+                    ProjectPropertyInstance.Create("ep1", "v1"),
+                    ProjectPropertyInstance.Create("ep2", "v2")
+                };
+
+                var toolsetGlobalProperties = new[]
+                {
+                    ProjectPropertyInstance.Create("gp1", "v1"),
+                    ProjectPropertyInstance.Create("gp2", "v2")
+                };
+
+                var subToolsetProperties = new[]
+                {
+                    ProjectPropertyInstance.Create("sp1", "v1"),
+                    ProjectPropertyInstance.Create("sp2", "v2")
+                };
+
+                var toolset = new Toolset(
+                    MSBuildConstants.CurrentToolsVersion,
+                    "tp",
+                    new PropertyDictionary<ProjectPropertyInstance>(toolsetBuildProperties),
+                    new PropertyDictionary<ProjectPropertyInstance>(toolsetEnvironmentProperties),
+                    new PropertyDictionary<ProjectPropertyInstance>(toolsetGlobalProperties),
+                    new Dictionary<string, SubToolset>
+                    {
+                        {"1.0", new SubToolset("1.0", new PropertyDictionary<ProjectPropertyInstance>(subToolsetProperties))},
+                        {"2.0", new SubToolset("2.0", new PropertyDictionary<ProjectPropertyInstance>(subToolsetProperties))}
+                    },
+                    "motp",
+                    "dotv",
+                    new Dictionary<string, ProjectImportPathMatch>
+                    {
+                        {"a", new ProjectImportPathMatch("a", new List<string> {"b", "c"})},
+                        {"d", new ProjectImportPathMatch("d", new List<string> {"e", "f"})}
+                    }
+                );
+
+                ProjectRootElement project = ProjectRootElement.Create();
+
+                ProjectUsingTaskElement simpleTask = project.AddUsingTask("t1", null, "a1");
+
+                yield return new object[]
+                {
+                    new List<ProjectUsingTaskElement>()
+                    {
+                        simpleTask
+                    },
+                    toolset
+                };
+
+
+                ProjectUsingTaskElement taskbyFile1 = project.AddUsingTask("t1", "f1", null);
+                taskbyFile1.TaskFactory = "f1";
+                taskbyFile1.Architecture = "a1";
+                taskbyFile1.Runtime = "r1";
+                taskbyFile1.AddUsingTaskBody("true", "b1");
+                var parameterGroup = taskbyFile1.AddParameterGroup();
+                parameterGroup.AddParameter("n1", "false", "true", typeof(string).FullName);
+
+                yield return new object[]
+                {
+                    new List<ProjectUsingTaskElement>()
+                    {
+                        taskbyFile1
+                    },
+                    toolset
+                };
+
+                ProjectUsingTaskElement taskbyName = project.AddUsingTask("t1", null, "n2");
+                taskbyName.TaskFactory = "f2";
+                taskbyName.Architecture = "a2";
+                taskbyName.Runtime = "r2";
+                taskbyName.AddUsingTaskBody("true", "b2");
+                parameterGroup = taskbyName.AddParameterGroup();
+                parameterGroup.AddParameter("n2", "true", "false", typeof(bool).FullName);
+
+                yield return new object[]
+                {
+                    new List<ProjectUsingTaskElement>()
+                    {
+                        taskbyFile1,
+                        taskbyName
+                    },
+                    toolset
+                };
+
+                ProjectUsingTaskElement taskByFile2 = project.AddUsingTask("t2", "n3", null);
+                taskByFile2.TaskFactory = "f3";
+                taskByFile2.Architecture = "a3";
+                taskByFile2.Runtime = "r3";
+                taskByFile2.AddUsingTaskBody("true", "b3");
+                parameterGroup = taskByFile2.AddParameterGroup();
+                parameterGroup.AddParameter("n3", "false", "true", typeof(int).FullName);
+
+                yield return new object[]
+                {
+                    new List<ProjectUsingTaskElement>()
+                    {
+                        taskbyFile1,
+                        taskByFile2,
+                        taskbyName,
+                    },
+                    toolset
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TaskRegistryTranslationTestData))]
+        public void TaskRegistryCanSerializeViaTranslator(List<ProjectUsingTaskElement> usingTaskElements, Toolset toolset)
+        {
+            var original = CreateTaskRegistryAndRegisterTasks(usingTaskElements, toolset);
+
+            original.Translate(TranslationHelpers.GetWriteTranslator());
+
+            var copy = TaskRegistry.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            Assert.True(new TaskRegistryComparers.TaskRegistryComparer().Equals(original, copy));
+        }
+
+        #endregion
+
         #region Helper Methods
 
         /// <summary>
@@ -2020,9 +2161,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create and fill a task registry based on some using task elements.
         /// </summary>
-        internal TaskRegistry CreateTaskRegistryAndRegisterTasks(List<ProjectUsingTaskElement> usingTaskElements)
+        internal TaskRegistry CreateTaskRegistryAndRegisterTasks(List<ProjectUsingTaskElement> usingTaskElements, Toolset toolset = null)
         {
-            TaskRegistry registry = new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            TaskRegistry registry = toolset != null
+                ? new TaskRegistry(toolset, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache)
+                : new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             foreach (ProjectUsingTaskElement projectUsingTaskElement in usingTaskElements)
             {

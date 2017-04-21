@@ -4018,45 +4018,58 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            string importPath = Path.GetTempFileName();
-            File.WriteAllText(importPath, importProject);
-
-            var collection = new ProjectCollection();
-            var root = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), collection);
-
-            root.FullPath = Path.GetTempFileName();
-            root.Save();
-
-            var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
-            var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
-
-            var manager = new BuildManager();
-
-            var request = new BuildRequestData(instance, new[] { "Foo" });
-            var parameters = new BuildParameters()
+            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] {"main", "import"}, string.Empty))
             {
-                DisableInProcNode = true,
-            };
+                try
+                {
+                    var importPath = testFiles.CreatedFiles[1];
+                    File.WriteAllText(importPath, CleanupFileContents(importProject));
 
-            manager.BeginBuild(parameters);
-            var submission = manager.PendBuildRequest(request);
+                    var root = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
+                    root.FullPath = Path.GetTempFileName();
+                    root.Save();
 
-            var results = submission.Execute();
-            Assert.True(results.OverallResult == BuildResultCode.Success);
+                    var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, _projectCollection);
+                    var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
 
-            manager.EndBuild();
-            manager.ResetCaches();
+                    var request = new BuildRequestData(instance, new[] {"Foo"});
 
-            project.SetProperty("ImportIt", "false");
-            project.Save();
 
-            manager.BeginBuild(parameters);
-            request = new BuildRequestData(instance, new[] { "Foo" }, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
-            submission = manager.PendBuildRequest(request);
-            results = submission.Execute();
-            Assert.True(results.OverallResult == BuildResultCode.Success);
+                    var parameters = new BuildParameters(_projectCollection)
+                    {
+                        DisableInProcNode = true,
+                        Loggers = new ILogger[] {_logger}
+                    };
 
-            manager.EndBuild();
+                    _buildManager.BeginBuild(parameters);
+
+
+                    var submission = _buildManager.PendBuildRequest(request);
+
+                    var results = submission.Execute();
+
+                    //todo maybe assert some target specific stuff?
+                    Assert.True(results.OverallResult == BuildResultCode.Success);
+
+                    _buildManager.EndBuild();
+                    _buildManager.ResetCaches();
+
+                    project.SetProperty("ImportIt", "false");
+                    project.Save();
+
+                    _buildManager.BeginBuild(parameters);
+                    request = new BuildRequestData(instance, new[] {"Foo"}, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
+                    submission = _buildManager.PendBuildRequest(request);
+                    results = submission.Execute();
+                    Assert.True(results.OverallResult == BuildResultCode.Success);
+                }
+                finally
+                {
+                    _buildManager.EndBuild();
+                }
+            }
+
+
         }
     }
 }

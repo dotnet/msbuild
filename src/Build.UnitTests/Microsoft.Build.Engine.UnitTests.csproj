@@ -126,6 +126,7 @@
     <Compile Include="BackEnd\TaskHostTaskCancelled_Tests.cs" />
     <Compile Include="BackEnd\TaskHostTaskComplete_Tests.cs" />
     <Compile Include="BackEnd\TaskHost_Tests.cs" />
+    <Compile Include="TestComparers\TaskRegistryComparers.cs" />
     <Compile Include="BackEnd\TaskRegistry_Tests.cs" />
     <Compile Include="BackEnd\TranslationHelpers.cs" />
     <Compile Include="BackEnd\TargetEntry_Tests.cs" />
@@ -176,9 +177,15 @@
     <Compile Include="Globbing\MSBuildGlob_Tests.cs" />
     <Compile Include="HashTableUtility_Tests.cs" />
     <Compile Include="Instance\HostServices_Tests.cs" />
+    <Compile Include="TestComparers\ProjectInstanceModelTestComparers.cs" />
+    <Compile Include="TestData\ProjectInstanceTestObjects.cs" />
     <Compile Include="Instance\ProjectInstance_Internal_Tests.cs" />
+    <Compile Include="Instance\ProjectTaskInstance_Internal_Tests.cs" />
+    <Compile Include="Instance\ProjectTargetInstance_Internal_Tests.cs" />
     <Compile Include="Instance\ProjectMetadataInstance_Internal_Tests.cs" />
+    <Compile Include="Instance\ProjectItemGroupTaskItemInstance_Internal_Tests.cs" />
     <Compile Include="Instance\ProjectPropertyInstance_Internal_Tests.cs" />
+    <Compile Include="Instance\ProjectPropertyGroupTaskPropertyInstance_Internal_Tests.cs" />
     <Compile Include="Instance\TaskItem_Tests.cs" />
     <Compile Include="InvalidProjectFileException_Tests.cs" />
     <Compile Include="LogFormatter_Tests.cs" />

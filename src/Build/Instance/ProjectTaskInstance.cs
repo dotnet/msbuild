@@ -121,39 +121,68 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Creates a new task instance directly.  Used for generating instances on-the-fly.
+        ///     Creates a new task instance directly.  Used for generating instances on-the-fly.
         /// </summary>
         /// <param name="name">The task name.</param>
-        /// <param name="taskLocation">The location for this task.</param>
+        /// <param name="location">The location for this task.</param>
         /// <param name="condition">The unevaluated condition.</param>
         /// <param name="continueOnError">The unevaluated continue on error.</param>
         /// <param name="msbuildRuntime">The MSBuild runtime.</param>
         /// <param name="msbuildArchitecture">The MSBuild architecture.</param>
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             string name,
-            ElementLocation taskLocation,
+            ElementLocation location,
             string condition,
             string continueOnError,
             string msbuildRuntime,
             string msbuildArchitecture
-            )
+        ) : this(
+            name,
+            condition,
+            continueOnError,
+            msbuildRuntime,
+            msbuildArchitecture,
+            new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(8, StringComparer.OrdinalIgnoreCase),
+            new List<ProjectTaskInstanceChild>(),
+            location,
+            condition == string.Empty ? null : ElementLocation.EmptyLocation,
+            continueOnError == string.Empty ? null : ElementLocation.EmptyLocation,
+            msbuildRuntime == string.Empty ? null : ElementLocation.EmptyLocation,
+            msbuildArchitecture == string.Empty ? null : ElementLocation.EmptyLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength("name", "name");
+        }
+
+        internal ProjectTaskInstance
+            (
+            string name,
+            string condition,
+            string continueOnError,
+            string msbuildRuntime,
+            string msbuildArchitecture,
+            CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> parameters,
+            List<ProjectTaskInstanceChild> outputs,
+            ElementLocation location,
+            ElementLocation conditionLocation,
+            ElementLocation continueOnErrorElementLocation,
+            ElementLocation msbuildRuntimeLocation,
+            ElementLocation msbuildArchitectureLocation)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
             ErrorUtilities.VerifyThrowArgumentNull(condition, "condition");
             ErrorUtilities.VerifyThrowArgumentNull(continueOnError, "continueOnError");
+
             _name = name;
             _condition = condition;
             _continueOnError = continueOnError;
             _msbuildRuntime = msbuildRuntime;
             _msbuildArchitecture = msbuildArchitecture;
-            _location = taskLocation;
-            _conditionLocation = (condition == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _continueOnErrorLocation = (continueOnError == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _msbuildArchitectureLocation = (msbuildArchitecture == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _msbuildRuntimeLocation = (msbuildRuntime == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _parameters = new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(8, StringComparer.OrdinalIgnoreCase);
-            _outputs = new List<ProjectTaskInstanceChild>();
+            _location = location;
+            _conditionLocation = conditionLocation;
+            _continueOnErrorLocation = continueOnErrorElementLocation;
+            _msbuildArchitectureLocation = msbuildArchitectureLocation;
+            _msbuildRuntimeLocation = msbuildRuntimeLocation;
+            _parameters = parameters;
+            _outputs = outputs;
         }
 
         private ProjectTaskInstance()
@@ -221,6 +250,8 @@ namespace Microsoft.Build.Execution
                 return filteredParameters;
             }
         }
+
+        internal IDictionary<string, Tuple<string, ElementLocation>> TestGetParameters => _parameters;
 
         /// <summary>
         /// Ordered set of output property and item objects.
