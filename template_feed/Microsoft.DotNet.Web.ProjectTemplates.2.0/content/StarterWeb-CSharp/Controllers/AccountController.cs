@@ -69,7 +69,7 @@ namespace Company.WebApplication1.Controllers
         {
             var properties = new AuthenticationProperties() { RedirectUri = "/" };
             properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = AzureAdB2COptions.EditProfilePolicyId;
-            await HttpContext.Authentication.ChallengeAsync(
+            await HttpContext.ChallengeAsync(
                 OpenIdConnectDefaults.AuthenticationScheme, properties, ChallengeBehavior.Unauthorized);
         }
         

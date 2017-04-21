@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Cookies;
 #endif
-#if (OrganizationalAuth || MultiOrgAuth)
+#if (MultiOrgAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
@@ -74,6 +74,7 @@ namespace Company.WebApplication1
                 sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             });
+
 #endif
 #if (IndividualB2CAuth)
 
@@ -93,71 +94,8 @@ namespace Company.WebApplication1
 #elseif (OrganizationalAuth || IndividualB2CAuth)
             services.AddCookieAuthentication();
 
-    #if (OrganizationalAuth || IndividualB2CAuth)
-            services.AddOpenIdConnectAuthentication(options =>
-            {
-                options.ClientId = Configuration["Authentication:AzureAd:ClientId"];
-        #if (OrgReadAccess)
-                options.ClientSecret = Configuration["Authentication:AzureAd:ClientSecret"];
-        #endif
-        #if (MultiOrgAuth)
-                options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common";
-        #elseif (SingleOrgAuth)
-                options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + Configuration["Authentication:AzureAd:TenantId"];
-        #endif
-    #else
             services.AddOpenIdConnectAuthentication();
             
-    #endif
-#endif
-#if (MultiOrgAuth)
-                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
-    #if (OrgReadAccess)
-                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-    #endif
-
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    // Instead of using the default validation (validating against a single issuer value, as we do in line of business apps),
-                    // we inject our own multitenant validation logic
-                    ValidateIssuer = false,
-
-                    // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
-                    //IssuerValidator = (issuer, securityToken, validationParameters) => {
-                    //    if (myIssuerValidationLogic(issuer)) return issuer;
-                    //}
-                };
-                options.Events = new OpenIdConnectEvents
-                {
-                    OnTicketReceived = (context) =>
-                    {
-                        // If your authentication logic is based on users then add your logic here
-                        return Task.FromResult(0);
-                    },
-                    OnAuthenticationFailed = (context) =>
-                    {
-                        context.Response.Redirect("/Home/Error");
-                        context.HandleResponse(); // Suppress the exception
-                        return Task.FromResult(0);
-                    },
-                    // If your application needs to do authenticate single users, add your user validation below.
-                    //OnTokenValidated = (context) =>
-                    //{
-                    //    return myUserValidationLogic(context.Ticket.Principal);
-                    //}
-                };
-#elseif (SingleOrgAuth)
-    #if (OrgReadAccess)
-                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
-                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-    #else
-                options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
-    #endif
-#endif
-#if (OrganizationalAuth)
-            });
->>>>>>> Fixes
-
 #endif
 
         }
