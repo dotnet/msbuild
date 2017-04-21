@@ -56,7 +56,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                              RestoreProj=$(RestoreProj);
                              DisableImplicitFrameworkReferences=true;
                              SkipUnchangedFiles=$(SkipUnchangedFiles);
-                             PreserveStoreLayout=$(PreserveStoreLayout)"
+                             PreserveStoreLayout=$(PreserveStoreLayout);
+                             CreateProfilingSymbols=$(CreateProfilingSymbols);
+                             ProfilingSymbolsDir=$(ProfilingSymbolsDir)"
                  ContinueOnError="WarnAndContinue">
       <Output ItemName="AllResolvedPackagesPublished" TaskParameter="TargetOutputs" />
     </MSBuild>
@@ -81,10 +83,13 @@ Copyright (c) .NET Foundation. All rights reserved.
           PublishDir=$(PublishDir);
           StoreStagingDir=$(StoreStagingDir);
           TargetFramework=$(TargetFramework);
+          RuntimeIdentifier=$(RuntimeIdentifier);
           JitPath=$(JitPath);
           Crossgen=$(Crossgen);
           SkipUnchangedFiles=$(SkipUnchangedFiles);
-          PreserveStoreLayout=$(PreserveStoreLayout)
+          PreserveStoreLayout=$(PreserveStoreLayout);
+          CreateProfilingSymbols=$(CreateProfilingSymbols);
+          ProfilingSymbolsDir=$(ProfilingSymbolsDir)
         </Properties>
       </PackageReferencesToStore>
     </ItemGroup>
@@ -205,6 +210,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <DefaultComposeDir>$(HOME)</DefaultComposeDir>
       <DefaultComposeDir Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</DefaultComposeDir>
       <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'store'))</DefaultComposeDir>
+
+      <_ProfilingSymbolsDirectoryName>ProfilingSymbols</_ProfilingSymbolsDirectoryName>
+      <DefaultProfilingSymbolsDir>$([System.IO.Path]::Combine($(DefaultComposeDir), $(_ProfilingSymbolsDirectoryName)))</DefaultProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' == '' and '$(ComposeDir)' != ''">$([System.IO.Path]::Combine($(ComposeDir), $(_ProfilingSymbolsDirectoryName)))</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ProfilingSymbolsDir), $(PlatformTarget)))</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' == ''">$(DefaultProfilingSymbolsDir)</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ProfilingSymbolsDir), $(_TFM)))</ProfilingSymbolsDir>
+      
       <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
       <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
@@ -218,6 +231,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RestoreProj>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Restore.csproj"))</RestoreProj>          <!-- To minimize parsing huge input files during restore stage for packages -->
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+      <CreateProfilingSymbols Condition="'$(CreateProfilingSymbols)' == ''">false</CreateProfilingSymbols>
     </PropertyGroup>
 
 
@@ -288,6 +302,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  Properties="RestoreGraphProjectInput=$(_PackageProjFile);
                              DisableImplicitFrameworkReferences=true;
                              RestoreOutputPath=$(StoreWorkerWorkingDir);
+                             RuntimeIdentifier=$(RuntimeIdentifier);
                              TargetFramework=$(TargetFramework);"/>
   </Target>
 

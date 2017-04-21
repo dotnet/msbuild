@@ -103,6 +103,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           _RuntimeOptimizedDir=$(_RuntimeOptimizedDir);
           PublishDir=$(StoreStagingDir);
           CrossgenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);
+          CreateProfilingSymbols=$(CreateProfilingSymbols);
+          ProfilingSymbolsDir=$(ProfilingSymbolsDir)
         </Properties>
       </AssembliestoCrossgen>
     </ItemGroup>
@@ -126,7 +128,10 @@ Copyright (c) .NET Foundation. All rights reserved.
            DependsOnTargets="_InitializeBasicProps;">
 
     <PropertyGroup>
+      <CrossgenProfilingSymbolsOutputDirectory>$([System.IO.Path]::GetDirectoryName($(ProfilingSymbolsDir)\$(CrossgenSubOutputPath)))</CrossgenProfilingSymbolsOutputDirectory>
       <CrossgenCommandline>$(CrossgenExe) -readytorun -in $(CrossgenInputAssembly) -out $(CrossgenOutputAssembly) -jitpath $(CrossgenJit) -platform_assemblies_paths $(CrossgenPlatformAssembliesPath)</CrossgenCommandline>
+      <CreateProfilingSymbolsOptionName Condition="'$(OS)' == 'Windows_NT'">CreatePDB</CreateProfilingSymbolsOptionName>
+      <CreateProfilingSymbolsOptionName Condition="'$(CreateProfilingSymbolsOptionName)' == ''">CreatePerfMap</CreateProfilingSymbolsOptionName>
     </PropertyGroup>
 
     <Message Text="CrossgenCommandline: $(CrossgenCommandline)"/>
@@ -137,9 +142,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--Optimization skip if the assembly is already present in the final output directory-->
     <Exec
      Command="$(CrossgenCommandline)"
-     Condition="!Exists($([System.IO.Path]::Combine($(PublishDir),$(CrossgenSubOutputPath))))">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
-    </Exec>
+     Condition="!Exists($([System.IO.Path]::Combine($(PublishDir),$(CrossgenSubOutputPath))))" />
 
     <Copy SourceFiles = "$(CrossgenOutputAssembly)"
           DestinationFiles="$(PublishDir)\$(CrossgenSubOutputPath)"
@@ -150,6 +153,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
+
+    <!-- Create profiling symbols if requested -->
+    <MakeDir Directories="$(CrossgenProfilingSymbolsOutputDirectory)"
+             Condition="'$(CreateProfilingSymbols)' == 'true'" />
+    <Exec Command="$(CrossgenExe) -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
+          Condition="'$(CreateProfilingSymbols)' == 'true'" />
   </Target>
 
   <Target Name="_InitializeBasicProps">
@@ -226,7 +235,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
     </PropertyGroup>
 
-    <MakeDir  Directories="$(_RuntimeOptimizedDir)"/>
+    <MakeDir Directories="$(_RuntimeOptimizedDir)"/>
+    <MakeDir Directories="$(ProfilingSymbolsDir)"
+             Condition="'$(CreateProfilingSymbols)' == 'true'" />
     
     <!-- Copy managed files to  a flat temp directory for passing it as ref -->
     <Copy SourceFiles = "@(_ManagedResolvedFilesToOptimize)"
