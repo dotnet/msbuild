@@ -1,0 +1,23 @@
+{
+  "symbolInfo": {
+    "TargetFrameworkOverride": {
+      "isHidden": "true",
+      "longName": "target-framework-override",
+      "shortName": ""
+    },
+    "Framework": {
+      "longName": "framework"
+    },
+    "EnablePack": {
+      "shortName": "p",
+      "longName": "enable-pack"
+    },
+    "skipRestore": {
+      "longName": "no-restore",
+      "shortName": ""
+    }
+  },
+  "UsageExamples": [
+    "--framework netcoreapp1.1"
+  ]
+}
