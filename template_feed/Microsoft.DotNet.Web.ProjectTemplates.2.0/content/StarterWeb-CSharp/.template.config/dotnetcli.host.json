@@ -36,6 +36,10 @@
       "longName": "client-id",
       "shortName": ""
     },
+    "CallbackPath": {
+      "longName": "callback-path",
+      "shortName": ""
+    },
     "Domain": {
       "longName": "domain",
       "shortName": ""

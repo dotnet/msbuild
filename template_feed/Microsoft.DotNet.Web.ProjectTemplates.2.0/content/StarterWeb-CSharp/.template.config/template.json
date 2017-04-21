@@ -173,6 +173,13 @@
       "replaces": "22222222-2222-2222-2222-222222222222",
       "description": "The TenantId ID of the directory to connect to (use with Single-org auth types)."
     },
+    "CallbackPath": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "/signin-oidc",
+      "defaultValue": "/signin-oidc",
+      "description": "The request path within the application's base path of the redirect URI (use with Single-org or IndividualB2C auth types)."
+    },
     "OrgReadAccess": {
       "type": "parameter",
       "datatype": "bool",
