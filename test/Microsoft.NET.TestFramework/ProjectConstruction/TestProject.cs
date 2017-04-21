@@ -172,7 +172,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             foreach (var additionalProperty in AdditionalProperties)
             {
-                propertyGroup.Add(new XElement($"{ns}{additionalProperty.Key}", additionalProperty.Value));
+                propertyGroup.Add(new XElement(ns + additionalProperty.Key, additionalProperty.Value));
             }
 
             if (this.IsExe)

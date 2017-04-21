@@ -141,21 +141,11 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyTheoryAttribute]
+        [CoreMSBuildAndWindowsOnlyTheory]
         [InlineData("netstandard2.0")]
         [InlineData("netcoreapp2.0")]
         public void Net461_is_implicit_for_Netstandard_and_Netcore_20(string targetFramework)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Fullframework NuGet versioning on Jenkins infrastructure issue
-                //        https://github.com/dotnet/sdk/issues/1041
-
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var testProjectName = targetFramework.Replace(".", "_") + "implicit_ptf";
 
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
@@ -170,7 +160,7 @@ namespace Microsoft.NET.Build.Tests
             buildCommand.Execute().Should().Pass();
         }
 
-        [WindowsOnlyTheoryAttribute]
+        [WindowsOnlyTheory]
         [InlineData("netstandard1.6")]
         [InlineData("netcoreapp1.1")]
         public void Net461_is_not_implicit_for_Netstandard_and_Netcore_less_than_20(string targetFramework)
@@ -184,19 +174,9 @@ namespace Microsoft.NET.Build.Tests
             restoreCommand.Execute().Should().Fail();
         }
 
-        [WindowsOnlyFact]
+        [CoreMSBuildAndWindowsOnlyTheory]
         public void It_is_possible_to_disabled_net461_implicit_package_target_fallback()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Fullframework NuGet versioning on Jenkins infrastructure issue
-                //        https://github.com/dotnet/sdk/issues/1041
-
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             const string testProjectName = "netstandard20_disabled_ptf";
 
             var testProjectTestAsset = CreateTestAsset(
