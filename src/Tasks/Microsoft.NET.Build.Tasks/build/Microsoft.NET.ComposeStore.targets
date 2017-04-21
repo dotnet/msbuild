@@ -204,7 +204,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <DefaultComposeDir>$(HOME)</DefaultComposeDir>
       <DefaultComposeDir Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</DefaultComposeDir>
-      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'packages'))</DefaultComposeDir>
+      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'store'))</DefaultComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
       <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
