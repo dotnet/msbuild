@@ -61,6 +61,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public const string UnableToGenerateDepsJson = "unable to generate deps.json, it may have been already generated: {0}";
 
+        public const string DepsJsonGeneratorProjectNotSet = "Unable to find deps.json generator project.";
+
         public const string UnableToDeleteTemporaryDepsJson = "unable to delete temporary deps.json file: {0}";
 
         public const string VersionForPackageCouldNotBeResolved = "Version for package `{0}` could not be resolved.";

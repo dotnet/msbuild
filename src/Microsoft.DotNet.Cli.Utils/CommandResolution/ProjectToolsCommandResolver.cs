@@ -316,6 +316,12 @@ namespace Microsoft.DotNet.Cli.Utils
             SingleProjectInfo toolLibrary,
             string toolDepsJsonGeneratorProject)
         {
+            if (string.IsNullOrEmpty(toolDepsJsonGeneratorProject) ||
+                !File.Exists(toolDepsJsonGeneratorProject))
+            {
+                throw new GracefulException(LocalizableStrings.DepsJsonGeneratorProjectNotSet);
+            }
+
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.GeneratingDepsJson,
                 depsPath));
@@ -331,6 +337,9 @@ namespace Microsoft.DotNet.Cli.Utils
             args.Add($"/p:ProjectAssetsFile=\"{toolLockFile.Path}\"");
             args.Add($"/p:ToolName={toolLibrary.Name}");
             args.Add($"/p:ProjectDepsFilePath={tempDepsFile}");
+
+            var toolTargetFramework = toolLockFile.Targets.First().TargetFramework.GetShortFolderName();
+            args.Add($"/p:TargetFramework={toolTargetFramework}");
 
 
             //  Look for the .props file in the Microsoft.NETCore.App package, until NuGet
@@ -364,7 +373,13 @@ namespace Microsoft.DotNet.Cli.Utils
             //  will think the deps file is up-to-date and skip executing
             File.Delete(tempDepsFile);
 
-            var result = new MSBuildForwardingAppWithoutLogging(args).Execute();
+            var msBuildExePath = _environment.GetEnvironmentVariable(Constants.MSBUILD_EXE_PATH);
+
+            msBuildExePath = string.IsNullOrEmpty(msBuildExePath) ?
+                Path.Combine(AppContext.BaseDirectory, "MSBuild.dll") :
+                msBuildExePath;
+
+            var result = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath).Execute();
 
             if (result != 0)
             {
