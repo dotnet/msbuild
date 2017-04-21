@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 #endif
 using System.IO;
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
@@ -130,7 +130,7 @@ namespace Microsoft.Build.Shared
         internal static AssemblyNameExtension GetAssemblyNameEx(string path)
         {
             AssemblyName assemblyName = null;
-#if FEATURE_ASSEMBLY_LOADFROM
+#if FEATURE_ASSEMBLY_LOADFROM && !MONO
             try
             {
                 assemblyName = AssemblyName.GetAssemblyName(path);
@@ -158,7 +158,16 @@ namespace Microsoft.Build.Shared
                 assemblyName = new AssemblyName();
                 assemblyName.Name = metadataReader.GetString(entry.Name);
                 assemblyName.Version = entry.Version;
-                assemblyName.CultureName = metadataReader.GetString(entry.Culture);
+                var cultureString = metadataReader.GetString(entry.Culture);
+                if (!NativeMethodsShared.IsMono)
+                {
+                    // set_CultureName throws NotImplementedException on Mono
+                    assemblyName.CultureName = cultureString;
+                }
+                else if (cultureString != null)
+                {
+                    assemblyName.CultureInfo = new CultureInfo(cultureString);
+                }
                 assemblyName.SetPublicKey(metadataReader.GetBlobBytes(entry.PublicKey));
                 assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
             }

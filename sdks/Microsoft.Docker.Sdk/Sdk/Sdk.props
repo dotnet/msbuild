@@ -31,6 +31,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetRuntime>None</TargetRuntime>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <SkipImportNuGetProps>true</SkipImportNuGetProps>
+    <SkipImportNuGetBuildTargets>true</SkipImportNuGetBuildTargets>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath)\Sdks\Microsoft.Docker.Sdk\build\Microsoft.VisualStudio.Docker.Compose.props"
           Condition="Exists('$(MSBuildExtensionsPath)\Sdks\Microsoft.Docker.Sdk\build\Microsoft.VisualStudio.Docker.Compose.props')" />
 

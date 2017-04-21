@@ -303,6 +303,7 @@ setHome
 
 #temporary workaround to this being set on wrench and breaking tests!
 unset FOO
+
 restoreBuildTools
 
 echo
