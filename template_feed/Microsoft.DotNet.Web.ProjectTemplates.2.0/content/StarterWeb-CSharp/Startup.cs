@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Cookies;
 #endif
-#if (MultiOrgAuth || IndividualB2CAuth)
+#if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
