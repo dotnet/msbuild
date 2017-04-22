@@ -11,9 +11,9 @@
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170410-189</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170410-189</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170410-189</TemplateEngineTemplate2_0Version>
+    <TemplateEngineVersion>1.0.0-beta2-20170421-198</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170421-198</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170421-198</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview1-002022</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
