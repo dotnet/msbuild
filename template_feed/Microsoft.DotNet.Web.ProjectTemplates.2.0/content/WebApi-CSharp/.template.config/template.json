@@ -210,7 +210,7 @@
     },
     "RequiresHttps": {
       "type": "computed",
-      "value": "(OrganizationalAuth)"
+      "value": "(OrganizationalAuth || IndividualB2CAuth)"
     },
     "IncludeApplicationInsights": {
       "type": "parameter",

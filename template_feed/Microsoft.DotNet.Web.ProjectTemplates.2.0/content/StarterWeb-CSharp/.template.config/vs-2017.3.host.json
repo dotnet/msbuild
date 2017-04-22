@@ -24,7 +24,13 @@
     },
     {
       "auth": "Individual",
-      "authenticationType": "IndividualAuth"
+      "authenticationType": "IndividualAuth",
+      "b2cAuthenticationOptions": "CloudExisting"
+    },
+    {
+      "auth": "Individual",
+      "authenticationType": "IndividualAuth",
+      "b2cAuthenticationOptions": "Local"
     },
     {
       "auth": "SingleOrg",

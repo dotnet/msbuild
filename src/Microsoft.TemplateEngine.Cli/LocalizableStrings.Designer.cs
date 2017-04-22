@@ -98,6 +98,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it..
+        /// </summary>
+        public static string AddRefPostActionFrameworkNotSupported {
+            get {
+                return ResourceManager.GetString("AddRefPostActionFrameworkNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
         /// </summary>
         public static string AddRefPostActionMisconfigured {

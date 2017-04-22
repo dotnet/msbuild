@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Cookies;
 #endif
-#if (MultiOrgAuth)
+#if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
@@ -68,8 +68,13 @@ namespace Company.WebApplication1
 #endif
 #if (OrganizationalAuth || IndividualB2CAuth)
 
-            services.AddAuthentication(
-                sharedOptions => sharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddAuthentication(sharedOptions => 
+            {
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            });
+
 #endif
 #if (IndividualB2CAuth)
 
@@ -81,6 +86,18 @@ namespace Company.WebApplication1
 #if (IndividualB2CAuth || OrganizationalAuth)
             services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OpenIdConnectOptionsSetup>();
 #endif
+
+#if (IndividualLocalAuth)
+
+            // Add external authentication handlers below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+
+#elseif (OrganizationalAuth || IndividualB2CAuth)
+            services.AddCookieAuthentication();
+
+            services.AddOpenIdConnectAuthentication();
+            
+#endif
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,7 +109,7 @@ namespace Company.WebApplication1
 #if (IndividualLocalAuth)
                 app.UseDatabaseErrorPage();
 #endif
-                app.UseBrowserLink();
+                //app.UseBrowserLink();
             }
             else
             {
@@ -101,15 +118,8 @@ namespace Company.WebApplication1
 
             app.UseStaticFiles();
 
-#if (IndividualLocalAuth)
-            app.UseIdentity();
-
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
-
-#elseif (OrganizationalAuth || IndividualB2CAuth)
-            app.UseCookieAuthentication();
-
-            app.UseOpenIdConnectAuthentication();
+#if (IndividualLocalAuth || OrganizationalAuth || IndividualB2CAuth)
+            app.UseAuthentication();
 
 #endif
             app.UseMvc(routes =>

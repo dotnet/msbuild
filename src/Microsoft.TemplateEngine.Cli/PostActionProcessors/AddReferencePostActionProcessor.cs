@@ -77,6 +77,11 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     }
                     commandResult = addReferenceCommand.Execute();
                 }
+                else if (string.Equals(referenceType, "framework", StringComparison.OrdinalIgnoreCase))
+                {
+                    environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionFrameworkNotSupported, referenceToAdd));
+                    return false;
+                }
                 else
                 {
                     environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnsupportedRefType, referenceType));

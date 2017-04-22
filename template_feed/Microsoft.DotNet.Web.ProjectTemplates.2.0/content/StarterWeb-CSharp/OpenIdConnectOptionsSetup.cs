@@ -33,8 +33,8 @@ namespace Company.WebApplication1
             oidcOptions.ClientId = Options.ClientId;
             oidcOptions.Authority = Options.Authority;
             oidcOptions.UseTokenLifetime = true;
-#if (OrganizationalAuth)
             oidcOptions.CallbackPath = Options.CallbackPath;
+#if (OrganizationalAuth)
     #if (OrgReadAccess)
             oidcOptions.ResponseType = OpenIdConnectResponseType.CodeIdToken;
     #endif
@@ -86,7 +86,7 @@ namespace Company.WebApplication1
 
         public Task OnRedirectToIdentityProvider(RedirectContext context)
         {
-            var defaultPolicy = AzureAdB2COptions.DefaultPolicy;
+            var defaultPolicy = Options.DefaultPolicy;
             if (context.Properties.Items.TryGetValue(AzureAdB2COptions.PolicyAuthenticationProperty, out var policy) && 
                 !policy.Equals(defaultPolicy))
             {
