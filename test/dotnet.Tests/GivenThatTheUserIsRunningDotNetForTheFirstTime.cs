@@ -109,7 +109,8 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.extensions.logging.console",
                 "microsoft.extensions.logging.debug",
                 "microsoft.extensions.options.configurationextensions",
-                "microsoft.visualstudio.web.browserlink",
+                //BrowserLink has been temporarily disabled until https://github.com/dotnet/templating/issues/644 is resolved
+                //"microsoft.visualstudio.web.browserlink",
             };
 
             _nugetFallbackFolder
