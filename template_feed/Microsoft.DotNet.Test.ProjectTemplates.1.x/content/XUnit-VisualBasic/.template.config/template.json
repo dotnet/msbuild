@@ -25,6 +25,7 @@
       "type": "parameter",
       "description": "The target framework for the project.",
       "datatype": "choice",
+      "replaces": "netcoreapp1.1",
       "choices": [
         {
           "choice": "netcoreapp1.0",
