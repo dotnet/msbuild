@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Channel>master</Channel>
-    <BranchName>master</BranchName>
+    <Channel>release/2.0.0</Channel>
+    <BranchName>release/2.0.0</BranchName>
   </PropertyGroup>
 </Project>
