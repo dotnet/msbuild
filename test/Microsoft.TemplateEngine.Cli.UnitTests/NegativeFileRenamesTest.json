@@ -1,0 +1,18 @@
+﻿[
+  {
+    "kind": "file_exists",
+    "path": "bar.cs"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "baz.cs"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "baz/baz.cs"
+  },
+  {
+    "kind": "file_exists",
+    "path": "bar/bar.cs"
+  }
+]

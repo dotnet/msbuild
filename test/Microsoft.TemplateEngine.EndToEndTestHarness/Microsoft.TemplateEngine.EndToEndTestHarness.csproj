@@ -40,6 +40,9 @@
     <None Include="test_templates\TemplateWithSourceName\bar\bar.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="test_templates\TemplateWithUnspecifiedSourceName\.template.config\template.json" />
+    <None Include="test_templates\TemplateWithUnspecifiedSourceName\bar.cs" />
+    <None Include="test_templates\TemplateWithUnspecifiedSourceName\bar\bar.cs" />
     <None Include="test_templates\TemplateWithValueForms\.template.config\template.json" />
     <None Include="test_templates\TemplateWithValueForms\bar.2.cs" />
     <None Include="test_templates\TemplateWithValueForms\bar.cs" />
