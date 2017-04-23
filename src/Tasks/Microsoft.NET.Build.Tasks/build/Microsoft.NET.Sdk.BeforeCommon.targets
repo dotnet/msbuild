@@ -108,6 +108,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(DisableImplicitPackageTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
+    <PackageTargetFallback>$(PackageTargetFallback);net461</PackageTargetFallback>    
+  </PropertyGroup>
+
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
