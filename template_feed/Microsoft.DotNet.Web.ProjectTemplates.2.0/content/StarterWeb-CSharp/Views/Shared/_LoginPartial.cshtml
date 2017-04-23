@@ -1,40 +1,20 @@
-﻿@*#if (IndividualLocalAuth) *@
-@using Microsoft.AspNetCore.Identity
-@using Company.WebApplication1.Models
-@*#else
-@*#if (IndividualB2CAuth)
+﻿@*#if (IndividualB2CAuth)
+@using Microsoft.AspNetCore.Authentication.Extensions
 @using Microsoft.Extensions.Options
 #endif
-@using System.Security.Principal
-#endif *@
 
-@*#if (IndividualLocalAuth) *@
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-
-@*#endif *@
 @*#if (IndividualB2CAuth)
 @inject IOptions<AzureAdB2COptions> AzureAdB2COptions
 
 #endif *@
-@*#if (IndividualLocalAuth) *@
-@if (SignInManager.IsSignedIn(User))
-@*#else
 @if (User.Identity.IsAuthenticated)
-#endif *@
 {
-@*#if (IndividualLocalAuth) *@
-    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
-        <ul class="nav navbar-nav navbar-right">
-            <li>
-                <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
-            </li>
-            <li>
-                <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
-            </li>
-        </ul>
-    </form>
-@*#elseif (IndividualB2CAuth)
+@*#if (IndividualLocalAuth)
+    <ul class="nav navbar-nav navbar-right">
+        <li><a asp-area="" asp-controller="Account" asp-action="Manage" title="Manage">Hello @User.Identity.Name!</a></li>
+        <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a></li>
+    </ul>
+#elseif (IndividualB2CAuth)
     <ul class="nav navbar-nav navbar-right">
         @if (!string.IsNullOrEmpty(AzureAdB2COptions.Value.EditProfilePolicyId))
         {
@@ -56,11 +36,6 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-@*#if (IndividualLocalAuth) *@
-        <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
-        <li><a asp-area="" asp-controller="Account" asp-action="Login">Log in</a></li>
-@*#else
-        <li><a asp-area="" asp-controller="Account" asp-action="Signin">Sign in</a></li>
-#endif *@
+        <li><a asp-area="" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
     </ul>
 }

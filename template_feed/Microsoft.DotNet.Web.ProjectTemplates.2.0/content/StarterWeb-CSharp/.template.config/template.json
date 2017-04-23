@@ -14,7 +14,14 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
+  "guids": [
+    "09732173-2cef-46b7-83db-1334bcb079d3", // Tenant ID
+    "53bc9b9d-9d6a-45d4-8429-2a2761773502", // Client ID
+    "ab1d2251-be0b-4457-abfe-4686ff9286c0", // Client app ID
+    "d2e0a81e-e08e-42ea-bbae-bec4c4ac6aed", // Client OpenID scope ID
+    "c9c97e6d-e0fc-4f75-b7ca-d43515b68ee3", // Client logout redirect URI ID
+    "8f87a3e2-5ac9-4852-8cc9-35799e66f898"  // Client redirect URI ID
+  ],
   "sources": [
     {
       "modifiers": [
@@ -23,41 +30,15 @@
           "exclude": [
             "Controllers/AccountController.cs",
             "Views/Account/**",
-            "Views/Manage/**",
-            "Views/Shared/_LoginPartial.cshtml"
-          ]
-        },
-        {
-          "condition": "(UseLocalDB || !IndividualLocalAuth)",
-          "exclude": [
-            "*.db"
+            "Views/Shared/_LoginPartial.cshtml",
+            "Extensions/AuthenticationServiceCollectionExtensions.cs"
           ]
         },
         {
           "condition": "(!IndividualLocalAuth)",
           "exclude": [
-            "Controllers/ManageController.cs",
-            "Views/Account/ConfirmEmail.cshtml",
-            "Views/Account/ExternalLoginConfirmation.cshtml",
-            "Views/Account/ExternalLoginFailure.cshtml",
-            "Views/Account/ForgotPassword.cshtml",
-            "Views/Account/ForgotPasswordConfirmation.cshtml",
-            "Views/Account/Lockout.cshtml",
-            "Views/Account/Login.cshtml",
-            "Views/Account/Register.cshtml",
-            "Views/Account/ResetPassword.cshtml",
-            "Views/Account/ResetPasswordConfirmation.cshtml",
-            "Views/Account/SendCode.cshtml",
-            "Views/Account/VerifyCode.cshtml",
-            "Views/Manage/AddPhoneNumber.cshtml",
-            "Views/Manage/ChangePassword.cshtml",
-            "Views/Manage/Index.cshtml",
-            "Views/Manage/ManageLogins.cshtml",
-            "Views/Manage/SetPassword.cshtml",
-            "Views/Manage/VerifyPhoneNumber.cshtml",
-            "Services/**",
-            "Data/**",
-            "Models/**"
+            "Areas/**",
+            "Extensions/IdentityService/**"
           ]
         },
         {
@@ -67,23 +48,17 @@
           ]
         },
         {
-          "condition": "(IndividualLocalAuth)",
+          "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "Views/Account/SignedOut.cshtml"
+            "Extensions/AzureAd/**"
           ]
         },
         {
-          "condition": "(!OrganizationalAuth && !IndividualB2CAuth)",
-          "exclude": "OpenIdConnectOptionsSetup.cs"
-        },
-        {
           "condition": "(!IndividualB2CAuth)",
-          "exclude": "AzureAdB2COptions.cs"
-        },
-        {
-          "condition": "(!OrganizationalAuth)",
-          "exclude": "AzureAdOptions.cs"
-        },
+          "exclude": [
+            "Extensions/AzureAdB2C/**"
+          ]
+        }
       ]
     }
   ],
@@ -159,7 +134,7 @@
       "type": "parameter",
       "datatype": "string",
       "replaces": "11111111-1111-1111-11111111111111111",
-      "description": "The Client ID for this project (use with Single-org, Multi-org, or IndividualB2C auth types)."
+      "description": "The Client ID for this project (use with individual and organizational auth types)."
     },
     "Domain": {
       "type": "parameter",
@@ -283,11 +258,11 @@
     },
     "NoAuth": {
       "type": "computed",
-      "value": "(!(IndividualAuth || MultiOrgAuth || SingleOrgAuth || WindowsAuth))"
+      "value": "(!(IndividualAuth || OrganizationalAuth || WindowsAuth))"
     },
     "RequiresHttps": {
       "type": "computed",
-      "value": "(OrganizationalAuth || IndividualB2CAuth)"
+      "value": "(OrganizationalAuth || IndividualAuth)"
     },
     "UseLocalDB": {
       "type": "parameter",
