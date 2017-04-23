@@ -17,8 +17,6 @@ using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
 using System.Runtime.Loader;
 using Newtonsoft.Json.Linq;
 
-using MigrateCommand = Microsoft.DotNet.Tools.Migrate.MigrateCommand;
-
 namespace Microsoft.DotNet.Migration.Tests
 {
     public class GivenThatIWantMigratedAppsToPackContent : TestBase

@@ -2,33 +2,40 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
-    public partial class MigrateCommand
+    public class MigrateCommandCompose
     {
-        public static MigrateCommand FromArgs(string[] args, string msbuildPath = null)
+        public static MigrateCommand.MigrateCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>();
-
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet migrate", args);
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            return result["dotnet"]["migrate"].Value<MigrateCommand>();
+            var parsedMigrateResult = result["dotnet"]["migrate"];
+            var migrateCommand = new MigrateCommand.MigrateCommand(
+                new DotnetSlnRedirector(),
+                new DotnetNewRedirector(),
+                parsedMigrateResult.ValueOrDefault<string>("--template-file"),
+                parsedMigrateResult.Arguments.FirstOrDefault(),
+                parsedMigrateResult.ValueOrDefault<string>("--sdk-package-version"),
+                parsedMigrateResult.ValueOrDefault<string>("--xproj-file"),
+                parsedMigrateResult.ValueOrDefault<string>("--report-file"),
+                parsedMigrateResult.ValueOrDefault<bool>("--skip-project-references"),
+                parsedMigrateResult.ValueOrDefault<bool>("--format-report-file-json"),
+                parsedMigrateResult.ValueOrDefault<bool>("--skip-backup"));
+            return migrateCommand;
         }
-
 
         public static int Run(string[] args)
         {
-
             // IMPORTANT:
             // When updating the command line args for dotnet-migrate, we need to update the in-VS caller of dotnet migrate as well.
             // It is located at dotnet/roslyn-project-system:
@@ -36,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             DebugHelper.HandleDebugSwitch(ref args);
 
-            MigrateCommand cmd;
+            MigrateCommand.MigrateCommand cmd;
             try
             {
                 cmd = FromArgs(args);
