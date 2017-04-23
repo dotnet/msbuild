@@ -21,6 +21,27 @@
       "datatype": "string",
       "defaultValue": ""
     },
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "replaces": "netcoreapp1.1",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "netcoreapp1.0",
+          "description": "Target netcoreapp1.0"
+        },
+        {
+          "choice": "netcoreapp1.1",
+          "description": "Target netcoreapp1.1"
+        },
+        {
+          "choice": "netstandard1.6",
+          "description": "Target netstandard1.6"
+        }
+      ],
+      "defaultValue": "netcoreapp1.1"
+    },
     "skipRestore": {
       "type": "parameter",
       "datatype": "bool",
