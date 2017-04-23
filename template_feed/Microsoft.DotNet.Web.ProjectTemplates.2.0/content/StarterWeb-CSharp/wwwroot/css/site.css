@@ -37,6 +37,11 @@ textarea {
     padding-left: 0.5em;
 }
 
+.dl-horizontal dt 
+{
+    white-space: normal;
+}
+
 #endif*/
 /* Make .svg files in the carousel display properly in older browsers */
 .carousel-inner .item img[src$=".svg"] {
