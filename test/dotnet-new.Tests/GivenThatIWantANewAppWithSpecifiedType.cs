@@ -21,9 +21,8 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("C#", "mstest", false)]
         [InlineData("C#", "xunit", false)]
         [InlineData("C#", "web", false)]
-        // Uncomment the tests below in PR#6362
-        //[InlineData("C#", "mvc", false)]
-        //[InlineData("C#", "webapi", false)]
+        [InlineData("C#", "mvc", false)]
+        [InlineData("C#", "webapi", false)]
         // Uncomment the test below once https://github.com/dotnet/netcorecli-fsc/issues/92 is fixed.
         //[InlineData("F#", "console", false)]
         //[InlineData("F#", "classlib", false)]
