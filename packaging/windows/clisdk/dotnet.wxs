@@ -19,12 +19,21 @@
         <Property Id="ProductEdition" Value="$(var.ProductEdition)" />
         <Property Id="ProductCPU" Value="$(var.Platform)" />
         <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
-
         <Property Id="MSIFASTINSTALL" Value="7" />
 
         <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
         <CustomActionRef Id="WixBroadcastEnvironmentChange" />
+
+        <CustomAction Id="RunDotnetNewToTriggerFirstTimeExperienceToPrimeCache"
+                ExeCommand="dotnet.exe new"
+                Directory="DOTNETHOME"
+                Execute="immediate"
+                Return="ignore"/>
+        <InstallExecuteSequence>
+            <Custom Action="RunDotnetNewToTriggerFirstTimeExperienceToPrimeCache"
+                After="InstallFinalize" />
+        </InstallExecuteSequence>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
