@@ -28,7 +28,6 @@ namespace Company.WebApplication1
         {
             // Add framework services.
             services.AddMvc();
-
 #if (OrganizationalAuth || IndividualB2CAuth)
 
             services.AddJwtBearerAuthentication();
