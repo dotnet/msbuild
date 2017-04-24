@@ -47,6 +47,7 @@
       <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
+      <CoreSetupBlobAccessTokenParam Condition=" '$(CoreSetupBlobAccessToken)' != '' ">?$(CoreSetupBlobAccessToken)</CoreSetupBlobAccessTokenParam>
     </PropertyGroup>
 
     <GetCommitHash RepoRoot="$(RepoRoot)">
@@ -178,28 +179,28 @@
     <ItemGroup>
       <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
                                Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
-        <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)</Url>
+        <Url>$(SharedFrameworkArchiveBlobRootUrl)/$(CombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(CombinedSharedHostAndFrameworkArchive)</DownloadFileName>
         <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedFrameworkInstallerFile"
                                Condition="!Exists('$(DownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)</Url>
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedFrameworkVersion)/$(DownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(DownloadedSharedFrameworkInstallerFile)</DownloadFileName>
         <ExtractDestination></ExtractDestination>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedSharedHostInstallerFile"
                                Condition="!Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
                                Condition="!Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
@@ -217,7 +218,7 @@
     <ItemGroup Condition=" '$(IncludeAdditionalSharedFrameworks)' != 'false' ">
       <_DownloadAndExtractItem Include="AdditionalCombinedSharedHostAndFrameworkArchive"
                                Condition="!Exists('$(AdditionalCombinedSharedHostAndFrameworkArchive)')">
-        <Url>$(AdditionalSharedFrameworkArchiveBlobRootUrl)/$(AdditionalCombinedFrameworkHostCompressedFileName)</Url>
+        <Url>$(AdditionalSharedFrameworkArchiveBlobRootUrl)/$(AdditionalCombinedFrameworkHostCompressedFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(AdditionalCombinedSharedHostAndFrameworkArchive)</DownloadFileName>
         <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
         <!-- don't overwrite the destination because both shared fx's need to be combined -->
@@ -226,21 +227,21 @@
 
       <_DownloadAndExtractItem Include="AdditionalDownloadedSharedFrameworkInstallerFile"
                                Condition="!Exists('$(AdditionalDownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedFrameworkVersion)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</Url>
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedFrameworkVersion)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(AdditionalDownloadedSharedFrameworkInstallerFile)</DownloadFileName>
         <ExtractDestination></ExtractDestination>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="AdditionalDownloadedSharedHostInstallerFile"
                                Condition="!Exists('$(AdditionalDownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedHostVersion)/$(AdditionalDownloadedSharedHostInstallerFileName)</Url>
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedHostVersion)/$(AdditionalDownloadedSharedHostInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(AdditionalDownloadedSharedHostInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
 
       <_DownloadAndExtractItem Include="AdditionalDownloadedHostFxrInstallerFile"
                                Condition="!Exists('$(AdditionalDownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)</Url>
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(AdditionalDownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
