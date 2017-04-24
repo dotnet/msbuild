@@ -11,8 +11,8 @@ Microsoft.NET.Sdk.Web.ProjectSystem
 ======================
 Project System package defines the following:
 
-- Default globs for the ASP.Net Core Web Projects.
-- Project Capabilities for CPS based ASP.NET Core Project System.
+- Default globs for the ASP.NET Core Web Projects.
+- Project Capabilities for ASP.NET Core Web Projects.
 
 Microsoft.NET.Sdk.Publish
 ======================
