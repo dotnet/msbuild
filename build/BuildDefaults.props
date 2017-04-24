@@ -7,5 +7,6 @@
     <UsePortableSharedFramework Condition=" '$(UsePortableSharedFramework)' == '' ">true</UsePortableSharedFramework>
     <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(UsePortableSharedFramework)' == 'true' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
     <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' ">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 </Project>

@@ -97,11 +97,6 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.netcore.app",
                 "microsoft.netcore.platforms",
                 "netstandard.library",
-            };
-
-            // https://github.com/dotnet/cli/issues/5505 - add the "2.0" asp.net packages into the offline cache
-            List<string> unexpectedDirectories = new List<string>()
-            {
                 "microsoft.aspnetcore.diagnostics",
                 "microsoft.aspnetcore.mvc",
                 "microsoft.aspnetcore.routing",
@@ -114,16 +109,13 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.extensions.logging.console",
                 "microsoft.extensions.logging.debug",
                 "microsoft.extensions.options.configurationextensions",
-                "microsoft.visualstudio.web.browserlink",
+                //BrowserLink has been temporarily disabled until https://github.com/dotnet/templating/issues/644 is resolved
+                //"microsoft.visualstudio.web.browserlink",
             };
 
             _nugetFallbackFolder
                 .Should()
                 .HaveDirectories(expectedDirectories);
-
-            _nugetFallbackFolder
-                .Should()
-                .NotHaveDirectories(unexpectedDirectories);
         }
 
         private string GetDotnetVersion()
