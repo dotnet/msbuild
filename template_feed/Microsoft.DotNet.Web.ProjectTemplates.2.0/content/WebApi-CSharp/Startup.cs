@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if (OrganizationalAuth || IndividualB2CAuth)
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.Extensions.Options;
 #endif
 
@@ -27,9 +28,9 @@ namespace Company.WebApplication1
         {
             // Add framework services.
             services.AddMvc();
+
 #if (OrganizationalAuth || IndividualB2CAuth)
             services.AddJwtBearerAuthentication();
-
 #endif
 #if (OrganizationalAuth)
 
