@@ -30,6 +30,7 @@ namespace Company.WebApplication1
             services.AddMvc();
 
 #if (OrganizationalAuth || IndividualB2CAuth)
+
             services.AddJwtBearerAuthentication();
 #endif
 #if (OrganizationalAuth)
