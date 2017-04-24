@@ -6,7 +6,6 @@
     <AssemblyName>dotnet-portable</AssemblyName>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
