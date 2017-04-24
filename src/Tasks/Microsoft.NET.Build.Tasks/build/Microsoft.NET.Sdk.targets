@@ -63,11 +63,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == '' And '$(BundledNETCoreAppTargetFrameworkVersion)' != ''">
-    <!-- Set the TFM used to restore .NET CLI tools to match the version of .NET Core bundled in the CLI -->
-    <DotnetCliToolTargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</DotnetCliToolTargetFramework>
-  </PropertyGroup>
-
   <PropertyGroup>
     <CoreBuildDependsOn>
       $(CoreBuildDependsOn);
