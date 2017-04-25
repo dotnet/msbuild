@@ -64,7 +64,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Lines="$(BundledVersionsPropsContent)"
                       Overwrite="true" />
     <Copy
-      DestinationFiles="$(SdkOutputDirectory)/$(BundledVersionsPropsFileName)"
-      SourceFiles="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)" />
+      SourceFiles="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
+      DestinationFiles="$(SdkOutputDirectory)/$(BundledVersionsPropsFileName)" />
   </Target>
 </Project>
