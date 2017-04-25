@@ -147,6 +147,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--quiet", string.Empty, Accept.NoArguments()),
                     Create.Option("-all|--show-all", string.Empty, Accept.NoArguments()),
                     Create.Option("--allow-scripts", string.Empty, Accept.ZeroOrOneArgument()),
+                    Create.Option("--baseline", string.Empty, Accept.ExactlyOneArgument()),
                 };
             }
         }

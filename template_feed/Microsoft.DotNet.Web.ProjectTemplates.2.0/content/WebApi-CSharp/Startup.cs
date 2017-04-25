@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if (OrganizationalAuth || IndividualB2CAuth)
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.Extensions.Options;
 #endif
 
@@ -27,6 +28,10 @@ namespace Company.WebApplication1
         {
             // Add framework services.
             services.AddMvc();
+#if (OrganizationalAuth || IndividualB2CAuth)
+
+            services.AddJwtBearerAuthentication();
+#endif
 #if (OrganizationalAuth)
 
             services.Configure<AzureAdOptions>(Configuration.GetSection("Authentication:AzureAd"));
@@ -43,10 +48,6 @@ namespace Company.WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-#if (OrganizationalAuth || IndividualB2CAuth)
-            app.UseJwtBearerAuthentication();
-
-#endif
             app.UseMvc();
         }
     }

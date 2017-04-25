@@ -203,6 +203,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string ShowAliasesAliasName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "show-alias" });
 
+        public string BaselineName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "baseline" });
+
         public IList<string> ExtraArgsFileNames => _parseResult.GetArgumentListAtPath(new[] { _commandName, "extra-args" }).ToList();
 
         public IList<string> ToInstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "install" }).ToList();

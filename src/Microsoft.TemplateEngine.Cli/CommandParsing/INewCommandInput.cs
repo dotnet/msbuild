@@ -18,6 +18,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string ShowAliasesAliasName { get; }
 
+        string BaselineName { get; }
+
         IList<string> ExtraArgsFileNames { get; }
 
         IList<string> ToInstallList { get; }
