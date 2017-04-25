@@ -15,7 +15,7 @@
     <PackageAssets Include="$(OutDir)\*.*" Exclude="*.log" />
   </ItemGroup>
 
-  <Target Name="Build" Outputs="@(PackageAssets)">
+  <Target Name="Build" Outputs="@(PackageAssets)" Condition=" '@(SigningConfig)' != '' ">
     <!-- If not RealSigning -->
     <Message Text="Skipping Real Signing" Condition="'$(SignType)'!='real'"/>
 
