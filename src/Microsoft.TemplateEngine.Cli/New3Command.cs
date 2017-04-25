@@ -730,7 +730,7 @@ namespace Microsoft.TemplateEngine.Cli
             HashSet<string> argsInvalidForAllTemplatesInGroup = new HashSet<string>();
             bool firstTemplate = true;
 
-            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
+            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse.OrderByDescending(x => x.Info.Precedence))
             {
                 bool argsError = false;
                 string commandParseFailureMessage = null;
