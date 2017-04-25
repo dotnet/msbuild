@@ -177,6 +177,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectInstance _projectInstanceIfAnyForDebuggerOnly;
 
+        private readonly SdkResolution _sdkResolution;
+
         /// <summary>
         /// The environment properties with which evaluation should take place.
         /// </summary>
@@ -247,7 +249,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, ProjectInstance projectInstanceIfAnyForDebuggerOnly)
+        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -276,6 +278,7 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _buildEventContext = buildEventContext;
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
+            _sdkResolution = sdkResolution;
         }
 
         /// <summary>
@@ -375,7 +378,7 @@ namespace Microsoft.Build.Evaluation
         /// newing one up, yet the whole class need not be static.
         /// The optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
         /// </remarks>
-        internal static IDictionary<string, object> Evaluate(IEvaluatorData<P, I, M, D> data, ProjectRootElement root, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, ProjectInstance projectInstanceIfAnyForDebuggerOnly)
+        internal static IDictionary<string, object> Evaluate(IEvaluatorData<P, I, M, D> data, ProjectRootElement root, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -388,7 +391,7 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, loggingService, itemFactory, toolsetProvider, projectRootElementCache, buildEventContext, projectInstanceIfAnyForDebuggerOnly);
+                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, loggingService, itemFactory, toolsetProvider, projectRootElementCache, buildEventContext, projectInstanceIfAnyForDebuggerOnly, sdkResolution);
                 IDictionary<string, object> projectLevelLocalsForBuild = evaluator.Evaluate();
                 return projectLevelLocalsForBuild;
 #if MSBUILDENABLEVSPROFILING 
@@ -993,35 +996,11 @@ namespace Microsoft.Build.Evaluation
                 DebuggerManager.BakeStates(Path.GetFileNameWithoutExtension(currentProjectOrImport.FullPath));
             }
 #endif
-            IList<ProjectImportElement> implicitImports = new List<ProjectImportElement>();
 
-            if (!String.IsNullOrWhiteSpace(currentProjectOrImport.Sdk))
-            {
-                // SDK imports are added implicitly where they are evaluated at the top and bottom as if they are in the XML
-                //
-                foreach (string sdk in currentProjectOrImport.Sdk.Split(';').Select(i => i.Trim()))
-                {
-                    if (String.IsNullOrWhiteSpace(sdk))
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat", currentProjectOrImport.Sdk);
-                    }
+            // Get all the implicit imports (e.g. <Project Sdk="" />, but not <Import Sdk="" />)
+            var implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
-                    int slashIndex = sdk.LastIndexOf("/", StringComparison.Ordinal);
-                    string sdkName = slashIndex > 0 ? sdk.Substring(0, slashIndex) : sdk;
-
-                    // TODO: do something other than just ignore the version
-
-                    if (sdkName.Contains("/"))
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat", currentProjectOrImport.Sdk);
-                    }
-
-                    implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, sdkName));
-
-                    implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, sdkName));
-                }
-            }
-
+            // Evaluate the "top" implicit imports as if they were the first entry in the file.
             foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Top))
             {
                 EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -1179,9 +1158,15 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
+                if (element is ProjectSdkElement)
+                {
+                    continue; // This case is handled by implicit imports.
+                }
+
                 ErrorUtilities.ThrowInternalError("Unexpected child type");
             }
 
+            // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
             foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Bottom))
             {
                 EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -2220,7 +2205,7 @@ namespace Microsoft.Build.Evaluation
             if (fallbackSearchPathMatch.Equals(ProjectImportPathMatch.None))
             {
                 List<ProjectRootElement> projects;
-                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, importElement.Project, out projects);
+                ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(directoryOfImportingFile, importElement, out projects);
                 return projects;
             }
 
@@ -2312,14 +2297,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                string project = importElement.Project;
-                if (!String.IsNullOrWhiteSpace(importElement.Sdk))
-                {
-                    project = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, importElement.Sdk, "Sdk", project);
-                }
-
-
-                var newExpandedImportPath = project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
+                var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
@@ -2377,22 +2355,38 @@ namespace Microsoft.Build.Evaluation
         /// Caches the parsed import into the provided collection, so future
         /// requests can be satisfied without re-parsing it.
         /// </summary>
-        private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
-                                            out List<ProjectRootElement> projects, bool throwOnFileNotExistsError = true)
+        private void ExpandAndLoadImportsFromUnescapedImportExpressionConditioned(string directoryOfImportingFile,
+            ProjectImportElement importElement, out List<ProjectRootElement> projects,
+            bool throwOnFileNotExistsError = true)
         {
-            if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties, _projectRootElementCache))
+            if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
+                ParserOptions.AllowProperties, _projectRootElementCache))
             {
                 projects = new List<ProjectRootElement>();
-                return LoadImportsResult.ConditionWasFalse;
+                return;
             }
 
             string project = importElement.Project;
-            if (!String.IsNullOrWhiteSpace(importElement.Sdk))
+
+            if (importElement.ParsedSdkReference != null)
             {
-                project = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, importElement.Sdk, "Sdk", project);
+                // Try to get the solution path when available.
+                var solutionPath = _data.GetProperty(SolutionProjectGenerator.SolutionPathPropertyName)?.EvaluatedValue;
+
+                // Combine SDK path with the "project" relative path
+                var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _loggingService,
+                    _buildEventContext, importElement.Location, solutionPath);
+
+                if (string.IsNullOrEmpty(sdkRootPath))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
+                }
+
+                project = Path.Combine(sdkRootPath, project);
             }
 
-            return ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project, throwOnFileNotExistsError, out projects);
+            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
+                throwOnFileNotExistsError, out projects);
         }
 
         /// <summary>

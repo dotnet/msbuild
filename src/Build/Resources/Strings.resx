@@ -1190,6 +1190,18 @@
     <value>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</value>
     <comment>{StrBegin="MSB4229: "}</comment>
   </data>
+  <data name="CouldNotResolveSdk" UESanitized="false" Visibility="Public">
+    <value>MSB4236: The SDK '{0}' specified could not be found.</value>
+    <comment>{StrBegin="MSB4236: "}</comment>
+  </data>
+  <data name="CouldNotLoadSdkResolver" UESanitized="false" Visibility="Public">
+    <value>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</value>
+    <comment>{StrBegin="MSB4237: "}</comment>
+  </data>
+  <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
+    <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
+    <comment>{StrBegin="MSB4238: "}</comment>
+  </data>
   <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1597,7 +1609,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4236.
+        Next message code should be MSB4239.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
