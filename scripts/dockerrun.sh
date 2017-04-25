@@ -136,5 +136,12 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e COMMITCOUNT \
     -e DROPSUFFIX \
     -e RELEASESUFFIX \
+    -e CoreFxAzureContainer \
+    -e AzureAccountName \
+    -e AzureAccessToken \
+    -e VsoPassword \
+    -e ReleaseToolsGitUrl \
+    -e CoreSetupBlobRootUrl \
+    -e CoreSetupBlobAccessToken \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"
