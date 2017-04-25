@@ -236,7 +236,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 var currentPackageUniqueId = $"{parentTargetId}/{currentItemId}";
                 // add current package to dependencies world
-                var currentItem = items[currentItemId].Clone();
+                var currentItem = GetItem(items, currentItemId);
                 DependenciesWorld[currentPackageUniqueId] = currentItem;
 
                 // update parent
@@ -255,11 +255,11 @@ namespace Microsoft.NET.Build.Tasks
                     // Update parent's Dependencies count and make sure parent is in the dependencies world
                     if (!string.IsNullOrEmpty(parentPackageId))
                     {
-                        parentDependency = Packages[parentPackageId].Clone();
+                        parentDependency = GetItem(Packages, parentPackageId);
                     }
                     else
                     {
-                        parentDependency = Targets[parentTargetId].Clone();
+                        parentDependency = GetItem(Targets, parentTargetId);
                         currentItem.IsTopLevelDependency = true;
                     }
 
@@ -267,6 +267,11 @@ namespace Microsoft.NET.Build.Tasks
                     DependenciesWorld[parentDependencyId] = parentDependency;
                 }
             }
+        }
+
+        private ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
+        {
+            return Targets.Count > 1 ? items[id].Clone() : items[id];
         }
 
         private abstract class ItemMetadata
