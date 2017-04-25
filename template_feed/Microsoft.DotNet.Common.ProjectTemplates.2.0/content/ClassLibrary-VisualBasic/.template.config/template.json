@@ -13,6 +13,20 @@
   },
   "sourceName": "Company.ClassLibrary1",
   "preferNameDirectory": true,
+  "baselines": {
+    "app": {
+      "description": "Target netcoreapp",
+      "defaultOverrides": {
+        "Framework": "netcoreapp2.0"
+      }
+    },
+    "standard": {
+      "description": "Target netstandard",
+      "defaultOverrides": {
+        "Framework": "netstandard2.0"
+      }
+    }
+  },
   "symbols": {
     "TargetFrameworkOverride": {
       "type": "parameter",
