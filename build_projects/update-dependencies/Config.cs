@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Microsoft.DotNet.Scripts
 {
@@ -35,11 +38,10 @@ namespace Microsoft.DotNet.Scripts
         private Lazy<string> _password = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PASSWORD"));
 
         private Lazy<string> _dotNetVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("DOTNET_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info"));
-        private Lazy<string> _roslynVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_FRAGMENT", "dotnet/roslyn/netcore1.0"));
-        private Lazy<string> _coreSetupVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_FRAGMENT", "dotnet/core-setup/master"));
+        private Lazy<string> _coreSetupVersionFragment = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_FRAGMENT", GetDefaultCoreSetupVersionFragment()));
         private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
         private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
-        private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "master"));
+        private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", GetDefaultUpstreamBranch()));
         private Lazy<string[]> _gitHubPullRequestNotifications = new Lazy<string[]>(() =>
                                                 GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
                                                     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
@@ -51,7 +53,6 @@ namespace Microsoft.DotNet.Scripts
         public string Email => _email.Value;
         public string Password => _password.Value;
         public string DotNetVersionUrl => _dotNetVersionUrl.Value;
-        public string RoslynVersionFragment => _roslynVersionFragment.Value;
         public string CoreSetupVersionFragment => _coreSetupVersionFragment.Value;
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
         public string GitHubProject => _gitHubProject.Value;
@@ -69,6 +70,39 @@ namespace Microsoft.DotNet.Scripts
             if (value == null)
             {
                 throw new InvalidOperationException($"Can't find environment variable '{name}'.");
+            }
+
+            return value;
+        }
+
+        private static string GetDefaultUpstreamBranch()
+        {
+            return GetRepoMSBuildPropValue("BranchInfo.props", "BranchName") ?? "master";
+        }
+
+        private static string GetDefaultCoreSetupVersionFragment()
+        {
+            string coreSetupChannel = GetRepoMSBuildPropValue("BundledRuntimes.props", "CoreSetupChannel") ?? "master";
+
+            return $"dotnet/core-setup/{coreSetupChannel}";
+        }
+
+        private static string GetRepoMSBuildPropValue(string propsFileName, string propertyName)
+        {
+            var propsFilePath = Path.Combine(Dirs.RepoRoot, "build", propsFileName);
+            var root = XDocument.Load(propsFilePath).Root;
+            var ns = root.Name.Namespace;
+
+            var value = root
+                .Elements(ns + "PropertyGroup")
+                .Elements(ns + propertyName)
+                .FirstOrDefault()
+                ?.Value;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                Console.WriteLine($"Could not find a property named '{propertyName}' in {propsFilePath}");
+                return null;
             }
 
             return value;
