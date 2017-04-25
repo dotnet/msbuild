@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -11,4 +11,13 @@
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
     </BuiltProjectOutputGroupOutput>
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\dotnet-portable\Program.cs" />
+
+    <Content Include="..\dotnet-prefercliruntime\prefercliruntime">
+      <Pack>true</Pack>
+      <PackagePath>\prefercliruntime</PackagePath>
+    </Content>
+  </ItemGroup>  
 </Project>
