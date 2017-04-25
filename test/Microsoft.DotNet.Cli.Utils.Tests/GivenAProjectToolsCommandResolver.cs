@@ -308,7 +308,7 @@ namespace Microsoft.DotNet.Tests
 
             result.Should().NotBeNull();
 
-            result.Args.Should().Contain("--fx-version 1.1.1");
+            result.Args.Should().Contain("--fx-version 1.1.2");
         }
 
         [Fact]
