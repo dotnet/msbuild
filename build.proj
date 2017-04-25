@@ -21,7 +21,8 @@
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkVersion>1.1.2</SharedFrameworkVersion>
     <SharedHostVersion>1.1.0</SharedHostVersion>
-    <HostFxrVersion>1.1.0</HostFxrVersion>
+    <HostFxrVersion Condition=" '$(OS)' != 'Windows_NT' ">1.1.0</HostFxrVersion>
+    <HostFxrVersion Condition=" '$(OS)' == 'Windows_NT' ">1.1.2</HostFxrVersion>
 
     <CoreCLRVersion>1.1.2</CoreCLRVersion>
     <JitVersion>1.1.2</JitVersion>
