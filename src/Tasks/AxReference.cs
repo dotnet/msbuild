@@ -77,7 +77,10 @@ namespace Microsoft.Build.Tasks
 
             var axImp = new ResolveComReference.AxImp();
 
-            axImp.ActiveXControlName = ReferenceInfo.strippedTypeLibPath;
+            if (ReferenceInfo != null)
+            {
+                axImp.ActiveXControlName = ReferenceInfo.strippedTypeLibPath;
+            }
 
             axImp.BuildEngine = BuildEngine;
             axImp.ToolPath = ToolPath;

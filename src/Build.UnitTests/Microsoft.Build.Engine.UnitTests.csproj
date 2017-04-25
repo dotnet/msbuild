@@ -190,6 +190,7 @@
     <Compile Include="TargetsFile_Test.cs" />
     <Compile Include="TestUtilities.cs" />
     <Compile Include="Utilities_Tests.cs" />
+    <Compile Include="WarningsAsMessagesAndErrors_Tests.cs" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

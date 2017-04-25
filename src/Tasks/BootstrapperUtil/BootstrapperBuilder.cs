@@ -1433,7 +1433,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         continue;
                     }
 
-                    if ((packageFileSource != null) && (packageFileDestination != null))
+                    if ((packageFileSource != null) && (packageFileDestination != null) &&
+                        (packageFileName != null))
                     {
                         // Calculate the hash of this file and add it to the PackageFileNode
                         if (!AddVerificationInformation(packageFileNode, packageFileSource.Value, packageFileName.Value, builder, settings, _results))

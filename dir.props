@@ -15,7 +15,7 @@
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
     <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <!-- Disable the import of the dynamically generated NuGet files because they generate warnings anyway:
          Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored. -->
@@ -62,7 +62,7 @@
     <ToolPackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</ToolPackagesDir>
     <MicroBuildDir>$(ToolPackagesDir)\MicroBuild.Core\$(MicroBuildVersion)\build\</MicroBuildDir>
     <GitVersioningDir>$(PackagesDir)\Nerdbank.GitVersioning\$(GitVersioningVersion)\build\</GitVersioningDir>
-    
+
     <!-- Tell build tools to use the full framework dlls that contain build tasks (like the nuget assets task) -->
     <BuildToolsTaskDir>$(ToolsDir)net45/</BuildToolsTaskDir>
     <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
@@ -89,7 +89,7 @@
     <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
     <DnuCoreRestoreCommand>&quot;$(DnuToolPath)&quot; restore</DnuCoreRestoreCommand>
     <DnuCoreRestoreCommand Condition="'$(OsEnvironment)'=='OSX'">ulimit -n 2500 ; $(DnuCoreRestoreCommand)</DnuCoreRestoreCommand>
-    
+
     <!-- Temporary until everything supports lowercase package directory names -->
     <DnuCoreRestoreCommand>$(DnuCoreRestoreCommand) --legacy-packages-directory</DnuCoreRestoreCommand>
 
@@ -175,6 +175,8 @@
 
   <!-- Set the host specific OS and Architecture variables -->
   <PropertyGroup>
+    <Deterministic>true</Deterministic>
+
     <!-- Possible Values: win7 / osx.10.10.  For linux, the value is calculated in cibuild.sh and passed at the command-line -->
     <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">win7</RuntimeSystem>
     <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'OSX'">osx.10.10</RuntimeSystem>
@@ -201,7 +203,7 @@
 
   <!-- Configure bootstrapping -->
   <PropertyGroup>
-    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)MSBuild$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
     <BootstrapDestination Condition="'$(NetCoreBuild)' == 'true'">$(BinDir)Bootstrap-NetCore$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
 
     <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
@@ -241,7 +243,7 @@
     <WindowsAppContainer>false</WindowsAppContainer>
 
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
-    
+
     <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update corefx dependencies-->
     <NuSpecTfm>.NETStandard$(TargetFrameworkVersion.TrimStart('v'))</NuSpecTfm>
 
@@ -368,6 +370,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
 
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
   </PropertyGroup>
 

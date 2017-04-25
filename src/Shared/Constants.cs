@@ -32,6 +32,21 @@ namespace Microsoft.Build.Shared
         internal const string SdksPath = "MSBuildSDKsPath";
 
         /// <summary>
+        /// Name of the property that indicates that all warnings should be treated as errors.
+        /// </summary>
+        internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates a list of warnings to treat as errors.
+        /// </summary>
+        internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates the list of warnings to treat as messages.
+        /// </summary>
+        internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
+
+        /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD
@@ -59,7 +74,7 @@ namespace Microsoft.Build.Shared
         internal const string CurrentAssemblyVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralAssemblyVersion;
 #endif
 
-        internal const string CurrentAssemblyFileVersion = "15.2.0.0";
+        internal const string CurrentAssemblyFileVersion = "15.3.0.0";
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"

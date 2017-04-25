@@ -7,6 +7,7 @@ if "%1"=="" goto doneParsingArguments
 if /i "%1"=="--scope" set SCOPE=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--target" set TARGET=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--host" set HOST=%2&& shift && shift && goto parseArguments
+if /i "%1"=="--config" set BASE_CONFIG=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--build-only" set BUILD_ONLY=true&& shift && goto parseArguments
 if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
 if /i "%1"=="--localized-build" set LOCALIZED_BUILD=true&& shift && goto parseArguments
@@ -30,11 +31,15 @@ if not defined TARGET (
     set TARGET=Full
 )
 
+if not defined BASE_CONFIG (
+    set BASE_CONFIG=Debug
+)
+
 set BUILD_CONFIGURATION=
 if /i "%TARGET%"=="CoreCLR" (
-    set BUILD_CONFIGURATION=Debug-NetCore
+    set BUILD_CONFIGURATION=%BASE_CONFIG%-NetCore
 ) else if /i "%TARGET%"=="Full" (
-    set BUILD_CONFIGURATION=Debug
+    set BUILD_CONFIGURATION=%BASE_CONFIG%
 ) else if /i "%TARGET%"=="All" (
     SET _originalArguments=%*
     CALL "!_originalScript!" !_originalArguments:All=Full!
@@ -45,8 +50,10 @@ if /i "%TARGET%"=="CoreCLR" (
 ) else (
     echo Unsupported target detected: %TARGET%. Configuring as if for Full.
     set TARGET=Full
-    set BUILD_CONFIGURATION=Debug
+    set BUILD_CONFIGURATION=%BASE_CONFIG%
 )
+
+echo Using Configuration: %BUILD_CONFIGURATION%
 
 :: Assign runtime host
 
@@ -130,7 +137,7 @@ if /i "%TARGET%"=="CoreCLR" (
 if /i "%TARGET%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap-NetCore\MSBuild.dll"
 ) else (
-    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
+    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild\15.0\Bin\MSBuild.exe"
 )
 
 :: The set of warnings to suppress for now
@@ -179,6 +186,7 @@ echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
 echo   --target ^<target^>              CoreCLR, Full, or All ^(default: Full^)
 echo   --host ^<host^>                  CoreCLR or Full ^(default: Full^)
+echo   --config ^<config^>              Debug or Release ^(default: Debug^)
 echo   --build-only                     Only build using a downloaded copy of MSBuild but do not bootstrap
 echo                                    or build again with those binaries
 echo   --bootstrap-only                 Build and bootstrap MSBuild but do not build again with those binaries

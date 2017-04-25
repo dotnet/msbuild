@@ -238,11 +238,11 @@ namespace Microsoft.Build.BuildEngine
             BuildEventContext buildEventContext
         )
         {
-            ErrorUtilities.VerifyThrow((conditionAttribute != null) || (condition.Length == 0), 
+            ErrorUtilities.VerifyThrow((conditionAttribute != null) || (string.IsNullOrEmpty(condition)),
                 "If condition is non-empty, you must provide the XML node representing the condition.");
 
             // An empty condition is equivalent to a "true" condition.
-            if ((null == condition) || (condition.Length == 0))
+            if (string.IsNullOrEmpty(condition))
             {
                 return true;
             }

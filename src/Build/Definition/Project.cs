@@ -3721,7 +3721,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<string> Removes { get; set; }
 
-        internal GlobResult(ProjectItemElement itemElement, IEnumerable<string> includeGlobStrings, IMSBuildGlob globWithGaps, IEnumerable<string> excludeFragmentStrings, IEnumerable<string> removeFragmentStrings)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GlobResult(ProjectItemElement itemElement, IEnumerable<string> includeGlobStrings, IMSBuildGlob globWithGaps, IEnumerable<string> excludeFragmentStrings, IEnumerable<string> removeFragmentStrings)
         {
             ItemElement = itemElement;
 

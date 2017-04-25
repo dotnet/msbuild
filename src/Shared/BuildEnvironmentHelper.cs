@@ -435,15 +435,15 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class BuildEnvironment
     {
-        public BuildEnvironment(BuildEnvironmentMode mode, string currrentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
+        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
         {
             Mode = mode;
             RunningTests = runningTests;
             RunningInVisualStudio = runningInVisualStudio;
 
-            CurrentMSBuildExePath = currrentMSBuildExePath;
-            CurrentMSBuildToolsDirectory = Path.GetDirectoryName(currrentMSBuildExePath);
-            CurrentMSBuildConfigurationFile = string.Concat(currrentMSBuildExePath, ".config");
+            CurrentMSBuildExePath = currentMSBuildExePath;
+            CurrentMSBuildToolsDirectory = Path.GetDirectoryName(currentMSBuildExePath);
+            CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
 
             VisualStudioInstallRootDirectory = visualStudioPath;
 

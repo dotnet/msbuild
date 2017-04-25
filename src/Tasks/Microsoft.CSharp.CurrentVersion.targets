@@ -55,7 +55,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Import Project="$(CSharpMonoTargetsPath)" Condition="'$(MSBuildRuntimeType)' == 'Mono'" />
 
-    <ItemGroup>
+    <ItemGroup Condition=" '$(DefineCSharpItemSchemas)' != 'false' ">
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)CSharp.ProjectItemsSchema.xaml;"/>
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)CSharp.xaml;">
             <Context>File</Context>

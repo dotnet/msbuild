@@ -54,7 +54,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Import Project="$(VisualBasicMonoTargetsPath)" Condition="'$(MSBuildRuntimeType)' == 'Mono'" />
 
-    <ItemGroup>
+    <ItemGroup Condition=" '$(DefineVisualBasicItemSchemas)' != 'false' ">
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)VisualBasic.ProjectItemsSchema.xaml;"/>
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)VisualBasic.xaml;">
             <Context>File</Context>
