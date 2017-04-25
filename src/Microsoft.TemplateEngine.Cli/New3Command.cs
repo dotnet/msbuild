@@ -301,7 +301,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, _commandInput.AllTemplateParams, _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified).ConfigureAwait(false);
+                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, _commandInput.AllTemplateParams, _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName).ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
             {
@@ -356,7 +356,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private IReadOnlyList<InvalidParameterInfo> GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner)
         {
-            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
+            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo, _commandInput.BaselineName);
             ParseTemplateArgs(templateInfo);
             allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _commandInput.AllTemplateParams, out userParamsWithInvalidValues);
@@ -1292,7 +1292,8 @@ namespace Microsoft.TemplateEngine.Cli
                 WellKnownSearchFilters.NameFilter(TemplateName),
                 WellKnownSearchFilters.ClassificationsFilter(TemplateName),
                 WellKnownSearchFilters.LanguageFilter(_commandInput.Language),
-                WellKnownSearchFilters.ContextFilter(context)
+                WellKnownSearchFilters.ContextFilter(context),
+                WellKnownSearchFilters.BaselineFilter(_commandInput.BaselineName)
             );
 
             IReadOnlyList<IFilteredTemplateInfo> matchedTemplates = templates.Where(x => x.IsMatch).ToList();
