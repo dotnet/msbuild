@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public const string LookingForPreferCliRuntimeFile = "{0}: Looking for prefercliruntime file at `{1}`";
 
+        public const string IgnoringPreferCLIRuntimeFile = "{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})";
+
         public const string AttemptingToResolve = "{0}: attempting to resolve {1}";
 
         public const string DidNotFindAMatchingProject = "{0}: Did not find a matching project {1}.";
