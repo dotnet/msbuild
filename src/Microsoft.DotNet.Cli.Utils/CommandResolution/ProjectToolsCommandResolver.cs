@@ -326,9 +326,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 LocalizableStrings.GeneratingDepsJson,
                 depsPath));
 
-            var dependencyContext = new DepsJsonBuilder()
-                .Build(toolLibrary, null, toolLockFile, framework, null);
-
             var tempDepsFile = Path.GetTempFileName();
 
             var args = new List<string>();
