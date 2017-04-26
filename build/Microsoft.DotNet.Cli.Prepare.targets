@@ -146,6 +146,7 @@
       <AdditionalCoreSetupChannel>preview</AdditionalCoreSetupChannel>
       <AdditionalSharedFrameworkVersion>1.0.5</AdditionalSharedFrameworkVersion>
       <AdditionalSharedHostVersion>1.0.1</AdditionalSharedHostVersion>
+      <AdditionalHostFxrContainerVersion>1.0.1</AdditionalHostFxrContainerVersion>
       <AdditionalHostFxrVersion Condition=" '$(OSName)' != 'win' ">1.0.1</AdditionalHostFxrVersion>
       <AdditionalHostFxrVersion Condition=" '$(OSName)' == 'win' ">1.0.5</AdditionalHostFxrVersion>
 
@@ -201,7 +202,7 @@
 
       <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
                                Condition="!Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+        <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrContainerVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
@@ -242,7 +243,7 @@
 
       <_DownloadAndExtractItem Include="AdditionalDownloadedHostFxrInstallerFile"
                                Condition="!Exists('$(AdditionalDownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
-        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrContainerVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</Url>
         <DownloadFileName>$(AdditionalDownloadedHostFxrInstallerFile)</DownloadFileName>
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
