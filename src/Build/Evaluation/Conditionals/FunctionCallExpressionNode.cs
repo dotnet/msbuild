@@ -40,9 +40,12 @@ namespace Microsoft.Build.Evaluation
 
                 try
                 {
-                    return !ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state)
+                    // Expand the items and use DefaultIfEmpty in case there is nothing returned
+                    // Then check if everything is not null (because the list was empty), not
+                    // already loaded into the cache, and exists
+                    return ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state)
                         .DefaultIfEmpty()
-                        .Any(i => i == null || state.LoadedProjectsCache?.TryGet(i) == null && !FileUtilities.FileOrDirectoryExistsNoThrow(i));
+                        .All(i => i != null && (state.LoadedProjectsCache?.TryGet(i) != null || FileUtilities.FileOrDirectoryExistsNoThrow(i)));
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
