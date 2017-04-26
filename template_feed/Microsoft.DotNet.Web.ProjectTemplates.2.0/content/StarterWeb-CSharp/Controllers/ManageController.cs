@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Company.WebApplication1.Models;
 using Company.WebApplication1.Models.ManageViewModels;
-using Company.WebApplication1.Services;
+using Company.WebApplication1.Identity.Services;
 
 namespace Company.WebApplication1.Controllers
 {

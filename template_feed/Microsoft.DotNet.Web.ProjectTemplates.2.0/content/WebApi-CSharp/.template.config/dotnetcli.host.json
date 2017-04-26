@@ -5,9 +5,12 @@
       "longName": "target-framework-override",
       "shortName": ""
     },
+    "UseLocalDB": {
+      "longName": "use-local-db"
+    },
     "AADInstance": {
       "longName": "aad-instance",
-      "shortName": "s"
+      "shortName": ""
     },
     "AAdB2CInstance": {
       "longName": "aad-b2c-instance",

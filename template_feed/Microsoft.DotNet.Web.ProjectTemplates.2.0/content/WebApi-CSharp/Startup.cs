@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+#if (OrganizationalAuth || IndividualAuth)
+using Microsoft.AspNetCore.Authentication.Extensions;
+#endif
 using Microsoft.AspNetCore.Builder;
+#if (IndividualLocalAuth)
+using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.Identity.Service;
+#endif
 using Microsoft.AspNetCore.Hosting;
+#if (OrganizationalAuth || IndividualAuth)
+using Microsoft.AspNetCore.Rewrite;
+#endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-#if (OrganizationalAuth || IndividualB2CAuth)
-using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.Extensions.Options;
-#endif
 
 namespace Company.WebApplication1
 {
@@ -26,28 +33,39 @@ namespace Company.WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add framework services.
+#if (IndividualLocalAuth)
+            services.AddIdentityServiceAuthentication();
+#elseif (IndividualB2CAuth)
+            services.AddAzureAdB2CWebApiAuthentication();
+#elseif (OrganizationalAuth)
+            services.AddAzureAdWebApiAuthentication();
+#endif
+#if (OrganizationalAuth || IndividualAuth)
+
+#endif
             services.AddMvc();
-#if (OrganizationalAuth || IndividualB2CAuth)
-
-            services.AddJwtBearerAuthentication();
-#endif
-#if (OrganizationalAuth)
-
-            services.Configure<AzureAdOptions>(Configuration.GetSection("Authentication:AzureAd"));
-#endif
-#if (IndividualB2CAuth)
-
-            services.Configure<AzureAdB2COptions>(Configuration.GetSection("Authentication:AzureAdB2C"));
-#endif
-#if (OrganizationalAuth || IndividualB2CAuth)
-            services.AddSingleton<IConfigureOptions<JwtBearerOptions>, JwtBearerOptionsSetup>();
-#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+#if (IndividualLocalAuth)
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseDevelopmentCertificateErrorPage(Configuration);
+            }
+
+            app.UseStaticFiles();
+
+#endif
+#if (OrganizationalAuth || IndividualAuth)
+            app.UseRewriter(new RewriteOptions().AddIISUrlRewrite(env.ContentRootFileProvider, "urlRewrite.config"));
+
+            app.UseAuthentication();
+
+#endif
             app.UseMvc();
         }
     }

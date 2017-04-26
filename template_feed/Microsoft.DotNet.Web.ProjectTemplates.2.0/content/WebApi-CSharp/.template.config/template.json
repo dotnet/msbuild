@@ -14,29 +14,55 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
+  "guids": [ 
+    "09732173-2cef-46b7-83db-1334bcb079d3", // Tenant ID
+    "53bc9b9d-9d6a-45d4-8429-2a2761773502", // Client ID
+    "ab1d2251-be0b-4457-abfe-4686ff9286c0", // Client app ID
+    "d2e0a81e-e08e-42ea-bbae-bec4c4ac6aed", // Client OpenID scope ID
+    "c9c97e6d-e0fc-4f75-b7ca-d43515b68ee3", // Client logout redirect URI ID
+    "8f87a3e2-5ac9-4852-8cc9-35799e66f898", // Client redirect URI ID
+    "63F0DED9-6722-437C-B5EF-F0543F3CF7FE", // Web API client ID
+    "823806a0-9193-413b-af88-55d9df14c1af", // Web API app ID
+    "14399c3c-ec16-459f-a7a4-2a41d25c7d4b"  // Web API user impersonation scope ID
+  ],
   "sources": [
     {
       "modifiers": [
         {
           "condition": "(windir == 'C:\\Windows')",
-          "exclude": "Properties/launchSettings.json"
+          "exclude": [
+            "Properties/launchSettings.json"
+          ]
+        },
+        {
+          "condition": "(!IndividualLocalAuth)",
+          "exclude": [
+            "Areas/**",
+            "Extensions/IdentityService/**",
+            "wwwroot/**",
+            "Controllers/HomeController.cs",
+            ".bowercc",
+            "bower.json",
+            "bundleconfig.json"
+          ]
         },
         {
           "condition": "(!IncludeLaunchSettings)",
-          "exclude": "Properties/launchSettings.json"
-        },
-        {
-          "condition": "(!IndividualB2CAuth && !OrganizationalAuth)",
-          "exclude": "JwtBearerOptionsSetup.cs"
-        },
-        {
-          "condition": "(!IndividualB2CAuth)",
-          "exclude": "AzureAdB2COptions.cs"
+          "exclude": [
+            "Properties/launchSettings.json"
+          ]
         },
         {
           "condition": "(!OrganizationalAuth)",
-          "exclude": "AzureAdOptions.cs"
+          "exclude": [
+            "Extensions/AzureAd/**"
+          ]
+        },
+        {
+          "condition": "(!IndividualB2CAuth)",
+          "exclude": [
+            "Extensions/AzureAdB2C/**"
+          ]
         }
       ]
     }
@@ -49,6 +75,10 @@
         {
           "choice": "None",
           "description": "No authentication"
+        },
+        {
+          "choice": "Individual",
+          "description": "Individual authentication"
         },
         {
           "choice": "IndividualB2C",
@@ -103,13 +133,13 @@
       "type": "parameter",
       "datatype": "string",
       "replaces": "qualified.domain.name",
-      "description": "The domain owning the directory (use with Single-org or IndividualB2C auth types)."
+      "description": "The domain for the directory tenant (use with Single-org or IndividualB2C auth types)."
     },
     "TenantId": {
       "type": "parameter",
       "datatype": "string",
       "replaces": "22222222-2222-2222-2222-222222222222",
-      "description": "The TenantId ID of the directory to connect to (use with Single-org auth)."
+      "description": "The TenantId ID of the directory to connect to (use with Single-org auth types)."
     },
     "OrgReadAccess": {
       "type": "parameter",
@@ -184,14 +214,6 @@
       },
       "replaces": "55555"
     },
-    "IndividualB2CAuth": {
-      "type": "computed",
-      "value": "(auth == \"IndividualB2C\")"
-    },
-    "IndividualAuth": {
-      "type": "computed",
-      "value": "(auth == \"IndividualB2C\")"
-    },
     "OrganizationalAuth": {
       "type": "computed",
       "value": "(auth == \"SingleOrg\")"
@@ -204,13 +226,31 @@
       "type": "computed",
       "value": "(auth == \"SingleOrg\")"
     },
+    "IndividualLocalAuth": {
+      "type": "computed",
+      "value": "(auth == \"Individual\")"
+    },
+    "IndividualAuth": {
+      "type": "computed",
+      "value": "(auth == \"Individual\" || auth == \"IndividualB2C\")"
+    },
+    "IndividualB2CAuth": {
+      "type": "computed",
+      "value": "(auth == \"IndividualB2C\")"
+    },
     "NoAuth": {
       "type": "computed",
-      "value": "(!(SingleOrgAuth || WindowsAuth || IndividualAuth))"
+      "value": "(!(IndividualAuth || OrganizationalAuth || WindowsAuth))"
     },
     "RequiresHttps": {
       "type": "computed",
-      "value": "(OrganizationalAuth || IndividualB2CAuth)"
+      "value": "(OrganizationalAuth || IndividualAuth)"
+    },
+    "UseLocalDB": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to use LocalDB instead of SQLite"
     },
     "IncludeApplicationInsights": {
       "type": "parameter",
