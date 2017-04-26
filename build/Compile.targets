@@ -12,5 +12,7 @@
     <!-- Publish DotNet -->
     <MSBuild Projects="$(SrcDirectory)/redist/redist.csproj"
              Targets="Publish" />
+
+    <MSBuild Projects="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver/Microsoft.DotNet.MSBuildSdkResolver.csproj" />
   </Target>
 </Project>

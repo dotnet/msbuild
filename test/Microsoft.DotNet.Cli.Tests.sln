@@ -76,6 +76,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-store.Tests", "dotne
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-back-compat.Tests", "dotnet-back-compat.Tests\dotnet-back-compat.Tests.csproj", "{27351B2F-325B-4843-9F4C-BC53FD06A7B5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdkResolver.Tests", "Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj", "{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -506,6 +508,18 @@ Global
 		{27351B2F-325B-4843-9F4C-BC53FD06A7B5}.Release|x64.Build.0 = Release|Any CPU
 		{27351B2F-325B-4843-9F4C-BC53FD06A7B5}.Release|x86.ActiveCfg = Release|Any CPU
 		{27351B2F-325B-4843-9F4C-BC53FD06A7B5}.Release|x86.Build.0 = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|x64.Build.0 = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Debug|x86.Build.0 = Debug|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|x64.ActiveCfg = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|x64.Build.0 = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{42A0CAB4-FFAD-47D4-9880-C0F4EDCF93DE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
