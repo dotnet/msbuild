@@ -94,6 +94,12 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             // Pass Dependency Graph file output path
             args.Add($"/p:RestoreGraphOutputPath=\"{dgFilePath}\"");
 
+            // Turn off recursive restore
+            args.Add($"/p:RestoreRecursive=false");
+
+            // Turn off restore for Dotnet cli tool references so that we do not generate extra dg specs
+            args.Add($"/p:RestoreDotnetCliToolReferences=false");
+
             var result = new MSBuildForwardingApp(args).Execute();
 
             if (result != 0)

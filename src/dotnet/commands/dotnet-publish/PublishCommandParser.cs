@@ -26,10 +26,10 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
-                    "--target",
-                    LocalizableStrings.TargetOptionDescription,
+                    "--manifest",
+                    LocalizableStrings.ManifestOptionDescription,
                     Accept.OneOrMoreArguments()
-                        .With(name: LocalizableStrings.TargetOption)
+                        .With(name: LocalizableStrings.ManifestOption)
                         .ForwardAsSingle(o => $"/p:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--self-contained",

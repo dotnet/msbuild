@@ -78,7 +78,7 @@
         <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
         <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
 
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Console" />
+        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/MvcIndividual" />
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
       </ItemGroup>
 
@@ -91,15 +91,16 @@
                         Lines="$(NuGetConfigContent)" />
 
       <DotNetNew ToolPath="$(OutputDirectory)"
-                 TemplateType="console"
-                 TemplateArgs="--debug:ephemeral-hive --skip-restore"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
+                 TemplateType="mvc"
+                 TemplateArgs="-au Individual --debug:ephemeral-hive --no-restore"
+                 WorkingDirectory="$(NuGetPackagesArchiveProject)/MvcIndividual" />
 
       <DotNetRestore ToolPath="$(OutputDirectory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      ConfigFile="$(LZMANuGetConfigFilePath)"
                      SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
+                     WorkingDirectory="$(NuGetPackagesArchiveProject)/MvcIndividual" />
+
 
       <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip;$(NuGetPackagesArchiveFolder)/**/*.nupkg" />
 

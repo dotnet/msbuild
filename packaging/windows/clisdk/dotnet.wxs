@@ -24,9 +24,6 @@
 
         <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
-        <Property Id="WIXUI_INSTALLDIR" Value="DOTNETHOME"/>
-        <UIRef Id="WixUI_InstallDir" />
-
         <CustomActionRef Id="WixBroadcastEnvironmentChange" />
     </Product>
     <Fragment>

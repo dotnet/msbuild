@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -o \"{rootPath}\" --skip-restore";
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
@@ -180,6 +180,25 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput("--no-build")
                 .Should().Fail()
                     .And.HaveStdErrContaining("--framework");
+        }
+
+        [Fact]
+        public void ItCanPassArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("-- foo bar baz")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;bar;baz");
         }
     }
 }

@@ -55,6 +55,8 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string RemoveDefinition = "Remove items from the project.";
 
+	public const string ListDefinition = "List items in the project.";
+
         public const string AdvancedCommands = "Advanced Commands";
 
         public const string NugetDefinition = "Provides additional NuGet commands.";

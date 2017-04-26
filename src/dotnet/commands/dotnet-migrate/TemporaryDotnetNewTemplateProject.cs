@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             Directory.CreateDirectory(tempDir);
 
-            RunCommand("new", new string[] { "console", "-o", tempDir, "--debug:ephemeral-hive", "--skip-restore" }, tempDir);
+            RunCommand("new", new string[] { "console", "-o", tempDir, "--debug:ephemeral-hive", "--no-restore" }, tempDir);
 
             return tempDir;
         }

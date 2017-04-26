@@ -6,6 +6,7 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 
 Looking for V1 of the .NET Core tooling?
 ----------------------------------------
+
 If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
 
 > **Note:** the master branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
@@ -22,7 +23,7 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8.2 |Windows x64 |Windows x86 |Mac OS X |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 | Linux x64 |
+|Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8.2 |Windows x64 |Windows x86 |macOS |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 | Linux x64 |
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8.2-build-badge]][debian-8.2-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][linux-build-badge]][linux-build]|
 
@@ -60,32 +61,6 @@ You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, 
 
 In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
 
-# Debian daily feed
-
-Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
-
-## Obtaining binaries
-
-Add debian feed:
-
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-Install:
-```
-sudo apt-get install <DebianPackageName>=<Version>
-```
-
-To list available packages:
-```
-apt-cache search dotnet-sdk | grep 2.0.0
-```
-
 > **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
@@ -96,7 +71,7 @@ apt-cache search dotnet-sdk | grep 2.0.0
 | **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>[tar.gz][ubuntu-14.04-targz] - [Checksum][ubuntu-14.04-targz-checksum] |
 | **Ubuntu 16.04** | [tar.gz][ubuntu-16.04-targz] - [Checksum][ubuntu-16.04-targz-checksum] |
 | **Debian 8.2** | [tar.gz][debian-8.2-targz] - [Checksum][debian-8.2-targz-checksum] |
-| **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
+| **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **CentOS 7.1 / Oracle Linux 7** | [tar.gz][centos-targz] - [Checksum][centos-targz-checksum] |
 | **RHEL 7.2** | [tar.gz][rhel-targz] - [Checksum][rhel-targz-checksum] |
 | **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
@@ -141,6 +116,32 @@ apt-cache search dotnet-sdk | grep 2.0.0
 
 [linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-linux-x64.latest.tar.gz
 [linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-linux-x64.latest.tar.gz.sha
+
+# Debian daily feed
+
+Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
+
+## Obtaining binaries
+
+Add debian feed:
+
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+Install:
+```
+sudo apt-get install <DebianPackageName>=<Version>
+```
+
+To list available packages:
+```
+apt-cache search dotnet-sdk | grep 2.0.0
+```
 
 Docker
 ------
