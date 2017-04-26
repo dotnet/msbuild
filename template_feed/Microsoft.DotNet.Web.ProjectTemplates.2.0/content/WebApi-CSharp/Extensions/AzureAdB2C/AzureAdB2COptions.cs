@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Company.WebApplication1
+namespace Microsoft.AspNetCore.Authentication.Extensions
 {
     public class AzureAdB2COptions
     {

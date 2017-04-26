@@ -28,7 +28,7 @@ using Microsoft.IdentityModel.Tokens;
 #if (IndividualLocalAuth)
 using Company.WebApplication1.Data;
 using Company.WebApplication1.Models;
-using Company.WebApplication1.Services;
+using Company.WebApplication1.Identity.Services;
 #endif
 
 namespace Company.WebApplication1

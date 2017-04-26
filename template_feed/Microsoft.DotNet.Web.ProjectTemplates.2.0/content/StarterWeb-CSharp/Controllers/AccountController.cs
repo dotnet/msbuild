@@ -26,7 +26,7 @@ using Microsoft.Extensions.Options;
 #if (IndividualLocalAuth)
 using Company.WebApplication1.Models;
 using Company.WebApplication1.Models.AccountViewModels;
-using Company.WebApplication1.Services;
+using Company.WebApplication1.Identity.Services;
 #endif
 
 namespace Company.WebApplication1.Controllers
