@@ -336,11 +336,6 @@ namespace Microsoft.Build.UnitTests
             "existsX",
             "!",
             "nonexistentfunction('xyz')",
-            "exists('a;b')", /* non scalar */
-            "exists(@(z))",
-            "exists('@(z)')",
-            "exists($(a_semi_b))",
-            "exists('$(a_semi_b)')",
             "exists(@(v)x)",
             "exists(@(v)$(nonexistent))",
             "exists('@(v)$(a)')",

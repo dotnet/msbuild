@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 directory2 = Path.Combine(Path.GetTempPath(), "fol$der" + Path.DirectorySeparatorChar + "fol$der2");
                 Directory.CreateDirectory(directory2);
 
-                string importPathRelativeEscaped = Path.Combine("fol$(x)$der2", "Escap%3beab$(x)leChar$ac;tersInI*tPa?h");
+                string importPathRelativeEscaped = Path.Combine("fol$(x)$der2", "Escap%3beab$(x)leChar$ac%3BtersInI*tPa?h");
                 string importRelative1 = Path.Combine("fol$der2", "Escap;eableChar$ac;tersInImportPath");
                 string importRelative2 = Path.Combine("fol$der2", "Escap;eableChar$ac;tersInI_XXXX_tPath");
                 importPath1 = Path.Combine(directory, importRelative1);
