@@ -245,7 +245,7 @@ case $target in
         setMonoDir
         CONFIGURATION=Debug-MONO
         RUNTIME_HOST_ARGS="--debug"
-        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild/MSBuild.dll"'"'
         ;;
     *)
         echo "Unsupported target detected: $target. Aborting."
