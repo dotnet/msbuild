@@ -8,9 +8,11 @@ namespace RazorPagesWebApplication.Pages
 {
     public class ContactModel : PageModel
     {
+        public string Message { get; set; }
+
         public void OnGet()
         {
-            ViewData["Message"] = "Your contact page.";
+            Model.Message = "Your contact page.";
         }
     }
 }

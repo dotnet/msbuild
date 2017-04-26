@@ -8,9 +8,11 @@ namespace RazorPagesWebApplication.Pages
 {
     public class AboutModel : PageModel
     {
+        public string Message { get; set; }
+
         public void OnGet()
         {
-            ViewData["Message"] = "Your application description page.";
+            Message = "Your application description page.";
         }
     }
 }
