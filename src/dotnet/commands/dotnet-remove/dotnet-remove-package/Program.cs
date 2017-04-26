@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
             {
                 throw new ArgumentNullException(nameof(fileOrDirectory));
             }
-            if (_appliedCommand.Arguments.Count != 1)
+            if (appliedCommand.Arguments.Count != 1)
             {
                 throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
             }
