@@ -185,5 +185,12 @@ namespace Microsoft.DotNet.Tools
         public const string ProjectNotCompatibleWithFrameworks = "Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:";
         public const string ProjectDoesNotTargetFramework = "Project `{0}` does not target framework `{1}`.";
         public const string ProjectCouldNotBeEvaluated = "Project `{0}` could not be evaluated. Evaluation failed with following error:\n{1}";
+
+        /// common options
+        public const string VerbosityOptionDescription = "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]";
+        public const string FrameworkOptionDescription = "Target framework to publish for. The target framework has to be specified in the project file.";
+        public const string RuntimeOptionDescription = "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.";
+        public const string ConfigurationOptionDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
+        public const string CmdVersionSuffixDescription = "Defines the value for the $(VersionSuffix) property in the project.";
     }
 }
