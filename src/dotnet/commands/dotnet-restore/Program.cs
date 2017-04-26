@@ -23,8 +23,6 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            Reporter.Output.WriteLine(string.Join(" ", args));
-
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet restore", args);
