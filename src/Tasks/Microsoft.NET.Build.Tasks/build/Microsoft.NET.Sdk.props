@@ -114,7 +114,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- List of supported .NET Core and .NET Standard TFMs -->
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-  
+
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
