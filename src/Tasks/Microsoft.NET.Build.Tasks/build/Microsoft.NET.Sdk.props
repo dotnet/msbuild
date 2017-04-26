@@ -107,6 +107,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
   
+  <!-- List of supported .NET Core and .NET Standard TFMs -->
+  <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
+  
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
