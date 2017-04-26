@@ -1104,6 +1104,88 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Fact]
+        public void ImportListOfItems()
+        {
+            string[] importPaths = {
+                ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <PropertyGroup>
+                            <Property1>15F11509E2E047EF9B337807ACEE4448</Property1>
+                            <Property2>01CB8D8A6E454918B17496468B3D74AA</Property2>
+                        </PropertyGroup>
+                    </Project>"),
+                ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <PropertyGroup>
+                            <Property1>$(Property1);1C5C388AD1AB46F8A95BDF5894E95B8B</Property1>
+                            <Property2>5D64384AAB7A45FEA105EDA9959F5A41</Property2>
+                        </PropertyGroup>
+                    </Project>")
+            };
+
+            string content = ObjectModelHelpers.CleanupFileContents($@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <PropertyGroup>
+                            <Imports>{String.Join(";", importPaths)}</Imports>
+                        </PropertyGroup>
+
+                        <Import Project='$(Imports)' Condition='Exists($(Imports))'/>
+                        
+                        <Target Name='t'>
+                          <Message Text='$(Property1)'/>
+                          <Message Text='$(Property2)'/>
+                        </Target>
+                    </Project>
+                ");
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+            MockLogger logger = new MockLogger();
+            bool result = project.Build(logger);
+            Assert.Equal(true, result);
+
+            logger.AssertLogContains("15F11509E2E047EF9B337807ACEE4448;1C5C388AD1AB46F8A95BDF5894E95B8B");
+            logger.AssertLogContains("5D64384AAB7A45FEA105EDA9959F5A41");
+            logger.AssertLogDoesntContain("01CB8D8A6E454918B17496468B3D74AA");
+        }
+
+        [Fact]
+        public void ImportListOfItemsOneFileDoesNotExist()
+        {
+            string[] importPaths = {
+                ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <PropertyGroup>
+                            <Property1>15F11509E2E047EF9B337807ACEE4448</Property1>
+                        </PropertyGroup>
+                    </Project>"),
+                "filethatdoesnotexist"
+            };
+
+            string content = ObjectModelHelpers.CleanupFileContents($@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <PropertyGroup>
+                            <Imports>{String.Join(";", importPaths)}</Imports>
+                        </PropertyGroup>
+
+                        <Import Project='$(Imports)' Condition='Exists($(Imports))'/>
+                        
+                        <Target Name='t'>
+                          <Message Text='$(Property1)'/>
+                        </Target>
+                    </Project>
+                ");
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+            MockLogger logger = new MockLogger();
+            bool result = project.Build(logger);
+            Assert.Equal(true, result);
+
+            logger.AssertLogDoesntContain("15F11509E2E047EF9B337807ACEE4448");
+        }
+
         /// <summary>
         /// There are several built-in MSBuildProjectXXXX properties like MSBuildProjectFile.
         /// These always refer to the outer project whereever they are evaluated.
