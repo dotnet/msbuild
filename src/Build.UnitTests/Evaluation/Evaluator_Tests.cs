@@ -1151,6 +1151,67 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void ImportListOfItemsWithWildcards()
+        {
+            string filename1 = Guid.NewGuid().ToString("N");
+            string filename2 = Guid.NewGuid().ToString("N");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory($"{filename1}-1.props", @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Property1>43FEAE1F861742549766443A31C581F9</Property1>
+                    </PropertyGroup>
+                </Project>");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory($"{filename1}-2.props", @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Property1>$(Property1);14F2D19468E24EEE86F7DD6D6E81BB20</Property1>
+                    </PropertyGroup>
+                </Project>");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory($"{filename2}-1.props", @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Property1>$(Property1);DCBE5C70A6EC41288AEA2259F0BFEEB4</Property1>
+                    </PropertyGroup>
+                </Project>");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory($"{filename2}-2.props", @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Property1>$(Property1);74960FBBB84C46F5B7CAAF9113F955FC</Property1>
+                    </PropertyGroup>
+                </Project>");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory($"{filename2}-3.props", @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Property1>$(Property1);67EFAD6EF5584EC2BD651119E6489424</Property1>
+                    </PropertyGroup>
+                </Project>");
+
+            string content = ObjectModelHelpers.CleanupFileContents($@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                    <PropertyGroup>
+                        <Imports>{ObjectModelHelpers.TempProjectDir}\{filename1}-*.props;{ObjectModelHelpers.TempProjectDir}\{filename2}-*.props</Imports>
+                    </PropertyGroup>
+
+                    <Import Project='$(Imports)'/>
+                        
+                    <Target Name='t'>
+                        <Message Text='$(Property1)'/>
+                    </Target>
+                </Project>
+            ");
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+            MockLogger logger = new MockLogger();
+            bool result = project.Build(logger);
+            Assert.Equal(true, result);
+
+            logger.AssertLogContains("43FEAE1F861742549766443A31C581F9;14F2D19468E24EEE86F7DD6D6E81BB20;DCBE5C70A6EC41288AEA2259F0BFEEB4;74960FBBB84C46F5B7CAAF9113F955FC;67EFAD6EF5584EC2BD651119E6489424");
+        }
+
+        [Fact]
         public void ImportListOfItemsOneFileDoesNotExist()
         {
             string[] importPaths = {
