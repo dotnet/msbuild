@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -18,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         public static Option VerbosityOption() =>
             Create.Option(
                 "-v|--verbosity",
-                "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]",
+                CommonLocalizableStrings.VerbosityOptionDescription,
                 Accept.AnyOneOf(
                           "q", "quiet",
                           "m", "minimal",
@@ -30,7 +31,7 @@ namespace Microsoft.DotNet.Cli
         public static Option FrameworkOption() =>
             Create.Option(
                 "-f|--framework",
-                "Target framework to publish for. The target framework has to be specified in the project file.",
+                CommonLocalizableStrings.FrameworkOptionDescription,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
                     .With(name: "FRAMEWORK")
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.Cli
         public static Option RuntimeOption() =>
             Create.Option(
                 "-r|--runtime",
-                "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.",
+                CommonLocalizableStrings.RuntimeOptionDescription,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                     .With(name: "RUNTIME_IDENTIFIER")
@@ -47,8 +48,8 @@ namespace Microsoft.DotNet.Cli
                 
         public static Option ConfigurationOption() =>
             Create.Option(
-                "-c|--configuration", 
-                "Configuration to use for building the project.  Default for most projects is  \"Debug\".",
+                "-c|--configuration",
+                CommonLocalizableStrings.ConfigurationOptionDescription,
                 Accept.ExactlyOneArgument()
                     .With(name: "CONFIGURATION")
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Cli
         public static Option VersionSuffixOption() =>
             Create.Option(
                 "--version-suffix",
-                "Defines the value for the $(VersionSuffix) property in the project.",
+                CommonLocalizableStrings.CmdVersionSuffixDescription,
                 Accept.ExactlyOneArgument()
                     .With(name: "VERSION_SUFFIX")
                     .ForwardAsSingle(o => $"/p:VersionSuffix={o.Arguments.Single()}"));
