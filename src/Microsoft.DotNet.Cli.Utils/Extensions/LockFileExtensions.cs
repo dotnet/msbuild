@@ -1,4 +1,7 @@
-﻿using Microsoft.DotNet.Tools.Common;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Packaging;
 using NuGet.ProjectModel;
 using System;

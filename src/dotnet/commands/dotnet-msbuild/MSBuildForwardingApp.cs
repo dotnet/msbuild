@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         private MSBuildForwardingAppWithoutLogging _forwardingAppWithoutLogging;
 
-        static IEnumerable<string> ConcatTelemetryLogger(IEnumerable<string> argsToForward)
+        private static IEnumerable<string> ConcatTelemetryLogger(IEnumerable<string> argsToForward)
         {
             if (Telemetry.CurrentSessionId != null)
             {

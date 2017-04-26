@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
     /// </summary>
     internal class ForwardingAppImplementation
     {
-        private const string s_hostExe = "dotnet";
+        private const string HostExe = "dotnet";
 
         private readonly string _forwardApplicationPath;
         private readonly IEnumerable<string> _argsToForward;
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private string GetHostExeName()
         {
-            return $"{s_hostExe}{FileNameSuffixes.CurrentPlatform.Exe}";
+            return $"{HostExe}{FileNameSuffixes.CurrentPlatform.Exe}";
         }
     }
 }

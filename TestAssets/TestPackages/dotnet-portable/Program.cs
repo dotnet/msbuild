@@ -13,11 +13,19 @@ namespace ConsoleApplication
         {
             Console.WriteLine("Hello Portable World!");
 
-            var coreAssembly = typeof(object).GetTypeInfo().Assembly;
-            string coreFolder = Path.GetDirectoryName(coreAssembly.Location);
-            string frameworkVersion = Path.GetFileName(coreFolder);
+            var depsFile = new FileInfo(GetDataFromAppDomain("FX_DEPS_FILE"));
+            string frameworkVersion = depsFile.Directory.Name;
 
             Console.WriteLine($"I'm running on shared framework version {frameworkVersion}!");
+        }
+
+        public static string GetDataFromAppDomain(string propertyName)
+        {
+            var appDomainType = typeof(object).GetTypeInfo().Assembly?.GetType("System.AppDomain");
+            var currentDomain = appDomainType?.GetProperty("CurrentDomain")?.GetValue(null);
+            var deps = appDomainType?.GetMethod("GetData")?.Invoke(currentDomain, new[] { propertyName });
+
+            return deps as string;
         }
     }
 }

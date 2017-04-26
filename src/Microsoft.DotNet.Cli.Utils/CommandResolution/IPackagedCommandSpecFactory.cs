@@ -8,8 +8,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public interface IPackagedCommandSpecFactory
     {
-        //  Code review TODO: Is it OK to make breaking changes to the CLI Utils API surface?
-
         CommandSpec CreateCommandSpecFromLibrary(
             LockFileTargetLibrary toolLibrary,
             string commandName,

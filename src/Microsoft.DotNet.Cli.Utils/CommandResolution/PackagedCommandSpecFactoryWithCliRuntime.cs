@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 else
                 {
                     arguments.Add("--fx-version");
-                    arguments.Add(new Muxer().SharedFxVersion);
+                    arguments.Add(muxer.SharedFxVersion);
                 }
             }
         }

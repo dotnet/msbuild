@@ -1,4 +1,7 @@
-﻿using Microsoft.DotNet.Cli.Utils;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +11,7 @@ namespace Microsoft.DotNet.Cli
 {
     public class ForwardingApp
     {
-        ForwardingAppImplementation _implementation;
+        private ForwardingAppImplementation _implementation;
 
         public ForwardingApp(
             string forwardApplicationPath,
