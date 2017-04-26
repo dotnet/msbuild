@@ -246,7 +246,7 @@ case $target in
         CONFIGURATION=Debug-MONO
         CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
         RUNTIME_HOST_ARGS="--debug"
-        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild/MSBuild.dll"'"'
         ;;
     *)
         echo "Unsupported target detected: $target. Aborting."
