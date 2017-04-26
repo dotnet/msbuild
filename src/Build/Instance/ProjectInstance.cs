@@ -32,6 +32,7 @@ using System.IO;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Execution
 {
@@ -185,6 +186,7 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
         private string _subToolsetVersion;
         private TaskRegistry _taskRegistry;
+        private ProjectRootElementCache _projectRootElementCache;
 
 
         /// <summary>
@@ -331,8 +333,8 @@ namespace Microsoft.Build.Execution
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
-            _hostServices = projectToInheritFrom._hostServices;
-            this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
+            HostServices = projectToInheritFrom.HostServices;
+            _projectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
             this.InitialTargets = new List<string>();
             this.DefaultTargets = new List<string>();
@@ -433,7 +435,7 @@ namespace Microsoft.Build.Execution
             this.SubToolsetVersion = data.SubToolsetVersion;
             this.TaskRegistry = data.TaskRegistry;
 
-            this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
+            _projectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
 
@@ -516,7 +518,7 @@ namespace Microsoft.Build.Execution
 
             this.EvaluatedItemElements = that.EvaluatedItemElements;
 
-            this.ProjectRootElementCache = that.ProjectRootElementCache;
+            _projectRootElementCache = that.ProjectRootElementCache;
         }
 
         /// <summary>
@@ -653,8 +655,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> DefaultTargets
         {
-            get => _defaultTargets;
-            private set => _defaultTargets = value;
+            get { return _defaultTargets; }
+            private set { _defaultTargets = value; }
         }
 
         /// <summary>
@@ -664,8 +666,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> InitialTargets
         {
-            get => _initialTargets;
-            private set => _initialTargets = value;
+            get { return _initialTargets; }
+            private set { _initialTargets = value; }
         }
 
         /// <summary>
@@ -824,8 +826,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.BeforeTargets
         {
-            get => _beforeTargets;
-            set => _beforeTargets = value;
+            get { return _beforeTargets; }
+            set { _beforeTargets = value; }
         }
 
         /// <summary>
@@ -834,8 +836,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AfterTargets
         {
-            get => _afterTargets;
-            set => _afterTargets = value;
+            get { return _afterTargets; }
+            set { _afterTargets = value; }
         }
 
         /// <summary>
@@ -889,8 +891,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal Toolset Toolset
         {
-            get => _toolset;
-            private set => _toolset = value;
+            get { return _toolset; }
+            private set { _toolset = value; }
         }
 
         /// <summary>
@@ -936,8 +938,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal string SubToolsetVersion
         {
-            get => _subToolsetVersion;
-            private set => _subToolsetVersion = value;
+            get { return _subToolsetVersion; }
+            private set { _subToolsetVersion = value; }
         }
 
         /// <summary>
@@ -984,8 +986,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal TaskRegistry TaskRegistry
         {
-            get => _taskRegistry;
-            private set => _taskRegistry = value;
+            get { return _taskRegistry; }
+            private set { _taskRegistry = value; }
         }
 
         /// <summary>
@@ -1003,9 +1005,31 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCache ProjectRootElementCache
         {
-            get;
-            private set;
+            get { return _projectRootElementCache; }
+            set
+            {
+                ErrorUtilities.VerifyThrow(_projectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
+                ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
+
+                _projectRootElementCache = value;
+                TaskRegistry.RootElementCache = value;
+            }
         }
+
+        /// <summary>
+        /// The HostServices to use during a build.
+        /// </summary>
+        internal HostServices HostServices
+        {
+            get { return _hostServices; }
+            set
+            {
+                ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
+                _hostServices = value;
+            }
+        }
+
+        internal bool IsLoaded => ProjectRootElementCache != null && TaskRegistry.IsLoaded;
 
         /// <summary>
         /// Returns the evaluated, escaped value of the provided item's include.
@@ -1684,6 +1708,26 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
+            if (Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
+            {
+                TranslateEntireState(translator);
+            }
+            else
+            {
+                TranslateMinimalState(translator);
+            }
+        }
+
+        private void TranslateMinimalState(INodePacketTranslator translator)
+        {
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _isImmutable);
+            TranslateItems(translator);
+        }
+
+        private void TranslateEntireState(INodePacketTranslator translator)
+        {
             TranslateProperties(translator);
             TranslateItems(translator);
             TranslateTargets(translator);
@@ -2283,7 +2327,7 @@ namespace Microsoft.Build.Execution
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
-            this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
+            _projectRootElementCache = buildParameters.ProjectRootElementCache;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 

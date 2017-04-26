@@ -151,7 +151,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The cache to load the *.tasks files into
         /// </summary>
-        private ProjectRootElementCache _projectRootElementCache;
+        internal ProjectRootElementCache RootElementCache { get; set; }
 
         /// <summary>
         /// Creates a task registry that does not fall back to any other task registry.
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
 
-            _projectRootElementCache = projectRootElementCache;
+            RootElementCache = projectRootElementCache;
         }
 
         private TaskRegistry()
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
             ErrorUtilities.VerifyThrowInternalNull(toolset, "toolset");
 
-            _projectRootElementCache = projectRootElementCache;
+            RootElementCache = projectRootElementCache;
             _toolset = toolset;
         }
 
@@ -212,6 +212,8 @@ namespace Microsoft.Build.Execution
                 return _taskRegistrations;
             }
         }
+
+        internal bool IsLoaded => RootElementCache != null;
 
         /// <summary>
         /// Evaluate the usingtask and add the result into the data passed in
@@ -474,7 +476,7 @@ namespace Microsoft.Build.Execution
             // Try the override task registry first
             if (_toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, _projectRootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -547,7 +549,7 @@ namespace Microsoft.Build.Execution
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, _projectRootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 

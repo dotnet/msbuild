@@ -19,6 +19,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
@@ -652,6 +653,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ")]
         public void ProjectInstanceCanSerializeViaTranslator(string projectContents)
         {
+            if (!Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
+            {
+                return;
+            }
+
             projectContents = string.Format(projectContents, MSBuildConstants.CurrentToolsVersion);
 
             var original = new ProjectInstance(ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)))));

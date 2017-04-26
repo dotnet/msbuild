@@ -26,6 +26,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
@@ -1128,8 +1129,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LoadProjectIntoConfiguration()
         {
-            ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.Project == null, "We've already loaded the project for this configuration id {0}.", _requestEntry.RequestConfiguration.ConfigurationId);
+            ErrorUtilities.VerifyThrow(!_requestEntry.RequestConfiguration.IsLoaded, "Already loaded the project for this configuration id {0}.", _requestEntry.RequestConfiguration.ConfigurationId);
 
+            if (Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
+            {
+                _requestEntry.RequestConfiguration.InitializeProject(_componentHost.BuildParameters, LoadProjectFromFile);
+            }
+            else
+            {
+                _requestEntry.RequestConfiguration.Project = LoadProjectFromFile();
+            }
+        }
+
+        private ProjectInstance LoadProjectFromFile()
+        {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 try
@@ -1154,7 +1167,7 @@ namespace Microsoft.Build.BackEnd
 
             string toolsVersionOverride = _requestEntry.RequestConfiguration.ExplicitToolsVersionSpecified ? _requestEntry.RequestConfiguration.ToolsVersion : null;
 
-            _requestEntry.RequestConfiguration.Project = new ProjectInstance(_requestEntry.RequestConfiguration.ProjectFullPath, globalProperties, toolsVersionOverride, _componentHost.BuildParameters, _nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext);
+            return new ProjectInstance(_requestEntry.RequestConfiguration.ProjectFullPath, globalProperties, toolsVersionOverride, _componentHost.BuildParameters, _nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext);
         }
 
         /// <summary>

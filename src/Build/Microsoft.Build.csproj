@@ -140,6 +140,9 @@
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>SharedUtilities\Traits.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
