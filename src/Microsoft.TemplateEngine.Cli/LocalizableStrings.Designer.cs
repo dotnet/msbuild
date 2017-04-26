@@ -62,6 +62,53 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}.
+        /// </summary>
+        public static string AddProjToSlnPostActionFailed {
+            get {
+                return ResourceManager.GetString("AddProjToSlnPostActionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add..
+        /// </summary>
+        public static string AddProjToSlnPostActionNoProjFiles {
+            get {
+                return ResourceManager.GetString("AddProjToSlnPostActionNoProjFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding project reference(s) to solution file. Running dotnet sln {0} add {1}.
+        /// </summary>
+        public static string AddProjToSlnPostActionRunning {
+            get {
+                return ResourceManager.GetString("AddProjToSlnPostActionRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully added
+        ///    project(s): {0}
+        ///    to solution file: {1}.
+        /// </summary>
+        public static string AddProjToSlnPostActionSucceeded {
+            get {
+                return ResourceManager.GetString("AddProjToSlnPostActionSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which solution file to add the reference to..
+        /// </summary>
+        public static string AddProjToSlnPostActionUnresolvedSlnFile {
+            get {
+                return ResourceManager.GetString("AddProjToSlnPostActionUnresolvedSlnFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
         /// </summary>
         public static string AddRefPostActionAddPackageRef {

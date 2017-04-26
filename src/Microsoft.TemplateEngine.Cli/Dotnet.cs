@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -52,6 +53,30 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName, "--version", version });
             }
+
+            return new Dotnet
+            {
+                _info = new ProcessStartInfo("dotnet", argString)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                }
+            };
+        }
+
+        public static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects)
+        {
+            List<string> allArgs = new List<string>()
+            {
+                "sln",
+                solutionFile,
+                "add"
+            };
+
+            allArgs.AddRange(projects);
+            string argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(allArgs);
 
             return new Dotnet
             {
