@@ -475,8 +475,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // projectInstance was serialized over. Finish initialization with node specific state
 
-                _project.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
-                _project.HostServices = buildParameters.HostServices;
+                _project.LateInitialize(buildParameters.ProjectRootElementCache, buildParameters.HostServices);
             }
 
             ErrorUtilities.VerifyThrow(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");

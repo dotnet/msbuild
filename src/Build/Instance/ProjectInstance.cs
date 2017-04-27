@@ -186,7 +186,6 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
         private string _subToolsetVersion;
         private TaskRegistry _taskRegistry;
-        private ProjectRootElementCache _projectRootElementCache;
 
 
         /// <summary>
@@ -333,8 +332,8 @@ namespace Microsoft.Build.Execution
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
-            HostServices = projectToInheritFrom.HostServices;
-            _projectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
+            _hostServices = projectToInheritFrom._hostServices;
+            this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
             this.InitialTargets = new List<string>();
             this.DefaultTargets = new List<string>();
@@ -435,7 +434,7 @@ namespace Microsoft.Build.Execution
             this.SubToolsetVersion = data.SubToolsetVersion;
             this.TaskRegistry = data.TaskRegistry;
 
-            _projectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
+            this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
 
@@ -518,7 +517,7 @@ namespace Microsoft.Build.Execution
 
             this.EvaluatedItemElements = that.EvaluatedItemElements;
 
-            _projectRootElementCache = that.ProjectRootElementCache;
+            this.ProjectRootElementCache = that.ProjectRootElementCache;
         }
 
         /// <summary>
@@ -1005,31 +1004,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCache ProjectRootElementCache
         {
-            get { return _projectRootElementCache; }
-            set
-            {
-                ErrorUtilities.VerifyThrow(_projectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
-                ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
-
-                _projectRootElementCache = value;
-                TaskRegistry.RootElementCache = value;
-            }
+            get;
+            private set;
         }
-
-        /// <summary>
-        /// The HostServices to use during a build.
-        /// </summary>
-        internal HostServices HostServices
-        {
-            get { return _hostServices; }
-            set
-            {
-                ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
-                _hostServices = value;
-            }
-        }
-
-        internal bool IsLoaded => ProjectRootElementCache != null && TaskRegistry.IsLoaded;
 
         /// <summary>
         /// Returns the evaluated, escaped value of the provided item's include.
@@ -1700,6 +1677,23 @@ namespace Microsoft.Build.Execution
             _items = new ItemDictionary<ProjectItemInstance>(projectState._items);
         }
 
+        internal bool IsLoaded => ProjectRootElementCache != null && TaskRegistry.IsLoaded;
+
+        /// <summary>
+        /// When project instances get serialized between nodes, they need to be initialized with node specific information.
+        /// The node specific information cannot come from the constructor, because that information is not available to INodePacketTranslators
+        /// </summary>
+        internal void LateInitialize(ProjectRootElementCache projectRootElementCache, HostServices hostServices)
+        {
+            ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
+            ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
+            ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
+
+            ProjectRootElementCache = projectRootElementCache;
+            _taskRegistry.RootElementCache = projectRootElementCache;
+            _hostServices = hostServices;
+        }
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -2327,7 +2321,7 @@ namespace Microsoft.Build.Execution
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
-            _projectRootElementCache = buildParameters.ProjectRootElementCache;
+            this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
