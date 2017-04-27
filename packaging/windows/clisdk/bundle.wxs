@@ -26,9 +26,6 @@
     <Variable Name="BUNDLEMONIKER" Type="string" Value="$(var.ProductMoniker)" bal:Overridable="no" />
 
     <Chain DisableSystemRestore="yes" ParallelCache="yes">
-      <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
-        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
-      </MsiPackage>
       <MsiPackage SourceFile="$(var.SharedFXMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
@@ -36,6 +33,9 @@
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
       <MsiPackage SourceFile="$(var.SharedHostMsiSourcePath)">
+        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
+      </MsiPackage>
+       <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
     </Chain>
