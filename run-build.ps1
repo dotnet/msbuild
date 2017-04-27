@@ -91,7 +91,7 @@ if ((Test-Path $bootStrapperPath) -eq 0)
 }
 
 # now execute it
-& $bootStrapperPath -DotNetInstallBranch master -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR_PJ -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
+& $bootStrapperPath -DotNetInstallBranch release/2.0.0 -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR_PJ -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
 if ($LastExitCode -ne 0)
 {
     Write-Output "Boot-strapping failed with exit code $LastExitCode, see bootstrap.log for more information."
@@ -101,8 +101,8 @@ if ($LastExitCode -ne 0)
 # install the post-PJnistic stage0
 $dotnetInstallPath = Join-Path $toolsLocalPath "dotnet-install.ps1"
 
-Write-Host "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-Invoke-Expression "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Write-Host "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Invoke-Expression "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"

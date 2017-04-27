@@ -9,6 +9,7 @@
     <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>
