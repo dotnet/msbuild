@@ -165,7 +165,7 @@ if [ ! -f $bootStrapperPath ]; then
     chmod u+x $bootStrapperPath
 fi
 
-$bootStrapperPath --dotNetInstallBranch master --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE > bootstrap.log
+$bootStrapperPath --dotNetInstallBranch release/2.0.0 --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE > bootstrap.log
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: Boot-strapping failed with exit code $EXIT_CODE, see bootstrap.log for more information." >&2
@@ -173,8 +173,8 @@ if [ $EXIT_CODE != 0 ]; then
 fi
 
 # now execute the script
-echo "installing CLI: $dotnetInstallPath --channel \"master\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
-$dotnetInstallPath --channel "master" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
+echo "installing CLI: $dotnetInstallPath --channel \"release/2.0.0\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
+$dotnetInstallPath --channel "release/2.0.0" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $EXIT_CODE." >&2
