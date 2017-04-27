@@ -23,6 +23,16 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_creates_a_deps_file_for_the_tool_and_the_tool_runs()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Fullframework NuGet versioning on Jenkins infrastructure issue
+                //        https://github.com/dotnet/sdk/issues/1041
+
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject toolProject = new TestProject()
             {
                 Name = "TestTool",
@@ -40,6 +50,16 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_handles_conflicts_when_creating_a_tool_deps_file()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Fullframework NuGet versioning on Jenkins infrastructure issue
+                //        https://github.com/dotnet/sdk/issues/1041
+
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject toolProject = new TestProject()
             {
                 Name = "DependencyContextTool",
