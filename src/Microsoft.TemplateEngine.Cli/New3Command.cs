@@ -1197,8 +1197,10 @@ namespace Microsoft.TemplateEngine.Cli
 
                             if (!string.IsNullOrWhiteSpace(choiceInfo.Value))
                             {
-                                displayValue.AppendLine("- " + choiceInfo.Value);
+                                displayValue.Append("- " + choiceInfo.Value);
                             }
+
+                            displayValue.AppendLine();
                         }
                     }
                     else
