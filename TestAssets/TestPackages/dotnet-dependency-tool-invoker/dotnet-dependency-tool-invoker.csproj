@@ -21,12 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(SdkNugetVersion)" />
     <PackageReference Include="System.Linq" Version="4.3.0" />

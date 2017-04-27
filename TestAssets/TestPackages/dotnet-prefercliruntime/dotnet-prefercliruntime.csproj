@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-
     <Content Include="prefercliruntime">
       <Pack>true</Pack>
       <PackagePath>\prefercliruntime</PackagePath>

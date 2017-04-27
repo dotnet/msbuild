@@ -22,6 +22,14 @@ namespace Microsoft.DotNet.Cli.Utils
             if(PrefersCliRuntime(commandPath))
             {
                 var runtimeConfigFile = Path.ChangeExtension(commandPath, FileNameSuffixes.RuntimeConfigJson);
+
+                if (!File.Exists(runtimeConfigFile))
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.CouldNotFindToolRuntimeConfigFile,
+                                                              nameof(PackagedCommandSpecFactory),
+                                                              Path.GetFileName(commandPath)));
+                }
+
                 var runtimeConfig = new RuntimeConfig(runtimeConfigFile);
 
                 var muxer = new Muxer();

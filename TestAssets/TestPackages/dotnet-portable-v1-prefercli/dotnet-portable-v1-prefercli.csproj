@@ -14,10 +14,5 @@
 
   <ItemGroup>
     <Compile Include="..\dotnet-portable\Program.cs" />
-
-    <Content Include="..\dotnet-prefercliruntime\prefercliruntime">
-      <Pack>true</Pack>
-      <PackagePath>\prefercliruntime</PackagePath>
-    </Content>
   </ItemGroup>  
 </Project>
