@@ -830,7 +830,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="list">The list to be translated.</param>
             /// <param name="factory">factory to create type T</param>
+            /// <param name="collectionFactory">factory to create the IList</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
+            /// <typeparam name="L">IList subtype</typeparam>
             public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>
             {
                 if (!TranslateNullable(list))

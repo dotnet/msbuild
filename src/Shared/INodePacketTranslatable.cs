@@ -10,7 +10,8 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Delegate for users that want to translate an arbitrary structure that cannot implement <see cref="INodePacketTranslatable"/> (e.g. translating a complex collection)
     /// </summary>
-    /// <param name="translator"></param>
+    /// <param name="translator">the translator</param>
+    /// <param name="obj">the object to translate</param>
     internal delegate void Translator<T>(ref T obj, INodePacketTranslator translator);
 
     /// <summary>

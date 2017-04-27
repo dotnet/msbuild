@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-        /// <param name="collectionCreator">A factory used to create a <see cref="NodePacketCollectionCreatorCollectionCreator{T}"/>.</param>
+        /// <param name="collectionCreator">A factory used to create the dictionary.</param>
         void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
             where T : class, INodePacketTranslatable;

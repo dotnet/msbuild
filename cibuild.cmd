@@ -151,7 +151,7 @@ set MSBUILDBINLOGPATH=%~dp0msbuild_rebuild-%HOST%.binlog
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /bl:%MSBUILDBINLOGPATH%
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /warnaserror /bl:%MSBUILDBINLOGPATH%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
