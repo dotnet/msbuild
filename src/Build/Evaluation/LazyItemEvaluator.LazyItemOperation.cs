@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation
 
                                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                item.SetMetadata(metadataElement, evaluatedValue);
+                                item.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }
                         }
 
@@ -207,6 +207,7 @@ namespace Microsoft.Build.Evaluation
 #endif
 
                             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
+                            evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
                             metadataList.Add(new Pair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
