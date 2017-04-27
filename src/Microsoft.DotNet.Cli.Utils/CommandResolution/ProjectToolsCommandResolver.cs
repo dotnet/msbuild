@@ -376,11 +376,16 @@ namespace Microsoft.DotNet.Cli.Utils
                 Path.Combine(AppContext.BaseDirectory, "MSBuild.dll") :
                 msBuildExePath;
 
-            var result = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath).Execute();
+            var result = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath)
+                .GetProcessStartInfo()
+                .ExecuteAndCaptureOutput(out string stdOut, out string stdErr);
 
             if (result != 0)
             {
-                //  TODO: Can / should we show the MSBuild output if there is a failure?
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.UnableToGenerateDepsJson,
+                    stdOut + Environment.NewLine + stdErr));
+
                 throw new GracefulException(string.Format(LocalizableStrings.UnableToGenerateDepsJson, toolDepsJsonGeneratorProject));
             }
 
