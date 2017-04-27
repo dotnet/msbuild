@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 {
     public class GivenThatWeWantToBeBackwardsCompatibleWith1xProjects : TestBase
     {
-        [Theory]
+        [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
         [InlineData("netcoreapp1.1")]
         public void ItRestoresBuildsAndRuns(string target)
         {
