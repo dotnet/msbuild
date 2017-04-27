@@ -5,13 +5,12 @@
     <background file="dotnetbackground.png" mime-type="image/png"/>
     <options customize="never" require-scripts="false" />
     <welcome file="welcome.html" mime-type="text/html" />
+    <conclusion file="firstTimeWelcomeMessage.html" mime-type="text/html" />
     <volume-check>
         <allowed-os-version>
-                <os-version min="10.12" />
+            <os-version min="10.12" />
         </allowed-os-version>
     </volume-check>
-    
-    
     <choices-outline>
         <line choice="{SharedFxComponentId}.pkg" />
         <line choice="{HostFxrComponentId}.pkg" />
@@ -24,7 +23,7 @@
     <choice id="{HostFxrComponentId}.pkg" visible="true" title="{HostFxrBrandName} (x64)" description="The .NET Core Host FX Resolver">
         <pkg-ref id="{HostFxrComponentId}.pkg" />
     </choice>
-    <choice id="{SharedHostComponentId}.pkg" visible="true" title="{SharedHostBrandName} (x64)" description="The .NET Core Shared Host." >
+    <choice id="{SharedHostComponentId}.pkg" visible="true" title="{SharedHostBrandName} (x64)" description="The .NET Core Shared Host.">
         <pkg-ref id="{SharedHostComponentId}.pkg" />
     </choice>
     <choice id="{CLISdkComponentId}.pkg" visible="true" title="{CLISdkBrandName} (x64)" description="The .NET Core SDK">
