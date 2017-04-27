@@ -563,6 +563,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"      <Project>
                     </Project>
                 ")]
+        // Project with one of each direct child (indirect children trees are tested separately)
         [InlineData(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
                         <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
@@ -594,6 +595,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                         </Target>
                     </Project>
                 ")]
+        // Project with at least two instances of each direct child. Tests that collections serialize well.
         [InlineData(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
                         <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
