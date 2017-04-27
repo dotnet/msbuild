@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 {
     public class GivenAppThrowingException : TestBase
     {
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
         public void ItShowsStackTraceWhenRun()
         {
             var root = TestAssets.Get("NonRestoredTestProjects", "AppThrowingException")
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                          .And.HaveStdErrContaining(msg2);
         }
 
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
         public void ItShowsStackTraceWhenRunAsTool()
         {
             var root = TestAssets.Get("NonRestoredTestProjects", "AppThrowingException")
