@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new RunCommand()
+            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(appRoot)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("run")
                 .Should().Fail()
                          .And.HaveStdErrContaining(msg1)
                          .And.HaveStdErrContaining(msg2);
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new DotnetCommand()
+            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(appWithToolDepRoot)
                 .ExecuteWithCapturedOutput("throwingtool")
                 .Should().Fail()
