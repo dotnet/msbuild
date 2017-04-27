@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.True(new ProjectInstanceComparer().Equals(original, copy));
+            Assert.Equal(original, copy, new ProjectInstanceComparer());
         }
 
         /// <summary>

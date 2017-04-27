@@ -1963,7 +1963,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             original.Translate(TranslationHelpers.GetWriteTranslator());
 
             var copy = TaskRegistry.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-            Assert.True(new TaskRegistryComparers.TaskRegistryComparer().Equals(original, copy));
+            Assert.Equal(original, copy, new TaskRegistryComparers.TaskRegistryComparer());
         }
 
         #endregion

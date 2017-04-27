@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Tests serialization.
+        /// Tests serialization of empty location.
         /// </summary>
         [Fact]
         public void SerializationTestForEmptyLocation()
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(location.File, deserializedLocation.File);
             Assert.Equal(location.Line, deserializedLocation.Line);
             Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.True(location.GetType().FullName.Contains("SmallElementLocation"));
+            Assert.True(deserializedLocation.GetType().FullName.Contains("SmallElementLocation"));
         }
 
         /// <summary>

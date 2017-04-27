@@ -228,7 +228,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Translates a list of strings
             /// </summary>
-            /// <param name="list"></param>
+            /// <param name="list">The list to be translated.</param>
             public void Translate(ref List<string> list)
             {
                 if (!TranslateNullable(list))

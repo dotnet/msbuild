@@ -4048,7 +4048,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         null
                     );
 
-
                     var submission = _buildManager.PendBuildRequest(buildRequestData);
 
                     var result = submission.Execute();
@@ -4063,6 +4062,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        /// When a ProjectInstance based BuildRequestData is built out of proc, the node should
+        /// not reload it from disk but instead fully utilize the entire translate project instance state
+        /// to do the build
         [Fact]
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk()
         {
@@ -4078,10 +4080,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </PropertyGroup>
 
   <Import Project=""{0}"" Condition=""'$(ImportIt)' == 'true'""/>
-
-  <Target Name=""Bazz"">
-    <Message Text=""Buzz"" Importance=""High"" />
-  </Target>
 
 </Project>";
 
@@ -4104,6 +4102,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     root.FullPath = Path.GetTempFileName();
                     root.Save();
 
+                    // build a project which runs a target from an imported file
+
                     var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, _projectCollection);
                     var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
 
@@ -4125,11 +4125,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     Assert.True(results.OverallResult == BuildResultCode.Success);
 
+                    // reset caches to ensure nothing is reused
+
                     _buildManager.EndBuild();
                     _buildManager.ResetCaches();
 
+                    // mutate the file on disk such that the import (containing the target to get executed)
+                    // is no longer imported
+
                     project.SetProperty("ImportIt", "false");
                     project.Save();
+
+                    // Build the initial project instance again.
+                    // The project instance is not in sync with the file anymore, making it an in-memory build:
+                    // the file does not contain the target Foo, but the project instance does
+                    // Building the stale project instance should still succeed. MSBuild should use the 
+                    // in-memory state to build and not reload from disk.
 
                     _buildManager.BeginBuild(parameters);
                     request = new BuildRequestData(instance, new[] {"Foo"}, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
