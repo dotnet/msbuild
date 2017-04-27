@@ -11,6 +11,7 @@ usage()
     echo "  --bootstrap-only               Build and bootstrap MSBuild but do not build again with those binaries"
     echo "  --build-only                   Only build using a downloaded copy of MSBuild but do not bootstrap"
     echo "                                 or build again with those binaries"
+    echo "  --config                       Debug or Release configuration"
 }
 
 restoreBuildTools(){
@@ -152,6 +153,7 @@ BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 TARGET_ARG="Build"
 EXTRA_ARGS=""
 CSC_ARGS=""
+PROJECT_CONFIG=Debug
 
 #parse command line args
 while [ $# -gt 0 ]
@@ -186,6 +188,11 @@ do
         --bootstrap-only)
         BOOTSTRAP_ONLY=true
         shift 1
+        ;;
+
+        --config)
+        PROJECT_CONFIG=$2
+        shift 2
         ;;
 
         *)
@@ -236,15 +243,27 @@ if [ "$host" = "Mono" ]; then
     fi
 fi
 
+case $PROJECT_CONFIG in
+    Debug)
+        CONFIGURATION=Debug
+        ;;
+    Release)
+        CONFIGURATION=Release
+        ;;
+    *)
+        echo "Unknown configuration $PROJECT_CONFIG. Defaulting to Debug"
+        ;;
+esac
+
 case $target in
     CoreCLR)
-        CONFIGURATION=Debug-NetCore
+        CONFIGURATION=${PROJECT_CONFIG}-NetCore
         MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
         ;;
 
     Mono)
         setMonoDir
-        CONFIGURATION=Debug-MONO
+        CONFIGURATION=${PROJECT_CONFIG}-MONO
         CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
         RUNTIME_HOST_ARGS="--debug"
         MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'

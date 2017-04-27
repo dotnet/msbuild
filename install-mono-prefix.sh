@@ -6,9 +6,13 @@ fi
 
 MSBUILD_TOOLSVERSION=15.0
 MONO_PREFIX=$1
-MSBUILD_OUT_DIR="bin/Debug-MONO/*_Deployment"
 MSBUILD_INSTALL_BIN_DIR="$MONO_PREFIX/lib/mono/msbuild/${MSBUILD_TOOLSVERSION}/bin"
 XBUILD_DIR=$MONO_PREFIX/lib/mono/xbuild
+MSBUILD_OUT_DIR="bin/Release-MONO/*_Deployment"
+
+if [ ! -d "$MSBUILD_OUT_DIR" ]; then
+    MSBUILD_OUT_DIR="bin/Debug-MONO/*_Deployment"
+fi
 
 mkdir -p ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 mkdir -p ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
