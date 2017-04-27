@@ -119,7 +119,7 @@ class Program
             restoreCommand.AddSource(nupkgPath);
             restoreCommand.Execute().Should().Pass();
 
-            string toolAssetsFilePath = Path.Combine(RepoInfo.NuGetCachePath, ".tools", toolProject.Name, "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
+            string toolAssetsFilePath = Path.Combine(RepoInfo.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant(), "1.0.0", toolProject.TargetFrameworks, "project.assets.json");
             var toolAssetsFile = new LockFileFormat().Read(toolAssetsFilePath);
 
             var args = new List<string>();
