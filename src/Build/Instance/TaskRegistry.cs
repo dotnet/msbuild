@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,7 +24,6 @@ using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAss
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Collections.ObjectModel;
-using System.Configuration;
 
 namespace Microsoft.Build.Execution
 {

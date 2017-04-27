@@ -7,6 +7,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -22,6 +24,8 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class NodePacketTranslatorExtensions
     {
+        private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
+
         /// <summary>
         /// Translates a PropertyDictionary of ProjectPropertyInstances.
         /// </summary>
@@ -79,10 +83,25 @@ namespace Microsoft.Build.BackEnd
                 typeof(INodePacketTranslatable).IsAssignableFrom(type),
                 $"{typeName} must be a {nameof(INodePacketTranslatable)}");
 
-            var parameterlessConstructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-            ErrorUtilities.VerifyThrowInvalidOperation(
-                parameterlessConstructor != null,
-                $"{typeName} must have a private parameterless constructor");
+            var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
+                type,
+                t =>
+                {
+                    ConstructorInfo constructor = null;
+#if FEATURE_TYPE_GETCONSTRUCTOR
+                    constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+#else
+                    constructor =
+                        type
+                            .GetTypeInfo()
+                            .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+                            .FirstOrDefault(c => c.GetParameters().Length == 0);
+#endif
+                    ErrorUtilities.VerifyThrowInvalidOperation(
+                        constructor != null,
+                        $"{typeName} must have a private parameterless constructor");
+                    return constructor;
+                });
 
             var targetInstanceChild = (INodePacketTranslatable) parameterlessConstructor.Invoke(new object[0]);
 
