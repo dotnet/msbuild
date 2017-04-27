@@ -339,7 +339,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var symbolFileExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ni.pdb" : ".map";
-            var symbolsFolder = new DirectoryInfo(Path.Combine(outputFolder, "ProfilingSymbols"));
+            var symbolsFolder = new DirectoryInfo(Path.Combine(outputFolder, "symbols"));
 
             var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
             newtonsoftSymbolsFolder.Should().Exist();

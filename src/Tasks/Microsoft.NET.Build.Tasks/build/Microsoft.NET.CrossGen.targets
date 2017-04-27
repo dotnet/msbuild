@@ -104,7 +104,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           PublishDir=$(StoreStagingDir);
           CrossgenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);
           CreateProfilingSymbols=$(CreateProfilingSymbols);
-          ProfilingSymbolsDir=$(ProfilingSymbolsDir)
+          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir);
+          _RuntimeSymbolsDir=$(_RuntimeSymbolsDir)
         </Properties>
       </AssembliestoCrossgen>
     </ItemGroup>
@@ -128,7 +129,8 @@ Copyright (c) .NET Foundation. All rights reserved.
            DependsOnTargets="_InitializeBasicProps;">
 
     <PropertyGroup>
-      <CrossgenProfilingSymbolsOutputDirectory>$([System.IO.Path]::GetDirectoryName($(ProfilingSymbolsDir)\$(CrossgenSubOutputPath)))</CrossgenProfilingSymbolsOutputDirectory>
+      <CrossgenProfilingSymbolsOutputDirectory>$([System.IO.Path]::GetDirectoryName($(_RuntimeSymbolsDir)\$(CrossgenSubOutputPath)))</CrossgenProfilingSymbolsOutputDirectory>
+      <CrossgenSymbolsStagingDirectory>$([System.IO.Path]::GetDirectoryName($(StoreSymbolsStagingDir)\$(CrossgenSubOutputPath)))</CrossgenSymbolsStagingDirectory>
       <CrossgenCommandline>$(CrossgenExe) -readytorun -in $(CrossgenInputAssembly) -out $(CrossgenOutputAssembly) -jitpath $(CrossgenJit) -platform_assemblies_paths $(CrossgenPlatformAssembliesPath)</CrossgenCommandline>
       <CreateProfilingSymbolsOptionName Condition="'$(OS)' == 'Windows_NT'">CreatePDB</CreateProfilingSymbolsOptionName>
       <CreateProfilingSymbolsOptionName Condition="'$(CreateProfilingSymbolsOptionName)' == ''">CreatePerfMap</CreateProfilingSymbolsOptionName>
@@ -138,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Workaround for https://github.com/NuGet/Home/issues/4424 -->
     <Exec Command="chmod 755 $(CrossgenExe)" Condition="'$(OS)' != 'Windows_NT'"/>
-    
+
     <!--Optimization skip if the assembly is already present in the final output directory-->
     <Exec
      Command="$(CrossgenCommandline)"
@@ -156,9 +158,23 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Create profiling symbols if requested -->
     <MakeDir Directories="$(CrossgenProfilingSymbolsOutputDirectory)"
-             Condition="'$(CreateProfilingSymbols)' == 'true'" />
+             Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
     <Exec Command="$(CrossgenExe) -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
-          Condition="'$(CreateProfilingSymbols)' == 'true'" />
+          Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
+
+    <ItemGroup>
+      <_ProfilingSymbols Include="$(CrossgenProfilingSymbolsOutputDirectory)\*"
+                         Condition="'$(CreateProfilingSymbols)' == 'true'" />
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(_ProfilingSymbols)"
+          DestinationFolder="$(CrossgenSymbolsStagingDirectory)"
+          Condition="'$(CreateProfilingSymbols)' == 'true'"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
   </Target>
 
   <Target Name="_InitializeBasicProps">
@@ -233,10 +249,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <_RuntimeRefDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimeref"))</_RuntimeRefDir>  <!-- flat app managed assemblies -->
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
+      <_RuntimeSymbolsDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimesymbols"))</_RuntimeSymbolsDir>
     </PropertyGroup>
 
     <MakeDir Directories="$(_RuntimeOptimizedDir)"/>
-    <MakeDir Directories="$(ProfilingSymbolsDir)"
+    <MakeDir Directories="$(_RuntimeSymbolsDir)"
              Condition="'$(CreateProfilingSymbols)' == 'true'" />
     
     <!-- Copy managed files to  a flat temp directory for passing it as ref -->
