@@ -27,6 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, StringBuilder> _filteredPackages;
+        private bool _includeMainProjectInDepsFile = true;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
         {
@@ -35,6 +36,12 @@ namespace Microsoft.NET.Build.Tasks
 
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+        }
+
+        public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
+        {
+            _includeMainProjectInDepsFile = includeMainProjectInDepsFile;
+            return this;
         }
 
         public DependencyContextBuilder WithFrameworkReferences(IEnumerable<ReferenceInfo> frameworkReferences)
@@ -101,31 +108,39 @@ namespace Microsoft.NET.Build.Tasks
 
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
-            RuntimeLibrary projectRuntimeLibrary = GetProjectRuntimeLibrary(
-                _mainProjectInfo,
-                _projectContext,
-                dependencyLookup);
-            IEnumerable<RuntimeLibrary> runtimeLibraries =
-                new[] { projectRuntimeLibrary }
+            IEnumerable<RuntimeLibrary> runtimeLibraries = Enumerable.Empty<RuntimeLibrary>();
+            if (_includeMainProjectInDepsFile)
+            {
+                runtimeLibraries = runtimeLibraries.Concat(new[]
+                {
+                    GetProjectRuntimeLibrary(
+                        _mainProjectInfo,
+                        _projectContext,
+                        dependencyLookup)
+                });
+            }
+            runtimeLibraries = runtimeLibraries
                 .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
                 .Concat(GetDirectReferenceRuntimeLibraries());
 
-            IEnumerable<CompilationLibrary> compilationLibraries;
+            IEnumerable<CompilationLibrary> compilationLibraries = Enumerable.Empty<CompilationLibrary>();
             if (includeCompilationLibraries)
             {
-                CompilationLibrary projectCompilationLibrary = GetProjectCompilationLibrary(
-                    _mainProjectInfo,
-                    _projectContext,
-                    dependencyLookup);
-                compilationLibraries =
-                    new[] { projectCompilationLibrary }
+                if (_includeMainProjectInDepsFile)
+                {
+                    compilationLibraries = compilationLibraries.Concat(new[]
+                    {
+                        GetProjectCompilationLibrary(
+                            _mainProjectInfo,
+                            _projectContext,
+                            dependencyLookup)
+                    });
+                }
+
+                compilationLibraries = compilationLibraries
                     .Concat(GetFrameworkLibraries())
                     .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>())
                     .Concat(GetDirectReferenceCompilationLibraries());
-            }
-            else
-            {
-                compilationLibraries = Enumerable.Empty<CompilationLibrary>();
             }
 
             var targetInfo = new TargetInfo(

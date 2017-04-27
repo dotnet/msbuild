@@ -50,6 +50,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
 
         [Required]
+        public bool IncludeMainProject { get; set; }
+
+        [Required]
         public ITaskItem[] ReferencePaths { get; set; }
 
         [Required]
@@ -117,11 +120,11 @@ namespace Microsoft.NET.Build.Tasks
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
-                ProjectPath,
-                AssemblyName,
-                AssemblyExtension,
-                AssemblyVersion,
-                AssemblySatelliteAssemblies);
+                    ProjectPath,
+                    AssemblyName,
+                    AssemblyExtension,
+                    AssemblyVersion,
+                    AssemblySatelliteAssemblies);            
 
             IEnumerable<ReferenceInfo> frameworkReferences =
                 ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
@@ -142,6 +145,7 @@ namespace Microsoft.NET.Build.Tasks
                 IsSelfContained);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithFrameworkReferences(frameworkReferences)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)

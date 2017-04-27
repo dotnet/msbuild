@@ -69,7 +69,7 @@ namespace Microsoft.NET.TestFramework
 
         public static string NuGetCachePath
         {
-            get { return Path.Combine(RepoRoot, "Packages"); }
+            get { return Path.Combine(RepoRoot, "packages"); }
         }
 
 
@@ -101,6 +101,16 @@ namespace Microsoft.NET.TestFramework
 #endif
 
             return directory;
+        }
+
+        public static ICommand AddTestEnvironmentVariables(ICommand command)
+        {
+            //  Set NUGET_PACKAGES environment variable to match value from build.ps1
+            command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.NuGetCachePath);
+
+            command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
+
+            return command;
         }
     }
 }
