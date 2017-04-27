@@ -468,7 +468,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
-      <IncludeMainProjectInDepsFile Condition=" '$(IncludeMainProjectInDepsFile)' == '' ">true</IncludeMainProjectInDepsFile>
     </PropertyGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"

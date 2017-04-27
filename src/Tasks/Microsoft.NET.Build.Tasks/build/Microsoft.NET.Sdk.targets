@@ -45,6 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectRuntimeConfigFileName Condition="'$(ProjectRuntimeConfigFileName)' == ''">$(AssemblyName).runtimeconfig.json</ProjectRuntimeConfigFileName>
     <ProjectRuntimeConfigFilePath Condition="'$(ProjectRuntimeConfigFilePath)' == ''">$(TargetDir)$(ProjectRuntimeConfigFileName)</ProjectRuntimeConfigFilePath>
     <ProjectRuntimeConfigDevFilePath Condition="'$(ProjectRuntimeConfigDevFilePath)' == ''">$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</ProjectRuntimeConfigDevFilePath>
+    <IncludeMainProjectInDepsFile Condition=" '$(IncludeMainProjectInDepsFile)' == '' ">true</IncludeMainProjectInDepsFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -86,10 +87,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(ProjectAssetsFile)"
           Outputs="$(ProjectDepsFilePath)">
 
-    <PropertyGroup>
-      <IncludeMainProjectInDepsFile Condition=" '$(IncludeMainProjectInDepsFile)' == '' ">true</IncludeMainProjectInDepsFile>
-    </PropertyGroup>
-    
     <!-- 
     Explicitly not passing any PrivateAssets information during 'Build', since these dependencies
     should be included during 'Build'.  They are only excluded on 'Publish'.

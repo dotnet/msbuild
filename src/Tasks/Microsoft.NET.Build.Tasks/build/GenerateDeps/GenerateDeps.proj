@@ -26,8 +26,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition=" '$(AdditionalImport)' != '' And Exists($(AdditionalImport))" />
   
   <PropertyGroup>
-    <TargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</TargetFramework>
-
     <ToolFolder>$([System.IO.Path]::GetDirectoryName($(ProjectAssetsFile)))</ToolFolder>
     <ProjectDepsFilePath Condition="'$(ProjectDepsFilePath)' == ''">$(ToolFolder)\$(ToolName).deps.json</ProjectDepsFilePath>
     

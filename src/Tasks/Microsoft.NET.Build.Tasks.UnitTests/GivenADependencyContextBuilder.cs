@@ -52,8 +52,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 Constants.DefaultPlatformLibrary,
                 isSelfContained: !string.IsNullOrEmpty(runtime));
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(projectContext)
-                .WithMainProject(mainProject)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
                 .Build();

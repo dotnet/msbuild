@@ -119,17 +119,12 @@ namespace Microsoft.NET.Build.Tasks
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
-            SingleProjectInfo mainProject = null;
-
-            if (IncludeMainProject)
-            {
-                mainProject = SingleProjectInfo.Create(
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
                     ProjectPath,
                     AssemblyName,
                     AssemblyExtension,
                     AssemblyVersion,
-                    AssemblySatelliteAssemblies);
-            }
+                    AssemblySatelliteAssemblies);            
 
             IEnumerable<ReferenceInfo> frameworkReferences =
                 ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
@@ -149,8 +144,8 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName,
                 IsSelfContained);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(projectContext)
-                .WithMainProject(mainProject)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithFrameworkReferences(frameworkReferences)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
