@@ -17,6 +17,8 @@
     <PlatformAbstractionsVersion>2.0.0-preview1-002101</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview1-002101</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
+    <ASPNETCoreRuntimeVersion>2.0.11626.0-TEST</ASPNETCoreRuntimeVersion>
+    <ASPNETCoreRuntimeFileNameVersionToken>preview1-24648</ASPNETCoreRuntimeFileNameVersionToken>
 
   </PropertyGroup>
 

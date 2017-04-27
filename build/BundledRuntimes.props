@@ -13,6 +13,12 @@
     <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(SharedFrameworkVersion)$(InstallerPortableSuffix)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
     <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
+    <!-- Examples:    Build.RuntimeStore.linux-preview1-24648.zip    AspNetCorePackageStoreLibx64.wixlib   -->
+    <ASPNETCoreRuntimeInstallerFileName Condition=" '$(InstallerExtension)' != '' ">Build.RuntimeStore.$(OSName)-$(ASPNETCoreRuntimeFileNameVersionToken).zip</ASPNETCoreRuntimeInstallerFileName>
+	<ASPNETCoreRuntimeInstallerFileName Condition=" '$(InstallerExtension)' != '' And '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</ASPNETCoreRuntimeInstallerFileName>
+
+    <ASPNETCoreRuntimeInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(ASPNETCoreRuntimeInstallerFileName)</ASPNETCoreRuntimeInstallerFile>
+
     <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
          NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
     <SharedFrameworkRid>$(ProductMonikerRid)</SharedFrameworkRid>
@@ -28,6 +34,7 @@
     <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Installers</CoreSetupInstallerBlobRootUrl>
     <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
     <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
+    <ASPNETCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store</ASPNETCoreRuntimeInstallerBlobRootUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,5 +65,13 @@
       <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
       <ExtractDestintation></ExtractDestintation>
     </_DownloadAndExtractItem>
+
+	<_DownloadAndExtractItem Include="ASPNETCoreRuntimeInstallerFile"
+                             Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(ASPNETCoreRuntimeInstallerFile)') And '$(InstallerExtension)' != ''">
+      <Url>$(ASPNETCoreRuntimeInstallerBlobRootUrl)/$(ASPNETCoreRuntimeVersion)/$(ASPNETCoreRuntimeInstallerFileName)</Url>
+      <DownloadFileName>$(ASPNETCoreRuntimeInstallerFile)</DownloadFileName>
+      <ExtractDestintation>$(IntermediateDirectory)/ASPNETCoreRuntimeStore</ExtractDestintation>
+    </_DownloadAndExtractItem>
+
   </ItemGroup>
 </Project>
