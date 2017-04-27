@@ -306,6 +306,12 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_creates_profiling_symbols()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // profiling symbols are not supported on OSX
+                return;
+            }
+
             TestAsset targetManifestsAsset = _testAssetsManager
                 .CopyTestAsset("TargetManifests")
                 .WithSource();
