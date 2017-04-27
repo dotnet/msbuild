@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            toolProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.DependencyModel", "2.0.0-preview1-002022", null));
+            toolProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.DependencyModel", "1.1.0", null));
 
             string toolSource = @"
 using System;
