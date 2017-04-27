@@ -122,7 +122,6 @@ namespace Microsoft.DotNet.Tests
 
             new GenericCommand(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1")
                 .WithWorkingDirectory(testInstance.Root)
-                .WithEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .Execute()
                 .Should().Fail();
         }
@@ -159,7 +158,6 @@ namespace Microsoft.DotNet.Tests
             var result =
                 new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testInstance.Root)
-                .WithEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
             result.Should().Pass()

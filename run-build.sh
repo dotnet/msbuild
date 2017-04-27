@@ -151,6 +151,10 @@ export VSTEST_BUILD_TRACE=1
 export VSTEST_TRACE_BUILD=1
 
 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
+# Don't resolve shared frameworks from user or global locations
+DOTNET_MULTILEVEL_LOOKUP=0
+
 toolsLocalPath="$REPOROOT/build_tools"
 if [ ! -z $BOOTSTRAP_INSTALL_DIR]; then
   toolsLocalPath = $BOOTSTRAP_INSTALL_DIR

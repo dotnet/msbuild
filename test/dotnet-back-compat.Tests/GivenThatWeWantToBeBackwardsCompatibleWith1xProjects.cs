@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.Cli.Build.Tests
     public class GivenThatWeWantToBeBackwardsCompatibleWith1xProjects : TestBase
     {
         [Theory]
-        [InlineData("netcoreapp1.0")]
         [InlineData("netcoreapp1.1")]
         public void ItRestoresBuildsAndRuns(string target)
         {
