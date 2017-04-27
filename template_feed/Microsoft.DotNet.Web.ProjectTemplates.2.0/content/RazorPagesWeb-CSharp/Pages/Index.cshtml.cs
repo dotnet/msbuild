@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace RazorPagesWebApplication.Pages
+namespace Company.WebApplication1.Pages
 {
     public class IndexModel : PageModel
     {

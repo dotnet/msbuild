@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RazorPagesWebApplication.Pages
+namespace Company.WebApplication1.Pages
 {
     public class AboutModel : PageModel
     {

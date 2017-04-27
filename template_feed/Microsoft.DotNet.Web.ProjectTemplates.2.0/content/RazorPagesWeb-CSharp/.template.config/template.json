@@ -13,7 +13,7 @@
     "type": "project"
   },
   "guids": ["0ce56475-d1db-490f-8af1-a881ea4fcd2d"],
-  "sourceName": "RazorPagesWebApplication",
+  "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols": {
     "TargetFrameworkOverride": {
@@ -87,7 +87,7 @@
       "replaces": "55555"
     }
   },
-  "primaryOutputs": [ { "path": "RazorPagesWebApplication.csproj" } ],
+  "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
   "defaultName": "WebApplication1",
   "postActions": [
     {

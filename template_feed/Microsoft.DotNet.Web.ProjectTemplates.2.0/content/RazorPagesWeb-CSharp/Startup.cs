@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace RazorPagesWebApplication
+namespace Company.WebApplication1
 {
     public class Startup
     {

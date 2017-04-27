@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RazorPagesWebApplication.Pages
+namespace Company.WebApplication1.Pages
 {
     public class ContactModel : PageModel
     {
@@ -12,7 +12,7 @@ namespace RazorPagesWebApplication.Pages
 
         public void OnGet()
         {
-            Model.Message = "Your contact page.";
+            Message = "Your contact page.";
         }
     }
 }
