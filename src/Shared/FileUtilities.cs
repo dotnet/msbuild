@@ -401,8 +401,10 @@ namespace Microsoft.Build.Shared
         /// first segment exists and is a directory.
         /// Use a native shared method to massage file path. If the file is adjusted,
         /// that qualifies is as a path.
+        ///
+        /// @baseDirectory is just passed to LooksLikeUnixFilePath, to help with the check
         /// </summary>
-        internal static string MaybeAdjustFilePath(string value)
+        internal static string MaybeAdjustFilePath(string value, string baseDirectory="")
         {
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
@@ -436,15 +438,18 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return LooksLikeUnixFilePath(checkValue) ? newValue : value;
+            return LooksLikeUnixFilePath(checkValue, baseDirectory) ? newValue : value;
         }
 
         /// <summary>
         /// If on Unix, check if the string looks like a file path.
         /// The heuristic is if something resembles paths (contains slashes) check if the
         /// first segment exists and is a directory.
+        ///
+        /// If @baseDirectory is not null, then look for the first segment exists under
+        /// that
         /// </summary>
-        internal static bool LooksLikeUnixFilePath(string value)
+        internal static bool LooksLikeUnixFilePath(string value, string baseDirectory="")
         {
             if (!NativeMethodsShared.IsUnixLike)
             {
@@ -459,7 +464,7 @@ namespace Microsoft.Build.Shared
                 firstSlash = value.Substring(1).IndexOf('/') + 1;
             }
 
-            if (firstSlash > 0 && Directory.Exists(value.Substring(0, firstSlash)))
+            if (firstSlash > 0 && Directory.Exists(Path.Combine(baseDirectory, value.Substring(0, firstSlash))))
             {
                 return true;
             }
