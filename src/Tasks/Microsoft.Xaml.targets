@@ -13,7 +13,7 @@
         the .NET Framework directory and thus will no longer be the right answer. Override it to point
         to the correct .NET Framework location. --> 
    <PropertyGroup>
-      <XamlBuildTaskPath Condition="'$(XamlBuildTaskPath)' == ''">$(MSBuildThisFileDirectory)</XamlBuildTaskPath>
+      <XamlBuildTaskPath Condition="'$(XamlBuildTaskPath)' == ''">$(MSBuildToolsPath64)</XamlBuildTaskPath>
    </PropertyGroup>
 
    <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.Xaml.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.Xaml.targets')" />
