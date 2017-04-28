@@ -6,8 +6,6 @@
     <!-- _DebugFileExt is not an upstream msbuild feature yet -->
     <_DebugFileExt Condition="'$(FscDebugFileExt)' != ''">$(FscDebugFileExt)</_DebugFileExt>
     <_DebugFileExt Condition="'$(_DebugFileExt)' == ''">.mdb</_DebugFileExt>
-
-    <DontRunFscWithDotnet>true</DontRunFscWithDotnet>
   </PropertyGroup>
 
 </Project>
