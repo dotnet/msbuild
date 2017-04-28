@@ -3341,6 +3341,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the resx file</returns>
         public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken)
         {
+            if (linkedBitmap != null)
+                Console.WriteLine ($"================================== WriteTestResX linkedBitmap: {linkedBitmap}");
             string resgenFile = Utilities.GetTempFileName(".resx");
             File.Delete(resgenFile);
             File.WriteAllText(resgenFile, GetTestResXContent(useType, linkedBitmap, extraToken, false));

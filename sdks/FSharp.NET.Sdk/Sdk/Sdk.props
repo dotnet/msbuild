@@ -8,8 +8,6 @@
     <_DebugFileExt Condition="'$(_DebugFileExt)' == ''">.mdb</_DebugFileExt>
 
     <DontRunFscWithDotnet>true</DontRunFscWithDotnet>
-    <FscToolExe>fsc.exe</FscToolExe>
-    <FscToolPath>$(MSBuildToolsPath)..\..\..\fsharp</FscToolPath>
   </PropertyGroup>
 
 </Project>
