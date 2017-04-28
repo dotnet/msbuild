@@ -24,6 +24,6 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
-        public bool SerializeEntireProjectInstance => string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTSERIALIZEENTIREPROJECTINSTANCE"));
+        public bool ForceEntireProjectInstanceStateSerialization => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_FORCE_ENTIRE_PROJECT_INSTANCE_STATE_SERIALIZATION"));
     }
 }

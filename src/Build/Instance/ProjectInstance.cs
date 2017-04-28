@@ -622,8 +622,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public bool TranslateEntireState
         {
-            get { return _translateEntireState; }
-            set { _translateEntireState = value; }
+            get
+            {
+                return _translateEntireState || Traits.Instance.EscapeHatches.ForceEntireProjectInstanceStateSerialization;
+            }
+
+            set
+            {
+                _translateEntireState = value;
+            }
         }
 
         /// <summary>
