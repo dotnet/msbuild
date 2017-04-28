@@ -130,54 +130,39 @@ done
 
 # $args array may have empty elements in it.
 # The easiest way to remove them is to cast to string and back to array.
-# This will actually break quoted arguments, arguments like 
+# This will actually break quoted arguments, arguments like
 # -test "hello world" will be broken into three arguments instead of two, as it should.
 temp="${args[@]}"
 args=($temp)
 
-# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-[ -z "$DOTNET_INSTALL_DIR_PJ" ] && export DOTNET_INSTALL_DIR_PJ=$REPOROOT/.dotnet_stage0PJ/$ARCHITECTURE
-[ -d "$DOTNET_INSTALL_DIR_PJ" ] || mkdir -p $DOTNET_INSTALL_DIR_PJ
-
-# Also create an install directory for a post-PJnistic CLI 
+# Create an install directory for the stage 0 CLI
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-# During xplat bootstrapping, disable HTTP parallelism to avoid fatal restore timeouts.
-export __INIT_TOOLS_RESTORE_ARGS="$__INIT_TOOLS_RESTORE_ARGS --disable-parallel"
+# We also need to pull down a project.json based CLI that is used by some tests
+# so create another directory for that.
+[ -z "$DOTNET_INSTALL_DIR_PJ" ] && export DOTNET_INSTALL_DIR_PJ=$REPOROOT/.dotnet_stage0PJ/$ARCHITECTURE
+[ -d "$DOTNET_INSTALL_DIR_PJ" ] || mkdir -p $DOTNET_INSTALL_DIR_PJ
+
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Enable verbose VS Test Console logging
 export VSTEST_BUILD_TRACE=1
 export VSTEST_TRACE_BUILD=1
 
-DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-toolsLocalPath="$REPOROOT/build_tools"
-if [ ! -z $BOOTSTRAP_INSTALL_DIR]; then
-  toolsLocalPath = $BOOTSTRAP_INSTALL_DIR
-fi
-bootStrapperPath="$toolsLocalPath/bootstrap.sh"
-dotnetInstallPath="$toolsLocalPath/dotnet-install.sh"
-if [ ! -f $bootStrapperPath ]; then
-    if [ ! -d $toolsLocalPath ]; then
-        mkdir $toolsLocalPath
-    fi
-    download "https://raw.githubusercontent.com/dotnet/buildtools/master/bootstrap/bootstrap.sh" "$bootStrapperPath"
-    chmod u+x $bootStrapperPath
-fi
-
-$bootStrapperPath --dotNetInstallBranch master --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE > bootstrap.log
+# Install a stage 0
+(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
-    echo "run-build: Error: Boot-strapping failed with exit code $EXIT_CODE, see bootstrap.log for more information." >&2
+    echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
     exit $EXIT_CODE
 fi
 
-# now execute the script
-echo "installing CLI: $dotnetInstallPath --channel \"master\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
-$dotnetInstallPath --channel "master" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
+# Install a project.json based CLI for use by tests
+(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR_PJ" --architecture "$ARCHITECTURE" --version "1.0.0-preview2-1-003177")
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
-    echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $EXIT_CODE." >&2
+    echo "run-build: Error: installing project-json based cli failed with exit code $EXIT_CODE." >&2
     exit $EXIT_CODE
 fi
 
