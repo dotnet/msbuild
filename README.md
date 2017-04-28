@@ -1,39 +1,52 @@
-ASP.NET Web Sdk targets
+Microsoft.NET.Sdk.Web
 ======================
-ASP.NET Web Sdk targets contains the tasks, targets and packages required to build and publish Web Applications.
+ASP.NET websdk repo contains the tasks, targets and packages required to build and publish Web Applications.
 
-Publish Commandline Usage:
+The websdk repo contains code for the following packages
+1. Microsoft.NET.Sdk.Web.ProjectSystem
+2. Microsoft.NET.Sdk.Publish &
+3. Microsoft.NET.Sdk.Web (Meta-package containing dependency to Microsoft.NET.Sdk.Web.ProjectSystem & Microsoft.NET.Sdk.Publish)
 
-- Folder publish without a profile (Default Publish):
+Microsoft.NET.Sdk.Web.ProjectSystem
+======================
+Project System package defines the following:
 
+- Default globs for the ASP.NET Core Web Projects.
+- Project Capabilities for ASP.NET Core Web Projects.
+
+Microsoft.NET.Sdk.Publish
+======================
+Publish package contains the tasks and targets to publish an ASP.NET core web application.
+
+The following Publish methods are currently supported by the Publish package:
+- Folder Publish
+- MsDeploy Publish
+- MsDeploy Package Publish
+
+Publish CommandLine Usage:
+
+Folder publish:
 ```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
-```
 or
-```
-dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
-```
-
-- Folder Publish with a profile:
-```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
-````
 or
-```
-dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
+dotnet publish WebApplication.csproj /p:PublishDir="C:\deployedApp\newapp"
 ```
 
- - MSDeploy Publish with a profile and password:
+MSDeploy Publish:
 ```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
+or
+dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
 ```
-(Not available on DotNet Core yet)
 
- - MsDeploy Package Publish with a profile:
+MsDeploy Package Publish:
 ```
 msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployPackageProfileName>
+or
+dotnet publish WebApplication.csproj /p:PublishProfile=<MsDeployPackageProfileName>
 ```
-(Not available on DotNet Core yet)
 
 Sample EF Migrations section:
 ```xml
@@ -58,7 +71,6 @@ Sample Folder Profile:
     <PublishProvider>FileSystem</PublishProvider>
     <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>
     <LastUsedPlatform>Any CPU</LastUsedPlatform>
-    <PublishFramework>netcoreapp1.0</PublishFramework>
     <publishUrl>bin\Release\PublishOutput</publishUrl>
     <DeleteExistingFiles>False</DeleteExistingFiles>
   </PropertyGroup>  
@@ -76,7 +88,6 @@ Sample MsDeploy Publish Profile:
     <LastUsedPlatform>Any CPU</LastUsedPlatform>
     <SiteUrlToLaunchAfterPublish>http://webappwithdb.azurewebsites.net</SiteUrlToLaunchAfterPublish>
     <LaunchSiteAfterPublish>True</LaunchSiteAfterPublish>
-    <PublishFramework>netcoreapp1.0</PublishFramework>
     <MSDeployServiceURL>webappwithdb.scm.azurewebsites.net:443</MSDeployServiceURL>
     <DeployIisAppPath>webappwithdb</DeployIisAppPath>
     <SkipExtraFilesOnServer>True</SkipExtraFilesOnServer>
@@ -95,7 +106,6 @@ Sample MsDeploy Package Publish Profile
     <WebPublishMethod>Package</WebPublishMethod>
     <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>
     <LastUsedPlatform>Any CPU</LastUsedPlatform>
-    <PublishFramework>netcoreapp1.0</PublishFramework>
     <DesktopBuildPackageLocation>c:\DeployedApp\WebDeployPackage.zip</DesktopBuildPackageLocation>
     <DeployIisAppPath>Default Web Site/WebAppWithDB</DeployIisAppPath>
   </PropertyGroup>
@@ -113,7 +123,6 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
     <LastUsedPlatform>Any CPU</LastUsedPlatform>
     <SiteUrlToLaunchAfterPublish>http://webappwithdb.azurewebsites.net</SiteUrlToLaunchAfterPublish>
     <LaunchSiteAfterPublish>True</LaunchSiteAfterPublish>
-    <PublishFramework>netcoreapp1.0</PublishFramework>
     <MSDeployServiceURL>webappwithdb.scm.azurewebsites.net:443</MSDeployServiceURL>
     <DeployIisAppPath>webappwithdb</DeployIisAppPath>
     <SkipExtraFilesOnServer>True</SkipExtraFilesOnServer>
