@@ -1,4 +1,7 @@
 #!/bin/sh
+
+set -e
+
 if [ $# -ne 1 ]; then
 	echo "Usage: install-mono.sh </path/to/mono/installation>"
 	exit 1
@@ -44,7 +47,7 @@ cp -R ${DESTDIR}${XBUILD_DIR}/14.0/Imports ${DESTDIR}${XBUILD_DIR}/${MSBUILD_TOO
 cp -R nuget-support/tv/* ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 cp -R nuget-support/tasks-targets/* ${DESTDIR}${XBUILD_DIR}/
 
-for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -s $f ${DESTDIR}${XBUILD_DIR} ; done
+for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -f -s $f ${DESTDIR}${XBUILD_DIR} ; done
 
 # copy SDKs
 SDKS_SRC_DIR=sdks
