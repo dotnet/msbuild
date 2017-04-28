@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         new[]
                         {
                             "Unable to locate the .NET Core SDK. Check that it is installed and that the version"
-                            + "specified in global.json (if any) matches the installed version."
+                            + " specified in global.json (if any) matches the installed version."
                         });
                 }
 
@@ -70,19 +70,22 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return null;
         }
 
-        // Search for [ProgramFiles]\dotnet in this order. Only ProgramFiles is defined on 
+        // Search for [ProgramFiles]\dotnet in this order.
         private static readonly string[] s_programFiles = new[]
         {
-            // "c:\Program Files" on x64 machine regardless process bitness, undefined on x86 machines.
+            // "c:\Program Files" on x64 machine regardless process architecture.
+            // Undefined on x86 machines.
             "ProgramW6432",
 
-            // "c:\Program Files (x86)" on x64 machine regardless of process bitness, undefined on x64 machines.
+            // "c:\Program Files (x86)" on x64 machine regardless of process architecture
+            // Undefined on x86 machines.
             "ProgramFiles(x86)",
 
-            // "c:\Program Files" in x64 process, "c:\Program Files (x86)" in x86 process.
-            // hostfxr will search this on its own if multilevel lookup is not disable, but
-            // we do it explicitly to prevent an environment with disabled multilevel lookup
-            // from crippling desktop msbuild and VS.
+            // "c:\Program Files" or "C:\Program Files (x86)" on x64 machine depending on process architecture. 
+            // "c:\Program Files" on x86 machines (therefore not redundant with the two locations above in that case).
+            //
+            // NOTE: hostfxr will search this on its own if multilevel lookup is not disable, but we do it explicitly
+            // to prevent an environment with disabled multilevel lookup from crippling desktop msbuild and VS.
             "ProgramFiles",
         };
 
@@ -91,12 +94,12 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             string environmentOverride = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
             if (environmentOverride != null)
             {
-                return new List<string>(1) { environmentOverride };
+                return new List<string>(capacity: 1) { environmentOverride };
             }
 
             // Initial capacity is 2 because while there are 3 candidates, we expect at most 2 unique ones (x64 + x86)
             // Also, N=3 here means that we needn't be concerned with the O(N^2) complexity of the foreach + contains.
-            var candidates = new List<string>(2); 
+            var candidates = new List<string>(capacity: 2); 
             foreach (string variable in s_programFiles)
             {
                 string directory = Environment.GetEnvironmentVariable(variable);
