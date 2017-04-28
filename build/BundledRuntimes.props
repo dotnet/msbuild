@@ -33,12 +33,15 @@
   <PropertyGroup>
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store</AspNetCoreRuntimeInstallerBlobRootUrl>
 
-    <!-- Examples:    Build.RS.linux-preview1.zip    Build.RS.winx86-preview1.zip    AspNetCorePackageStoreLibx64.wixlib   -->
-    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(OSName).zip</AspNetCoreRuntimeInstallerArchiveFileName>
-    <AspNetCoreRuntimeInstallerArchiveFileName Condition=" '$(OSName)' == 'win' ">Build.RS.$(OSName)$(Architecture).zip</AspNetCoreRuntimeInstallerArchiveFileName>
-    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
+    <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'win' ">$(OSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'osx' ">$(OSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
 
+    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken).zip</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
+
+    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
     <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
   </PropertyGroup>
 
