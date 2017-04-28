@@ -177,8 +177,8 @@ if [ $EXIT_CODE != 0 ]; then
 fi
 
 # now execute the script
-echo "installing CLI: $dotnetInstallPath --channel \"release/2.0.0\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
-$dotnetInstallPath --channel "release/2.0.0" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
+echo "installing CLI: $dotnetInstallPath --channel \"release/2.0.0\" --version \"2.0.0-preview1-005867\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\" $LINUX_PORTABLE_INSTALL_ARGS"
+$dotnetInstallPath --channel "release/2.0.0" --version "2.0.0-preview1-005867" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $EXIT_CODE." >&2

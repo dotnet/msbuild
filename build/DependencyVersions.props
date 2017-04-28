@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>2.0.0-preview1-002101-00</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.2.0-preview-000093-02</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.3.0-preview-000111-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc4-61325-08</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>2.0.0-alpha-20170428-1</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-beta1-2418</CLI_NuGet_Version>
@@ -11,9 +11,9 @@
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170425-201</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170425-203</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170425-203</TemplateEngineTemplate2_0Version>
+    <TemplateEngineVersion>1.0.0-beta2-20170427-205</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170427-205</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170427-205</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview1-002101</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview1-002101</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
