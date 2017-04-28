@@ -15,13 +15,31 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         // Default resolver has priority 10000 and we want to go before it and leave room on either side of us. 
         public override int Priority => 5000;
 
+        private readonly Func<string, string> _getEnvironmentVariable;
+
+        public DotNetMSBuildSdkResolver() 
+            : this(Environment.GetEnvironmentVariable)
+        {
+        }
+
+        // Test hook to provide environment variables without polluting the test process.
+        internal DotNetMSBuildSdkResolver(IReadOnlyDictionary<string, string> mockEnvironmentVariables)
+            : this(key => mockEnvironmentVariables.TryGetValue(key, out var value) ? value : null)
+        {
+        }
+
+        private DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable)
+        {
+            _getEnvironmentVariable = getEnvironmentVariable;
+        }
+
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
             // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
             // base directory and report a given version to msbuild (which may be null if unknown. One key use case
             // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
-            string msbuildSdksDir = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
-            string netcoreSdkVersion = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+            string msbuildSdksDir = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
+            string netcoreSdkVersion = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
 
             if (msbuildSdksDir == null)
             {
@@ -91,7 +109,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private List<string> GetDotnetExeDirectoryCandidates()
         {
-            string environmentOverride = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
+            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
             if (environmentOverride != null)
             {
                 return new List<string>(capacity: 1) { environmentOverride };
@@ -102,7 +120,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             var candidates = new List<string>(capacity: 2); 
             foreach (string variable in s_programFiles)
             {
-                string directory = Environment.GetEnvironmentVariable(variable);
+                string directory = _getEnvironmentVariable(variable);
                 if (directory == null)
                 {
                     continue;
