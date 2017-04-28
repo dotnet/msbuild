@@ -9,7 +9,6 @@
 
   <Target Name="GenerateBundledVersionsProps">
     <PropertyGroup>
-      <BundledVersionsPropsFolder>15.0/Imports/Microsoft.Common.props/ImportBefore</BundledVersionsPropsFolder>
       <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
     </PropertyGroup>
 
@@ -59,12 +58,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </BundledVersionsPropsContent>
   </PropertyGroup>
 
-    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)" />
-    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
+    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFileName)"
                       Lines="$(BundledVersionsPropsContent)"
                       Overwrite="true" />
-    <Copy
-      SourceFiles="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFolder)/$(BundledVersionsPropsFileName)"
-      DestinationFiles="$(SdkOutputDirectory)/$(BundledVersionsPropsFileName)" />
   </Target>
 </Project>
