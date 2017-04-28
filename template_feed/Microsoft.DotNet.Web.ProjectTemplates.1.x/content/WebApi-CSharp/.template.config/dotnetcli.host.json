@@ -20,6 +20,10 @@
       "longName": "client-id",
       "shortName": ""
     },
+    "Audience": {
+      "longName": "audience",
+      "shortName": ""
+    },
     "Domain": {
       "longName": "domain",
       "shortName": ""
