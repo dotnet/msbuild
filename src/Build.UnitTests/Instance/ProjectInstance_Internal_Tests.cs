@@ -524,6 +524,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal(first.Toolset, second.Toolset);
         }
+        
+        /// <summary>
+        /// Cloning project copies toolsversion
+        /// </summary>
+        [Fact]
+        public void CloneStateTranslation()
+        {
+            ProjectInstance first = GetSampleProjectInstance();
+            first.TranslateEntireState = true;
+
+            ProjectInstance second = first.DeepCopy();
+
+            Assert.Equal(true, second.TranslateEntireState);
+        }
 
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
@@ -563,7 +577,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"      <Project>
                     </Project>
                 ")]
-        // Project with one of each direct child (indirect children trees are tested separately)
+        // Project with one of each direct child(indirect children trees are tested separately)
         [InlineData(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
                         <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
@@ -653,16 +667,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                         </Target>
                     </Project>
                 ")]
-        public void ProjectInstanceCanSerializeViaTranslator(string projectContents)
+        public void ProjectInstanceCanSerializeEntireStateViaTranslator(string projectContents)
         {
-            if (!Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
-            {
-                return;
-            }
-
             projectContents = string.Format(projectContents, MSBuildConstants.CurrentToolsVersion);
 
             var original = new ProjectInstance(ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)))));
+
+            original.TranslateEntireState = true;
 
             ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());

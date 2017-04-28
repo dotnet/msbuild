@@ -1131,14 +1131,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(!_requestEntry.RequestConfiguration.IsLoaded, "Already loaded the project for this configuration id {0}.", _requestEntry.RequestConfiguration.ConfigurationId);
 
-            if (Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
-            {
-                _requestEntry.RequestConfiguration.InitializeProject(_componentHost.BuildParameters, LoadProjectFromFile);
-            }
-            else
-            {
-                _requestEntry.RequestConfiguration.Project = LoadProjectFromFile();
-            }
+            _requestEntry.RequestConfiguration.InitializeProject(_componentHost.BuildParameters, LoadProjectFromFile);
         }
 
         private ProjectInstance LoadProjectFromFile()

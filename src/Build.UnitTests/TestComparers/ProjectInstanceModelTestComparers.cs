@@ -23,6 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         {
             public bool Equals(ProjectInstance x, ProjectInstance y)
             {
+                Assert.Equal(x.TranslateEntireState, y.TranslateEntireState);
                 Assert.Equal(x.Properties, y.Properties, EqualityComparer<ProjectPropertyInstance>.Default);
                 Assert.Equal(x.TestEnvironmentalProperties, y.TestEnvironmentalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
                 Helpers.AssertDictionariesEqual(x.GlobalProperties, y.GlobalProperties);

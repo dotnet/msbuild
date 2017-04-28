@@ -4065,13 +4065,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a ProjectInstance based BuildRequestData is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build
-        [Fact]
-        public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
-            if (!Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
-            {
-                return;
-            }
 
             var mainProject =
 @"<Project>
@@ -4107,6 +4105,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, _projectCollection);
                     var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
 
+                    instance.TranslateEntireState = shouldSerializeEntireState;
+
                     var request = new BuildRequestData(instance, new[] {"Foo"});
 
 
@@ -4139,14 +4139,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     // Build the initial project instance again.
                     // The project instance is not in sync with the file anymore, making it an in-memory build:
                     // the file does not contain the target Foo, but the project instance does
-                    // Building the stale project instance should still succeed. MSBuild should use the 
+                    // Building the stale project instance should still succeed when the entire state is translated: MSBuild should use the 
                     // in-memory state to build and not reload from disk.
 
                     _buildManager.BeginBuild(parameters);
                     request = new BuildRequestData(instance, new[] {"Foo"}, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
                     submission = _buildManager.PendBuildRequest(request);
+
+
                     results = submission.Execute();
-                    Assert.True(results.OverallResult == BuildResultCode.Success);
+
+                    if (shouldSerializeEntireState)
+                    {
+                        Assert.Equal(BuildResultCode.Success, results.OverallResult);
+                    }
+                    else
+                    {
+                        Assert.Equal(BuildResultCode.Failure, results.OverallResult);
+                        Assert.Contains("The target \"Foo\" does not exist in the project", _logger.FullLog, StringComparison.OrdinalIgnoreCase);
+                    }
                 }
                 finally
                 {

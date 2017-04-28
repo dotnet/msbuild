@@ -186,6 +186,7 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
         private string _subToolsetVersion;
         private TaskRegistry _taskRegistry;
+        private bool _translateEntireState;
 
 
         /// <summary>
@@ -474,6 +475,8 @@ namespace Microsoft.Build.Execution
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
 
+            TranslateEntireState = that.TranslateEntireState;
+
             _properties = new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
 
             foreach (ProjectPropertyInstance property in that.Properties)
@@ -608,6 +611,19 @@ namespace Microsoft.Build.Execution
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Serialize the entire project instance state.
+        /// 
+        /// When false, only a part of the project instance state is serialized (properties and items).
+        /// In this case out of proc nodes re-evaluate the project instance from disk to obtain the un-serialized state.
+        /// This partial state recombination may lead to build issues when the project instance state differs from what is on disk.
+        /// </summary>
+        public bool TranslateEntireState
+        {
+            get { return _translateEntireState; }
+            set { _translateEntireState = value; }
         }
 
         /// <summary>
@@ -1702,9 +1718,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
-            if (Traits.Instance.EscapeHatches.SerializeEntireProjectInstance)
+            translator.Translate(ref _translateEntireState);
+
+            if (TranslateEntireState)
             {
-                TranslateEntireState(translator);
+                TranslateAllState(translator);
             }
             else
             {
@@ -1712,7 +1730,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void TranslateMinimalState(INodePacketTranslator translator)
+        internal void TranslateMinimalState(INodePacketTranslator translator)
         {
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
@@ -1720,7 +1738,7 @@ namespace Microsoft.Build.Execution
             TranslateItems(translator);
         }
 
-        private void TranslateEntireState(INodePacketTranslator translator)
+        private void TranslateAllState(INodePacketTranslator translator)
         {
             TranslateProperties(translator);
             TranslateItems(translator);

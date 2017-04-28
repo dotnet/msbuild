@@ -140,6 +140,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _savedCurrentDirectory;
 
+        private bool _translateEntireProjectInstanceState;
+
         #endregion
 
         /// <summary>
@@ -187,6 +189,8 @@ namespace Microsoft.Build.BackEnd
                 _project = data.ProjectInstance;
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
+                _translateEntireProjectInstanceState = data.ProjectInstance.TranslateEntireState;
+
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -223,6 +227,7 @@ namespace Microsoft.Build.BackEnd
             _project = instance;
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
+            _translateEntireProjectInstanceState = instance.TranslateEntireState;
             this.IsCacheable = false;
         }
 
@@ -236,6 +241,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
             _project = other._project;
+            _translateEntireProjectInstanceState = other._translateEntireProjectInstanceState;
             _transferredProperties = other._transferredProperties;
             _projectDefaultTargets = other._projectDefaultTargets;
             _projectInitialTargets = other._projectInitialTargets;
@@ -449,8 +455,10 @@ namespace Microsoft.Build.BackEnd
             // Clear these out so the other accessors don't complain.  We don't want to generally enable resetting these fields.
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
+
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
+            _translateEntireProjectInstanceState = _project.TranslateEntireState;
 
             if (IsCached)
             {
@@ -461,17 +469,13 @@ namespace Microsoft.Build.BackEnd
 
         public void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
         {
-            ErrorUtilities.VerifyThrow(
-                Traits.Instance.EscapeHatches.SerializeEntireProjectInstance,
-                $"This method assumes the {nameof(ProjectInstance)} is entirely serialized");
-
             if (_project == null || // building from file. Load project from file
                 _transferredProperties != null // need to overwrite particular properties, so load project from file and overwrite properties
             )
             {
                 Project = loadProjectFromFile.Invoke();
             }
-            else
+            else if (_translateEntireProjectInstanceState)
             {
                 // projectInstance was serialized over. Finish initialization with node specific state
 
@@ -872,6 +876,7 @@ namespace Microsoft.Build.BackEnd
                 _transferredState = _project;
             }
 
+            translator.Translate(ref _translateEntireProjectInstanceState);
             translator.Translate(ref _configId);
             translator.Translate(ref _projectFullPath);
             translator.Translate(ref _transferredState, ProjectInstance.FactoryForDeserialization);
@@ -884,7 +889,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
 
             // if the entire state is translated, then the transferred state, if exists, represents the full evaluation data
-            if (Traits.Instance.EscapeHatches.SerializeEntireProjectInstance && 
+            if (_translateEntireProjectInstanceState && 
                 translator.Mode == TranslationDirection.ReadFromStream &&
                 _transferredState != null)
             {
