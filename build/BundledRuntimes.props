@@ -30,6 +30,10 @@
     <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeVersion)</AspNetCoreRuntimeInstallerBlobRootUrl>
+  </PropertyGroup>
+
   <ItemGroup>
     <_DownloadAndExtractItem Include="CombinedSharedHostAndFrameworkArchive"
                              Condition="!Exists('$(CombinedSharedHostAndFrameworkArchive)')">
