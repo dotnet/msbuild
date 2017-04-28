@@ -9,7 +9,7 @@ namespace Company.WebApplication1.Data
 {
     public class ApplicationDbContextFactory : IDbContextFactory<ApplicationDbContext>
     {
-        public ApplicationDbContext Create(DbContextFactoryOptions options) =>
-            Program.BuildWebHost(Array.Empty<string>()).Services.GetRequiredService<ApplicationDbContext>();
+        public ApplicationDbContext Create(string[] args) =>
+            Program.BuildWebHost(args).Services.GetRequiredService<ApplicationDbContext>();
     }
 }
