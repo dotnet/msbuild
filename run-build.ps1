@@ -67,6 +67,9 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
+# Don't resolve shared frameworks from user or global locations
+$env:DOTNET_MULTILEVEL_LOOKUP=0
+
 # Enable vs test console logging
 $env:VSTEST_BUILD_TRACE=1
 $env:VSTEST_TRACE_BUILD=1

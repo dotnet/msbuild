@@ -281,7 +281,8 @@ namespace Microsoft.DotNet.Tests
                 lockFile,
                 s_toolPackageFramework,
                 depsJsonFile,
-                new SingleProjectInfo("dotnet-portable", "1.0.0", Enumerable.Empty<ResourceAssemblyInfo>()));
+                new SingleProjectInfo("dotnet-portable", "1.0.0", Enumerable.Empty<ResourceAssemblyInfo>()),
+                GetToolDepsJsonGeneratorProject());
 
             File.ReadAllText(depsJsonFile).Should().Be("temp");
             File.Delete(depsJsonFile);
@@ -455,6 +456,13 @@ namespace Microsoft.DotNet.Tests
                 new ProjectToolsCommandResolver(packagedCommandSpecFactory, new EnvironmentProvider());
 
             return projectToolsCommandResolver;
+        }
+
+        private string GetToolDepsJsonGeneratorProject()
+        {
+            //  When using the product, the ToolDepsJsonGeneratorProject property is used to get this path, but for testing
+            //  we'll hard code the path inside the SDK since we don't have a project to evaluate here
+            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
         }
     }
 }

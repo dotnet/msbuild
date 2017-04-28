@@ -10,10 +10,6 @@
     <DefineConstants>DESKTOP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="1.0.6-preview" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.5-preview" />

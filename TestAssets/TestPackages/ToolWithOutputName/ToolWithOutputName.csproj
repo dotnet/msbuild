@@ -6,13 +6,6 @@
     <AssemblyName>dotnet-tool-with-output-name</AssemblyName>
     <PackageId>ToolWithOutputName</PackageId>
     <OutputType>Exe</OutputType>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
 
 </Project>
