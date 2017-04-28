@@ -342,7 +342,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    IReadOnlyList<InvalidParameterInfo> invalidParameterList = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
+                    IReadOnlyList<InvalidParameterInfo> invalidParameterList = GetTemplateUsageInformation(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
                     string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(invalidParameterList);
                     Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
@@ -354,7 +354,8 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.Status;
         }
 
-        private IReadOnlyList<InvalidParameterInfo> GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner)
+        private IReadOnlyList<InvalidParameterInfo> GetTemplateUsageInformation(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues,
+                                                    out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner)
         {
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo, _commandInput.BaselineName);
             ParseTemplateArgs(templateInfo);
@@ -398,6 +399,21 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
             }
+
+            // get all the flags
+            // get all the user input params that have the default value
+            Dictionary<string, IReadOnlyList<string>> inputFlagVariants = new Dictionary<string, IReadOnlyList<string>>();
+            userParamsWithDefaultValues = new HashSet<string>();
+            foreach (string paramName in allParams.ParameterDefinitions.Select(x => x.Name))
+            {
+                inputFlagVariants[paramName] = _commandInput.VariantsForCanonical(paramName);
+
+                if (_commandInput.TemplateParamHasValue(paramName) && string.IsNullOrEmpty(_commandInput.TemplateParamValue(paramName)))
+                {
+                    userParamsWithDefaultValues.Add(paramName);
+                }
+            }
+            variantsForCanonicals = inputFlagVariants;
 
             return invalidParameters;
         }
@@ -1148,7 +1164,8 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams, bool showImplicitlyHiddenParams, bool hasPostActionScriptRunner)
+        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams,
+                    IReadOnlyDictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals, HashSet<string> groupUserParamsWithDefaultValues, bool showImplicitlyHiddenParams, bool hasPostActionScriptRunner)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
@@ -1173,7 +1190,7 @@ namespace Microsoft.TemplateEngine.Cli
                         else
                         {
                             // the key is guaranteed to exist
-                            IList<string> variants = _commandInput.VariantsForCanonical(param.Name).ToList();
+                            IList<string> variants = groupVariantsForCanonicals[param.Name].ToList();
                             options = string.Join("|", variants.Reverse());
                         }
 
@@ -1227,8 +1244,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         // this will catch when the user inputs the default value. The above deliberately skips it on the resolved values.
                         if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                            && _commandInput.TemplateParamHasValue(param.Name)
-                            && string.IsNullOrEmpty(_commandInput.TemplateParamValue(param.Name)))
+                            && groupUserParamsWithDefaultValues.Contains(param.Name))
                         {
                             configuredValue = "true";
                         }
@@ -1589,9 +1605,12 @@ namespace Microsoft.TemplateEngine.Cli
             IDictionary<string, InvalidParameterInfo> invalidParametersForGroup = new Dictionary<string, InvalidParameterInfo>();
             bool firstInList = true;
 
+            Dictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals = new Dictionary<string, IReadOnlyList<string>>();
+            HashSet<string> groupUserParamsWithDefaultValues = new HashSet<string>();
+
             foreach (ITemplateInfo templateInfo in templateGroup)
             {
-                IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out bool hasPostActionScriptRunner);
+                IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
 
                 if (firstInList)
                 {
@@ -1609,11 +1628,23 @@ namespace Microsoft.TemplateEngine.Cli
                 groupParametersToExplicitlyHide.UnionWith(parametersToExplicitlyHide);
                 groupHasPostActionScriptRunner |= hasPostActionScriptRunner;
                 parameterSetsForAllTemplatesInGroup.Add(allParamsForTemplate);
+
+                // take the variants from the first template that has the canonical
+                foreach (KeyValuePair<string, IReadOnlyList<string>> canonicalAndVariants in variantsForCanonicals)
+                {
+                    if (!groupVariantsForCanonicals.ContainsKey(canonicalAndVariants.Key))
+                    {
+                        groupVariantsForCanonicals[canonicalAndVariants.Key] = canonicalAndVariants.Value;
+                    }
+                }
+
+                // If any template says the user input value is the default, include it here.
+                groupUserParamsWithDefaultValues.UnionWith(userParamsWithDefaultValues);
             }
 
             IParameterSet allGroupParameters = new TemplateGroupParameterSet(parameterSetsForAllTemplatesInGroup);
             string parameterErrors = InvalidParameterInfo.InvalidParameterListToString(invalidParametersForGroup.Values.ToList());
-            ShowParameterHelp(_commandInput.AllTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), groupParametersToExplicitlyHide, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
+            ShowParameterHelp(_commandInput.AllTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), groupParametersToExplicitlyHide, groupVariantsForCanonicals, groupUserParamsWithDefaultValues, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
         }
 
         // Returns true if any partial matches were displayed, false otherwise
