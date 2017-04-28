@@ -34,8 +34,8 @@
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store</AspNetCoreRuntimeInstallerBlobRootUrl>
 
     <!-- Examples:    Build.RS.linux-preview1.zip    Build.RS.winx86-preview1.zip    AspNetCorePackageStoreLibx64.wixlib   -->
-    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(OSName)-$(AspNetCoreRuntimeFileNameVersionToken).zip</AspNetCoreRuntimeInstallerArchiveFileName>
-    <AspNetCoreRuntimeInstallerArchiveFileName Condition=" '$(OSName)' == 'win' ">Build.RS.$(OSName)$(Architecture)-$(AspNetCoreRuntimeFileNameVersionToken).zip</AspNetCoreRuntimeInstallerArchiveFileName>
+    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(OSName).zip</AspNetCoreRuntimeInstallerArchiveFileName>
+    <AspNetCoreRuntimeInstallerArchiveFileName Condition=" '$(OSName)' == 'win' ">Build.RS.$(OSName)$(Architecture).zip</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
 
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
