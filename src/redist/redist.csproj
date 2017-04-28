@@ -30,6 +30,17 @@
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
 
+  <Target Name="PublishAspNetRuntimePackageStore"
+          AfterTargets="CrossgenPublishDir">
+    <ItemGroup>
+      <AspNetRuntimePackageStore Remove="*" />
+      <AspNetRuntimePackageStore Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(AspNetRuntimePackageStore)"
+          DestinationFiles="@(AspNetRuntimePackageStore->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishSharedFramework"
           BeforeTargets="Publish">
     <ItemGroup>
