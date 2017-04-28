@@ -23,11 +23,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Normal commands -->
     <LanguageTargets Condition=" '$(FSharpLanguageTargets)' != '' ">$(FSharpLanguageTargets)</LanguageTargets>
 
-
-    <!-- Set this here, because FscTool* properties get unconditionally set
-	 in the Sdk, so we want to override them -->
-    <FscToolExe>fsc.exe</FscToolExe>
-    <FscToolPath>$(MSBuildToolsPath)\..\..\..\fsharp</FscToolPath>
   </PropertyGroup>
 
 </Project>
