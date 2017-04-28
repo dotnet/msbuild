@@ -148,6 +148,7 @@
   </Target>
 
   <Target Name="PublishLzmaArchive"
+          Condition="'$(CLIBUILD_SKIP_LZMA)' != 'true'"
           DependsOnTargets="GetNuGetPackagesArchive"
           AfterTargets="Publish">
   </Target>
