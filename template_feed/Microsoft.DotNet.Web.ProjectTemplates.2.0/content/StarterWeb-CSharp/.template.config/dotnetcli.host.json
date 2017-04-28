@@ -10,7 +10,7 @@
     },
     "AADInstance": {
       "longName": "aad-instance",
-      "shortName": "s"
+      "shortName": ""
     },
     "AAdB2CInstance": {
       "longName": "aad-b2c-instance",

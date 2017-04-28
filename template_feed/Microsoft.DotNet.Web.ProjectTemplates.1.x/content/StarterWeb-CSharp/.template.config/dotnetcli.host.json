@@ -13,7 +13,7 @@
     },
     "AADInstance": {
       "longName": "aad-instance",
-      "shortName": "s"
+      "shortName": ""
     },
     "OrgReadAccess": {
       "longName": "org-read-access",
