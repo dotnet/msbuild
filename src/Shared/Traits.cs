@@ -4,6 +4,7 @@
 // </copyright>
 
 using System;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
@@ -24,6 +25,36 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
-        public bool ForceEntireProjectInstanceStateSerialization => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_FORCE_ENTIRE_PROJECT_INSTANCE_STATE_SERIALIZATION"));
+        public ProjectInstanceTranslationMode? ProjectInstanceTranslation => new Lazy<ProjectInstanceTranslationMode?>(
+            () =>
+            {
+                var mode = Environment.GetEnvironmentVariable("MSBUILD_PROJECTINSTANCE_TRANSLATION_MODE");
+
+                if (mode == null)
+                {
+                    return null;
+                }
+
+                if (mode.Equals("full", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ProjectInstanceTranslationMode.Full;
+                }
+
+                if (mode.Equals("partial", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ProjectInstanceTranslationMode.Partial;
+                }
+
+                ErrorUtilities.ThrowInvalidOperation("Shared.InvalidEscapeHatchValue", mode);
+
+                return null;
+            },
+            true).Value;
+
+        public enum ProjectInstanceTranslationMode
+        {
+            Full,
+            Partial
+        }
     }
 }

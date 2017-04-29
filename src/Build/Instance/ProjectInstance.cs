@@ -624,12 +624,20 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                return _translateEntireState || Traits.Instance.EscapeHatches.ForceEntireProjectInstanceStateSerialization;
+                switch (Traits.Instance.EscapeHatches.ProjectInstanceTranslation)
+                {
+                    case EscapeHatches.ProjectInstanceTranslationMode.Full: return true;
+                    case EscapeHatches.ProjectInstanceTranslationMode.Partial: return false;
+                    default: return _translateEntireState;
+                }
             }
 
             set
             {
-                _translateEntireState = value;
+                if (Traits.Instance.EscapeHatches.ProjectInstanceTranslation == null)
+                {
+                    _translateEntireState = value;
+                }
             }
         }
 
