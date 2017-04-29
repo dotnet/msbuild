@@ -131,6 +131,16 @@
     </PropertyGroup>
   </Target>
 
+  <!-- The C# compiler supports the new EmbeddedFiles item for files to embed into the portable .pdb
+  http://source.roslyn.io/#MSBuildItem=EmbeddedFiles -->
+  <Target Name="PopulateEmbeddedFiles"
+          AfterTargets="BeforeCompile"
+          BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <EmbeddedFiles Include="@(Compile)" />
+    </ItemGroup>
+  </Target>
+
   <!-- We want this target to be incremental, but editbin affects the file in place, as does
        OpenSourceSign. So run this target when the assembly has been updated since the last
        time it was signed. Signing will run immediately after this, flipping another bit and
