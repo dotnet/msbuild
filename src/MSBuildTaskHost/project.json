@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5",
+    "SourceLink.Create.CommandLine": "2.1.0"
   },
   "frameworks": {
     "net35": { }

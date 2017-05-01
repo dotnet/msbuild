@@ -176,6 +176,8 @@
   <!-- Set the host specific OS and Architecture variables -->
   <PropertyGroup>
     <Deterministic>true</Deterministic>
+    <DebugType>portable</DebugType>
+    <SourceLinkCreate>true</SourceLinkCreate>
 
     <!-- Possible Values: win7 / osx.10.10.  For linux, the value is calculated in cibuild.sh and passed at the command-line -->
     <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">win7</RuntimeSystem>
