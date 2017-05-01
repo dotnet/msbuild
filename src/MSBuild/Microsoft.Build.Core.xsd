@@ -379,6 +379,24 @@
                 <xs:documentation><!-- _locID_text="ImportType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="Sdk" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    <!-- _locID_text="ImportType_Sdk" _locComment="" -->Name of the SDK which contains the project file to import</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="Version" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    <!-- _locID_text="ImportType_Version" _locComment="" -->Optional expression used to specify the version of the SDK referenced by this import</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="MinimumVersion" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    <!-- _locID_text="ImportType_MinimumVersion" _locComment="" -->Optional expression used to specify the minimum SDK version required by the referring import</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
     <!-- ======================================================================================= -->  
     <xs:complexType name="ProjectExtensionsType" mixed="true">

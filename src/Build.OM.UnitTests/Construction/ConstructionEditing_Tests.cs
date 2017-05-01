@@ -16,6 +16,7 @@ using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -3255,6 +3256,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
+        public void UpdateSdkImportProperty()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectImportElement import = project.AddImport("file");
+
+            // Add properties and assert that the SdkReference is updated accordingly.
+            import.Sdk = "Name";
+            AssertSdkEquals(import, "Name", null, null);
+
+            import.Version = "Version";
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            import.MinimumVersion = "Min";
+            AssertSdkEquals(import, "Name", "Version", "Min");
+
+            import.MinimumVersion = null;
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            import.Version = null;
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            Assert.Throws<ArgumentException>(() => import.Sdk = null);
+        }
+
         private static string AdjustSpacesForItem(string expectedItem)
         {
             Assert.False(string.IsNullOrEmpty(expectedItem));
@@ -3287,6 +3312,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             expectedItem = sb.ToString();
             return expectedItem;
+        }
+
+        private void AssertSdkEquals(ProjectImportElement importElement, string name, string version, string minimumVersion)
+        {
+            // Use reflection to verify the value. The property is not public and we do not have InternalsVisibleTo (by design).
+            PropertyInfo pi = importElement.GetType().GetProperty("ParsedSdkReference");
+
+            var expected = new SdkReference(name, version, minimumVersion);
+            var actual = (SdkReference) pi.GetValue(importElement);
+
+            Assert.Equal(expected, actual);
         }
     }
 }
