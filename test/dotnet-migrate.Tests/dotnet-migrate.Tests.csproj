@@ -28,6 +28,6 @@
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
     <PackageReference Include="moq.netcore" Version="4.4.0-beta8" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliProjectJsonMigrationVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
   </ItemGroup>
 </Project>

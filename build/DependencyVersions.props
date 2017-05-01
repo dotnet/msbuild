@@ -17,10 +17,7 @@
     <PlatformAbstractionsVersion>2.0.0-preview2-002093</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview2-002093</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
-    <CliProjectJsonMigrationVersion>1.1.0-alpha-2127</CliProjectJsonMigrationVersion>
-    <CliMigrateCommandVersion>0.1.0-alpha-2127</CliMigrateCommandVersion>
-    <CliNuGetPackagingCoreTypesVersion>4.3.0-preview1-2500</CliNuGetPackagingCoreTypesVersion>
-    <CliNuGetProjectModelVersion>4.3.0-preview1-2500</CliNuGetProjectModelVersion>
+    <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
 
   </PropertyGroup>
 

@@ -36,8 +36,8 @@
     <PackageReference Include="Microsoft.Build" Version="$(CLI_MSBuild_Version)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(CliCommandLineParserVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(CliMigrateCommandVersion)" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliProjectJsonMigrationVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(CliMigrateVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(TemplateEngineVersion)" />

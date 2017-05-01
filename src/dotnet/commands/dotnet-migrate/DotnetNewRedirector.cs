@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 {
     public class DotnetNewRedirector : ICanCreateDotnetCoreTemplate
     {
-        public void CreateWithWithEphemeralHiveAndNoRestore(
+        public void CreateWithEphemeralHiveAndNoRestore(
             string templateName,
             string outputDirectory,
             string workingDirectory)

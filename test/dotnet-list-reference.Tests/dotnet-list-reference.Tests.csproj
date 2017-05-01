@@ -19,6 +19,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
-    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliProjectJsonMigrationVersion)" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
   </ItemGroup>
 </Project>
