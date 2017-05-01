@@ -90,10 +90,12 @@ namespace Microsoft.Build.Construction
     {
         internal ProjectImportElement() { }
         public Microsoft.Build.Construction.ImplicitImportLocation ImplicitImportLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string MinimumVersion { get { throw null; } set { } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
         public string Sdk { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation SdkLocation { get { throw null; } }
+        public string Version { get { throw null; } set { } }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("#Imports={Count} Condition={Condition} Label={Label}")]
