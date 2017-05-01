@@ -23,12 +23,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         }
 
         // Test hook to provide environment variables without polluting the test process.
-        internal DotNetMSBuildSdkResolver(IReadOnlyDictionary<string, string> mockEnvironmentVariables)
-            : this(key => mockEnvironmentVariables.TryGetValue(key, out var value) ? value : null)
-        {
-        }
-
-        private DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable)
+        internal DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
         }

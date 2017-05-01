@@ -10,6 +10,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
+using System;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -73,13 +74,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             }
 
             public SdkResolver CreateResolver()
-                => new DotNetMSBuildSdkResolver(
-                new Dictionary<string, string>
-                {
-                    ["ProgramW6432"] = GetProgramFilesDirectory(ProgramFiles.X64).FullName,
-                    ["ProgramFiles(x86)"] = GetProgramFilesDirectory(ProgramFiles.X86).FullName,
-                    ["ProgramFiles"] = GetProgramFilesDirectory(ProgramFiles.Default).FullName,
-                });
+                => new DotNetMSBuildSdkResolver(GetEnvironmentVariable);
 
             public DirectoryInfo GetSdkDirectory(ProgramFiles programFiles, string sdkName, string sdkVersion)
                 => TestDirectory.GetDirectory(GetProgramFilesDirectory(programFiles).FullName, "dotnet", "sdk", sdkVersion, "Sdks", sdkName, "Sdk");
@@ -97,6 +92,28 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public void CreateGlobalJson(DirectoryInfo directory, string version)
                 => File.WriteAllText(directory.GetFile("global.json").FullName, 
                     $@"{{ ""sdk"": {{ ""version"":  ""{version}"" }} }}");
+
+            public string GetEnvironmentVariable(string variable)
+            {
+                ProgramFiles programFiles;
+
+                switch (variable)
+                {
+                    case "ProgramW6432":
+                        programFiles = ProgramFiles.X64;
+                        break;
+                    case "ProgramFiles(x86)":
+                        programFiles = ProgramFiles.X86;
+                        break;
+                    case "ProgramFiles":
+                        programFiles = ProgramFiles.Default;
+                        break;
+                    default:
+                        return null;
+                }
+
+                return GetProgramFilesDirectory(programFiles).FullName;
+            }
         }
 
         private sealed class MockContext : SdkResolverContext
