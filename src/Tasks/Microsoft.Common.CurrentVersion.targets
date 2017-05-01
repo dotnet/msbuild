@@ -281,6 +281,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, c:\MyProjects\MyProject\bin\debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(Deterministic)' == 'true' ">$([System.IO.Path]::Combine(`$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetFullPath(`$(TargetPath)`))))`, 'ref', `$(TargetFileName)`))</TargetRefPath>
+
     <!-- Example, c:\MyProjects\MyProject\ -->
     <ProjectDir Condition=" '$(ProjectDir)' == '' ">$(MSBuildProjectDirectory)\</ProjectDir>
 
@@ -348,6 +350,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Deterministic)' == 'true'">
+    <!-- TODO: should this be configurable? Default path obeys conventions. -->
+    <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
+    <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
+    <CreateDirectory Include="$(OutDir)ref" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
@@ -771,7 +780,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="Build"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
       DependsOnTargets="$(BuildDependsOn)"
-      Returns="$(TargetPath)" />
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
 
   <!--
     ============================================================
@@ -1797,6 +1806,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+        <ReferenceAssembly Condition="'$(TargetRefPath)' != ''">$(TargetRefPath)</ReferenceAssembly>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
@@ -2015,7 +2025,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
     </ResolveAssemblyReference>
+
+    <ItemGroup>
+      <ReferencePathWithInterfaceOnlyAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')" />
+    </ItemGroup>
   </Target>
+
+  <ItemDefinitionGroup>
+    <ReferencePath>
+      <ReferenceAssembly>%(FullPath)</ReferenceAssembly>
+    </ReferencePath>
+  </ItemDefinitionGroup>
 
   <!--
     ====================================================================================================
@@ -4006,6 +4026,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
     </Copy>
+
+    <!-- Copy the build product (.dll or .exe). -->
+    <CopyRefAssembly
+        SourcePath="@(IntermediateRefAssembly)"
+        DestinationPath="$(TargetRefPath)"
+        Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true' and Exists('@(IntermediateRefAssembly)')"
+            >
+
+      <Output TaskParameter="DestinationPath" ItemName="ReferenceAssembly"/>
+
+    </CopyRefAssembly>
 
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; @(MainAssembly->'%(FullPath)')" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
 
