@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <ItemGroup>
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>";
-            File.WriteAllText(_sdkPropsPath, " < Project />");
+            File.WriteAllText(_sdkPropsPath, "<Project />");
             File.WriteAllText(_sdkTargetsPath, "<Project />");
 
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <ItemGroup>
     <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
   </ItemGroup>";
-            File.WriteAllText(_sdkPropsPath, " < Project />");
+            File.WriteAllText(_sdkPropsPath, " <Project />");
             File.WriteAllText(_sdkTargetsPath, "<Project />");
 
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))

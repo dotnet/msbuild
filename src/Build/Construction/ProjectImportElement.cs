@@ -169,6 +169,11 @@ namespace Microsoft.Build.Construction
             return owner.CreateImportElement(this.Project);
         }
 
+        /// <summary>
+        /// Helper method to extract attribute values and update the ParsedSdkReference property if
+        /// necessary (update only when changed).
+        /// </summary>
+        /// <returns>True if the ParsedSdkReference was updated, otherwise false (no update necessary).</returns>
         private bool CheckUpdatedSdk()
         {
 
