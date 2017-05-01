@@ -18,6 +18,7 @@
       <OutputDirectory Condition="'$(OutputDirectory)' == ''">$(BaseOutputDirectory)/stage2</OutputDirectory>
       <CompilationDirectory Condition="'$(CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
       <PackagesDirectory Condition="'$(PackagesDirectory)' == ''">$(BaseOutputDirectory)/packages</PackagesDirectory>
+      <SdkResolverOutputDirectory>$(BaseOutputDirectory)/intermediate/MSBuildSdkResolver</SdkResolverOutputDirectory>
 
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
            signs files that are under these paths. -->
@@ -66,6 +67,19 @@
     <ItemGroup>
       <!-- NuPkg contents -->
       <FilesToSign Include="$(OutDir)/bin/**/Microsoft.DotNet.Cli.Utils.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignSdkResolverContents" DependsOnTargets="GetSignSdkResolverContentsFiles;SignFiles" />
+
+  <Target Name="GetSignSdkResolverContentsFiles">
+    <PropertyGroup>
+      <OutDir>$(SdkResolverOutputDirectory)</OutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <FilesToSign Include="$(SdkResolverOutputDirectory)/Microsoft.DotNet.MSBuildSdkResolver.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
