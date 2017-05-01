@@ -4038,6 +4038,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             >
 
       <Output TaskParameter="DestinationPath" ItemName="ReferenceAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
     </CopyRefAssembly>
 
@@ -4502,6 +4503,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--Record the main compile outputs.-->
     <ItemGroup>
       <FileWrites Include="@(IntermediateAssembly)" Condition="Exists('@(IntermediateAssembly)')"/>
+      <FileWrites Include="@(IntermediateRefAssembly)" Condition="'@(IntermediateRefAssembly)' != '' and Exists('@(IntermediateRefAssembly)')"/>
     </ItemGroup>
 
     <!-- Record the .xml if one was produced. -->
