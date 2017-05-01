@@ -4030,7 +4030,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </Copy>
 
-    <!-- Copy the build product (.dll or .exe). -->
+    <!-- Copy the reference assembly build product (.dll or .exe). -->
     <CopyRefAssembly
         SourcePath="@(IntermediateRefAssembly)"
         DestinationPath="$(TargetRefPath)"
