@@ -2032,6 +2032,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <ItemDefinitionGroup>
+    <!-- Reference assemblies are not produced in all cases, but it's easier to consume them
+         if this metadatum is always populated. This item definition ensures that it points
+         to the implementation assembly unless specified. -->
     <ReferencePath>
       <ReferenceAssembly>%(FullPath)</ReferenceAssembly>
     </ReferencePath>
