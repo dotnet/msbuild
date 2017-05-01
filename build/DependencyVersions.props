@@ -12,7 +12,6 @@
     <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
     <NuGetVersion>4.3.0-preview1-2500</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NewtonsoftJsonSideBySideVersion>9.0.1</NewtonsoftJsonSideBySideVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
   </PropertyGroup>
 
