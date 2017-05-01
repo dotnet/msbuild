@@ -523,9 +523,9 @@ namespace Microsoft.Build.Construction
             if (element.HasAttribute(XMakeAttributes.sdk))
             {
                 sdk = new SdkReference(
-                    element.GetAttribute(XMakeAttributes.sdk),
-                    element.GetAttribute(XMakeAttributes.sdkVersion),
-                    element.GetAttribute(XMakeAttributes.sdkMinimumVersion));
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdk, nullIfNotExists: true),
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkVersion, nullIfNotExists: true),
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkMinimumVersion, nullIfNotExists: true));
             }
 
             return new ProjectImportElement(element, parent, _project, sdk);
