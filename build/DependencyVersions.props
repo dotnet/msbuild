@@ -7,7 +7,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <MsBuildPackagesVersion>15.1.548</MsBuildPackagesVersion>
+    <MsBuildPackagesVersion>15.2.0-preview-000093-02</MsBuildPackagesVersion>
     <DependencyModelVersion>2.0.0-preview1-001960</DependencyModelVersion>
     <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
     <NuGetVersion>4.3.0-preview1-2500</NuGetVersion>
