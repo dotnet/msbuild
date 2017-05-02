@@ -185,7 +185,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{project}.deps.json",
                 $"{project}.runtimeconfig.json",
                 "System.Collections.NonGeneric.dll",
-                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}"
+                $"{FileConstants.DynamicLibPrefix}coreclr{FileConstants.DynamicLibSuffix}"
             });
 
             publishDirectory.Should().NotHaveFiles(new[] {

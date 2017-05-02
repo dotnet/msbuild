@@ -51,8 +51,8 @@ namespace Microsoft.NET.Build.Tests
                 "HelloWorld.deps.json",
                 "HelloWorld.runtimeconfig.dev.json",
                 "HelloWorld.runtimeconfig.json",
-                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })

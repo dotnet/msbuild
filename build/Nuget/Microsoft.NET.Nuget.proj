@@ -8,6 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <PackProjectInputFile>$(MSbuildProjectFullPath)</PackProjectInputFile>

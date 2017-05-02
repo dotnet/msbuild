@@ -45,10 +45,10 @@ namespace Microsoft.NET.Publish.Tests
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-                $"{FileConstants.DynamicLibPrefix}sqlite3{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}coreclr{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
             });
 
             Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Publish.Tests
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-                $"{FileConstants.DynamicLibPrefix}sqlite3{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
             });
 
             Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
