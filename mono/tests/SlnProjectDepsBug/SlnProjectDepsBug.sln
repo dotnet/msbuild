@@ -1,0 +1,32 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlnProjectDepsBug", "SlnProjectDepsBug\SlnProjectDepsBug.csproj", "{2A45AC7E-98A0-4AA8-84F0-7C02A7469313}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibC", "LibC\LibC.csproj", "{9C743F94-9DA8-422B-8FB8-DEB139216381}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibB", "LibB\LibB.csproj", "{34ED4F6B-145E-467E-AFFB-48B3237878D3}"
+        ProjectSection(ProjectDependencies) = postProject
+	                {9C743F94-9DA8-422B-8FB8-DEB139216381} = {9C743F94-9DA8-422B-8FB8-DEB139216381}
+        EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A45AC7E-98A0-4AA8-84F0-7C02A7469313}.Debug|x86.ActiveCfg = Debug|x86
+		{2A45AC7E-98A0-4AA8-84F0-7C02A7469313}.Debug|x86.Build.0 = Debug|x86
+		{2A45AC7E-98A0-4AA8-84F0-7C02A7469313}.Release|x86.ActiveCfg = Release|x86
+		{2A45AC7E-98A0-4AA8-84F0-7C02A7469313}.Release|x86.Build.0 = Release|x86
+		{9C743F94-9DA8-422B-8FB8-DEB139216381}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9C743F94-9DA8-422B-8FB8-DEB139216381}.Debug|x86.Build.0 = Debug|Any CPU
+		{9C743F94-9DA8-422B-8FB8-DEB139216381}.Release|x86.ActiveCfg = Release|Any CPU
+		{9C743F94-9DA8-422B-8FB8-DEB139216381}.Release|x86.Build.0 = Release|Any CPU
+		{34ED4F6B-145E-467E-AFFB-48B3237878D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{34ED4F6B-145E-467E-AFFB-48B3237878D3}.Debug|x86.Build.0 = Debug|Any CPU
+		{34ED4F6B-145E-467E-AFFB-48B3237878D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{34ED4F6B-145E-467E-AFFB-48B3237878D3}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

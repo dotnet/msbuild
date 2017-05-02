@@ -8,6 +8,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
+using Microsoft.Build.Shared;
 
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
@@ -154,7 +155,11 @@ namespace Microsoft.Build.Construction
         public string RelativePath
         {
             get { return _relativePath; }
-            internal set { _relativePath = value; }
+            internal set
+            {
+                _relativePath = FileUtilities.MaybeAdjustFilePath(value,
+                                                    baseDirectory:this.ParentSolution.SolutionFileDirectory ?? String.Empty);
+            }
         }
 
         /// <summary>
