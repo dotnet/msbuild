@@ -28,6 +28,11 @@
       "b2cAuthenticationOptions": "CloudExisting"
     },
     {
+      "auth": "Individual",
+      "authenticationType": "IndividualAuth",
+      "b2cAuthenticationOptions": "Local"
+    },
+    {
       "auth": "SingleOrg",
       "authenticationType": "OrgAuth",
       "orgAuthenticationOptions": "SSO"
