@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                                        "-r \"C:\\report.wfw\" " +
                                        "--format-report-file-json");
 
-            Action a = () => result["dotnet"]["migrate"].Value<MigrateCommand>();
+            Action a = () => result["dotnet"]["migrate"].Value<MigrateCommandCompose>();
             a.ShouldNotThrow<ParseException>();
         }
 
