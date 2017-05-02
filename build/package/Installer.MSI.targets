@@ -115,6 +115,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
                       '$(SdkInstallerFile)'
+                      '$(AspNetCoreRuntimeInstallerWixLibFile)'
                       '$(DownloadedSharedFrameworkInstallerFile)'
                       '$(DownloadedHostFxrInstallerFile)'
                       '$(DownloadedSharedHostInstallerFile)'
