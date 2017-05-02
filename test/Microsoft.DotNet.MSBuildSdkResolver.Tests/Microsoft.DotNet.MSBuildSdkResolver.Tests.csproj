@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net462;$(CliTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>net461;$(CliTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(CliTargetFramework)</TargetFrameworks>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
