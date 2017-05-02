@@ -2030,7 +2030,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ResolveAssemblyReference>
 
     <ItemGroup>
-      <ReferencePathWithInterfaceOnlyAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')" />
+      <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')" />
     </ItemGroup>
   </Target>
 
