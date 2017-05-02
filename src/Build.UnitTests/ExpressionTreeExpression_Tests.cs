@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ITestOutputHelper output;
 
 
-        private static readonly string[] FilesWithExistenceChecks = { "a", "a;b", "a'b", ";", "'" };
+        private static readonly string[] FilesWithExistenceChecks = { "a", "c", "a;b", "a'b", ";", "'" };
 
         private readonly Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
@@ -137,6 +137,8 @@ namespace Microsoft.Build.UnitTests
             "exists(a)",
             "exists('a%3bb')", /* semicolon */
             "exists('a%27b')", /* apostrophe */
+            "exists('a;c')", /* items */
+            "exists($(a_semi_c))",
             "exists($(a_escapedsemi_b))",
             "exists('$(a_escapedsemi_b)')",
             "exists($(a_escapedapos_b))",
@@ -192,6 +194,11 @@ namespace Microsoft.Build.UnitTests
             "exists('@(u)')",
             "exists('$(foo_apos_foo)')",
             "!exists('a')",
+            "!exists('a;c')",
+            "!exists('$(a_semi_c)')",
+            "exists('a;b;c')", /* a and c exist but b does not */
+            "exists('b;c;a')",
+            "exists('$(a_semi_c);b')",
             "!!!exists(a)",
             "exists('|||||')",
             @"hastrailingslash('foo')",
@@ -336,11 +343,6 @@ namespace Microsoft.Build.UnitTests
             "existsX",
             "!",
             "nonexistentfunction('xyz')",
-            "exists('a;b')", /* non scalar */
-            "exists(@(z))",
-            "exists('@(z)')",
-            "exists($(a_semi_b))",
-            "exists('$(a_semi_b)')",
             "exists(@(v)x)",
             "exists(@(v)$(nonexistent))",
             "exists('@(v)$(a)')",
@@ -382,7 +384,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("e", "xxx"));
             propertyBag.Set(ProjectPropertyInstance.Create("f", "1.9.5"));
             propertyBag.Set(ProjectPropertyInstance.Create("and", "and"));
-            propertyBag.Set(ProjectPropertyInstance.Create("a_semi_b", "a;b"));
+            propertyBag.Set(ProjectPropertyInstance.Create("a_semi_c", "a;c"));
             propertyBag.Set(ProjectPropertyInstance.Create("a_apos_b", "a'b"));
             propertyBag.Set(ProjectPropertyInstance.Create("foo_apos_foo", "foo'foo"));
             propertyBag.Set(ProjectPropertyInstance.Create("a_escapedsemi_b", "a%3bb"));
