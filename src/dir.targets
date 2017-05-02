@@ -111,5 +111,5 @@
 
   <!-- https://github.com/ctaggart/SourceLink - stamps the portable .pdbs with URLs to sources on GitHub 
   so that debugger can download the exact matching source files during debugging -->
-  <Import Project="$(PackagesDir)\sourcelink.create.commandline\2.1.0\build\SourceLink.Create.CommandLine.targets" Condition="'$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\sourcelink.create.commandline\2.1.0\build\SourceLink.Create.CommandLine.targets')" />
+  <Import Project="$(PackagesDir)\sourcelink.create.commandline\2.1.0\build\SourceLink.Create.CommandLine.targets" Condition="'$(MSBuildRuntimeType)' == 'Full' And '$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\sourcelink.create.commandline\2.1.0\build\SourceLink.Create.CommandLine.targets')" />
 </Project>
