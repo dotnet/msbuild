@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
+    <PackageReference Include="NuGet.Configuration" Version="4.3.0-beta1-2418" />
   </ItemGroup>
 </Project>

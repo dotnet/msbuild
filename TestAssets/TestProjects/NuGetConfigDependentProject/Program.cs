@@ -3,20 +3,14 @@
 
 using System;
 using System.Collections;
-using Newtonsoft.Json.Linq;
+using NuGet.Configuration;
 
 class Program
 {
     public static void Main(string[] args)
     {
-        ArrayList argList = new ArrayList(args);
-        JObject jObject = new JObject();
+        var settingValue = new SettingValue("key", "value", false);
 
-        foreach (string arg in argList)
-        {
-            jObject[arg] = arg;
-        }
-
-        Console.WriteLine(jObject.ToString());
+        Console.WriteLine(settingValue.Key);
     }
 }

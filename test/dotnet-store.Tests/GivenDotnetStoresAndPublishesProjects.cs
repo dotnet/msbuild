@@ -70,9 +70,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void AppFailsDueToMissingCache()
         {
-            var testAppName = "NewtonSoftDependentProject";
-            var profileProjectName = "NewtonsoftProfile";
-            var targetManifestFileName = "NewtonsoftFilterProfile.xml";
+            var testAppName = "NuGetConfigDependentProject";
+            var profileProjectName = "NuGetConfigProfile";
+            var targetManifestFileName = "NuGetConfigFilterProfile.xml";
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
                 .Should().Fail()
-                .And.HaveStdErrContaining($"Error: assembly specified in the dependencies manifest was not found probably due to missing runtime store associated with {targetManifestFileName} -- package: 'Newtonsoft.Json',");
+                .And.HaveStdErrContaining($"Error: assembly specified in the dependencies manifest was not found probably due to missing runtime store associated with {targetManifestFileName} -- package: 'NuGet.Configuration',");
         }
 
         [Fact]
