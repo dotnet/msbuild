@@ -32,6 +32,7 @@ using System.IO;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Execution
 {
@@ -87,6 +88,10 @@ namespace Microsoft.Build.Execution
         /// It is just a wrapper around <see cref="_actualTargets">actualTargets</see>.
         /// </summary>
         private IDictionary<string, ProjectTargetInstance> _targets;
+
+        private List<string> _defaultTargets;
+
+        private List<string> _initialTargets;
 
         /// <summary>
         /// The global properties evaluation occurred with.
@@ -175,6 +180,14 @@ namespace Microsoft.Build.Execution
         /// The object is always mutable during evaluation.
         /// </summary>
         private bool _isImmutable;
+
+        private IDictionary<string, List<TargetSpecification>> _beforeTargets;
+        private IDictionary<string, List<TargetSpecification>> _afterTargets;
+        private Toolset _toolset;
+        private string _subToolsetVersion;
+        private TaskRegistry _taskRegistry;
+        private bool _translateEntireState;
+
 
         /// <summary>
         /// Creates a ProjectInstance directly.
@@ -462,6 +475,8 @@ namespace Microsoft.Build.Execution
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
 
+            TranslateEntireState = that.TranslateEntireState;
+
             _properties = new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
 
             foreach (ProjectPropertyInstance property in that.Properties)
@@ -599,6 +614,34 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Serialize the entire project instance state.
+        /// 
+        /// When false, only a part of the project instance state is serialized (properties and items).
+        /// In this case out of proc nodes re-evaluate the project instance from disk to obtain the un-serialized state.
+        /// This partial state recombination may lead to build issues when the project instance state differs from what is on disk.
+        /// </summary>
+        public bool TranslateEntireState
+        {
+            get
+            {
+                switch (Traits.Instance.EscapeHatches.ProjectInstanceTranslation)
+                {
+                    case EscapeHatches.ProjectInstanceTranslationMode.Full: return true;
+                    case EscapeHatches.ProjectInstanceTranslationMode.Partial: return false;
+                    default: return _translateEntireState;
+                }
+            }
+
+            set
+            {
+                if (Traits.Instance.EscapeHatches.ProjectInstanceTranslation == null)
+                {
+                    _translateEntireState = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// The project's root directory, for evaluation of relative paths and
         /// setting the current directory during build.
         /// Is never null: projects not loaded from disk use the current directory from
@@ -642,8 +685,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> DefaultTargets
         {
-            get;
-            private set;
+            get { return _defaultTargets; }
+            private set { _defaultTargets = value; }
         }
 
         /// <summary>
@@ -653,8 +696,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> InitialTargets
         {
-            get;
-            private set;
+            get { return _initialTargets; }
+            private set { _initialTargets = value; }
         }
 
         /// <summary>
@@ -813,8 +856,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.BeforeTargets
         {
-            get;
-            set;
+            get { return _beforeTargets; }
+            set { _beforeTargets = value; }
         }
 
         /// <summary>
@@ -823,8 +866,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IDictionary<string, List<TargetSpecification>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AfterTargets
         {
-            get;
-            set;
+            get { return _afterTargets; }
+            set { _afterTargets = value; }
         }
 
         /// <summary>
@@ -878,8 +921,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal Toolset Toolset
         {
-            get;
-            private set;
+            get { return _toolset; }
+            private set { _toolset = value; }
         }
 
         /// <summary>
@@ -925,8 +968,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal string SubToolsetVersion
         {
-            get;
-            private set;
+            get { return _subToolsetVersion; }
+            private set { _subToolsetVersion = value; }
         }
 
         /// <summary>
@@ -939,6 +982,8 @@ namespace Microsoft.Build.Execution
             get
             { return _properties; }
         }
+
+        internal ICollection<ProjectPropertyInstance> TestEnvironmentalProperties => new ReadOnlyCollection<ProjectPropertyInstance>(_environmentVariableProperties);
 
         /// <summary>
         /// Actual collection of items in this project,
@@ -971,8 +1016,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal TaskRegistry TaskRegistry
         {
-            get;
-            private set;
+            get { return _taskRegistry; }
+            private set { _taskRegistry = value; }
         }
 
         /// <summary>
@@ -1663,6 +1708,23 @@ namespace Microsoft.Build.Execution
             _items = new ItemDictionary<ProjectItemInstance>(projectState._items);
         }
 
+        internal bool IsLoaded => ProjectRootElementCache != null && TaskRegistry.IsLoaded;
+
+        /// <summary>
+        /// When project instances get serialized between nodes, they need to be initialized with node specific information.
+        /// The node specific information cannot come from the constructor, because that information is not available to INodePacketTranslators
+        /// </summary>
+        internal void LateInitialize(ProjectRootElementCache projectRootElementCache, HostServices hostServices)
+        {
+            ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
+            ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
+            ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
+
+            ProjectRootElementCache = projectRootElementCache;
+            _taskRegistry.RootElementCache = projectRootElementCache;
+            _hostServices = hostServices;
+        }
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -1671,9 +1733,99 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
-            translator.TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
-            translator.TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _translateEntireState);
+
+            if (TranslateEntireState)
+            {
+                TranslateAllState(translator);
+            }
+            else
+            {
+                TranslateMinimalState(translator);
+            }
+        }
+
+        internal void TranslateMinimalState(INodePacketTranslator translator)
+        {
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _isImmutable);
+            TranslateItems(translator);
+        }
+
+        private void TranslateAllState(INodePacketTranslator translator)
+        {
+            TranslateProperties(translator);
+            TranslateItems(translator);
+            TranslateTargets(translator);
+            TranslateToolsetSpecificState(translator);
+
+            translator.Translate(ref _directory);
+            translator.Translate(ref _projectFileLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _taskRegistry, TaskRegistry.FactoryForDeserialization);
+            translator.Translate(ref _isImmutable);
+
+            translator.TranslateDictionary(
+                ref _itemDefinitions,
+                ProjectItemDefinitionInstance.FactoryForDeserialization,
+                capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
+        }
+
+        private void TranslateToolsetSpecificState(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
+            translator.Translate(ref _usingDifferentToolsVersionFromProjectFile);
+            translator.Translate(ref _explicitToolsVersionSpecified);
+            translator.Translate(ref _originalProjectToolsVersion);
+            translator.Translate(ref _subToolsetVersion);
+        }
+
+        private void TranslateProperties(INodePacketTranslator translator)
+        {
+            translator.TranslateDictionary(ref _environmentVariableProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+
+            var globalPropertiesToTreatAsLocal = (HashSet<string>) _globalPropertiesToTreatAsLocal;
+            translator.Translate(ref globalPropertiesToTreatAsLocal);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _globalPropertiesToTreatAsLocal = globalPropertiesToTreatAsLocal;
+            }
+
+            // ignore _initialGlobalsForDebugging. Only used for the debugger.
+        }
+
+        private void TranslateTargets(INodePacketTranslator translator)
+        {
+            translator.TranslateDictionary(ref _targets,
+                ProjectTargetInstance.FactoryForDeserialization,
+                capacity => new RetrievableEntryHashSet<ProjectTargetInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
+
+            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
+            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
+
+            translator.Translate(ref _defaultTargets);
+            translator.Translate(ref _initialTargets);
+        }
+
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, INodePacketTranslator translator)
+        {
+            translator.Translate(ref key);
+        }
+
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, INodePacketTranslator translator)
+        {
+            translator.Translate(ref value, TargetSpecification.FactoryForDeserialization);
+        }
+
+        private void TranslateItems(INodePacketTranslator translator)
+        {
+            // ignore EvaluatedItemElements. Only used by public API users, not nodes
+            // ignore itemsByEvaluatedInclude. Only used by public API users, not nodes
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
@@ -1687,7 +1839,7 @@ namespace Microsoft.Build.Execution
                     for (int i = 0; i < itemCount; i++)
                     {
                         ProjectItemInstance item = null;
-                        translator.Translate(ref item, delegate (INodePacketTranslator outerTranslator) { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
+                        translator.Translate(ref item, delegate { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
                         _items.Add(item);
                     }
                 }
@@ -1705,7 +1857,7 @@ namespace Microsoft.Build.Execution
                     foreach (ProjectItemInstance item in itemList)
                     {
                         ProjectItemInstance temp = item;
-                        translator.Translate(ref temp, delegate (INodePacketTranslator outerTranslator) { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
+                        translator.Translate(ref temp, delegate { return ProjectItemInstance.FactoryForDeserialization(translator, this); });
                     }
                 }
             }

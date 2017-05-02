@@ -9,7 +9,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 #if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
 #endif
@@ -129,6 +128,14 @@ namespace Microsoft.Build.Collections
                 {
                     backing.AddRef();
                 }
+            }
+        }
+
+        public CopyOnWriteDictionary(IDictionary<K, V> dictionary)
+        {
+            foreach (var pair in dictionary)
+            {
+                this[pair.Key] = pair.Value;
             }
         }
 

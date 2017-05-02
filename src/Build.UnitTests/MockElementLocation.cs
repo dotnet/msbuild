@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A dummy element location.
     /// </summary>
-    internal class MockElementLocation : ElementLocation
+    public class MockElementLocation : ElementLocation
     {
         /// <summary>
         /// Single instance

@@ -5,6 +5,8 @@
 // <summary>Type for TaskInstance and ProjectPropertyGroupTaskInstance and ProjectItemGroupTaskInstance.</summary>
 //-----------------------------------------------------------------------
 
+using System;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;
@@ -15,15 +17,12 @@ namespace Microsoft.Build.Execution
     /// Type for ProjectTaskInstance and ProjectPropertyGroupTaskInstance and ProjectItemGroupTaskInstance
     /// allowing them to be used in a single collection of target children
     /// </summary>
-    public abstract class ProjectTargetInstanceChild
+    public abstract class ProjectTargetInstanceChild : INodePacketTranslatable
     {
         /// <summary>
         /// Condition on the element
         /// </summary>
-        public abstract string Condition
-        {
-            get;
-        }
+        public abstract string Condition { get; }
 
         /// <summary>
         /// Full path to the file in which the originating element was originally 
@@ -39,18 +38,23 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Location of the original element
         /// </summary>
-        public abstract ElementLocation Location
-        {
-            get;
-        }
+        public abstract ElementLocation Location { get; }
 
         /// <summary>
         /// Location of the original condition attribute
         /// if any
         /// </summary>
-        public abstract ElementLocation ConditionLocation
+        public abstract ElementLocation ConditionLocation { get; }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
-            get;
+            // all subclasses should be translateable
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+        }
+
+        internal static ProjectTargetInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            return translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
         }
     }
 }

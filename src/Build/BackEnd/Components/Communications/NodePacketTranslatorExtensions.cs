@@ -7,20 +7,13 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-#if FEATURE_BINARY_SERIALIZATION
-using System.Runtime.Serialization.Formatters.Binary;
-#endif
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Globalization;
+using System.Reflection;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -29,8 +22,10 @@ namespace Microsoft.Build.BackEnd
     /// officially supported by INodePacketTranslator, but that we still want to do 
     /// custom translation of.  
     /// </summary>
-    static internal class NodePacketTranslatorExtensions
+    internal static class NodePacketTranslatorExtensions
     {
+        private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
+
         /// <summary>
         /// Translates a PropertyDictionary of ProjectPropertyInstances.
         /// </summary>
@@ -67,6 +62,52 @@ namespace Microsoft.Build.BackEnd
                     translator.Translate(ref instanceForSerialization, ProjectPropertyInstance.FactoryForDeserialization);
                 }
             }
+        }
+
+        /// <summary>
+        /// Deserialize a type or a subtype by its full name. The type must implement ITranslateable
+        /// </summary>
+        /// <typeparam name="T">Top level type. Serialized types can be of this type, or subtypes</typeparam>
+        /// <returns></returns>
+        public static T FactoryForDeserializingTypeWithName<T>(this INodePacketTranslator translator)
+        {
+            string typeName = null;
+            translator.Translate(ref typeName);
+
+            var type = Type.GetType(typeName);
+            ErrorUtilities.VerifyThrowInvalidOperation(type != null, "type cannot be null");
+            ErrorUtilities.VerifyThrowInvalidOperation(
+                typeof(T).IsAssignableFrom(type),
+                $"{typeName} must be a {typeof(T).FullName}");
+            ErrorUtilities.VerifyThrowInvalidOperation(
+                typeof(INodePacketTranslatable).IsAssignableFrom(type),
+                $"{typeName} must be a {nameof(INodePacketTranslatable)}");
+
+            var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
+                type,
+                t =>
+                {
+                    ConstructorInfo constructor = null;
+#if FEATURE_TYPE_GETCONSTRUCTOR
+                    constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+#else
+                    constructor =
+                        type
+                            .GetTypeInfo()
+                            .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+                            .FirstOrDefault(c => c.GetParameters().Length == 0);
+#endif
+                    ErrorUtilities.VerifyThrowInvalidOperation(
+                        constructor != null,
+                        $"{typeName} must have a private parameterless constructor");
+                    return constructor;
+                });
+
+            var targetInstanceChild = (INodePacketTranslatable) parameterlessConstructor.Invoke(new object[0]);
+
+            targetInstanceChild.Translate(translator);
+
+            return (T) targetInstanceChild;
         }
     }
 }

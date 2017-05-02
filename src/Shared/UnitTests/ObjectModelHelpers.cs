@@ -1126,6 +1126,35 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        internal static void AssertDictionariesEqual<K, V>(IDictionary<K, V> x, IDictionary<K, V> y, Action<KeyValuePair<K, V>, KeyValuePair<K, V>> assertPairsEqual)
+        {
+            if (x == null || y == null)
+            {
+                Assert.True(x == null && y == null);
+                return;
+            }
+
+            Assert.Equal(x.Count, y.Count);
+
+            for (var i = 0; i < x.Count; i++)
+            {
+                var xPair = x.ElementAt(i);
+                var yPair = y.ElementAt(i);
+
+                assertPairsEqual(xPair, yPair);
+            }
+        }
+
+        internal static void AssertDictionariesEqual(IDictionary<string, string> x, IDictionary<string, string> y)
+        {
+            AssertDictionariesEqual(x, y,
+                (xPair, yPair) =>
+                {
+                    Assert.Equal(xPair.Key, yPair.Key);
+                    Assert.Equal(xPair.Value, yPair.Value);
+                });
+        }
+
         /// <summary>
         /// Verify that the two enumerables are value identical
         /// </summary>
@@ -1718,6 +1747,34 @@ namespace Microsoft.Build.UnitTests
             ~TestProjectWithFiles()
             {
                 Cleanup();
+            }
+        }
+
+        internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
+        {
+            public bool Equals(ElementLocation x, ElementLocation y)
+            {
+                if (x == null)
+                {
+                    return y == null;
+                }
+
+                if (x.Line != y.Line || x.Column != y.Column)
+                {
+                    return false;
+                }
+
+                if (!String.Equals(x.File, y.File, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            public int GetHashCode(ElementLocation obj)
+            {
+                return obj.Line.GetHashCode() ^ obj.Column.GetHashCode() ^ obj.File.GetHashCode();
             }
         }
     }

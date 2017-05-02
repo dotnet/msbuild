@@ -5,6 +5,7 @@
 // <summary>Type for TaskOutputItem and TaskOutputProperty.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Execution
     /// Type for TaskOutputItem and TaskOutputProperty
     /// allowing them to be used in a single collection
     /// </summary>
-    public abstract class ProjectTaskInstanceChild
+    public abstract class ProjectTaskInstanceChild : INodePacketTranslatable
     {
         /// <summary>
         /// Condition on the element
@@ -47,6 +48,17 @@ namespace Microsoft.Build.Execution
         public abstract ElementLocation ConditionLocation
         {
             get;
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            // all subclasses should be translateable
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+        }
+
+        internal static ProjectTaskInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstanceChild>();
         }
     }
 }

@@ -27,6 +27,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 using Xunit;
+using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -84,7 +85,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (_buildManager != null)
             {
                 _buildManager.Dispose();
-                _buildManager = null;
+                _projectCollection.Dispose();
             }
         }
 
@@ -108,7 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuild()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -150,7 +151,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void VerifyEnvironmentSavedBetweenCalls()
         {
-            string contents1 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='SetEnvv' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
@@ -173,7 +174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             project.Save();
             try
             {
-                string contents2 = ObjectModelHelpers.CleanupFileContents(@"
+                string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
         <Target Name='Build' >
          <MSBuild Targets='SetEnv' Projects='" + project.FullPath + "'/>" +
@@ -324,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Need to set this env variable to enable Process.GetCurrentProcess().Id in the project file.
                 Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
-                Project project = CreateProject(ObjectModelHelpers.CleanupFileContents(Contents), ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, false);
+                Project project = CreateProject(CleanupFileContents(Contents), MSBuildDefaultToolsVersion, _projectCollection, false);
                 projectFullPath = project.FullPath;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[0], _projectCollection.HostServices);
@@ -362,7 +363,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void InProcForwardPropertiesFromChild()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -415,7 +416,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -470,7 +471,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void MsBuildForwardAllPropertiesFromChildLaunchChildNode()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -493,7 +494,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 Project project = CreateProject(contents, null, _projectCollection, false);
                 tempFile = project.FullPath;
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
@@ -540,7 +541,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void OutOfProcNodeForwardCertainproperties()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -561,7 +562,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 Project project = CreateProject(contents, null, _projectCollection, false);
                 tempFile = project.FullPath;
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
 
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -603,7 +604,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
   <Target Name='Build'>
        <MsBuild Projects='OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache.proj' Targets='BuildA'/>
@@ -612,7 +613,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+            string projectContents = CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -638,7 +639,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 Project project = CreateProject(contents, null, _projectCollection, false);
                 tempFile = project.FullPath;
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
 
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -694,7 +695,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void ForwardNoPropertiesLaunchChildNode()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -715,7 +716,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 Project project = CreateProject(contents, null, _projectCollection, false);
                 tempFile = project.FullPath;
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
@@ -754,7 +755,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
 
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <UsingTask TaskName='VerifyGlobalProjectCollection' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
                         <Task>
@@ -800,7 +801,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Project project = CreateProject(contents, null, projectCollection, false);
                 tempFile = project.FullPath;
 
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
 
                 BuildParameters customParameters = new BuildParameters(projectCollection);
                 customParameters.Loggers = new ILogger[] { _logger };
@@ -831,7 +832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -853,7 +854,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Project project = CreateProject(contents, null, _projectCollection, false);
                 tempFile = project.FullPath;
 
-                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
@@ -883,7 +884,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailure()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Error Text='[fail]'/>
@@ -905,7 +906,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
               <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                  <Target Name='test'>
                      <Message Text='[Message]' Importance='high'/>
@@ -941,7 +942,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
               <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                  <Target Name='test'>
                      <Message Text='[message]' Importance='high'/>
@@ -1010,7 +1011,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DisposeAfterUse()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 </Project>
 ");
@@ -1142,7 +1143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void EndBuildBlocks()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(1)) + @"'/>
@@ -1167,7 +1168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void EndBuildCalledWithinSubmissionCallback()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Message Text='[success 1]'/>
@@ -1213,7 +1214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuild()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Message Text='[success 1]'/>
@@ -1221,7 +1222,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            string contents2 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Message Text='[success 2]'/>
@@ -1251,7 +1252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"'/>
@@ -1260,7 +1261,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            string contents2 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Message Text='[success 2]'/>
@@ -1295,7 +1296,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void OverlappingIdenticalBuildSubmissions()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test' Condition='false' />
 </Project>
@@ -1331,7 +1332,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='A' DependsOnTargets='SetProp;MaySkip;UnsetProp' />
 
@@ -1379,7 +1380,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void EndWithUnexecutedSubmission()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
@@ -1387,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             _buildManager.EndBuild();
@@ -1399,7 +1400,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildWithUnexecutedSubmission()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
@@ -1407,7 +1408,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             _buildManager.CancelAllSubmissions();
@@ -1421,7 +1422,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "mono-osx-failing")]
         public void CancelledBuild()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
@@ -1429,7 +1430,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
 
@@ -1454,7 +1455,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
-                string contents = ObjectModelHelpers.CleanupFileContents(@"
+                string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
  <Target Name='test'>
 	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
@@ -1489,7 +1490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
-                string contents = ObjectModelHelpers.CleanupFileContents(@"
+                string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
@@ -1498,7 +1499,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-                BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
                 _buildManager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
@@ -1526,7 +1527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay40()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
 	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
@@ -1534,7 +1535,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1558,7 +1559,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
@@ -1567,7 +1568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1594,7 +1595,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
     <Message Text='text'/>
@@ -1604,7 +1605,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
@@ -1625,7 +1626,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
@@ -1636,7 +1637,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             try
@@ -1667,7 +1668,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
@@ -1678,7 +1679,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             try
@@ -1714,7 +1715,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             string projectFile = Path.Combine(tempDir, "foo.proj");
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Message Text='[success]'/>
@@ -1727,7 +1728,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                BuildRequestData data = new BuildRequestData(projectFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(projectFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
                 _buildManager.Build(_parameters, data);
             }
             finally
@@ -1745,14 +1746,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ProjectInstanceStoredInCache()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Message Text='text'/>
  </Target>
 </Project>
 ");
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
 
@@ -1767,7 +1768,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <PropertyGroup>
@@ -1795,7 +1796,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void ResetCacheClearsInstances()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <PropertyGroup>
@@ -1829,7 +1830,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void DisablingCacheResetKeepsInstance()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <PropertyGroup>
@@ -1870,7 +1871,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void GhostProjectRootElementCache()
         {
-            string contents1 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Msbuild Projects='Project2.proj'>
@@ -1882,7 +1883,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            string contents2 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
     <PropertyGroup>
         <Bar Condition=""'$(Bar)' == ''"">Baz</Bar>
@@ -1950,14 +1951,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void VerifyImportedProjectRootElementsInheritExplicitLoadFlag()
         {
-            string contents1 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Import Project='{0}' />
  <Target Name='test' />
 </Project>
 ");
 
-            string contents2 = ObjectModelHelpers.CleanupFileContents(@"
+            string contents2 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
     <PropertyGroup>
         <ImportedProperty>ImportedValue</ImportedProperty>
@@ -2026,7 +2027,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-linux-failing")]
         public void Regress251333()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -2065,7 +2066,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void Regress239661()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -2082,7 +2083,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 File.WriteAllText(fileName, contents);
-                BuildRequestData data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, new string[0], null);
                 _parameters.DisableInProcNode = true;
                 BuildResult result = _buildManager.Build(_parameters, data);
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -2107,7 +2108,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void Regress239661_NodeUnavailable()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <PropertyGroup>
        <InitialProperty1>InitialProperty1</InitialProperty1>
@@ -2142,7 +2143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void ProjectInstanceTransfersToOOPNode()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
    <DeleteMe>deleteme</DeleteMe>
@@ -2219,7 +2220,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void ProjectInstanceLimitedTransferToOOPNode()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
    <Unmodified>unmodified</Unmodified>
@@ -2347,8 +2348,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
 
                 _buildManager.BeginBuild(_parameters);
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
@@ -2426,8 +2427,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
 
                 _buildManager.BeginBuild(_parameters);
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
@@ -2499,8 +2500,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
 
                 _buildManager.BeginBuild(_parameters);
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
@@ -2568,8 +2569,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
 
                 _buildManager.BeginBuild(_parameters);
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
@@ -2785,9 +2786,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
-                File.WriteAllText(projC, ObjectModelHelpers.CleanupFileContents(contentsC));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
+                File.WriteAllText(projC, CleanupFileContents(contentsC));
 
                 _parameters.MaxNodeCount = 2;
                 _parameters.EnableNodeReuse = false;
@@ -2911,9 +2912,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
-                File.WriteAllText(projC, ObjectModelHelpers.CleanupFileContents(contentsC));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
+                File.WriteAllText(projC, CleanupFileContents(contentsC));
 
                 _parameters.MaxNodeCount = 2;
                 _parameters.EnableNodeReuse = false;
@@ -3037,9 +3038,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
-                File.WriteAllText(projC, ObjectModelHelpers.CleanupFileContents(contentsC));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
+                File.WriteAllText(projC, CleanupFileContents(contentsC));
 
                 _parameters.MaxNodeCount = 2;
                 _parameters.EnableNodeReuse = false;
@@ -3150,9 +3151,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
-                File.WriteAllText(projC, ObjectModelHelpers.CleanupFileContents(contentsC));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
+                File.WriteAllText(projC, CleanupFileContents(contentsC));
 
                 _parameters.MaxNodeCount = 2;
                 _parameters.EnableNodeReuse = false;
@@ -3246,8 +3247,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
 
-                File.WriteAllText(projA, ObjectModelHelpers.CleanupFileContents(contentsA));
-                File.WriteAllText(projB, ObjectModelHelpers.CleanupFileContents(contentsB));
+                File.WriteAllText(projA, CleanupFileContents(contentsA));
+                File.WriteAllText(projB, CleanupFileContents(contentsB));
 
                 _buildManager.BeginBuild(_parameters);
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
@@ -3296,12 +3297,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ";
                 projectPath1 = Path.GetTempFileName();
-                File.WriteAllText(projectPath1, ObjectModelHelpers.CleanupFileContents(projectContent));
+                File.WriteAllText(projectPath1, CleanupFileContents(projectContent));
 
                 Project project1 = new Project(projectPath1);
 
                 projectPath2 = Path.GetTempFileName();
-                File.WriteAllText(projectPath2, ObjectModelHelpers.CleanupFileContents(projectContent));
+                File.WriteAllText(projectPath2, CleanupFileContents(projectContent));
 
                 Project project2 = new Project(projectPath2);
 
@@ -3381,7 +3382,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
                 projectPath1 = FileUtilities.GetTemporaryFile();
-                File.WriteAllText(projectPath1, ObjectModelHelpers.CleanupFileContents(projectContent1));
+                File.WriteAllText(projectPath1, CleanupFileContents(projectContent1));
 
                 Project project1 = new Project(projectPath1);
 
@@ -3396,7 +3397,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
                 projectPath2 = FileUtilities.GetTemporaryFile();
-                File.WriteAllText(projectPath2, ObjectModelHelpers.CleanupFileContents(projectContent2));
+                File.WriteAllText(projectPath2, CleanupFileContents(projectContent2));
 
                 Project project2 = new Project(projectPath2);
 
@@ -3487,7 +3488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
                 projectPath1 = FileUtilities.GetTemporaryFile();
-                File.WriteAllText(projectPath1, ObjectModelHelpers.CleanupFileContents(projectContent1));
+                File.WriteAllText(projectPath1, CleanupFileContents(projectContent1));
 
                 Project project1 = new Project(projectPath1);
 
@@ -3502,7 +3503,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
                 projectPath2 = FileUtilities.GetTemporaryFile();
-                File.WriteAllText(projectPath2, ObjectModelHelpers.CleanupFileContents(projectContent2));
+                File.WriteAllText(projectPath2, CleanupFileContents(projectContent2));
 
                 Project project2 = new Project(projectPath2);
 
@@ -3572,7 +3573,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
         public void Regress265010()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
    <Prop>BaseValue</Prop>
@@ -3606,7 +3607,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 HostServices services = new HostServices();
                 services.SetNodeAffinity(fileName, NodeAffinity.OutOfProc);
-                BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new[] { "BaseTest" }, services);
+                BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "BaseTest" }, services);
                 _buildManager.PendBuildRequest(data).Execute();
                 _logger.AssertLogContains("[BaseValue]");
                 _logger.AssertLogContains("[BaseItem]");
@@ -3614,7 +3615,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _parameters.ResetCaches = false;
                 services.SetNodeAffinity(fileName, NodeAffinity.InProc);
-                data = new BuildRequestData(fileName, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new[] { "MovedTest" }, services);
+                data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "MovedTest" }, services);
                 _buildManager.PendBuildRequest(data).Execute();
                 _logger.AssertLogContains("[NewValue]");
                 _logger.AssertLogContains("[BaseItem;NewItem]");
@@ -3637,7 +3638,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void WarningsAreTreatedAsErrorsAll()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
     <Warning Text='This warning should be treated as an error' Code='ABC123'/>
@@ -3647,7 +3648,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             _parameters.WarningsAsErrors = new HashSet<string>();
 
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
@@ -3666,7 +3667,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void WarningsAreTreatedAsErrorsSpecific()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
     <Warning Text='This warning should be treated as an error' Code='ABC123'/>
@@ -3677,7 +3678,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
 
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
@@ -3696,7 +3697,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void WarningsAreTreatedAsErrorsButTargetsStillSucceed()
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
 <Target Name='target1'>
     <Message Text='text'/>
@@ -3708,7 +3709,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
 
-            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
             BuildResult buildResult = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1", "target2" }));
@@ -3731,7 +3732,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private string BuildAndCheckCache(BuildManager localBuildManager, IEnumerable<string> exceptCacheDirectories)
         {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+            string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='One' Outputs='one.txt'>   
  </Target>
@@ -3753,7 +3754,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 var services = new HostServices();
-                BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new[] { "One", "Two", "Three" }, services);
+                BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "One", "Two", "Three" }, services);
                 var result = localBuildManager.PendBuildRequest(data).Execute();
                 Assert.Equal(result.OverallResult, BuildResultCode.Success); // "Test project failed to build correctly."
             }
@@ -3931,7 +3932,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 </Project>";
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] { "p2p", "main" }))
+            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] {"p2p", "main"}))
             using (var collection = new ProjectCollection())
             using (var manager = new BuildManager())
             {
@@ -3940,7 +3941,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var p2pProjectPath = testFiles.CreatedFiles[0];
                     File.WriteAllText(p2pProjectPath, p2pProjectContents);
 
-                    var mainRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath))), collection);
+                    var mainRootElement = ProjectRootElement.Create(
+                        XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath))),
+                        collection);
 
                     mainRootElement.FullPath = testFiles.CreatedFiles[1];
                     mainRootElement.Save();
@@ -3948,13 +3951,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     // build p2p project as a real p2p dependency of some other project. This loads the p2p into msbuild's caches
 
                     var mainProject = new Project(mainRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
-                    var mainInstance = mainProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
+                    var mainInstance = mainProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
 
-                    var request = new BuildRequestData(mainInstance, new[] { "BuildOther" });
+                    var request = new BuildRequestData(mainInstance, new[] {"BuildOther"});
 
-                    var parameters = new BuildParameters()
+                    var parameters = new BuildParameters
                     {
-                        DisableInProcNode = true,
+                        DisableInProcNode = true
                     };
 
                     manager.BeginBuild(parameters);
@@ -3972,13 +3975,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     for (var i = 0; i < 2; i++)
                     {
-                        var p2pInstance = p2pProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
+                        var p2pInstance = p2pProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
 
                         var newPropertyValue = $"NewValue_{i}";
 
                         p2pInstance.SetProperty("P", newPropertyValue);
 
-                        request = new BuildRequestData(p2pInstance, new[] { "Foo" });
+                        request = new BuildRequestData(p2pInstance, new[] {"Foo"});
                         submission = manager.PendBuildRequest(request);
                         results = submission.Execute();
 
@@ -3989,6 +3992,176 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 finally
                 {
                     manager.EndBuild();
+                }
+            }
+        }
+
+        [Fact]
+        public void OutOfProcFileBasedP2PBuildSucceeds()
+        {
+            var mainProject =
+@"<Project>
+
+  <Target Name=`MainTarget` Returns=`foo;@(P2PReturnValue)`>
+    <MSBuild Projects=`{0}` Targets=`P2PTarget`>
+      <Output TaskParameter=`TargetOutputs` ItemName=`P2PReturnValue` />
+    </MSBuild>
+  </Target>
+
+</Project>";
+
+            var p2pProject =
+@"<Project>
+
+  <Target Name=`P2PTarget` Returns=`bar`>
+    <Message Text=`Bar` Importance=`High` />
+  </Target>
+
+</Project>";
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] {"main", "p2p"}, string.Empty))
+            {
+                var buildParameters = new BuildParameters(_projectCollection)
+                {
+                    DisableInProcNode = true,
+                    Loggers = new ILogger[] {_logger}
+                };
+
+                _buildManager.BeginBuild(buildParameters);
+
+                try
+                {
+                    var p2pProjectPath = testFiles.CreatedFiles[1];
+                    var cleanedUpP2pContents = CleanupFileContents(p2pProject);
+                    File.WriteAllText(p2pProjectPath, cleanedUpP2pContents);
+
+                    var mainProjectPath = testFiles.CreatedFiles[0];
+                    var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, p2pProjectPath));
+                    File.WriteAllText(mainProjectPath, cleanedUpMainContents);
+
+
+                    var buildRequestData = new BuildRequestData(
+                        mainProjectPath,
+                        new Dictionary<string, string>(),
+                        MSBuildConstants.CurrentToolsVersion,
+                        new[] {"MainTarget"},
+                        null
+                    );
+
+                    var submission = _buildManager.PendBuildRequest(buildRequestData);
+
+                    var result = submission.Execute();
+
+                    Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                    Assert.Equal("foo;bar", string.Join(";", result.ResultsByTarget["MainTarget"].Items.Select(i => i.ItemSpec)));
+                }
+                finally
+                {
+                    _buildManager.EndBuild();
+                }
+            }
+        }
+
+        /// When a ProjectInstance based BuildRequestData is built out of proc, the node should
+        /// not reload it from disk but instead fully utilize the entire translate project instance state
+        /// to do the build
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
+        {
+
+            var mainProject =
+@"<Project>
+  <PropertyGroup>
+    <ImportIt>true</ImportIt>
+  </PropertyGroup>
+
+  <Import Project=""{0}"" Condition=""'$(ImportIt)' == 'true'""/>
+
+</Project>";
+
+
+            var importProject =
+@"<Project>
+  <Target Name=""Foo"">
+    <Message Text=""Bar"" Importance=""High"" />
+  </Target>
+</Project>";
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(string.Empty, new[] {"main", "import"}, string.Empty))
+            {
+                try
+                {
+                    var importPath = testFiles.CreatedFiles[1];
+                    File.WriteAllText(importPath, CleanupFileContents(importProject));
+
+                    var root = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
+                    root.FullPath = Path.GetTempFileName();
+                    root.Save();
+
+                    // build a project which runs a target from an imported file
+
+                    var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, _projectCollection);
+                    var instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
+
+                    instance.TranslateEntireState = shouldSerializeEntireState;
+
+                    var request = new BuildRequestData(instance, new[] {"Foo"});
+
+
+                    var parameters = new BuildParameters(_projectCollection)
+                    {
+                        DisableInProcNode = true,
+                        Loggers = new ILogger[] {_logger}
+                    };
+
+                    _buildManager.BeginBuild(parameters);
+
+
+                    var submission = _buildManager.PendBuildRequest(request);
+
+                    var results = submission.Execute();
+
+                    Assert.True(results.OverallResult == BuildResultCode.Success);
+
+                    // reset caches to ensure nothing is reused
+
+                    _buildManager.EndBuild();
+                    _buildManager.ResetCaches();
+
+                    // mutate the file on disk such that the import (containing the target to get executed)
+                    // is no longer imported
+
+                    project.SetProperty("ImportIt", "false");
+                    project.Save();
+
+                    // Build the initial project instance again.
+                    // The project instance is not in sync with the file anymore, making it an in-memory build:
+                    // the file does not contain the target Foo, but the project instance does
+                    // Building the stale project instance should still succeed when the entire state is translated: MSBuild should use the 
+                    // in-memory state to build and not reload from disk.
+
+                    _buildManager.BeginBuild(parameters);
+                    request = new BuildRequestData(instance, new[] {"Foo"}, null, BuildRequestDataFlags.ReplaceExistingProjectInstance);
+                    submission = _buildManager.PendBuildRequest(request);
+
+
+                    results = submission.Execute();
+
+                    if (shouldSerializeEntireState)
+                    {
+                        Assert.Equal(BuildResultCode.Success, results.OverallResult);
+                    }
+                    else
+                    {
+                        Assert.Equal(BuildResultCode.Failure, results.OverallResult);
+                        Assert.Contains("The target \"Foo\" does not exist in the project", _logger.FullLog, StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+                finally
+                {
+                    _buildManager.EndBuild();
                 }
             }
         }
