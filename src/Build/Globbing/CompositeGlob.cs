@@ -44,7 +44,10 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
+            // Threadpools are a scarce resource in Visual Studio, do not use them.
+            //return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
+
+            return Globs.Any(g => g.IsMatch(stringToMatch));
         }
     }
 }
