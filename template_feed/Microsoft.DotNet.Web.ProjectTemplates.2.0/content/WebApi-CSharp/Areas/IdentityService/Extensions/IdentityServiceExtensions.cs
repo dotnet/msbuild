@@ -22,8 +22,8 @@ namespace Microsoft.AspNetCore.Identity.Service.Extensions
 
         public static IIdentityServiceBuilder AddIdentityServiceExtensions(this IIdentityServiceBuilder builder)
         {
-            builder.Services.AddScoped<IAuthorizationResponseParameterProvider, ClientInfoProvider>();
-            builder.Services.AddScoped<ITokenResponseParameterProvider, ClientInfoProvider>();
+            builder.Services.AddSingleton<IAuthorizationResponseParameterProvider, ClientInfoProvider>();
+            builder.Services.AddSingleton<ITokenResponseParameterProvider, ClientInfoProvider>();
             builder.Services.Configure<IdentityServiceOptions>(options =>
             {
                 AddContextClaims(options.IdTokenOptions.ContextClaims);
