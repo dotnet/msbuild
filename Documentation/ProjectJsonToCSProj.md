@@ -1,4 +1,4 @@
-.NET CLI preview 3 is coming, and with it comes the .csproj project file format and msbuild engine. The team has put a lot of focus on making the transition as seamless as possible, but as with any change of this magnitude there are some gotcha's to keep in mind. This issue explains how to use the .NET CLI during this transitional period.
+.NET CLI preview 3 is here, and with it comes the .csproj project file format and msbuild engine. The team has put a lot of focus on making the transition as seamless as possible, but as with any change of this magnitude there are some gotcha's to keep in mind. This issue explains how to use the .NET CLI during this transitional period.
 
 # Overview
 Starting with @coolcsh's great post [Changes to Project.json](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/) the team has been hard at work moving the .NET command line story from project.json to msbuild. Our plan was fairly straightforward:
