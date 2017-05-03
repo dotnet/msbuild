@@ -131,7 +131,7 @@
         <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
         <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
         <NugetPackagesArchiveRelativeBlobUrl>$(Product)/NuGetPackagesArchives</NugetPackagesArchiveRelativeBlobUrl>
-        <NugetPackagesArchiveBlobUrl>$(DotnetBlobRootUrl)/$(NugetPackagesArchiveRelativeBlobUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
+        <NugetPackagesArchiveBlobUrl>$(DotnetBlobRootUrl)/$(NugetPackagesArchiveRelativeBlobUrl)/$(NugetPackagesArchiveName)$(CoreSetupBlobAccessTokenParam)</NugetPackagesArchiveBlobUrl>
       </PropertyGroup>
     </Target>
 </Project>
