@@ -508,7 +508,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ExcludeFromPublishPackageReference Include="@(PackageReference)"
-                                          Condition="'%(PackageReference.PrivateAssets)' == 'All'" />
+                                          Condition="(('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.ExcludeFromPublish)' != 'false')) Or ('%(PackageReference.ExcludeFromPublish)' == 'true')" />
     </ItemGroup>
 
   </Target>
