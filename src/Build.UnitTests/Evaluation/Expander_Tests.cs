@@ -2585,19 +2585,32 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 #endif
 
-#if FEATURE_RUNTIMEINFORMATION
         /// <summary>
-        /// Expand property function that uses types available only on .netstandard1.3 and above (RuntimeInformation)
-        /// The test exercises: static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument,
+        /// The test exercises: RuntimeInformation / OSPlatform usage, static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument
         /// </summary>
-        [Fact]
-        public void PropertyFunctionRuntimeInformation()
+        [Theory]
+        [InlineData(
+            "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Create($([System.Runtime.InteropServices.OSPlatform]::$$platform$$.ToString())))))",
+            "True"
+        )]
+        [InlineData(
+            @"$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::$$platform$$)))",
+            "True"
+        )]
+        [InlineData(
+            "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)",
+            "$$architecture$$"
+        )]
+        public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
         {
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Func<string, string, string, string> formatString = (aString, platform, architecture) => aString
+                .Replace("$$platform$$", platform)
+                .Replace("$$architecture$$", architecture);
 
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            var currentPlatformString = "";
+            var currentPlatformString = string.Empty;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -2612,16 +2625,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 currentPlatformString = "OSX";
             }
 
-            var propertyFunction = "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(" +
-                                        "$([System.Runtime.InteropServices.OSPlatform]::Create(" +
-                                            $"$([System.Runtime.InteropServices.OSPlatform]::{currentPlatformString}.ToString()" +
-                                   ")))))";
+            var currentArchitectureString = RuntimeInformation.OSArchitecture.ToString();
+
+            propertyFunction = formatString(propertyFunction, currentPlatformString, currentArchitectureString);
+            expectedExpansion = formatString(expectedExpansion, currentPlatformString, currentArchitectureString);
 
             var result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal("True", result);
+            Assert.Equal(expectedExpansion, result);
         }
-#endif
 
         /// <summary>
         /// Expand property function that calls a method with an enum parameter
