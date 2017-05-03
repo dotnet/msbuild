@@ -507,8 +507,14 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(ComputeExcludeFromPublishPackageReferences)' == 'true'">
 
     <ItemGroup>
+      
+      <!-- PrivateAssets="All" means exclude from publish, unless ExcludeFromPublish metadata is specified separately -->
+      <PackageReference Update="@(PackageReference)" 
+                        Publish="false"
+                        Condition="('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.Publish)' == '')"/>
+      
       <ExcludeFromPublishPackageReference Include="@(PackageReference)"
-                                          Condition="(('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.ExcludeFromPublish)' != 'false')) Or ('%(PackageReference.ExcludeFromPublish)' == 'true')" />
+                                          Condition="('%(PackageReference.Publish)' == 'false')" />
     </ItemGroup>
 
   </Target>
