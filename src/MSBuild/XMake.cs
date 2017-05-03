@@ -1015,10 +1015,19 @@ namespace Microsoft.Build.CommandLine
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGGING", "1");
                 }
 
+#if MONO
+                // FIXME: Remove toolsVersion added from xbuild and then remove this too
+                if (toolsVersion != null && toolsVersion != MSBuildConstants.CurrentToolsVersion)
+                {
+                    var toolset = projectCollection.GetToolset(MSBuildConstants.CurrentToolsVersion);
+                    ThrowInvalidToolsVersionInitializationException(new Toolset[] {toolset}, toolsVersion);
+                }
+#else
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
                 }
+#endif
 
 #if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here. 
