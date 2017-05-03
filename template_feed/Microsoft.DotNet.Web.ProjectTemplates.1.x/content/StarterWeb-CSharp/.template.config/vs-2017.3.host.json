@@ -16,6 +16,7 @@
   "supportsDocker": true,
   "isApi": false,
   "usesOidc": true,
+  "useBrowserLink": true,
   "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.StarterWeb",
   "supportedAuthentications": [
     {
