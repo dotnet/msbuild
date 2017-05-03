@@ -585,7 +585,8 @@ namespace Microsoft.Build.CommandLine
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
                     // is a better way.
-                    if (cpuCount == 1 && FileUtilities.IsSolutionFilename(projectFile) && verbosity > LoggerVerbosity.Minimal)
+                    // FIXME: remove this mono check once we have /m support
+                    if (!NativeMethodsShared.IsMono && cpuCount == 1 && FileUtilities.IsSolutionFilename(projectFile) && verbosity > LoggerVerbosity.Minimal)
                     {
                         Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
@@ -1015,10 +1016,19 @@ namespace Microsoft.Build.CommandLine
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGGING", "1");
                 }
 
+#if MONO
+                // FIXME: Remove toolsVersion added from xbuild and then remove this too
+                if (toolsVersion != null && toolsVersion != MSBuildConstants.CurrentToolsVersion)
+                {
+                    var toolset = projectCollection.GetToolset(MSBuildConstants.CurrentToolsVersion);
+                    ThrowInvalidToolsVersionInitializationException(new Toolset[] {toolset}, toolsVersion);
+                }
+#else
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
                 }
+#endif
 
 #if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here. 
