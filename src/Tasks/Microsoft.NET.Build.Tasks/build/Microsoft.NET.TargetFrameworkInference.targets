@@ -83,7 +83,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForUnsupportedTargetFramework" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
     <NETSdkError Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'" 
                  ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
-                 FormatArguments="$(TargetFramework)" />
+                 FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
   <!-- 
