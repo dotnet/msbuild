@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Xml.Linq;
 using System.Linq;
 using FluentAssertions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Pack.Tests
 {
@@ -79,6 +80,13 @@ namespace Microsoft.NET.Pack.Tests
         [Fact]
         public void Packing_a_netcoreapp_2_0_library_does_not_include_the_implicit_dependency()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20Library",
@@ -117,6 +125,13 @@ namespace Microsoft.NET.Pack.Tests
         [Fact]
         public void Packing_a_netcoreapp_2_0_app_includes_the_implicit_dependency()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20App",
@@ -139,13 +154,25 @@ namespace Microsoft.NET.Pack.Tests
         [Fact]
         public void Packing_a_multitargeted_library_includes_implicit_dependencies_when_appropriate()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
             TestProject testProject = new TestProject()
             {
                 Name = "PackMultiTargetedLibrary",
                 IsSdkProject = true,
-                TargetFrameworks = "netstandard1.1;netstandard2.0;netcoreapp1.1;netcoreapp2.0;net461",
+                TargetFrameworks = "netstandard1.1;netstandard2.0;netcoreapp1.1;netcoreapp2.0",
                 IsExe = false
             };
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                testProject.TargetFrameworks += ";net461";
+            }
 
             var dependencyGroups = PackAndGetDependencyGroups(testProject, out var ns);
 
@@ -171,7 +198,10 @@ namespace Microsoft.NET.Pack.Tests
             ExpectDependencyGroup(".NETStandard2.0", null);
             ExpectDependencyGroup(".NETCoreApp1.1", "Microsoft.NETCore.App");
             ExpectDependencyGroup(".NETCoreApp2.0", null);
-            ExpectDependencyGroup(".NETFramework4.6.1", null);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                ExpectDependencyGroup(".NETFramework4.6.1", null);
+            }
         }
 
         List<XElement> PackAndGetDependencyGroups(TestProject testProject, out XNamespace ns)
