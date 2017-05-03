@@ -10,7 +10,9 @@ param(
     [switch]$SkipTests,
     [switch]$FullMSBuild,
     [switch]$RealSign,
-    [switch]$Help)
+    [switch]$Help,
+    [Parameter(Position=0, ValueFromRemainingArguments=$true)]
+    $ExtraParameters)
 
 if($Help)
 {
@@ -100,8 +102,9 @@ $commonBuildArgs = echo $RepoRoot\build\build.proj /m:1 /nologo /p:Configuration
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
+$msbuildBinLog = Join-Path -path $logPath -childPath "sdk.binlog"
 
-dotnet msbuild /t:$buildTarget $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+dotnet msbuild /t:$buildTarget $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog /bl:$msbuildBinLog $ExtraParameters
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
 
 msbuild  /t:$buildTarget $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
