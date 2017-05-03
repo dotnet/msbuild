@@ -315,7 +315,7 @@ Restores netcoreapp and publishes it to a temp directory
                               TargetFramework="$(_TFM)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
+                              ExcludeFromPublishPackageReferences="@(ExcludeFromPublishPackageReference)"
                               PreserveStoreLayout="false">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="CrossgenResolvedAssembliesToPublish" />

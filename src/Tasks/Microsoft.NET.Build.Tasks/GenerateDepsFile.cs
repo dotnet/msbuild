@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem CompilerOptions { get; set; }
 
-        public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
+        public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
 
         public string[] TargetManifestFileList { get; set; }
 
@@ -136,7 +136,7 @@ namespace Microsoft.NET.Build.Tasks
                 ReferencePaths,
                 ReferenceSatellitePaths);
 
-            IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+            IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tasks
                 .WithFrameworkReferences(frameworkReferences)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
-                .WithPrivateAssets(privateAssets)
+                .WithExcludeFromPublishAssets(excludeFromPublishAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .WithPackagesThatWhereFiltered(GetFilteredPackages())

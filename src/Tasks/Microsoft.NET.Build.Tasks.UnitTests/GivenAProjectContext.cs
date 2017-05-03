@@ -15,7 +15,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     public class GivenAProjectContext
     {
         [Fact]
-        public void ItComputesPrivateAssetsExclusionList()
+        public void ItComputesExcludeFromPublishList()
         {
             LockFile lockFile = TestLockFiles.GetLockFile("dependencies.withgraphs");
             ProjectContext projectContext = lockFile.CreateProjectContext(
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                Constants.DefaultPlatformLibrary,
                isSelfContained: false);
 
-            IEnumerable<string> privateAssetPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
+            IEnumerable<string> excludeFromPublishPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
             IDictionary<string, LockFileTargetLibrary> libraryLookup =
                 projectContext
                     .LockFileTarget
@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     .ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
             HashSet<string> exclusionList =
-                projectContext.GetPrivateAssetsExclusionList(privateAssetPackageIds, libraryLookup);
+                projectContext.GetExcludeFromPublishList(excludeFromPublishPackageIds, libraryLookup);
             
             HashSet<string> expectedExclusions = new HashSet<string>()
             {

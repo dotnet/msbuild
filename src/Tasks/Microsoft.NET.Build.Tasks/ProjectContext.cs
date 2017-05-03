@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks
             IsFrameworkDependent = isFrameworkDependent;
         }
 
-        public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(IEnumerable<string> privateAssetPackageIds)
+        public IEnumerable<LockFileTargetLibrary> GetRuntimeLibraries(IEnumerable<string> excludeFromPublishPackageIds)
         {
             IEnumerable<LockFileTargetLibrary> runtimeLibraries = _lockFileTarget.Libraries;
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
@@ -65,14 +65,14 @@ namespace Microsoft.NET.Build.Tasks
                 allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
             }
 
-            if (privateAssetPackageIds?.Any() == true)
+            if (excludeFromPublishPackageIds?.Any() == true)
             {
-                HashSet<string> privateAssetsExclusionList =
-                    GetPrivateAssetsExclusionList(
-                        privateAssetPackageIds,
+                HashSet<string> excludeFromPublishList =
+                    GetExcludeFromPublishList(
+                        excludeFromPublishPackageIds,
                         libraryLookup);
 
-                allExclusionList.UnionWith(privateAssetsExclusionList);
+                allExclusionList.UnionWith(excludeFromPublishList);
             }
 
             if (PackagesToBeFiltered != null)
@@ -99,21 +99,21 @@ namespace Microsoft.NET.Build.Tasks
             return runtimeLibraries.Filter(allExclusionList).ToArray();
         }
 
-        public IEnumerable<LockFileTargetLibrary> GetCompileLibraries(IEnumerable<string> compilePrivateAssetPackageIds)
+        public IEnumerable<LockFileTargetLibrary> GetCompileLibraries(IEnumerable<string> compileExcludeFromPublishPackageIds)
         {
             IEnumerable<LockFileTargetLibrary> compileLibraries = _lockFileTarget.Libraries;
 
-            if (compilePrivateAssetPackageIds?.Any() == true)
+            if (compileExcludeFromPublishPackageIds?.Any() == true)
             {
                 Dictionary<string, LockFileTargetLibrary> libraryLookup =
                     compileLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
-                HashSet<string> privateAssetsExclusionList =
-                    GetPrivateAssetsExclusionList(
-                        compilePrivateAssetPackageIds,
+                HashSet<string> excludeFromPublishList =
+                    GetExcludeFromPublishList(
+                        compileExcludeFromPublishPackageIds,
                         libraryLookup);
 
-                compileLibraries = compileLibraries.Filter(privateAssetsExclusionList);
+                compileLibraries = compileLibraries.Filter(excludeFromPublishList);
             }
 
             return compileLibraries.ToArray();
@@ -147,27 +147,27 @@ namespace Microsoft.NET.Build.Tasks
                 .ToArray();
         }
 
-        public HashSet<string> GetPrivateAssetsExclusionList(
-            IEnumerable<string> privateAssetPackageIds,
+        public HashSet<string> GetExcludeFromPublishList(
+            IEnumerable<string> excludeFromPublishPackageIds,
             IDictionary<string, LockFileTargetLibrary> libraryLookup)
         {
-            var nonPrivateAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var nonExcludeFromPublishAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            var nonPrivateAssetsToSearch = new Stack<string>();
-            var privateAssetsToSearch = new Stack<string>();
+            var nonExcludeFromPublishAssetsToSearch = new Stack<string>();
+            var excludeFromPublishAssetsToSearch = new Stack<string>();
 
             // Start with the top-level dependencies, and put them into "private" or "non-private" buckets
-            var privateAssetPackagesLookup = new HashSet<string>(privateAssetPackageIds, StringComparer.OrdinalIgnoreCase);
+            var excludeFromPublishPackagesLookup = new HashSet<string>(excludeFromPublishPackageIds, StringComparer.OrdinalIgnoreCase);
             foreach (var topLevelDependency in GetTopLevelDependencies())
             {
-                if (!privateAssetPackagesLookup.Contains(topLevelDependency))
+                if (!excludeFromPublishPackagesLookup.Contains(topLevelDependency))
                 {
-                    nonPrivateAssetsToSearch.Push(topLevelDependency);
-                    nonPrivateAssets.Add(topLevelDependency);
+                    nonExcludeFromPublishAssetsToSearch.Push(topLevelDependency);
+                    nonExcludeFromPublishAssets.Add(topLevelDependency);
                 }
                 else
                 {
-                    privateAssetsToSearch.Push(topLevelDependency);
+                    excludeFromPublishAssetsToSearch.Push(topLevelDependency);
                 }
             }
 
@@ -175,17 +175,17 @@ namespace Microsoft.NET.Build.Tasks
             string libraryName;
 
             // Walk all the non-private assets' dependencies and mark them as non-private
-            while (nonPrivateAssetsToSearch.Count > 0)
+            while (nonExcludeFromPublishAssetsToSearch.Count > 0)
             {
-                libraryName = nonPrivateAssetsToSearch.Pop();
+                libraryName = nonExcludeFromPublishAssetsToSearch.Pop();
                 if (libraryLookup.TryGetValue(libraryName, out library))
                 {
                     foreach (var dependency in library.Dependencies)
                     {
-                        if (!nonPrivateAssets.Contains(dependency.Id))
+                        if (!nonExcludeFromPublishAssets.Contains(dependency.Id))
                         {
-                            nonPrivateAssetsToSearch.Push(dependency.Id);
-                            nonPrivateAssets.Add(dependency.Id);
+                            nonExcludeFromPublishAssetsToSearch.Push(dependency.Id);
+                            nonExcludeFromPublishAssets.Add(dependency.Id);
                         }
                     }
                 }
@@ -193,25 +193,25 @@ namespace Microsoft.NET.Build.Tasks
 
             // Go through assets marked private and their dependencies
             // For libraries not marked as non-private, mark them down as private
-            var privateAssetsToExclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            while (privateAssetsToSearch.Count > 0)
+            var assetsToExcludeFromPublish = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            while (excludeFromPublishAssetsToSearch.Count > 0)
             {
-                libraryName = privateAssetsToSearch.Pop();
+                libraryName = excludeFromPublishAssetsToSearch.Pop();
                 if (libraryLookup.TryGetValue(libraryName, out library))
                 {
-                    privateAssetsToExclude.Add(libraryName);
+                    assetsToExcludeFromPublish.Add(libraryName);
 
                     foreach (var dependency in library.Dependencies)
                     {
-                        if (!nonPrivateAssets.Contains(dependency.Id))
+                        if (!nonExcludeFromPublishAssets.Contains(dependency.Id))
                         {
-                            privateAssetsToSearch.Push(dependency.Id);
+                            excludeFromPublishAssetsToSearch.Push(dependency.Id);
                         }
                     }
                 }
             }
 
-            return privateAssetsToExclude;
+            return assetsToExcludeFromPublish;
         }
         private static HashSet<string> GetPackagesToBeFiltered(
           IDictionary<string, HashSet<PackageIdentity>> packagesToBeFiltered,

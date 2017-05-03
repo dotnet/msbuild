@@ -88,7 +88,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(ProjectDepsFilePath)">
 
     <!-- 
-    Explicitly not passing any PrivateAssets information during 'Build', since these dependencies
+    Explicitly not passing any ExcludeFromPublishPackageReferences information during 'Build', since these dependencies
     should be included during 'Build'.  They are only excluded on 'Publish'.
     -->
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"

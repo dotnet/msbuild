@@ -247,14 +247,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="RunResolvePublishAssemblies"
-          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+          DependsOnTargets="ComputeExcludeFromPublishPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary">
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
+                              ExcludeFromPublishPackageReferences="@(ExcludeFromPublishPackageReference)"
                               TargetManifestFiles="@(TargetManifestFileList)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
                               IsSelfContained="$(SelfContained)" >
@@ -460,7 +460,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="GeneratePublishDependencyFile"
-          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+          DependsOnTargets="ComputeExcludeFromPublishPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _HandlePublishFileConflicts"
@@ -485,7 +485,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
+                      ExcludeFromPublishPackageReferences="@(ExcludeFromPublishPackageReference)"
                       TargetManifestFileList="@(TargetManifestFileList)"
                       IsSelfContained="$(SelfContained)" />
 
@@ -493,22 +493,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        ComputePrivateAssetsPackageReferences
+                                        ComputeExcludeFromPublishPackageReferences
 
-    Builds up the @(PrivateAssetsPackageReference) item by looking for @(PackageReference) items with 
+    Builds up the @(ExcludeFromPublishPackageReference) item by looking for @(PackageReference) items with 
     <PrivateAssets> metadata.
     ============================================================
     -->
   <PropertyGroup>
-    <ComputePrivateAssetsPackageReferences Condition="'$(ComputePrivateAssetsPackageReferences)' == ''">true</ComputePrivateAssetsPackageReferences>
+    <ComputeExcludeFromPublishPackageReferences Condition="'$(ComputeExcludeFromPublishPackageReferences)' == ''">true</ComputeExcludeFromPublishPackageReferences>
   </PropertyGroup>
 
-  <Target Name="ComputePrivateAssetsPackageReferences"
-          Condition="'$(ComputePrivateAssetsPackageReferences)' == 'true'">
+  <Target Name="ComputeExcludeFromPublishPackageReferences"
+          Condition="'$(ComputeExcludeFromPublishPackageReferences)' == 'true'">
 
     <ItemGroup>
-      <PrivateAssetsPackageReference Include="@(PackageReference)"
-                                     Condition="'%(PackageReference.PrivateAssets)' == 'All'" />
+      <ExcludeFromPublishPackageReference Include="@(PackageReference)"
+                                          Condition="'%(PackageReference.PrivateAssets)' == 'All'" />
     </ItemGroup>
 
   </Target>
