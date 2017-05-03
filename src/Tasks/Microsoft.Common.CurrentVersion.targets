@@ -4041,7 +4041,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             >
 
       <Output TaskParameter="DestinationPath" ItemName="ReferenceAssembly"/>
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+      <Output TaskParameter="DestinationPath" ItemName="FileWrites"/>
 
     </CopyRefAssembly>
 
