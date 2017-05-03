@@ -56,6 +56,10 @@
     },
     "UserSecretsId": {
       "isHidden": true
+    },
+    "UseBrowserLink": {
+      "longName": "use-browser-link",
+      "shortName": ""
     }
   },
   "UsageExamples": [

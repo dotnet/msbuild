@@ -236,6 +236,12 @@
       "defaultValue": "false",
       "description": "Whether or not to use LocalDB instead of SQLite"
     },
+    "UseBrowserLink": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to include BrowserLink in the project"
+    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",

@@ -38,7 +38,9 @@ type Startup private () =
 
         if (env.IsDevelopment()) then
             app.UseDeveloperExceptionPage() |> ignore
+#if (UseBrowserLink)
             app.UseBrowserLink() |> ignore
+#endif
         else
             app.UseExceptionHandler("/Home/Error") |> ignore
 
