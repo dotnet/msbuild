@@ -1809,7 +1809,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
-        <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' != ''">$(TargetRefPath)</ReferenceAssembly>
+        <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
