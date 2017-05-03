@@ -36,12 +36,12 @@
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
 
-    <ZipFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' == 'win' "
+    <ZipFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND $([System.String]::new('%(_DownloadAndExtractItem.DownloadFileName)').EndsWith('.zip')) "
                                SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
                                DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
                                OverwriteDestination="$(OverwriteExtractionDestination)" />
 
-    <TarGzFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' != 'win' "
+    <TarGzFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND  $([System.String]::new('%(_DownloadAndExtractItem.DownloadFileName)').EndsWith('.tar.gz')) "
                                SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
                                DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
                                OverwriteDestination="$(OverwriteExtractionDestination)" />
