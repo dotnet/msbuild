@@ -25,6 +25,9 @@ namespace Microsoft.TemplateEngine.Cli
         [JsonProperty]
         public Dictionary<string, Dictionary<string, string>> SymbolInfo { get; }
 
+        [JsonProperty]
+        public bool IsHidden { get; set; }
+
         public HashSet<string> HiddenParameterNames
         {
             get

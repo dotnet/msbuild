@@ -1312,7 +1312,8 @@ namespace Microsoft.TemplateEngine.Cli
                 WellKnownSearchFilters.LanguageFilter(_commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(context),
                 WellKnownSearchFilters.BaselineFilter(_commandInput.BaselineName)
-            );
+            )
+            .Where(x => !IsTemplateHiddenByHostFile(x.Info)).ToList();
 
             IReadOnlyList<IFilteredTemplateInfo> matchedTemplates = templates.Where(x => x.IsMatch).ToList();
 
@@ -1332,6 +1333,12 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _matchedTemplates = matchedTemplates;
+        }
+
+        private bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo)
+        {
+            HostSpecificTemplateData hostData = ReadHostSpecificTemplateData(templateInfo);
+            return hostData.IsHidden;
         }
 
         private IReadOnlyList<IFilteredTemplateInfo> FilterTemplatesOnParameters(IReadOnlyList<IFilteredTemplateInfo> templatesToFilter)
@@ -1421,7 +1428,8 @@ namespace Microsoft.TemplateEngine.Cli
                 false,
                 WellKnownSearchFilters.ContextFilter(context),
                 WellKnownSearchFilters.NameFilter(string.Empty)
-            );
+            )
+            .Where(x => !IsTemplateHiddenByHostFile(x.Info)).ToList();
 
             return templates;
         }
@@ -1445,7 +1453,8 @@ namespace Microsoft.TemplateEngine.Cli
             (
                 false,
                 WellKnownSearchFilters.NameFilter(string.Empty)
-            );
+            )
+            .Where(x => !IsTemplateHiddenByHostFile(x.Info)).ToList();
 
             return templates;
         }
