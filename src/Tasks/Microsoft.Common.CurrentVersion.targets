@@ -154,9 +154,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DocumentationFileProduced>true</_DocumentationFileProduced>
     <_DocumentationFileProduced Condition="'$(DocumentationFile)'==''">false</_DocumentationFileProduced>
 
-    <!-- Whether or not a reference assembly is produced-->
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <ProduceReferenceAssembly Condition="'$(Deterministic)' == 'true'">true</ProduceReferenceAssembly>
+    <!-- Whether or not a reference assembly is produced. -->
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(Deterministic)' != 'true'">false</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(Deterministic)' == 'true'">true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OutputPath)' == '' ">
