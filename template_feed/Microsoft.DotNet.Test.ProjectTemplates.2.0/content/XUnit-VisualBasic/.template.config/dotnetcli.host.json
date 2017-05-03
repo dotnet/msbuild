@@ -1,4 +1,5 @@
 {
+  "isHidden": true,
   "symbolInfo": {
     "TargetFrameworkOverride": {
       "isHidden": "true",
@@ -21,3 +22,4 @@
     "--framework netcoreapp2.0"
   ]
 }
+
