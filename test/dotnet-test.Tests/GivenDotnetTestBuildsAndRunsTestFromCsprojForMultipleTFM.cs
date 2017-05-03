@@ -12,11 +12,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnetTestBuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/4616")]
+        [WindowsOnlyFact]
         public void MStestMultiTFM()
         {
-            var testProjectDirectory = TestAssets.Get("VSTestDesktopAndNetCore")
-                .CreateInstance()
+            var testProjectDirectory = TestAssets.Get("VSTestMulti")
+                .CreateInstance("1")
                 .WithSourceFiles()
                 .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages)
                 .Root;
@@ -45,15 +45,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [WindowsOnlyFact]
         public void XunitMultiTFM()
         {
-            // Copy VSTestXunitDesktopAndNetCore project in output directory of project dotnet-test.Tests
-            string testAppName = "VSTestXunitDesktopAndNetCore";
+            // Copy XunitMulti project in output directory of project dotnet-test.Tests
+            string testAppName = "XunitMulti";
             var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
+                            .CreateInstance("2")
                             .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
-            // Restore project VSTestXunitDesktopAndNetCore
+            // Restore project XunitMulti
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
