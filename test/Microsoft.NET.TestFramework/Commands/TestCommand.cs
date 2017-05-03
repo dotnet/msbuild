@@ -11,7 +11,8 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         public MSBuildTest MSBuild { get; }
 
-        public string ProjectRootPath { get; }
+        private readonly string _projectRootPath;
+        public string ProjectRootPath => _projectRootPath;
 
         public string ProjectFile { get; }
 
@@ -20,24 +21,34 @@ namespace Microsoft.NET.TestFramework.Commands
         protected TestCommand(MSBuildTest msBuild, string projectRootPath, string relativePathToProject = null)
         {
             MSBuild = msBuild;
-            ProjectRootPath = projectRootPath;
-            ProjectFile = FindProjectFile(relativePathToProject);
+            _projectRootPath = projectRootPath;
+            ProjectFile = FindProjectFile(ref _projectRootPath, relativePathToProject);
         }
 
         public abstract CommandResult Execute(params string[] args);
 
-        private string FindProjectFile(string relativePathToProject)
+        private static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
         {
             if (!string.IsNullOrEmpty(relativePathToProject))
             {
-                return Path.Combine(ProjectRootPath, relativePathToProject);
+                string fullPathToProject = Path.Combine(projectRootPath, relativePathToProject);
+                if (File.Exists(fullPathToProject))
+                {
+                    //  If a file exists at the specified relative path, it's the project file
+                    return fullPathToProject;
+                }
+                else
+                {
+                    //  Otherwise, treat the relative path as the root path for the project and search for the project file under that path
+                    projectRootPath = fullPathToProject;
+                }
             }
 
-            var buildProjectFiles = Directory.GetFiles(ProjectRootPath, "*.csproj");
+            var buildProjectFiles = Directory.GetFiles(projectRootPath, "*.csproj");
 
             if (buildProjectFiles.Length != 1)
             {
-                var errorMsg = $"Found {buildProjectFiles.Length} csproj files under {ProjectRootPath} instead of just 1.";
+                var errorMsg = $"Found {buildProjectFiles.Length} csproj files under {projectRootPath} instead of just 1.";
                 throw new ArgumentException(errorMsg);
             }
 

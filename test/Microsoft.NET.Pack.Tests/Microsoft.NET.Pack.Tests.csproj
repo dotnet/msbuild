@@ -30,6 +30,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GivenThatThereAreImplicitPackageReferences.cs" />
     <Compile Include="GivenThatWeWantToPackAHelloWorldProject.cs" />
     <Compile Include="GivenThatWeWantToPackASimpleLibrary.cs" />
     <Compile Include="GivenThatWeWantToPackACrossTargetedLibrary.cs" />
