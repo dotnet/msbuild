@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+set -x
 if [ $# -ne 1 ]; then
 	echo "Usage: install-mono.sh </path/to/mono/installation>"
 	exit 1
