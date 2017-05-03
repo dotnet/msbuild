@@ -11,13 +11,18 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using System.Collections;
 using System;
+using System.Diagnostics;
 using Microsoft.Build.Construction;
 using System.IO;
 using System.Xml;
 using System.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
+using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -519,6 +524,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal(first.Toolset, second.Toolset);
         }
+        
+        /// <summary>
+        /// Cloning project copies toolsversion
+        /// </summary>
+        [Fact]
+        public void CloneStateTranslation()
+        {
+            ProjectInstance first = GetSampleProjectInstance();
+            first.TranslateEntireState = true;
+
+            ProjectInstance second = first.DeepCopy();
+
+            Assert.Equal(true, second.TranslateEntireState);
+        }
 
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
@@ -551,6 +570,115 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.True(success);
             mockLogger.AssertLogContains(new string[] { "Building...", "Completed!" });
+        }
+
+        [Theory]
+        [InlineData(
+            @"      <Project>
+                    </Project>
+                ")]
+        // Project with one of each direct child(indirect children trees are tested separately)
+        [InlineData(
+            @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
+                        <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
+
+                        <ItemDefinitionGroup>
+                            <i>
+                              <n>n1</n>
+                            </i>
+                        </ItemDefinitionGroup>
+
+                        <PropertyGroup>
+                            <p1>v1</p1>
+                        </PropertyGroup>
+
+                        <ItemGroup>
+                            <i Include='i0'/>
+                        </ItemGroup>
+
+                        <Target Name='t1'>
+                            <t1/>
+                        </Target>
+
+                        <Target Name='t2' BeforeTargets=`t1`>
+                            <t2/>
+                        </Target>
+
+                        <Target Name='t3' AfterTargets=`t2`>
+                            <t3/>
+                        </Target>
+                    </Project>
+                ")]
+        // Project with at least two instances of each direct child. Tests that collections serialize well.
+        [InlineData(
+            @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
+                        <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
+                        <UsingTask TaskName=`t2` AssemblyFile=`f2`/>
+
+                        <ItemDefinitionGroup>
+                            <i>
+                              <n>n1</n>
+                            </i>
+                        </ItemDefinitionGroup>
+
+                        <ItemDefinitionGroup>
+                            <i2>
+                              <n2>n2</n2>
+                            </i2>
+                        </ItemDefinitionGroup>
+
+                        <PropertyGroup>
+                            <p1>v1</p1>
+                        </PropertyGroup>
+
+                        <PropertyGroup>
+                            <p2>v2</p2>
+                        </PropertyGroup>
+
+                        <ItemGroup>
+                            <i Include='i1'/>
+                        </ItemGroup>
+
+                        <ItemGroup>
+                            <i2 Include='i2'>
+                              <m1 Condition=`1==1`>m1</m1>
+                              <m2>m2</m2>
+                            </i2>
+                        </ItemGroup>
+
+                        <Target Name='t1'>
+                            <t1/>
+                        </Target>
+
+                        <Target Name='t2' BeforeTargets=`t1`>
+                            <t2/>
+                        </Target>
+
+                        <Target Name='t3' AfterTargets=`t1`>
+                            <t3/>
+                        </Target>
+
+                        <Target Name='t4' BeforeTargets=`t1`>
+                            <t4/>
+                        </Target>
+
+                        <Target Name='t5' AfterTargets=`t1`>
+                            <t5/>
+                        </Target>
+                    </Project>
+                ")]
+        public void ProjectInstanceCanSerializeEntireStateViaTranslator(string projectContents)
+        {
+            projectContents = string.Format(projectContents, MSBuildConstants.CurrentToolsVersion);
+
+            var original = new ProjectInstance(ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)))));
+
+            original.TranslateEntireState = true;
+
+            ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(original, copy, new ProjectInstanceComparer());
         }
 
         /// <summary>

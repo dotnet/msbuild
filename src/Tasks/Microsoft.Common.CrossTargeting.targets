@@ -170,6 +170,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DirectoryBuildTargetsPath Condition="'$(_DirectoryBuildTargetsBasePath)' != '' and '$(_DirectoryBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildTargetsBasePath)', '$(_DirectoryBuildTargetsFile)'))</DirectoryBuildTargetsPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(DirectoryBuildTargetsPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
 
   <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->

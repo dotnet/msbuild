@@ -11,6 +11,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
 {
@@ -21,74 +22,74 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class
     /// </remarks>
     [DebuggerDisplay("Name={_name} Condition={_condition} ContinueOnError={_continueOnError} MSBuildRuntime={MSBuildRuntime} MSBuildArchitecture={MSBuildArchitecture} #Parameters={_parameters.Count} #Outputs={_outputs.Count}")]
-    public sealed class ProjectTaskInstance : ProjectTargetInstanceChild
+    public sealed class ProjectTaskInstance : ProjectTargetInstanceChild, INodePacketTranslatable
     {
         /// <summary>
         /// Name of the task, possibly qualified, as it appears in the project
         /// </summary>
-        private readonly string _name;
+        private string _name;
 
         /// <summary>
         /// Condition on the task, if any
         /// May be empty string
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Continue on error on the task, if any
         /// May be empty string
         /// </summary>
-        private readonly string _continueOnError;
+        private string _continueOnError;
 
         /// <summary>
         /// Runtime on the task, if any
         /// May be empty string
         /// </summary>
-        private readonly string _msbuildRuntime;
+        private string _msbuildRuntime;
 
         /// <summary>
         /// Architecture on the task, if any
         /// May be empty string
         /// </summary>
-        private readonly string _msbuildArchitecture;
+        private string _msbuildArchitecture;
 
         /// <summary>
         /// Unordered set of task parameter names and unevaluated values.
         /// This is a dead, read-only collection.
         /// </summary>
-        private readonly CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> _parameters;
+        private CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> _parameters;
 
         /// <summary>
         /// Output properties and items below this task. This is an ordered collection
         /// as one may depend on another.
         /// This is a dead, read-only collection.
         /// </summary>
-        private readonly IList<ProjectTaskInstanceChild> _outputs;
+        private List<ProjectTaskInstanceChild> _outputs;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Location of the continueOnError attribute, if any
         /// </summary>
-        private readonly ElementLocation _continueOnErrorLocation;
+        private ElementLocation _continueOnErrorLocation;
 
         /// <summary>
         /// Location of the MSBuildRuntime attribute, if any
         /// </summary>
-        private readonly ElementLocation _msbuildRuntimeLocation;
+        private ElementLocation _msbuildRuntimeLocation;
 
         /// <summary>
         /// Location of the MSBuildArchitecture attribute, if any
         /// </summary>
-        private readonly ElementLocation _msbuildArchitectureLocation;
+        private ElementLocation _msbuildArchitectureLocation;
 
         /// <summary>
         /// Constructor called by Evaluator.
@@ -120,39 +121,72 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Creates a new task instance directly.  Used for generating instances on-the-fly.
+        ///     Creates a new task instance directly.  Used for generating instances on-the-fly.
         /// </summary>
         /// <param name="name">The task name.</param>
-        /// <param name="taskLocation">The location for this task.</param>
+        /// <param name="location">The location for this task.</param>
         /// <param name="condition">The unevaluated condition.</param>
         /// <param name="continueOnError">The unevaluated continue on error.</param>
         /// <param name="msbuildRuntime">The MSBuild runtime.</param>
         /// <param name="msbuildArchitecture">The MSBuild architecture.</param>
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             string name,
-            ElementLocation taskLocation,
+            ElementLocation location,
             string condition,
             string continueOnError,
             string msbuildRuntime,
             string msbuildArchitecture
-            )
+        ) : this(
+            name,
+            condition,
+            continueOnError,
+            msbuildRuntime,
+            msbuildArchitecture,
+            new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(8, StringComparer.OrdinalIgnoreCase),
+            new List<ProjectTaskInstanceChild>(),
+            location,
+            condition == string.Empty ? null : ElementLocation.EmptyLocation,
+            continueOnError == string.Empty ? null : ElementLocation.EmptyLocation,
+            msbuildRuntime == string.Empty ? null : ElementLocation.EmptyLocation,
+            msbuildArchitecture == string.Empty ? null : ElementLocation.EmptyLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength("name", "name");
+        }
+
+        internal ProjectTaskInstance
+            (
+            string name,
+            string condition,
+            string continueOnError,
+            string msbuildRuntime,
+            string msbuildArchitecture,
+            CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> parameters,
+            List<ProjectTaskInstanceChild> outputs,
+            ElementLocation location,
+            ElementLocation conditionLocation,
+            ElementLocation continueOnErrorElementLocation,
+            ElementLocation msbuildRuntimeLocation,
+            ElementLocation msbuildArchitectureLocation)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
             ErrorUtilities.VerifyThrowArgumentNull(condition, "condition");
             ErrorUtilities.VerifyThrowArgumentNull(continueOnError, "continueOnError");
+
             _name = name;
             _condition = condition;
             _continueOnError = continueOnError;
             _msbuildRuntime = msbuildRuntime;
             _msbuildArchitecture = msbuildArchitecture;
-            _location = taskLocation;
-            _conditionLocation = (condition == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _continueOnErrorLocation = (continueOnError == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _msbuildArchitectureLocation = (msbuildArchitecture == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _msbuildRuntimeLocation = (msbuildRuntime == String.Empty) ? null : ElementLocation.EmptyLocation;
-            _parameters = new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(8, StringComparer.OrdinalIgnoreCase);
-            _outputs = new List<ProjectTaskInstanceChild>();
+            _location = location;
+            _conditionLocation = conditionLocation;
+            _continueOnErrorLocation = continueOnErrorElementLocation;
+            _msbuildArchitectureLocation = msbuildArchitectureLocation;
+            _msbuildRuntimeLocation = msbuildRuntimeLocation;
+            _parameters = parameters;
+            _outputs = outputs;
+        }
+
+        private ProjectTaskInstance()
+        {
         }
 
         /// <summary>
@@ -216,6 +250,8 @@ namespace Microsoft.Build.Execution
                 return filteredParameters;
             }
         }
+
+        internal IDictionary<string, Tuple<string, ElementLocation>> TestGetParameters => _parameters;
 
         /// <summary>
         /// Ordered set of output property and item objects.
@@ -324,6 +360,71 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName, "taskOutputParameterName");
             ErrorUtilities.VerifyThrowArgumentLength(propertyName, "propertyName");
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var typeName = this.GetType().FullName;
+                translator.Translate(ref typeName);
+            }
+
+            translator.Translate(ref _name);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _continueOnError);
+            translator.Translate(ref _msbuildRuntime);
+            translator.Translate(ref _msbuildArchitecture);
+            translator.Translate(ref _outputs, ProjectTaskInstanceChild.FactoryForDeserialization);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _continueOnErrorLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _msbuildRuntimeLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _msbuildArchitectureLocation, ElementLocation.FactoryForDeserialization);
+
+            IDictionary<string, Tuple<string, ElementLocation>> localParameters = _parameters;
+            translator.TranslateDictionary(
+                ref localParameters,
+                ParametersKeyTranslator,
+                ParametersValueTranslator,
+                count => new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(count));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
+            {
+                _parameters = (CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>) localParameters;
+            }
+        }
+
+        private static void ParametersKeyTranslator(ref string key, INodePacketTranslator translator)
+        {
+            translator.Translate(ref key);
+        }
+
+        private static void ParametersValueTranslator(ref Tuple<string, ElementLocation> value, INodePacketTranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var item1 = value.Item1;
+                var item2 = value.Item2;
+
+                translator.Translate(ref item1);
+                translator.Translate(ref item2, ElementLocation.FactoryForDeserialization);
+            }
+            else
+            {
+                var item1 = default(string);
+                var item2 = default(ElementLocation);
+
+                translator.Translate(ref item1);
+                translator.Translate(ref item2, ElementLocation.FactoryForDeserialization);
+
+                value = Tuple.Create(item1, item2);
+            }
+        }
+
+        internal new static ProjectTaskInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstance>();
         }
     }
 }

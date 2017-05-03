@@ -228,7 +228,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal ProjectMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new ProjectMetadataInstance(translator);
         }

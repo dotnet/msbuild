@@ -24,6 +24,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     internal class MockLoggingService : ILoggingService
     {
+        private Action<string> _writer;
+
+        public MockLoggingService(Action<string> writter = null)
+        {
+            _writer = writter ?? Console.WriteLine;
+        }
+
         #region ILoggingService Members
 
         /// <summary>
@@ -242,10 +249,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="messageArgs">The args for the message</param>
         public void LogComment(BuildEventContext buildEventContext, MessageImportance importance, string messageResourceName, params object[] messageArgs)
         {
-            Console.WriteLine(messageResourceName);
+            _writer(messageResourceName);
             foreach (object o in messageArgs)
             {
-                Console.WriteLine((string)o);
+                _writer((string)o);
             }
         }
 
@@ -257,7 +264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="message">The message</param>
         public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message)
         {
-            Console.WriteLine(message);
+            _writer(message);
         }
 
         /// <summary>
@@ -277,10 +284,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="messageArgs">The message args</param>
         public void LogError(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            Console.WriteLine(messageResourceName);
+            _writer(messageResourceName);
             foreach (object o in messageArgs)
             {
-                Console.WriteLine((string)o);
+                _writer((string)o);
             }
         }
 
@@ -294,10 +301,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="messageArgs">The message args</param>
         public void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            Console.WriteLine(messageResourceName);
+            _writer(messageResourceName);
             foreach (object o in messageArgs)
             {
-                Console.WriteLine((string)o);
+                _writer((string)o);
             }
         }
 
@@ -312,7 +319,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="message">The message</param>
         public void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
-            Console.WriteLine(message);
+            _writer(message);
         }
 
         /// <summary>
@@ -332,6 +339,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="file">The file</param>
         public void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file)
         {
+            _writer(exception.Message);
         }
 
         /// <summary>
@@ -378,10 +386,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="messageArgs">The message args</param>
         public void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            Console.WriteLine(messageResourceName);
+            _writer(messageResourceName);
             foreach (object o in messageArgs)
             {
-                Console.WriteLine((string)o);
+                _writer((string)o);
             }
         }
 
@@ -396,7 +404,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="message">The message</param>
         public void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
-            Console.WriteLine(message);
+            _writer(message);
         }
 
         /// <summary>

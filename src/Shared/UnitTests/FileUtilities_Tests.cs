@@ -854,7 +854,7 @@ namespace Microsoft.Build.UnitTests
         public void RelativePathLooksLikeUnixPathOnUnixWithBaseDirectory()
         {
             string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
-            string oldCWD = Environment.CurrentDirectory;
+            string oldCWD = Directory.GetCurrentDirectory();
 
             try
             {
@@ -886,7 +886,7 @@ namespace Microsoft.Build.UnitTests
         {
             // <tmp_dir>/first/second/file.txt
             string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
-            string oldCWD = Environment.CurrentDirectory;
+            string oldCWD = Directory.GetCurrentDirectory();
 
             try
             {

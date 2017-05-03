@@ -22,35 +22,23 @@ namespace Microsoft.Build.Tasks
         private BindingRedirect[] _bindingRedirects = null;
 
         /// <summary>
-        /// The partial assemblyname, there should be no version.
+        /// The partial <see cref="AssemblyName"/>, there should be no version.
         /// </summary>
-        private AssemblyName _partialAssemblyName = null;
+        private AssemblyName _partialAssemblyName;
 
         /// <summary>
-        /// The partial assemblyname, there should be no version.
+        /// The partial <see cref="AssemblyName"/>, there should be no version.
         /// </summary>
         internal AssemblyName PartialAssemblyName
         {
             set
             {
-#if FEATURE_ASSEMBLYNAME_CLONE
-                _partialAssemblyName = (AssemblyName)value.Clone();
-#else
-                _partialAssemblyName = new AssemblyName(value.FullName);
-#endif
+                _partialAssemblyName = value.CloneIfPossible();
                 _partialAssemblyName.Version = null;
             }
             get
             {
-                if (_partialAssemblyName == null)
-                {
-                    return null;
-                }
-#if FEATURE_ASSEMBLYNAME_CLONE
-                return (AssemblyName)_partialAssemblyName.Clone();
-#else
-                return new AssemblyName(_partialAssemblyName.FullName);
-#endif
+                return _partialAssemblyName?.CloneIfPossible();
             }
         }
 

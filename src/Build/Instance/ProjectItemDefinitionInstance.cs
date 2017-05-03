@@ -14,6 +14,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
 {
@@ -22,12 +23,12 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
-    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>
+    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, INodePacketTranslatable
     {
         /// <summary>
         /// Item type, for example "Compile", that this item definition applies to
         /// </summary>
-        private readonly string _itemType;
+        private string _itemType;
 
         /// <summary>
         /// Collection of metadata that link the XML metadata and instance metadata
@@ -67,6 +68,10 @@ namespace Microsoft.Build.Execution
             {
                 _metadata.Set(new ProjectMetadataInstance(originalMetadata));
             }
+        }
+
+        private ProjectItemDefinitionInstance()
+        {
         }
 
         /// <summary>
@@ -219,6 +224,20 @@ namespace Microsoft.Build.Execution
             }
 
             return element;
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _itemType);
+            translator.TranslateDictionary(ref _metadata, ProjectMetadataInstance.FactoryForDeserialization);
+        }
+
+        internal static ProjectItemDefinitionInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new ProjectItemDefinitionInstance();
+            ((INodePacketTranslatable) instance).Translate(translator);
+
+            return instance;
         }
     }
 }

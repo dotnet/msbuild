@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -19,22 +20,22 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// Immutable.
     /// </remarks>
-    public sealed class ProjectTaskOutputItemInstance : ProjectTaskInstanceChild
+    public sealed class ProjectTaskOutputItemInstance : ProjectTaskInstanceChild, INodePacketTranslatable
     {
         /// <summary>
         /// Name of the property to put the output in
         /// </summary>
-        private readonly string _itemType;
+        private string _itemType;
 
         /// <summary>
         /// Property on the task class to retrieve the output from
         /// </summary>
-        private readonly string _taskParameter;
+        private string _taskParameter;
 
         /// <summary>
         /// Condition on the output element
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Location of the original element
@@ -74,6 +75,10 @@ namespace Microsoft.Build.Execution
             _itemTypeLocation = itemTypeLocation;
             _taskParameterLocation = taskParameterLocation;
             _conditionLocation = conditionLocation;
+        }
+
+        private ProjectTaskOutputItemInstance()
+        {
         }
 
         /// <summary>
@@ -131,6 +136,23 @@ namespace Microsoft.Build.Execution
         public ElementLocation ItemTypeLocation
         {
             get { return _itemTypeLocation; }
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var typeName = this.GetType().FullName;
+                translator.Translate(ref typeName);
+            }
+
+            translator.Translate(ref _itemType);
+            translator.Translate(ref _taskParameter);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _itemTypeLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _taskParameterLocation, ElementLocation.FactoryForDeserialization);
         }
     }
 }

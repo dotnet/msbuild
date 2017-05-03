@@ -121,6 +121,7 @@
     <Compile Include="ProjectStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Sdk\SdkReference.cs" />
     <Compile Include="RequiredAttribute.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -129,6 +130,11 @@
     </Compile>
     <Compile Include="RunInMTAAttribute.cs" />
     <Compile Include="RunInSTAAttribute.cs" />
+    <Compile Include="Sdk\SdkLogger.cs" />
+    <Compile Include="Sdk\SdkResolver.cs" />
+    <Compile Include="Sdk\SdkResolverContext.cs" />
+    <Compile Include="Sdk\SdkResult.cs" />
+    <Compile Include="Sdk\SdkResultFactory.cs" />
     <Compile Include="TargetFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

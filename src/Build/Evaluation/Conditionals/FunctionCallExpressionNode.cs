@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -38,20 +38,14 @@ namespace Microsoft.Build.Evaluation
                 // Check we only have one argument
                 VerifyArgumentCount(1, state);
 
-                // Expand properties and items, and verify the result is an appropriate scalar
-                string expandedValue = ExpandArgumentForScalarParameter("exists", (GenericExpressionNode)_arguments[0], state);
-
-                if (String.IsNullOrEmpty(expandedValue))
-                {
-                    return false;
-                }
-
                 try
                 {
-                    if (state.EvaluationDirectory != null && !Path.IsPathRooted(expandedValue))
-                    {
-                        expandedValue = Path.GetFullPath(Path.Combine(state.EvaluationDirectory, expandedValue));
-                    }
+                    // Expand the items and use DefaultIfEmpty in case there is nothing returned
+                    // Then check if everything is not null (because the list was empty), not
+                    // already loaded into the cache, and exists
+                    return ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state)
+                        .DefaultIfEmpty()
+                        .All(i => i != null && (state.LoadedProjectsCache?.TryGet(i) != null || FileUtilities.FileOrDirectoryExistsNoThrow(i)));
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
@@ -64,15 +58,6 @@ namespace Microsoft.Build.Evaluation
 
                     return false;
                 }
-
-                if (state.LoadedProjectsCache != null && state.LoadedProjectsCache.TryGet(expandedValue) != null)
-                {
-                    return true;
-                }
-
-                bool exists = FileUtilities.FileOrDirectoryExistsNoThrow(expandedValue);
-
-                return exists;
             }
             else if (String.Compare(_functionName, "HasTrailingSlash", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -128,9 +113,7 @@ namespace Microsoft.Build.Evaluation
                 argument = FileUtilities.FixFilePath(argument);
             }
 
-            IList<TaskItem> items;
-
-            items = state.ExpandIntoTaskItems(argument);
+            IList<TaskItem> items = state.ExpandIntoTaskItems(argument);
 
             string expandedValue = String.Empty;
 
@@ -152,6 +135,23 @@ namespace Microsoft.Build.Evaluation
             }
 
             return expandedValue;
+        }
+
+        private IEnumerable<string> ExpandArgumentAsFileList(GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state, bool isFilePath = true)
+        {
+            string argument = argumentNode.GetUnexpandedValue(state);
+
+            // Fix path before expansion
+            if (isFilePath)
+            {
+                argument = FileUtilities.FixFilePath(argument);
+            }
+
+            return state.ExpandIntoTaskItems(argument)
+                .Select(i =>
+                    state.EvaluationDirectory != null && !Path.IsPathRooted(i.ItemSpec)
+                        ? Path.GetFullPath(Path.Combine(state.EvaluationDirectory, i.ItemSpec))
+                        : i.ItemSpec);
         }
 
         /// <summary>

@@ -383,6 +383,48 @@ namespace Microsoft.Build.Framework
     {
         public RunInSTAAttribute() { }
     }
+    public abstract partial class SdkLogger
+    {
+        protected SdkLogger() { }
+        public abstract void LogMessage(string message, Microsoft.Build.Framework.MessageImportance messageImportance=(Microsoft.Build.Framework.MessageImportance)(2));
+    }
+    public sealed partial class SdkReference : System.IEquatable<Microsoft.Build.Framework.SdkReference>
+    {
+        public SdkReference(string name, string version, string minimumVersion) { }
+        public string MinimumVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Version { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool Equals(Microsoft.Build.Framework.SdkReference other) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+        public static bool TryParse(string sdk, out Microsoft.Build.Framework.SdkReference sdkReference) { sdkReference = default(Microsoft.Build.Framework.SdkReference); throw null; }
+    }
+    public abstract partial class SdkResolver
+    {
+        protected SdkResolver() { }
+        public abstract string Name { get; }
+        public abstract int Priority { get; }
+        public abstract Microsoft.Build.Framework.SdkResult Resolve(Microsoft.Build.Framework.SdkReference sdkReference, Microsoft.Build.Framework.SdkResolverContext resolverContext, Microsoft.Build.Framework.SdkResultFactory factory);
+    }
+    public abstract partial class SdkResolverContext
+    {
+        protected SdkResolverContext() { }
+        public virtual Microsoft.Build.Framework.SdkLogger Logger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+        public virtual string ProjectFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+        public virtual string SolutionFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+    }
+    public abstract partial class SdkResult
+    {
+        protected SdkResult() { }
+        public bool Success { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+    }
+    public abstract partial class SdkResultFactory
+    {
+        protected SdkResultFactory() { }
+        public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
+        public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
+    }
     public partial class TargetFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected TargetFinishedEventArgs() { }

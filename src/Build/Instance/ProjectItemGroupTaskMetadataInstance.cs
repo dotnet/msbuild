@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -21,32 +22,32 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name} Value={_value} Condition={_condition}")]
-    public class ProjectItemGroupTaskMetadataInstance
+    public class ProjectItemGroupTaskMetadataInstance : INodePacketTranslatable
     {
         /// <summary>
         /// Name of the metadatum
         /// </summary>
-        private readonly string _name;
+        private string _name;
 
         /// <summary>
         /// Unevaluated value
         /// </summary>
-        private readonly string _value;
+        private string _value;
 
         /// <summary>
         /// Unevaluated condition
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Constructor called by the Evaluator.
@@ -74,6 +75,10 @@ namespace Microsoft.Build.Execution
             _name = that._name;
             _value = that._value;
             _condition = that._condition;
+        }
+
+        private ProjectItemGroupTaskMetadataInstance()
+        {
         }
 
         /// <summary>
@@ -132,6 +137,23 @@ namespace Microsoft.Build.Execution
         internal ProjectItemGroupTaskMetadataInstance DeepClone()
         {
             return new ProjectItemGroupTaskMetadataInstance(this);
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _name);
+            translator.Translate(ref _value);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+        }
+
+        internal static ProjectItemGroupTaskMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new ProjectItemGroupTaskMetadataInstance();
+            ((INodePacketTranslatable) instance).Translate(translator);
+
+            return instance;
         }
     }
 }

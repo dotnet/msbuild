@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -207,6 +208,23 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <inheritdoc />
+            public void Translate(ref HashSet<string> set)
+            {
+                if (!TranslateNullable(set))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                set = new HashSet<string>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    set.Add(_reader.ReadString());
+                }
+            }
+
             /// <summary>
             /// Translates a list of strings
             /// </summary>
@@ -235,13 +253,20 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">TaskItem type</typeparam>
             public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable
             {
+                IList<T> listAsInterface = list;
+                Translate(ref listAsInterface, factory, count => new List<T>(count));
+                list = (List<T>) listAsInterface;
+            }
+
+            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>
+            {
                 if (!TranslateNullable(list))
                 {
                     return;
                 }
 
                 int count = _reader.ReadInt32();
-                list = new List<T>(count);
+                list = collectionFactory(count);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -453,13 +478,24 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
             {
+                IDictionary<string, string> copy = dictionary;
+
+                TranslateDictionary(
+                    ref copy,
+                    count => new Dictionary<string, string>(count, comparer));
+
+                dictionary = (Dictionary<string, string>) copy;
+            }
+
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
+            {
                 if (!TranslateNullable(dictionary))
                 {
                     return;
                 }
 
                 int count = _reader.ReadInt32();
-                dictionary = new Dictionary<string, string>(count, comparer);
+                dictionary = dictionaryCreator(count);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -467,6 +503,30 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     string value = null;
                     Translate(ref value);
+                    dictionary[key] = value;
+                }
+            }
+
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                Translator<K> keyTranslator,
+                Translator<V> valueTranslator,
+                NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                dictionary = dictionaryCreator(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    K key = default(K);
+                    keyTranslator.Invoke(ref key, this);
+                    V value = default(V);
+                    valueTranslator(ref value, this);
                     dictionary[key] = value;
                 }
             }
@@ -536,7 +596,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class, INodePacketTranslatable
             {
@@ -725,6 +785,23 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <inheritdoc />
+            public void Translate(ref HashSet<string> set)
+            {
+                if (!TranslateNullable(set))
+                {
+                    return;
+                }
+
+                int count = set.Count;
+                _writer.Write(count);
+
+                foreach (var item in set)
+                {
+                    _writer.Write(item);
+                }
+            }
+
             /// <summary>
             /// Translates a list of T where T implements INodePacketTranslateable
             /// </summary>
@@ -732,6 +809,31 @@ namespace Microsoft.Build.BackEnd
             /// <param name="factory">factory to create type T</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
             public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = list.Count;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    T value = list[i];
+                    Translate<T>(ref value, factory);
+                }
+            }
+
+            /// <summary>
+            /// Translates a list of T where T implements INodePacketTranslateable
+            /// </summary>
+            /// <param name="list">The list to be translated.</param>
+            /// <param name="factory">factory to create type T</param>
+            /// <param name="collectionFactory">factory to create the IList</param>
+            /// <typeparam name="T">A TaskItemType</typeparam>
+            /// <typeparam name="L">IList subtype</typeparam>
+            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -955,6 +1057,12 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
             {
+                IDictionary<string, string> copy = dictionary;
+                TranslateDictionary(ref copy, (NodePacketCollectionCreator<IDictionary<string, string>>)null);
+            }
+
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
+            {
                 if (!TranslateNullable(dictionary))
                 {
                     return;
@@ -969,6 +1077,29 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     string value = pair.Value;
                     Translate(ref value);
+                }
+            }
+
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                Translator<K> keyTranslator,
+                Translator<V> valueTranslator,
+                NodePacketCollectionCreator<IDictionary<K, V>> collectionCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = dictionary.Count;
+                _writer.Write(count);
+
+                foreach (KeyValuePair<K, V> pair in dictionary)
+                {
+                    K key = pair.Key;
+                    keyTranslator.Invoke(ref key, this);
+                    V value = pair.Value;
+                    valueTranslator.Invoke(ref value, this);
                 }
             }
 
@@ -1035,7 +1166,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class, INodePacketTranslatable
             {

@@ -11,7 +11,7 @@ usage()
     echo "  --bootstrap-only               Build and bootstrap MSBuild but do not build again with those binaries"
     echo "  --build-only                   Only build using a downloaded copy of MSBuild but do not bootstrap"
     echo "                                 or build again with those binaries"
-    echo "  --config                       Debug or Release configuration"
+    echo "  --config                       Debug or Release configuration (default: Debug)"
 }
 
 restoreBuildTools(){
@@ -263,7 +263,6 @@ case $target in
     Mono)
         setMonoDir
         CONFIGURATION=${PROJECT_CONFIG}-MONO
-        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
         RUNTIME_HOST_ARGS="--debug"
         MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild/MSBuild.dll"'"'
         ;;

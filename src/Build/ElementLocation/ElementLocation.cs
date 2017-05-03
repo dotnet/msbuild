@@ -157,7 +157,7 @@ namespace Microsoft.Build.Construction
         /// Factory for serialization.
         /// Custom factory is needed because this class is abstract and uses a factory pattern.
         /// </summary>
-        internal static IElementLocation FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ElementLocation FactoryForDeserialization(INodePacketTranslator translator)
         {
             string file = null;
             int line = 0;
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ElementLocation Create(string file, int line, int column)
         {
-            if (file == null && line == 0 && column == 0)
+            if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
             {
                 return EmptyLocation;
             }
@@ -329,11 +329,10 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Constructor for the case where we have most or all information.
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
-            /// File may be null, indicating the file was not loaded from disk.
+            /// File may be null or empty, indicating the file was not loaded from disk.
             /// </summary>
             internal SmallElementLocation(string file, int line, int column)
             {
-                ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(file, "file");
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
                 ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
 

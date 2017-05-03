@@ -10,13 +10,6 @@ namespace Microsoft.Build.UnitTests
     [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
     public  class FixPathOnUnixTests
     {
-        string _assemblyPath;
-
-        public FixPathOnUnixTests()
-        {
-            _assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-        }
-
         [Fact]
         public void TestPathFixupInMetadata()
         {
@@ -27,18 +20,18 @@ namespace Microsoft.Build.UnitTests
                     </Target>
                </Project>";
 
-            string mainProjectContents = String.Format(@"
+            string mainProjectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                    <UsingTask TaskName='TestTask' AssemblyFile='{0}' />
+                    <UsingTask TaskName='LogTaskPropertiesTask' AssemblyName='Microsoft.Build.Engine.UnitTests' />
                     <ItemGroup>
                         <Item0 Include='xyz'>
                             <Md0>lib\foo.dll</Md0>
                         </Item0>
                     </ItemGroup>
                     <Target Name='Build'>
-                        <TestTask Items='@(Item0)' />
+                        <LogTaskPropertiesTask Items='@(Item0)' />
                     </Target>
-                </Project>", _assemblyPath);
+                </Project>";
 
             string buildProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("build.proj", buildProjectContents);
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("projectDirectory/main.proj", mainProjectContents);
@@ -57,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    public class TestTask : Task
+    public class LogTaskPropertiesTask : Task
     {
         public ITaskItem[] Items { get; set; }
 

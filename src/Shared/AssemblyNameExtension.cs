@@ -57,7 +57,7 @@ namespace Microsoft.Build.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    sealed internal class AssemblyNameExtension
+    internal sealed class AssemblyNameExtension
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
@@ -601,11 +601,7 @@ namespace Microsoft.Build.Shared
 
             if (asAssemblyName != null)
             {
-#if FEATURE_ASSEMBLYNAME_CLONE
-                newExtension.asAssemblyName = (AssemblyName)asAssemblyName.Clone();
-#else
-                newExtension.asAssemblyName = new AssemblyName(asAssemblyName.FullName);
-#endif
+                newExtension.asAssemblyName = asAssemblyName.CloneIfPossible();
             }
 
             newExtension.asString = asString;

@@ -36,49 +36,71 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Directory.CreateDirectory(_testSdkDirectory);
         }
 
-        [Fact]
-        public void SdkImportsAreInLogicalProject()
+        [Theory]
+        [InlineData(@"
+<Project Sdk=""{0}"">
+  <PropertyGroup>
+    <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+  </PropertyGroup>
+</Project>
+")]
+        [InlineData(@"
+<Project>
+  <Sdk Name=""{0}"" />
+  <PropertyGroup>
+    <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+  </PropertyGroup>
+</Project>
+")]
+        public void SdkImportsAreInLogicalProject(string projectFormatString)
         {
             File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
             File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
 
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                string content = $@"
-                    <Project Sdk=""{SdkName}"">
-                        <PropertyGroup>
-                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
-                        </PropertyGroup>
-                    </Project>";
+                string content = string.Format(projectFormatString, SdkName);
 
                 ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                Project project = new Project(projectRootElement);
+                var project = new Project(projectRootElement);
 
                 IList<ProjectElement> children = project.GetLogicalProject().ToList();
-                
-                Assert.Equal(6, children.Count);
+
+                // <Sdk> style will have an extra ProjectElment.
+                var expected = projectFormatString.Contains("Sdk=") ? 6 : 7;
+                Assert.Equal(expected, children.Count);
             }
         }
 
-        [Fact]
-        public void SdkImportsAreInImportList()
+        [Theory]
+        [InlineData(@"
+<Project Sdk=""{0}"">
+  <PropertyGroup>
+    <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+  </PropertyGroup>
+</Project>
+")]
+        [InlineData(@"
+<Project>
+  <Sdk Name=""{0}"" />
+  <PropertyGroup>
+    <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+  </PropertyGroup>
+</Project>
+")]
+        public void SdkImportsAreInImportList(string projectFormatString)
         {
             File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
             File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
 
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                string content = $@"
-                    <Project Sdk=""{SdkName}"">
-                        <PropertyGroup>
-                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
-                        </PropertyGroup>
-                    </Project>";
+                string content = string.Format(projectFormatString, SdkName);
 
                 ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                Project project = new Project(projectRootElement);
+                var project = new Project(projectRootElement);
 
                 // The XML representation of the project should indicate there are no imports
                 Assert.Equal(0, projectRootElement.Imports.Count);
@@ -103,8 +125,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Verifies that when a user specifies more than one SDK that everything works as expected
         /// </summary>
-        [Fact]
-        public void SdkSupportsMultiple()
+        [Theory]
+        [InlineData(@"
+<Project Sdk=""{0};{1};{2}"">
+</Project >")]
+        [InlineData(@"
+<Project>
+  <Sdk Name=""{0}"" />
+  <Sdk Name=""{1}"" />
+  <Sdk Name=""{2}"" />
+</Project>")]
+        public void SdkSupportsMultiple(string projectFormatString)
         {
             IList<string> sdkNames = new List<string>
             {
@@ -123,10 +154,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                string content = $@"
-                    <Project Sdk=""{String.Join("; ", sdkNames)}"">
-                        
-                    </Project>";
+                string content = string.Format(projectFormatString, sdkNames[0], sdkNames[1], sdkNames[2]);
 
                 ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
@@ -144,8 +172,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Fact]
-        public void ProjectWithSdkImportsIsCloneable()
+        [Theory]
+        [InlineData(@"<Project Sdk=""{0}"" ToolsVersion=""15.0"">
+")]
+        [InlineData(@"<Project ToolsVersion=""15.0"">
+  <Sdk Name=""{0}"" />
+")]
+        public void ProjectWithSdkImportsIsCloneable(string projectFileFirstLineFormat)
         {
             File.WriteAllText(_sdkPropsPath, "<Project />");
             File.WriteAllText(_sdkTargetsPath, "<Project />");
@@ -154,7 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 // Based on the new-console-project CLI template (but not matching exactly
                 // should not be a deal-breaker).
-                string content = $@"<Project Sdk=""{SdkName}"" ToolsVersion=""15.0"">
+                string content = $@"{string.Format(projectFileFirstLineFormat, SdkName)}
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -177,8 +210,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Fact]
-        public void ProjectWithSdkImportsIsRemoveable()
+        [Theory]
+        [InlineData(@"<Project Sdk=""{0}"" ToolsVersion=""15.0"">
+")]
+        [InlineData(@"<Project ToolsVersion=""15.0"">
+  <Sdk Name=""{0}"" />
+")]
+        public void ProjectWithSdkImportsIsRemoveable(string projectFileFirstLineFormat)
         {
             File.WriteAllText(_sdkPropsPath, "<Project />");
             File.WriteAllText(_sdkTargetsPath, "<Project />");
@@ -187,7 +225,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 // Based on the new-console-project CLI template (but not matching exactly
                 // should not be a deal-breaker).
-                string content = $@"<Project Sdk=""{SdkName}"" ToolsVersion=""15.0"">
+                string content = $@"{string.Format(projectFileFirstLineFormat, SdkName)}
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -257,6 +295,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
 
                 Assert.Equal(0, project.Imports.Count);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that an empty SDK attribute works and nothing is imported.
+        /// </summary>
+        [Fact]
+        public void ProjectWithEmptySdkNameElementThrows()
+        {
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
+            {
+                string content = @"
+                    <Project>
+                        <Sdk Name="""" />
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
+                    </Project>";
+
+                var e =
+                    Assert.Throws<InvalidProjectFileException>(() => new Project(
+                        ProjectRootElement.Create(XmlReader.Create(new StringReader(content)))));
+
+                Assert.Equal("MSB4238", e.ErrorCode);
             }
         }
 
