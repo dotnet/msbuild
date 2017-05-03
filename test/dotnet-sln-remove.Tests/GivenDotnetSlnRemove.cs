@@ -25,6 +25,22 @@ Options:
   -h, --help   Show help information
 ";
 
+        private const string SlnCommandHelpText = @".NET modify solution file command
+
+Usage: dotnet sln [options] <SLN_FILE> [command]
+
+Arguments:
+  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information
+
+Commands:
+  add <args>      .NET Add project(s) to a solution file Command
+  list            .NET List project(s) in a solution file Command
+  remove <args>   .NET Remove project(s) from a solution file Command
+";
+
         private const string ExpectedSlnContentsAfterRemove = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
@@ -187,6 +203,7 @@ EndGlobal
                 .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(SlnCommandHelpText);
         }
 
         [Theory]
