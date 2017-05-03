@@ -71,14 +71,16 @@ cp -R nuget-support/tasks-targets/* ${DESTDIR}${XBUILD_DIR}/
 # Bockbuild will handle copying these files
 test -d ${XBUILD_DIR}/Microsoft/NuGet && for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -s $f ${DESTDIR}${XBUILD_DIR} ; done
 
+# man page
+mkdir -p ${DESTDIR}${MONO_PREFIX}/share/man/man1
+cp mono/msbuild.1 ${DESTDIR}${MONO_PREFIX}/share/man/man1/
+
 # copy SDKs
 SDKS_SRC_DIR=sdks
 SDKS_OUT_DIR=${MSBUILD_INSTALL_BIN_DIR}/Sdks
 
 cp -R ${SDKS_SRC_DIR}/ ${DESTDIR}${SDKS_OUT_DIR}
 
-# man page
-cp mono/msbuild.1 ${DESTDIR}${MONO_PREFIX}/share/man/man1/
 
 sed -e 's,@bindir@,'$MONO_PREFIX'/bin,' -e 's,@mono_instdir@,'$MONO_PREFIX/lib/mono',' msbuild-mono-deploy.in > msbuild-mono-deploy.tmp
 chmod +x msbuild-mono-deploy.tmp
