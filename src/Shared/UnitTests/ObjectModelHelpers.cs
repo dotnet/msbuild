@@ -10,6 +10,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -142,10 +143,10 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-
-            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles))
+            using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
             {
+                var testProject = env.CreateTestProjectWithFiles(projectContents, inputFiles);
                 var evaluatedItems = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection).Items.ToList();
 
                 if (expectedMetadataPerItem == null)
@@ -1632,121 +1633,6 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 return tempPaths;
-            }
-        }
-
-        internal class TemporaryEnvironment : IDisposable
-        {
-            private bool _disposed;
-            private readonly string _name;
-            private readonly string _originalValue;
-
-            public TemporaryEnvironment(string name, string value)
-            {
-                _name = name;
-                _originalValue = Environment.GetEnvironmentVariable(name);
-
-                Environment.SetEnvironmentVariable(name, value);
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (!_disposed)
-                {
-                    if (disposing)
-                    {
-                        Environment.SetEnvironmentVariable(_name, _originalValue);
-                    }
-
-                    _disposed = true;
-                }
-            }
-        }
-
-        internal class TestProjectWithFiles : IDisposable
-        {
-            private bool _disposed;
-
-            private readonly string _testRoot;
-            private readonly string[] _createdFiles;
-            private readonly string _projectFile;
-
-            public string TestRoot
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _testRoot;
-                }
-            }
-
-            public string[] CreatedFiles
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _createdFiles;
-                }
-            }
-
-            public string ProjectFile
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _projectFile;
-                }
-            }
-
-            public TestProjectWithFiles(string projectContents, string[] files, string relativePathFromRootToProject)
-            {
-                string createdProjectFile;
-                string[] createdFiles;
-                _testRoot = CreateProjectInTempDirectoryWithFiles(projectContents, files, out createdProjectFile, out createdFiles, relativePathFromRootToProject);
-
-                _createdFiles = createdFiles;
-                _projectFile = createdProjectFile;
-            }
-
-            public TestProjectWithFiles(string projectContents, string[] files) : this(projectContents, files, ".")
-            {
-            }
-
-            private void ThrowIfDisposed()
-            {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException($"{nameof(TestProjectWithFiles)}({TestRoot}) was disposed");
-                }
-            }
-
-            public void Dispose()
-            {
-                Cleanup();
-                GC.SuppressFinalize(this);
-            }
-
-            private void Cleanup()
-            {
-                if (_disposed)
-                {
-                    return;
-                }
-
-                FileUtilities.DeleteDirectoryNoThrow(TestRoot, true);
-
-                _disposed = true;
-            }
-
-            ~TestProjectWithFiles()
-            {
-                Cleanup();
             }
         }
 

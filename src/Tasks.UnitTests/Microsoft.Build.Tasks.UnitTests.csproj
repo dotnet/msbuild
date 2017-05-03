@@ -42,6 +42,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\QuotingUtilities.cs" />
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="AssemblyIdentity_Tests.cs" />
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssignCulture_Tests.cs" />

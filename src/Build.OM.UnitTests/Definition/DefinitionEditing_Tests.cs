@@ -13,6 +13,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -1711,8 +1712,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             )]
         public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabledAndItemComesFromGlob(string projectContents, int itemIndex, string[] files)
         {
-            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, files))
+            using (var env = TestEnvironment.Create())
             {
+                var testProject = env.CreateTestProjectWithFiles(projectContents, files);
                 var projectFile = testProject.ProjectFile;
 
                 AssertDisabledItemSplitting(
