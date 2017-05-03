@@ -33,6 +33,14 @@
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />
 
+      <!-- Create layout: Aspnet runtime -->
+      <Copy
+        DestinationFiles="@(AspNetRuntimeFiles ->'$(LayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+        SourceFiles="@(AspNetRuntimeFiles)"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        UseHardlinksIfPossible="False" />
+
       <!-- Create layout: Man Pages -->
       <Copy
         DestinationFiles="@(SdkDebManPageFiles->'$(LayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
