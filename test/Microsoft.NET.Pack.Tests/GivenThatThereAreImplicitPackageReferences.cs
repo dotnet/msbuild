@@ -77,16 +77,11 @@ namespace Microsoft.NET.Pack.Tests
                 .Should().StartWith("1.1.");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void Packing_a_netcoreapp_2_0_library_does_not_include_the_implicit_dependency()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20Library",
@@ -122,16 +117,11 @@ namespace Microsoft.NET.Pack.Tests
                 .Should().StartWith("1.1.");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void Packing_a_netcoreapp_2_0_app_includes_the_implicit_dependency()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20App",
@@ -151,16 +141,11 @@ namespace Microsoft.NET.Pack.Tests
                 .Should().StartWith("2.0.");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void Packing_a_multitargeted_library_includes_implicit_dependencies_when_appropriate()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject testProject = new TestProject()
             {
                 Name = "PackMultiTargetedLibrary",
