@@ -5,10 +5,6 @@
     "text": "<TargetFramework>netcoreapp1.1</TargetFramework>"
   },
   {
-    "kind": "file_does_not_exist",
-    "path": "NuGet.config"
-  },
-  {
     "kind": "file_exists",
     "path": "wwwroot/css/site.css"
   }
