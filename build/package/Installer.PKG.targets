@@ -80,6 +80,9 @@
             DependsOnTargets="Init;Layout;SetupPkgInputsOutputs"
             Condition=" '$(OSName)' == 'osx' ">
 
+      <Copy SourceFiles="@(AspNetRuntimeFilesInput)"
+            DestinationFiles="@(AspNetRuntimeFilesInput->'$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
+
       <Exec Command="pkgbuild
                      --root '$(SdkLayoutOutputDirectory)'
                      --identifier '$(SdkComponentId)'

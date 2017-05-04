@@ -16,6 +16,8 @@
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/sdk/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/additionalDeps/**/*" />
       <CombinedFrameworkSdkInput Include="$(OutputDirectory)/store/**/*" />
+
+      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
     </ItemGroup>
 
     <MakeRelative
