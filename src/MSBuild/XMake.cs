@@ -3288,7 +3288,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayCopyrightMessage()
         {
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString()));
+#if RUNTIME_TYPE_NETCORE
+            const string frameworkName = ".NET Core";
+#elif MONO
+            const string frameworkName = "Mono";
+#else
+            const string frameworkName = ".NET Framework";
+#endif
+
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
         }
 
         /// <summary>
