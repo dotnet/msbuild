@@ -60,3 +60,4 @@ When `preview2` shipped the Visual Studio new project templates included both a 
 We included this file by default as a future-proofing tactic. When the CLI launches it looks for this file in the current directory, or the nearest parent directory, and tries to find a matching version of itself. If an exact match is found then it is used. Otherwise, `dotnet.exe` picks the latest installed CLI. When there is no exact match AND preview3 is installed then we get into trouble because preview3 cannot reason about project.json files.
 
 When working with `preview2` and `preview3` on the same machine we need to be sure that `preview2` projects have a global.json present and that the `version` property is set to an installed preview2 version. This will typically be `1.0.0-preview2-003121` or `1.0.0-preview2-003131`. You can check what is installed by looking in `%PROGRAM FILES%\dotnet\sdk` and checking the folder names. 
+
