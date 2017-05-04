@@ -1616,7 +1616,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (firstInList)
                 {
                     invalidParametersForGroup = invalidParamsForTemplate.ToDictionary(x => x.Canonical, x => x);
-                    groupParametersToExplicitlyHide = parametersToExplicitlyHide;
+                    groupParametersToExplicitlyHide = new HashSet<string>(parametersToExplicitlyHide);
                     firstInList = false;
                 }
                 else
