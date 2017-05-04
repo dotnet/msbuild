@@ -35,8 +35,8 @@
 
       <!-- Create layout: Aspnet runtime -->
       <Copy
-        DestinationFiles="@(AspNetRuntimeFiles ->'$(LayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
-        SourceFiles="@(AspNetRuntimeFiles)"
+        DestinationFiles="@(AspNetRuntimeFilesInput ->'$(LayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+        SourceFiles="@(AspNetRuntimeFilesInput)"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />

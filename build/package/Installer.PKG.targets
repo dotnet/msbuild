@@ -80,13 +80,8 @@
             DependsOnTargets="Init;Layout;SetupPkgInputsOutputs"
             Condition=" '$(OSName)' == 'osx' ">
 
-      <!-- Adding the ASP.NET runtime package store to the pkg -->
-      <ItemGroup>
-        <AspNetRuntimePackageStoreFiles Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
-      </ItemGroup>
-
-      <Copy SourceFiles="@(AspNetRuntimePackageStoreFiles)"
-            DestinationFiles="@(AspNetRuntimePackageStoreFiles->'$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
+      <Copy SourceFiles="@(AspNetRuntimeFilesInput)"
+            DestinationFiles="@(AspNetRuntimeFilesInput->'$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
 
       <Exec Command="pkgbuild
                      --root '$(SdkLayoutOutputDirectory)'

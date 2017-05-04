@@ -42,11 +42,9 @@
       <ManpagesDirectory>$(RepoRoot)/Documentation/manpages</ManpagesDirectory>
       <EndToEndTestProject>$(RepoRoot)/test/EndToEnd/EndToEnd.csproj</EndToEndTestProject>
       <CLISdkRoot>$(OutputDirectory)/sdk</CLISdkRoot>
-      <AspNetRuntimeRoot>$(AspNetRuntimePackageStorePublishDirectory)</AspNetRuntimeRoot>
     </PropertyGroup>
 
     <ItemGroup>
-      <AspNetRuntimeFiles Include="$(AspNetRuntimeRoot)/**/*" />
       <CLISdkFiles Include="$(CLISdkRoot)/**/*" />
       <SdkDebManPageFiles Include="$(ManpagesDirectory)/**/*" />
     </ItemGroup>
