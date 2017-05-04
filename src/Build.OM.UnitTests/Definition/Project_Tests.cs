@@ -15,6 +15,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1460,9 +1461,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
 </Project>");
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
                 ProjectRootElement import =
                     ProjectRootElement.Create(
@@ -1524,9 +1526,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
             };
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
 
                 var import = ProjectRootElement.Create(
@@ -1607,9 +1610,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
             };
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
 
                 var projectRootElement = ProjectRootElement.Create(
@@ -3262,9 +3266,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected1Foo, projectContents, "1.foo");
             AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], "u/x"))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 var expected2Foo = new ProvenanceResultTupleList
@@ -3550,9 +3555,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             projectContents = string.Format(projectContents, includeGlob);
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile);
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 ProvenanceResultTupleList expectedProvenance = null;
@@ -3786,9 +3792,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(project, new[] { "a", "b" }))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(project, new[] { "a", "b" });
                 var globResult = new Project(testFiles.ProjectFile, null, MSBuildConstants.CurrentToolsVersion, projectCollection).GetAllGlobs();
 
                 var expected = new GlobResultList

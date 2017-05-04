@@ -15,6 +15,7 @@ using System.Xml;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -1625,8 +1626,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ItemPredecessorToItemWithCaseChangeAndEscapeHatch()
         {
-            using (new Helpers.TemporaryEnvironment("MSBUILDUSECASESENSITIVEITEMNAMES", "1"))
+            using (var env = TestEnvironment.Create())
             {
+                env.SetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES", "1");
                 string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' >
                         <ItemGroup>
@@ -1705,8 +1707,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ItemPredecessorToItemViaTransformWithCaseChangeWithEscapeHatch()
         {
-            using (new Helpers.TemporaryEnvironment("MSBUILDUSECASESENSITIVEITEMNAMES", "1"))
+            using (var env = TestEnvironment.Create())
             {
+                env.SetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES", "1");
                 string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' >
                         <ItemGroup>

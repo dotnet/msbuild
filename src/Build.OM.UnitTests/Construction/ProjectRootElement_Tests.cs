@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
@@ -1306,9 +1307,10 @@ Project(""{";
 <Project xmlns = 'msbuildnamespace'>
 </Project>";
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
 
                 var projectXml = ProjectRootElement.Create(
@@ -1344,8 +1346,9 @@ Project(""{";
         [InlineData(false, null, false)]
         public void ReloadCanSpecifyPreserveFormatting(bool initialPreserveFormatting, bool? reloadShouldPreserveFormatting, bool expectedFormattingAfterReload)
         {
-            using (var testFiles = new Helpers.TestProjectWithFiles("", new[] { "build.proj" }))
+            using (var env = TestEnvironment.Create())
             {
+                var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = testFiles.CreatedFiles.First();
 
                 var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject, null, initialPreserveFormatting);
@@ -1604,10 +1607,11 @@ true, true, true)]
 
 </Project>");
 
-            using (var testFiles = new Helpers.TestProjectWithFiles("", new []{"build.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection1 = new ProjectCollection())
             using (var projectCollection2 = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectPath = testFiles.CreatedFiles.First();
 
                 var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(initialProjectContents, projectCollection1, preserveFormatting: true);

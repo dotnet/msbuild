@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using System.IO;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -869,8 +870,9 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     </PropertyGroup>
 </Project>");
 
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                using (var env = TestEnvironment.Create())
                 {
+                    env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
                     string content = @"<Project Sdk='MSBuildUnitTestSdk'>
   <PropertyGroup>
     <p>v1</p>
