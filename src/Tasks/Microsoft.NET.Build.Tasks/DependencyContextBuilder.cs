@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tasks
         private IEnumerable<ReferenceInfo> _frameworkReferences;
         private IEnumerable<ReferenceInfo> _directReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
-        private IEnumerable<string> _privateAssetPackageIds;
+        private IEnumerable<string> _excludeFromPublishPackageIds;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, StringBuilder> _filteredPackages;
@@ -64,9 +64,9 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
+        public DependencyContextBuilder WithExcludeFromPublishAssets(IEnumerable<string> excludeFromPublishPackageIds)
         {
-            _privateAssetPackageIds = privateAssetPackageIds;
+            _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
             return this;
         }
 
@@ -92,10 +92,10 @@ namespace Microsoft.NET.Build.Tasks
         {
             bool includeCompilationLibraries = _compilationOptions != null;
 
-            IEnumerable<LockFileTargetLibrary> runtimeExports = _projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
+            IEnumerable<LockFileTargetLibrary> runtimeExports = _projectContext.GetRuntimeLibraries(_excludeFromPublishPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?
-                    _projectContext.GetCompileLibraries(_privateAssetPackageIds) :
+                    _projectContext.GetCompileLibraries(_excludeFromPublishPackageIds) :
                     Enumerable.Empty<LockFileTargetLibrary>();
 
             var dependencyLookup = compilationExports

@@ -23,14 +23,16 @@ namespace Microsoft.NET.Pack.Tests
                 .WithSource()
                 .Restore();
 
-            new PackCommand(Stage0MSBuild, helloWorldAsset.TestRoot)
+            var packCommand = new PackCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+
+            packCommand
                 .Execute()
                 .Should()
                 .Pass();
 
             //  Validate the contents of the NuGet package by looking at the generated .nuspec file, as that's simpler
             //  than unzipping and inspecting the .nupkg
-            string nuspecPath = Path.Combine(helloWorldAsset.TestRoot, "obj", "HelloWorld.1.0.0.nuspec");
+            string nuspecPath = packCommand.GetIntermediateNuspecPath();
             var nuspec = XDocument.Load(nuspecPath);
 
             var ns = nuspec.Root.Name.Namespace;
