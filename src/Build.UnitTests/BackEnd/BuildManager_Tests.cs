@@ -3998,6 +3998,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void OutOfProcFileBasedP2PBuildSucceeds()
         {
             var mainProject =
@@ -4069,6 +4070,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [Trait("Category", "mono-osx-failing")]
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
 
