@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetConfig : INuGetConfig
     {
-        public const string FallbackPackageFolders = "fallbackPackageFolders";
+        public const string FallbackPackageFolders = "packageSources";
 
         private ISettings _settings;
 
