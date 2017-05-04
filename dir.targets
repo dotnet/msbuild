@@ -98,6 +98,11 @@
          with state.  They were passing because MSTest was serial. -->
     <Message Importance="High" Text="xunit -> %(MainAssembly.Filename)..." />
 
+    <PropertyGroup>
+        <XunitOptions Condition="'$(TestMethodToRun)' != ''">$(XunitOptions) -method $(TestMethodToRun)</XunitOptions>
+        <XunitOptions Condition="'$(TestClassToRun)' != ''">$(XunitOptions) -class $(TestClassToRun)</XunitOptions>
+    </PropertyGroup>
+
     <!-- Run tests on the full framework -->
     <Exec Command="$(ToolPackagesDir)\xunit.runner.console\$(XunitVersion)\tools\xunit.console.x86.exe @(AssemblyUnderTest, ' ') $(XunitOptions) -noshadow -parallel none -xml %(AssemblyUnderTest.FullPath)_TestResults.xml -html %(AssemblyUnderTest.FullPath)_TestResults.html > %(AssemblyUnderTest.FullPath)_stdout.txt"
           Condition="'$(NetCoreBuild)' != 'true'" />

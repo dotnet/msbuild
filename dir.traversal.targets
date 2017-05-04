@@ -21,7 +21,8 @@
 
   <Target Name="TestAllProjects">
     <!-- MSBuild tests must be sequential -->
-    <MSBuild Targets="Test" Projects="@(Project)" BuildInParallel="false" />
+    <MSBuild Targets="Test" Projects="@(Project)" BuildInParallel="false" Condition="'$(ProjectToTest)' == ''"/>
+    <MSBuild Targets="Test" Projects="$(ProjectToTest)" BuildInParallel="false" Condition="'$(ProjectToTest)' != ''"/>
   </Target>
 
   <PropertyGroup>
