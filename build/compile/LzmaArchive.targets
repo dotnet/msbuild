@@ -3,7 +3,7 @@
 
     <PropertyGroup>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
-      <NugetPackagesArchiveName>nuGetPackagesArchive.notimestamp.lzma</NugetPackagesArchiveName>
+      <NugetPackagesArchiveName>nuGetPackagesArchive.$(AspNetCoreRuntimePackageFlavor).lzma</NugetPackagesArchiveName>
       <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
       <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
