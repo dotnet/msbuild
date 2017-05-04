@@ -36,7 +36,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- If targeting .NET Standard 2.0 or higher, then don't include a dependency on NETStandard.Library in the package produced by pack -->
     <PackageReference Update="NETStandard.Library"
-                      Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '2.0' "
+                      Condition=" ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0') "
                       PrivateAssets="All" 
                       Publish="true" />
   </ItemGroup>
@@ -47,7 +47,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- For libraries targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
          Packing an app (for example a .NET CLI tool) should include the Microsoft.NETCore.App package dependency. -->
     <PackageReference Update="Microsoft.NETCore.App"
-                      Condition="('$(OutputType)' != 'Exe') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0')"
+                      Condition="('$(OutputType)' != 'Exe') And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0')"
                       PrivateAssets="All"
                       Publish="true" />    
   </ItemGroup>
