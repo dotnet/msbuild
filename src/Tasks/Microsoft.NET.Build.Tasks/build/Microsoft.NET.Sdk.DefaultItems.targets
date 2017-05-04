@@ -59,7 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          produced, so we will roll forward to the latest version. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
     
-    <!-- Default to use th latest stable release.  Currently this is the same as the previous clause, but when we have a stable 2.0 package this should change. -->
+    <!-- Default to use the latest stable release.  Currently this is the same as the previous clause, but when we have a stable 2.0 package this should change. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">1.6.1</NETStandardImplicitPackageVersion>
   </PropertyGroup>
   

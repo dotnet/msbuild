@@ -247,14 +247,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="RunResolvePublishAssemblies"
-          DependsOnTargets="ComputeExcludeFromPublishPackageReferences;
+          DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary">
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              ExcludeFromPublishPackageReferences="@(ExcludeFromPublishPackageReference)"
+                              ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                               TargetManifestFiles="@(TargetManifestFileList)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
                               IsSelfContained="$(SelfContained)" >
@@ -460,7 +460,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="GeneratePublishDependencyFile"
-          DependsOnTargets="ComputeExcludeFromPublishPackageReferences;
+          DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _HandlePublishFileConflicts"
@@ -485,7 +485,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
-                      ExcludeFromPublishPackageReferences="@(ExcludeFromPublishPackageReference)"
+                      ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                       TargetManifestFileList="@(TargetManifestFileList)"
                       IsSelfContained="$(SelfContained)" />
 
@@ -493,27 +493,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        ComputeExcludeFromPublishPackageReferences
+                                        _ComputeExcludeFromPublishPackageReferences
 
-    Builds up the @(ExcludeFromPublishPackageReference) item by looking for @(PackageReference) items with 
-    <PrivateAssets> metadata.
+    Builds up the @(_ExcludeFromPublishPackageReference) item by looking for @(PackageReference) items where
+    that have Publish=false metadata, or that have PrivateAssets=All and don't specify Publish
     ============================================================
     -->
   <PropertyGroup>
-    <ComputeExcludeFromPublishPackageReferences Condition="'$(ComputeExcludeFromPublishPackageReferences)' == ''">true</ComputeExcludeFromPublishPackageReferences>
+    <_ComputeExcludeFromPublishPackageReferences Condition="'$(_ComputeExcludeFromPublishPackageReferences)' == ''">true</_ComputeExcludeFromPublishPackageReferences>
   </PropertyGroup>
 
-  <Target Name="ComputeExcludeFromPublishPackageReferences"
-          Condition="'$(ComputeExcludeFromPublishPackageReferences)' == 'true'">
+  <Target Name="_ComputeExcludeFromPublishPackageReferences"
+          Condition="'$(_ComputeExcludeFromPublishPackageReferences)' == 'true'">
 
     <ItemGroup>
       
-      <!-- PrivateAssets="All" means exclude from publish, unless ExcludeFromPublish metadata is specified separately -->
-      <PackageReference Update="@(PackageReference)" 
-                        Publish="false"
+      <!-- PrivateAssets="All" means exclude from publish, unless Publish metadata is specified separately -->
+      <PackageReference Publish="false"
                         Condition="('%(PackageReference.PrivateAssets)' == 'All') And ('%(PackageReference.Publish)' == '')"/>
       
-      <ExcludeFromPublishPackageReference Include="@(PackageReference)"
+      <_ExcludeFromPublishPackageReference Include="@(PackageReference)"
                                           Condition="('%(PackageReference.Publish)' == 'false')" />
     </ItemGroup>
 

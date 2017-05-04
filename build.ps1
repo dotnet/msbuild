@@ -26,6 +26,8 @@ if($Help)
     Write-Host "  -FullMSBuild                       Run tests with the full .NET Framework version of MSBuild instead of the .NET Core version"
     Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
+    Write-Host ""
+    Write-Host "Any additional parameters will be passed through to the main invocation of MSBuild"
     exit 0
 }
 
