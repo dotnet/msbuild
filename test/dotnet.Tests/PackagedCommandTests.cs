@@ -16,6 +16,7 @@ using Xunit.Abstractions;
 using Microsoft.Build.Construction;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using System.Xml.Linq;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -161,8 +162,60 @@ namespace Microsoft.DotNet.Tests
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
             result.Should().Pass()
-                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");    
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
 
+        }
+
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
+        public void IfAToolHasNotBeenRestoredForNetCoreApp2_0ItFallsBackToNetCoreApp1_x()
+        {
+            string toolName = "dotnet-portable-v1";
+
+            var toolFolder = Path.Combine(new RepoDirectoriesProvider().NugetPackages,
+                                          ".tools",
+                                          toolName);
+
+            //  Other tests may have restored the tool for netcoreapp2.0, so delete its tools folder
+            if (Directory.Exists(toolFolder))
+            {
+                Directory.Delete(toolFolder, true);
+            }
+
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+
+            testInstance = testInstance.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                //  Remove reference to tool that won't restore on 1.x
+                project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-PreferCliRuntime")
+                    .Remove();
+
+                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
+                    .Single();
+
+                toolReference.Attribute("Include").Value = toolName;
+
+                //  Restore tools for .NET Core 1.1
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "DotnetCliToolTargetFramework", "netcoreapp1.1"));
+
+            });
+
+            testInstance = testInstance.WithRestoreFiles();
+
+            var result =
+                    new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                    .WithWorkingDirectory(testInstance.Root)
+                    .Execute("portable-v1");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
         }
 
         [Fact]

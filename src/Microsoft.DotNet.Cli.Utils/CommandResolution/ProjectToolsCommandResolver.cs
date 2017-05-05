@@ -134,12 +134,35 @@ namespace Microsoft.DotNet.Cli.Utils
                 ProjectToolsCommandResolverName,
                 string.Join(Environment.NewLine, possiblePackageRoots.Select((p) => $"- {p}"))));
 
-            var toolPackageFramework = project.DotnetCliToolTargetFramework;
+            List<NuGetFramework> toolFrameworksToCheck = new List<NuGetFramework>();
+            toolFrameworksToCheck.Add(project.DotnetCliToolTargetFramework);
 
-            var toolLockFile = GetToolLockFile(
-                toolLibraryRange,
-                toolPackageFramework,
-                possiblePackageRoots);
+            //  NuGet restore in Visual Studio may restore for netcoreapp1.0.  So if that happens, fall back to
+            //  looking for a netcoreapp1.0 or netcoreapp1.1 tool restore.
+            if (project.DotnetCliToolTargetFramework.Framework == FrameworkConstants.FrameworkIdentifiers.NetCoreApp &&
+                project.DotnetCliToolTargetFramework.Version >= new Version(2, 0, 0))
+            {
+                toolFrameworksToCheck.Add(NuGetFramework.Parse("netcoreapp1.1"));
+                toolFrameworksToCheck.Add(NuGetFramework.Parse("netcoreapp1.0"));
+            }
+
+            
+            LockFile toolLockFile = null;
+            NuGetFramework toolTargetFramework = null; ;
+
+            foreach (var toolFramework in toolFrameworksToCheck)
+            {
+                toolLockFile = GetToolLockFile(
+                    toolLibraryRange,
+                    toolFramework,
+                    possiblePackageRoots);
+
+                if (toolLockFile != null)
+                {
+                    toolTargetFramework = toolFramework;
+                    break;
+                }
+            }
 
             if (toolLockFile == null)
             {
@@ -152,7 +175,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolLockFile.Path));
 
             var toolLibrary = toolLockFile.Targets
-                .FirstOrDefault(t => toolPackageFramework == t.TargetFramework)
+                .FirstOrDefault(t => toolTargetFramework == t.TargetFramework)
                 ?.Libraries.FirstOrDefault(
                     l => StringComparer.OrdinalIgnoreCase.Equals(l.Name, toolLibraryRange.Name));
             if (toolLibrary == null)
@@ -168,7 +191,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var depsFilePath = GetToolDepsFilePath(
                 toolLibraryRange,
-                toolPackageFramework,
+                toolTargetFramework,
                 toolLockFile,
                 depsFileRoot,
                 project.ToolDepsJsonGeneratorProject);
