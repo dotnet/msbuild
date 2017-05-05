@@ -2999,6 +2999,11 @@
         <target state="translated">(Aucun message spécifié)</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
+        <target state="new">MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
