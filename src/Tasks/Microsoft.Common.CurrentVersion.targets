@@ -2053,8 +2053,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target Name="FindReferenceAssembliesForReferences"
           DependsOnTargets="$(ResolveReferencesDependsOn)">
-      <ItemGroup>
-      <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')" />
+    <ItemGroup>
+      <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')"
+                                      Condition="'$(CompileUsingReferenceAssemblies)' != 'false'" />
+      <ReferencePathWithRefAssemblies Include="@(ReferencePath)"
+                                      Condition="'$(CompileUsingReferenceAssemblies)' == 'false'" />
     </ItemGroup>
   </Target>
 
