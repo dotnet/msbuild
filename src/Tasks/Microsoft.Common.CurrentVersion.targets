@@ -2055,7 +2055,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           DependsOnTargets="$(ResolveReferencesDependsOn)">
     <ItemGroup>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')"
-                                      Condition="'$(CompileUsingReferenceAssemblies)' != 'false'" />
+                                      Condition="'$(CompileUsingReferenceAssemblies)' != 'false'">
+        <OriginalPath Condition="'%(ReferencePath.Identity)' != '@(ReferencePath->'%(ReferenceAssembly)')'">%(ReferencePath.Identity)</OriginalPath>
+      </ReferencePathWithRefAssemblies>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath)"
                                       Condition="'$(CompileUsingReferenceAssemblies)' == 'false'" />
     </ItemGroup>
