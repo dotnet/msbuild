@@ -54,7 +54,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETStandardTargetFrameworkVersion)'">$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
 
-    <!-- Default to use v1.6.1 (latest stable release) -->
+    <!-- If targeting .NET Standard 1.x, use version 1.6.1 of the package.  This is so that when projects are packed, the dependency on the package produced won't change when
+         updating to the 2.0 or higher SDK.  When targeting .NET Standard 2.0 or higher, the NETStandard.Library reference won't show up as a dependency of the package
+         produced, so we will roll forward to the latest version. -->
+    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
+    
+    <!-- Default to use the latest stable release.  Currently this is the same as the previous clause, but when we have a stable 2.0 package this should change. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">1.6.1</NETStandardImplicitPackageVersion>
   </PropertyGroup>
   

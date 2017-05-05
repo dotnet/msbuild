@@ -50,6 +50,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
 
         [Required]
+        public bool IncludeMainProject { get; set; }
+
+        [Required]
         public ITaskItem[] ReferencePaths { get; set; }
 
         [Required]
@@ -60,7 +63,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem CompilerOptions { get; set; }
 
-        public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
+        public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
 
         public string[] TargetManifestFileList { get; set; }
 
@@ -117,11 +120,11 @@ namespace Microsoft.NET.Build.Tasks
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
-                ProjectPath,
-                AssemblyName,
-                AssemblyExtension,
-                AssemblyVersion,
-                AssemblySatelliteAssemblies);
+                    ProjectPath,
+                    AssemblyName,
+                    AssemblyExtension,
+                    AssemblyVersion,
+                    AssemblySatelliteAssemblies);            
 
             IEnumerable<ReferenceInfo> frameworkReferences =
                 ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
@@ -133,7 +136,7 @@ namespace Microsoft.NET.Build.Tasks
                 ReferencePaths,
                 ReferenceSatellitePaths);
 
-            IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+            IEnumerable<string> excludeFromPublishAssets = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
@@ -142,10 +145,11 @@ namespace Microsoft.NET.Build.Tasks
                 IsSelfContained);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithMainProjectInDepsFile(IncludeMainProject)
                 .WithFrameworkReferences(frameworkReferences)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
-                .WithPrivateAssets(privateAssets)
+                .WithExcludeFromPublishAssets(excludeFromPublishAssets)
                 .WithCompilationOptions(compilationOptions)
                 .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .WithPackagesThatWhereFiltered(GetFilteredPackages())

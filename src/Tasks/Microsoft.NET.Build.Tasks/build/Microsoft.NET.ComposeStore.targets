@@ -56,7 +56,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                              RestoreProj=$(RestoreProj);
                              DisableImplicitFrameworkReferences=true;
                              SkipUnchangedFiles=$(SkipUnchangedFiles);
-                             PreserveStoreLayout=$(PreserveStoreLayout)"
+                             PreserveStoreLayout=$(PreserveStoreLayout);
+                             CreateProfilingSymbols=$(CreateProfilingSymbols);
+                             StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)"
                  ContinueOnError="WarnAndContinue">
       <Output ItemName="AllResolvedPackagesPublished" TaskParameter="TargetOutputs" />
     </MSBuild>
@@ -81,10 +83,13 @@ Copyright (c) .NET Foundation. All rights reserved.
           PublishDir=$(PublishDir);
           StoreStagingDir=$(StoreStagingDir);
           TargetFramework=$(TargetFramework);
+          RuntimeIdentifier=$(RuntimeIdentifier);
           JitPath=$(JitPath);
           Crossgen=$(Crossgen);
           SkipUnchangedFiles=$(SkipUnchangedFiles);
-          PreserveStoreLayout=$(PreserveStoreLayout)
+          PreserveStoreLayout=$(PreserveStoreLayout);
+          CreateProfilingSymbols=$(CreateProfilingSymbols);
+          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)
         </Properties>
       </PackageReferencesToStore>
     </ItemGroup>
@@ -163,6 +168,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="StoreWorkerMain;">
     <ItemGroup>
       <_OptimizedResolvedFileToPublish Include="$(StoreStagingDir)\**\*.*" />
+      <_OptimizedSymbolFileToPublish Include="$(StoreSymbolsStagingDir)\**\*.*" />
     </ItemGroup>
 
     <Copy SourceFiles = "@(_OptimizedResolvedFileToPublish)"
@@ -175,6 +181,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
+    </Copy>
+
+    <Copy SourceFiles="@(_OptimizedSymbolFileToPublish)"
+          DestinationFolder="$(ProfilingSymbolsDir)%(RecursiveDir)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          Condition="'@(_OptimizedSymbolFileToPublish)' != ''"
+          SkipUnchangedFiles="$(SkipUnchangedFiles)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
   </Target>
   
@@ -205,6 +221,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <DefaultComposeDir>$(HOME)</DefaultComposeDir>
       <DefaultComposeDir Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</DefaultComposeDir>
       <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'store'))</DefaultComposeDir>
+
+      <_ProfilingSymbolsDirectoryName>symbols</_ProfilingSymbolsDirectoryName>
+      <DefaultProfilingSymbolsDir>$([System.IO.Path]::Combine($(DefaultComposeDir), $(_ProfilingSymbolsDirectoryName)))</DefaultProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' == '' and '$(ComposeDir)' != ''">$([System.IO.Path]::Combine($(ComposeDir), $(_ProfilingSymbolsDirectoryName)))</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ProfilingSymbolsDir), $(PlatformTarget)))</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(ProfilingSymbolsDir)' == ''">$(DefaultProfilingSymbolsDir)</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ProfilingSymbolsDir), $(_TFM)))</ProfilingSymbolsDir>
+      <ProfilingSymbolsDir Condition="!HasTrailingSlash('$(ProfilingSymbolsDir)')">$(ProfilingSymbolsDir)\</ProfilingSymbolsDir>
+
       <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
       <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
@@ -215,9 +240,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ComposeWorkingDir Condition="'$(ComposeWorkingDir)' == ''">$([System.IO.Path]::Combine($(TEMP), $(_RandomFileName)))</ComposeWorkingDir>
       <ComposeWorkingDir>$([System.IO.Path]::GetFullPath($(ComposeWorkingDir)))</ComposeWorkingDir>
       <StoreStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"StagingDir"))</StoreStagingDir>      <!-- Will contain optimized managed assemblies in nuget cache layout -->
+      <StoreSymbolsStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"SymbolsStagingDir"))</StoreSymbolsStagingDir>
       <RestoreProj>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Restore.csproj"))</RestoreProj>          <!-- To minimize parsing huge input files during restore stage for packages -->
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+      <CreateProfilingSymbols Condition="'$(CreateProfilingSymbols)' == ''">false</CreateProfilingSymbols>
     </PropertyGroup>
 
 
@@ -288,6 +315,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  Properties="RestoreGraphProjectInput=$(_PackageProjFile);
                              DisableImplicitFrameworkReferences=true;
                              RestoreOutputPath=$(StoreWorkerWorkingDir);
+                             RuntimeIdentifier=$(RuntimeIdentifier);
                              TargetFramework=$(TargetFramework);"/>
   </Target>
 

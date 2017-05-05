@@ -45,6 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectRuntimeConfigFileName Condition="'$(ProjectRuntimeConfigFileName)' == ''">$(AssemblyName).runtimeconfig.json</ProjectRuntimeConfigFileName>
     <ProjectRuntimeConfigFilePath Condition="'$(ProjectRuntimeConfigFilePath)' == ''">$(TargetDir)$(ProjectRuntimeConfigFileName)</ProjectRuntimeConfigFilePath>
     <ProjectRuntimeConfigDevFilePath Condition="'$(ProjectRuntimeConfigDevFilePath)' == ''">$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</ProjectRuntimeConfigDevFilePath>
+    <IncludeMainProjectInDepsFile Condition=" '$(IncludeMainProjectInDepsFile)' == '' ">true</IncludeMainProjectInDepsFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -62,7 +63,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
   </PropertyGroup>
-
+  
   <PropertyGroup>
     <CoreBuildDependsOn>
       $(CoreBuildDependsOn);
@@ -87,7 +88,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(ProjectDepsFilePath)">
 
     <!-- 
-    Explicitly not passing any PrivateAssets information during 'Build', since these dependencies
+    Explicitly not passing any ExcludeFromPublishPackageReferences information during 'Build', since these dependencies
     should be included during 'Build'.  They are only excluded on 'Publish'.
     -->
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
@@ -100,6 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       ReferencePaths="@(ReferencePath)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
+                      IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       FilesToSkip="@(_ConflictPackageFiles)"

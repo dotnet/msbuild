@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <SigningConfig Include="$(MSBuildThisFileDirectory)SignToolConfig.json" Condition="'$(BuildTemplates)' != 'true'"/>
-    <SigningConfig Include="$(MSBuildThisFileDirectory)SignToolTemplateConfig.json" Condition="'$(BuildTemplates)' == 'true'"/>
 
     <!-- Make note, without actually knowing what's included in the SigningConfig,
          we just assume that everything in the output dir is, and treat them
@@ -16,7 +15,7 @@
     <PackageAssets Include="$(OutDir)\*.*" Exclude="*.log" />
   </ItemGroup>
 
-  <Target Name="Build" Outputs="@(PackageAssets)">
+  <Target Name="Build" Outputs="@(PackageAssets)" Condition=" '@(SigningConfig)' != '' ">
     <!-- If not RealSigning -->
     <Message Text="Skipping Real Signing" Condition="'$(SignType)'!='real'"/>
 

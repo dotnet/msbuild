@@ -345,7 +345,7 @@ public static class Program
                 .WithSource()
                 .Restore(relativePath: "HelloWorld", args: $"/p:RuntimeIdentifiers={rid}");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, helloWorldAsset.TestRoot, @"DeployProj\Deploy.proj");
+            var buildCommand = new BuildCommand(Stage0MSBuild, helloWorldAsset.TestRoot, Path.Combine("DeployProj", "Deploy.proj"));
 
             buildCommand
                 .Execute()

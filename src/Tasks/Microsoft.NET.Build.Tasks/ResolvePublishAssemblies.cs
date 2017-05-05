@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
-        public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
+        public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
 
         public bool PreserveStoreLayout { get; set; }
 
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             var lockFileCache = new LockFileCache(BuildEngine4);
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
-            IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+            IEnumerable<string> excludeFromPublishPackageIds = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
             HashSet<PackageIdentity> packagestoBeFiltered = null;
 
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tasks
 
             var assemblyResolver =
                 new PublishAssembliesResolver(packageResolver)
-                    .WithPrivateAssets(privateAssetsPackageIds)
+                    .WithExcludeFromPublish(excludeFromPublishPackageIds)
                     .WithPreserveStoreLayout(PreserveStoreLayout);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = assemblyResolver.Resolve(projectContext);
