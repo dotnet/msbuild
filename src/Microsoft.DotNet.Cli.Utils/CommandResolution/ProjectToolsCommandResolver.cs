@@ -141,9 +141,33 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolPackageFramework,
                 possiblePackageRoots);
 
+
+            //  NuGet restore in Visual Studio may restore for netcoreapp1.0.  So if that happens, fall back to
+            //  looking for a netcoreapp1.0 or netcoreapp1.1 tool restore.
             if (toolLockFile == null)
             {
-                return null;
+                if (toolPackageFramework.Framework == FrameworkConstants.FrameworkIdentifiers.NetCoreApp &&
+                    toolPackageFramework.Version >= new Version(2, 0, 0))
+                {
+                    foreach (var fallbackFramework in new [] { "netcoreapp1.1", "netcoreapp1.0"})
+                    {
+                        toolPackageFramework = NuGetFramework.Parse(fallbackFramework);
+                        toolLockFile = GetToolLockFile(
+                            toolLibraryRange,
+                            toolPackageFramework,
+                            possiblePackageRoots);
+
+                        if (toolLockFile != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (toolLockFile == null)
+                {
+                    return null;
+                }
             }
 
             Reporter.Verbose.WriteLine(string.Format(
