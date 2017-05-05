@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Tools.Test
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
         public const string CmdLoggerDescription = @"Specify a logger for test results.
-                                        Example: --logger ""trx[;LogFileName=<Defaults to unique file name>]""";
+                                        Example: --logger ""trx[;LogFileName=<Defaults to unique file name>]""
+                                        More info on logger arguments support:https://aka.ms/vstest-report";
 
         public const string CmdConfiguration = "CONFIGURATION";
 
@@ -58,12 +59,22 @@ namespace Microsoft.DotNet.Tools.Test
 
         public const string CmdNoBuildDescription = @"Do not build project before testing.";
 
-        public const string RunSettingsArgsHelpText = @"Any extra command-line runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
-                                        Example: -- RunConfiguration.ResultsDirectory=""C:\users\user\desktop\Results Directory"" MSTest.DeploymentEnabled=false";
-
         public const string CmdResultsDirectoryDescription = @"The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
                                         Example: --results-directory <PATH_TO_RESULTS_DIRECTORY>";
 
         public const string CmdPathToResultsDirectory = "PATH_TO_RESULTS_DIRECTORY";
+
+        public const string RunSettingsArgumentsDescription = @"
+
+RunSettings arguments:
+  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after ""-- "". Note the space after --. 
+  Use a space to separate multiple[name] =[value].
+  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
+  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True";
+
+        public const string cmdCollectFriendlyName = "DATA_COLLECTOR_FRIENDLY_NAME";
+
+        public const string cmdCollectDescription = @"Enables data collector for the test run.
+                                        More info here : https://aka.ms/vstest-collect";
     }
 }

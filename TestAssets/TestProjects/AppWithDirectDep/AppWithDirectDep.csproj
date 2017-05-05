@@ -7,8 +7,6 @@
     <AssemblyName>AppWithDirectDep</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
-    <DotnetCliToolTargetFramework>netcoreapp2.0</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

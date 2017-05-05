@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="NuGet.Configuration" Version ="4.3.0-beta1-2418"/>
+  </ItemGroup>
+</Project>

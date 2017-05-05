@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Restore.Tests
         [Fact]
         public void ItRestoresTestAppToSpecificDirectory()
         {
-            var rootPath = TestAssets.Get("VSTestDotNetCore").CreateInstance().WithSourceFiles().Root.FullName;
+            var rootPath = TestAssets.Get("VSTestCore").CreateInstance().WithSourceFiles().Root.FullName;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));

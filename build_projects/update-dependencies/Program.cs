@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Scripts
 
             List<BuildInfo> buildInfos = new List<BuildInfo>();
 
-            buildInfos.Add(GetBuildInfo("Roslyn", s_config.RoslynVersionFragment, fetchLatestReleaseFile: false));
             buildInfos.Add(GetBuildInfo("CoreSetup", s_config.CoreSetupVersionFragment, fetchLatestReleaseFile: false));
 
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();

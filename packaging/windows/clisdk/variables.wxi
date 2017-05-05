@@ -17,9 +17,11 @@
 
   <?define Platform   =   "$(sys.BUILDARCH)" ?>
   <?if $(var.Platform)=x86?>
+  <?define WixQuietExec="WixQuietExec"?>
   <?define Program_Files="ProgramFilesFolder"?>
   <?define Win64AttributeValue=no?>
   <?elseif $(var.Platform)=x64?>
+  <?define WixQuietExec="WixQuietExec64"?>
   <?define Program_Files="ProgramFiles64Folder"?>
   <?define Win64AttributeValue=yes?>
   <?else?>
