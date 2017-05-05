@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks
     {
         private  HashSet<PackageIdentity> _allResolvedPackages = new HashSet<PackageIdentity>();
         private readonly IPackageResolver _packageResolver;
-        private IEnumerable<string> _privateAssetPackageIds;
+        private IEnumerable<string> _excludeFromPublishPackageIds;
         private bool _preserveStoreLayout;
 
         public PublishAssembliesResolver(IPackageResolver packageResolver)
@@ -22,9 +22,9 @@ namespace Microsoft.NET.Build.Tasks
             _packageResolver = packageResolver;
         }
 
-        public PublishAssembliesResolver WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
+        public PublishAssembliesResolver WithExcludeFromPublish(IEnumerable<string> excludeFromPublishPackageIds)
         {
-            _privateAssetPackageIds = privateAssetPackageIds;
+            _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
             return this;
         }
         public PublishAssembliesResolver WithPreserveStoreLayout(bool preserveStoreLayout)
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_excludeFromPublishPackageIds))
             {
                 if (targetLibrary.Type != "package")
                 {

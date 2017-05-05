@@ -14,15 +14,11 @@
 
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
 
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Nuget.proj" />
 
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetStandard.vsmanproj" />
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetStandard.vsmanproj" />
 
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Dependencies\**\*.csproj" />
 

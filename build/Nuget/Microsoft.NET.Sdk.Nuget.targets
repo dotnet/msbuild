@@ -44,6 +44,10 @@ vs.localizedResources
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\build"' />
       <SdkSwrLines Include='%20%20file source="%24(OutputPath)PackagesLayout\build\%(LaidOutSdk_BuildFiles.Filename)%(LaidOutSdk_BuildFiles.Extension)"' />
 
+      <LaidOutSdk_BuildGenerateDepsFiles Include="$(PackagesLayoutDir)build\GenerateDeps\*" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\build\GenerateDeps"' />
+      <SdkSwrLines Include='%20%20file source="%24(OutputPath)PackagesLayout\build\GenerateDeps\%(LaidOutSdk_BuildGenerateDepsFiles.Filename)%(LaidOutSdk_BuildGenerateDepsFiles.Extension)"' />
+
       <LaidOutSdk_BuildCrossTargetingFiles Include="$(PackagesLayoutDir)buildCrossTargeting\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\buildCrossTargeting"' />
       <SdkSwrLines Include='%20%20file source="%24(OutputPath)PackagesLayout\buildCrossTargeting\%(LaidOutSdk_BuildCrossTargetingFiles.Filename)%(LaidOutSdk_BuildCrossTargetingFiles.Extension)"' />      

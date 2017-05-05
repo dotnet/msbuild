@@ -10,7 +10,9 @@ param(
     [switch]$SkipTests,
     [switch]$FullMSBuild,
     [switch]$RealSign,
-    [switch]$Help)
+    [switch]$Help,
+    [Parameter(Position=0, ValueFromRemainingArguments=$true)]
+    $ExtraParameters)
 
 if($Help)
 {
@@ -24,6 +26,8 @@ if($Help)
     Write-Host "  -FullMSBuild                       Run tests with the full .NET Framework version of MSBuild instead of the .NET Core version"
     Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
+    Write-Host ""
+    Write-Host "Any additional parameters will be passed through to the main invocation of MSBuild"
     exit 0
 }
 
@@ -100,17 +104,10 @@ $commonBuildArgs = echo $RepoRoot\build\build.proj /m:1 /nologo /p:Configuration
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
+$msbuildBinLog = Join-Path -path $logPath -childPath "sdk.binlog"
 
-dotnet msbuild /t:$buildTarget $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+dotnet msbuild /t:$buildTarget $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog /bl:$msbuildBinLog $ExtraParameters
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
-
-# Template Build
-$msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
-$msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
-$msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
-
-msbuild /t:restore /p:RestorePackagesPath=$PackagesPath $RepoRoot\sdk-templates.sln /verbosity:$Verbosity
-if($LASTEXITCODE -ne 0) { throw "Failed to restore nuget packages for templates" }
 
 msbuild  /t:$buildTarget $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build templates" }

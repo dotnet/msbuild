@@ -4,13 +4,14 @@
 using System;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using System.IO;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
     public sealed class PackCommand : TestCommand
     {
-        public PackCommand(MSBuildTest msbuild, string projectPath)
-            : base(msbuild, projectPath)
+        public PackCommand(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
+            : base(msbuild, projectPath, relativePathToProject)
         {
         }
 
@@ -22,6 +23,16 @@ namespace Microsoft.NET.TestFramework.Commands
             var command = MSBuild.CreateCommandForTarget("pack", newArgs.ToArray());
 
             return command.Execute();
+        }
+
+        public string GetIntermediateNuspecPath(string packageId = null, string packageVersion = "1.0.0")
+        {
+            if (packageId == null)
+            {
+                packageId = Path.GetFileNameWithoutExtension(ProjectFile);
+            }
+
+            return Path.Combine(GetBaseIntermediateDirectory().FullName, $"{packageId}.{packageVersion}.nuspec");
         }
     }
 }

@@ -56,7 +56,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 else
                 {
-                    _runtimeRid = rid;                    
+                    _runtimeRid = rid;
                 }
             }
         }
@@ -79,7 +79,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
 
-            List<string> files_on_disk = new List < string > {
+            List<string> files_on_disk = new List<string> {
                "artifact.xml",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{FileConstants.DynamicLibSuffix}",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
@@ -93,7 +93,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
             //valid artifact.xml
-           var knownpackage = new HashSet<PackageIdentity>();
+            var knownpackage = new HashSet<PackageIdentity>();
 
             knownpackage.Add(new PackageIdentity("Microsoft.NETCore.Targets", NuGetVersion.Parse("1.2.0-beta-24821-02")));
             knownpackage.Add(new PackageIdentity("System.Private.Uri", NuGetVersion.Parse("4.4.0-beta-24821-02")));
@@ -113,11 +113,11 @@ namespace Microsoft.NET.Publish.Tests
 
             packagescomposed.Count.Should().Be(knownpackage.Count);
 
-            foreach(var pkg in packagescomposed)
+            foreach (var pkg in packagescomposed)
             {
-                knownpackage.Should().Contain(elem => elem.Equals(pkg),"package {0}, version {1} was not expected to be stored", pkg.Id, pkg.Version);
+                knownpackage.Should().Contain(elem => elem.Equals(pkg), "package {0}, version {1} was not expected to be stored", pkg.Id, pkg.Version);
             }
-            
+
         }
         [Fact]
         public void compose_with_fxfiles()
@@ -301,6 +301,52 @@ namespace Microsoft.NET.Publish.Tests
             {
                 runtimeFolder.Delete(true);
             }
+        }
+
+        [Fact]
+        public void It_creates_profiling_symbols()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // profiling symbols are not supported on OSX
+                return;
+            }
+
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+                //  See https://github.com/dotnet/sdk/issues/1077
+                return;
+            }
+
+            TestAsset targetManifestsAsset = _testAssetsManager
+                .CopyTestAsset("TargetManifests")
+                .WithSource();
+
+            var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
+            var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
+
+            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
+                .Execute(
+                    $"/p:RuntimeIdentifier={_runtimeRid}",
+                    "/p:TargetFramework=netcoreapp2.0",
+                    $"/p:ComposeDir={outputFolder}",
+                    $"/p:ComposeWorkingDir={workingDir}",
+                    "/p:DoNotDecorateComposeDir=true",
+                    "/p:PreserveComposeWorkingDir=true",
+                    "/p:CreateProfilingSymbols=true")
+                .Should()
+                .Pass();
+
+            var symbolFileExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ni.pdb" : ".map";
+            var symbolsFolder = new DirectoryInfo(Path.Combine(outputFolder, "symbols"));
+
+            var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
+            newtonsoftSymbolsFolder.Should().Exist();
+
+            var newtonsoftSymbolsFiles = newtonsoftSymbolsFolder.GetFiles().ToArray();
+            newtonsoftSymbolsFiles.Length.Should().Be(1);
+            newtonsoftSymbolsFiles[0].Name.Should().StartWith("Newtonsoft.Json").And.EndWith(symbolFileExtension);
         }
 
         private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)

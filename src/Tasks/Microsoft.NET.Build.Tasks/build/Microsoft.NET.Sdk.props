@@ -103,9 +103,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Path to project that the .NET CLI will build in order to generate deps.json files for .NET CLI tools -->
+    <ToolDepsJsonGeneratorProject>$(MSBuildThisFileDirectory)GenerateDeps\GenerateDeps.proj</ToolDepsJsonGeneratorProject>
+  </PropertyGroup>
   
   <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+  
+  <!-- List of supported .NET Core and .NET Standard TFMs -->
+  <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
   
   <!-- Temporary workarounds -->
   <PropertyGroup>
