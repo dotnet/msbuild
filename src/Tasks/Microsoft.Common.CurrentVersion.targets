@@ -1372,9 +1372,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterResolveReferences
     </ResolveReferencesDependsOn>
   </PropertyGroup>
+
+  <!-- FindReferenceAssembliesForReferences needs to see a fully-populated @(ReferencePath),
+       so it should run after all of the subcomponents of ResolveReferences, including
+       user overrides of AfterResolveReferences and targets added by appending to
+       $(ResolveReferencesDependsOn) (like ImplicitlyExpandDesignTimeFacades). So list it
+       last explicitly, rather than adding it to the property.   -->
   <Target
       Name="ResolveReferences"
-      DependsOnTargets="$(ResolveReferencesDependsOn)"/>
+      DependsOnTargets="$(ResolveReferencesDependsOn);FindReferenceAssembliesForReferences"/>
 
   <!--
     ============================================================
@@ -2028,8 +2034,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
     </ResolveAssemblyReference>
+  </Target>
 
-    <ItemGroup>
+  <!--
+    ============================================================
+
+                                        FindReferenceAssembliesForReferences
+
+    Given the list of references, create a list of assemblies to pass to the compiler that
+    includes reference assemblies rather than implementation assemblies where possible.
+
+        [IN]
+        @(ReferencePath) - List of assembly references as resolved paths with ReferenceAssembly metadata
+
+        [OUT]
+        @(ReferencePathWithRefAssemblies) - Paths to resolved reference (or implementation) assemblies.
+    ============================================================
+    -->
+  <Target Name="FindReferenceAssembliesForReferences"
+          DependsOnTargets="$(ResolveReferencesDependsOn)">
+      <ItemGroup>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')" />
     </ItemGroup>
   </Target>
