@@ -133,23 +133,23 @@
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
         <source>{0} will be compiled because the tracking log is not available.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
         <source>{0} will be compiled because it was not found in the tracking log.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
         <source>{0} will be compiled because not all outputs are available.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
         <source>{0} will be compiled because dependency {1} was missing.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
         <source>{0} will be compiled because {1} was modified at {2}.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
         <source>{0} will be compiled.</source>
@@ -169,7 +169,7 @@
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
         <source>{0} will be compiled because output {1} does not exist.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">
         <source>Read Tracking Logs:</source>
