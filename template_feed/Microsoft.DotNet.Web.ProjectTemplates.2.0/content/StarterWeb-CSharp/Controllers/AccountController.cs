@@ -39,7 +39,7 @@ namespace Company.WebApplication1.Controllers
         [HttpGet]
         public IActionResult Manage()
         {
-            return RedirectToAction("Index", "Manage", new { area = Identity.IdentityServiceConstants.Tenant });
+            return RedirectToAction("Index", "Manage", new { area = "IdentityService" });
         }
 #elseif (IndividualB2CAuth)
         [HttpGet]
