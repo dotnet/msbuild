@@ -31,7 +31,8 @@
             "Controllers/AccountController.cs",
             "Views/Account/**",
             "Views/Shared/_LoginPartial.cshtml",
-            "Extensions/AuthenticationServiceCollectionExtensions.cs"
+            "Extensions/AuthenticationServiceCollectionExtensions.cs",
+            "urlRewrite.config"
           ]
         },
         {
