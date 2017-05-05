@@ -37,7 +37,8 @@
         {
           "condition": "(!IndividualAuth && !OrganizationalAuth)",
           "exclude": [
-            "urlRewrite.config"
+            "urlRewrite.config",
+            "Extensions/**"
           ]
         },
         {
