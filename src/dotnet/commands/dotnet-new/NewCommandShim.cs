@@ -29,13 +29,14 @@ namespace Microsoft.DotNet.Tools.New
         {
             var sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
             var telemetry = new Telemetry(new NuGetCacheSentinel(new CliFallbackFolderPathCalculator()), sessionId);
-            var logger = new TelemetryLogger((name, props, measures) =>
-            {
-                if (telemetry.Enabled)
-                {
-                    telemetry.TrackEvent(name, props, measures);
-                }
-            });
+            var logger = new TelemetryLogger(null);
+            //(name, props, measures) =>
+            //{
+            //    if (telemetry.Enabled)
+            //    {
+            //        telemetry.TrackEvent(name, props, measures);
+            //    }
+            //});
             return New3Command.Run(CommandName, CreateHost(), logger, FirstRun, args);
         }
 
