@@ -23,6 +23,21 @@ Options:
   -h, --help   Show help information
 ";
 
+        private const string RemoveCommandHelpText = @".NET Remove Command
+
+Usage: dotnet remove [options] <PROJECT> [command]
+
+Arguments:
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information
+
+Commands:
+  package <PACKAGE_NAME>   .NET Remove Package reference Command.
+  reference <args>         .NET Remove Project to Project reference Command
+";
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
@@ -42,6 +57,7 @@ Options:
                 .ExecuteWithCapturedOutput($"remove {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(RemoveCommandHelpText);
         }
 
         [Fact]
