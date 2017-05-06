@@ -6,12 +6,6 @@
     <AssemblyName>dotnet-fallbackfoldertool</AssemblyName>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
+  
 </Project>

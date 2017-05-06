@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- This test asset needs to import the general dir.props in order to get the SdkNugetVersion property.
+      This is why it also needs to explicitly set DisableImplicitFrameworkReferences to false. -->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-    <AssemblyName>dotnet-dependency-tool-invoker</AssemblyName>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8;dnxcore50</PackageTargetFallback>
     <VersionSuffix></VersionSuffix>
-    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
     <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
@@ -18,12 +18,6 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs;..\..\..\src\dotnet\CommonLocalizableStrings.cs;" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
   </ItemGroup>
 
   <ItemGroup>

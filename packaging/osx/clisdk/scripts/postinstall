@@ -11,4 +11,8 @@ INSTALL_DESTINATION=$2
 # A temporary fix for the permissions issue(s)
 chmod -R 755 $INSTALL_DESTINATION
 
+# Run 'dotnet new' as user to trigger the first time experience to initialize the cache
+INSTALLER_USER=$(stat -f '%Su' $HOME)
+su - $INSTALLER_USER -c "$INSTALL_DESTINATION/dotnet new > /dev/null 2>&1 || true"
+
 exit 0

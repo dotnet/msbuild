@@ -26,5 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
         NuGetFramework DotnetCliToolTargetFramework { get; }
 
         Dictionary<string, string> EnvironmentVariables { get; }
+
+        string ToolDepsJsonGeneratorProject { get; }
     }
 }

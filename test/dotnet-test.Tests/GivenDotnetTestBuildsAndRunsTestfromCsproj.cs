@@ -17,20 +17,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void MSTestSingleTFM()
         {
-            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCore";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles();
-
-            var testProjectDirectory = testInstance.Root.FullName;
-
-            // Restore project VSTestDotNetCore
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
-                .Should()
-                .Pass();
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("3");
 
             // Call test
             CommandResult result = new DotnetTestCommand()
@@ -47,15 +34,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void XunitSingleTFM()
         {
-            // Copy VSTestXunitDotNetCore project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestXunitDotNetCore";
+            // Copy XunitCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "XunitCore";
             var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
+                            .CreateInstance("4")
                             .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
-            // Restore project VSTestXunitDotNetCore
+            // Restore project XunitCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -77,11 +64,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
-            // Copy and restore VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("5");
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp2.0", "VSTestDotNetCore.dll");
+                                   configuration, "netcoreapp2.0", "VSTestCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
@@ -96,10 +83,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void TestWillCreateTrxLoggerInTheSpecifiedResultsDirectoryBySwitch()
         {
-            // Copy and restore VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("6");
 
-            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "TestResults", "netcoreappx.y");
+            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "TR", "x.y");
 
             // Delete trxLoggerDirectory if it exist
             if (Directory.Exists(trxLoggerDirectory))
@@ -127,10 +114,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void ItCreatesTrxReportInTheSpecifiedResultsDirectoryByArgs()
         {
-            // Copy and restore VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("7");
 
-            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "ResultsDirectory");
+            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "RD");
 
             // Delete trxLoggerDirectory if it exist
             if (Directory.Exists(trxLoggerDirectory))
@@ -155,12 +142,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/5035")]
+        [Fact]
         public void ItBuildsAndTestsAppWhenRestoringToSpecificDirectory()
         {
-            var rootPath = TestAssets.Get("VSTestDotNetCore").CreateInstance().WithSourceFiles().Root.FullName;
+            // Creating folder with name short name "RestoreTest" to avoid PathTooLongException
+            var rootPath = TestAssets.Get("VSTestCore").CreateInstance("8").WithSourceFiles().Root.FullName;
 
-            string dir = "pkgs";
+            // Moving pkgs folder on top to avoid PathTooLongException
+            string dir = @"..\..\..\..\pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             string args = $"--packages \"{dir}\"";
@@ -186,17 +175,35 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
+        [Fact]
+        public void ItUsesVerbosityPassedToDefineVerbosityOfConsoleLoggerOfTheTests()
+        {
+            // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("9");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput("-v q");
+
+            // Verify
+            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().NotContain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+            result.StdOut.Should().NotContain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            result.ExitCode.Should().Be(1);
+        }
+
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
         {
-            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCore";
+            // Copy VSTestCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestCore";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance(callingMethod)
                             .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
-            // Restore project VSTestDotNetCore
+            // Restore project VSTestCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()

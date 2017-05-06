@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
         }
 
-        public static TestCommand FromArgs(string[] args, string msbuildPath=null)
+        public static TestCommand FromArgs(string[] args, string msbuildPath = null)
         {
             var msbuildArgs = new List<string>()
             {
@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             var result = parser.ParseFrom("dotnet test", args);
 
+            UpdateRunSettingsArgumentsText();
             result.ShowHelpOrErrorIfAppropriate();
 
             var parsedTest = result["dotnet"]["test"];
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             msbuildArgs.AddRange(parsedTest.Arguments);
 
-            var runSettingsOptions = 
+            var runSettingsOptions =
                 result.UnparsedTokens
                     .Select(GetSemiColonEscapedString);
 
@@ -53,6 +54,17 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildArgs.Add($"/p:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
+            var verbosityArg = msbuildArgs.LastOrDefault(arg => arg.StartsWith("/verbosity"));
+
+            if (!string.IsNullOrEmpty(verbosityArg))
+            {
+                var verbosity = verbosityArg.Split(':');
+                if (verbosity.Length == 2)
+                {
+                    msbuildArgs.Add($"/p:VSTestVerbosity={verbosity[1]}");
+                }
+            }
+
             return new TestCommand(msbuildArgs, msbuildPath);
         }
 
@@ -61,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Test
             DebugHelper.HandleDebugSwitch(ref args);
 
             TestCommand cmd;
-            
+
             try
             {
                 cmd = FromArgs(args);
@@ -95,6 +107,12 @@ namespace Microsoft.DotNet.Tools.Test
             }
 
             return array;
+        }
+
+        private static void UpdateRunSettingsArgumentsText()
+        {
+            DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";
+            DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
         }
     }
 }

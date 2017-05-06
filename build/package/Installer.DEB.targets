@@ -75,6 +75,11 @@
       <DebianConfigJsonFile>$(LayoutDirectory)/debian_config.json</DebianConfigJsonFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <DebianPostinstTemplateFile>$(RepoRoot)/packaging/deb/postinst</DebianPostinstTemplateFile>
+      <DebianPostinstFile>$(LayoutDirectory)/debian/postinst</DebianPostinstFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>

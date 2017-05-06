@@ -13,17 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
             string commandName,
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
-            string nugetPackagesRoot,
-            CommandResolutionStrategy commandResolutionStrategy,
-            string depsFilePath,
-            string runtimeConfigPath);
-
-        CommandSpec CreateCommandSpecFromLibrary(
-            LockFileTargetLibrary toolLibrary,
-            string commandName,
-            IEnumerable<string> commandArguments,
-            IEnumerable<string> allowedExtensions,
-            IEnumerable<string> packageFolders,
+            LockFile lockFile,
             CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath);

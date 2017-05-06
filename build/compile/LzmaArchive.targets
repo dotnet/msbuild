@@ -2,127 +2,20 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
-      <UploadNuGetPackagesArchiveToAzure>false</UploadNuGetPackagesArchiveToAzure>
-      <NuGetConfigContent>
-        &lt;configuration&gt;
-        &lt;packageSources&gt;
-        &lt;add key="configurable.source" value="%CLI_LZMA_PACKAGE_SOURCE%" /&gt;
-        &lt;/packageSources&gt;
-        &lt;/configuration&gt;
-      </NuGetConfigContent>
-
-      <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
-      <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
-      <LZMANuGetConfigFilePath Condition=" '$(CLI_LZMA_PACKAGE_SOURCE)' != '' ">$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
-      <LZMANuGetConfigFilePath Condition=" '$(LZMANuGetConfigFilePath)' == '' ">$(RepoRoot)/NuGet.Config</LZMANuGetConfigFilePath>
-      <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
-      <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
       <FinalArchive>$(SdkOutputDirectory)/nuGetPackagesArchive.lzma</FinalArchive>
+      <NugetPackagesArchiveName>nuGetPackagesArchive.$(AspNetCoreRuntimePackageFlavor).lzma</NugetPackagesArchiveName>
+      <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
+      <NugetPackagesArchiveBlobUrl>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"
-            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs;
-                              DownloadNuGetPackagesArchive;
-                              GenerateNuGetPackagesArchive;
-                              UploadNuGetPackagesArchiveToAzure"
             Inputs="$(IntermediateArchive)"
             Outputs="$(FinalArchive)"
             Condition=" '$(IncludeNuGetPackageArchive)' == 'true' ">
-      <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
-    </Target>
-
-    <Target Name="UploadNuGetPackagesArchiveToAzure"
-            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs;
-                              GenerateNuGetPackagesArchive"
-            Condition=" '$(UploadNuGetPackagesArchiveToAzure)' == 'true' And  '$(PUBLISH_LZMA_TO_AZURE_BLOB)' != '' ">
-      <ItemGroup>
-        <NuGetPackagesArchiveToUpload Include="$(IntermediateArchive)" />
-      </ItemGroup>
-
-      <ItemGroup>
-        <NuGetPackagesArchiveToUpload>
-          <RelativeBlobPath>$(NugetPackagesArchiveRelativeBlobUrl)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
-        </NuGetPackagesArchiveToUpload>
-      </ItemGroup>
-
-      <UploadToAzure
-        AccountKey="$(ArtifactCloudDropAccessToken)"
-        AccountName="$(ArtifactCloudDropAccountName)"
-        ContainerName="$(ArtifactContainerName)"
-        Items="@(NuGetPackagesArchiveToUpload)"
-        Overwrite="false"
-        ContinueOnError="WarnAndContinue" />
-    </Target>
-
-    <Target Name="DownloadNuGetPackagesArchive"
-            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs"
-            Inputs="$(IntermediateArchive)"
-            Outputs="$(IntermediateArchive)">
       <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)"
                     DestinationPath="$(IntermediateArchive)"
                     ContinueOnError="WarnAndContinue" />
-    </Target>
 
-    <Target Name="GenerateNuGetPackagesArchive"
-            DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs"
-            Inputs="$(IntermediateArchive)"
-            Outputs="$(IntermediateArchive)">
-
-      <!-- I need to use the CreateProperty task in conjunction with the ValueSetByTask TaskParameter -->
-      <!-- to ensure that the property only gets set when the parent target is run. -->
-      <CreateProperty Value="true">
-        <Output TaskParameter="ValueSetByTask" PropertyName="UploadNuGetPackagesArchiveToAzure" />
-      </CreateProperty>
-
-      <ItemGroup>
-        <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
-        <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
-
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/MvcIndividual" />
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
-      </ItemGroup>
-
-      <Delete Files="@(FilesToClean)" />
-      <RemoveDir Directories="@(NuGetPackagesArchiveDirectory)" />
-      <MakeDir Directories="@(NuGetPackagesArchiveDirectory)"/>
-
-      <WriteLinesToFile Condition=" '$(CLI_LZMA_PACKAGE_SOURCE)' != '' "
-                        File="$(LZMANuGetConfigFilePath)" 
-                        Lines="$(NuGetConfigContent)" />
-
-      <DotNetNew ToolPath="$(OutputDirectory)"
-                 TemplateType="mvc"
-                 TemplateArgs="-au Individual --debug:ephemeral-hive --no-restore"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/MvcIndividual" />
-
-      <DotNetRestore ToolPath="$(OutputDirectory)"
-                     Packages="$(NuGetPackagesArchiveFolder)"
-                     ConfigFile="$(LZMANuGetConfigFilePath)"
-                     SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/MvcIndividual" />
-
-
-      <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip;$(NuGetPackagesArchiveFolder)/**/*.nupkg" />
-
-      <Message Text="Publishing Archiver" />
-
-      <DotNetPublish ToolPath="$(OutputDirectory)"
-                     WorkingDirectory="$(RepoRoot)/tools/Archiver"
-                     Output="$(ToolsOutputDirectory)"
-                     Configuration="$(Configuration)" />
-
-      <Exec Command="$(DotnetInOutputDirectory) $(ArchiverDll) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
-    </Target>
-
-    <Target Name="SetupNuGetPackagesArchiveInputsOutputs">
-      <GenerateNuGetPackagesArchiveVersion ToolPath="$(OutputDirectory)" SDKVersion="$(CLI_NETSDK_Version)">
-        <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion" />
-      </GenerateNuGetPackagesArchiveVersion>
-      <PropertyGroup>
-        <NugetPackagesArchiveName>nuGetPackagesArchive.$(NuGetPackagesArchiveVersion).lzma</NugetPackagesArchiveName>
-        <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-        <NugetPackagesArchiveRelativeBlobUrl>$(Product)/NuGetPackagesArchives</NugetPackagesArchiveRelativeBlobUrl>
-        <NugetPackagesArchiveBlobUrl>$(DotnetBlobRootUrl)/$(NugetPackagesArchiveRelativeBlobUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
-      </PropertyGroup>
+      <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
     </Target>
 </Project>

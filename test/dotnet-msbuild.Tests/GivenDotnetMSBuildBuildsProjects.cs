@@ -14,6 +14,8 @@ using NuGet.Protocol;
 using Xunit;
 using Xunit.Abstractions;
 using MSBuildCommand = Microsoft.DotNet.Tools.Test.Utilities.MSBuildCommand;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -164,11 +166,16 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
 
-            FieldInfo forwardingAppFieldInfo = msBuildForwardingApp
+            object forwardingAppWithoutLogging = msBuildForwardingApp
+                .GetType()
+                .GetField("_forwardingAppWithoutLogging", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(msBuildForwardingApp);
+
+            FieldInfo forwardingAppFieldInfo = forwardingAppWithoutLogging
                 .GetType()
                 .GetField("_forwardingApp", BindingFlags.Instance | BindingFlags.NonPublic);
 
-            ForwardingApp forwardingApp = forwardingAppFieldInfo?.GetValue(msBuildForwardingApp) as ForwardingApp;
+            object forwardingApp = forwardingAppFieldInfo?.GetValue(forwardingAppWithoutLogging);
 
             FieldInfo allArgsFieldinfo = forwardingApp?
                 .GetType()

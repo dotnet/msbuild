@@ -25,7 +25,22 @@
     <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
     <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Installers</CoreSetupInstallerBlobRootUrl>
     <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
-    <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
+    <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</CombinedSharedHostAndFrameworkArchive>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeVersion)</AspNetCoreRuntimeInstallerBlobRootUrl>
+
+    <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'win' ">$(OSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'osx' ">$(OSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+
+    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
+    <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
+
+    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
+    <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,14 +62,29 @@
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupInstallerBlobRootUrl)/$(SharedHostVersion)/$(DownloadedSharedHostInstallerFileName)</Url>
       <DownloadFileName>$(DownloadedSharedHostInstallerFile)</DownloadFileName>
-      <ExtractDestintation></ExtractDestintation>
+      <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
 
     <_DownloadAndExtractItem Include="DownloadedHostFxrInstallerFile"
                              Condition="'$(SkipBuildingInstallers)' != 'true' And !Exists('$(DownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
       <Url>$(CoreSetupInstallerBlobRootUrl)/$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)</Url>
       <DownloadFileName>$(DownloadedHostFxrInstallerFile)</DownloadFileName>
-      <ExtractDestintation></ExtractDestintation>
+      <ExtractDestination></ExtractDestination>
     </_DownloadAndExtractItem>
+
+  <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerWixLibFile"
+                           Condition=" '$(AspNetCoreRuntimeInstallerWixLibFile)' != '' And !Exists('$(AspNetCoreRuntimeInstallerWixLibFile)')">
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerWixLibFileName)</Url>
+      <DownloadFileName>$(AspNetCoreRuntimeInstallerWixLibFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+  </_DownloadAndExtractItem>
+
+  <_DownloadAndExtractItem Include="AspNetCoreRuntimeInstallerArchiveFile"
+                           Condition="!Exists('$(AspNetCoreRuntimeInstallerArchiveFile)')">
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerArchiveFileName)</Url>
+      <DownloadFileName>$(AspNetCoreRuntimeInstallerArchiveFile)</DownloadFileName>
+      <ExtractDestination>$(AspNetRuntimePackageStorePublishDirectory)</ExtractDestination>
+  </_DownloadAndExtractItem>
+
   </ItemGroup>
 </Project>
