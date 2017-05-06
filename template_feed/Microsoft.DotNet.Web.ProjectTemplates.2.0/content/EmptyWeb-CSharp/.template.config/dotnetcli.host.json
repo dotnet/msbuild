@@ -22,7 +22,7 @@
       "isHidden": true
     }
   },
-  "UsageExamples": [
+  "usageExamples": [
     "--framework netcoreapp2.0"
   ]
 }

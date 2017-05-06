@@ -75,7 +75,7 @@
       "isHidden": true
     }
   },
-  "UsageExamples": [
+  "usageExamples": [
     "--auth Individual"
   ]
 }

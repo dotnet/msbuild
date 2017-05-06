@@ -59,7 +59,7 @@
       "isHidden": true
     }
   },
-  "UsageExamples": [
+  "usageExamples": [
     "--framework netcoreapp1.1"
   ]
 }

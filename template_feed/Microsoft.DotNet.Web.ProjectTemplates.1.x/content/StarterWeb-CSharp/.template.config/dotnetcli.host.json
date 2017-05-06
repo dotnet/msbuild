@@ -62,7 +62,7 @@
       "shortName": ""
     }
   },
-  "UsageExamples": [
+  "usageExamples": [
     "--framework netcoreapp1.1 --auth Individual"
   ]
 }
