@@ -188,7 +188,7 @@ namespace Microsoft.NET.Pack.Tests
             }
         }
 
-        List<XElement> PackAndGetDependencyGroups(TestProject testProject, out XNamespace ns)
+        private List<XElement> PackAndGetDependencyGroups(TestProject testProject, out XNamespace ns)
         {
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                 .Restore(Log, testProject.Name);
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Pack.Tests
             return dependencyGroups;
         }
 
-        List<XElement> PackAndGetDependencies(TestProject testProject)
+        private List<XElement> PackAndGetDependencies(TestProject testProject)
         {
             var dependencyGroups = PackAndGetDependencyGroups(testProject, out var ns);
 
