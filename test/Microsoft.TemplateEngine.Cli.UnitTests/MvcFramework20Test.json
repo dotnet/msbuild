@@ -6,10 +6,6 @@
   },
   {
     "kind": "file_exists",
-    "path": "NuGet.config"
-  },
-  {
-    "kind": "file_exists",
     "path": "wwwroot/css/site.css"
   }
 ]

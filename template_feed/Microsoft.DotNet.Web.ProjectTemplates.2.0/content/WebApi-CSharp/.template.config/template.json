@@ -35,6 +35,13 @@
           ]
         },
         {
+          "condition": "(!IndividualAuth && !OrganizationalAuth)",
+          "exclude": [
+            "urlRewrite.config",
+            "Extensions/**"
+          ]
+        },
+        {
           "condition": "(!IndividualLocalAuth)",
           "exclude": [
             "Areas/**",
