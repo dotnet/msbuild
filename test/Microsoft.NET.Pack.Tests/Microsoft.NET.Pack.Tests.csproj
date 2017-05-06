@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Include="GivenThatThereAreImplicitPackageReferences.cs" />
     <Compile Include="GivenThatWeWantToPackAHelloWorldProject.cs" />
+    <Compile Include="GivenThatWeWantToPackANetFrameworkLibrary.cs" />
     <Compile Include="GivenThatWeWantToPackASimpleLibrary.cs" />
     <Compile Include="GivenThatWeWantToPackACrossTargetedLibrary.cs" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
