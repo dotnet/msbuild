@@ -1,10 +1,10 @@
 {
   "author": "Microsoft",
   "classifications": ["Web", "WebAPI"],
-  "name": "ASP.NET Core Empty",
+  "name": "ASP.NET Core Web API",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Microsoft.Web.WebApi",
-  "precedence": "100",
+  "precedence": "200",
   "identity": "Microsoft.Web.WebApi.FSharp",
   "shortName": "webapi",
   "thirdPartyNotices": "https://aka.ms/template-3pn",
