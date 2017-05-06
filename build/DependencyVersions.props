@@ -14,8 +14,8 @@
     <TemplateEngineVersion>1.0.0-beta2-20170503-217</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta2-20170504-221</TemplateEngineTemplateVersion>
     <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170504-221</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.0.0-preview2-25306-06</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0-preview2-25306-06</DependencyModelVersion>
+    <PlatformAbstractionsVersion>2.0.0-preview2-002093</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.0.0-preview2-002093</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
     <AspNetCoreRuntimeVersion>2.0.0-preview1-65</AspNetCoreRuntimeVersion>
