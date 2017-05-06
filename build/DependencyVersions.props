@@ -17,7 +17,7 @@
     <PlatformAbstractionsVersion>2.0.0-preview1-002111</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview1-002111</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
-    <AspNetCoreRuntimeVersion>2.0.0-preview1-80</AspNetCoreRuntimeVersion>
+    <AspNetCoreRuntimeVersion>2.0.0-preview1-82</AspNetCoreRuntimeVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
