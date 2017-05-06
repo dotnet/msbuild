@@ -3,6 +3,7 @@
 
 param(
     [Parameter(Mandatory=$true)][string]$CLISDKMSIFile,
+    [Parameter(Mandatory=$true)][string]$ASPNETRuntimeWixLibFile,
     [Parameter(Mandatory=$true)][string]$SharedFxMSIFile,
     [Parameter(Mandatory=$true)][string]$HostFxrMSIFile,
     [Parameter(Mandatory=$true)][string]$SharedHostMSIFile,
@@ -69,6 +70,7 @@ function RunLightForBundle
     .\light.exe -nologo `
         -cultures:en-us `
         bundle.wixobj `
+        $ASPNETRuntimeWixlibFile `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
         -ext WixTagExtension.dll `
@@ -89,6 +91,11 @@ function RunLightForBundle
 if(!(Test-Path $CLISDKMSIFile))
 {
     throw "$CLISDKMSIFile not found"
+}
+
+if(!(Test-Path $ASPNETRuntimeWixLibFile))
+{
+    throw "$ASPNETRuntimeWixLibFile not found"
 }
 
 Write-Host "Creating dotnet Bundle at $DotnetBundleOutput"

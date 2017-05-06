@@ -20,7 +20,7 @@
     <BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Binaries/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110SharedFrameworkArchiveBlobRootUrl>
     <BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>$(BackwardsCompatibility110CoreSetupBlobRootUrlWithChannel)/Installers</BackwardsCompatibility110CoreSetupInstallerBlobRootUrl>
     <BackwardsCompatibility110CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(BackwardsCompatibility110SharedFrameworkVersion)</BackwardsCompatibility110CoreSetupDownloadDirectory>
-    <BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>$(BackwardsCompatibility110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>
+    <BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>$(BackwardsCompatibility110CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive$(ArchiveExtension)</BackwardsCompatibility110CombinedSharedHostAndFrameworkArchive>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">

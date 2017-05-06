@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Cli
                   Accept.ZeroOrMoreArguments()
                         .With(name: LocalizableStrings.CmdArgProject,
                               description: LocalizableStrings.CmdArgDescription),
+                  false,
                   CommonOptions.HelpOption(),
                   Create.Option(
                         "-s|--settings",
@@ -74,6 +75,12 @@ namespace Microsoft.DotNet.Cli
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToResultsDirectory)
                               .ForwardAsSingle(o => $"/p:VSTestResultsDirectory={o.Arguments.Single()}")),
+                  Create.Option(
+                        "--collect",
+                        LocalizableStrings.cmdCollectDescription,
+                        Accept.OneOrMoreArguments()
+                              .With(name: LocalizableStrings.cmdCollectFriendlyName)
+                              .ForwardAsSingle(o => $"/p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
                   CommonOptions.VerbosityOption());
 
         private static string GetSemiColonEsacpedstring(string arg)

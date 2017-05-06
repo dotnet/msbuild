@@ -21,9 +21,49 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if(PrefersCliRuntime(commandPath))
             {
-                arguments.Add("--fx-version");
-                arguments.Add(new Muxer().SharedFxVersion);
+                var runtimeConfigFile = Path.ChangeExtension(commandPath, FileNameSuffixes.RuntimeConfigJson);
+
+                if (!File.Exists(runtimeConfigFile))
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.CouldNotFindToolRuntimeConfigFile,
+                                                              nameof(PackagedCommandSpecFactory),
+                                                              Path.GetFileName(commandPath)));
+                }
+
+                var runtimeConfig = new RuntimeConfig(runtimeConfigFile);
+
+                var muxer = new Muxer();
+
+                Version currentFrameworkSimpleVersion = GetVersionWithoutPrerelease(muxer.SharedFxVersion);
+                Version toolFrameworkSimpleVersion = GetVersionWithoutPrerelease(runtimeConfig.Framework.Version);
+
+                if (currentFrameworkSimpleVersion.Major != toolFrameworkSimpleVersion.Major)
+                {
+                    Reporter.Verbose.WriteLine(
+                        string.Format(
+                            LocalizableStrings.IgnoringPreferCLIRuntimeFile,
+                            nameof(PackagedCommandSpecFactory),
+                            runtimeConfig.Framework.Version,
+                            muxer.SharedFxVersion));
+                }
+                else
+                {
+                    arguments.Add("--fx-version");
+                    arguments.Add(muxer.SharedFxVersion);
+                }
             }
+        }
+
+        private static Version GetVersionWithoutPrerelease(string version)
+        {
+            int dashOrPlusIndex = version.IndexOfAny(new char[] { '-', '+' });
+
+            if (dashOrPlusIndex >= 0)
+            {
+                version = version.Substring(0, dashOrPlusIndex);
+            }
+
+            return new Version(version);
         }
 
         private static bool PrefersCliRuntime(string commandPath)
@@ -35,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Utils
             Reporter.Verbose.WriteLine(
                 string.Format(
                     LocalizableStrings.LookingForPreferCliRuntimeFile,
-                    "packagedcommandspecfactory",
+                    nameof(PackagedCommandSpecFactory),
                     preferCliRuntimePath));
 
             return File.Exists(preferCliRuntimePath);

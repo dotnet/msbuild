@@ -2,22 +2,26 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>2.0.0-preview2-002093-00</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.2.0-preview-000093-02</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.3.0-preview-000117-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc4-61325-08</CLI_Roslyn_Version>
-    <CLI_NETSDK_Version>2.0.0-preview2-20170425-7</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.0-preview2-20170506-1</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-preview1-2500</CLI_NuGet_Version>
-    <CLI_WEBSDK_Version>1.0.0-rel-20170413-451</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.1.0-preview-20170414-04</CLI_TestPlatform_Version>
+    <CLI_WEBSDK_Version>1.0.0-rel-20170501-473</CLI_WEBSDK_Version>
+    <CLI_TestPlatform_Version>15.3.0-preview-20170502-03</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170425-201</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170425-203</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170425-203</TemplateEngineTemplate2_0Version>
+    <TemplateEngineVersion>1.0.0-beta2-20170503-217</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170504-221</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170504-221</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview2-002093</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview2-002093</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
+    <AspNetCoreRuntimeVersion>2.0.0-preview1-65</AspNetCoreRuntimeVersion>
+    
+    <!-- This should either be timestamped or notimestamp as appropriate -->
+    <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
 
   </PropertyGroup>
 

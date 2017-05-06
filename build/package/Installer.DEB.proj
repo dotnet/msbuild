@@ -10,7 +10,7 @@
                             TestDebuild;
                             BuildSdkDeb;
                             TestSdkDeb;"
-          Condition=" '$(OSName)' == 'ubuntu' " 
+          Condition=" '$(OSName)' == 'ubuntu' "
           Outputs="@(GeneratedInstallers)"/>
 
   <Target Name="BuildSdkDeb"
@@ -28,15 +28,31 @@
       <!-- Create layout: Binaries -->
       <Copy
         DestinationFiles="@(CLISdkFiles->'$(LayoutPackageRootDir)/sdk/%(RecursiveDir)%(Filename)%(Extension)')"
-        SourceFiles="@(CLISdkFiles)"       
+        SourceFiles="@(CLISdkFiles)"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />
-      
+
+      <!-- Create layout: Aspnet runtime -->
+      <Copy
+        DestinationFiles="@(AspNetRuntimeFilesInput ->'$(LayoutPackageRootDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+        SourceFiles="@(AspNetRuntimeFilesInput)"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        UseHardlinksIfPossible="False" />
+
       <!-- Create layout: Man Pages -->
       <Copy
         DestinationFiles="@(SdkDebManPageFiles->'$(LayoutDocsDir)/%(RecursiveDir)%(Filename)-$(SdkVersion)%(Extension)')"
         SourceFiles="@(SdkDebManPageFiles)"
+        OverwriteReadOnlyFiles="True"
+        SkipUnchangedFiles="False"
+        UseHardlinksIfPossible="False" />
+
+      <!-- Create layout: postinst -->
+      <Copy
+        DestinationFiles= "$(DebianPostinstFile)"
+        SourceFiles="$(DebianPostinstTemplateFile)"
         OverwriteReadOnlyFiles="True"
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />
@@ -47,7 +63,7 @@
         DestinationFile="$(DebianConfigJsonFile)"
         ReplacementItems="@(DebianConfigTokenValues)" />
 
-      <Chmod 
+      <Chmod
         Glob="$(PackageTool)"
         Mode="u+x" />
 
@@ -58,12 +74,12 @@
                      PackageName="$(SdkDebianPackageName)"
                      PackageVersion="$(SdkVersion)"
                      WorkingDirectory="$(DotnetDebToolDir)" />
-      
+
       <!-- Copy SDK package to output -->
       <ItemGroup>
         <GeneratedDebFiles Include="$(DotNetDebToolOutputDirectory)/*.deb" />
       </ItemGroup>
-  
+
       <Error Text="@(GeneratedDebFiles->Count()) .deb files generated." Condition="'@(GeneratedDebFiles->Count())' != 1" />
 
       <Copy
@@ -97,9 +113,9 @@
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
       <!-- Run E2E -->
-      <DotNetRestore ProjectPath="$(EndToEndTestProject)" 
-                     ToolPath="$(DebianInstalledDirectory)" /> 
- 
+      <DotNetRestore ProjectPath="$(EndToEndTestProject)"
+                     ToolPath="$(DebianInstalledDirectory)" />
+
       <DotNetTest ProjectPath="$(EndToEndTestProject)"
                   EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
                   ToolPath="$(DebianInstalledDirectory)" />
@@ -158,11 +174,11 @@
 
   <Target Name="TestDebuild">
       <Message Text="Don't remove this" />
-      
+
       <!-- run Debuild -->
       <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
           <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
-      </Exec>  
+      </Exec>
 
       <!-- Check if it returned 0 -->
       <PropertyGroup>

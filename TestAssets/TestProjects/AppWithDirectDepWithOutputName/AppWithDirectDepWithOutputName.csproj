@@ -4,8 +4,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
-    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

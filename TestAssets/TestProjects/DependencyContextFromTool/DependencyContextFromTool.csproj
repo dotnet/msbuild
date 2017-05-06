@@ -8,8 +8,6 @@
     <OutputType>Exe</OutputType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
-    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

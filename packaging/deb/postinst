@@ -1,3 +1,15 @@
 #!/usr/bin/env sh
 echo "This software may collect information about you and your use of the software, and send that to Microsoft."
 echo "Please visit http://aka.ms/dotnet-cli-eula for more information."
+
+# Run 'dotnet new' as the user to trigger the first time experience to initialize the cache
+echo "Welcome to .NET Core!
+---------------------
+Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+
+Telemetry
+--------------
+The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
+You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
+You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry."
+su - $SUDO_USER -c "dotnet new > /dev/null 2>&1 || true"

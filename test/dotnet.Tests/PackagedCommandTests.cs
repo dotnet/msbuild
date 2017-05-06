@@ -16,6 +16,7 @@ using Xunit.Abstractions;
 using Microsoft.Build.Construction;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using System.Xml.Linq;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -91,6 +92,132 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IfPreviousVersionOfSharedFrameworkIsNotInstalled_ToolsTargetingItFail(bool toolPrefersCLIRuntime)
+        {
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+
+            testInstance = testInstance.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
+                    .Single();
+
+                toolReference.Attribute("Include").Value =
+                    toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
+            });
+
+            testInstance = testInstance.WithRestoreFiles();
+
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+
+            new GenericCommand(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1")
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Fail();
+        }
+
+        [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IfPreviousVersionOfSharedFrameworkIsInstalled_ToolsTargetingItRun(bool toolPrefersCLIRuntime)
+        {
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+
+            testInstance = testInstance.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
+                    .Single();
+
+                toolReference.Attribute("Include").Value =
+                    toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
+            });
+
+            testInstance = testInstance.WithRestoreFiles();
+
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+
+            var result =
+                new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
+
+        }
+
+        [RequiresSpecificFrameworkFact("netcoreapp1.1")]
+        public void IfAToolHasNotBeenRestoredForNetCoreApp2_0ItFallsBackToNetCoreApp1_x()
+        {
+            string toolName = "dotnet-portable-v1";
+
+            var toolFolder = Path.Combine(new RepoDirectoriesProvider().NugetPackages,
+                                          ".tools",
+                                          toolName);
+
+            //  Other tests may have restored the tool for netcoreapp2.0, so delete its tools folder
+            if (Directory.Exists(toolFolder))
+            {
+                Directory.Delete(toolFolder, true);
+            }
+
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+
+            testInstance = testInstance.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                //  Remove reference to tool that won't restore on 1.x
+                project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-PreferCliRuntime")
+                    .Remove();
+
+                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
+                    .Single();
+
+                toolReference.Attribute("Include").Value = toolName;
+
+                //  Restore tools for .NET Core 1.1
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "DotnetCliToolTargetFramework", "netcoreapp1.1"));
+
+            });
+
+            testInstance = testInstance.WithRestoreFiles();
+
+            var result =
+                    new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                    .WithWorkingDirectory(testInstance.Root)
+                    .Execute("portable-v1");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
+        }
+
         [Fact]
         public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
         {
@@ -112,7 +239,7 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.1")] // https://github.com/dotnet/cli/issues/6087
+        [Fact]
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
             var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
@@ -242,7 +369,7 @@ namespace Microsoft.DotNet.Tests
                 .Should().Fail();
         }
 
-        [RequiresSpecificFrameworkFact("netcoreapp1.1")] // https://github.com/dotnet/cli/issues/6087
+        [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = TestAssets.Get("DependencyContextFromTool")

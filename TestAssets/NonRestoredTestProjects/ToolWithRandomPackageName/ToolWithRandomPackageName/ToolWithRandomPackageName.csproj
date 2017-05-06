@@ -7,7 +7,6 @@
     <GeneratedPackageId>random-name</GeneratedPackageId>
     <PackageId>$(GeneratedPackageId)</PackageId>
     <AssemblyName>dotnet-randompackage</AssemblyName>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>

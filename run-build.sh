@@ -150,8 +150,12 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export VSTEST_BUILD_TRACE=1
 export VSTEST_TRACE_BUILD=1
 
+
+# Don't resolve shared frameworks from user or global locations
+DOTNET_MULTILEVEL_LOOKUP=0
+
 # Install a stage 0
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --version "2.0.0-preview1-005867" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
@@ -184,7 +188,7 @@ echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
     dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
-    dotnet msbuild build.proj /m /v:diag /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS "${args[@]}"
+    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS "${args[@]}"
 else
     echo "Not building due to --nobuild"
     echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS ${args[@]}'"

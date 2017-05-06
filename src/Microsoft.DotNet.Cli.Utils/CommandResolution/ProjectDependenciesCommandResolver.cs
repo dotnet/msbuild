@@ -120,15 +120,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var lockFile = project.GetLockFile();
             var toolLibrary = GetToolLibraryForContext(lockFile, commandName, framework);
-            var normalizedNugetPackagesRoot =
-                PathUtility.EnsureNoTrailingDirectorySeparator(lockFile.PackageFolders.First().Path);
 
             var commandSpec = _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                         toolLibrary,
                         commandName,
                         commandArguments,
                         allowedExtensions,
-                        normalizedNugetPackagesRoot,
+                        lockFile,
                         s_commandResolutionStrategy,
                         depsFilePath,
                         runtimeConfigPath);
