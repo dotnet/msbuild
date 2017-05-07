@@ -4,6 +4,7 @@
   "classifications": ["Common", "Library"],
   "name": "Class library",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
   "groupIdentity": "Microsoft.Common.Library",
   "precedence": "100",
   "identity": "Microsoft.Common.Library.CSharp",

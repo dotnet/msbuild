@@ -1,12 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": [
-    "Web",
-    "ASP.NET"
-  ],
+  "classifications": [ "Web", "ASP.NET" ],
   "name": "MVC ViewImports",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A MVC View Import Page",
   "groupIdentity": "Microsoft.AspNetCore.Mvc.ViewImports",
   "precedence": "100",
   "identity": "Microsoft.AspNetCore.Mvc.ViewImports",

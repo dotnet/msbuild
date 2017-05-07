@@ -4,6 +4,7 @@
   "classifications": ["Config"],
   "name": "Web Config",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A file used to configure Web Application settings",
   "tags": {
     "type": "item"
   },

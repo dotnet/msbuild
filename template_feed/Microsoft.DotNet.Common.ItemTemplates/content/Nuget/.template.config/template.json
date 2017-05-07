@@ -4,6 +4,7 @@
   "classifications": ["Config"],
   "name": "Nuget Config",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A file for configuring the locations NuGet will search for packages",
   "tags": {
     "type": "item"
   },

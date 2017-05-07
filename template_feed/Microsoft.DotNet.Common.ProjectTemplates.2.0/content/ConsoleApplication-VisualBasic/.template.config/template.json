@@ -4,6 +4,7 @@
   "classifications": ["Common", "Console"],
   "name": "Console Application",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
   "groupIdentity": "Microsoft.Common.Console",
   "precedence": "2000",
   "identity": "Microsoft.Common.Console.VisualBasic.2.0",

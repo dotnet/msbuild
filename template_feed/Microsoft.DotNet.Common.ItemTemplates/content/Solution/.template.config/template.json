@@ -4,6 +4,7 @@
   "classifications": ["Solution"],
   "name": "Solution File",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "Create an empty solution containing no projects",
   "groupIdentity": "ItemSolution",
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Solution",
