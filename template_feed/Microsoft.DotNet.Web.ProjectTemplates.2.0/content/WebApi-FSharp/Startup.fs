@@ -6,24 +6,15 @@ open System.Linq
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Configuration
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Logging
 
 
 type Startup private () =
 
-    new (env: IHostingEnvironment) as this =
+    new (configuration: IConfiguration) as this =
         Startup() then
-
-        let builder =
-            ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional = false, reloadOnChange = true)
-                .AddJsonFile((sprintf "appsettings.%s.json" (env.EnvironmentName)), optional = true)
-                .AddEnvironmentVariables()
-
-        this.Configuration <- builder.Build()
+        this.Configuration <- configuration
 
     // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services: IServiceCollection) =
@@ -31,11 +22,7 @@ type Startup private () =
         services.AddMvc() |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment, loggerFactory: ILoggerFactory) =
-
-        loggerFactory.AddConsole(this.Configuration.GetSection("Logging")) |> ignore
-        loggerFactory.AddDebug() |> ignore
-
+    member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment) =
         app.UseMvc() |> ignore
 
-    member val Configuration : IConfigurationRoot = null with get, set
+    member val Configuration : IConfiguration = null with get, set

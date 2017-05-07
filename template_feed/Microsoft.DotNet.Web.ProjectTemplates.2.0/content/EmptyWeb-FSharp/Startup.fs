@@ -5,14 +5,13 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Logging
 
 type Startup() =
 
     member this.ConfigureServices(services: IServiceCollection) =
         ()
 
-    member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment, log: ILoggerFactory) =
+    member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment) =
         log.AddConsole() |> ignore
 
         if env.IsDevelopment() then app.UseDeveloperExceptionPage() |> ignore
