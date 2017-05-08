@@ -22,8 +22,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [Fact]
-        public void BasicResX2Resources()
+        [Theory]
+        [InlineData(true, false)]
+        public void BasicResX2Resources(bool resourceReadOnly)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
@@ -36,6 +37,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             try
             {
                 string resxFile = Utilities.WriteTestResX(false, null, null);
+
+                if (resourceReadOnly)
+                {
+                    File.SetAttributes(resxFile, FileAttributes.ReadOnly);
+                }
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.Sources[0].SetMetadata("Attribute", "InputValue");
 
