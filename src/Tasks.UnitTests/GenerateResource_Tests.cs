@@ -23,7 +23,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  ResX to Resources, no references
         /// </summary>
         [Theory]
-        [InlineData(true, false)]
+        [InlineData(true)]
+        [InlineData(false)]
         public void BasicResX2Resources(bool resourceReadOnly)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
