@@ -25,7 +25,17 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
-        public ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
+        /// <summary>
+        /// Always use the accurate-but-slow CreateFile approach to timestamp extraction.
+        /// </summary>
+        public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
+
+        public readonly ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
+
+        /// <summary>
+        /// Never use the slow (but more accurate) CreateFile approach to timestamp extraction.
+        /// </summary>
+        public readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
         {

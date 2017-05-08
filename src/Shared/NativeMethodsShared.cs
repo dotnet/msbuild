@@ -16,6 +16,7 @@ using System.Reflection;
 using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
 {
@@ -851,54 +852,85 @@ namespace Microsoft.Build.Shared
             return null;
         }
 
-        private static readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
-
         /// <summary>
         /// Get the last write time of the fullpath to the file.
-        /// If the file does not exist, then DateTime.MinValue is returned
         /// </summary>
         /// <param name="fullPath">Full path to the file in the filesystem</param>
-        /// <returns></returns>
+        /// <returns>The last write time of the file, or DateTime.MinValue if the file does not exist.</returns>
+        /// <remarks>
+        /// This method should be accurate for regular files and symlinks, but can report incorrect data
+        /// if the file's content was modified by writing to it through a different link, unless
+        /// MSBUILDALWAYSCHECKCONTENTTIMESTAMP=1.
+        /// </remarks>
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
+
             if (IsWindows)
             {
-                if (UseSymlinkTimeInsteadOfTargetTime)
+                if (Traits.Instance.EscapeHatches.AlwaysUseContentTimestamp)
                 {
-                    WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-                    bool success = false;
-
-                    success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-                    if (success)
-                    {
-                        long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
-                        fileModifiedTime = DateTime.FromFileTimeUtc(dt);
-                    }
+                    return GetContentLastWriteFileUtcTime(fullPath);
                 }
-                else
+
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+
+                if (success)
                 {
-                    using (SafeFileHandle handle =
-                        CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ, IntPtr.Zero, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, IntPtr.Zero))
+                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+
+                    // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp. 
+                    if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
                     {
-                        if (!handle.IsInvalid)
-                        {
-                            FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
-                            if (!GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime) != true)
-                            {
-                                long fileTime = ((long) (uint) ftLastWriteTime.dwHighDateTime) << 32 |
-                                                (long) (uint) ftLastWriteTime.dwLowDateTime;
-                                fileModifiedTime =
-                                    DateTime.FromFileTimeUtc(fileTime);
-                            }
-                        }
+                        fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);
                     }
                 }
             }
             else if (File.Exists(fullPath))
             {
                 fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
+            }
+
+            return fileModifiedTime;
+        }
+
+        /// <summary>
+        /// Get the last write time of the content pointed to by a file path.
+        /// </summary>
+        /// <param name="fullPath">Full path to the file in the filesystem</param>
+        /// <returns>The last write time of the file, or DateTime.MinValue if the file does not exist.</returns>
+        /// <remarks>
+        /// This is the most accurate timestamp-extraction mechanism, but it is too slow to use all the time.
+        /// See https://github.com/Microsoft/msbuild/issues/2052.
+        /// </remarks>
+        private static DateTime GetContentLastWriteFileUtcTime(string fullPath)
+        {
+            DateTime fileModifiedTime = DateTime.MinValue;
+
+            using (SafeFileHandle handle =
+                CreateFile(fullPath,
+                    GENERIC_READ,
+                    FILE_SHARE_READ,
+                    IntPtr.Zero,
+                    OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL, /* No FILE_FLAG_OPEN_REPARSE_POINT; read through to content */
+                    IntPtr.Zero))
+            {
+                if (!handle.IsInvalid)
+                {
+                    FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
+                    if (!GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime) != true)
+                    {
+                        long fileTime = ((long)(uint)ftLastWriteTime.dwHighDateTime) << 32 |
+                                        (long)(uint)ftLastWriteTime.dwLowDateTime;
+                        fileModifiedTime =
+                            DateTime.FromFileTimeUtc(fileTime);
+                    }
+                }
             }
 
             return fileModifiedTime;
