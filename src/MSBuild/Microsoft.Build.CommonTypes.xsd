@@ -1774,6 +1774,11 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_textPackageId _locComment="" -->The case-insensitive NuGet package identifier, which must be unique across nuget.org or whatever gallery the NuGet package will reside in. IDs may not contain spaces or characters that are not valid for a URL, and generally follow .NET namespace rules.</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="Title" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_textTitle _locComment="" -->A human-friendly title of the package, typically used in UI displays as on nuget.org and the Package Manager in Visual Studio. If not specified, the package ID is used instead.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="PackageLicenseUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="PackageLicenseUrl" _locComment="" -->The URL for the NuGet package's license, often shown in UI displays as well as nuget.org</xs:documentation>
