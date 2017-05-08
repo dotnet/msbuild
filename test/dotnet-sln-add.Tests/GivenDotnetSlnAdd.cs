@@ -484,6 +484,35 @@ EndGlobal
         [InlineData("TestAppWithSlnAndCsprojFiles")]
         [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
         [InlineData("TestAppWithEmptySln")]
+        public void WhenInvalidProjectIsPassedItDoesNotGetAdded(string testAsset)
+        {
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = "Lib/Library.cs";
+            var projectPath = Path.Combine("Lib", "Library.cs");
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            var expectedNumberOfProjects = slnFile.Projects.Count();
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().BeEmpty();
+            cmd.StdErr.Should().Match("Invalid project `*`. The project file could not be loaded.*");
+
+            slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            slnFile.Projects.Count().Should().Be(expectedNumberOfProjects);
+        }
+
+        [Theory]
+        [InlineData("TestAppWithSlnAndCsprojFiles")]
+        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
+        [InlineData("TestAppWithEmptySln")]
         public void WhenValidProjectIsPassedTheSlnBuilds(string testAsset)
         {
             var projectDirectory = TestAssets

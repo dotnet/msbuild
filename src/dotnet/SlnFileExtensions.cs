@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
@@ -36,7 +37,19 @@ namespace Microsoft.DotNet.Tools.Common
             }
             else
             {
-                var projectInstance = new ProjectInstance(fullProjectPath);
+                ProjectInstance projectInstance = null;
+                try
+                {
+                    projectInstance = new ProjectInstance(fullProjectPath);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    Reporter.Error.WriteLine(string.Format(
+                        CommonLocalizableStrings.InvalidProjectWithExceptionMessage,
+                        fullProjectPath,
+                        e.Message));
+                    return;
+                }
 
                 var slnProject = new SlnProject
                 {

@@ -101,6 +101,7 @@ namespace Microsoft.DotNet.Tools
         public const string MoreThanOneProjectInDirectory = "Found more than one project in `{0}`. Please specify which one to use.";
         public const string FoundInvalidProject = "Found a project `{0}` but it is invalid.";
         public const string InvalidProject = "Invalid project `{0}`.";
+        public const string InvalidProjectWithExceptionMessage = "Invalid project `{0}`. {1}";
 
         /// Solution
         public const string CouldNotFindSolutionIn = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
