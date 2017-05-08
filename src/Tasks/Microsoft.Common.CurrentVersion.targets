@@ -2030,6 +2030,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="SerializationAssemblyFiles" ItemName="_ReferenceSerializationAssemblyPaths"/>
       <Output TaskParameter="ScatterFiles" ItemName="_ReferenceScatterPaths"/>
       <Output TaskParameter="CopyLocalFiles" ItemName="ReferenceCopyLocalPaths"/>
+      <!-- Indicate to the IDE that updated (possibly transitive) references should trigger
+           an (incremental) build. -->
+      <Output TaskParameter="CopyLocalFiles" ItemName="UpToDateCheckInput"/>
       <Output TaskParameter="SuggestedRedirects" ItemName="SuggestedBindingRedirects"/>
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
