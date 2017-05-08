@@ -2060,6 +2060,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </ReferencePathWithRefAssemblies>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath)"
                                       Condition="'$(CompileUsingReferenceAssemblies)' == 'false'" />
+
+      <!-- The project system normally looks only at the inputs to the compiler in its
+           fast up-to-date check, but if the implementation assembly of a ref is stale
+           we still want to rerun to ensure copies, etc. happen. -->
+      <UpToDateCheckInput Include="@(ReferencePathWithRefAssemblies->'%(OriginalPath)')" />
     </ItemGroup>
   </Target>
 
