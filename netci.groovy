@@ -44,7 +44,7 @@ def branch = GithubBranchName
 
                         skipTestsWhenResultsNotFound = false
                     }
-                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-rc')
+                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-dev15-1')
 
                     break;
                 case 'OSX':
