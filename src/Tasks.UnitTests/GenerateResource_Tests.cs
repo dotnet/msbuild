@@ -43,6 +43,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 {
                     File.SetAttributes(resxFile, FileAttributes.ReadOnly);
                 }
+
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.Sources[0].SetMetadata("Attribute", "InputValue");
 
