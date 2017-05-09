@@ -230,8 +230,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ProfilingSymbolsDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ProfilingSymbolsDir), $(_TFM)))</ProfilingSymbolsDir>
       <ProfilingSymbolsDir Condition="!HasTrailingSlash('$(ProfilingSymbolsDir)')">$(ProfilingSymbolsDir)\</ProfilingSymbolsDir>
 
-      <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
+      <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
       <StoreArtifactXml>$([System.IO.Path]::Combine($(ComposeDir),"artifact.xml"))</StoreArtifactXml>
       <PublishDir>$([System.IO.Path]::GetFullPath($(ComposeDir)))</PublishDir>
