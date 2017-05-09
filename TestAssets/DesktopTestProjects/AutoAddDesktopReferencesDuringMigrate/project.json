@@ -4,9 +4,6 @@
     "debugType": "portable",
     "emitEntryPoint": true
   },
-  "dependencies": {
-    "Newtonsoft.Json": "9.0.1"
-  },
   "frameworks": {
     "net451": {}
   },
