@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -2585,43 +2586,71 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 #endif
 
-#if FEATURE_RUNTIMEINFORMATION
         /// <summary>
-        /// Expand property function that uses types available only on .netstandard1.3 and above (RuntimeInformation)
-        /// The test exercises: static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument,
+        /// The test exercises: RuntimeInformation / OSPlatform usage, static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument
         /// </summary>
-        [Fact]
-        public void PropertyFunctionRuntimeInformation()
+        [Theory]
+        [InlineData(
+            "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Create($([System.Runtime.InteropServices.OSPlatform]::$$platform$$.ToString())))))",
+            "True"
+        )]
+        [InlineData(
+            @"$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::$$platform$$)))",
+            "True"
+        )]
+        [InlineData(
+            "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)",
+            "$$architecture$$"
+        )]
+        [InlineData(
+            "$([MSBuild]::IsOsPlatform($$platform$$))",
+            "True"
+        )]
+        public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
         {
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Func<string, string, string, string> formatString = (aString, platform, architecture) => aString
+                .Replace("$$platform$$", platform)
+                .Replace("$$architecture$$", architecture);
 
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            var currentPlatformString = "";
+            string currentPlatformString = Helpers.GetOSPlatformAsString();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                currentPlatformString = "Windows";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                currentPlatformString = "Linux";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                currentPlatformString = "OSX";
-            }
+            var currentArchitectureString = RuntimeInformation.OSArchitecture.ToString();
 
-            var propertyFunction = "$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(" +
-                                        "$([System.Runtime.InteropServices.OSPlatform]::Create(" +
-                                            $"$([System.Runtime.InteropServices.OSPlatform]::{currentPlatformString}.ToString()" +
-                                   ")))))";
+            propertyFunction = formatString(propertyFunction, currentPlatformString, currentArchitectureString);
+            expectedExpansion = formatString(expectedExpansion, currentPlatformString, currentArchitectureString);
 
             var result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
+            Assert.Equal(expectedExpansion, result);
+        }
+
+        [Fact]
+        public void InvalidIsOsPlatformArgumentShouldPrintAvailablePlatforms()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            var exception = Assert.Throws<InvalidProjectFileException>(
+                () => expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::IsOsPlatform(Foo))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            Assert.Contains("Linux, OSX, Windows", exception.Message);
+        }
+
+        [Fact]
+        public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            var osPlatformLowerCase = Helpers.GetOSPlatformAsString().ToLower();
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::IsOsPlatform({osPlatformLowerCase}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
             Assert.Equal("True", result);
         }
-#endif
 
         /// <summary>
         /// Expand property function that calls a method with an enum parameter

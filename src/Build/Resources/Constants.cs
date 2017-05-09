@@ -326,10 +326,8 @@ namespace Microsoft.Build.Internal
                     var environmentType = new Tuple<string, Type>(null, typeof(System.Environment));
                     var directoryType = new Tuple<string, Type>(null, typeof(System.IO.Directory));
                     var fileType = new Tuple<string, Type>(null, typeof(System.IO.File));
-#if FEATURE_RUNTIMEINFORMATION
                     var runtimeInformationType = new Tuple<string, Type>(null, typeof(System.Runtime.InteropServices.RuntimeInformation));
                     var osPlatformType = new Tuple<string, Type>(null, typeof(System.Runtime.InteropServices.OSPlatform));
-#endif
 
                     // Make specific static methods available (Assembly qualified type names are *NOT* supported, only null which means mscorlib):
                     TryAdd("System.Environment::ExpandEnvironmentVariables", environmentType);
@@ -421,10 +419,8 @@ namespace Microsoft.Build.Internal
                     TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(System.UriBuilder)));
                     TryAdd("System.Version", new Tuple<string, Type>(null, typeof(System.Version)));
                     TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
-#if FEATURE_RUNTIMEINFORMATION
                     TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                     TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
-#endif
                 }
             }
         }
