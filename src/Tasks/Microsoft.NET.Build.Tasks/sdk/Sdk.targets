@@ -45,11 +45,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
   
   <!-- Import targets from NuGet.Build.Tasks.Pack package/Sdk -->
-  <PropertyGroup>
-    <NuGetBuildTasksPackTargets Condition="'$(NuGetBuildTasksPackTargets)' == '' And '$(IsCrossTargetingBuild)' == 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
-    <NuGetBuildTasksPackTargets Condition="'$(NuGetBuildTasksPackTargets)' == '' And '$(IsCrossTargetingBuild)' != 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
+  <PropertyGroup Condition="'$(NuGetBuildTasksPackTargets)' == '' AND '$(ImportNuGetBuildTasksPackTargetsFromSdk' != 'false'">
+    <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' == 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
+    <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' != 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
+    <ImportNuGetBuildTasksPackTargetsFromSdk>true</ImportNuGetBuildTasksPackTargetsFromSdk>
   </PropertyGroup>
   
   <Import Project="$(NuGetBuildTasksPackTargets)"
-          Condition="Exists('$(NuGetBuildTasksPackTargets)')"/>  
+          Condition="Exists('$(NuGetBuildTasksPackTargets)') AND '$(ImportNuGetBuildTasksPackTargetsFromSdk)' == 'true'"/>  
 </Project>
