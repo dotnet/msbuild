@@ -203,19 +203,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if RUNTIME_TYPE_NETCORE
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
 #elif MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Theory]
         [InlineData(2, false)]
+        [InlineData(4, false)]
         [InlineData(8, false)]
+        [InlineData(12, false)]
         [InlineData(16, false)]
+        [InlineData(2, true)]
+        [InlineData(4, true)]
+        [InlineData(8, true)]
+        [InlineData(12, true)]
+        [InlineData(16, true)]
 #endif
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
         {
             // This test has previously been failing silently. With the addition of TestEnvironment the
             // failure is now noticed (worker node is crashing with "Pipe is broken" exception. See #2057:
             // https://github.com/Microsoft/msbuild/issues/2057
-            _env.ClearTestInvariants();
+            //_env.ClearTestInvariants();
 
             // Communications debug log enabled, picked up by TestEnvironment
             if (enbaleDebugComm) _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
