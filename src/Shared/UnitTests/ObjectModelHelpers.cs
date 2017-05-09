@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 
@@ -1022,6 +1023,30 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     internal static partial class Helpers
     {
+        internal static string GetOSPlatformAsString()
+        {
+            var currentPlatformString = string.Empty;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                currentPlatformString = "Windows";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                currentPlatformString = "Linux";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                currentPlatformString = "OSX";
+            }
+            else
+            {
+                Assert.True(false, "unrecognized current platform");
+            }
+
+            return currentPlatformString;
+        }
+
         /// <summary>
         /// Returns the count of objects returned by an enumerator
         /// </summary>

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -2601,6 +2602,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)",
             "$$architecture$$"
         )]
+        [InlineData(
+            "$([MSBuild]::IsOsPlatform($$platform$$))",
+            "True"
+        )]
         public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
         {
             Func<string, string, string, string> formatString = (aString, platform, architecture) => aString
@@ -2610,20 +2615,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            var currentPlatformString = string.Empty;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                currentPlatformString = "Windows";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                currentPlatformString = "Linux";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                currentPlatformString = "OSX";
-            }
+            string currentPlatformString = Helpers.GetOSPlatformAsString();
 
             var currentArchitectureString = RuntimeInformation.OSArchitecture.ToString();
 
@@ -2633,6 +2625,31 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(expectedExpansion, result);
+        }
+
+        [Fact]
+        public void InvalidIsOsPlatformArgumentShouldPrintAvailablePlatforms()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            var exception = Assert.Throws<InvalidProjectFileException>(
+                () => expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::IsOsPlatform(Foo))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            Assert.Contains("Linux, OSX, Windows", exception.Message);
+        }
+
+        [Fact]
+        public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            var osPlatformLowerCase = Helpers.GetOSPlatformAsString().ToLower();
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::IsOsPlatform({osPlatformLowerCase}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal("True", result);
         }
 
         /// <summary>
