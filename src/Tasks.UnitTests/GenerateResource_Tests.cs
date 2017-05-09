@@ -22,20 +22,30 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [Fact]
-        public void BasicResX2Resources()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BasicResX2Resources(bool resourceReadOnly)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing BasicResX2Resources() test");
 
+            string resxFile = null;
+
             GenerateResource t = Utilities.CreateTask();
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
             {
-                string resxFile = Utilities.WriteTestResX(false, null, null);
+                resxFile = Utilities.WriteTestResX(false, null, null);
+
+                if (resourceReadOnly)
+                {
+                    File.SetAttributes(resxFile, FileAttributes.ReadOnly);
+                }
+
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.Sources[0].SetMetadata("Attribute", "InputValue");
 
@@ -57,6 +67,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             finally
             {
                 // Done, so clean up.
+                if (resourceReadOnly && !string.IsNullOrEmpty(resxFile))
+                {
+                    File.SetAttributes(resxFile, FileAttributes.Normal);
+                }
+
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
                 {
