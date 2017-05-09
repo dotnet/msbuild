@@ -5,8 +5,10 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.DependencyInvoker
 {
@@ -16,51 +18,79 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var dotnetParams = new DotnetBaseParams("dotnet-dependency-tool-invoker", "DotNet Dependency Tool Invoker", "Invokes tools declared as NuGet dependencies of a project");
+            args = new [] { "dotnet-dependency-tool-invoker" }.Concat(args).ToArray();
 
-            dotnetParams.Parse(args);
+            var parser = new Parser(
+                options: DotnetDependencyToolInvokerParser.DotnetDependencyToolInvoker());
 
-            if (string.IsNullOrEmpty(dotnetParams.Command))
+            var parseResult = parser.Parse(args);
+            var appliedOptions = parseResult["dotnet-dependency-tool-invoker"];
+
+            Console.WriteLine(parseResult.Diagram());
+
+            if (appliedOptions.HasOption("help"))
             {
-                Console.WriteLine("A command name must be provided");
-
-                return 1;
+                Console.WriteLine(parseResult.Command().HelpView());
+                return 0;
             }
+
+            var command = appliedOptions.Arguments.First();
+            var framework = appliedOptions.ValueOrDefault<NuGetFramework>("framework");
+            var configuration = appliedOptions.ValueOrDefault<string>("configuration");
+            if (string.IsNullOrEmpty(configuration))
+            {
+                configuration = Constants.DefaultConfiguration;
+            }
+
+            var output = appliedOptions.SingleArgumentOrDefault("output");
+            var projectPath = appliedOptions.ValueOrDefault<string>("project-path");
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                projectPath = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
+            }
+
+            var appArguments = parseResult.UnmatchedTokens;
 
             var commandFactory =
                 new ProjectDependenciesCommandFactory(
-                    dotnetParams.Framework,
-                    dotnetParams.Config,
-                    dotnetParams.Output,
-                    dotnetParams.BuildBasePath,
-                    dotnetParams.ProjectPath);
+                    framework,
+                    configuration,
+                    output,
+                    string.Empty,
+                    projectPath);
 
-            var result = InvokeDependencyToolForMSBuild(commandFactory, dotnetParams);
+            var result =
+                InvokeDependencyToolForMSBuild(commandFactory, command, framework, configuration, appArguments);
 
             return result;
         }
 
         private static int InvokeDependencyToolForMSBuild(
             ProjectDependenciesCommandFactory commandFactory,
-            DotnetBaseParams dotnetParams)
+            string command,
+            NuGetFramework framework,
+            string configuration,
+            IEnumerable<string> appArguments)
         {
-            Console.WriteLine($"Invoking '{dotnetParams.Command}' for '{dotnetParams.Framework.GetShortFolderName()}'.");
+            Console.WriteLine($"Invoking '{command}' for '{framework.GetShortFolderName()}'.");
 
-            return InvokeDependencyTool(commandFactory, dotnetParams, dotnetParams.Framework);
+            return InvokeDependencyTool(commandFactory, command, framework, configuration, appArguments);
         }
 
         private static int InvokeDependencyTool(
             ProjectDependenciesCommandFactory commandFactory,
-            DotnetBaseParams dotnetParams,
-            NuGetFramework framework)
+            string command,
+            NuGetFramework framework,
+            string configuration,
+            IEnumerable<string> appArguments)
         {
             try
             {
                 var exitCode = commandFactory.Create(
-                        $"dotnet-{dotnetParams.Command}",
-                        dotnetParams.RemainingArguments,
+                        $"dotnet-{command}",
+                        appArguments,
                         framework,
-                        dotnetParams.Config)
+                        configuration)
                     .ForwardStdErr()
                     .ForwardStdOut()
                     .Execute()
