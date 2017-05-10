@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests
                 new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream)
             );
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceNames = t.ManifestResourceNames;
 
@@ -574,7 +574,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -600,7 +600,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -626,7 +626,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -651,7 +651,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
