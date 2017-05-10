@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Passing in a relative path that doesn't exist (expecting sucess)
+        /// Passing in a relative path that doesn't exist (expecting success)
         /// </summary>
         [Fact]
         public void FakeFile()
