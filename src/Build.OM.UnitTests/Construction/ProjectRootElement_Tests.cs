@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// </summary>
     public class ProjectRootElement_Tests
     {
-        private const string SimpleProject = 
+        private const string SimpleProject =
 @"<Project xmlns=`msbuildnamespace`>
 
   <PropertyGroup>
@@ -745,7 +745,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 VerifyLoadedProjectHasEncoding(projectFullPath, Encoding.Unicode);
 
                 // We don't test ASCII, since there is no byte order mark for it,
-                // and the XmlReader will legitimately decide to intrepret it as UTF8,
+                // and the XmlReader will legitimately decide to interpret it as UTF8,
                 // which would fail the test although it's a reasonable assumption
                 // when no xml declaration is present.
                 ////VerifyLoadedProjectHasEncoding(projectFullPath, Encoding.ASCII);
@@ -1331,7 +1331,7 @@ Project(""{";
                 Assert.False(xml2.PreserveFormatting);
 
                 Assert.NotNull(xml0);
-                
+
                 Assert.Same(xml0, xml1);
                 Assert.Same(xml0, xml2);
             }
@@ -1870,7 +1870,7 @@ true, true, true)]
         }
 
         /// <summary>
-        /// Creates a project at a given path with a given encoding but without the Xml declaration, 
+        /// Creates a project at a given path with a given encoding but without the Xml declaration,
         /// and then verifies that when loaded by MSBuild, the encoding is correctly reported.
         /// </summary>
         private void VerifyLoadedProjectHasEncoding(string projectFullPath, Encoding encoding)
