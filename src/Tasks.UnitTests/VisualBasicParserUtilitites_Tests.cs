@@ -107,9 +107,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertParse
-        * 
+        *
         * Parse 'source' as VB source code and get the first class name fully-qualified
-        * with namespace information. That classname must match the expected class name.
+        * with namespace information. That class name must match the expected class name.
         */
         private static void AssertParse(string source, string expectedClassName)
         {
