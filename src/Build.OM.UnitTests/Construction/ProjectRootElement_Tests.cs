@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Set defaulttargets
+        /// Set default targets
         /// </summary>
         [Fact]
         public void SetDefaultTargets()
