@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         ///
         /// File Structure
         /// test.targets
-        /// test.tx, file to check for existance
+        /// test.tx, file to check for existence
         /// subdir\test.proj
         /// </summary>
         [Fact]
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         ///
         /// File Structure
         /// test.targets
-        /// test.tx, file to check for existance
+        /// test.tx, file to check for existence
         /// subdir\test.proj
         /// </summary>
         [Fact]
