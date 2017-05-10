@@ -8178,7 +8178,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// "I am the UI representative for this entire redist". ClickOnce will use this to hide
         /// all other redist items and to show only this item.
         ///
-        /// (2) Redist (string) -- This the the value of FileList Redist from the *.xml file.
+        /// (2) Redist (string) -- This the value of FileList Redist from the *.xml file.
         /// This string means "I am the unique name of this entire redist".
         ///
         /// </summary>

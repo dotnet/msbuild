@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
 
         /// <summary>
-        /// Return the the current Visual Studio version
+        /// Return the current Visual Studio version
         /// </summary>
         internal static string CurrentVisualStudioVersion
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the default tools version 
+        /// Return the default tools version
         /// </summary>
         internal static string MSBuildDefaultToolsVersion
         {
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the current assembly version 
+        /// Return the current assembly version
         /// </summary>
         internal static string MSBuildAssemblyVersion
         {
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Helper that asserts if an exception of type specified is 
+        /// Helper that asserts if an exception of type specified is
         /// not thrown when calling specified method
         /// </summary>
         /// <example>
@@ -209,19 +209,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -231,19 +231,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Used to compare the contents of two arrays. 
+        /// Used to compare the contents of two arrays.
         /// </summary>
         internal static void AssertArrayContentsMatch(object[] expected, object[] actual)
         {
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
-            // Now that we've verified they're both non-null and of the same length, compare each item in the array. 
+            // Now that we've verified they're both non-null and of the same length, compare each item in the array.
             for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
@@ -501,7 +501,7 @@ namespace Microsoft.Build.UnitTests
             XmlDocument xmldoc = new XmlDocument();
             xmldoc.LoadXml(xml);
 
-            // Normalize all the whitespace by writing the Xml document out to a 
+            // Normalize all the whitespace by writing the Xml document out to a
             // string, with PreserveWhitespace=false.
             xmldoc.PreserveWhitespace = false;
 
@@ -741,7 +741,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void DeleteDirectory(string dir)
         {
-            // Manually deleting all children, but intentionally leaving the 
+            // Manually deleting all children, but intentionally leaving the
             // Temp project directory behind due to locking issues which were causing
             // failures in main on Amd64-WOW runs.
 
@@ -784,7 +784,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Creates a file in the %TEMP%\TempDirForMSBuildUnitTests directory, after cleaning
-        /// up the file contents (replacing single-back-quote with double-quote, etc.). 
+        /// up the file contents (replacing single-back-quote with double-quote, etc.).
         /// Silently OVERWRITES existing file.
         /// </summary>
         /// <param name="fileRelativePath"></param>
@@ -1373,7 +1373,7 @@ namespace Microsoft.Build.UnitTests
 
         private static string[] SplitPathIntoFragments(string path)
         {
-            // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX, 
+            // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX,
             // which renders them useless for the following case where I want to split a path that may contain either separator
             var splits = path.Split('/', '\\');
 
@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Creates a new temp path
         /// Sets all OS temp environment variables to the new path
-        /// 
+        ///
         /// Cleanup:
         /// - restores OS temp environment variables
         /// - deletes all files written to the new temp path
