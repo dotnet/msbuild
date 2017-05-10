@@ -1591,7 +1591,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which does not exist.
+        /// Make sure we get the correct exception when the xml file points to an included framework which does not exist.
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistPointsToInvalidInclude()
@@ -1623,7 +1623,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which has invalid path chars.
+        /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistInvalidPathChars()
@@ -1659,7 +1659,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which has invalid path chars.
+        /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

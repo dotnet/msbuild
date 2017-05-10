@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll"),   // MyDontCopyLocalAssembly
             };
 
-            // matrix of expected CopyLocal value per assembly per framwork
+            // matrix of expected CopyLocal value per assembly per framework
             string[,] expectedCopyLocal =
             {
                 // v2.0     v3.0     v3.5      v4.0
