@@ -2890,7 +2890,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.UseSourcePath = false;
                 t.NeverLockTypeAssemblies = false;
                 t.SdkToolsPath = sdkToolsPath;
-                Assert.True(t.Execute()); // "Task should have completed succesfully"
+                Assert.True(t.Execute()); // "Task should have completed successfully"
 
                 Utilities.AssertLogContains(t, "/compile");
                 foreach (ITaskItem i in sources)
