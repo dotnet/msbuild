@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("createdTime")); // "test 30"
             Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("accessedTime")); // "test 31"
 
-            // Negative tests to get maximum code coverage inside the many many different branches
+            // Negative tests to get maximum code coverage inside the many different branches
             // of FileUtilities.ItemSpecModifiers.IsItemSpecModifier.
             Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("rootxxx")); // "test 41"
             Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Rootxxx")); // "test 42"
@@ -457,7 +457,7 @@ namespace Microsoft.Build.UnitTests
                    // Check for \\?\Globalroot, an internal mechanism to the kernel
                    // that provides aliases for drives and other undocumented stuff.
                    // The kernel team won't even describe the full set of what
-                   // is available here - we don't want managed apps mucking 
+                   // is available here - we don't want managed apps mucking
                    // with this for security reasons.
                  * */
                 Assert.Equal(null, FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
