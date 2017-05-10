@@ -748,7 +748,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.VerifyAssertProjectContent(expected, project);
         }
-        
+
         /// <summary>
         /// Add item with remove in itemgroup in target
         /// </summary>
@@ -1905,7 +1905,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project with a single item group with existing items of
         /// various item types and item specs; should add in alpha order of item type,
         /// then item spec, keeping different item specs in different groups; different
-        /// item groups are not mutally sorted
+        /// item groups are not mutually sorted
         /// </summary>
         [Fact]
         public void AddItem_ExistingItemGroupWithVariousItems()
