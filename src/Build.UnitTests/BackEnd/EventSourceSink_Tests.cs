@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             /// <summary>
             /// To test the exception mechinism of the event source, we may want to
-            /// thow certain exceptions in the event handlers. This can be null if
+            /// throw certain exceptions in the event handlers. This can be null if
             /// no exception is to be thrown.
             /// </summary>
             private Exception _exceptionInHandlers;
