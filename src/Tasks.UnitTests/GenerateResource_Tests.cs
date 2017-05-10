@@ -3446,7 +3446,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="classNamespace"></param>
         public static void STRNamespaceTestHelper(string strLanguage, string resourcesNamespace, string classNamespace)
         {
-            // these two parameters shouldnot be null
+            // these two parameters should not be null
             Assert.NotNull(strLanguage);
             Assert.NotNull(resourcesNamespace);
             // Generate Task
