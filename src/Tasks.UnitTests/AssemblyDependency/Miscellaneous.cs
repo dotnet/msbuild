@@ -5866,7 +5866,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///     Subset list which has a redist name and entries
         ///
         /// Expected:
-        ///     Expect no black list to be generated and no warnigns to be emitted
+        ///     Expect no black list to be generated and no warnings to be emitted
         ///
         /// Rational:
         ///     Since the redist list name is null or empty we have no way of matching any subset list up to it.

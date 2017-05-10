@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// When properties are consumed and set in imports make sure that we get the correct warnigns.
+        /// When properties are consumed and set in imports make sure that we get the correct warnings.
         /// </summary>
         [Fact]
         public void VerifyUsedUnInitializedPropertyInImports()
