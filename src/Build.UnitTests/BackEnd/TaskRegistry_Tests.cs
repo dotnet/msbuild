@@ -2269,7 +2269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// Get the meatadata on the item based on the metadataName
+            /// Get the metadata on the item based on the metadataName
             /// </summary>
             public string GetMetadata(string metadataName)
             {
