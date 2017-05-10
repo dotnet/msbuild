@@ -211,14 +211,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Validate that setting a bool param with an item which evaluates to nothing does not cause the parameter to get set.
-        /// </summary>       
+        /// </summary>
         [Fact]
         public void TestSetBoolParamEmptyItem()
         {
             ValidateTaskParameterNotSet("BoolParam", "@(NonExistantItem)");
         }
 
-        #endregion 
+        #endregion
 
         #region Bool Array Params
 
@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ValidateTaskParameterNotSet("BoolArrayParam", "@(NonExistantItem)");
         }
 
-        #endregion 
+        #endregion
 
         #region Int Params
 
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate that setting an item array with 
+        /// Validate that setting an item array with
         /// </summary>
         [Fact]
         public void TestSetItemArrayParamString()
@@ -731,7 +731,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate that an int array output to a property produces the correct semi-colon-delimiated evaluated value.
+        /// Validate that an int array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
         [Fact]
         public void TestOutputIntArrayToProperty()
@@ -879,7 +879,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate that an item array output to a property produces the correct semi-colon-demlimited evaluated value.
+        /// Validate that an item array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
         [Fact]
         public void TestOutputItemArrayToProperty()
