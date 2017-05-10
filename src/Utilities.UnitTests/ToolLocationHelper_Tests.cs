@@ -1411,7 +1411,7 @@ namespace Microsoft.Build.UnitTests
         #region ChainReferenceAssemblyPath
 
         /// <summary>
-        /// Verify the chaining method returns a null if there is no redist list file for the framework we are trying to chaing with. This is ok because the lack of a redist list file means we
+        /// Verify the chaining method returns a null if there is no redist list file for the framework we are trying to chain with. This is ok because the lack of a redist list file means we
         /// do not have anything to chain with.
         /// </summary>
         [Fact]
