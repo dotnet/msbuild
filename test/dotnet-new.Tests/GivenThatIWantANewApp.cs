@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.New.Tests
                     var context = reader.Read(stream);
                     var dependency = context
                         .RuntimeLibraries
-                        .Single(library => library.Name == packageName);
+                        .Single(library => string.Equals(library.Name, packageName, StringComparison.OrdinalIgnoreCase));
 
                     return dependency.Version;
                 }
