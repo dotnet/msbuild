@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Log some events on one thread and verify that even
-        /// when events are being logged while shutdown is occuring
+        /// when events are being logged while shutdown is occurring
         /// that the shutdown still completes.
         /// </summary>
         [Fact]
