@@ -595,7 +595,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 }
                 Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
             }
-            // Delete the files created suring the test
+            // Delete the files created during the test
             finally
             {
                 File.Delete(proj1Path);
