@@ -6306,7 +6306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             SubsetListFinder finder = new SubsetListFinder(new string[0]);
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
-            Assert.Equal(0, returnArray.Length); // "Expected the array returned to be 0 lengh"
+            Assert.Equal(0, returnArray.Length); // "Expected the array returned to be 0 length"
         }
 
 
