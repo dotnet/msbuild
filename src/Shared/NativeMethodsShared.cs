@@ -928,7 +928,7 @@ namespace Microsoft.Build.Shared
         {
             // See ndp\clr\src\bcl\system\io\__error.cs for this code as it appears in the CLR.
 
-            // Something really bad went wrong witht the call
+            // Something really bad went wrong with the call
             // translate the error into an exception
 
             // Convert the errorcode into an HRESULT (See MakeHRFromErrorCode in Win32Native.cs in
