@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region Constructor
 
             /// <summary>
-            /// Constructor to tell the logger when to throw an exception and what excetption
+            /// Constructor to tell the logger when to throw an exception and what exception
             /// to throw
             /// </summary>
             /// <param name="throwOnShutdown">True, throw the exception when shutdown is called</param>
