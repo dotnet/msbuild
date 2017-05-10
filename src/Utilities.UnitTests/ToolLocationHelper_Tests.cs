@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify the case where there is no Inclded framework attribute, there should be no errors and we should continue on as if there were no further framework chained with the current one
+        /// Verify the case where there is no Included framework attribute, there should be no errors and we should continue on as if there were no further framework chained with the current one
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistExistsNoInclude()
