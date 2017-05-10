@@ -3893,7 +3893,7 @@ elementFormDefault="qualified">
 
     <xs:element name="AppxDefaultResourceQualifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="AppxDefaultResourceQualifiers" _locComment="" -->'|'-delimited list of key=value pairs representing default resource qualifers.</xs:documentation>
+            <xs:documentation><!-- _locID_text="AppxDefaultResourceQualifiers" _locComment="" -->'|'-delimited list of key=value pairs representing default resource qualifiers.</xs:documentation>
         </xs:annotation>
     </xs:element>
 
@@ -3959,7 +3959,7 @@ elementFormDefault="qualified">
 
     <xs:element name="AppxBundleAutoResourcePackageQualifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="AppxBundleAutoResourcePackageQualifiers" _locComment="" -->'|'-delimited list of resource qualifers which will be used for automatic resource pack splitting.</xs:documentation>
+            <xs:documentation><!-- _locID_text="AppxBundleAutoResourcePackageQualifiers" _locComment="" -->'|'-delimited list of resource qualifiers which will be used for automatic resource pack splitting.</xs:documentation>
         </xs:annotation>
     </xs:element>
 
