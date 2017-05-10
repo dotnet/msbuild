@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection. 
+        /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection.
         /// </summary>
         [Fact]
         public void VerifyExistsInMemoryProjects()
@@ -124,10 +124,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in, 
-        /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file. 
+        /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in,
+        /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file.
         /// When conditions are evaluated inside of a target they are evaluated relative to the project file.
-        /// 
+        ///
         /// File Structure
         /// test.targets
         /// test.tx, file to check for existance
@@ -256,10 +256,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in, 
-        /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file. 
+        /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in,
+        /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file.
         /// When conditions are evaluated inside of a target they are evaluated relative to the project file.
-        /// 
+        ///
         /// File Structure
         /// test.targets
         /// test.tx, file to check for existance
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If a property is set to an empty value and then set to a non empty value we do not expect a warning. 
+        /// If a property is set to an empty value and then set to a non empty value we do not expect a warning.
         /// </summary>
         [Fact]
         public void EmptyPropertyIsThenSet()
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If a property has not been set yet and we consume the property we are setting in order to set it, do not warn 
+        /// If a property has not been set yet and we consume the property we are setting in order to set it, do not warn
         /// </summary>
         [Fact]
         public void SetPropertyToItself()
@@ -584,7 +584,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                        <Maz>Something</Maz>
                                      </PropertyGroup>
                                      <PropertyGroup>
-                                         <Maz Condition=""'$(Maz)' == ''"">Something</Maz>        
+                                         <Maz Condition=""'$(Maz)' == ''"">Something</Maz>
                                      </PropertyGroup>
 
                                   <Target Name=""Test""/>
@@ -791,11 +791,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
 
                         <Import Project='" + importPath + @"'/>
-                        
+
                         <PropertyGroup>
                           <q>foo_bar</q>
                         </PropertyGroup>
-                        
+
                         <Import Project='" + importPath + @"'/>
 
                         <Target Name='t'>
@@ -848,7 +848,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <PropertyGroup>
                           <p>Hello</p>
-                        </PropertyGroup>  
+                        </PropertyGroup>
                       <Import Project='" + importPath3 + @"'/>
                     </Project>
                 ");
@@ -866,11 +866,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
 
                         <Import Project='" + importPath + @"'/>
-                        
+
                         <PropertyGroup>
                           <q>foo_bar</q>
                         </PropertyGroup>
-                        
+
                         <Import Project='" + importPath + @"'/>
                         <Import Project='" + importPath2 + @"'/>
                         <Target Name='t'>
@@ -923,7 +923,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <PropertyGroup>
                           <p>Hello</p>
-                        </PropertyGroup>  
+                        </PropertyGroup>
                       <Import Project='" + importPath1 + @"'/>
                     </Project>
                 ");
@@ -983,7 +983,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <PropertyGroup>
                           <p>Hello</p>
-                        </PropertyGroup>  
+                        </PropertyGroup>
                       <Import Project='" + importPath1 + @"'/>
                     </Project>
                 ");
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
 
                         <Import Project='$(Imports)' Condition='Exists($(Imports))'/>
-                        
+
                         <Target Name='t'>
                           <Message Text='$(Property1)'/>
                           <Message Text='$(Property2)'/>
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </PropertyGroup>
 
                     <Import Project='$(Imports)'/>
-                        
+
                     <Target Name='t'>
                         <Message Text='$(Property1)'/>
                     </Target>
@@ -1232,7 +1232,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
 
                         <Import Project='$(Imports)' Condition='Exists($(Imports))'/>
-                        
+
                         <Target Name='t'>
                           <Message Text='$(Property1)'/>
                         </Target>
@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Predecessor of item is item 
+        /// Predecessor of item is item
         /// </summary>
         [Fact]
         public void ItemPredecessorToItem()
@@ -1834,9 +1834,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. As project.AllEvaluatedProperties
             // is an ordered collection and since such properties necessarily should occur before other properties, we don't need to scan
-            // the whole list. 
-            // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties, 
-            // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches. 
+            // the whole list.
+            // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
+            // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
             foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
             {
                 allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
@@ -1847,8 +1847,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
 
-            // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then 
-            // they do. 
+            // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then
+            // they do.
             foreach (ProjectProperty property in nonImportedProperties)
             {
                 ProjectProperty propertyFromAllEvaluated = null;
@@ -1997,8 +1997,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. As project.AllEvaluatedProperties
                 // is an ordered collection and since such properties necessarily should occur before other properties, we don't need to scan
                 // the whole list.
-                // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties, 
-                // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches. 
+                // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
+                // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
                 foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
                 {
                     allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
@@ -2009,8 +2009,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Assert.Equal(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
 
-                // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then 
-                // they do. 
+                // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then
+                // they do.
                 foreach (ProjectProperty property in nonImportedProperties)
                 {
                     ProjectProperty propertyFromAllEvaluated = null;
@@ -2128,8 +2128,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // All those properties which aren't defined in any file. Examples are global properties, environment properties, etc.
             IEnumerable<ProjectProperty> nonImportedProperties = project.Properties.Where(property => property.Xml == null);
 
-            // AllEvaluatedProperties intentionally includes duplicates; but if there are any among the non-imported properties, then 
-            // our count won't match the above.  
+            // AllEvaluatedProperties intentionally includes duplicates; but if there are any among the non-imported properties, then
+            // our count won't match the above.
             HashSet<string> allProjectPropertiesNoDuplicateNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (ProjectProperty property in project.AllEvaluatedProperties)
             {
@@ -2279,7 +2279,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// Test that the default value for $(MSBuildExtensionsPath) points to "c:\program files\msbuild" in a 64-bit process
-        /// or on a 32-bit machine and "c:\program files (x86)\msbuild" in a 32-bit process on a 64-bit machine. 
+        /// or on a 32-bit machine and "c:\program files (x86)\msbuild" in a 32-bit process on a 64-bit machine.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -2326,8 +2326,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #endif
 
         /// <summary>
-        /// Test that the default value for $(MSBuildExtensionsPath) points to the 32-bit Program Files always 
-        /// (ie. it should have the same value as MSBuildExtensionsPath32). 
+        /// Test that the default value for $(MSBuildExtensionsPath) points to the 32-bit Program Files always
+        /// (ie. it should have the same value as MSBuildExtensionsPath32).
         /// </summary>
         [Fact]
         public void MSBuildExtensionsPathDefault()
@@ -2345,8 +2345,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                // Set any pre-existing environment variables to null, just in case someone had set 
-                // MSBuildExtensionsPath or MSBuildExtensionsPath32 explicitly in the environment. 
+                // Set any pre-existing environment variables to null, just in case someone had set
+                // MSBuildExtensionsPath or MSBuildExtensionsPath32 explicitly in the environment.
                 Environment.SetEnvironmentVariable(specialPropertyName, null);
                 Environment.SetEnvironmentVariable(specialPropertyName32, null);
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH", null);
@@ -2415,7 +2415,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
 #if FEATURE_INSTALLED_MSBUILD
         /// <summary>
-        /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine. 
+        /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine.
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
         [Fact]
@@ -2493,8 +2493,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
 #if FEATURE_INSTALLED_MSBUILD
         /// <summary>
-        /// The default value for $(MSBuildExtensionsPath64) should point to "c:\program files\msbuild" on a 64 bit machine, 
-        /// and should be empty on a 32-bit machine. 
+        /// The default value for $(MSBuildExtensionsPath64) should point to "c:\program files\msbuild" on a 64 bit machine,
+        /// and should be empty on a 32-bit machine.
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
         [Fact]
@@ -2570,7 +2570,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify whether LocalAppData property is set by default in msbuild 
+        /// Verify whether LocalAppData property is set by default in msbuild
         /// with the path of the OS special LocalApplicationData or ApplicationData folders.
         /// </summary>
         [Fact]
@@ -2733,7 +2733,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 <PropertyGroup>
                                     <abcdef>$(MSBuildNodeCount)</abcdef>
                                 </PropertyGroup>
-                                
+
                                 <Target Name='t'>
                                     <Message Text='[$(abcdef)]' />
                                 </Target>
@@ -2769,7 +2769,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 <PropertyGroup>
                                     <abcdef>$(MSBuildNodeCount)</abcdef>
                                 </PropertyGroup>
-                                
+
                                 <Target Name='t'>
                                     <Message Text='[$(abcdef)]' />
                                 </Target>
@@ -2794,7 +2794,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 <PropertyGroup>
                                     <abcdef>$(MsBuildProgramFiles32)</abcdef>
                                 </PropertyGroup>
-                                
+
                                 <Target Name='t'>
                                     <Message Text='[$(abcdef)]' />
                                 </Target>
@@ -2808,7 +2808,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- adding the tag to the ProjectRootElement on its own does nothing.  
+        /// Basic verification -- adding the tag to the ProjectRootElement on its own does nothing.
         /// </summary>
         [Fact]
         public void VerifyTreatAsLocalPropertyTagDoesNothingIfNoGlobalProperty()
@@ -2832,8 +2832,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with no TreatAsLocalProperty, but with a global property specified, the global property 
-        /// overrides the local property.  
+        /// Basic verification -- with no TreatAsLocalProperty, but with a global property specified, the global property
+        /// overrides the local property.
         /// </summary>
         [Fact]
         public void VerifyGlobalPropertyOverridesIfNoTreatAsLocalProperty()
@@ -2861,8 +2861,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty, and with a global property specified, the local property 
-        /// overrides the global property.  
+        /// Basic verification -- with TreatAsLocalProperty, and with a global property specified, the local property
+        /// overrides the global property.
         /// </summary>
         [Fact]
         public void VerifyLocalPropertyOverridesIfTreatAsLocalPropertySet()
@@ -2890,8 +2890,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
-        /// global property overrides the local property.  
+        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the
+        /// global property overrides the local property.
         /// </summary>
         [Fact]
         public void VerifyGlobalPropertyOverridesNonSpecifiedLocalProperty()
@@ -2919,8 +2919,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
-        /// global property overrides the local property.  
+        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the
+        /// global property overrides the local property.
         /// </summary>
         [Fact]
         public void VerifyLocalPropertyInheritsFromOverriddenGlobalProperty()
@@ -2948,8 +2948,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
-        /// global property overrides the local property.  
+        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the
+        /// global property overrides the local property.
         /// </summary>
         [Fact]
         public void VerifyTreatAsLocalPropertySpecificationWorksIfSpecificationIsItselfAProperty()
@@ -3023,7 +3023,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
 
-                // Should not reach this point. 
+                // Should not reach this point.
                 Assert.True(false);
             }
            );
@@ -3063,8 +3063,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- if there are empty entries in the split of the properties for TreatAsLocalProperty, 
-        /// they should be ignored. 
+        /// Basic verification -- if there are empty entries in the split of the properties for TreatAsLocalProperty,
+        /// they should be ignored.
         /// </summary>
         [Fact]
         public void VerifyTreatAsLocalPropertyEmptySplits()
@@ -3096,8 +3096,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- if looking at the project in the OM, verify that while looking at the property 
-        /// value returns the mutable version, looking explicitly at the global properties dictionary still returns 
+        /// Basic verification -- if looking at the project in the OM, verify that while looking at the property
+        /// value returns the mutable version, looking explicitly at the global properties dictionary still returns
         /// the original global property value.
         /// </summary>
         [Fact]
@@ -3124,8 +3124,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is 
-        /// re-evaluated, it should be re-evaluated in the context of that modified value. 
+        /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is
+        /// re-evaluated, it should be re-evaluated in the context of that modified value.
         /// </summary>
         [Fact]
         public void VerifyModificationsToTreatAsLocalPropertyRespected()
@@ -3165,8 +3165,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is 
-        /// re-evaluated, it should be re-evaluated in the context of that modified value. 
+        /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is
+        /// re-evaluated, it should be re-evaluated in the context of that modified value.
         /// </summary>
         [Fact]
         public void VerifyModificationsToGlobalPropertiesRespected()
@@ -3201,8 +3201,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty set to multiple global properties, and with multiple global properties 
-        /// passed in, only the ones that are marked TALP are overridable.  
+        /// Basic verification -- with TreatAsLocalProperty set to multiple global properties, and with multiple global properties
+        /// passed in, only the ones that are marked TALP are overridable.
         /// </summary>
         [Fact]
         public void VerifyOnlySpecifiedPropertiesOverridden()
@@ -3238,8 +3238,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in a parent project, that property is still treated as overridable 
-        /// when defined in an imported project. 
+        /// If TreatAsLocalProperty is set in a parent project, that property is still treated as overridable
+        /// when defined in an imported project.
         /// </summary>
         [Fact]
         public void VerifyPropertySetInImportStillOverrides()
@@ -3298,8 +3298,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent 
-        /// project before the import are ignored and the global property value is used instead. 
+        /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent
+        /// project before the import are ignored and the global property value is used instead.
         /// </summary>
         [Fact]
         public void VerifyTreatAsLocalPropertyInImportDoesntAffectParentProjectAboveIt()
@@ -3359,8 +3359,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent 
-        /// project after the import recognize the TreatAsLocalProperty flag and override the global property value. 
+        /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent
+        /// project after the import recognize the TreatAsLocalProperty flag and override the global property value.
         /// </summary>
         [Fact]
         public void VerifyTreatAsLocalPropertyInImportAffectsParentProjectBelowIt()
@@ -3419,9 +3419,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in both the parent and imported project, the end result 
-        /// set of overridable properties is the union of the two sets, though of course you cannot 
-        /// override a property until you reach the import that mentions it in its TreatAsLocalProperty 
+        /// If TreatAsLocalProperty is set in both the parent and imported project, the end result
+        /// set of overridable properties is the union of the two sets, though of course you cannot
+        /// override a property until you reach the import that mentions it in its TreatAsLocalProperty
         /// parameter.
         /// </summary>
         [Fact]
@@ -3495,7 +3495,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If a property is set to TreatAsLocalProperty in both the parent project and the import, this is 
+        /// If a property is set to TreatAsLocalProperty in both the parent project and the import, this is
         /// silently acknowledged.
         /// </summary>
         [Fact]
@@ -3568,8 +3568,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in a parent project, a project that is P2P'ed to will 
-        /// still receive the original value of the global property. 
+        /// If TreatAsLocalProperty is set in a parent project, a project that is P2P'ed to will
+        /// still receive the original value of the global property.
         /// </summary>
         [Fact]
         public void VerifyGlobalPropertyPassedToP2P()
@@ -3629,8 +3629,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If TreatAsLocalProperty is set in a parent project, a project that is P2P'ed who is explicitly 
-        /// passed the property, will get the mutable local value rather than the original value of the 
+        /// If TreatAsLocalProperty is set in a parent project, a project that is P2P'ed who is explicitly
+        /// passed the property, will get the mutable local value rather than the original value of the
         /// global property.
         /// </summary>
         [Fact]
@@ -3693,7 +3693,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that when we don't specify the sub-toolset version, we get the correct sub-toolset properties
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
-        /// sorted) toolset if it's not.  
+        /// sorted) toolset if it's not.
         /// </summary>
         [Fact]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
@@ -3742,8 +3742,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
                 else
                 {
-                    // if Dev10 is not installed, the default sub-toolset is the numerical least -- in our case, "11.0" -- 
-                    // so the toolset properties are a combination of that + the base toolset. 
+                    // if Dev10 is not installed, the default sub-toolset is the numerical least -- in our case, "11.0" --
+                    // so the toolset properties are a combination of that + the base toolset.
                     logger.AssertLogContains(".[a1].");
                     logger.AssertLogContains(".[[b2]].");
                     logger.AssertLogContains(".[[[c2]]].");
@@ -3751,7 +3751,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a1||");
             }
@@ -3762,8 +3762,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify that when we specify an invalid sub-toolset version, we just get the properties from the base 
-        /// toolset ... but that invalid version is still reflected as a project property.  
+        /// Verify that when we specify an invalid sub-toolset version, we just get the properties from the base
+        /// toolset ... but that invalid version is still reflected as a project property.
         /// </summary>
         [Fact]
         public void VerifyNoSubToolsetPropertiesAreEvaluatedWithInvalidSubToolset()
@@ -3803,7 +3803,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[ABCDE]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a1||");
             }
@@ -3854,7 +3854,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[FakeSubToolset]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a3||");
             }
@@ -3865,7 +3865,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify that if a non-existent sub-toolset is specified, we simply ignore it and just use the base toolset properties. 
+        /// Verify that if a non-existent sub-toolset is specified, we simply ignore it and just use the base toolset properties.
         /// </summary>
         [Fact]
         public void VerifyExplicitNonExistentSubToolsetPropertiesAreEvaluated()
@@ -3905,7 +3905,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[abcdef]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a1||");
             }
@@ -3916,7 +3916,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify that if there is a conflict between sub-toolset and environment properties, the sub-toolset properties win.  
+        /// Verify that if there is a conflict between sub-toolset and environment properties, the sub-toolset properties win.
         /// </summary>
         [Fact]
         public void VerifySubToolsetPropertiesOverrideEnvironment()
@@ -3928,7 +3928,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "FakeSubToolset");
-                Environment.SetEnvironmentVariable("C", "c4"); // not explosive :) 
+                Environment.SetEnvironmentVariable("C", "c4"); // not explosive :)
                 Environment.SetEnvironmentVariable("D", "d4");
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -3964,7 +3964,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[[FakeSubToolset]]]]]");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a3||");
             }
@@ -3977,7 +3977,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Verify that if there is a conflict between sub-toolset and global properties, the global properties win.  
+        /// Verify that if there is a conflict between sub-toolset and global properties, the global properties win.
         /// </summary>
         [Fact]
         public void VerifyGlobalPropertiesOverrideSubToolset()
@@ -4026,7 +4026,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[[FakeSubToolset]]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a3||");
             }
@@ -4083,7 +4083,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 logger.AssertLogContains(".[[[[11.0]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-                // the value of any of the sub-toolset properties. 
+                // the value of any of the sub-toolset properties.
                 logger.AssertLogContains("|changed|");
                 logger.AssertLogContains("||a1||");
             }
@@ -4134,7 +4134,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains(".[[[[FakeSubToolset]]]].");
 
             // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-            // the value of any of the sub-toolset properties. 
+            // the value of any of the sub-toolset properties.
             logger.AssertLogContains("|changed|");
             logger.AssertLogContains("||a3||");
         }
@@ -4177,7 +4177,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains(".[[[[FakeSubToolset]]]].");
 
             // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
-            // the value of any of the sub-toolset properties. 
+            // the value of any of the sub-toolset properties.
             logger.AssertLogContains("|changed|");
             logger.AssertLogContains("||a3||");
         }
@@ -4185,7 +4185,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that DTD processing is disabled when loading a project
         /// We add some invalid DTD code to a MSBuild project, if such code is ever parsed a XmlException will be thrown
-        /// If DTD parsing is desabled (desired behavior), no XmlException should be caught
+        /// If DTD parsing is disabled (desired behavior), no XmlException should be caught
         /// </summary>
         [Fact]
         public void VerifyDTDProcessingIsDisabled()
@@ -4332,7 +4332,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
         /// The test "VerifyDTDProcessingIsDisabled" creates a project with a url reference to this server from a DTD tag
-        /// If a connection request is received, this thread will terminate, if not, the server will remain alive until 
+        /// If a connection request is received, this thread will terminate, if not, the server will remain alive until
         /// "VerifyDTDProcessingIsDisabled" returns.
         /// </summary>
         static private void HttpServerThread()
@@ -4349,17 +4349,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #endif
 
         /// <summary>
-        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  
-        /// 
+        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:
+        ///
         /// ToolsVersion = Fake
-        /// Base Properties: 
+        /// Base Properties:
         /// a = a1
         /// b = b1
-        /// 
-        /// SubToolset "11.0": 
+        ///
+        /// SubToolset "11.0":
         /// b = b2
         /// c = c2
-        /// 
+        ///
         /// SubToolset "FakeSubToolset":
         /// a = a3
         /// c = c3
@@ -4532,7 +4532,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
 
             /// <summary>
-            /// Returns the hash code for a ProjectProperty object. 
+            /// Returns the hash code for a ProjectProperty object.
             /// </summary>
             /// <param name="obj"> A ProjectProperty object. </param>
             /// <returns> The has code. </returns>
