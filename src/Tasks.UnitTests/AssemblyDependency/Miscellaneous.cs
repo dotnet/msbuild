@@ -670,7 +670,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When specifying "EmbedInteropTypes" on a project targeting Fx higher thatn v4.0 -
+        /// When specifying "EmbedInteropTypes" on a project targeting Fx higher than v4.0 -
         /// CopyLocal should be overridden to false
         /// </summary>
         [Fact]
