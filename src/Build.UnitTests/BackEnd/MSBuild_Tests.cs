@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithDefault()
@@ -517,7 +517,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithoutDefault()
@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithBlanks()
@@ -703,7 +703,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesInvalid()
@@ -758,7 +758,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithDefault()
@@ -825,7 +825,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithGlobalProperties()
@@ -894,7 +894,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithoutDefault()

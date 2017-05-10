@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             #endregion
 
-            #region Propeties
+            #region Properties
 
             /// <summary>
             /// Not used, implemented due to ILoggerInterface
