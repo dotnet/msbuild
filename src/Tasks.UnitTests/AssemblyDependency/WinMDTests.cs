@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If the file does nto exist then we should report this is not a winmd file.
+        /// If the file does not exist then we should report this is not a winmd file.
         /// </summary>
         [Fact]
         public void IsWinMDFileFileDoesNotExistFilePath()
