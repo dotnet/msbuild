@@ -86,12 +86,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _mockRequestCallback = new MockIRequestBuilderCallback(new BuildResult[] { buildResult });
             entry.Builder = (IRequestBuilder)_mockRequestCallback;
 
-            _taskHost = new TaskHost(_mockHost, entry, _elementLocation, null /*Dont care about the callback either unless doing a build*/);
+            _taskHost = new TaskHost(_mockHost, entry, _elementLocation, null /*Don't care about the callback either unless doing a build*/);
             _taskHost.LoggingContext = new TaskLoggingContext(_loggingService, BuildEventContext.Invalid);
         }
 
         /// <summary>
-        /// Verify when pulling target outputs out that we do not get the lives ones which are in the cache. 
+        /// Verify when pulling target outputs out that we do not get the lives ones which are in the cache.
         /// This is to prevent changes to the target outputs from being reflected in the cache if the changes are made in the task which calls the msbuild callback.
         /// </summary>
         [Fact]
@@ -520,7 +520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </UsingTask>
                         <Target Name='Build'>
                             <test/>
-                            <Warning Text=""[3]""/>          
+                            <Warning Text=""[3]""/>
                         </Target>
                     </Project>";
 
@@ -556,7 +556,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </UsingTask>
                         <Target Name='Build'>
                             <test/>
-                            <Message Text=""[3]""/>          
+                            <Message Text=""[3]""/>
                         </Target>
                     </Project>";
 
@@ -592,7 +592,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </UsingTask>
                         <Target Name='Build'>
                             <test/>
-                            <Warning Text=""[3]""/>          
+                            <Warning Text=""[3]""/>
                         </Target>
                     </Project>";
 
@@ -628,7 +628,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </UsingTask>
                         <Target Name='Build'>
                             <test ContinueOnError=""true""/>
-                            <Warning Text=""[3]""/>          
+                            <Warning Text=""[3]""/>
                         </Target>
                     </Project>";
 

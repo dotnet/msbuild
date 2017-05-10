@@ -712,7 +712,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// If we use a property twice make sure we warn and dont crash due to the dictionary which is holding the used but uninitialized variables..
+        /// If we use a property twice make sure we warn and don't crash due to the dictionary which is holding the used but uninitialized variables..
         /// </summary>
         [Fact]
         public void UsePropertyBeforeSetDuplicates()

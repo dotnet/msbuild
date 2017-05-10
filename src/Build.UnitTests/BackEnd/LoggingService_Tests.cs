@@ -832,7 +832,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Create a logger description from the class name and logger assembly
         /// This is used in any test which needs to register a distributed logger.
         /// </summary>
-        /// <param name="loggerClassName">Fully qualified class name (dont for get ParentClass+Nestedclass, if nested)</param>
+        /// <param name="loggerClassName">Fully qualified class name (don't for get ParentClass+Nestedclass, if nested)</param>
         /// <param name="loggerAssemblyName">Assembly name which contains class</param>
         /// <returns>A logger description which can be registered</returns>
         private LoggerDescription CreateLoggerDescription(string loggerClassName, string loggerAssemblyName, bool forwardAllEvents)

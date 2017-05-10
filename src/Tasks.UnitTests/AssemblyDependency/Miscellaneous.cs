@@ -5716,7 +5716,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
-        /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
+        /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListEmptyAssemblyInfoWithRedistAssemblies()
@@ -6234,7 +6234,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
-        /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
+        /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
