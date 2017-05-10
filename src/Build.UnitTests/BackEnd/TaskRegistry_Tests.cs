@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Register the same task multiple times with the same name
         ///     Expect:
-        ///         Three three tasks to be registered
+        ///         Three tasks to be registered
         ///         Expect two of the tasks to be under the same task name bucket
         ///         Expect the correct assembly information to be registered for each of the tasks
         /// </summary>
