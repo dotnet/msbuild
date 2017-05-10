@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
-        /// project name for for project started event and the target started event. 
+        /// project name for for project started event and the target started event.
         /// Test for BUG 579935
         /// </summary>
         [Fact]
@@ -1333,7 +1333,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            //Clear time dependant build started message
+            //Clear time dependent build started message
             sc.Clear();
 
             es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
 
-            //Clear time dependant build started message
+            //Clear time dependent build started message
             string expectedOutput = null;
             string actualOutput = null;
             sc.Clear();
@@ -2104,7 +2104,7 @@ namespace Microsoft.Build.UnitTests
             // BuildStarted event
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.Consume(new BuildFinishedEventArgs("bf",
                                                      null, true));
             // Log so far
@@ -2171,8 +2171,8 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(beea);
 
-            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this 
-            // would call ResetConsoleLoggerState and we will fail to detect if Initialize() 
+            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this
+            // would call ResetConsoleLoggerState and we will fail to detect if Initialize()
             // is not calling it.
 
             // Log so far
@@ -2195,7 +2195,7 @@ namespace Microsoft.Build.UnitTests
             // BuildStarted event
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.Consume(new BuildFinishedEventArgs("bf",
                                                      null, true));
             // Log so far
@@ -2256,7 +2256,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted1 = new TaskStartedEventArgs(null, null, null, null, "task");
                 taskStarted1.BuildEventContext = project1Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.Consume(taskStarted1);
 
                 BuildMessageEventArgs messsage1 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -2284,7 +2284,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted2 = new TaskStartedEventArgs(null, null, null, null, "task2");
                 taskStarted2.BuildEventContext = project2Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.Consume(taskStarted2);
 
                 BuildMessageEventArgs messsage2 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -2332,7 +2332,7 @@ namespace Microsoft.Build.UnitTests
 
                 // BuildStarted event
                 es.Consume(new BuildStartedEventArgs("bs", null));
-                // BuildFinished 
+                // BuildFinished
                 es.Consume(new BuildFinishedEventArgs("bf",
                                                          null, true));
                 // Log so far
@@ -2484,9 +2484,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event. 
+        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event.
         /// We cannot verify there is a newline after the project done event for the MP single proc log because
-        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a 
+        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a
         /// text file.
         /// </summary>
         [Fact]
