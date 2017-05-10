@@ -4231,7 +4231,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// Verify that DTD processing is disabled when loading a project
-        /// We create an HTTP server that waits for a request and load a project containing DTD code making reference to a ficticious file in the server.
+        /// We create an HTTP server that waits for a request and load a project containing DTD code making reference to a fictitious file in the server.
         /// This test emulates a scenario where some malicious DTD code could upload user data to a malicious website
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
