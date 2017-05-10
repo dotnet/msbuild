@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure when a dot net assembly depends on a WinMDFile that
         /// we get the winmd file resolved. Also make sure that if there is Implementation, ImageRuntime, or IsWinMD set on the dll that
-        /// it does not get propigated to the winmd file dependency.
+        /// it does not get propagated to the winmd file dependency.
         /// </summary>
         [Fact]
         public void DotNetAssemblyDependsOnAWinMDFile()

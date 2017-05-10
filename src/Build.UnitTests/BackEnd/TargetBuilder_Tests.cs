@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Tests that a circular dependency within a CallTarget call correctly propogates the failure.  Bug 502570.
+        /// Tests that a circular dependency within a CallTarget call correctly propagates the failure.  Bug 502570.
         /// </summary>
         [Fact]
         public void TestCircularDependencyInCallTarget()
