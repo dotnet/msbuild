@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
         [Fact]
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
         [Fact]
@@ -613,7 +613,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
         [Fact]
@@ -660,7 +660,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
         [Fact]
