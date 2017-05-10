@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             taskParameters.Add("Baz", "Qux");
 
             // Even with a different value to the additional parameter, because it's a fuzzy equals and because all
-            // our equivalency check looks for is runtime and architecture, it still successfully retrieves the
+            // our equivalence check looks for is runtime and architecture, it still successfully retrieves the
             // existing record from the cache.
             RetrieveAndValidateRegisteredTaskRecord
                 (

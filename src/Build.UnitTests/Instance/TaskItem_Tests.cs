@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Ensure when cloning an Item that the clone is equivilant to the parent item and that they are not the same object.
+        /// Ensure when cloning an Item that the clone is equivalent to the parent item and that they are not the same object.
         /// </summary>
         [Fact]
         public void TestDeepClone()
