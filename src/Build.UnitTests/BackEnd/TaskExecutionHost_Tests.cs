@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
         /// <summary>
-        /// Validate that setting a non-existant parameter fails, but does not throw an exception.
+        /// Validate that setting a non-existent parameter fails, but does not throw an exception.
         /// </summary>
         [Fact]
         public void ValidateNonExistantParameter()
@@ -936,7 +936,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
         /// <summary>
-        /// Attempts to gather outputs from a non-existant output.  This should fail.
+        /// Attempts to gather outputs from a non-existent output.  This should fail.
         /// </summary>
         [Fact]
         public void TestNonexistantOutput()

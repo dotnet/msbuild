@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // MSBuildExtensionsPath* property value has highest priority for the lookups
             try {
                 var projColln = new ProjectCollection();
-                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existstant"), extnDir1));
+                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existent"), extnDir1));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
                 var project = projColln.LoadProject(mainProjectPath);
