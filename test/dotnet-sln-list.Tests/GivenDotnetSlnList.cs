@@ -21,7 +21,7 @@ Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 ";
 
         private const string SlnCommandHelpText = @".NET modify solution file command
@@ -32,7 +32,7 @@ Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 
 Commands:
   add <args>      .NET Add project(s) to a solution file Command
@@ -101,7 +101,7 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln InvalidSolution.sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -120,7 +120,7 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Invalid format in line 1: File header is missing.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 

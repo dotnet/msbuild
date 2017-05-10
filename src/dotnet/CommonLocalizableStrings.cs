@@ -101,13 +101,13 @@ namespace Microsoft.DotNet.Tools
         public const string MoreThanOneProjectInDirectory = "Found more than one project in `{0}`. Please specify which one to use.";
         public const string FoundInvalidProject = "Found a project `{0}` but it is invalid.";
         public const string InvalidProject = "Invalid project `{0}`.";
-        public const string InvalidProjectWithExceptionMessage = "Invalid project `{0}`. {1}";
+        public const string InvalidProjectWithExceptionMessage = "Invalid project `{0}`. {1}.";
 
         /// Solution
         public const string CouldNotFindSolutionIn = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         public const string CouldNotFindSolutionOrDirectory = "Could not find solution or directory `{0}`.";
         public const string MoreThanOneSolutionInDirectory = "Found more than one solution file in {0}. Please specify which one to use.";
-        public const string InvalidSolutionFormatString = "Invalid solution `{0}`. {1}"; // {0} is the solution path, {1} is already localized details on the failure
+        public const string InvalidSolutionFormatString = "Invalid solution `{0}`. {1}."; // {0} is the solution path, {1} is already localized details on the failure
         public const string SolutionDoesNotExist = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         
         /// add p2p
@@ -185,13 +185,15 @@ namespace Microsoft.DotNet.Tools
 
         public const string ProjectNotCompatibleWithFrameworks = "Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:";
         public const string ProjectDoesNotTargetFramework = "Project `{0}` does not target framework `{1}`.";
-        public const string ProjectCouldNotBeEvaluated = "Project `{0}` could not be evaluated. Evaluation failed with following error:\n{1}";
+        public const string ProjectCouldNotBeEvaluated = "Project `{0}` could not be evaluated. Evaluation failed with following error:\n{1}.";
 
         /// common options
-        public const string VerbosityOptionDescription = "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]";
+        public const string VerbosityOptionDescription = "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].";
         public const string FrameworkOptionDescription = "Target framework to publish for. The target framework has to be specified in the project file.";
         public const string RuntimeOptionDescription = "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.";
         public const string ConfigurationOptionDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
         public const string CmdVersionSuffixDescription = "Defines the value for the $(VersionSuffix) property in the project.";
+
+        public const string ShowHelpDescription = "Show help information.";
     }
 }
