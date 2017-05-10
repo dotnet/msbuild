@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return; // "Cannot have invliad characters in file name on Unix"
+                return; // "Cannot have invalid characters in file name on Unix"
             }
 
             string content = @"
@@ -2107,7 +2107,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function - invlaid since properties don't have properties
+        /// Expand property function - invalid since properties don't have properties
         /// </summary>
         [Fact]
         public void PropertyFunctionInvalid2()
@@ -2125,7 +2125,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
            );
         }
         /// <summary>
-        /// Expand property function - invlaid since properties don't have properties and don't support '.' in them
+        /// Expand property function - invalid since properties don't have properties and don't support '.' in them
         /// </summary>
         [Fact]
         public void PropertyFunctionInvalid3()

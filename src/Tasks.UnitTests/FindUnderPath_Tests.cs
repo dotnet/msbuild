@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return; // "Cannot have invliad characters in file name on Unix"
+                return; // "Cannot have invalid characters in file name on Unix"
             }
 
             FindUnderPath t = new FindUnderPath();
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return; // "Cannot have invliad characters in file name on Unix"
+                return; // "Cannot have invalid characters in file name on Unix"
             }
 
             FindUnderPath t = new FindUnderPath();
