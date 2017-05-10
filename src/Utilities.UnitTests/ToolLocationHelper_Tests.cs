@@ -1827,7 +1827,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Make sure we do not crach if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
+        /// Make sure we do not crash if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
         ///
         /// </summary>
         [Fact]

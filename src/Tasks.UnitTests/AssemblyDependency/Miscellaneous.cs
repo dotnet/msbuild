@@ -6317,7 +6317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SubsetListFinderVerifyEmptyInSubsetsToSearchForAndCaching()
         {
-            // Verify the program will not crach when an empty string is passed in and that when we call the method twice that we get the
+            // Verify the program will not crash when an empty string is passed in and that when we call the method twice that we get the
             // exact same array of strings back.
             SubsetListFinder finder = new SubsetListFinder(new string[] { "Clent", string.Empty, "Bar" });
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
