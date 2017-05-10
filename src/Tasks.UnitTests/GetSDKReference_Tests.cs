@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string testRACommonConfigurationx86 = Path.Combine(referenceAssemblyDirectoryCommonConfigX86, "G.dll");
             string testRACommonConfigurationx64 = Path.Combine(referenceAssemblyDirectoryCommonConfigX64, "G.dll");
             string testRACommonConfigurationNeutral = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "H.dll");
-            // Make duplicate of winmd but change to dll extenson so that we can make sure that we eliminate duplicate file names.
+            // Make duplicate of winmd but change to dll extension so that we can make sure that we eliminate duplicate file names.
             string testRACommonConfigurationNeutralDupe = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "A.dll");
 
             string redist = Path.Combine(redistDirectoryConfigx86, "A.dll");
@@ -560,7 +560,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
         /// <summary>
         /// Verify that different cache files are created and used correctly for assemblies with the same identity but with files in different directories
-        /// Also verifies that when 
+        /// Also verifies that when
         /// </summary>
         [Fact]
         public void VerifyCacheFileNames()
@@ -625,7 +625,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct reference files are found and that by default we do log the reference files 
+        /// Verify the correct reference files are found and that by default we do log the reference files
         /// added.
         /// </summary>
         [Fact]
@@ -674,7 +674,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct reference files are found and that by default we do log the reference files 
+        /// Verify the correct reference files are found and that by default we do log the reference files
         /// added.
         /// </summary>
         [Fact]
@@ -770,7 +770,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
 
         /// <summary>
-        /// Verify the correct reference files are found and that by default we do log the reference files 
+        /// Verify the correct reference files are found and that by default we do log the reference files
         /// added.
         /// </summary>
         [Fact]
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct reference files are found and that by default we do log the reference files 
+        /// Verify the correct reference files are found and that by default we do log the reference files
         /// added.
         /// </summary>
         [Fact]
@@ -910,7 +910,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct redist files are found and that by default we do not log the redist files 
+        /// Verify the correct redist files are found and that by default we do not log the redist files
         /// added.
         /// </summary>
         [Fact]
@@ -976,7 +976,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct redist files are found and that by default we do not log the redist files 
+        /// Verify the correct redist files are found and that by default we do not log the redist files
         /// added.
         /// </summary>
         [Fact]
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct redist files are found and that by default we do not log the redist files 
+        /// Verify the correct redist files are found and that by default we do not log the redist files
         /// added.
         /// </summary>
         [Fact]
@@ -1041,7 +1041,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         }
 
         /// <summary>
-        /// Verify the correct redist files are found and that by default we do not log the redist files 
+        /// Verify the correct redist files are found and that by default we do not log the redist files
         /// added.
         /// </summary>
         [Fact]
