@@ -3406,7 +3406,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If an item is explictly Private=='true' (as opposed to implicitly when the attribute isn't set at all)
+        /// If an item is explicitly Private=='true' (as opposed to implicitly when the attribute isn't set at all)
         /// then it should be CopyLocal true even if its in the FX directory
         /// </summary>
         [Fact]
