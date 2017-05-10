@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8.2 |Windows x64 |Windows x86 |macOS |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 | Linux x64 |
+|Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8 |Windows x64 |Windows x86 |macOS |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 | Linux x64 |
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8.2-build-badge]][debian-8.2-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][linux-build-badge]][linux-build]|
+|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8-build-badge]][debian-8-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][linux-build-badge]][linux-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5449/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5449
@@ -39,8 +39,8 @@ Build Status
 [ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5448/badge
 [ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5448
 
-[debian-8.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5442/badge
-[debian-8.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5442
+[debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5442/badge
+[debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5442
 
 [osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5445/badge
 [osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5445
@@ -70,7 +70,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
 | **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>[tar.gz][ubuntu-14.04-targz] - [Checksum][ubuntu-14.04-targz-checksum] |
 | **Ubuntu 16.04** | [tar.gz][ubuntu-16.04-targz] - [Checksum][ubuntu-16.04-targz-checksum] |
-| **Debian 8.2** | [tar.gz][debian-8.2-targz] - [Checksum][debian-8.2-targz-checksum] |
+| **Debian 8** | [tar.gz][debian-8-targz] - [Checksum][debian-8-targz-checksum] |
 | **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **CentOS 7.1 / Oracle Linux 7** | [tar.gz][centos-targz] - [Checksum][centos-targz-checksum] |
 | **RHEL 7.2** | [tar.gz][rhel-targz] - [Checksum][rhel-targz-checksum] |
@@ -100,8 +100,8 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 [ubuntu-16.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz
 [ubuntu-16.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz.sha
 
-[debian-8.2-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-debian-x64.latest.tar.gz
-[debian-8.2-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-debian-x64.latest.tar.gz.sha
+[debian-8-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-debian-x64.latest.tar.gz
+[debian-8-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-debian-x64.latest.tar.gz.sha
 
 [osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg
 [osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg.sha
