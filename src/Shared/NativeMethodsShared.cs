@@ -723,7 +723,7 @@ namespace Microsoft.Build.Shared
         /// <param name="fileModifiedTimeUtc">The UTC last write time for the directory</param>
         internal static bool GetLastWriteDirectoryUtcTime(string fullPath, out DateTime fileModifiedTimeUtc)
         {
-            // This code was copied from the reference mananger, if there is a bug fix in that code, see if the same fix should also be made
+            // This code was copied from the reference manager, if there is a bug fix in that code, see if the same fix should also be made
             // there
 
             fileModifiedTimeUtc = DateTime.MinValue;
