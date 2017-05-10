@@ -3616,7 +3616,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on A version 2
         ///
         ///
-        /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary refrence which caused the problems
+        /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary reference which caused the problems
         /// are A and C.
         /// </summary>
         [Fact]

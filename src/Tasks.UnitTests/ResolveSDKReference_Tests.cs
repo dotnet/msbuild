@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Verify that if refernces have SDKName metadata on them that matches a resolved SDK then that SDK should
+        /// Verify that if references have SDKName metadata on them that matches a resolved SDK then that SDK should
         /// not have its reference assemblies expanded.
         /// </summary>
         [Fact]

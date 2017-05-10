@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     0,
                     null
                 };
-                // explode on item coming from item refence with one item
+                // explode on item coming from item reference with one item
                 yield return new object[]
                 {
                     @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     1, // operate on the second item. It is produced by the second item element
                     null
                 };
-                // explode on item coming from item refence with multiple items
+                // explode on item coming from item reference with multiple items
                 yield return new object[]
                 {
                     @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
