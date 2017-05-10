@@ -4554,7 +4554,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - A
         ///
         ///    And, the following conditions.
-        ///     Primary "A" has has two scatter files "M1" and "M2"
+        ///     Primary "A" has two scatter files "M1" and "M2"
         ///
         /// Expected result:
         /// * M1 and M2 should be output in ScatterFiles and CopyLocal.
