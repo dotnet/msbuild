@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.Logging
         private LoggingService _initializedService;
 
         /// <summary>
-        /// The event signalled when shutdown is complete.
+        /// The event signaled when shutdown is complete.
         /// </summary>
         private ManualResetEvent _shutdownComplete = new ManualResetEvent(false);
 
