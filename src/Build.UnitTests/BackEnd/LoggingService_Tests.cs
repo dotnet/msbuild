@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             logServiceComponent.InitializeComponent(loggingHost);
 
-            // Makesure that the parameters in the host are set in the logging service
+            // Make sure that the parameters in the host are set in the logging service
             LoggingService service = (LoggingService)logServiceComponent;
             Assert.Equal(service.ServiceState, LoggingServiceState.Initialized);
             Assert.Equal(4, service.MaxCPUCount);
