@@ -2586,7 +2586,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ExpectRedistEntries(fullRedistListContentsDuplicates, 2, 1);
         }
         /// <summary>
-        /// Make sure that if there are different versons that they are all picked
+        /// Make sure that if there are different versions that they are all picked
         /// </summary>
         [Fact]
         public void TestDuplicateHandlingDifferentVersion()
