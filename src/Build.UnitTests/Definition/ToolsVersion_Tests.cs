@@ -920,7 +920,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private bool directoryExists(string path)
         {
-            // run throught directory exits to throw the correct exceptions if there are any
+            // run through directory exits to throw the correct exceptions if there are any
             Directory.Exists(path);
             return path.Contains("msbuildoverridetasks");
         }
