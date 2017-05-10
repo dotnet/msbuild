@@ -1250,7 +1250,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         /// <summary>
         /// There are several built-in MSBuildProjectXXXX properties like MSBuildProjectFile.
-        /// These always refer to the outer project whereever they are evaluated.
+        /// These always refer to the outer project wherever they are evaluated.
         /// We also want MSBuildFileXXXX properties that are similar but have special behavior:
         /// their values vary according to the file they are evaluated in.
         /// </summary>
