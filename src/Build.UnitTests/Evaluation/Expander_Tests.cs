@@ -2818,7 +2818,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function chosing either the value (if not empty) or the default specfied
+        /// Expand property function choosing either the value (if not empty) or the default specfied
         /// </summary>
         [Fact]
         public void PropertyFunctionValueOrDefault()
@@ -2837,7 +2837,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function chosing either the value (from the environment) or the default specfied
+        /// Expand property function choosing either the value (from the environment) or the default specfied
         /// </summary>
         [Fact]
         public void PropertyFunctionValueOrDefaultFromEnvironment()
