@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property expressions into ProjectPropertyInstance itmes
+        /// Expand property expressions into ProjectPropertyInstance items
         /// </summary>
         [Fact]
         public void ExpandPropertiesIntoProjectPropertyInstances()
