@@ -698,9 +698,9 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // An error in any other situation is unexpected.
                                 ExceptionHandling.DumpExceptionToFile(e);
+                                ChangeLinkStatus(LinkStatus.Failed);
                             }
 
-                            ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;
                             break;
                         }
