@@ -1447,7 +1447,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
         /// <summary>
-        /// Verify when a random scalar input class is attempted to be registered that we get an invalid proejct file exceptions.
+        /// Verify when a random scalar input class is attempted to be registered that we get an invalid project file exceptions.
         /// </summary>
         [Fact]
         public void BadScalarInputOnInputParameter()
