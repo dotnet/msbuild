@@ -2612,7 +2612,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Expect to read in a certain number of redist list entries, this is factored out becase we went to test a number of input combinations which will all result in entries returned.
+        /// Expect to read in a certain number of redist list entries, this is factored out because we went to test a number of input combinations which will all result in entries returned.
         /// </summary>
         private static List<AssemblyEntry> ExpectRedistEntries(string fullRedistListContentsDuplicates, int numberOfExpectedEntries, int numberofExpectedRemapEntries)
         {
