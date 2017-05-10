@@ -1153,7 +1153,7 @@ namespace Microsoft.Build.BackEnd
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
-            foreach (ProjectPropertyInstance property in _requestEntry.RequestConfiguration.Properties)
+            foreach (ProjectPropertyInstance property in _requestEntry.RequestConfiguration.GlobalProperties)
             {
                 globalProperties.Add(property.Name, ((IProperty)property).EvaluatedValueEscaped);
             }

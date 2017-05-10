@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 for (int i = 0; i < projectFiles.Length; ++i)
                 {
                     projectFiles[i] = _newRequests[i].Config.ProjectFullPath;
-                    properties[i] = new PropertyDictionary<ProjectPropertyInstance>(_newRequests[i].Config.Properties);
+                    properties[i] = new PropertyDictionary<ProjectPropertyInstance>(_newRequests[i].Config.GlobalProperties);
                     toolsVersions[i] = _newRequests[i].Config.ToolsVersion;
                 }
 

@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the global properties to use to build this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> Properties
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties
         {
             [DebuggerStepThrough]
             get
@@ -488,7 +488,7 @@ namespace Microsoft.Build.BackEnd
         internal void StampWithUniqueGlobalProperty()
         {
             var key = $"ProjectInstance{Guid.NewGuid():N}";
-            Properties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+            GlobalProperties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
         }
 
         /// <summary>
