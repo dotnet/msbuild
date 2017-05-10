@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Make sure when we read in the tasks files off disk that they come in in a sorted order so that there is a deterministic way of
+        /// Make sure when we read in the tasks files off disk that they come in a sorted order so that there is a deterministic way of
         /// figurting out the order the files were read in.
         /// </summary>
         [Fact]
