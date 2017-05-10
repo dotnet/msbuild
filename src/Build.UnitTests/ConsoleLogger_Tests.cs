@@ -2189,7 +2189,7 @@ namespace Microsoft.Build.UnitTests
             // Clear the log obtained so far
             sc.Clear();
 
-            //Initilialize (This should call ResetConsoleLoggerState(...))
+            // Initialize (This should call ResetConsoleLoggerState(...))
             L.Initialize(es);
 
             // BuildStarted event
