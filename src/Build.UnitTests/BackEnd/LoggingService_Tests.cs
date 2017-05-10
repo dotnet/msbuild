@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify an exception is thrown if in itialized is called after the service has been shutdown
+        /// Verify an exception is thrown if in initialized is called after the service has been shutdown
         /// </summary>
         [Fact]
         public void InitializeComponentAfterShutdown()
