@@ -81,10 +81,10 @@ DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/s
 curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --version $DOTNET_CLI_VERSION --verbose
 
 # Install 1.0.4 shared framework
-[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.0.4" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Preview" --version "1.0.4" --shared-runtime
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.0.5" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Preview" --version "1.0.5" --shared-runtime
 
 # Install 1.1.1 shared framework
-[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.1.1" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Release/1.1.0" --version "1.1.1" --shared-runtime
+[ -d "$DOTNET_INSTALL_DIR/shared/Microsoft.NETCore.App/1.1.2" ] || curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin  --channel "Release/1.1.0" --version "1.1.2" --shared-runtime
 
 # Put stage 0 on the PATH
 export PATH="$DOTNET_INSTALL_DIR:$PATH"
