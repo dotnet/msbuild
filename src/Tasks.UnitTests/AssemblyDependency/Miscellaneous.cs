@@ -91,11 +91,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC
         /// </summary>
         [Fact]
@@ -539,7 +539,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
-                    // This version is not a match. 
+                    // This version is not a match.
                     Assert.True(false, "Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
@@ -1440,7 +1440,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// If we are targeting NONE and there are two assemblies with the same name then we want to pick the first one rather than look for an assembly which
-        /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecure is picked.
+        /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecture is picked.
         /// </summary>
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
@@ -5241,8 +5241,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// There is an App.Config file that redirects all versions of C to V2.
         /// Assemblies A and B are both located via their HintPath.
-        /// 
-        /// </summary>        
+        ///
+        /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void Regress339786_CrossVersionsWithAppConfig()
