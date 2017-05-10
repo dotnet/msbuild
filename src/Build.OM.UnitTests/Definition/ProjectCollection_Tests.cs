@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.SetGlobalProperty("a", "b");
             Assert.False(dirtyRaised);
 
-            // Change GlobalProperties on a project to see that that doesn't propagate as an XML change.
+            // Change GlobalProperties on a project to see that doesn't propagate as an XML change.
             dirtyRaised = false;
             var project = new Project(pre);
             project.SetGlobalProperty("q", "s");
