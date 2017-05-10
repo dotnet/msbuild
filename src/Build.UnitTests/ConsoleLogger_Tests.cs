@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
-        /// project name for for project started event and the target started event.
+        /// project name for project started event and the target started event.
         /// Test for BUG 579935
         /// </summary>
         [Fact]
