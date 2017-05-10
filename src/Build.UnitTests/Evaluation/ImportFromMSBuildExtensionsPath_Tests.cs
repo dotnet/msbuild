@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                // The path to "extensions1" fallback should exist, but the file doens't need to
+                // The path to "extensions1" fallback should exist, but the file doesn't need to
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("file.props"), string.Empty);
 
                 // Implement fallback for UndefinedProperty, but don't define the property.
