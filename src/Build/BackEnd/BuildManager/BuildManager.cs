@@ -1311,9 +1311,7 @@ namespace Microsoft.Build.Execution
                 // built on another node (e.g. the project was encountered as a p2p reference and scheduled to a node).
                 // Add a dummy property to force cache invalidation in the scheduler and the nodes.
                 // TODO find a better solution than a dummy property
-
-                var key = $"ProjectInstance{Guid.NewGuid():N}";
-                unresolvedConfiguration.Properties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+                unresolvedConfiguration.StampWithUniqueGlobalProperty();
 
                 resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
             }

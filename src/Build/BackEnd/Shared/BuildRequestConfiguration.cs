@@ -485,6 +485,12 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");
         }
 
+        internal void StampWithUniqueGlobalProperty()
+        {
+            var key = $"ProjectInstance{Guid.NewGuid():N}";
+            Properties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+        }
+
         /// <summary>
         /// Returns true if the default and initial targets have been resolved.
         /// </summary>
@@ -1056,6 +1062,5 @@ namespace Microsoft.Build.BackEnd
                 throw;
             }
         }
-
     }
 }
