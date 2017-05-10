@@ -803,7 +803,7 @@ namespace Microsoft.Build.UnitTests.Logging
             private BuildEventArgs _raisedStatusEvent;
 
             /// <summary>
-            /// To test the exception mechinism of the event source, we may want to
+            /// To test the exception mechanism of the event source, we may want to
             /// throw certain exceptions in the event handlers. This can be null if
             /// no exception is to be thrown.
             /// </summary>
