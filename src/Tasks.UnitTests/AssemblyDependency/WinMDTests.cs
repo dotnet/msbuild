@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We should report that a regluar net assembly is not a winmd file.
+        /// We should report that a regular net assembly is not a winmd file.
         /// </summary>
         [Fact]
         public void IsWinMDFileRegularNetAssemblyFile()
