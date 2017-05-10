@@ -2308,7 +2308,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// CandidateAssemblyFiles are extra files passed in through the CandidateAssemblyFiles
-        /// that should be considered for matching whem search paths contains {CandidateAssemblyFiles}
+        /// that should be considered for matching when search paths contains {CandidateAssemblyFiles}
         /// </summary>
         [Fact]
         public void CandidateAssemblyFiles()
