@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
             string result =
             CreateCSharpManifestResourceName.CreateManifestNameImpl
                 (
-                    @"irrelevent",
+                    @"irrelevant",
                     null,
                     true,
                     null,    // Root namespace
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
             string result =
             CreateCSharpManifestResourceName.CreateManifestNameImpl
                 (
-                    @"irrelevent",
+                    @"irrelevant",
                     null,
                     true,
                     null,    // Root namespace
