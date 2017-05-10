@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
             {
                 var binaryLogger = new BinaryLogger();
 
-                // with this file name, the file will be archived as as build artifact so we can inspect it later
+                // with this file name, the file will be archived as build artifact so we can inspect it later
                 // this is needed to investigate an intermittent failure of this test on Ubuntu 14
                 var logFilePath = "Microsoft.Build.Engine.UnitTests.dll_TestBinaryLoggerRoundtrip.binlog";
                 binaryLogger.Parameters = logFilePath;
