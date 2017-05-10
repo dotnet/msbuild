@@ -3903,7 +3903,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - D, version 1
         ///   References - D, version 2
         ///
-        /// Neither D1 nor D2 are CopyLocal. This is a solveable conflict because D2 has a higher version
+        /// Neither D1 nor D2 are CopyLocal. This is a solvable conflict because D2 has a higher version
         /// than D1 and there won't be an output directory conflict.
         /// </summary>
         [Fact]
