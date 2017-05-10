@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests
                         }
                         else if (File.Exists(path))
                         {
-                            File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly); // make writeable
+                            File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly); // make writable
                             File.Delete(path);
                         }
                     }
