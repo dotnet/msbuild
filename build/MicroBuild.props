@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildVersion)/build/</MicroBuildPropsAndTargetsPath>
+  </PropertyGroup>
+</Project>
