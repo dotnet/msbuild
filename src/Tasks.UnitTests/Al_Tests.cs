@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests the LinkResources parameter with two items with differing metdata.
+        /// Tests the LinkResources parameter with two items with differing metadata.
         /// </summary>
         [Fact]
         public void LinkResourcesWithTwoItems()

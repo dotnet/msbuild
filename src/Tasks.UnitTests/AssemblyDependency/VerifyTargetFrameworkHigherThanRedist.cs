@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// ReferenceVersion9 depends on mscorlib 9. However the redist list only allows 4.0 since framework unification for dependencies only
         /// allows upward unification this would result in a warning. Therefore we need to remap mscorlib 9 to 4.0
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void RemapAssemblyBasic()
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify an error is emitted when the reference itself is in the redist list but is a higher version that is described in the redist list. 
+        /// Verify an error is emitted when the reference itself is in the redist list but is a higher version that is described in the redist list.
         /// In this case ReferenceVersion9 is version=9.0.0.0 but in the redist we show its highest version as 4.0.0.0.
         /// </summary>
         [Fact]
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do 
+        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do 
+        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where two assemblies with different versions but the same name depend on an assembly which is in the redist list but has a higher version than
-        /// what is described in the redist list. We expect two warnings because both assemblies are goign to be resolved even though one of them will not be copy local.
+        /// what is described in the redist list. We expect two warnings because both assemblies are going to be resolved even though one of them will not be copy local.
         /// </summary>
         [Fact]
         public void TwoDependenciesSameNameDependOnHigherVersion()

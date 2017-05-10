@@ -955,7 +955,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             xml1.AddProperty("Import", "p2");
             xml2.AddProperty("Import", "p3");
 
-            // These imports are duplicates but for each project will evaluate to seperate projects.  We expect that to NOT break
+            // These imports are duplicates but for each project will evaluate to separate projects.  We expect that to NOT break
             // the preprocessor's internal mapping.
             //
             xml1.AddImport("$(Import)");

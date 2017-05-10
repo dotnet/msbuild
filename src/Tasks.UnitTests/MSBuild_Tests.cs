@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(1, logger.ErrorCount);
-            Assert.True(logger.FullLog.Contains("MSB3204")); // upgrade to vcxproj needed 
+            Assert.True(logger.FullLog.Contains("MSB3204")); // upgrade to vcxproj needed
         }
 
         /// <summary>
@@ -397,7 +397,7 @@ namespace Microsoft.Build.UnitTests
             // -------------------------------------------------------
             // TeamBuild.proj
             // -------------------------------------------------------
-            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task, 
+            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task,
             // and overriding the OutDir property.  However, the value being passed into OutDir
             // is coming from another property which is produced by CreateProperty and has
             // some special characters in it.
@@ -406,16 +406,16 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                    
+
                         <CreateProperty Value=`$(MSBuildProjectDirectory)\binaries\`>
                             <Output PropertyName=`MasterOutDir` TaskParameter=`Value`/>
                         </CreateProperty>
-                        
+
                         <MSBuild Projects=`ConsoleApplication1\ConsoleApplication1.csproj`
                                  Properties=`OutDir=$(MasterOutDir)`
                                  Targets=`Rebuild`/>
                     </Target>
-                    
+
                 </Project>
                 ");
 
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithDefault()
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithoutDefault()
@@ -540,7 +540,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesWithBlanks()
@@ -596,7 +596,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing different global properites via metadata works
+        /// Check if passing different global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentGlobalPropertiesInvalid()
@@ -645,7 +645,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithDefault()
@@ -701,7 +701,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithGlobalProperties()
@@ -760,7 +760,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Check if passing additional global properites via metadata works
+        /// Check if passing additional global properties via metadata works
         /// </summary>
         [Fact]
         public void DifferentAdditionalPropertiesWithoutDefault()
@@ -836,7 +836,7 @@ namespace Microsoft.Build.UnitTests
                     <ItemGroup>
                         <ProjectFile Include=`" + projectFile1 + @"` />
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`$(Targets)` TargetAndPropertyListSeparators=`%3B;%3C` />
                     </Target>
@@ -896,7 +896,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project1), new TaskItem(project2)
                 };
 
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests
                     switch (i)
                     {
                         case 0:
-                            // Verify setting BuildInParallel and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel and StopOnFirstFailure to
                             // true will cause the msbuild task to set BuildInParallel to false during the execute
                             msbuildTask.BuildInParallel = true;
                             msbuildTask.StopOnFirstFailure = true;
@@ -923,7 +923,7 @@ namespace Microsoft.Build.UnitTests
                             Assert.False(msbuildTask.BuildInParallel); // "Iteration of 0 Expected BuildInParallel to be false"
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = true;
                             msbuildTask.StopOnFirstFailure = false;
@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests
                             Assert.True(msbuildTask.BuildInParallel); // "Iteration of 1 Expected BuildInParallel to be true"
                             break;
                         case 2:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // true will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = false;
                             msbuildTask.StopOnFirstFailure = true;
@@ -946,7 +946,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = false;
                             msbuildTask.StopOnFirstFailure = false;
@@ -998,7 +998,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project1), new TaskItem(project2)
                 };
 
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
@@ -1008,12 +1008,12 @@ namespace Microsoft.Build.UnitTests
                     msbuildTask.BuildEngine = mockEngine;
                     msbuildTask.Projects = projects;
                     msbuildTask.Targets = new string[] { "msbuild" };
-                    // Make success true as the expected resultis false
+                    // Make success true as the expected result is false
                     bool success = true;
                     switch (i)
                     {
                         case 0:
-                            // Verify setting BuildInParallel and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel and StopOnFirstFailure to
                             // true will not cause the msbuild task to set BuildInParallel to false during the execute
                             msbuildTask.BuildInParallel = true;
                             msbuildTask.StopOnFirstFailure = true;
@@ -1024,7 +1024,7 @@ namespace Microsoft.Build.UnitTests
                             Assert.True(msbuildTask.BuildInParallel); // "Iteration of 0 Expected BuildInParallel to be true"
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = true;
                             msbuildTask.StopOnFirstFailure = false;
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.UnitTests
                             Assert.True(msbuildTask.BuildInParallel); // "Iteration of 1 Expected BuildInParallel to be true"
                             break;
                         case 2:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // true will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = false;
                             msbuildTask.StopOnFirstFailure = true;
@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             msbuildTask.BuildInParallel = false;
                             msbuildTask.StopOnFirstFailure = false;
@@ -1265,12 +1265,12 @@ namespace Microsoft.Build.UnitTests
                             <AdditionalProperties>C=$(CValues)%3BD=$(DValues)</AdditionalProperties>
                         </ProjectFile>
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`Build` Properties=`a=$(AValues)%3Bb=$(BValues)` TargetAndPropertyListSeparators=`%3B`>
                             <Output TaskParameter=`TargetOutputs` PropertyName=`SomeOutputs`/>
                         </MSBuild>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 
@@ -1322,7 +1322,7 @@ namespace Microsoft.Build.UnitTests
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 

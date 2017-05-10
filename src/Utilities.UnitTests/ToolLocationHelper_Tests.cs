@@ -625,7 +625,7 @@ namespace Microsoft.Build.UnitTests
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
                     fakeWhidbeyPath,  // Simulate "whidbey" as the current runtime
-                    "v1.1",                 // We're looking for "everett" 
+                    "v1.1",                 // We're looking for "everett"
                     new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
                     new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                     SharedDotNetFrameworkArchitecture.Current
@@ -955,7 +955,7 @@ namespace Microsoft.Build.UnitTests
             string pathToSdkV4InstallRootOnVS10 = Path.Combine(FrameworkLocationHelper.programFiles32, @"Microsoft SDKs\Windows\v7.0A\");
             string pathToSdkV4InstallRootOnVS11 = Path.Combine(FrameworkLocationHelper.programFiles32, @"Microsoft SDKs\Windows\v8.0A\");
 
-            // After uninstalling the 4.5 (Dev11) SDK, the Bootstrapper folder is left behind, so we can't 
+            // After uninstalling the 4.5 (Dev11) SDK, the Bootstrapper folder is left behind, so we can't
             // just check for the root folder.
             if (!Directory.Exists(Path.Combine(pathToSdkV4InstallRootOnVS11, "bin")))
             {
@@ -1087,16 +1087,16 @@ namespace Microsoft.Build.UnitTests
                                     Log.LogMessage(MessageImportance.High, ""currentInstall35Location = {0}"", currentInstall35Location);
                                     Log.LogMessage(MessageImportance.High, ""currentInstall40Location = {0}"", currentInstall40Location);
 
-                                    if (!String.Equals(sdk35ToolsPath, pathTo35Sdk, StringComparison.OrdinalIgnoreCase) && 
-                                        (currentInstall35Location != null &&  /* this will be null on win8 express since 35 tools and this registry key will not be written, for vsultimate it is written*/      
+                                    if (!String.Equals(sdk35ToolsPath, pathTo35Sdk, StringComparison.OrdinalIgnoreCase) &&
+                                        (currentInstall35Location != null &&  /* this will be null on win8 express since 35 tools and this registry key will not be written, for vsultimate it is written*/
                                         !String.Equals(currentInstall35Location, pathTo35Sdk, StringComparison.OrdinalIgnoreCase))
                                        )
                                     {
                                         Log.LogError(""Sdk35ToolsPath is incorrect! Registry: {0}  ToolLocationHelper: {1}  CurrentInstallFolder: {2}"", sdk35ToolsPath, pathTo35Sdk, currentInstall35Location);
                                     }
 
-                                    if (!String.Equals(sdk40ToolsPath, pathTo40Sdk, StringComparison.OrdinalIgnoreCase) && 
-                                        (currentInstall40Location != null &&  /* this will be null on win8 express since 35 tools and this registry key will not be written, for vsultimate it is written*/      
+                                    if (!String.Equals(sdk40ToolsPath, pathTo40Sdk, StringComparison.OrdinalIgnoreCase) &&
+                                        (currentInstall40Location != null &&  /* this will be null on win8 express since 35 tools and this registry key will not be written, for vsultimate it is written*/
                                         !String.Equals(currentInstall40Location, pathTo40Sdk, StringComparison.OrdinalIgnoreCase))
                                        )
                                     {
@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.UnitTests
                                         pathTo35Sdk = Path.GetDirectoryName(pathTo35Sdk) + ""\\"";
                                     }
 
-                                    string pathTo40Sdk = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(""gacutil.exe"", TargetDotNetFrameworkVersion.VersionLatest); 
+                                    string pathTo40Sdk = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(""gacutil.exe"", TargetDotNetFrameworkVersion.VersionLatest);
 
                                     if (!String.IsNullOrEmpty(pathTo40Sdk))
                                     {
@@ -1411,7 +1411,7 @@ namespace Microsoft.Build.UnitTests
         #region ChainReferenceAssemblyPath
 
         /// <summary>
-        /// Verify the chaining method returns a null if there is no redist list file for the framework we are trying to chaing with. This is ok because the lack of a redist list file means we
+        /// Verify the chaining method returns a null if there is no redist list file for the framework we are trying to chain with. This is ok because the lack of a redist list file means we
         /// do not have anything to chain with.
         /// </summary>
         [Fact]
@@ -1423,7 +1423,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we do not hang, crash, go on forever if there is a circular reference with the include frameworks. What should happen is 
+        /// Verify we do not hang, crash, go on forever if there is a circular reference with the include frameworks. What should happen is
         /// we should notice that we have already chained to a given framework and not try and chain with it again.
         /// </summary>
         [Fact]
@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify the case where there is no Inclded framework attribute, there should be no errors and we should continue on as if there were no further framework chained with the current one
+        /// Verify the case where there is no Included framework attribute, there should be no errors and we should continue on as if there were no further framework chained with the current one
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistExistsNoInclude()
@@ -1591,7 +1591,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which does not exist.
+        /// Make sure we get the correct exception when the xml file points to an included framework which does not exist.
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistPointsToInvalidInclude()
@@ -1623,7 +1623,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which has invalid path chars.
+        /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
         [Fact]
         public void ChainReferenceAssembliesRedistInvalidPathChars()
@@ -1659,7 +1659,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Make sure we get the correct exception when the xml file points to an included framwork which has invalid path chars.
+        /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -1827,8 +1827,8 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Make sure we do not crach if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
-        /// 
+        /// Make sure we do not crash if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
+        ///
         /// </summary>
         [Fact]
         public void GetPathToReferenceAssembliesWithRootCircularReference()
@@ -1884,7 +1884,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the root path is a string but the framework name is null. 
+        /// Test the case where the root path is a string but the framework name is null.
         /// We should expect the correct argument null exception
         /// </summary>
         [Fact]
@@ -1954,7 +1954,7 @@ namespace Microsoft.Build.UnitTests
         #region GetReferenceAssemblyPathWithDefaultRoot
 
         /// <summary>
-        /// Test the case where the method which only takes in a FrameworkName will throw an exception when 
+        /// Test the case where the method which only takes in a FrameworkName will throw an exception when
         /// the input is null since a null framework name is not useful
         /// </summary>
         [Fact]
@@ -1967,7 +1967,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Verify the method correctly returns the 4.5 reference assembly location information if .net 4.5 and 
+        /// Verify the method correctly returns the 4.5 reference assembly location information if .net 4.5 and
         /// its corresponding reference assemblies are installed.
         /// If they are not installed, the test should be ignored.
         /// </summary>
@@ -2193,7 +2193,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Verify when 35 reference asssemblie are simulated to not be installed that the method returns an empty list
+        /// Verify when 35 reference assembly are simulated to not be installed that the method returns an empty list
         /// </summary>
         [Fact]
         public void LegacyFramework35ReferenceAssembliesNotInstalled()
@@ -2208,15 +2208,15 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.
-        ///  
+        ///
         /// We are on a 64 bit machine
         /// Targeting .net framework 3.5
-        /// 
+        ///
         /// 1) Target platform is x86. We expect to get the 32 bit framework directory
         /// 2) Target platform is x64, we expect to get the 64 bit framework directory
         /// 3) Target platform is Itanium, we expect to get the 64 bit framework directory
         /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under.
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void GetPathToStandardLibraries64Bit35()
@@ -2260,10 +2260,10 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.
-        ///  
+        ///
         /// We are on a 64 bit machine
         /// Targeting .net framework 4.0
-        /// 
+        ///
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
         [Fact]
@@ -2300,16 +2300,16 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure when we are targeting .net framework 3.5 and are on a 32 bit machine we get the correct framework path.
-        ///  
+        ///
         /// We are on a 32 bit machine
         /// Targeting .net framework 3.5
-        /// 
+        ///
         /// 1) Target platform is x86. We expect to get the 32 bit framework directory
         /// 2) Target platform is x64, we expect to get the 32 bit framework directory
         /// 3) Target platform is Itanium, we expect to get the 32 bit framework directory
-        /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under. In the 
+        /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under. In the
         ///    case of the unit test this should be the 32 bit framework directory.
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void GetPathToStandardLibraries32Bit35()
@@ -2344,10 +2344,10 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure when we are targeting .net framework 4.0 and are on a 32 bit machine we get the correct framework path.
-        ///  
+        ///
         /// We are on a 32 bit machine
         /// Targeting .net framework 4.0
-        /// 
+        ///
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
         [Fact]
@@ -2710,7 +2710,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Delegate method simulates a file system for testing location methods. 
+        /// Delegate method simulates a file system for testing location methods.
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -2852,7 +2852,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             /// <summary>
-            /// Return a path to the .net framework reference assemblies if the boolean property said we should return one. 
+            /// Return a path to the .net framework reference assemblies if the boolean property said we should return one.
             /// Return null if we should not fake the fact that the framework reference assemblies are installed
             /// </summary>
             internal string GetDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion version)
@@ -2897,7 +2897,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             /// <summary>
-            /// Return a path to the .net framework if the boolean property said we should return one. 
+            /// Return a path to the .net framework if the boolean property said we should return one.
             /// Return null if we should not fake the fact that the framework is installed
             /// </summary>
             internal string GetDotNetFramework(TargetDotNetFrameworkVersion version)
@@ -3125,7 +3125,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify we do not get any resolved paths when we pass in a root which is too long
-        /// 
+        ///
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -3165,7 +3165,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify we get no resolved paths when we pass in a path which does not exist.
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void ResolveFromDirectoryNotExist()
@@ -3406,7 +3406,7 @@ namespace Microsoft.Build.UnitTests
                     AppX-Debug-ARM = "".\AppX\Debug\ARM\Microsoft.MySDK.ARM.Debug.1.0.appx""
                     AppX-Retail-x86 = "".\AppX\Retail\x86\Microsoft.MySDK.x86.1.0.appx""
                     AppX-Retail-x64 = "".\AppX\Retail\x64\Microsoft.MySDK.x64.1.0.appx""
-                    AppX-Retail-ARM = "".\AppX\Retail\ARM\Microsoft.MySDK.ARM.1.0.appx"" 
+                    AppX-Retail-ARM = "".\AppX\Retail\ARM\Microsoft.MySDK.ARM.1.0.appx""
                     CopyRedistToSubDirectory = "".""
                     DependsOn = ""SDKB, version=2.0""
                     MoreInfo = ""http://msdn.microsoft.com/MySDK""
@@ -3507,7 +3507,7 @@ namespace Microsoft.Build.UnitTests
 	                AppX-Debug-ARM = "".\AppX\Debug\ARM\Microsoft.MySDK.ARM.Debug.1.0.appx""
 	                AppX-Retail-x86 = "".\AppX\Retail\x86\Microsoft.MySDK.x86.1.0.appx""
 	                AppX-Retail-x64 = "".\AppX\Retail\x64\Microsoft.MySDK.x64.1.0.appx""
-	                AppX-Retail-ARM = "".\AppX\Retail\ARM\Microsoft.MySDK.ARM.1.0.appx"" 
+	                AppX-Retail-ARM = "".\AppX\Retail\ARM\Microsoft.MySDK.ARM.1.0.appx""
                     CopyRedistToSubDirectory = "".""
                     DependsOn = ""SDKB, version=2.0""
                     MoreInfo = ""http://msdn.microsoft.com/MySDK""
@@ -3620,11 +3620,11 @@ namespace Microsoft.Build.UnitTests
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
                  <PropertyGroup>
-                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                     <SDKLocation1>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=2.0','MyPlatform','8.0'))</SDKLocation1>
                     <SDKLocation2>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=V2.0','MyPlatform','8.0'))</SDKLocation2>
-                    <SDKLocation3>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform','8.0'))</SDKLocation3>                 
+                    <SDKLocation3>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform','8.0'))</SDKLocation3>
                     <SDKName>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('MyPlatform','8.0'))</SDKName>
                  </PropertyGroup>
 
@@ -3691,7 +3691,7 @@ namespace Microsoft.Build.UnitTests
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
                  <PropertyGroup>
-                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>" +
                    @"<SDKDirectoryRoot>" + testDirectoryRoot + "</SDKDirectoryRoot>" +
                     @"<SDKLocation1>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)',''))</SDKLocation1>
@@ -3764,13 +3764,13 @@ namespace Microsoft.Build.UnitTests
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
                  <PropertyGroup>
-                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                     <SDKRegistryRoot>SOFTWARE\Microsoft\VerifyGetInstalledSDKLocations3</SDKRegistryRoot>
                     <SDKDiskRoot>Somewhere</SDKDiskRoot>
                     <SDKLocation1>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)','$(SDKRegistryRoot)'))</SDKLocation1>
-                    <SDKLocation2>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=V2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)','$(SDKRegistryRoot)'))</SDKLocation2>                 
-                    <SDKLocation3>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform','8.0', '$(SDKDirectoryRoot)','$(SDKRegistryRoot)'))</SDKLocation3> 
+                    <SDKLocation2>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=V2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)','$(SDKRegistryRoot)'))</SDKLocation2>
+                    <SDKLocation3>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform','8.0', '$(SDKDirectoryRoot)','$(SDKRegistryRoot)'))</SDKLocation3>
                     <SDKName>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('MyPlatform','8.0', '$(SDKDirectoryRoot)', '$(SDKRegistryRoot)'))</SDKName>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -3854,7 +3854,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         /// <summary>
-        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
+        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out.
         /// </summary>
         [Fact]
@@ -3982,7 +3982,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_REGISTRY_SDKS
         /// <summary>
-        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
+        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out.
         /// </summary>
         [Fact]
@@ -4073,7 +4073,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
+        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out. Make sure that when we resolve from both the disk and registry that there are no duplicates
         /// and make sure we get the expected results.
         /// </summary>
@@ -4283,7 +4283,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
+        /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out. Make sure that when we resolve from both the disk and registry that there are no duplicates
         /// and make sure we get the expected results.
         /// </summary>
@@ -4357,11 +4357,11 @@ namespace Microsoft.Build.UnitTests
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
                  <PropertyGroup>
-                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                     <SDKRegistryRoot>SOFTWARE\Microsoft\VerifyGetPlatformSDKPropsLocation</SDKRegistryRoot>
                     <SDKDiskRoot>Somewhere</SDKDiskRoot>
-                    <PlatformSDKLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform', '8.0', '$(SDKDirectoryRoot)', '$(SDKRegistryRoot)'))</PlatformSDKLocation> 
+                    <PlatformSDKLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform', '8.0', '$(SDKDirectoryRoot)', '$(SDKRegistryRoot)'))</PlatformSDKLocation>
                     <PropsLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKPropsFileLocation('',' ','MyPlatform',' ','8.0', '$(SDKDirectoryRoot)', '$(SDKRegistryRoot)'))</PropsLocation>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4424,7 +4424,7 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyGetOneCoreSDKPropsLocation()
         {
-            // This is the mockup layout for One Core SDK. 
+            // This is the mockup layout for One Core SDK.
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetOneCoreSDKPropsLocation");
             string platformDirectory = Path.Combine(testDirectoryRoot, "OneCoreSDK", "1.0") + Path.DirectorySeparatorChar;
             string propsDirectory =
@@ -4435,11 +4435,11 @@ namespace Microsoft.Build.UnitTests
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
                  <PropertyGroup>
-                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    <TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                     <SDKRegistryRoot>SOFTWARE\Microsoft\VerifyGetOneCoreSDKPropsLocation</SDKRegistryRoot>
                     <SDKDiskRoot>Somewhere</SDKDiskRoot>
-                    <PlatformSDKLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('OneCoreSDK', '1.0', '', '$(SDKRegistryRoot)'))</PlatformSDKLocation> 
+                    <PlatformSDKLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('OneCoreSDK', '1.0', '', '$(SDKRegistryRoot)'))</PlatformSDKLocation>
                     <PropsLocation>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKPropsFileLocation('OneCoreSDK','1.0','MyPlatform',' ','0.8.0.0', '', '$(SDKRegistryRoot)'))</PropsLocation>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>

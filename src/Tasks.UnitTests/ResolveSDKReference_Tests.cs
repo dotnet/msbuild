@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Verify that if refernces have SDKName metadata on them that matches a resolved SDK then that SDK should
+        /// Verify that if references have SDKName metadata on them that matches a resolved SDK then that SDK should
         /// not have its reference assemblies expanded.
         /// </summary>
         [Fact]
@@ -1498,7 +1498,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error 
+        /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error
         /// and not resolve the SDK. We also add a good one as well to make sure resolution continues.
         /// </summary>
         [Fact]
@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error 
+        /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error
         /// and not resolve the SDK. We also add a good one as well to make sure resolution continues.
         /// </summary>
         [Fact]
@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Test the case where we Have a good manfest that had framework and appx locations that exactly match the targeted sdk configuration and architecture.
+        /// Test the case where we Have a good manifest that had framework and appx locations that exactly match the targeted sdk configuration and architecture.
         /// </summary>
         [Fact]
         public void GoodManifestMatchingConfigAndArch()
@@ -1972,7 +1972,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Test the case where we Have a good manfest that had framework and appx locations that only match the targeted sdk configuration.
+        /// Test the case where we Have a good manifest that had framework and appx locations that only match the targeted sdk configuration.
         /// </summary>
         [Fact]
         public void GoodManifestMatchingConfigOnly()
@@ -2107,7 +2107,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Test the case where we Have a good manfest that had framework and appx locations that does not match any of the config arch combinations but does match
+        /// Test the case where we Have a good manifest that had framework and appx locations that does not match any of the config arch combinations but does match
         /// and entry name simply FrameworkIdentity or APPX
         /// </summary>
         [Fact]
@@ -2320,7 +2320,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the 
+        /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the
         /// same is true for APPX.
         /// </summary>
         [Fact]
@@ -2392,7 +2392,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         /// <summary>
-        /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the 
+        /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the
         /// same is true for APPX.
         /// </summary>
         [Fact]

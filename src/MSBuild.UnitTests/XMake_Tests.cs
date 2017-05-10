@@ -102,27 +102,27 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Quoting Rules:
-         * 
+         *
          * A string is considered quoted if it is enclosed in double-quotes. A double-quote can be escaped with a backslash, or it
          * is automatically escaped if it is the last character in an explicitly terminated quoted string. A backslash itself can
          * be escaped with another backslash IFF it precedes a double-quote, otherwise it is interpreted literally.
-         * 
+         *
          * e.g.
          *      abc"cde"xyz         --> "cde" is quoted
          *      abc"xyz             --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc"xyz"            --> "xyz" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc\"cde"xyz        --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc\\"cde"xyz       --> "cde" is quoted
          *      abc\\\"cde"xyz      --> "xyz" is quoted (the terminal double-quote is assumed)
-         * 
+         *
          *      abc"""xyz           --> """ is quoted
          *      abc""""xyz          --> """ and "xyz" are quoted (the terminal double-quote is assumed)
          *      abc"""""xyz         --> """ is quoted
          *      abc""""""xyz        --> """ and """ are quoted
          *      abc"cde""xyz        --> "cde"" is quoted
          *      abc"xyz""           --> "xyz"" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc""xyz            --> nothing is quoted
          *      abc""cde""xyz       --> nothing is quoted
          */
@@ -550,7 +550,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
-        /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI 
+        /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
         /// culture, which didn't allow for certain kinds of string formatting/parsing.
         /// </summary>
         /// <remarks>
@@ -608,7 +608,7 @@ namespace Microsoft.Build.UnitTests
                                                 <foo/>
                                                 <msbuildToolsets default=""X"">
                                                 <foo/>
-                                                    <toolset toolsVersion=""X""> 
+                                                    <toolset toolsVersion=""X"">
                                                         <foo/>
                                                     <property name=""MSBuildBinPath"" value=""Y""/>
                                                     <foo/>
@@ -647,7 +647,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    // Process does not let go its lock on the exe file until about 1 millisecond after 
+                    // Process does not let go its lock on the exe file until about 1 millisecond after
                     // p.WaitForExit() returns. Do I know why? No I don't.
                     RobustDelete(startDirectory);
                 }
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests
                         }
                         else if (File.Exists(path))
                         {
-                            File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly); // make writeable
+                            File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly); // make writable
                             File.Delete(path);
                         }
                     }
@@ -978,7 +978,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
+        /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but lower precedence than the actual command line
         /// </summary>
         [Fact]
@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
+        /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
         [Fact]
@@ -1060,7 +1060,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
+        /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
         [Fact]
@@ -1457,7 +1457,7 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// Test when there are two solutions in the smae directory
+        /// Test when there are two solutions in the same directory
         /// </summary>
         [Fact]
         public void TestProcessProjectSwitchTwoSolutions()
@@ -1935,7 +1935,7 @@ namespace Microsoft.Build.UnitTests
 
                         var directoryName = Path.GetDirectoryName(destinationFile);
                         Directory.CreateDirectory(directoryName);
-                        
+
                         File.Copy(sourceFile, destinationFile);
                     }
                 }

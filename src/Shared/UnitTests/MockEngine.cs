@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Assert that the log doesnt contain the given string.
+        /// Assert that the log doesn't contain the given string.
         /// First check if the string is in the log string. If not
         /// than make sure it is also not in the MockLogger
         /// </summary>

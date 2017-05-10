@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static Expander<ProjectPropertyInstance, ProjectItemInstance> s_registryExpander;
 
         /// <summary>
-        /// Name of the test task built into the test 
+        /// Name of the test task built into the test
         /// assembly at testTaskLocation.
         /// </summary>
         private const string TestTaskName = "TestTask";
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly ILoggingService _loggingService;
 
         /// <summary>
-        /// Target logging context to use when logging. 
+        /// Target logging context to use when logging.
         /// </summary>
         private readonly TargetLoggingContext _targetLoggingContext;
 
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly BuildEventContext _loggerContext = new BuildEventContext(2, 2, 2, 2);
 
         /// <summary>
-        /// Element location to use when logging 
+        /// Element location to use when logging
         /// </summary>
         private readonly ElementLocation _elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
 
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Register the same task multiple times with the same name
         ///     Expect:
-        ///         Three three tasks to be registered
+        ///         Three tasks to be registered
         ///         Expect two of the tasks to be under the same task name bucket
         ///         Expect the correct assembly information to be registered for each of the tasks
         /// </summary>
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate registration of tasks with different combinations of task parameters.  
+        /// Validate registration of tasks with different combinations of task parameters.
         /// Expected that an otherwise equivalent task will be recognized as a separate task if it has
         /// different task parameters set.
         /// </summary>
@@ -339,8 +339,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Cache read tests
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheTaskDoesNotExist_ExactMatch()
@@ -379,8 +379,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheTaskDoesNotExist_FuzzyMatch()
@@ -419,8 +419,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheMatchingTaskDoesNotExist_FuzzyMatch()
@@ -461,8 +461,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheMatchingTaskDoesNotExistOnFirstCallButDoesOnSecond()
@@ -503,8 +503,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheMatchingExactParameters()
@@ -578,10 +578,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters beyond just runtime and architecture.  Hint: it shouldn't 
-        /// ever work, since we don't currently have a way to create a using task with 
-        /// parameters other than those two. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters beyond just runtime and architecture.  Hint: it shouldn't
+        /// ever work, since we don't currently have a way to create a using task with
+        /// parameters other than those two.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheMatchingExactParameters_AdditionalParameters()
@@ -598,8 +598,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            // Runtime and architecture match the using task exactly, but since there is an additional parameter, it still 
-            // doesn't match when doing exact matching. 
+            // Runtime and architecture match the using task exactly, but since there is an additional parameter, it still
+            // doesn't match when doing exact matching.
             Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
             taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.x86);
@@ -614,8 +614,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrievedFromCache: false
                 );
 
-            // However, it should still match itself -- so if we try again, we should get the "no match" 
-            // back from the cache this time.  
+            // However, it should still match itself -- so if we try again, we should get the "no match"
+            // back from the cache this time.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -627,7 +627,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test retrieving a matching task record using various parameter combinations when allowing 
+        /// Test retrieving a matching task record using various parameter combinations when allowing
         /// fuzzy matches.
         /// </summary>
         [Fact]
@@ -710,7 +710,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test retrieving a matching task record using various parameter combinations when allowing 
+        /// Test retrieving a matching task record using various parameter combinations when allowing
         /// fuzzy matches.
         /// </summary>
         [Fact]
@@ -767,9 +767,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test fuzzy matching of parameters when retrieving task records when there are 
-        /// multiple using tasks registered for the same task, just with different parameter 
-        /// sets. 
+        /// Test fuzzy matching of parameters when retrieving task records when there are
+        /// multiple using tasks registered for the same task, just with different parameter
+        /// sets.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks()
@@ -856,7 +856,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
-            // match *|x64 again 
+            // match *|x64 again
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -895,11 +895,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test fuzzy matching of parameters when retrieving task records when there are 
-        /// multiple using tasks registered for the same task, just with different parameter 
-        /// sets. Specific sub-test:  although we generally pick the first available record if 
-        /// there are multiple matches, if we are doing fuzzy matching, we should prefer the 
-        /// record that's in the cache, even if it wasn't the original first record. 
+        /// Test fuzzy matching of parameters when retrieving task records when there are
+        /// multiple using tasks registered for the same task, just with different parameter
+        /// sets. Specific sub-test:  although we generally pick the first available record if
+        /// there are multiple matches, if we are doing fuzzy matching, we should prefer the
+        /// record that's in the cache, even if it wasn't the original first record.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks_PreferCache()
@@ -934,8 +934,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
 
-            // CLR4|* -- could be filled by either, would normally be filled by CLR4|x86 (since it was registered first), 
-            // but since *|x64 is in the cache already, we return that one. 
+            // CLR4|* -- could be filled by either, would normally be filled by CLR4|x86 (since it was registered first),
+            // but since *|x64 is in the cache already, we return that one.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -950,7 +950,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test retrieving a matching task record using various parameter combinations when allowing 
+        /// Test retrieving a matching task record using various parameter combinations when allowing
         /// fuzzy matches.
         /// </summary>
         [Fact]
@@ -992,7 +992,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrievedFromCache: false
                 );
 
-            // try CLR4|* again -- should resolve correctly from the cache. 
+            // try CLR4|* again -- should resolve correctly from the cache.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -1018,10 +1018,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate task retrieval and exact cache retrieval when attempting to load 
-        /// a task with parameters beyond just runtime and architecture.  Hint: it shouldn't 
-        /// ever work, since we don't currently have a way to create a using task with 
-        /// parameters other than those two. 
+        /// Validate task retrieval and exact cache retrieval when attempting to load
+        /// a task with parameters beyond just runtime and architecture.  Hint: it shouldn't
+        /// ever work, since we don't currently have a way to create a using task with
+        /// parameters other than those two.
         /// </summary>
         [Fact]
         public void RetrieveFromCacheFuzzyMatchingParameters_AdditionalParameters()
@@ -1038,7 +1038,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            // Runtime and architecture match, so even though we have the extra parameter, it should still match 
+            // Runtime and architecture match, so even though we have the extra parameter, it should still match
             Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
             taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.x86);
@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
-            // And if we try again, we should get it from the cache this time.  
+            // And if we try again, we should get it from the cache this time.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -1072,9 +1072,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.x86);
             taskParameters.Add("Baz", "Qux");
 
-            // Even with a different value to the additional parameter, because it's a fuzzy equals and because all 
-            // our equivalency check looks for is runtime and architecture, it still successfully retrieves the 
-            // existing record from the cache. 
+            // Even with a different value to the additional parameter, because it's a fuzzy equals and because all
+            // our equivalence check looks for is runtime and architecture, it still successfully retrieves the
+            // existing record from the cache.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that when when multiple parameters are set that they show up in the parametergroup object
+        /// Verify that when multiple parameters are set that they show up in the parametergroup object
         /// </summary>
         [Fact]
         public void MultipleGoodParameters()
@@ -1423,7 +1423,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify when a class which derives from ITask is attempted to be registered that we get an InvalidProjectFileException. 
+        /// Verify when a class which derives from ITask is attempted to be registered that we get an InvalidProjectFileException.
         /// We only support ITaskItems and not their derived types as input parameters.
         /// </summary>
         [Fact]
@@ -1447,7 +1447,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
         /// <summary>
-        /// Verify when a random scalar input class is attempted to be registered that we get an invalid proejct file exceptions.
+        /// Verify when a random scalar input class is attempted to be registered that we get an invalid project file exceptions.
         /// </summary>
         [Fact]
         public void BadScalarInputOnInputParameter()
@@ -1971,12 +1971,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Helper Methods
 
         /// <summary>
-        /// With the given task registry, retrieve a copy of the test task with the given runtime and 
-        /// architecture and verify: 
-        /// - that it was retrieved (or not) as expected 
+        /// With the given task registry, retrieve a copy of the test task with the given runtime and
+        /// architecture and verify:
+        /// - that it was retrieved (or not) as expected
         /// - that it was retrieved from the cache (or not) as expected
-        /// - that the record that was retrieved had the expected runtime and architecture 
-        ///   values as its factory parameters. 
+        /// - that the record that was retrieved had the expected runtime and architecture
+        ///   values as its factory parameters.
         /// </summary>
         private void RetrieveAndValidateRegisteredTaskRecord
                                                         (
@@ -2015,12 +2015,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With the given task registry, retrieve a copy of the test task with the given runtime and 
-        /// architecture and verify: 
-        /// - that it was retrieved (or not) as expected 
+        /// With the given task registry, retrieve a copy of the test task with the given runtime and
+        /// architecture and verify:
+        /// - that it was retrieved (or not) as expected
         /// - that it was retrieved from the cache (or not) as expected
-        /// - that the record that was retrieved had the expected runtime and architecture 
-        ///   values as its factory parameters. 
+        /// - that the record that was retrieved had the expected runtime and architecture
+        ///   values as its factory parameters.
         /// </summary>
         private void RetrieveAndValidateRegisteredTaskRecord
                                                         (
@@ -2048,16 +2048,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With the given task registry, retrieve a copy of the test task with the given runtime and 
-        /// architecture and verify: 
-        /// - that it was retrieved (or not) as expected 
+        /// With the given task registry, retrieve a copy of the test task with the given runtime and
+        /// architecture and verify:
+        /// - that it was retrieved (or not) as expected
         /// - that it was retrieved from the cache (or not) as expected
         /// </summary>
         private void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, Dictionary<string, string> taskParameters, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
         {
-            // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.  
-            // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass 
-            // null (which will be treated as "don't validate"). 
+            // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.
+            // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass
+            // null (which will be treated as "don't validate").
             string expectedRuntime = null;
             string expectedArchitecture = null;
             if (exactMatchRequired)
@@ -2070,16 +2070,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With the given task registry, retrieve a copy of the test task with the given runtime and 
-        /// architecture and verify: 
-        /// - that it was retrieved (or not) as expected 
+        /// With the given task registry, retrieve a copy of the test task with the given runtime and
+        /// architecture and verify:
+        /// - that it was retrieved (or not) as expected
         /// - that it was retrieved from the cache (or not) as expected
         /// </summary>
         private void RetrieveAndValidateRegisteredTaskRecord(TaskRegistry registry, bool exactMatchRequired, string runtime, string architecture, bool shouldBeRetrieved, bool shouldBeRetrievedFromCache)
         {
-            // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.  
-            // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass 
-            // null (which will be treated as "don't validate"). 
+            // if we're requiring an exact match, we can cheat and figure out what the expected runtime / architecture should be.
+            // if not, then if the user didn't pass us an expected runtime, we can't really check it, so just pass
+            // null (which will be treated as "don't validate").
             string expectedRuntime = exactMatchRequired ? runtime : null;
             string expectedArchitecture = exactMatchRequired ? architecture : null;
 
@@ -2269,7 +2269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// Get the meatadata on the item based on the metadataName
+            /// Get the metadata on the item based on the metadataName
             /// </summary>
             public string GetMetadata(string metadataName)
             {

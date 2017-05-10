@@ -14,7 +14,7 @@ using Xunit;
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
-    /// Most of the common ResolveNonMSBuildOutput/AssignProjectConfiguration functionality is tested 
+    /// Most of the common ResolveNonMSBuildOutput/AssignProjectConfiguration functionality is tested
     /// in ResolveNonMSBuildProjectOutput_Tests.
     /// Here, only test the AssignProjectConfiguration specific code
     /// </summary>
@@ -102,10 +102,10 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does not have either of the metadata set on it.
+        ///
         /// We would expect the following case:
-        /// 
+        ///
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
@@ -123,10 +123,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does not have either of the metadata set on it.
+        ///
         /// We would expect the following case:
-        /// 
+        ///
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
@@ -143,8 +143,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does not have either of the metadata set on it.
+        ///
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to true
         ///     Expect none of the metadata to be set
@@ -164,11 +164,11 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does not have either of the metadata set on it.
+        ///
         /// We would expect the following case:
         /// ReferenceAndBuildProjectsDisabledInProjectConfiguration is set to true meaning we want to build disabled projects.
-        /// 
+        ///
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect no pieces of metadata to be set on the reference item
         /// </summary>
@@ -186,8 +186,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does not have either of the metadata set on it.
+        ///
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to false (BuildReference, and ReferenceOutputAssembly)
@@ -207,8 +207,8 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does has one or more of the metadata set on it. 
-        /// 
+        /// Test the case where the project reference does has one or more of the metadata set on it.
+        ///
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to true since they were already set (BuildReference, and ReferenceOutputAssembly)
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests
 
         #region Test Defaults
         /// <summary>
-        /// Verify if no values are passed in for certain properties that their default values are used. 
+        /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
         [Fact]
         public void VerifyDefaultValueDefaultToVcxPlatformMappings()
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
 
             AssignProjectConfiguration assignProjectConfiguration = new AssignProjectConfiguration();
 
-            /// Test defaults with nothign set
+            /// Test defaults with nothing set
             string actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
             Assert.True(expectedDefaultToVcxPlatformMapping.Equals(actualDefaultToVcxPlatformMapping, StringComparison.OrdinalIgnoreCase), String.Format("Expected '{0}' but found '{1}'", expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping));
 
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify if no values are passed in for certain properties that their default values are used. 
+        /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
         [Fact]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingNoOutput()
@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify if no values are passed in for certain properties that their default values are used. 
+        /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
         [Fact]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingLibraryOutput()

@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property expressions into ProjectPropertyInstance itmes
+        /// Expand property expressions into ProjectPropertyInstance items
         /// </summary>
         [Fact]
         public void ExpandPropertiesIntoProjectPropertyInstances()
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return; // "Cannot have invliad characters in file name on Unix"
+                return; // "Cannot have invalid characters in file name on Unix"
             }
 
             string content = @"
@@ -834,9 +834,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 
                     <Target Name=`Build` Condition=`'@(foo)'!=''` >
-                        <Message Text=`This target should NOT run.`/>  
+                        <Message Text=`This target should NOT run.`/>
                     </Target>
-                  
+
                 </Project>
                 ");
 
@@ -852,7 +852,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     <Target Name=`Build`>
                         <Message Text=`Item list foo contains @(foo)`/>
                     </Target>
-                  
+
                 </Project>
                 ");
 
@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
   </ItemGroup>
 
   <Target Name=""AfterBuild"">
-    <Message Text=""[@(_Item->HasMetadata('a'), '|')]""/>  
+    <Message Text=""[@(_Item->HasMetadata('a'), '|')]""/>
   </Target>
 
 
@@ -1250,8 +1250,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "$(OutputPath) ; $(TargetPath) ; %(Language)_%(Culture)",
                  ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
-            // the following items are passed to the TaskItem constructor, and thus their ItemSpecs should be 
-            // in escaped form. 
+            // the following items are passed to the TaskItem constructor, and thus their ItemSpecs should be
+            // in escaped form.
             ObjectModelHelpers.AssertItemsMatch(@"
                 string$(p): ddd=444
                 dialogs%253b: eee=555
@@ -1388,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Exercises ExpandAllIntoString with a string that does not need expanding. 
+        /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
         [Fact]
@@ -1405,7 +1405,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Create a *non-literal* string. If we used a literal string, the CLR might (would) intern
             // it, which would mean that Expander would inevitably return a reference to the same string.
             // In real builds, the strings will never be literals, and we want to test the behavior in
-            // that situation. 
+            // that situation.
             xmlattribute.Value = "abc123" + new Random().Next();
             string expandedString = expander.ExpandIntoStringLeaveEscaped(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
@@ -1485,7 +1485,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// v10.0\TeamData\Microsoft.Data.Schema.Common.targets shipped with bad syntax:
         /// $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory)
-        /// this was evaluating to blank before, now it errors; we have to special case it to 
+        /// this was evaluating to blank before, now it errors; we have to special case it to
         /// evaluate to blank.
         /// Note that this still works whether or not the key exists and has a value.
         /// </summary>
@@ -1502,7 +1502,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         // Compat hack: WebProjects may have an import with a condition like:
-        //       Condition=" '$(Solutions.VSVersion)' == '8.0'" 
+        //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
         // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
         // Be compatible by returning an empty string here.
         [Fact]
@@ -1689,10 +1689,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             string content = @"
  <Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
- 
+
         <Target Name=""Build"">
             <WriteLinesToFile Overwrite=""true"" File=""unittest.%28msbuild%29.file"" Lines=""Nothing much here""/>
-        
+
             <ItemGroup>
                 <TestFile Include=""unittest.%28msbuild%29.file"" />
             </ItemGroup>
@@ -1716,7 +1716,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45) == null)
             {
-                // if there aren't any reference assemblies installed on the machine in the first place, of course 
+                // if there aren't any reference assemblies installed on the machine in the first place, of course
                 // we're not going to find them. :)
                 return;
             }
@@ -1732,7 +1732,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </PropertyGroup>
 
                     <Target Name=""Build"">
-                        <GetReferenceAssemblyPaths 
+                        <GetReferenceAssemblyPaths
                             Condition="" '$(TargetFrameworkDirectory)' == '' and '$(TargetFrameworkMoniker)' !=''""
                             TargetFrameworkMoniker=""$(TargetFrameworkMoniker)""
                             RootPath=""$(TargetFrameworkRootPath)""
@@ -1743,11 +1743,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         <PropertyGroup>
                             <ReferenceAssemblyPathsFromFunction>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToStandardLibraries($(TargetFrameworkIdentifier), $(TargetFrameworkVersion), $(TargetFrameworkProfile)))\</ReferenceAssemblyPathsFromFunction>
                         </PropertyGroup>
-                        
+
                         <Message Text=""Task:     $(ReferenceAssemblyPathsFromTask)"" Importance=""High"" />
                         <Message Text=""Function: $(ReferenceAssemblyPathsFromFunction)"" Importance=""High"" />
 
-                        <Warning Text=""Reference assembly paths do not match!"" Condition=""'$(ReferenceAssemblyPathsFromFunction)' != '$(ReferenceAssemblyPathsFromTask)'"" />    
+                        <Warning Text=""Reference assembly paths do not match!"" Condition=""'$(ReferenceAssemblyPathsFromFunction)' != '$(ReferenceAssemblyPathsFromTask)'"" />
                     </Target>
 
                 </Project>
@@ -1954,7 +1954,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function with an argument that is expanded, and a chaing of other functions.
+        /// Expand property function with an argument that is expanded, and a chaining of other functions.
         /// </summary>
         [Fact]
         public void PropertyFunctionPropertyWithArgumentNestedAndChainedFunction()
@@ -2107,7 +2107,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function - invlaid since properties don't have properties
+        /// Expand property function - invalid since properties don't have properties
         /// </summary>
         [Fact]
         public void PropertyFunctionInvalid2()
@@ -2125,7 +2125,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
            );
         }
         /// <summary>
-        /// Expand property function - invlaid since properties don't have properties and don't support '.' in them
+        /// Expand property function - invalid since properties don't have properties and don't support '.' in them
         /// </summary>
         [Fact]
         public void PropertyFunctionInvalid3()
@@ -2260,7 +2260,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -2279,7 +2279,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethod1()
@@ -2350,7 +2350,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
-                
+
                 string result = expander.ExpandIntoStringLeaveEscaped("$([System.Type]::GetType(`System.Type`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 Assert.Equal(0, String.Compare("System.Type", result, StringComparison.OrdinalIgnoreCase));
@@ -2394,7 +2394,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -2412,7 +2412,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces()
@@ -2430,7 +2430,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces2()
@@ -2448,7 +2448,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodQuoted1Spaces3()
@@ -2511,7 +2511,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that calls a static method 
+        /// Expand property function that calls a static method
         /// </summary>
         [Fact]
         public void PropertyFunctionStaticMethodNested()
@@ -2661,7 +2661,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
-            
+
             string result = expander.ExpandIntoStringLeaveEscaped("$([System.String]::Equals(`a`, `A`, StringComparison.OrdinalIgnoreCase))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal(true.ToString(), result);
         }
@@ -2709,7 +2709,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Set element location to a file deep in the directory structure.  This is where the function should start looking
             //
             MockElementLocation mockElementLocation = new MockElementLocation(Path.Combine(ObjectModelHelpers.TempProjectDir, "one", "two", "three", "four", "five", Path.GetRandomFileName()));
-            
+
             string fileToFind = FileUtilities.GetTemporaryFile(ObjectModelHelpers.TempProjectDir, ".tmp");
 
             try
@@ -2818,7 +2818,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function chosing either the value (if not empty) or the default specfied
+        /// Expand property function choosing either the value (if not empty) or the default specified
         /// </summary>
         [Fact]
         public void PropertyFunctionValueOrDefault()
@@ -2837,7 +2837,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function chosing either the value (from the environment) or the default specfied
+        /// Expand property function choosing either the value (from the environment) or the default specified
         /// </summary>
         [Fact]
         public void PropertyFunctionValueOrDefaultFromEnvironment()
@@ -3229,7 +3229,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void Medley()
         {
-            // Make absolutely sure that the static method cache hasn't been polluted by the other tests.  
+            // Make absolutely sure that the static method cache hasn't been polluted by the other tests.
             AvailableStaticMethods.Reset_ForUnitTestsOnly();
 
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();

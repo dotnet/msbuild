@@ -20,9 +20,9 @@ namespace Microsoft.Build.UnitTests
     {
         /*
          * Method:  GetFileSystemEntries
-         * 
+         *
          * Simulate Directories.GetFileSystemEntries where file names are short.
-         * 
+         *
          */
         private static string[] GetFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
@@ -99,9 +99,9 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// This pattern should *not* recurse indefinitely since there is no '**' in the pattern:
-        /// 
+        ///
         ///        c:\?emp\foo
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void Regress162390()
@@ -121,9 +121,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForShortLocalPath
-        * 
+        *
         * Convert a short local path to a long path.
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForShortLocalPath()
@@ -144,9 +144,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForLongLocalPath
-        * 
+        *
         * Convert a long local path to a long path (nop).
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForLongLocalPath()
@@ -162,9 +162,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForShortUncPath
-        * 
+        *
         * Convert a short UNC path to a long path.
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForShortUncPath()
@@ -185,9 +185,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForLongUncPath
-        * 
+        *
         * Convert a long UNC path to a long path (nop)
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForLongUncPath()
@@ -203,9 +203,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForRelativePath
-        * 
+        *
         * Convert a short relative path to a long path
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForRelativePath()
@@ -226,9 +226,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForRelativePathPreservesTrailingSlash
-        * 
+        *
         * Convert a short relative path with a trailing backslash to a long path
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForRelativePathPreservesTrailingSlash()
@@ -249,9 +249,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForRelativePathPreservesExtraSlashes
-        * 
+        *
         * Convert a short relative path with doubled embedded backslashes to a long path
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForRelativePathPreservesExtraSlashes()
@@ -272,9 +272,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameForMixedLongAndShort
-        * 
+        *
         * Only part of the path might be short.
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameForMixedLongAndShort()
@@ -295,10 +295,10 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  GetLongFileNameWherePartOfThePathDoesntExist
-        * 
+        *
         * Part of the path may not exist. In this case, we treat the non-existent parts
         * as if they were already a long file name.
-        * 
+        *
         */
         [Fact]
         public void GetLongFileNameWherePartOfThePathDoesntExist()
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RecursiveDirRecursive()
         {
-            // Check that a wildcardpath of **\x\**\ matches correctly since, \**\ is a 
+            // Check that a wildcardpath of **\x\**\ matches correctly since, \**\ is a
             // separate code path.
             ValidateFileMatch(@"c:\foo\**\x\**\*.*", @"c:\foo\x\file.txt", true);
             ValidateFileMatch(@"c:\foo\**\x\**\*.*", @"c:\foo\y\x\file.txt", true);
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests
         {
             // However, we don't wtool this to match,
             ValidateNoFileMatch(@"C:\foo\**", @"C:\foo", true);
-            // becase we don't know whether foo is a file or folder.
+            // because we don't know whether foo is a file or folder.
 
             // Same for UNC
             ValidateNoFileMatch
@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MultipleStarStar()
         {
-            // Multiple-** matches 
+            // Multiple-** matches
             ValidateFileMatch("c:\\**\\user\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
             ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
             ValidateFileMatch("c:\\**\\user\\**\\*.*", "c://Documents and Settings\\user\\NTUSER.DAT", true);
@@ -1325,12 +1325,12 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// A general purpose method used to:
-        /// 
+        ///
         /// (1) Simulate a file system.
         /// (2) Check whether all matchingFiles where hit by the filespec pattern.
         /// (3) Check whether all nonmatchingFiles were *not* hit by the filespec pattern.
         /// (4) Check whether all untouchableFiles were not even requested (usually for perf reasons).
-        /// 
+        ///
         /// These can be used in various combinations to test the filematcher framework.
         /// </summary>
         /// <param name="filespec">A FileMatcher filespec, possibly with wildcards.</param>
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Runs the test 4 times with the include and exclude using either forward or backward slashes.
         /// Expects the <param name="filespec"></param> and <param name="excludeFileSpects"></param> to contain only backward slashes
-        /// 
+        ///
         /// To preserve current MSBuild behaviour, it only does so if the path is not rooted. Rooted paths do not support forward slashes (as observed on MSBuild 14.0.25420.1)
         /// </summary>
         private static void MatchDriverWithDifferentSlashes
