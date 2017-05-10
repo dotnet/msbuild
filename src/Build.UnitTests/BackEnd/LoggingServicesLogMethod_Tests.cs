@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in. 
+        /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in.
         /// </summary>
         [Fact]
         public void LogErrorEmptyMessageResource()
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify a message is logged when both parameters are good and 
+        /// Verify a message is logged when both parameters are good and
         /// the exception has not been logged yet. Verify with and without OnlyLogCriticalEvents.
         /// In Both cases we expect the event to be logged
         /// </summary>
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify a LogTaskWarningFromException with a null exception and a non null exception 
+        /// Verify a LogTaskWarningFromException with a null exception and a non null exception
         /// with all of the other fields properly filled out.
         /// </summary>
         [Fact]
@@ -573,7 +573,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify an exception is when a empty MessageResourceName is passed in. 
+        /// Verify an exception is when a empty MessageResourceName is passed in.
         /// </summary>
         [Fact]
         public void LogWarningEmptyMessageResource()
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify a message is logged when all of the parameters are filled out 
+        /// Verify a message is logged when all of the parameters are filled out
         /// </summary>
         [Fact]
         public void LogWarningTests()
@@ -696,7 +696,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are 
+        /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are
         /// valid inputs.
         /// </summary>
         [Fact]
@@ -886,7 +886,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             BuildStartedEventArgs buildEvent =
                 new BuildStartedEventArgs(
-                    ResourceUtilities.FormatResourceString("BuildStarted"), 
+                    ResourceUtilities.FormatResourceString("BuildStarted"),
                     null /* no help keyword */,
                     service.ProcessedBuildEvent.Timestamp);
 
@@ -972,7 +972,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Test the case where TaskName 
+        /// Test the case where TaskName
         /// </summary>
         [Fact]
         public void TaskStartedEvent()
@@ -1007,7 +1007,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Test the case where TaskName is null. 
+        /// Test the case where TaskName is null.
         /// </summary>
         [Fact]
         public void TaskFinishedNullTaskName()
@@ -1095,7 +1095,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Test the case where TargetName is null. 
+        /// Test the case where TargetName is null.
         /// </summary>
         [Fact]
         public void TargetFinishedNullTargetName()
@@ -1130,8 +1130,8 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.LogTelemetry(
-                    buildEventContext: null, 
-                    eventName: null, 
+                    buildEventContext: null,
+                    eventName: null,
                     properties: new Dictionary<string, string>());;
             });
 
@@ -1295,7 +1295,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 
-            // Now do it the right way -- with a matching ProjectStarted. 
+            // Now do it the right way -- with a matching ProjectStarted.
             BuildEventContext projectContext = service.LogProjectStarted
                 (
                     new BuildEventContext(1, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId),
@@ -1706,8 +1706,8 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region Helper Classes
         /// <summary>
-        /// Create a derived class which overrides ProcessLoggingEvent so 
-        /// we can test most of the logging methods without relying on the 
+        /// Create a derived class which overrides ProcessLoggingEvent so
+        /// we can test most of the logging methods without relying on the
         /// exact implementation of process logging events.
         /// </summary>
         internal class ProcessBuildEventHelper : LoggingService
@@ -1772,8 +1772,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
-            /// Override the method to log which event was p1446
-            /// rocessed so it can be verified in a test
+            /// Override the method to log which event was processed so it can be verified in a test
             /// </summary>
             /// <param name="buildEvent">Build event which was asked to be processed</param>
             internal override void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
@@ -1793,7 +1792,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
-            /// Reset the event processed by ProcessLoggingEvent. 
+            /// Reset the event processed by ProcessLoggingEvent.
             /// This is done so another event can be logged.
             /// </summary>
             internal void ResetProcessedBuildEvent()
