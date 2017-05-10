@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// Validates that we can correctly load two of the same project file with different global properties, even when
-        /// those global properties are applied to the project by the project collection (and then overrided in one case). 
+        /// those global properties are applied to the project by the project collection (and then overridden in one case). 
         /// </summary>
         [Fact]
         public void TwoProjectsDistinguishedByGlobalPropertiesOnly_ProjectOverridesProjectCollection()
