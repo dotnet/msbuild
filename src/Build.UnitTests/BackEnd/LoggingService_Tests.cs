@@ -880,7 +880,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region IForwardingLogger Members
 
             /// <summary>
-            /// Not used, implmented due to interface
+            /// Not used, implemented due to interface
             /// </summary>
             /// <value>Notused</value>
             public IEventRedirector BuildEventRedirector
