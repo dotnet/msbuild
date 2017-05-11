@@ -23,7 +23,7 @@ Arguments:
   <args>      Project to project references to add
 
 Options:
-  -h, --help                    Show help information
+  -h, --help                    Show help information.
   -f, --framework <FRAMEWORK>   Add reference only when targeting a specific framework
 ";
 
@@ -35,7 +35,7 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 
 Commands:
   package <PACKAGE_NAME>   .NET Add Package reference Command

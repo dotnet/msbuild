@@ -21,7 +21,7 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 ";
 
         private const string ListCommandHelpText = @".NET List Command
@@ -32,7 +32,7 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 
 Commands:
   reference   .NET Core Project-to-Project dependency viewer

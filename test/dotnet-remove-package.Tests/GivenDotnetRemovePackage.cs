@@ -20,7 +20,7 @@ Arguments:
   <PACKAGE_NAME>   Package reference to remove.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 ";
 
         private const string RemoveCommandHelpText = @".NET Remove Command
@@ -31,7 +31,7 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 
 Commands:
   package <PACKAGE_NAME>   .NET Remove Package reference Command.

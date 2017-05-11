@@ -22,7 +22,7 @@ Arguments:
   <args>       Remove the specified project(s) from the solution. The project is not impacted.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 ";
 
         private const string SlnCommandHelpText = @".NET modify solution file command
@@ -33,7 +33,7 @@ Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
 
 Commands:
   add <args>      .NET Add project(s) to a solution file Command
@@ -236,7 +236,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln InvalidSolution.sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -256,7 +256,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Invalid format in line 1: File header is missing.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
