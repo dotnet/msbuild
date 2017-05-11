@@ -162,7 +162,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
             result.Should().Pass()
-                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.2!");
 
         }
 
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tests
                     .Execute("portable-v1");
 
             result.Should().Pass()
-                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.1!");
+                .And.HaveStdOutContaining("I'm running on shared framework version 1.1.2!");
         }
 
         [Fact]
