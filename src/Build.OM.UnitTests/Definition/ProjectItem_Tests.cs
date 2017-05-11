@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -898,9 +899,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Action<bool, bool> runTest = (includeIsAbsolute, excludeIsAbsolute) =>
             {
-                using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles, "project"))
+                using (var env = TestEnvironment.Create())
                 {
-                    var projectFile = testProject.ProjectFile;
+                    var projectFile = env
+                        .CreateTestProjectWithFiles(projectContents, inputFiles, "project")
+                        .ProjectFile;
+
                     var projectFileDir = Path.GetDirectoryName(projectFile);
 
                     var include = adjustFilePath(includeIsAbsolute, projectFileDir, includeRelativePath, includeItem);
@@ -950,9 +954,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, files, relativePathFromRootToProject))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, files,relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
 
@@ -970,9 +975,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, files, relativePathFromRootToProject))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, files, relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
 
@@ -2564,8 +2570,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> itemsFromFragmentWithGlobs;
 
-            using (var testProject = new Helpers.TestProjectWithFiles(formattedProjectContents, globFiles))
+            using (var env = TestEnvironment.Create())
             {
+                var testProject = env.CreateTestProjectWithFiles(formattedProjectContents, globFiles);
                 itemsFromFragmentWithGlobs = Helpers.MakeList(new Project(testProject.ProjectFile).GetItems("i"));
             }
 

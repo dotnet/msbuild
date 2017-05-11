@@ -3656,7 +3656,7 @@ namespace Microsoft.Build.Tasks
             private int _col;
 
             internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open), encoding, detectEncoding)
+                : base(File.Open(fileName, FileMode.Open, FileAccess.Read), encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;

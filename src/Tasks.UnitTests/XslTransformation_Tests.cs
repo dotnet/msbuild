@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
     /// 3. When Xml parameters are missing.
     /// 4. Both missing.
     /// 5. Too many Xml parameters.
-    /// 6. Too many Xsl paramters.
+    /// 6. Too many Xsl parameters.
     /// 7. Setting Out parameter to file.
     /// 8. Setting Out parameter to screen.
     /// 9. Setting correct "Parameter" parameters for Xsl.
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Too many Xsl paramters.
+        /// Too many Xsl parameters.
         /// </summary>
         [Fact]
         public void ManyXslParameters()

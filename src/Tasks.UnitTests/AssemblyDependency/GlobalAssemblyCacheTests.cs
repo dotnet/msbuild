@@ -31,13 +31,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
-        /// 
+        ///
         /// This test two aspects. First that we get the correct runtime, second that we get the highest version for that assembly in the runtime.
         /// </summary>
         [Fact]
@@ -55,14 +55,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
-        /// 
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used. 
+        ///
+        /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
         [Fact]
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
         ///
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
+        /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
         [Fact]
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// And we target 4.0 runtime that we get the Version 4.0.0.0 system.
         ///
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
+        /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
         [Fact]
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         ///
         ///
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
+        /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
         [Fact]

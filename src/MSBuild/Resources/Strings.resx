@@ -87,10 +87,10 @@
     <comment>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "/noautoresponse" and "MSBuild.rsp" should not be localized.</comment>
   </data>
   <data name="CopyrightMessage" UESanitized="true" Visibility="Public">
-    <value>Microsoft (R) Build Engine version {0}
+    <value>Microsoft (R) Build Engine version {0} for {1}
 Copyright (C) Microsoft Corporation. All rights reserved.
 </value>
-    <comment>LOCALIZATION: {0} contains the DLL version number</comment>
+    <comment>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</comment>
   </data>
   <data name="DuplicateProjectSwitchError" UESanitized="true" Visibility="Public">
     <value>MSBUILD : error MSB1008: Only one project can be specified.</value>

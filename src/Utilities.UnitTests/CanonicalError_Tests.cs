@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests
         {
             CanonicalError.Parts errorParts = CanonicalError.Parse(message);
 
-            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpretted."
+            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpreted."
             AssertEqual(errorParts.origin, tool);
             AssertEqual(errorParts.category, severity);
             AssertEqual(errorParts.code, code);
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests
         {
             CanonicalError.Parts errorParts = CanonicalError.Parse(message);
 
-            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpretted."
+            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpreted."
             AssertEqual(errorParts.origin, filename);
             AssertEqual(errorParts.category, severity);
             AssertEqual(errorParts.code, code);

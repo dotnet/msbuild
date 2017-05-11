@@ -99,7 +99,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Check the first 3 bytes of a stream to determine if it matches the the given preamble.
+        /// Check the first 3 bytes of a stream to determine if it matches the given preamble.
         /// </summary>
         /// <param name="stream">Steam to check.</param>
         /// <param name="preamble">Preamble to look for.</param>

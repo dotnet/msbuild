@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public Scheduler_Tests()
         {
-            // Since we're creating our own BuildManager, we need to make sure that the default 
+            // Since we're creating our own BuildManager, we need to make sure that the default
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
             if (nodeProviderInProc != null)
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verify that if the affinity of one of the requests is out-of-proc, we create an out-of-proc node (but only one)
-        /// even if the max node count = 1. 
+        /// even if the max node count = 1.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void TestOutOfProcNodeCreatedWhenAffinityIsOutOfProc()
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
+            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
             Assert.Equal(1, response.Count);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
@@ -296,7 +296,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that if the affinity of our requests is out-of-proc, that many out-of-proc nodes will 
+        /// Verify that if the affinity of our requests is out-of-proc, that many out-of-proc nodes will
         /// be made (assuming it does not exceed MaxNodeCount)
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
+            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
             Assert.Equal(1, response.Count);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
@@ -320,9 +320,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that if we have multiple requests and the max node count to fulfill them, 
-        /// we still won't create any new nodes if they're all for the same configuration -- 
-        /// they'd end up all being assigned to the same node. 
+        /// Verify that if we have multiple requests and the max node count to fulfill them,
+        /// we still won't create any new nodes if they're all for the same configuration --
+        /// they'd end up all being assigned to the same node.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void TestNoNewNodesCreatedForMultipleRequestsWithSameConfiguration()
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that if the affinity of our requests is "any", we will not create more than 
+        /// Verify that if the affinity of our requests is "any", we will not create more than
         /// MaxNodeCount nodes (1 IP node + MaxNodeCount - 1 OOP nodes)
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
@@ -373,14 +373,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that if we get 2 Any and 2 inproc requests, in that order, we will only create 2 nodes, since the initial inproc 
-        /// node will service an Any request instead of an inproc request, leaving only one non-inproc request for the second round 
-        /// of node creation.  
+        /// Verify that if we get 2 Any and 2 inproc requests, in that order, we will only create 2 nodes, since the initial inproc
+        /// node will service an Any request instead of an inproc request, leaving only one non-inproc request for the second round
+        /// of node creation.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void VerifyRequestOrderingDoesNotAffectNodeCreationCountWithInProcAndAnyRequests()
         {
-            // Since we're creating our own BuildManager, we need to make sure that the default 
+            // Since we're creating our own BuildManager, we need to make sure that the default
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
             if (nodeProviderInProc != null)
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
+            // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
             Assert.Equal(1, response.Count);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
@@ -514,8 +514,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure that traversal projects are marked with an affinity of "InProc", which means that 
-        /// even if multiple are available, we should still only have the single inproc node.  
+        /// Make sure that traversal projects are marked with an affinity of "InProc", which means that
+        /// even if multiple are available, we should still only have the single inproc node.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void TestTraversalAffinityIsInProc()
@@ -530,21 +530,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            // There will be no request to create a new node, because both of the above requests are traversals, 
-            // which have an affinity of "inproc", and the inproc node already exists. 
+            // There will be no request to create a new node, because both of the above requests are traversals,
+            // which have an affinity of "inproc", and the inproc node already exists.
             Assert.Equal(1, response.Count);
             Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
             Assert.Equal(request1, response[0].BuildRequest);
         }
 
         /// <summary>
-        /// With something approximating the BuildManager's build loop, make sure that we don't end up 
-        /// trying to create more nodes than we can actually support.   
+        /// With something approximating the BuildManager's build loop, make sure that we don't end up
+        /// trying to create more nodes than we can actually support.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void VerifyNoOverCreationOfNodesWithBuildLoop()
         {
-            // Since we're creating our own BuildManager, we need to make sure that the default 
+            // Since we're creating our own BuildManager, we need to make sure that the default
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
             if (nodeProviderInProc != null)
@@ -639,7 +639,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that providing a result to the only ourstanding request results in build complete.
+        /// Verify that providing a result to the only outstanding request results in build complete.
         /// </summary>
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
         public void TestResult()

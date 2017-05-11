@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         //  \s*\)";
         // We need to support any item expressions that satisfy this expression.
         //
-        // Try spaces everywhere that that regex allows spaces:
+        // Try spaces everywhere that regex allows spaces:
         [Fact]
         public void SpacingInItemListExpression()
         {

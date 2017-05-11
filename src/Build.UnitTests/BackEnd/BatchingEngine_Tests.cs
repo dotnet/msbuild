@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Missing unittest found by mutation testing.
         /// REASON TEST WASN'T ORIGINALLY PRESENT: Missed test.
-        /// 
+        ///
         /// This test ensures that two items with duplicate attributes end up in exactly one batching
         /// bucket.
         /// </summary>
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), null);
 
-            // If duplicate buckes have been folded correctly, then there will be exactly one bucket here
+            // If duplicate buckets have been folded correctly, then there will be exactly one bucket here
             // containing both a.foo and b.foo.
             Assert.Equal(1, buckets.Count);
         }
@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </ItemGroup>
                     </Target>
                     <Target Name=""MakeDbPackage""  Outputs=""%(Environments.Identity)"">
-                        <Message Text=""Item Before:%(Environments.Identity) @(ItemsToZip)"" />   
+                        <Message Text=""Item Before:%(Environments.Identity) @(ItemsToZip)"" />
                         <ItemGroup>
                              <ItemsToZip Remove=""@(ItemsToZip)"" />
                         </ItemGroup>
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Regress a bug where batching over an item list seemed to have 
+        /// Regress a bug where batching over an item list seemed to have
         /// items for that list even in buckets where there should be none, because
         /// it was batching over metadata that only other list/s had.
         /// </summary>
@@ -304,9 +304,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <k>x</k>
     </j>
   </ItemGroup>
-  
+
   <Target Name=""t"">
-    <ItemGroup>     
+    <ItemGroup>
       <Obj Condition=""'%(j.k)'==''"" Include=""@(j->'%(Filename).obj');%(i.foo)""/>
     </ItemGroup>
     <Message Text=""@(Obj)"" />
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <ItemGroup>
         <a Include=""a1""/>
         <b Include=""b1""/>
-    </ItemGroup>       
+    </ItemGroup>
     <Target Name=""t""  Outputs=""%(a.Identity)%(b.identity)"">
         <Message Text=""[a=@(a) b=@(b)]"" />
     </Target>
@@ -398,8 +398,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
         /// <summary>
-        /// It is important that the batching engine invokes the different batches in the same 
-        /// order as the items are declared in the project, especially when batching is simply 
+        /// It is important that the batching engine invokes the different batches in the same
+        /// order as the items are declared in the project, especially when batching is simply
         /// being used as a "for loop".
         /// </summary>
         [Fact]

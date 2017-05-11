@@ -18,8 +18,11 @@ namespace Microsoft.Build.BackEnd
     /// Contains information about a target name and reference location.
     /// </summary>
     [DebuggerDisplay("Name={TargetName}")]
-    internal class TargetSpecification
+    internal class TargetSpecification : INodePacketTranslatable
     {
+        private string _targetName;
+        private ElementLocation _referenceLocation;
+
         /// <summary>
         /// Construct a target specification.
         /// </summary>
@@ -30,26 +33,36 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentLength(targetName, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, "referenceLocation");
 
-            this.TargetName = targetName;
-            this.ReferenceLocation = referenceLocation;
+            this._targetName = targetName;
+            this._referenceLocation = referenceLocation;
+        }
+
+        private TargetSpecification()
+        {
         }
 
         /// <summary>
         /// Gets or sets the target name            
         /// </summary>
-        public string TargetName
-        {
-            get;
-            private set;
-        }
+        public string TargetName => _targetName;
 
         /// <summary>
         /// Gets or sets the reference location
         /// </summary>
-        public ElementLocation ReferenceLocation
+        public ElementLocation ReferenceLocation => _referenceLocation;
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
-            get;
-            private set;
+            translator.Translate(ref _targetName);
+            translator.Translate(ref _referenceLocation, ElementLocation.FactoryForDeserialization);
+        }
+
+        internal static TargetSpecification FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new TargetSpecification();
+            ((INodePacketTranslatable) instance).Translate(translator);
+
+            return instance;
         }
     }
 }

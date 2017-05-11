@@ -230,13 +230,13 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(sourceFile);
 
                 FileInfo file = new FileInfo(destinationFile);
-                file.Attributes = file.Attributes ^ FileAttributes.ReadOnly; // mark destination writeable only
+                file.Attributes = file.Attributes ^ FileAttributes.ReadOnly; // mark destination writable only
                 File.Delete(destinationFile);
             }
         }
 
         /// <summary>
-        /// Move should overwrite any writeable destination file
+        /// Move should overwrite any writable destination file
         /// </summary>
         [Fact]
         public void MoveOverExistingFileDestinationWriteable()

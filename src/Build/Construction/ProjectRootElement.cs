@@ -1548,6 +1548,14 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Creates a project SDK element attached to this project.
+        /// </summary>
+        public ProjectSdkElement CreateProjectSdkElement(string sdkName, string sdkVersion)
+        {
+            return ProjectSdkElement.CreateDisconnected(sdkName, sdkVersion, this);
+        }
+
+        /// <summary>
         /// Save the project to the file system, if dirty.
         /// Uses the Encoding returned by the Encoding property.
         /// Creates any necessary directories.
@@ -1884,6 +1892,56 @@ namespace Microsoft.Build.Construction
         internal void MarkAsExplicitlyLoaded()
         {
             IsExplicitlyLoaded = true;
+        }
+
+        /// <summary>
+        /// Creates and returns a list of <see cref="ProjectImportElement"/> nodes which are implicitly
+        /// referenced by the Project.
+        /// </summary>
+        /// <param name="currentProjectOrImport">Current project</param>
+        /// <returns>An <see cref="IEnumerable{SdkReference}"/> containing details of the SDKs referenced by the project.</returns>
+        internal List<ProjectImportElement> GetImplicitImportNodes(ProjectRootElement currentProjectOrImport)
+        {
+            var nodes = new List<ProjectImportElement>();
+
+            foreach (var referencedSdk in ParseSdks(Sdk, SdkLocation))
+            {
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+            }
+
+            foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
+            {
+                var referencedSdk = new SdkReference(
+                    sdkNode.XmlElement.GetAttribute("Name"),
+                    sdkNode.XmlElement.GetAttribute("Version"),
+                    sdkNode.XmlElement.GetAttribute("MinimumVersion"));
+
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
+                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+            }
+
+            return nodes;
+        }
+
+        private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
+        {
+            if (String.IsNullOrWhiteSpace(sdks))
+            {
+                yield break;
+            }
+
+            foreach (string sdk in sdks.Split(';').Select(i => i.Trim()))
+            {
+                SdkReference sdkReference;
+
+                if (!SdkReference.TryParse(sdk, out sdkReference))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(sdkLocation, "InvalidSdkFormat", sdks);
+                }
+
+                yield return sdkReference;
+            }
         }
 
         /// <summary>

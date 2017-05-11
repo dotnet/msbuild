@@ -6,11 +6,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -52,12 +52,12 @@ namespace Microsoft.Build.Execution
     ///            AssemblyName="utiltasks.dll"
     ///            AssemblyFile="$(MyDownloadedTasks)\"/&gt;
     /// </example>
-    internal sealed class TaskRegistry
+    internal sealed class TaskRegistry : INodePacketTranslatable
     {
         /// <summary>
         /// The fallback task registry
         /// </summary>
-        private readonly Toolset _toolset;
+        private Toolset _toolset;
 
         /// <summary>
         /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The cache to load the *.tasks files into
         /// </summary>
-        private ProjectRootElementCache _projectRootElementCache;
+        internal ProjectRootElementCache RootElementCache { get; set; }
 
         /// <summary>
         /// Creates a task registry that does not fall back to any other task registry.
@@ -159,7 +159,11 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
 
-            _projectRootElementCache = projectRootElementCache;
+            RootElementCache = projectRootElementCache;
+        }
+
+        private TaskRegistry()
+        {
         }
 
         /// <summary>
@@ -176,7 +180,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
             ErrorUtilities.VerifyThrowInternalNull(toolset, "toolset");
 
-            _projectRootElementCache = projectRootElementCache;
+            RootElementCache = projectRootElementCache;
             _toolset = toolset;
         }
 
@@ -200,12 +204,14 @@ namespace Microsoft.Build.Execution
             {
                 if (null == _taskRegistrations)
                 {
-                    _taskRegistrations = new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    _taskRegistrations = CreateRegisteredTaskDictionary();
                 }
 
                 return _taskRegistrations;
             }
         }
+
+        internal bool IsLoaded => RootElementCache != null;
 
         /// <summary>
         /// Evaluate the usingtask and add the result into the data passed in
@@ -368,19 +374,26 @@ namespace Microsoft.Build.Execution
                 parameterGroupAndTaskElementRecord.ExpandUsingTask<P, I>(projectUsingTaskXml, expander, expanderOptions);
             }
 
-            IDictionary<string, string> taskFactoryParameters = null;
+            Dictionary<string, string> taskFactoryParameters = null;
             string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
 
             if ((runtime != String.Empty) || (architecture != String.Empty))
             {
-                taskFactoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                taskFactoryParameters = CreateTaskFactoryParametersDictionary();
 
                 taskFactoryParameters.Add(XMakeAttributes.runtime, (runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime));
                 taskFactoryParameters.Add(XMakeAttributes.architecture, (architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture));
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
+        }
+
+        private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
+        {
+            return initialCount == null
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -461,7 +474,7 @@ namespace Microsoft.Build.Execution
             // Try the override task registry first
             if (_toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, _projectRootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -534,7 +547,7 @@ namespace Microsoft.Build.Execution
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, _projectRootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -626,7 +639,7 @@ namespace Microsoft.Build.Execution
         /// Registers an evaluated using task tag for future 
         /// consultation
         /// </summary>
-        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, IDictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
+        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, "assemblyLoadInfo");
@@ -634,7 +647,7 @@ namespace Microsoft.Build.Execution
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
             {
-                _taskRegistrations = new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                _taskRegistrations = CreateRegisteredTaskDictionary();
             }
 
             // since more than one task can have the same name, we want to keep track of all assemblies that are declared to
@@ -648,6 +661,14 @@ namespace Microsoft.Build.Execution
             }
 
             registeredTaskEntries.Add(new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord));
+        }
+
+        private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
+        {
+
+            return capacity != null
+                ? new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
+                : new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
         }
 
         /// <summary>
@@ -681,17 +702,41 @@ namespace Microsoft.Build.Execution
         /// the set of identity parameters
         /// </summary>
         [DebuggerDisplay("{Name} ParameterCount = {TaskIdentityParameters.Count}")]
-        internal class RegisteredTaskIdentity
+        internal class RegisteredTaskIdentity : INodePacketTranslatable
         {
+            private string _name;
+            private IDictionary<string, string> _taskIdentityParameters;
+
             /// <summary>
             /// Constructor
             /// </summary>
             internal RegisteredTaskIdentity(string name, IDictionary<string, string> taskIdentityParameters)
             {
-                Name = name;
+                _name = name;
 
                 // The ReadOnlyDictionary is a *wrapper*, the Dictionary is the copy.
-                TaskIdentityParameters = taskIdentityParameters == null ? null : new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(taskIdentityParameters, StringComparer.OrdinalIgnoreCase));
+                _taskIdentityParameters = taskIdentityParameters == null ? null : new ReadOnlyDictionary<string, string>(CreateTaskIdentityParametersDictionary(taskIdentityParameters));
+            }
+
+            private static IDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
+            {
+                ErrorUtilities.VerifyThrowInvalidOperation(initialState == null || initialCount == null, "at most one can be non-null");
+
+                if (initialState != null)
+                {
+                    return new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase);
+                }
+
+                if (initialCount != null)
+                {
+                    return new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
+                }
+
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            public RegisteredTaskIdentity()
+            {
             }
 
             /// <summary>
@@ -699,8 +744,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string Name
             {
-                get;
-                private set;
+                get { return _name; }
             }
 
             /// <summary>
@@ -708,8 +752,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public IDictionary<string, string> TaskIdentityParameters
             {
-                get;
-                private set;
+                get { return _taskIdentityParameters; }
             }
 
             /// <summary>
@@ -924,12 +967,25 @@ namespace Microsoft.Build.Execution
                     return true;
                 }
             }
+
+            public void Translate(INodePacketTranslator translator)
+            {
+                translator.Translate(ref _name);
+
+                IDictionary<string, string> taskIdentityParameters = _taskIdentityParameters;
+                translator.TranslateDictionary(ref taskIdentityParameters, count => CreateTaskIdentityParametersDictionary(null, count));
+
+                if (translator.Mode == TranslationDirection.ReadFromStream && taskIdentityParameters != null)
+                {
+                    _taskIdentityParameters = new ReadOnlyDictionary<string, string>(taskIdentityParameters);
+                }
+            }
         }
 
         /// <summary>
         /// A record for a task registration which also contains the factory which matches the record
         /// </summary>
-        internal class RegisteredTaskRecord
+        internal class RegisteredTaskRecord : INodePacketTranslatable
         {
             /// <summary>
             /// Default task factory to use if one is not specified
@@ -974,7 +1030,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Identity of this task.
             /// </summary>
-            private readonly RegisteredTaskIdentity _taskIdentity;
+            private RegisteredTaskIdentity _taskIdentity;
 
             /// <summary>
             /// Typeloader for taskFactories
@@ -1012,7 +1068,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.  
             /// </summary>
-            private IDictionary<string, string> _taskFactoryParameters;
+            private Dictionary<string, string> _taskFactoryParameters;
 
             /// <summary>
             /// Encapsulates the parameters and the body of the task element for the inline task.
@@ -1022,7 +1078,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Constructor
             /// </summary>
-            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, IDictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask)
+            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1049,6 +1105,10 @@ namespace Microsoft.Build.Execution
                 {
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
+            }
+
+            private RegisteredTaskRecord()
+            {
             }
 
             /// <summary>
@@ -1104,10 +1164,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Identity of this task. 
             /// </summary>
-            private RegisteredTaskIdentity TaskIdentity
-            {
-                get { return _taskIdentity; }
-            }
+            internal RegisteredTaskIdentity TaskIdentity => _taskIdentity;
 
             /// <summary>
             /// Ask the question, whether or not the task name can be created by the task factory. 
@@ -1426,7 +1483,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Keep track of the xml which will be sent to the inline task factory and the parameters if any which will also be passed in
             /// </summary>
-            internal class ParameterGroupAndTaskElementRecord
+            internal class ParameterGroupAndTaskElementRecord : INodePacketTranslatable
             {
                 /// <summary>
                 /// The list of parameters found in the using task along with a corosponding UsingTaskParameterInfo which contains the specific information about it
@@ -1447,7 +1504,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// Create an empty ParameterGroupAndTaskElementRecord
                 /// </summary>
-                internal ParameterGroupAndTaskElementRecord()
+                public ParameterGroupAndTaskElementRecord()
                 {
                 }
 
@@ -1513,7 +1570,7 @@ namespace Microsoft.Build.Execution
                     bool evaluate;
                     string expandedType = expander.ExpandIntoStringLeaveEscaped(taskElement.Evaluate, expanderOptions, taskElement.EvaluateLocation);
 
-                    if (!bool.TryParse(expandedType, out evaluate))
+                    if (!Boolean.TryParse(expandedType, out evaluate))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject
                         (
@@ -1591,7 +1648,7 @@ namespace Microsoft.Build.Execution
                         bool output;
                         string expandedOutput = expander.ExpandIntoStringLeaveEscaped(parameter.Output, expanderOptions, parameter.OutputLocation);
 
-                        if (!bool.TryParse(expandedOutput, out output))
+                        if (!Boolean.TryParse(expandedOutput, out output))
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                             (
@@ -1622,7 +1679,7 @@ namespace Microsoft.Build.Execution
                         bool required;
                         string expandedRequired = expander.ExpandIntoStringLeaveEscaped(parameter.Required, expanderOptions, parameter.RequiredLocation);
 
-                        if (!bool.TryParse(expandedRequired, out required))
+                        if (!Boolean.TryParse(expandedRequired, out required))
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                             (
@@ -1638,7 +1695,109 @@ namespace Microsoft.Build.Execution
                         UsingTaskParameters.Add(parameter.Name, new TaskPropertyInfo(parameter.Name, paramType, output, required));
                     }
                 }
+
+                public void Translate(INodePacketTranslator translator)
+                {
+                    translator.Translate(ref _inlineTaskXmlBody);
+                    translator.Translate(ref _taskBodyEvaluated);
+
+                    translator.TranslateDictionary(ref _usingTaskParameters, TranslatorForTaskParametersKey, TranslatorForTaskParameterValue, count => new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase));
+                }
+
+                // todo move to nested function after C# 7
+                private static void TranslatorForTaskParametersKey(ref string key, INodePacketTranslator translator)
+                {
+                    translator.Translate(ref key);
+                }
+
+                // todo move to nested function after C# 7
+                private static void TranslatorForTaskParameterValue(ref TaskPropertyInfo taskPropertyInfo, INodePacketTranslator translator)
+                {
+                    string name = null;
+                    string propertyTypeName = null;
+                    bool output = false;
+                    bool required = false;
+
+                    var writing = translator.Mode == TranslationDirection.WriteToStream;
+
+                    if (writing)
+                    {
+                        name = taskPropertyInfo.Name;
+                        propertyTypeName = taskPropertyInfo.PropertyType.AssemblyQualifiedName;
+                        output = taskPropertyInfo.Output;
+                        required = taskPropertyInfo.Required;
+                    }
+
+                    translator.Translate(ref name);
+                    translator.Translate(ref output);
+                    translator.Translate(ref required);
+                    translator.Translate(ref propertyTypeName);
+
+                    if (!writing)
+                    {
+                        Type propertyType = Type.GetType(propertyTypeName);
+                        taskPropertyInfo = new TaskPropertyInfo(name, propertyType, output, required);
+                    }
+                }
             }
+
+            public void Translate(INodePacketTranslator translator)
+            {
+                translator.Translate(ref _taskIdentity);
+                translator.Translate(ref _registeredName);
+                translator.Translate(ref _taskFactoryAssemblyLoadInfo, AssemblyLoadInfo.FactoryForTranslation);
+                translator.Translate(ref _taskFactory);
+                translator.Translate(ref _parameterGroupAndTaskBody);
+
+                IDictionary<string, string> localParameters = _taskFactoryParameters;
+                translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));
+
+                if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
+                {
+                    _taskFactoryParameters = (Dictionary<string, string>) localParameters;
+                }
+            }
+
+            internal static RegisteredTaskRecord FactoryForDeserialization(INodePacketTranslator translator)
+            {
+                var instance = new RegisteredTaskRecord();
+                instance.Translate(translator);
+
+                return instance;
+            }
+        }
+
+        public void Translate(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
+
+            IDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> copy = _taskRegistrations;
+            translator.TranslateDictionary(ref copy, TranslateTaskRegistrationKey, TranslateTaskRegistrationValue, count => CreateRegisteredTaskDictionary(count));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>) copy;
+            }
+        }
+
+        //todo make nested after C# 7
+        void TranslateTaskRegistrationKey(ref RegisteredTaskIdentity taskIdentity, INodePacketTranslator translator)
+        {
+            translator.Translate(ref taskIdentity);
+        }
+
+        //todo make nested after C# 7
+        void TranslateTaskRegistrationValue(ref List<RegisteredTaskRecord> taskRecords, INodePacketTranslator translator)
+        {
+            translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);
+        }
+
+        public static TaskRegistry FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new TaskRegistry();
+            instance.Translate(translator);
+
+            return instance;
         }
     }
 }

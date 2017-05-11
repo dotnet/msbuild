@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Diagnostics;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Initialize an unparented ProjectImportElement
         /// </summary>
-        private ProjectImportElement(XmlElementWithLocation xmlElement, ProjectRootElement containingProject)
+        internal ProjectImportElement(XmlElementWithLocation xmlElement, ProjectRootElement containingProject)
             : base(xmlElement, null, containingProject)
         {
         }
@@ -91,7 +91,12 @@ namespace Microsoft.Build.Construction
         /// added because of the <see cref="ProjectRootElement.Sdk"/> attribute and the location where the project was
         /// imported.
         /// </summary>
-        public ImplicitImportLocation ImplicitImportLocation { get; internal set; } = ImplicitImportLocation.None;
+        public ImplicitImportLocation ImplicitImportLocation { get; internal set; }
+
+        /// <summary>
+        /// <see cref="SdkReference"/> if applicable to this import element.
+        /// </summary>
+        internal SdkReference ParsedSdkReference { get; set; }
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
@@ -101,27 +106,23 @@ namespace Microsoft.Build.Construction
         internal static ProjectImportElement CreateDisconnected(string project, ProjectRootElement containingProject)
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.import);
-
-            ProjectImportElement import = new ProjectImportElement(element, containingProject);
-
-            import.Project = project;
-
-            return import;
+            return new ProjectImportElement(element, containingProject) {Project = project};
         }
 
         /// <summary>
         /// Creates an implicit ProjectImportElement as if it was in the project.
         /// </summary>
         /// <returns></returns>
-        internal static ProjectImportElement CreateImplicit(string project, ProjectRootElement containingProject, ImplicitImportLocation implicitImportLocation, string sdkName)
+        internal static ProjectImportElement CreateImplicit(string project, ProjectRootElement containingProject, ImplicitImportLocation implicitImportLocation, SdkReference sdkReference)
         {
-            ProjectImportElement import = CreateDisconnected(project, containingProject);
-
-            import.ImplicitImportLocation = implicitImportLocation;
-
-            import.Sdk = sdkName;
-
-            return import;
+            XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.import);
+            return new ProjectImportElement(element, containingProject)
+            {
+                Project = project,
+                Sdk = sdkReference.ToString(),
+                ImplicitImportLocation = implicitImportLocation,
+                ParsedSdkReference = sdkReference
+            };
         }
 
         /// <summary>

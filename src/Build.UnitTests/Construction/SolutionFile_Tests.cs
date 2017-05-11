@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Test that the first project line of a project with the C++ project guid and an 
+        /// Test that the first project line of a project with the C++ project guid and an
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
@@ -66,9 +66,9 @@ namespace Microsoft.Build.UnitTests.Construction
            );
         }
         /// <summary>
-        /// Test that the first project line of a project with the C++ project guid and an 
-        /// arbitrary extension is seen as valid -- we assume that all C++ projects except 
-        /// .vcproj are MSBuild format. 
+        /// Test that the first project line of a project with the C++ project guid and an
+        /// arbitrary extension is seen as valid -- we assume that all C++ projects except
+        /// .vcproj are MSBuild format.
         /// </summary>
         [Fact]
         public void ParseFirstProjectLine_VC2()
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(solutionDev12Corrupted4.Version, 11);
             Assert.Equal(solutionDev12Corrupted4.VisualStudioVersion, 10);
 
-            // Corrupted version number 
+            // Corrupted version number
             string solutionFileContentsDev12Corrupted5 =
                @"
                     Microsoft Visual Studio Solution File, Format Version 11.00
@@ -500,7 +500,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 File.WriteAllText(proj2Path, etpProjContent);
 
-                // Create the thirsd .etp project file
+                // Create the third .etp project file
                 etpProjContent = @"<?xml version=""1.0""?>
                 <EFPROJECT>
                     <GENERAL>
@@ -595,7 +595,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 }
                 Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
             }
-            // Delete the files created suring the test
+            // Delete the files created during the test
             finally
             {
                 File.Delete(proj1Path);
@@ -753,7 +753,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Test to parse a very basic .sln file to validate that description property in a solution file 
+        /// Test to parse a very basic .sln file to validate that description property in a solution file
         /// is properly handled.
         /// </summary>
         [Fact]
@@ -1015,8 +1015,8 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Tests situation where there's a nonexistent project listed in the solution folders.  We should 
-        /// error with a useful message. 
+        /// Tests situation where there's a nonexistent project listed in the solution folders.  We should
+        /// error with a useful message.
         /// </summary>
         [Fact]
         public void MissingNestedProject()
@@ -1075,8 +1075,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
 
         /// <summary>
-        /// Verifies that we correctly identify solution folders and mercury non-buildable projects both as 
-        /// "non-building"  
+        /// Verifies that we correctly identify solution folders and mercury non-buildable projects both as
+        /// "non-building"
         /// </summary>
         [Fact]
         public void BuildableProjects()
@@ -1217,7 +1217,7 @@ EndGlobal
             Assert.Equal("MySlnFolder", solution.ProjectsInOrder[4].ProjectName);
             Assert.False(SolutionFile.IsBuildableProject(solution.ProjectsInOrder[4]));
 
-            // Even though it doesn't have project configurations mapped for all solution configurations, 
+            // Even though it doesn't have project configurations mapped for all solution configurations,
             // it at least has some, so this project should still be marked as "buildable"
             Assert.Equal("{A5EE8128-B08E-4533-86C5-E46714981680}", solution.ProjectsInOrder[5].ProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[5].ProjectName);
@@ -1663,7 +1663,7 @@ EndGlobal
            );
         }
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
         [Fact]
@@ -1761,7 +1761,7 @@ EndGlobal
         }
 
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a more tricky solution
         /// </summary>
         [Fact]

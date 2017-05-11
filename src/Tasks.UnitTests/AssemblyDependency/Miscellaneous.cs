@@ -91,11 +91,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC
         /// </summary>
         [Fact]
@@ -539,7 +539,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
-                    // This version is not a match. 
+                    // This version is not a match.
                     Assert.True(false, "Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
@@ -670,8 +670,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When specifying "EmbedInteropTypes" on a project targeting Fx higher thatn v4.0 -
-        /// CopyLocal should be overriden to false
+        /// When specifying "EmbedInteropTypes" on a project targeting Fx higher than v4.0 -
+        /// CopyLocal should be overridden to false
         /// </summary>
         [Fact]
         public void EmbedInteropTypes()
@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll"),   // MyDontCopyLocalAssembly
             };
 
-            // matrix of expected CopyLocal value per assembly per framwork
+            // matrix of expected CopyLocal value per assembly per framework
             string[,] expectedCopyLocal =
             {
                 // v2.0     v3.0     v3.5      v4.0
@@ -1440,7 +1440,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// If we are targeting NONE and there are two assemblies with the same name then we want to pick the first one rather than look for an assembly which
-        /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecure is picked.
+        /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecture is picked.
         /// </summary>
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
@@ -2308,7 +2308,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// CandidateAssemblyFiles are extra files passed in through the CandidateAssemblyFiles
-        /// that should be considered for matching whem search paths contains {CandidateAssemblyFiles}
+        /// that should be considered for matching when search paths contains {CandidateAssemblyFiles}
         /// </summary>
         [Fact]
         public void CandidateAssemblyFiles()
@@ -2586,7 +2586,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ExpectRedistEntries(fullRedistListContentsDuplicates, 2, 1);
         }
         /// <summary>
-        /// Make sure that if there are different versons that they are all picked
+        /// Make sure that if there are different versions that they are all picked
         /// </summary>
         [Fact]
         public void TestDuplicateHandlingDifferentVersion()
@@ -2612,7 +2612,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Expect to read in a certain number of redist list entries, this is factored out becase we went to test a number of input combinations which will all result in entries returned.
+        /// Expect to read in a certain number of redist list entries, this is factored out because we went to test a number of input combinations which will all result in entries returned.
         /// </summary>
         private static List<AssemblyEntry> ExpectRedistEntries(string fullRedistListContentsDuplicates, int numberOfExpectedEntries, int numberofExpectedRemapEntries)
         {
@@ -3406,7 +3406,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If an item is explictly Private=='true' (as opposed to implicitly when the attribute isn't set at all)
+        /// If an item is explicitly Private=='true' (as opposed to implicitly when the attribute isn't set at all)
         /// then it should be CopyLocal true even if its in the FX directory
         /// </summary>
         [Fact]
@@ -3616,7 +3616,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on A version 2
         ///
         ///
-        /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary refrence which caused the problems
+        /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary reference which caused the problems
         /// are A and C.
         /// </summary>
         [Fact]
@@ -3903,7 +3903,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - D, version 1
         ///   References - D, version 2
         ///
-        /// Neither D1 nor D2 are CopyLocal. This is a solveable conflict because D2 has a higher version
+        /// Neither D1 nor D2 are CopyLocal. This is a solvable conflict because D2 has a higher version
         /// than D1 and there won't be an output directory conflict.
         /// </summary>
         [Fact]
@@ -4554,7 +4554,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - A
         ///
         ///    And, the following conditions.
-        ///     Primary "A" has has two scatter files "M1" and "M2"
+        ///     Primary "A" has two scatter files "M1" and "M2"
         ///
         /// Expected result:
         /// * M1 and M2 should be output in ScatterFiles and CopyLocal.
@@ -5241,8 +5241,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// There is an App.Config file that redirects all versions of C to V2.
         /// Assemblies A and B are both located via their HintPath.
-        /// 
-        /// </summary>        
+        ///
+        /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void Regress339786_CrossVersionsWithAppConfig()
@@ -5715,8 +5715,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list genreated as there is nothing to subtract.
-        /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
+        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
+        /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListEmptyAssemblyInfoWithRedistAssemblies()
@@ -5866,7 +5866,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///     Subset list which has a redist name and entries
         ///
         /// Expected:
-        ///     Expect no black list to be generated and no warnigns to be emitted
+        ///     Expect no black list to be generated and no warnings to be emitted
         ///
         /// Rational:
         ///     Since the redist list name is null or empty we have no way of matching any subset list up to it.
@@ -6233,8 +6233,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list genreated as there is nothing to subtract.
-        /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
+        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
+        /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
@@ -6306,7 +6306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             SubsetListFinder finder = new SubsetListFinder(new string[0]);
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
-            Assert.Equal(0, returnArray.Length); // "Expected the array returned to be 0 lengh"
+            Assert.Equal(0, returnArray.Length); // "Expected the array returned to be 0 length"
         }
 
 
@@ -6317,7 +6317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SubsetListFinderVerifyEmptyInSubsetsToSearchForAndCaching()
         {
-            // Verify the program will not crach when an empty string is passed in and that when we call the method twice that we get the
+            // Verify the program will not crash when an empty string is passed in and that when we call the method twice that we get the
             // exact same array of strings back.
             SubsetListFinder finder = new SubsetListFinder(new string[] { "Clent", string.Empty, "Bar" });
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
@@ -8178,7 +8178,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// "I am the UI representative for this entire redist". ClickOnce will use this to hide
         /// all other redist items and to show only this item.
         ///
-        /// (2) Redist (string) -- This the the value of FileList Redist from the *.xml file.
+        /// (2) Redist (string) -- This the value of FileList Redist from the *.xml file.
         /// This string means "I am the unique name of this entire redist".
         ///
         /// </summary>

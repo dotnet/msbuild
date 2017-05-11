@@ -26,7 +26,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented
-        /// by the hexadecimal number XX. 
+        /// by the hexadecimal number XX.
         /// </summary>
         /// <param name="escapedString">The string to unescape.</param>
         /// <returns>unescaped string</returns>
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented
-        /// by the hexadecimal number XX. 
+        /// by the hexadecimal number XX.
         /// </summary>
         /// <param name="escapedString">The string to unescape.</param>
         /// <param name="escapingWasNecessary">Whether any replacements were made.</param>
@@ -61,8 +61,8 @@ namespace Microsoft.Build.Shared
         {
             escapingWasNecessary = false;
 
-            // If the string doesn't contain anything, then by definition it doesn't 
-            // need unescaping. 
+            // If the string doesn't contain anything, then by definition it doesn't
+            // need unescaping.
             if (String.IsNullOrEmpty(escapedString))
             {
                 return escapedString;
@@ -124,12 +124,12 @@ namespace Microsoft.Build.Shared
 
 
         /// <summary>
-        /// Adds instances of %XX in the input string where the char char to be escaped appears
-        /// XX is the hex value of the ASCII code for the char.  Interns and caches the result. 
+        /// Adds instances of %XX in the input string where the char to be escaped appears
+        /// XX is the hex value of the ASCII code for the char.  Interns and caches the result.
         /// </summary>
         /// <comment>
-        /// NOTE:  Only recommended for use in scenarios where there's expected to be significant 
-        /// repetition of the escaped string.  Cache currently grows unbounded.  
+        /// NOTE:  Only recommended for use in scenarios where there's expected to be significant
+        /// repetition of the escaped string.  Cache currently grows unbounded.
         /// </comment>
         internal static string EscapeWithCaching(string unescapedString)
         {
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Adds instances of %XX in the input string where the char char to be escaped appears
+        /// Adds instances of %XX in the input string where the char to be escaped appears
         /// XX is the hex value of the ASCII code for the char.
         /// </summary>
         /// <param name="unescapedString">The string to escape.</param>
@@ -148,12 +148,12 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Adds instances of %XX in the input string where the char char to be escaped appears
+        /// Adds instances of %XX in the input string where the char to be escaped appears
         /// XX is the hex value of the ASCII code for the char.  Caches if requested.
         /// </summary>
         /// <param name="unescapedString">The string to escape.</param>
         /// <param name="cache">
-        /// True if the cache should be checked, and if the resultant string 
+        /// True if the cache should be checked, and if the resultant string
         /// should be cached.
         /// </param>
         private static string EscapeWithOptionalCaching(string unescapedString, bool cache)
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Shared
                 return unescapedString;
             }
 
-            // next, if we're caching, check to see if it's already there. 
+            // next, if we're caching, check to see if it's already there.
             if (cache)
             {
                 string cachedEscapedString = null;
@@ -293,9 +293,9 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Special characters that need escaping.
-        /// It's VERY important that the percent character is the FIRST on the list - since it's both a character 
-        /// we escape and use in escape sequences, we can unintentionally escape other escape sequences if we 
-        /// don't process it first. Of course we'll have a similar problem if we ever decide to escape hex digits 
+        /// It's VERY important that the percent character is the FIRST on the list - since it's both a character
+        /// we escape and use in escape sequences, we can unintentionally escape other escape sequences if we
+        /// don't process it first. Of course we'll have a similar problem if we ever decide to escape hex digits
         /// (that would require rewriting the algorithm) but since it seems unlikely that we ever do, this should
         /// be good enough to avoid complicating the algorithm at this point.
         /// </summary>

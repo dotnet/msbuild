@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;
@@ -19,32 +20,32 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class
     /// </remarks>
     [DebuggerDisplay("ExecuteTargets={_executeTargets} Condition={_condition}")]
-    public sealed class ProjectOnErrorInstance : ProjectTargetInstanceChild
+    public sealed class ProjectOnErrorInstance : ProjectTargetInstanceChild, INodePacketTranslatable
     {
         /// <summary>
         /// Unevaluated executetargets value.
         /// </summary>
-        private readonly string _executeTargets;
+        private string _executeTargets;
 
         /// <summary>
         /// Condition on the element.
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Location of the executeTargets attribute
         /// </summary>
-        private readonly ElementLocation _executeTargetsLocation;
+        private ElementLocation _executeTargetsLocation;
 
         /// <summary>
         /// Constructor called by Evaluator.
@@ -68,6 +69,10 @@ namespace Microsoft.Build.Execution
             _location = location;
             _executeTargetsLocation = executeTargetsLocation;
             _conditionLocation = conditionLocation;
+        }
+
+        private ProjectOnErrorInstance()
+        {
         }
 
         /// <summary>
@@ -110,6 +115,26 @@ namespace Microsoft.Build.Execution
         public ElementLocation ExecuteTargetsLocation
         {
             get { return _executeTargetsLocation; }
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var typeName = this.GetType().FullName;
+                translator.Translate(ref typeName);
+            }
+
+            translator.Translate(ref _executeTargets);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _executeTargetsLocation, ElementLocation.FactoryForDeserialization);
+        }
+
+        internal new static ProjectOnErrorInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            return translator.FactoryForDeserializingTypeWithName<ProjectOnErrorInstance>();
         }
     }
 }

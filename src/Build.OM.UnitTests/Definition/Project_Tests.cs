@@ -15,16 +15,18 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 
 using Task = System.Threading.Tasks.Task;
-// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock. 
+// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
 using ProvenanceResultTupleList = System.Collections.Generic.List<System.Tuple<string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int>>;
-using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string, System.Collections.Immutable.ImmutableHashSet<string>>>;
+using GlobResultList = System.Collections.Generic.List<System.Tuple<string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>>>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -79,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ";
 
         /// <summary>
-        /// Since when the project file is saved it may be intented we want to make sure the indent charachters do not affect the evaluation against empty. 
+        /// Since when the project file is saved it may be intended we want to make sure the indent characters do not affect the evaluation against empty.
         /// We test here newline, tab, and carriage return.
         /// </summary>
         [Fact]
@@ -101,7 +103,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                            <Message Text=""$(Message1)"" Importance=""High""/>
                           <Message Text=""$(Message2)"" Importance=""High""/>
                           <Message Text=""$(Message3)"" Importance=""High""/>
-                       </Target>                    
+                       </Target>
                     </Project>");
 
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
@@ -126,7 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <Project xmlns='msbuildnamespace'>
                       <Target Name=""BUild"">
                            <Message Text=""IHaveBeenLogged"" Importance=""High""/>
-                       </Target>                    
+                       </Target>
                     </Project>");
 
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
@@ -153,7 +155,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <Project xmlns='msbuildnamespace'>
                       <Target Name=""BUild"">
                            <Message Text=""IHaveBeenLogged"" Importance=""High""/>
-                       </Target>                    
+                       </Target>
                     </Project>");
 
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
@@ -193,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Load a project from a file path that has valid XML that does not 
+        /// Load a project from a file path that has valid XML that does not
         /// evaluate successfully; then trying again after fixing the file should succeed.
         /// </summary>
         [Fact]
@@ -378,7 +380,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// When we try and access the ImportsIncludingDuplicates property on the project without setting 
+        /// When we try and access the ImportsIncludingDuplicates property on the project without setting
         /// the correct projectloadsetting flag, we expect an invalidoperationexception.
         /// </summary>
         [Fact]
@@ -1142,10 +1144,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Xml.ToolsVersion = "2.0";
             project.ReevaluateIfNecessary();
 
-            // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way 
-            // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and 
-            // clearing some internal state to make sure that the update environment variable is picked up, so 
-            // there's not a good way of doing it from these deliberately public OM only tests. 
+            // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way
+            // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and
+            // clearing some internal state to make sure that the update environment variable is picked up, so
+            // there's not a good way of doing it from these deliberately public OM only tests.
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
 
             project.Xml.ToolsVersion = "4.0";
@@ -1195,10 +1197,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Xml.ToolsVersion = "2.0";
             project.ReevaluateIfNecessary();
 
-            // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way 
-            // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and 
-            // clearing some internal state to make sure that the update environment variable is picked up, so 
-            // there's not a good way of doing it from these deliberately public OM only tests. 
+            // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way
+            // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and
+            // clearing some internal state to make sure that the update environment variable is picked up, so
+            // there's not a good way of doing it from these deliberately public OM only tests.
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.GetPropertyValue("msbuildtoolsversion"));
 
             project.Xml.ToolsVersion = "4.0";
@@ -1268,8 +1270,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Test Project's surfacing of the sub-toolset version when it is overridden by a value in the 
-        /// environment 
+        /// Test Project's surfacing of the sub-toolset version when it is overridden by a value in the
+        /// environment
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -1321,8 +1323,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for 
-        /// getting the sub-toolset version. 
+        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for
+        /// getting the sub-toolset version.
         /// </summary>
         [Fact]
         public void GetSubToolsetVersion_FromConstructor()
@@ -1437,7 +1439,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.Delete(path);
             }
         }
-        
+
         /// <summary>
         /// Adding an import to an existing PRE object and re-evaluating should preserve the initial import PRE object
         /// </summary>
@@ -1459,9 +1461,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
 </Project>");
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
                 ProjectRootElement import =
                     ProjectRootElement.Create(
@@ -1523,9 +1526,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
             };
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
 
                 var import = ProjectRootElement.Create(
@@ -1606,9 +1610,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
             };
 
-            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
 
                 var projectRootElement = ProjectRootElement.Create(
@@ -1733,7 +1738,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Tests the tracking of virtual items from the construction to instance model, with the removal of a virtual item. 
+        /// Tests the tracking of virtual items from the construction to instance model, with the removal of a virtual item.
         /// </summary>
         [Fact]
         public void ItemsByEvaluatedIncludeAndExpansion()
@@ -2008,12 +2013,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                               <ItemGroup>
                                 <i Include='i1' />
                               </ItemGroup>
-                            </When>      
+                            </When>
                         </Choose>
 
                       <PropertyGroup>
                         <p>v</p>
-                      </PropertyGroup> 
+                      </PropertyGroup>
 
                     </Project>
                 ");
@@ -2417,7 +2422,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(0, project.Items.Count());
         }
 
-        /// <summary> 
+        /// <summary>
         /// Reserved property in project constructor should just throw
         /// </summary>
         [Fact]
@@ -2432,7 +2437,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
-        /// <summary> 
+        /// <summary>
         /// Reserved property in project collection global properties should log an error then rethrow
         /// </summary>
         [Fact]
@@ -2457,7 +2462,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
-        /// <summary> 
+        /// <summary>
         /// Invalid property (reserved name) in project collection global properties should log an error then rethrow
         /// </summary>
         [Fact]
@@ -2484,10 +2489,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
         /// <summary>
         /// Create tree like this
-        /// 
+        ///
         /// \b.targets
         /// \sub\a.proj
-        /// 
+        ///
         /// An item specified with "..\*" in b.targets should find b.targets
         /// as it was evaluated relative to the project file itself.
         /// </summary>
@@ -2528,7 +2533,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Invalid property (space) in project collection global properties should log an error then rethrow
         /// </summary>
         [Fact]
@@ -2964,7 +2969,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetItemProvenanceByItemType()
         {
-            var project = 
+            var project =
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <A Include=`*.foo;1.foo`/>
@@ -3261,9 +3266,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected1Foo, projectContents, "1.foo");
             AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], "u/x"))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 var expected2Foo = new ProvenanceResultTupleList
@@ -3502,7 +3508,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertProvenanceResult(expected, project, "1.foo");
         }
-		
+
 		[Fact]
         public void GetItemProvenanceShouldWorkWithRemoveElements()
         {
@@ -3549,9 +3555,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             projectContents = string.Format(projectContents, includeGlob);
 
-            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile))
+            using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile);
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 ProvenanceResultTupleList expectedProvenance = null;
@@ -3566,6 +3573,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(getItemProvenanceArgument));
             }
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldNotFindGlobsIfThereAreNoItemElements()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList();
+
+            AssertGlobResult(expected, project);
         }
 
         [Fact]
@@ -3605,32 +3627,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void GetAllGlobsResultsShouldBeInItemElementOrder()
-        {
-            var itemElements = Environment.ProcessorCount * 5;
-            var expected = new GlobResultList();
-
-            var project =
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    {0}
-                  </ItemGroup>
-                </Project>
-            ";
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < itemElements; i++)
-            {
-                sb.AppendLine($"<i_{i} Include=\"*\"/>");
-                expected.Add(Tuple.Create($"i_{i}", "*", ImmutableHashSet<string>.Empty));
-            }
-
-            project = string.Format(project, sb);
-
-            AssertGlobResult(expected, project);
-        }
-
-        [Fact]
         public void GetAllGlobsShouldFindDirectlyReferencedGlobs()
         {
             var project =
@@ -3642,16 +3638,99 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
+            var expectedIncludes = new[] { "*.a", "*", "**", "?a" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*.a", expectedExcludes),
-                Tuple.Create("A", "*", expectedExcludes),
-                Tuple.Create("A", "**", expectedExcludes),
-                Tuple.Create("A", "?a", expectedExcludes)
+                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet.Create<string>())
             };
 
             AssertGlobResult(expected, project);
+        }
+
+        [Fact]
+        public void GetAllGlobsShouldFindAllExcludesAndRemoves()
+        {
+            var project =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*` Exclude=`e*`/>
+                    <A Remove=`a`/>
+                    <A Remove=`b`/>
+                    <A Include=`**` Exclude=`e**`/>
+                    <A Remove=`c`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var expected = new GlobResultList
+            {
+                Tuple.Create("A", new []{"**"}, new [] {"e**"}.ToImmutableHashSet(), new [] {"c"}.ToImmutableHashSet()),
+                Tuple.Create("A", new []{"*"}, new [] {"e*"}.ToImmutableHashSet(), new [] {"c", "b", "a"}.ToImmutableHashSet()),
+            };
+
+            AssertGlobResult(expected, project);
+        }
+
+        [Theory]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+//<A Remove=`e*;f*`/>
+//",
+//        new[] {"ba"},
+//        new[] {"a", "ca", "da", "ea", "fa"}
+//        )]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+//",
+//        new[] {"ba", "ea", "fa"},
+//        new[] {"a", "ca", "da"}
+//        )]
+//        [InlineData(
+//            @"
+//<A Include=`a;b*;c*;d*;e*;f*`/>
+//",
+//        new[] {"ba", "ca", "da", "ea", "fa"},
+//        new[] {"a"}
+//        )]
+        [InlineData(
+            @"
+<E Include=`b`/>
+<R Include=`c`/>
+
+<A Include=`a*;b*;c*` Exclude=`@(E)`/>
+<A Remove=`@(R)`/>
+",
+        new[] {"aa", "bb", "cc"},
+        new[] {"b", "c"}
+        )]
+        public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
+        {
+            var projectTemplate =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    {0}
+                  </ItemGroup>
+                </Project>
+                ";
+
+            var projectContents = string.Format(projectTemplate, itemContents);
+
+            var getAllGlobsResult = ObjectModelHelpers.CreateInMemoryProject(projectContents).GetAllGlobs();
+
+            var uberGlob = new CompositeGlob(getAllGlobsResult.Select(r => r.MsBuildGlob).ToImmutableArray());
+
+            foreach (var matchingString in stringsThatShouldMatch)
+            {
+                Assert.True(uberGlob.IsMatch(matchingString));
+            }
+
+            foreach (var nonMatchingString in stringsThatShouldNotMatch)
+            {
+                Assert.False(uberGlob.IsMatch(nonMatchingString));
+            }
         }
 
         [Fact]
@@ -3666,16 +3745,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ";
 
+            var expectedIncludes = new[] { "*.a", "*", "**" };
             var expectedExcludes = new[] { "1", "*", "3" }.ToImmutableHashSet();
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*.a", expectedExcludes),
-                Tuple.Create("A", "*", expectedExcludes),
-                Tuple.Create("A", "**", expectedExcludes)
+                Tuple.Create("A", expectedIncludes, expectedExcludes, ImmutableHashSet<string>.Empty)
             };
 
             AssertGlobResult(expected, project, "A");
-            AssertGlobResult(new GlobResultList(), project, "NotExistant");
+            AssertGlobResult(new GlobResultList(), project, "NotExistent");
         }
 
         [Fact]
@@ -3694,7 +3772,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expected = new GlobResultList
             {
-                Tuple.Create("A", "*", new[] {"*"}.ToImmutableHashSet()),
+                Tuple.Create("A", new []{"*"}, new[] {"*"}.ToImmutableHashSet(), ImmutableHashSet<string>.Empty),
             };
 
             AssertGlobResult(expected, project);
@@ -3709,17 +3787,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <A Include=`*`/>
                     <B Include=`@(A)`/>
                     <C Include=`**` Exclude=`@(A)`/>
+                    <C Remove=`@(A)` />
                   </ItemGroup>
                 </Project>
                 ";
 
-            var expected = new GlobResultList
+            using (var env = TestEnvironment.Create())
+            using (var projectCollection = new ProjectCollection())
             {
-                Tuple.Create("A", "*", ImmutableHashSet<string>.Empty),
-                Tuple.Create("C", "**", ImmutableHashSet<string>.Empty),
-            };
+                var testFiles = env.CreateTestProjectWithFiles(project, new[] { "a", "b" });
+                var globResult = new Project(testFiles.ProjectFile, null, MSBuildConstants.CurrentToolsVersion, projectCollection).GetAllGlobs();
 
-            AssertGlobResult(expected, project);
+                var expected = new GlobResultList
+                {
+                    Tuple.Create("C", new []{"**"}, new [] {"build.proj", "a", "b"}.ToImmutableHashSet(), new [] {"build.proj", "a", "b"}.ToImmutableHashSet()),
+                    Tuple.Create("A", new []{"*"}, ImmutableHashSet<string>.Empty, ImmutableHashSet<string>.Empty)
+                };
+
+                AssertGlobResultsEqual(expected, globResult);
+            }
         }
 
         private static void AssertGlobResult(GlobResultList expected, string project)
@@ -3741,8 +3827,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             for (var i = 0; i < expected.Count; i++)
             {
                 Assert.Equal(expected[i].Item1, globs[i].ItemElement.ItemType);
-                Assert.Equal(expected[i].Item2, globs[i].Glob);
+                Assert.Equal(expected[i].Item2, globs[i].IncludeGlobs);
                 Assert.Equal(expected[i].Item3, globs[i].Excludes);
+                Assert.Equal(expected[i].Item4, globs[i].Removes);
             }
         }
 

@@ -835,7 +835,7 @@ namespace Microsoft.Build.Execution
                 // Create/Retrieve a configuration for each request
                 BuildRequestConfiguration buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion, _buildParameters.GetToolset);
                 BuildRequestConfiguration matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
-                BuildRequestConfiguration newConfiguration = ResolveConfiguration(buildRequestConfiguration, matchingConfiguration, (submission.BuildRequestData.Flags & BuildRequestDataFlags.ReplaceExistingProjectInstance) == BuildRequestDataFlags.ReplaceExistingProjectInstance);
+                BuildRequestConfiguration newConfiguration = ResolveConfiguration(buildRequestConfiguration, matchingConfiguration, submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
 
                 newConfiguration.ExplicitlyLoaded = true;
 
@@ -1293,29 +1293,55 @@ namespace Microsoft.Build.Execution
             BuildRequestConfiguration resolvedConfiguration = matchingConfigurationFromCache ?? _configCache.GetMatchingConfiguration(unresolvedConfiguration);
             if (resolvedConfiguration == null)
             {
-                int newConfigurationId = _scheduler.GetConfigurationIdFromPlan(unresolvedConfiguration.ProjectFullPath);
-                if (_configCache.HasConfiguration(newConfigurationId) || (newConfigurationId == BuildRequestConfiguration.InvalidConfigurationId))
-                {
-                    // There is already a configuration like this one or one didn't exist in a plan, so generate a new ID.
-                    newConfigurationId = GetNewConfigurationId();
-                }
-
-                resolvedConfiguration = unresolvedConfiguration.ShallowCloneWithNewId(newConfigurationId);
-                _configCache.AddConfiguration(resolvedConfiguration);
+                resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
             }
-            else if (replaceProjectInstance && unresolvedConfiguration.Project != null)
+            else if (unresolvedConfiguration.Project != null && replaceProjectInstance)
             {
-                resolvedConfiguration.Project = unresolvedConfiguration.Project;
-                _resultsCache.ClearResultsForConfiguration(resolvedConfiguration.ConfigurationId);
+                ReplaceExistingProjectInstance(unresolvedConfiguration, resolvedConfiguration);
             }
             else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project != null && !Object.ReferenceEquals(unresolvedConfiguration.Project, resolvedConfiguration.Project))
             {
-                // The user passed in a different instance than the one we already had.  Throw away any corresponding results.
-                _resultsCache.ClearResultsForConfiguration(resolvedConfiguration.ConfigurationId);
-                resolvedConfiguration.Project = unresolvedConfiguration.Project;
+                // The user passed in a different instance than the one we already had. Throw away any corresponding results.
+                ReplaceExistingProjectInstance(unresolvedConfiguration, resolvedConfiguration);
+            }
+            else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project == null)
+            {
+                // Workaround for https://github.com/Microsoft/msbuild/issues/1748
+                // If the submission has a project instance but the existing configuration does not, it probably means that the project was 
+                // built on another node (e.g. the project was encountered as a p2p reference and scheduled to a node).
+                // Add a dummy property to force cache invalidation in the scheduler and the nodes.
+                // TODO find a better solution than a dummy property
+
+                var key = $"ProjectInstance{Guid.NewGuid():N}";
+                unresolvedConfiguration.Properties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+
+                resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
             }
 
             return resolvedConfiguration;
+        }
+
+        private void ReplaceExistingProjectInstance(BuildRequestConfiguration newConfiguration, BuildRequestConfiguration existingConfiguration)
+        {
+            existingConfiguration.Project = newConfiguration.Project;
+            _resultsCache.ClearResultsForConfiguration(existingConfiguration.ConfigurationId);
+        }
+
+        private BuildRequestConfiguration AddNewConfiguration(BuildRequestConfiguration unresolvedConfiguration)
+        {
+            var newConfigurationId = _scheduler.GetConfigurationIdFromPlan(unresolvedConfiguration.ProjectFullPath);
+
+            if (_configCache.HasConfiguration(newConfigurationId) || (newConfigurationId == BuildRequestConfiguration.InvalidConfigurationId))
+            {
+                // There is already a configuration like this one or one didn't exist in a plan, so generate a new ID.
+                newConfigurationId = GetNewConfigurationId();
+            }
+
+            var newConfiguration = unresolvedConfiguration.ShallowCloneWithNewId(newConfigurationId);
+
+            _configCache.AddConfiguration(newConfiguration);
+
+            return newConfiguration;
         }
 
         /// <summary>

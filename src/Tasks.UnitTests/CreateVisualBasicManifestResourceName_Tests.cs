@@ -130,7 +130,7 @@ End Namespace
         }
 
         /// <summary>
-        /// A dependent class plus there is a culture that was expressed in the metadata of the 
+        /// A dependent class plus there is a culture that was expressed in the metadata of the
         /// item rather than the filename.
         /// </summary>
         [Fact]
@@ -343,7 +343,7 @@ End Namespace
 
             bool success = t.Execute(new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream));
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceNames = t.ManifestResourceNames;
 
@@ -378,14 +378,14 @@ End Namespace
         /// <summary>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        /// 
+        ///
         ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        /// 
+        ///
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  In
         /// the case of:
-        /// 
+        ///
         ///     Form1.ro.resx == DependentUpon ==> Form1.vb
-        /// 
+        ///
         /// we continue to treat "ro" as the culture.
         /// </summary>
         [Fact]
@@ -476,7 +476,7 @@ End Namespace
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -502,7 +502,7 @@ End Namespace
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -528,7 +528,7 @@ End Namespace
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -553,7 +553,7 @@ End Namespace
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 

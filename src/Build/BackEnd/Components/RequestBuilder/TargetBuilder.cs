@@ -474,21 +474,27 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     case TargetEntryState.ErrorExecution:
-                        // Push the error targets onto the stack.  This target will now be marked as completed.
-                        // When that state is processed, it will mark its parent for error execution
-                        List<TargetSpecification> errorTargets = currentTargetEntry.GetErrorTargets(_projectLoggingContext);
-                        try
+                        if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
-                            await PushTargets(errorTargets, currentTargetEntry, currentTargetEntry.Lookup, true, false, TargetPushType.Normal);
-                        }
-                        catch
-                        {
-                            if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(currentTargetEntry.Name))
+                            // Push the error targets onto the stack.  This target will now be marked as completed.
+                            // When that state is processed, it will mark its parent for error execution
+                            var errorTargets = currentTargetEntry.GetErrorTargets(_projectLoggingContext);
+                            try
                             {
-                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
+                                await PushTargets(errorTargets, currentTargetEntry, currentTargetEntry.Lookup, true,
+                                    false, TargetPushType.Normal);
                             }
+                            catch
+                            {
+                                if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(
+                                    currentTargetEntry.Name))
+                                {
+                                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry
+                                        .Name);
+                                }
 
-                            throw;
+                                throw;
+                            }
                         }
 
                         break;

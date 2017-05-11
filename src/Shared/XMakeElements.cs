@@ -34,6 +34,7 @@ namespace Microsoft.Build.Shared
         internal const string usingTaskParameterGroup = "ParameterGroup";
         internal const string usingTaskParameter = "Parameter";
         internal const string usingTaskBody = "Task";
+        internal const string sdk = "Sdk";
 
         internal static readonly char[] illegalTargetNameCharacters = new char[] { '$', '@', '(', ')', '%', '*', '?', '.' };
 

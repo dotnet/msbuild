@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Definition
     public class ProjectItem_Tests
     {
         /// <summary>
-        /// Make sure the the CopyFrom actually does a clone.
+        /// Make sure the CopyFrom actually does a clone.
         /// </summary>
         [Fact]
         public void CopyFromClonesMetadata()

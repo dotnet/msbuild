@@ -21,10 +21,10 @@ namespace Microsoft.Build.BackEnd
     internal delegate T NodePacketValueFactory<T>(INodePacketTranslator translator);
 
     /// <summary>
-    /// This delegate is used to create arbitrary dictionary types for serialization.
+    /// This delegate is used to create arbitrary collection types for serialization.
     /// </summary>
     /// <typeparam name="T">The type of dictionary to be created.</typeparam>
-    internal delegate T NodePacketDictionaryCreator<T>(int capacity);
+    internal delegate T NodePacketCollectionCreator<T>(int capacity);
 
     /// <summary>
     /// The serialization mode.
@@ -142,12 +142,28 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref List<string> list);
 
         /// <summary>
+        /// Translates a set of strings
+        /// </summary>
+        /// <param name="set">The set to be translated.</param>
+        void Translate(ref HashSet<string> set);
+
+        /// <summary>
         /// Translates a list of T where T implements INodePacketTranslateable
         /// </summary>
         /// <param name="list">The list to be translated.</param>
         /// <param name="factory">factory to create type T</param>
         /// <typeparam name="T">A TaskItemType</typeparam>
         void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable;
+
+        /// <summary>
+        /// Translates a list of T where T implements INodePacketTranslateable using a collection factory
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="factory">factory to create type T</param>
+        /// <typeparam name="T">An ITranslatable subtype</typeparam>
+        /// <typeparam name="L">An IList subtype</typeparam>
+        /// <param name="collectionFactory">factory to create a collection</param>
+        void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>;
 
         /// <summary>
         /// Translates a DateTime.
@@ -261,6 +277,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
 
+        void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
+
+        void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, Translator<K> keyTranslator, Translator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
+
         /// <summary>
         /// Translates a dictionary of { string, T }.  
         /// </summary>
@@ -289,8 +309,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-        /// <param name="dictionaryCreator">A factory used to create a <see cref="NodePacketDictionaryCreator{D}"/>.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+        /// <param name="collectionCreator">A factory used to create the dictionary.</param>
+        void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
             where T : class, INodePacketTranslatable;
 

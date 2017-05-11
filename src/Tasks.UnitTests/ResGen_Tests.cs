@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests
                 "OutputFiles"
                 );
 
-            // If only OutputFiles is set, then the task should return -- as far as 
+            // If only OutputFiles is set, then the task should return -- as far as
             // it's concerned, no work needs to be done.
             t = new ResGen(); // zero out the log
             t.InputFiles = null;
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteTaskAndVerifyLogContainsResource(t, true /* task passes */, "ResGen.NoInputFiles");
 
-            // However, iff OutputFiles is set to null, it should revert back to default
+            // However, if OutputFiles is set to null, it should revert back to default
             t.InputFiles = differentLengthInput;
             t.OutputFiles = null;
 
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests
             //min reference argument is " /r:a.dll"
             int minReferenceArgumentLength = referenceSwitchDelta + "a.dll".Length;
 
-            // reference name is of the form aaa...aaa###.dll (repeated a characters followed by 3 
+            // reference name is of the form aaa...aaa###.dll (repeated a characters followed by 3
             // digit identifier for uniqueness followed by the .dll file extension
             StringBuilder referencePathBuilder = new StringBuilder();
             referencePathBuilder.Append('a', referencePathLength - (3 /* 3 digit identifier */ + 4 /* file extension */));
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
             t = CreateCommandLineResGen();
 
             // compute command line with only one reference switch so remaining added reference
-            // arguments will have the same length, since the first reference argument added may not have a 
+            // arguments will have the same length, since the first reference argument added may not have a
             // leading space
             List<ITaskItem> references = new List<ITaskItem>();
             references.Add(new TaskItem() { ItemSpec = "a.dll" });
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void SdkToolsPath()
@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void ToolPath()
@@ -498,7 +498,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Given an instance of a ResGen task, executes that task (assuming all necessary parameters
         /// have been set ahead of time) and verifies that the execution log contains the error
-        /// corresponding to the resource name passed in. 
+        /// corresponding to the resource name passed in.
         /// </summary>
         /// <param name="t">The task to execute and check</param>
         /// <param name="errorResource">The name of the resource string to check the log for</param>
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Given an instance of a ResGen task, executes that task (assuming all necessary parameters
-        /// have been set ahead of time), verifies that the task had the expected result, and checks 
+        /// have been set ahead of time), verifies that the task had the expected result, and checks
         /// the log for the string corresponding to the resource name passed in
         /// </summary>
         /// <param name="t">The task to execute and check</param>
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Given an instance of a ResGen task, executes that task (assuming all necessary parameters
-        /// have been set ahead of time), verifies that the task had the expected result, and ensures 
+        /// have been set ahead of time), verifies that the task had the expected result, and ensures
         /// the log does not contain the string corresponding to the resource name passed in
         /// </summary>
         /// <param name="t">The task to execute and check</param>

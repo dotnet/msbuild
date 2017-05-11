@@ -1952,11 +1952,6 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">MSB4229: "{0}" değeri, Sdk belirtimi için geçerli değil. Öznitelik, eğik çizgiyle ayrılmış Sdk-adı/en-düşük-sürüm çiftlerinden oluşan, noktalı virgülle ayrılmış bir liste olmalıdır.</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
-      <trans-unit id="TaskFactoryNotSupportedFailure">
-        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
-        <target state="translated">MSB4801: "{0}" görev fabrikası, MSBuild’in bu sürümü tarafından desteklenmediği için yüklenemedi.</target>
-        <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
         <target state="translated">MSB4802: "{0}" görevinin örneği "{1}" üzerinden oluşturulamadı. {2}, MSBuild’in bu sürümü tarafından desteklenmiyor</target>
@@ -1981,6 +1976,51 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
         <target state="translated">MSB4231: ProjectRootElement, kaydedilmemiş değişiklikler içeriyorsa yeniden yüklenemez.</target>
         <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
+      <trans-unit id="EvaluationStarted">
+        <source>Evaluation started ("{0}")</source>
+        <target state="new">Evaluation started ("{0}")</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="EvaluationFinished">
+        <source>Evaluation finished ("{0}")</source>
+        <target state="new">Evaluation finished ("{0}")</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerParameters">
+        <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
+        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
+      </trans-unit>
+      <trans-unit id="IncludeRemoveOrUpdate">
+        <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
+        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
+      </trans-unit>
+      <trans-unit id="PropertyReassignment">
+        <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
+        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotResolveSdk">
+        <source>MSB4236: The SDK '{0}' specified could not be found.</source>
+        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <note>{StrBegin="MSB4236: "}</note>
+      </trans-unit>
+      <trans-unit id="CouldNotLoadSdkResolver">
+        <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
+        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <note>{StrBegin="MSB4237: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidSdkElementName">
+        <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
+        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <note>{StrBegin="MSB4238: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedLogFileFormat">
+        <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
+        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>
   </file>

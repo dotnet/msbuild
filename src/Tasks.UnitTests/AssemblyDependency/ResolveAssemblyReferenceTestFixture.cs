@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
   <File AssemblyName=""System.Dynamic"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.EnterpriseServices"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.IdentityModel"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
-  <File AssemblyName=""System.IdentityModel.Selectors"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" /> 
+  <File AssemblyName=""System.IdentityModel.Selectors"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.IO.Log"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Management"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Management.Instrumentation"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
   <File AssemblyName=""System.ServiceModel.Routing"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.ServiceModel.Web"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.ServiceProcess"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
-  <File AssemblyName=""System.Speech"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" /> 
+  <File AssemblyName=""System.Speech"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Transactions"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Web.Abstractions"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Web.ApplicationServices"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -840,7 +840,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// A mock delagate for Directory.GetDirectories.
+        /// A mock delegate for Directory.GetDirectories.
         /// </summary>
         /// <param name="file">The file path.</param>
         /// <param name="file">The file pattern.</param>

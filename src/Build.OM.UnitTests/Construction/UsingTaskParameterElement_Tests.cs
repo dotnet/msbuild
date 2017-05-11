@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Set type type to empty
+        /// Set type to empty
         /// </summary>
         [Fact]
         public void SetEmptyType()
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Set type type to null
+        /// Set type to null
         /// </summary>
         [Fact]
         public void SetNullType()

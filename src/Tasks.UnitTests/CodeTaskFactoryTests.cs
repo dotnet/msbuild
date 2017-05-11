@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we get an error if a the the code element is missing
+        /// Verify we get an error if a the code element is missing
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

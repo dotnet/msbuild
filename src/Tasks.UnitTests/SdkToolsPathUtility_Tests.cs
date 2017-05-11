@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// This class is used for testing the ability of the SdkToolsPathUtility class to handel situations when 
+        /// This class is used for testing the ability of the SdkToolsPathUtility class to handle situations when
         /// the toolname exists or does not exist.
         /// </summary>
         internal class MockFileExists
