@@ -2,6 +2,8 @@
 <Project InitialTargets="SetSigningProperties" DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="MicroBuild.props" />
   <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
+  <Import Project="InitRepo.props" />
+  <Import Project="$(BuildInfoProps)" />
 
   <!-- This will be overridden if we're building with MicroBuild. -->
   <Target Name="SignFiles">
