@@ -45,8 +45,7 @@
       <GenerateMsiVersion CommitCount="$(CommitCount)"
                           VersionMajor="$(VersionMajor)"
                           VersionMinor="$(VersionMinor)"
-                          VersionPatch="$(VersionPatch)"
-                          ReleaseSuffix="$(ReleaseSuffix)">
+                          VersionPatch="$(VersionPatch)">
         <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       </GenerateMsiVersion>
 
