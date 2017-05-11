@@ -1,1 +1,0 @@
-This is to test if contents are copied correctly by the dotnet tools
