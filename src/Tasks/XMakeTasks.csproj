@@ -292,7 +292,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\Resolver.cs">
-      <SubType>Code</SubType>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs">
