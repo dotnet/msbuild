@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -21,28 +22,28 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("Condition={_condition}")]
-    public class ProjectItemGroupTaskInstance : ProjectTargetInstanceChild
+    public class ProjectItemGroupTaskInstance : ProjectTargetInstanceChild, INodePacketTranslatable
     {
         /// <summary>
         /// Condition, if any
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Child items.
         /// Not ProjectItemInstances, as these are evaluated during the build.
         /// </summary>
-        private readonly ICollection<ProjectItemGroupTaskItemInstance> _items;
+        private List<ProjectItemGroupTaskItemInstance> _items;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Constructor called by the Evaluator.
@@ -53,7 +54,7 @@ namespace Microsoft.Build.Execution
             string condition,
             ElementLocation location,
             ElementLocation conditionLocation,
-            IEnumerable<ProjectItemGroupTaskItemInstance> items
+            List<ProjectItemGroupTaskItemInstance> items
             )
         {
             ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
@@ -63,13 +64,7 @@ namespace Microsoft.Build.Execution
             _condition = condition;
             _location = location;
             _conditionLocation = conditionLocation;
-
-            if (items != null)
-            {
-                _items = (items is ICollection<ProjectItemGroupTaskItemInstance>) ?
-                    ((ICollection<ProjectItemGroupTaskItemInstance>)items) :
-                    new List<ProjectItemGroupTaskItemInstance>(items);
-            }
+            _items = items;
         }
 
         /// <summary>
@@ -80,6 +75,10 @@ namespace Microsoft.Build.Execution
             // All members are immutable
             _condition = that._condition;
             _items = that._items;
+        }
+
+        private ProjectItemGroupTaskInstance()
+        {
         }
 
         /// <summary>
@@ -129,6 +128,20 @@ namespace Microsoft.Build.Execution
         internal ProjectItemGroupTaskInstance DeepClone()
         {
             return new ProjectItemGroupTaskInstance(this);
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                var typeName = this.GetType().FullName;
+                translator.Translate(ref typeName);
+            }
+
+            translator.Translate(ref _condition);
+            translator.Translate(ref _items, ProjectItemGroupTaskItemInstance.FactoryForDeserialization);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
         }
     }
 }

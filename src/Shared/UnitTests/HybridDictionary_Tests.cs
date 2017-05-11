@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                             break;
 
                         case 2:
-                            // Remove something nonexisting
+                            // Remove something nonexistent
                             AssertBothOrNeitherThrew<bool>(delegate () { return dict.Remove("ZZ"); }, delegate () { return shadow.Remove("ZZ"); });
                             AssertDictionariesIdentical(dict, shadow);
                             break;
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                             break;
 
                         case 10:
-                            // Add something nonexisting
+                            // Add something non existing
                             string key2 = new String(keys[rand.Next(keys.Length)], 1);
                             string value5 = rand.Next(10).ToString();
                             AssertBothOrNeitherThrew(delegate () { dict.Add(key2, value5); }, delegate () { shadow.Add(key2, value5); });

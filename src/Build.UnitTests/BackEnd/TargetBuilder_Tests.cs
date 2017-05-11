@@ -294,14 +294,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// BeforeTargets specifies a missing target. Should not warn or error. 
+        /// BeforeTargets specifies a missing target. Should not warn or error.
         /// </summary>
         [Fact]
         public void TestBeforeTargetsMissing()
         {
             string content = @"
 <Project DefaultTargets='t' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    
+
     <Target Name='t' BeforeTargets='x'>
         <Message Text='[t]' />
     </Target>
@@ -317,14 +317,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// BeforeTargets specifies a missing target. Should not warn or error. 
+        /// BeforeTargets specifies a missing target. Should not warn or error.
         /// </summary>
         [Fact]
         public void TestBeforeTargetsMissingRunsOthers()
         {
             string content = @"
 <Project DefaultTargets='a;c' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    
+
     <Target Name='t' BeforeTargets='a;b;c'>
         <Message Text='[t]' />
     </Target>
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <Target Name='c'>
         <Message Text='[c]' />
     </Target>
-   
+
 </Project>
                 ";
 
@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string content = @"
 <Project DefaultTargets='t' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    
+
     <Target Name='t' AfterTargets='x'>
         <Message Text='[t]' />
     </Target>
@@ -372,14 +372,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// AfterTargets specifies a missing target. Should not warn or error. 
+        /// AfterTargets specifies a missing target. Should not warn or error.
         /// </summary>
         [Fact]
         public void TestAfterTargetsMissingRunsOthers()
         {
             string content = @"
 <Project DefaultTargets='a;c' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    
+
     <Target Name='t' AfterTargets='a;b'>
         <Message Text='[t]' />
     </Target>
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <Target Name='c'>
         <Message Text='[c]' />
     </Target>
-   
+
 </Project>
                 ";
 
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Tests that a circular dependency within a CallTarget call correctly propogates the failure.  Bug 502570.
+        /// Tests that a circular dependency within a CallTarget call correctly propagates the failure.  Bug 502570.
         /// </summary>
         [Fact]
         public void TestCircularDependencyInCallTarget()
@@ -1321,15 +1321,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='SkipCondition' Condition=""'true' == 'false'"" />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='DepError' DependsOnTargets='Foo;Skip;Error;Baz2'>
-                        <OnError ExecuteTargets='Baz'/>                  
+                        <OnError ExecuteTargets='Baz'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1523,7 +1523,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// Retrieves the name of thoe host.
+            /// Retrieves the name of the host.
             /// </summary>
             public string Name
             {

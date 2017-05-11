@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test a set of strings that are similar to eachother
+        /// Test a set of strings that are similar to each other
         /// </summary>
         [Fact]
         public void InternableDifferingOnlyByNthCharacter()

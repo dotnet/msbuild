@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
                 var projColln = new ProjectCollection();
-                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1, Path.Combine("tmp", "nonexistant")));
+                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1, Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
 
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), extnTargetsFileContentWithCondition);
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir1, Path.Combine("tmp", "nonexistant")},
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir1, Path.Combine("tmp", "nonexistent")},
                                                             null,
                                                             (p, l) => {
                                                                 Assert.True(p.Build());
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                                             String.Format(extnTargetsFileContent2, mainProjectPath));
 
             CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
-                                                        new string[] {extnDir2, Path.Combine("tmp", "nonexistant"), extnDir1},
+                                                        new string[] {extnDir2, Path.Combine("tmp", "nonexistent"), extnDir1},
                                                         null,
                                                         (p, l) => l.AssertLogContains("MSB4210"));
         }
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
 
             CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath",
-                new[] {extnDir1, Path.Combine("tmp", "nonexistant"), extnDir2},
+                new[] {extnDir1, Path.Combine("tmp", "nonexistent"), extnDir2},
                 null,
                 (project, logger) =>
                 {
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), extnTargetsFileContent);
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {Path.Combine("tmp", "nonexistant"), extnDir1},
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {Path.Combine("tmp", "nonexistent"), extnDir1},
                                                     null, (p, l) => Assert.True(p.Build()));
         }
 
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 var projColln = new ProjectCollection();
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1,
-                                                                                Path.Combine("tmp", "nonexistant")));
+                                                                                Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
 
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string extnDir2 = GetNewExtensionsPathAndCreateFile("extensions2", Path.Combine("foo", "extn.proj"), extnTargetsFileContent2);
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir2, Path.Combine("tmp", "nonexistant"), extnDir1},
+            CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] {extnDir2, Path.Combine("tmp", "nonexistent"), extnDir1},
                                                             null,
                                                             (p, l) => {
                                                                 Assert.True(p.Build());
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // MSBuildExtensionsPath* property value has highest priority for the lookups
             try {
                 var projColln = new ProjectCollection();
-                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existstant"), extnDir1));
+                projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existent"), extnDir1));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
                 var project = projColln.LoadProject(mainProjectPath);
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             try
             {
-                // The path to "extensions1" fallback should exist, but the file doens't need to
+                // The path to "extensions1" fallback should exist, but the file doesn't need to
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("file.props"), string.Empty);
 
                 // Implement fallback for UndefinedProperty, but don't define the property.

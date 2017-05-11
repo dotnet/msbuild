@@ -1080,7 +1080,7 @@ namespace Microsoft.Build.UnitTests
 
 #if _NOT_YET_FULLY_CONVERTED_
         /// <summary>
-        /// Tests that exercise the the SplitResourcesByCulture Target in Microsoft.Common.targets.
+        /// Tests that exercise the SplitResourcesByCulture Target in Microsoft.Common.targets.
         /// This target's job is to separate the items that need to run through resgen from 
         /// those that need to go directly into CSC. Also, Culture and non-Culture resources 
         /// are split.
@@ -1506,7 +1506,7 @@ namespace Microsoft.Build.UnitTests
     }    
 
     /// <summary>
-    /// Tests that exercise the the PrepareResourceNames Target in 
+    /// Tests that exercise the PrepareResourceNames Target in 
     /// Microsoft.VisualBasic.targets.
     /// 
     /// This target's job is to create manifest resource names for each of

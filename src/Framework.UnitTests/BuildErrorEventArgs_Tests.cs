@@ -31,14 +31,14 @@ namespace Microsoft.Build.UnitTests
             BuildErrorEventArgs beea = new BuildErrorEventArgs2();
             beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender");
             beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender", DateTime.Now);
-            beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", DateTime.Now, "Messsage");
+            beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", DateTime.Now, "Message");
             beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null);
             beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now);
             beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now, null);
         }
 
         /// <summary>
-        /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
+        /// Create a derived class so that we can test the default constructor in order to increase code coverage and
         /// verify this code path.
         /// </summary>
         private class BuildErrorEventArgs2 : BuildErrorEventArgs

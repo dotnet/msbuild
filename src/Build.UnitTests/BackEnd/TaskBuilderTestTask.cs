@@ -536,7 +536,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// There is nothing to initalize
+            /// There is nothing to initialize
             /// </summary>
             public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskLoggingHost)
             {

@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             EventSourceSink sink = new EventSourceSink();
 
-            // Registers event handlers onto the event source 
+            // Registers event handlers onto the event source
             EventHandlerHelper handlerHelper = new EventHandlerHelper(sink, null);
             RaiseEventHelper raiseEventHelper = new RaiseEventHelper(sink);
 
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region Private methods
         /// <summary>
-        /// Take an event and an exception to raise, create a new sink and raise the event on it. 
+        /// Take an event and an exception to raise, create a new sink and raise the event on it.
         /// In the event handler registered on the sink, the exception will be thrown.
         /// </summary>
         /// <param name="buildEventToRaise">BuildEvent to raise on the </param>
@@ -803,8 +803,8 @@ namespace Microsoft.Build.UnitTests.Logging
             private BuildEventArgs _raisedStatusEvent;
 
             /// <summary>
-            /// To test the exception mechinism of the event source, we may want to 
-            /// thow certain exceptions in the event handlers. This can be null if 
+            /// To test the exception mechanism of the event source, we may want to
+            /// throw certain exceptions in the event handlers. This can be null if
             /// no exception is to be thrown.
             /// </summary>
             private Exception _exceptionInHandlers;
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests.Logging
             private bool _enteredAnyEventHandler;
 
             /// <summary>
-            /// Events such as BuildStarted, ProjectStarted/Finished, ... are status events. 
+            /// Events such as BuildStarted, ProjectStarted/Finished, ... are status events.
             /// In addition to being raised on their own events, they are also raised on the status event and any event.
             /// </summary>
             private bool _enteredStatusEventHandler;
@@ -886,8 +886,8 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
-            /// Which event was raised on the event source, this can be asserted upon 
-            /// to verify the event passed to the event source is the same one which was 
+            /// Which event was raised on the event source, this can be asserted upon
+            /// to verify the event passed to the event source is the same one which was
             /// received by the event handlers
             /// </summary>
             public BuildEventArgs RaisedEvent
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region Public Methods
 
             /// <summary>
-            /// Reset the per event variables so that we can raise another 
+            /// Reset the per event variables so that we can raise another
             /// event and capture the information for it.
             /// </summary>
             public void ResetRaisedEvent()
@@ -1092,7 +1092,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
-            /// Handle a events raised from the any event source. This source will 
+            /// Handle a events raised from the any event source. This source will
             /// raise all events no matter the type.
             /// </summary>
             /// <param name="sender">Who sent the event</param>
@@ -1126,7 +1126,7 @@ namespace Microsoft.Build.UnitTests.Logging
             private static GenericBuildEventArgs s_genericBuild = new GenericBuildEventArgs();
 
             /// <summary>
-            /// Generic Build Status Evemt
+            /// Generic Build Status Event
             /// </summary>
             private static GenericBuildStatusEventArgs s_genericBuildStatus = new GenericBuildStatusEventArgs();
 

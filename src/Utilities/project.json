@@ -2,7 +2,8 @@
   "frameworks": {
     "net46": {
       "dependencies": {
-        "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+        "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
       }
     },
     "netstandard1.3": {
@@ -14,6 +15,7 @@
         "System.Reflection.TypeExtensions": "4.1.0",
         "System.Runtime.Serialization.Primitives": "4.1.1",
         "System.Runtime.Serialization.Xml": "4.1.1",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
         "System.Security.Cryptography.X509Certificates": "4.1.0",
         "System.Threading.Thread": "4.0.0",
         "System.Xml.XmlDocument": "4.0.1"

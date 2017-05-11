@@ -91,8 +91,8 @@ namespace Microsoft.Build.UnitTests
         /// LogMessageFromStream parses the stream and decides if it is an error/warning/message.
         /// The way it figures out if a message is an error or warning is by parsing it against
         /// the canonical error/warning format.  If it happens to be an error this method returns
-        /// true ... isError.  This unit test ensures that passing a cannonical error format results
-        /// in this method returning true and passing a non canonical message results in it returning 
+        /// true ... isError.  This unit test ensures that passing a canonical error format results
+        /// in this method returning true and passing a non canonical message results in it returning
         /// false
         /// </summary>
         [Fact]

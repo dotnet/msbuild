@@ -222,6 +222,18 @@
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Shared.InvalidEscapeHatchValue">
+        <source>MSB5025: Invalid escape hatch value: {0}</source>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

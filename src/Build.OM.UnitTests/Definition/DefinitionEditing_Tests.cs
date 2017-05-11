@@ -13,6 +13,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                       </Project>",
                     0, // operate on first item
-                    null // project setup that should be performed afte the project is loaded. Used to simulate items coming from globs
+                    null // project setup that should be performed after the project is loaded. Used to simulate items coming from globs
                 };
                 // explode on item coming from property with one item
                 yield return new object[]
@@ -76,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     0,
                     null
                 };
-                // explode on item coming from item refence with one item
+                // explode on item coming from item reference with one item
                 yield return new object[]
                 {
                     @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -90,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     1, // operate on the second item. It is produced by the second item element
                     null
                 };
-                // explode on item coming from item refence with multiple items
+                // explode on item coming from item reference with multiple items
                 yield return new object[]
                 {
                     @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -260,8 +261,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has a property expression. As a convenience, we attempt to expand the 
-        /// expression to create the evaluated include. 
+        /// Add an item whose include has a property expression. As a convenience, we attempt to expand the
+        /// expression to create the evaluated include.
         /// </summary>
         [Fact]
         public void AddItem_IncludeContainsPropertyExpression()
@@ -277,7 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has a wildcard. We attempt to expand the wildcard using the 
+        /// Add an item whose include has a wildcard. We attempt to expand the wildcard using the
         /// file system. In this case, we have one entry in the project and two evaluated items.
         /// </summary>
         [Fact]
@@ -315,8 +316,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has an item expression. As a convenience, we attempt to expand the 
-        /// expression to create the evaluated include. 
+        /// Add an item whose include has an item expression. As a convenience, we attempt to expand the
+        /// expression to create the evaluated include.
         /// This value will not be reliable until the project is reevaluated --
         /// for example, it assumes any items referenced are defined above this one.
         /// </summary>
@@ -591,7 +592,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// that matches that wildcard.  In this case, we add a new item, because the old
         /// one wasn't equivalent.
         /// In contrast Orcas/Whidbey assumed that the user wants
-        /// that metadata on the new item, too. 
+        /// that metadata on the new item, too.
         /// </summary>
         [Fact]
         public void AddItem_DoesNotMatchWildcardWithMetadata()
@@ -646,7 +647,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
-        /// list of items.  Now the user tries to add an item that matches that wildcard.  
+        /// list of items.  Now the user tries to add an item that matches that wildcard.
         /// In this case, we don't touch the project at all.
         /// </summary>
         [Fact]
@@ -833,7 +834,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
-        /// list of items, and it uses a property reference.  Now the user tries to add a new 
+        /// list of items, and it uses a property reference.  Now the user tries to add a new
         /// item that matches that wildcard.  In this case, we don't touch the project at all.
         /// </summary>
         [Fact]
@@ -970,11 +971,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Rename, with the new name containing an item expression.
         /// Because the new name expands to not exactly one item, we don't attempt to
         /// update the evaluated include.
-        /// Reasoning: The case we interested in for expansion here is setting something 
-        /// like "$(sourcesroot)\foo.cs" and expanding that to a single item. 
-        /// If say "@(foo)" is set as the new name, and it expands to blank, that might 
-        /// be surprising to the host and maybe even unhandled, if on full reevaluation 
-        /// it wouldn't expand to blank. That's why I'm being cautious and supporting 
+        /// Reasoning: The case we interested in for expansion here is setting something
+        /// like "$(sourcesroot)\foo.cs" and expanding that to a single item.
+        /// If say "@(foo)" is set as the new name, and it expands to blank, that might
+        /// be surprising to the host and maybe even unhandled, if on full reevaluation
+        /// it wouldn't expand to blank. That's why I'm being cautious and supporting
         /// the most common scenario only. Many hosts will do a ReevaluateIfNecessary before reading anyway (including CPS)
         /// </summary>
         [Fact]
@@ -1464,7 +1465,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItem(i); });
         }
-        
+
         [Theory]
         [MemberData(nameof(ItemElementsThatRequireSplitting))]
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
@@ -1559,7 +1560,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Verify item expressions are not expanded in new property values.
         /// NOTE: They aren't expanded to "blank". It just seems like that, because
-        /// when you output them, item expansion happens after property expansion, and 
+        /// when you output them, item expansion happens after property expansion, and
         /// they may evaluate to blank then. (Unless items do exist at that point.)
         /// </summary>
         [Fact]
@@ -1711,8 +1712,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             )]
         public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabledAndItemComesFromGlob(string projectContents, int itemIndex, string[] files)
         {
-            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, files))
+            using (var env = TestEnvironment.Create())
             {
+                var testProject = env.CreateTestProjectWithFiles(projectContents, files);
                 var projectFile = testProject.ProjectFile;
 
                 AssertDisabledItemSplitting(
@@ -2007,7 +2009,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add metadata that would be modified by evaluation. 
+        /// Add metadata that would be modified by evaluation.
         /// Should be evaluated on a best-effort basis.
         /// </summary>
         [Fact]
@@ -2198,8 +2200,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has a property expression. As a convenience, we attempt to expand the 
-        /// expression to create the evaluated include. 
+        /// Add an item whose include has a property expression. As a convenience, we attempt to expand the
+        /// expression to create the evaluated include.
         /// </summary>
         [Fact]
         public void AddItemFast_IncludeContainsPropertyExpression()
@@ -2215,7 +2217,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has a wildcard. We attempt to expand the wildcard using the 
+        /// Add an item whose include has a wildcard. We attempt to expand the wildcard using the
         /// file system. In this case, we have one entry in the project and two evaluated items.
         /// </summary>
         [Fact]
@@ -2253,8 +2255,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Add an item whose include has an item expression. As a convenience, we attempt to expand the 
-        /// expression to create the evaluated include. 
+        /// Add an item whose include has an item expression. As a convenience, we attempt to expand the
+        /// expression to create the evaluated include.
         /// This value will not be reliable until the project is reevaluated --
         /// for example, it assumes any items referenced are defined above this one.
         /// </summary>
@@ -2522,7 +2524,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// that matches that wildcard.  In this case, we add a new item, because the old
         /// one wasn't equivalent.
         /// In contrast Orcas/Whidbey assumed that the user wants
-        /// that metadata on the new item, too. 
+        /// that metadata on the new item, too.
         /// </summary>
         [Fact]
         public void AddItemFast_DoesNotMatchWildcardWithMetadata()
@@ -2577,7 +2579,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
-        /// list of items.  Now the user tries to add an item that matches that wildcard.  
+        /// list of items.  Now the user tries to add an item that matches that wildcard.
         /// In this case, we don't touch the project at all.
         /// </summary>
         [Fact]
@@ -2624,12 +2626,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
 
             project.ThrowInsteadOfSplittingItemElement = true;
-            
+
             var initialXml = project.Xml.RawXml;
             var item = project.Items.ElementAt(itemIndex);
 
             var ex = Assert.Throws(typeof(InvalidOperationException), () => itemOperation(project, item));
-            
+
             Assert.Matches("The requested operation needs to split the item element at location .* into individual elements but item element splitting is disabled with .*", ex.Message);
             Assert.False(project.IsDirty, "project should not be dirty after item splitting threw exception");
             Assert.Equal(initialXml, project.Xml.RawXml);

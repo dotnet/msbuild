@@ -2112,7 +2112,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Implementation of a comparer that determines equality between ProjectItemInstances
         /// </summary>
-        private class ProjectItemInstanceEqualityComparer : IEqualityComparer<ProjectItemInstance>
+        internal class ProjectItemInstanceEqualityComparer : IEqualityComparer<ProjectItemInstance>
         {
             /// <summary>
             /// The singleton comparer.

@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Tests the tools version 4.0 is written to the the registry at install time
+        /// Tests the tools version 4.0 is written to the registry at install time
         /// </summary>
         [Fact(Skip = "Test requires installed toolset.")]
         public void DefaultValuesInRegistryCreatedBySetup()

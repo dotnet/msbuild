@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when we are trying to match a name which is is the reference assembly directory
+        /// Verify when we are trying to match a name which is the reference assembly directory
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

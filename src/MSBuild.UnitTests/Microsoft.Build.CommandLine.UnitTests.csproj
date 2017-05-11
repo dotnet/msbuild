@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-   <!--
+  <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
-  <Import Project="..\dir.props"/>
+  <Import Project="..\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -32,6 +32,9 @@
     </Compile>
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
     </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>VersionUtilities.cs</Link>
@@ -99,5 +102,5 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <Import Project="..\dir.targets"/>
+  <Import Project="..\dir.targets" />
 </Project>

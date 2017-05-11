@@ -4,7 +4,7 @@ elementFormDefault="qualified">
 
     <!-- =================== INCLUDE COMMON SCHEMA =========================== -->
     <xs:include schemaLocation="Microsoft.Build.Core.xsd"/>
-    
+
     <!-- ======================== ITEMS =====================================-->
     <!-- Possible Types include SimpleItemType (no meta-data subelements), GenericItemType (any meta-data), or something more specific.-->
     <xs:element name="Reference" substitutionGroup="msb:Item">
@@ -30,7 +30,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_FusionName" _locComment="" -->Fusion name of the assembly (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                            
+                            </xs:element>
                             <xs:element name="SpecificVersion">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_SpecificVersion" _locComment="" -->Whether only the version in the fusion name should be referenced (optional, boolean)</xs:documentation>
@@ -48,14 +48,14 @@ elementFormDefault="qualified">
                             </xs:element>
                           <xs:element name="EmbedInteropTypes" type="msb:boolean">
                             <xs:annotation>
-                              <xs:documentation><!-- _locID_text="Reference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop asemblies only (optional, boolean)</xs:documentation>
+                              <xs:documentation><!-- _locID_text="Reference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
                             </xs:annotation>
                           </xs:element>
                           <xs:element name="RequiredTargetFramework">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_RequiredTargetFramework" _locComment="" -->The minimum required target framework version in order to use this assembly as a reference</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                     <!-- redefine Include just to give a specific description -->
@@ -140,7 +140,7 @@ elementFormDefault="qualified">
                             </xs:element>
                           <xs:element name="EmbedInteropTypes" type="msb:boolean">
                             <xs:annotation>
-                              <xs:documentation><!-- _locID_text="COMReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop asemblies only (optional, boolean)</xs:documentation>
+                              <xs:documentation><!-- _locID_text="COMReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
                             </xs:annotation>
                           </xs:element>
                         </xs:choice>
@@ -518,7 +518,7 @@ elementFormDefault="qualified">
   <xs:element name="NativeReference" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="NativeReference" _locComment="" -->Reference to a native manifest file, or to a file that contains a native manifest</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="msb:SimpleItemType">
@@ -528,7 +528,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="NativeReference_Name" _locComment="" -->Base name of manifest file</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="HintPath">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="NativeReference_HintPath" _locComment="" -->Relative path to manifest file</xs:documentation>
@@ -541,7 +541,7 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="NativeReference_Include" _locComment="" -->Reference full name</xs:documentation>
                         </xs:annotation>
-                    </xs:attribute>                    
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -569,12 +569,12 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ProjectReference_Reference" _locComment="" -->Boolean specifying whether the outputs of the project referenced should be passed to the compiler. Default is true.</xs:documentation>
                                 </xs:annotation>
-                            </xs:element> 
+                            </xs:element>
                             <xs:element name="SpecificVersion">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_SpecificVersion" _locComment="" -->Whether the exact version of the assembly should be used.</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                            
+                            </xs:element>
                             <xs:element name="Targets">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ProjectReference_Targets" _locComment="" -->Semicolon separated list of targets in the referenced projects that should be built. Default is the value of $(ProjectReferenceBuildTargets) whose default is blank, indicating the default targets.</xs:documentation>
@@ -590,7 +590,7 @@ elementFormDefault="qualified">
                             <xs:element name="Package"/>
                             <xs:element name="EmbedInteropTypes" type="msb:boolean">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="ProjectReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop asemblies only (optional, boolean)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="ProjectReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="IncludeAssets">
@@ -625,15 +625,15 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>    
+    </xs:element>
     <xs:element name="Compile" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Compile" _locComment="" -->Source files for compiler</xs:documentation>
-        </xs:annotation>        
-        <xs:complexType>           
+        </xs:annotation>
+        <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="msb:SimpleItemType">
-                    <xs:sequence minOccurs="0" maxOccurs="unbounded">                       
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
                             <xs:element name="SubType"/>
                             <xs:element name="DependentUpon"/>
@@ -641,7 +641,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Compile_AutoGen" _locComment="" -->Whether file was generated from another file (boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                 
+                            </xs:element>
                             <xs:element name="DesignTime"/>
                             <xs:element name="Link">
                                 <xs:annotation>
@@ -653,7 +653,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Compile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="CopyToOutputDirectory"/>
                             <xs:element name="VBMyExtensionTemplateID"/>
                         </xs:choice>
@@ -663,7 +663,7 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Compile_Include" _locComment="" -->Semi-colon separated list of source files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
-                    </xs:attribute>                    
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -671,7 +671,7 @@ elementFormDefault="qualified">
     <xs:element name="EmbeddedResource" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="EmbeddedResource" _locComment="" -->Resources to be embedded in the generated assembly</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="msb:SimpleItemType">
@@ -682,27 +682,27 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                               
+                            </xs:element>
                             <xs:element name="LastGenOutput">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_LastGenOutput" _locComment="" -->File that was created by any file generator that was run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                 
+                            </xs:element>
                             <xs:element name="CustomToolNamespace">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_CustomToolNamespace" _locComment="" -->Namespace into which any file generator that is run on this item should create code</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Visible">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="SubType"/>
                             <xs:element name="CopyToOutputDirectory"/>
                             <xs:element name="LogicalName"/>
@@ -713,7 +713,7 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="EmbeddedResource_Include" _locComment="" -->Semi-colon separated list of resource files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
-                    </xs:attribute>                    
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -732,14 +732,14 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                  
+                            </xs:element>
                             <xs:element name="LastGenOutput"/>
                             <xs:element name="CustomToolNamespace"/>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="PublishState">
                                <xs:annotation>
@@ -774,7 +774,7 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>    
+    </xs:element>
     <xs:element name="Page" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Page" _locComment="" -->XAML files that are converted to binary and compiled into the assembly</xs:documentation>
@@ -789,21 +789,21 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Page_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                  
+                            </xs:element>
                             <xs:element name="LastGenOutput"/>
                             <xs:element name="CustomToolNamespace"/>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Page_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
                             <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Page_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                    
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                     <!-- redefine Include just to give a specific description -->
@@ -815,7 +815,7 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>    
+    </xs:element>
     <xs:element name="Resource" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Resource" _locComment="" -->File that is compiled into the assembly</xs:documentation>
@@ -830,21 +830,21 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Resource_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                  
+                            </xs:element>
                             <xs:element name="LastGenOutput"/>
                             <xs:element name="CustomToolNamespace"/>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Resource_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
                             <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Resource_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                    
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                     <!-- redefine Include just to give a specific description -->
@@ -856,7 +856,7 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>    
+    </xs:element>
     <xs:element name="ApplicationDefinition" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ApplicationDefinition" _locComment="" -->XAML file that contains the application definition, only one can be defined</xs:documentation>
@@ -871,27 +871,27 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ApplicationDefinition_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                  
+                            </xs:element>
                             <xs:element name="LastGenOutput"/>
                             <xs:element name="CustomToolNamespace"/>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ApplicationDefinition_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
                             <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ApplicationDefinition_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                    
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>   
+    </xs:element>
     <xs:element name="None" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="None" _locComment="" -->Files that should have no role in the build process</xs:documentation>
@@ -906,20 +906,20 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="None_Generator" _locComment="" -->Name of any file generator that is run on this item</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                  
+                            </xs:element>
                             <xs:element name="LastGenOutput"/>
                             <xs:element name="CustomToolNamespace"/>
                             <xs:element name="Link">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="None_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Visible">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="None_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
-                            <xs:element name="CopyToOutputDirectory"/>                            
+                            </xs:element>
+                            <xs:element name="CopyToOutputDirectory"/>
                         </xs:choice>
                     </xs:sequence>
                 </xs:extension>
@@ -930,7 +930,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="BaseApplicationManifest" _locComment="" -->The base application manifest for the build. Contains ClickOnce security information.</xs:documentation>
         </xs:annotation>
-    </xs:element>  
+    </xs:element>
     <xs:element name="Folder" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Folder on disk</xs:documentation>
@@ -940,17 +940,17 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Import" _locComment="" -->Assemblies whose namespaces should be imported by the Visual Basic compiler</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="Service" type="msb:SimpleItemType" substitutionGroup="msb:Item"/>
     <xs:element name="WebReferences" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WebReferences" _locComment="" -->Name of Web References folder to display in user interface</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="WebReferenceUrl" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WebReferenceUrl" _locComment="" -->Represents a reference to a web service</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
             <xs:complexType>
                 <xs:complexContent>
                     <xs:extension base="msb:SimpleItemType">
@@ -970,7 +970,7 @@ elementFormDefault="qualified">
                             <xs:annotation>
                                 <xs:documentation><!-- _locID_text="WebReferenceUrl_Include" _locComment="" -->URL to web service</xs:documentation>
                             </xs:annotation>
-                        </xs:attribute>                        
+                        </xs:attribute>
                     </xs:extension>
                 </xs:complexContent>
             </xs:complexType>
@@ -985,7 +985,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="FileAssociation_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="DefaultIcon"/>
                             <xs:element name="Description"/>
                             <xs:element name="Progid"/>
@@ -1005,7 +1005,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="BootstrapperFile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="ProductName"/>
                             <xs:element name="Install"/>
                         </xs:choice>
@@ -1024,7 +1024,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="PublishFile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                                
+                            </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="IncludeHash">
                                 <xs:annotation>
@@ -1040,7 +1040,7 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="PublishFile_PublishState" _locComment="" -->Default, Included, Excluded, DataFile, ManifestEntryPoint, or Prerequisite</xs:documentation>
                                 </xs:annotation>
-                            </xs:element>                            
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                 </xs:extension>
@@ -1077,7 +1077,7 @@ elementFormDefault="qualified">
     </xs:element>
     <!-- ======================== PROPERTIES =====================================-->
     <!-- Possible Types include StringPropertyType (text with no subelements), GenericPropertyType (any content), or something more specific.-->
-    
+
     <xs:element name="VisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1106,7 +1106,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AssemblyName" _locComment="" -->Name of output assembly</xs:documentation>
         </xs:annotation>
-    </xs:element>           
+    </xs:element>
     <xs:element name="AssemblyOriginatorKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyOriginatorKeyFileType" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyOriginatorKeyMode" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1120,13 +1120,13 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AutorunEnabled" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>         
+    </xs:element>
     <xs:element name="BaseAddress" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="BootstrapperComponentsLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="BootstrapperComponentsLocation" _locComment="" -->HomeSite, Relative, or Absolute</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="BootstrapperComponentsUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="BootstrapperEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -1153,26 +1153,26 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DebugSymbols" _locComment="" -->Whether to emit symbols (boolean)</xs:documentation>
         </xs:annotation>
-    </xs:element>        
-    <xs:element name="DebugType" type="msb:StringPropertyType" substitutionGroup="msb:Property">   
+    </xs:element>
+    <xs:element name="DebugType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, or full</xs:documentation>
         </xs:annotation>
-    </xs:element>         
+    </xs:element>
     <xs:element name="DefaultClientScript" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultHTMLPageLayout" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultTargetSchema" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefineConstants" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="DefineDebug" type="msb:StringPropertyType" substitutionGroup="msb:Property">   
+    <xs:element name="DefineDebug" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DefineDebug" _locComment="" -->Whether DEBUG is defined (boolean)</xs:documentation>
         </xs:annotation>
-    </xs:element>          
+    </xs:element>
     <xs:element name="DefineTrace" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DefineTrace" _locComment="" -->Whether TRACE is defined (boolean)</xs:documentation>
         </xs:annotation>
-    </xs:element>          
+    </xs:element>
     <xs:element name="DelaySign" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisableLangXtns" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisallowUrlActivation" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1189,7 +1189,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="CodeAnalysisApplyLogFileXsl" _locComment="" -->Indicates whether to apply the XSL style sheet specified in $(CodeAnalysisLogFileXsl) to the Code Analysis report. This report is specified in $(CodeAnalysisLogFile). The default is false.</xs:documentation>
         </xs:annotation>
-    </xs:element>    
+    </xs:element>
     <xs:element name="CodeAnalysisConsoleXsl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="CodeAnalysisConsoleXsl" _locComment="" -->Path to the XSL style sheet that will be applied to the Code Analysis console output. The default is an empty string (''), which causes Code Analysis to use its default console output.</xs:documentation>
@@ -1429,7 +1429,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="FrameworkPathOverride" _locComment="" -->Sets the /sdkpath switch for a VB project to the specified value</xs:documentation>
         </xs:annotation>
-    </xs:element>     
+    </xs:element>
     <xs:element name="GenerateManifests" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="GenerateLibraryLayout" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="GeneratePackageOnBuild" type="msb:boolean" substitutionGroup="msb:Property">
@@ -1466,7 +1466,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MapFileExtensions" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>                
+    </xs:element>
     <xs:element name="MinimumRequiredVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MinimumRequiredVersion" _locComment="" -->Matches the expression "\d\.\d\.\d\.\d"</xs:documentation>
@@ -1489,19 +1489,19 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="MSBuildWarningsAsErrors" _locComment="" -->Indicates a semicolon delimited list of warnings to treat as errors when building a project.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="NoConfig" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
+    <xs:element name="NoConfig" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="NoStandardLibraries" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="NoStdLib" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="NoStdLib" _locComment="" -->Whether standard libraries (such as mscorlib) should be referenced automatically (boolean)</xs:documentation>
         </xs:annotation>
-    </xs:element>          
+    </xs:element>
     <xs:element name="NoWarn" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="NoWarn" _locComment="" -->Comma separated list of disabled warnings</xs:documentation>
         </xs:annotation>
-    </xs:element>   
-    <xs:element name="OldToolsVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>     
+    </xs:element>
+    <xs:element name="OldToolsVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="OutDir" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetExt" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1509,38 +1509,38 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OpenBrowserOnPublish" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>                
+    </xs:element>
     <xs:element name="Optimize" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Optimize" _locComment="" -->Should compiler optimize output (boolean)</xs:documentation>
         </xs:annotation>
-    </xs:element>     
+    </xs:element>
     <xs:element name="OptionCompare" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OptionCompare" _locComment="" -->Option Compare setting (Text or Binary)</xs:documentation>
         </xs:annotation>
-    </xs:element>         
+    </xs:element>
     <xs:element name="OptionExplicit" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OptionExplicit" _locComment="" -->Should Option Explicit be set (On or Off)</xs:documentation>
         </xs:annotation>
-    </xs:element>         
+    </xs:element>
     <xs:element name="OptionStrict" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OptionStrict" _locComment="" -->Should Option Strict be set (On or Off)</xs:documentation>
         </xs:annotation>
-    </xs:element>       
+    </xs:element>
     <xs:element name="OptionInfer" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OptionInfer" _locComment="" -->Should Option Infer be set (On or Off)</xs:documentation>
         </xs:annotation>
-    </xs:element>            
+    </xs:element>
     <xs:element name="OSVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="OutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputPath" _locComment="" -->Path to output folder, with trailing slash</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="OutputType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
@@ -1553,15 +1553,15 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="Platform" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="PlatformFamilyName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
-    <xs:element name="PlatformID" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
+    <xs:element name="PlatformFamilyName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="PlatformID" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformTarget" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformToolset" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PostBuildEvent" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PostBuildEvent" _locComment="" -->Command line to be run at the end of build</xs:documentation>
         </xs:annotation>
-    </xs:element>          
+    </xs:element>
     <xs:element name="PreBuildEvent" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PreBuildEvent" _locComment="" -->Command line to be run at the start of build</xs:documentation>
@@ -1584,7 +1584,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ReferencePath" _locComment="" -->Semi-colon separated list of folders to search during reference resolution</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="RegisterForComInterop" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RemoteDebugEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RemoteDebugMachine" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1656,24 +1656,24 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0;net461)</xs:documentation>
       </xs:annotation>
     </xs:element>
-    <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
-    <xs:element name="TargetPlatformIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>  
-    <xs:element name="TargetPlatformVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>   
+    <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="TargetPlatformIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="TargetPlatformVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetZone" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TrustUrlParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="TrustUrlParameters" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>                
+    </xs:element>
     <xs:element name="TypeComplianceDiagnostics" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UICulture" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="UpgradeBackupLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>     
+    <xs:element name="UpgradeBackupLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UpdateEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdateEnabled" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>                
+    </xs:element>
     <xs:element name="UpdateInterval" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UpdateIntervalUnits" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -1689,13 +1689,13 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdatePeriodically" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="UpdateRequired" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdateRequired" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
-    </xs:element>                
-    <xs:element name="UpdateUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
+    </xs:element>
+    <xs:element name="UpdateUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UseAppConfigForCompiler" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="UseApplicationTrust" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UseOfMfc" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1708,12 +1708,12 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WarningLevel" _locComment="" -->integer between 0 and 4 inclusive</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="WarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WarningsAsErrors" _locComment="" -->Comma separated list of warning numbers to treat as errors</xs:documentation>
         </xs:annotation>
-    </xs:element>          
+    </xs:element>
     <xs:element name="WebPage" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Win32ResourceFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WholeProgramOptimization" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1772,6 +1772,11 @@ elementFormDefault="qualified">
     <xs:element name="PackageId" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_textPackageId _locComment="" -->The case-insensitive NuGet package identifier, which must be unique across nuget.org or whatever gallery the NuGet package will reside in. IDs may not contain spaces or characters that are not valid for a URL, and generally follow .NET namespace rules.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Title" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_textTitle _locComment="" -->A human-friendly title of the package, typically used in UI displays as on nuget.org and the Package Manager in Visual Studio. If not specified, the package ID is used instead.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PackageLicenseUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -2992,7 +2997,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="Timeout" />
                     <xs:attribute name="TreatWarningsAsErrors" type="msb:boolean" />
                     <xs:attribute name="ToolPath" />
-                    <xs:attribute name="UpdateProject" type="msb:boolean" />                    
+                    <xs:attribute name="UpdateProject" type="msb:boolean" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -3591,7 +3596,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="DefaultLanguage" _locComment="" -->Default resource language.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="PackageCertificateKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PackageCertificateKeyFile" _locComment="" -->App package certificate key file.</xs:documentation>
@@ -3603,97 +3608,97 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxAutoIncrementPackageRevision" _locComment="" -->Flag indicating whether to auto-increment package revision.</xs:documentation>
         </xs:annotation>
     </xs:element>
-        
+
     <xs:element name="AppxMSBuildToolsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxMSBuildToolsPath" _locComment="" -->Full path to a folder containing packaging build targets and tasks assembly.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxMSBuildTaskAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxMSBuildTaskAssembly" _locComment="" -->Full path to packaging build tasks assembly.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackage" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackage" _locComment="" -->Flag marking current project as capable of being packaged as an app package.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxUseHardlinksIfPossible" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxUseHardlinksIfPossible" _locComment="" -->Flag indicating whether to use hard links if possible when copying files during creation of app packages.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxSkipUnchangedFiles" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxSkipUnchangedFiles" _locComment="" -->Flag indicating whether to skip unchanged files when copying files during creation of app packages.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxGeneratePriEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxGeneratePriEnabled" _locComment="" -->Flag indicating whether to generate resource index files (PRI files) during packaging.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageSigningEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageSigningEnabled" _locComment="" -->Flag indicating whether to enable signing of app packages.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageIncludePrivateSymbols" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageIncludePrivateSymbols" _locComment="" -->Flag indicating whether to include private symbols in symbol packages.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxSymbolPackageEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxSymbolPackageEnabled" _locComment="" -->Flag indicating whether to generate a symbol package when an app package is created.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxTestLayoutEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxTestLayoutEnabled" _locComment="" -->Flag indicating whether to create test layout when an app package is created.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageValidationEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageValidationEnabled" _locComment="" -->Flag indicating whether to enable validation of app packages.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxHarvestWinmdRegistration" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxHarvestWinmdRegistration" _locComment="" -->Flag indicating whether to enable harvesting of WinMD registration information.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="EnableSigningChecks" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="EnableSigningChecks" _locComment="" -->Flag indicating whether to enable signing checks during app package generation.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxStrictManifestValidationEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxStrictManifestValidationEnabled" _locComment="" -->Flag indicating whether to enable strict manifest validation.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxFilterOutUnusedLanguagesResourceFileMaps" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxFilterOutUnusedLanguagesResourceFileMaps" _locComment="" -->Flag indicating whether to filter out unused language resource file maps.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxOSMinVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxOSMinVersion" _locComment="" -->Targeted minimum OS version.</xs:documentation>
@@ -3705,24 +3710,24 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxOSMaxVersionTested" _locComment="" -->Targeted maximum OS version tested.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageDirName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageDirName" _locComment="" -->Name of the folder where app packages are produced.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="PlatformSpecificBundleArtifactsListDirName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PlatformSpecificBundleArtifactsListDirName" _locComment="" -->Name of the folder where platform-specific bundle artifact lists are stored.</xs:documentation>
         </xs:annotation>
     </xs:element>
-        
+
     <xs:element name="AppxPackageDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageDir" _locComment="" -->Full path to a folder where app packages will be saved.</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
 
     <xs:element name="AppxPackageArtifactsDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -3741,13 +3746,13 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxValidateAppxManifest" _locComment="" -->Flag indicating whether to validate app manifest.</xs:documentation>
         </xs:annotation>
     </xs:element>
-        
+
     <xs:element name="MakePriExeFullPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MakePriExeFullPath" _locComment="" -->Full path to makepri.exe utility.</xs:documentation>
         </xs:annotation>
     </xs:element>
-        
+
     <xs:element name="MakeAppxExeFullPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MakeAppxExeFullPath" _locComment="" -->Full path to makeappx.exe utility.</xs:documentation>
@@ -3759,25 +3764,25 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="SignAppxPackageExeFullPath" _locComment="" -->Full path to signtool.exe utility.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="ResgenToolPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ResgenToolPath" _locComment="" -->Full path to a folder containing resgen tool.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="PdbCopyExeFullPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PdbCopyExeFullPath" _locComment="" -->Full path to pdbcopy.exe utility.</xs:documentation>
         </xs:annotation>
     </xs:element>
-            
+
     <xs:element name="AppxSymbolStrippedDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxSymbolStrippedDir" _locComment="" -->Full path to a directory where stripped PDBs will be stored.</xs:documentation>
         </xs:annotation>
     </xs:element>
-            
+
     <xs:element name="AppxPrependPriInitialPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPrependPriInitialPath" _locComment="" -->Flag indicating whether to enable prepending initial path when indexing RESW and RESJSON files in class libraries.</xs:documentation>
@@ -3807,7 +3812,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxPackageRecipe" _locComment="" -->Full path to the app package recipe.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="FinalAppxPackageRecipe" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="FinalAppxPackageRecipe" _locComment="" -->Full path to the final app package recipe.</xs:documentation>
@@ -3888,7 +3893,7 @@ elementFormDefault="qualified">
 
     <xs:element name="AppxDefaultResourceQualifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="AppxDefaultResourceQualifiers" _locComment="" -->'|'-delimited list of key=value pairs representing default resource qualifers.</xs:documentation>
+            <xs:documentation><!-- _locID_text="AppxDefaultResourceQualifiers" _locComment="" -->'|'-delimited list of key=value pairs representing default resource qualifiers.</xs:documentation>
         </xs:annotation>
     </xs:element>
 
@@ -3903,7 +3908,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxPriConfigXmlDefaultSnippetPath" _locComment="" -->Path to an XML file containing default element for priconfi.xml file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="TargetPlatformSdkRootOverride" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="TargetPlatformSdkRootOverride" _locComment="" -->Full path to platform SDK root.</xs:documentation>
@@ -3954,7 +3959,7 @@ elementFormDefault="qualified">
 
     <xs:element name="AppxBundleAutoResourcePackageQualifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="AppxBundleAutoResourcePackageQualifiers" _locComment="" -->'|'-delimited list of resource qualifers which will be used for automatic resource pack splitting.</xs:documentation>
+            <xs:documentation><!-- _locID_text="AppxBundleAutoResourcePackageQualifiers" _locComment="" -->'|'-delimited list of resource qualifiers which will be used for automatic resource pack splitting.</xs:documentation>
         </xs:annotation>
     </xs:element>
 
@@ -4035,109 +4040,109 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxBundleFolderSuffix" _locComment="" -->Suffix to append to app bundle folder.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="PlatformSpecificBundleArtifactsListDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PlatformSpecificBundleArtifactsListDir" _locComment="" -->Full path to a folder where platform-specific bundle artifact list files are stored.</xs:documentation>
         </xs:annotation>
-    </xs:element>    
+    </xs:element>
 
     <xs:element name="AppxPackageAllowDebugFrameworkReferencesInManifest" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageAllowDebugFrameworkReferencesInManifest" _locComment="" -->Flag indicating whether to allow inclusion of debug framework references in an app manifest.</xs:documentation>
         </xs:annotation>
-    </xs:element>    
+    </xs:element>
 
     <xs:element name="GenerateAppxPackageOnBuild" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="GenerateAppxPackageOnBuild" _locComment="" -->Flag indicating whether to generate app package during the build.</xs:documentation>
         </xs:annotation>
-    </xs:element>    
+    </xs:element>
 
     <xs:element name="InsertReverseMap" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="InsertReverseMap" _locComment="" -->Flag indicating whether to insert reverse resource map during resource index generation.</xs:documentation>
         </xs:annotation>
-    </xs:element>    
+    </xs:element>
 
     <xs:element name="IncludeBuiltProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeBuiltProjectOutputGroup" _locComment="" -->Flag indicating whether to include primary build outputs into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeDebugSymbolsProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeDebugSymbolsProjectOutputGroup" _locComment="" -->Flag indicating whether to include debug symbols into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeDocumentationProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeDocumentationProjectOutputGroup" _locComment="" -->Flag indicating whether to include documentation into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeSatelliteDllsProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeSatelliteDllsProjectOutputGroup" _locComment="" -->Flag indicating whether to include satellite DLLs into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeSourceFilesProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeSourceFilesProjectOutputGroup" _locComment="" -->Flag indicating whether to include source files into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeContentFilesProjectOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeContentFilesProjectOutputGroup" _locComment="" -->Flag indicating whether to include content files into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeSGenFilesOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeSGenFilesOutputGroup" _locComment="" -->Flag indicating whether to include SGen files into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeCopyLocalFilesOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeCopyLocalFilesOutputGroup" _locComment="" -->Flag indicating whether to include files marked as 'Copy local' into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeComFilesOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeComFilesOutputGroup" _locComment="" -->Flag indicating whether to include COM files into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeCustomOutputGroupForPackaging" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeCustomOutputGroupForPackaging" _locComment="" -->Flag indicating whether to include custom output group into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeCopyWinmdArtifactsOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeCopyWinmdArtifactsOutputGroup" _locComment="" -->Flag indicating whether to include WinMD artifacts into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeSDKRedistOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeBuiltProjectOutputGroup" _locComment="" -->Flag indicating whether to include SDK redist into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludePriFilesOutputGroup" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludePriFilesOutputGroup" _locComment="" -->Flag indicating whether to include resource index (PRI) files into the app package payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="IncludeGetResolvedSDKReferences" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeGetResolvedSDKReferences" _locComment="" -->Flag indicating whether to include resolved SDK references into the app package payload.</xs:documentation>
@@ -4149,7 +4154,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="ProjectPriIndexName" _locComment="" -->Name of the resource index used in the generated .pri file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AutoIncrementPackageRevision" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AutoIncrementPackageRevision" _locComment="" -->Flag indicating whether to enable auto increment of an app package revision.</xs:documentation>
@@ -4167,43 +4172,43 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="IncludeBuiltProjectOutputGroup" _locComment="" -->Name of the app package to generate.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxStoreContainer" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeBuiltProjectOutputGroup" _locComment="" -->Name of the app store container to generate.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageTestDir" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="IncludeBuiltProjectOutputGroup" _locComment="" -->Name of the folder where test app packages will be copied</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxPackageOutput" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxPackageOutput" _locComment="" -->Full path to the app package file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxSymbolPackageOutput" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxSymbolPackageOutput" _locComment="" -->Full path to the app symbol package file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxGenerateProjectPriFileAdditionalMakepriExeParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxGenerateProjectPriFileAdditionalMakepriExeParameters" _locComment="" -->Additional parameters to pass to makepri.exe when generating project PRI file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxCreatePriFilesForPortableLibrariesAdditionalMakepriExeParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxCreatePriFilesForPortableLibrariesAdditionalMakepriExeParameters" _locComment="" -->Additional parameters to pass to makepri.exe when generating PRI file for a portable library.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxExpandPriContentAdditionalMakepriExeParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxExpandPriContentAdditionalMakepriExeParameters" _locComment="" -->Additional parameters to pass to makepri.exe when extracting payload file names.</xs:documentation>
@@ -4254,13 +4259,13 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AppxManifestSchema" _locComment="" -->App manifest schema file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="StoreManifestSchema" type="msb:SchemaItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="StoreManifestSchema" _locComment="" -->Store manifest schema file.</xs:documentation>
         </xs:annotation>
     </xs:element>
-        
+
     <xs:element name="AppxHashUri" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxHashUri" _locComment="" -->Hash algorithm URI.</xs:documentation>
@@ -4279,7 +4284,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-        
+
     <xs:element name="PRIResource" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PRIResource" _locComment="" -->String resources to be indexed in app package's resource index.</xs:documentation>
@@ -4308,19 +4313,19 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="AppxSystemBinary" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxSystemBinary" _locComment="" -->Name of any file which is present on the machine and should not be part of the app payload.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxReservedFileName" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxReservedFileName" _locComment="" -->Reserved file name which cannot appear in the app package.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    
+
     <xs:element name="AppxManifestFileNameQuery" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxManifestFileNameQuery" _locComment="" -->XPath queries used to extract file names from the app manifest.</xs:documentation>
@@ -4360,7 +4365,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="AppxManifest" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxManifest" _locComment="" -->app manifest template</xs:documentation>
@@ -4394,7 +4399,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="StoreAssociationFile" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="StoreAssociationFile" _locComment="" -->A file containing app store association data.</xs:documentation>
@@ -4423,7 +4428,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="AppxManifestMetadata" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AppxManifestMetadata" _locComment="" -->App manifest metadata item. Can be a literal, or it can be a path to a binary to extract version from.</xs:documentation>
@@ -4452,7 +4457,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="PlatformVersionDescription" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PlatformVersionDescription" _locComment="" -->Platform version description. Used to map between internal OS version and marketing OS version.</xs:documentation>
@@ -4483,7 +4488,7 @@ elementFormDefault="qualified">
     </xs:element>
 
     <!-- Following items are declared here to get rid of schema validation warnings,         -->
-    <!-- but are not intended for overriding, so they do not have documentation annotations. --> 
+    <!-- but are not intended for overriding, so they do not have documentation annotations. -->
 
     <xs:element name="_AppxBundleContent" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
     <xs:element name="_AppxBundleMainPackageMapGeneratedFiles" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
@@ -4566,7 +4571,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="CopyWinmdArtifactsOutputGroupOutputs" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
@@ -4578,7 +4583,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="CopyLocalFilesOutputGroupOutput" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
@@ -4590,7 +4595,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="_PackagingOutputsUnexpanded" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
@@ -4617,7 +4622,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="_ProjectArchitectureItem" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
@@ -4630,7 +4635,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="_AppxBundleResourceFileMapsIntermediate" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
@@ -4672,7 +4677,7 @@ elementFormDefault="qualified">
     <!-- ================ -->
     <!-- Packaging tasks. -->
     <!-- ================ -->
-    
+
     <xs:complexType name="ToolTaskType">
         <xs:complexContent>
             <xs:extension base="msb:TaskType">
@@ -4774,7 +4779,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="ExpandPayloadDirectories" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4785,7 +4790,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="ExpandPriContent" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4801,7 +4806,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="ExtractHashAlgorithmId" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4813,7 +4818,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="FilterOutUnusedLanguagesResourceFileMaps" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4827,7 +4832,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="GenerateAppxManifest" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4857,7 +4862,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="GenerateAppxPackageRecipe" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4883,7 +4888,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="GenerateAppxSymbolPackage" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4898,7 +4903,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="GeneratePriConfigurationFiles" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -4984,7 +4989,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="GetPackageArchitecture" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5091,7 +5096,7 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
-    </xs:element>    
+    </xs:element>
 
     <xs:element name="RemoveDuplicatePayload" substitutionGroup="msb:Task">
         <xs:complexType>
@@ -5104,7 +5109,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="RemoveDuplicatePriFiles" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5116,7 +5121,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="RemoveDuplicateSDKReferences" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5127,7 +5132,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="SignAppxPackage" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5161,7 +5166,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="UpdateAppxManifestForBundle" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5186,7 +5191,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="ValidateAppxManifest" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5227,7 +5232,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="ValidateAppxPackage" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
@@ -5261,5 +5266,5 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+
 </xs:schema>

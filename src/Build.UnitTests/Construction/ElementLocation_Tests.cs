@@ -181,6 +181,24 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Tests serialization of empty location.
+        /// </summary>
+        [Fact]
+        public void SerializationTestForEmptyLocation()
+        {
+            IElementLocation location = ElementLocation.EmptyLocation;
+
+            TranslationHelpers.GetWriteTranslator().Translate(ref location, ElementLocation.FactoryForDeserialization);
+            IElementLocation deserializedLocation = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
+
+            Assert.Equal(location.File, deserializedLocation.File);
+            Assert.Equal(location.Line, deserializedLocation.Line);
+            Assert.Equal(location.Column, deserializedLocation.Column);
+            Assert.True(deserializedLocation.GetType().FullName.Contains("SmallElementLocation"));
+        }
+
+        /// <summary>
         /// Tests constructor specifying file, line and column.
         /// </summary>
         [Fact]

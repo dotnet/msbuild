@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// Validates that we can correctly load two of the same project file with different global properties, even when
-        /// those global properties are applied to the project by the project collection (and then overrided in one case). 
+        /// those global properties are applied to the project by the project collection (and then overridden in one case). 
         /// </summary>
         [Fact]
         public void TwoProjectsDistinguishedByGlobalPropertiesOnly_ProjectOverridesProjectCollection()
@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
         [Fact]
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
         [Fact]
@@ -613,7 +613,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
         [Fact]
@@ -660,7 +660,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Changing global properties on collection should should update the collection's defaults,
+        /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
         [Fact]
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.SetGlobalProperty("a", "b");
             Assert.False(dirtyRaised);
 
-            // Change GlobalProperties on a project to see that that doesn't propagate as an XML change.
+            // Change GlobalProperties on a project to see that doesn't propagate as an XML change.
             dirtyRaised = false;
             var project = new Project(pre);
             project.SetGlobalProperty("q", "s");

@@ -22,6 +22,11 @@
                     <xs:documentation><!-- _locID_text="Project_InitialTargets" _locComment="" -->Optional semi-colon separated list of targets that should always be built before any other targets</xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute name="Sdk" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation><!-- _locID_text="Project_Sdk" _locComment="" -->Optional string describing the MSBuild SDK(s) this project should be built with</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
             <xs:attribute name="ToolsVersion" type="xs:string" use="optional">
                 <xs:annotation>
                     <xs:documentation><!-- _locID_text="Project_ToolsVersion" _locComment="" -->Optional string describing the toolset version this project should normally be built with</xs:documentation>

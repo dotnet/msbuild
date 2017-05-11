@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
         /*
          * Method:   AttributeForwarding
          *
-         * Make sure that attributes set on input items are forwarded to ouput items.
+         * Make sure that attributes set on input items are forwarded to output items.
          */
         [Fact]
         public void AttributeForwarding()

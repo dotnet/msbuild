@@ -8,6 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
@@ -22,48 +24,48 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class.
     /// </remarks>
     [DebuggerDisplay("Name={_name} Count={_children.Count} Condition={_condition} Inputs={_inputs} Outputs={_outputs} DependsOnTargets={_dependsOnTargets}")]
-    public sealed class ProjectTargetInstance : IImmutable, IKeyed
+    public sealed class ProjectTargetInstance : IImmutable, IKeyed, INodePacketTranslatable
     {
         /// <summary>
         /// Name of the target
         /// </summary>
-        private readonly string _name;
+        private string _name;
 
         /// <summary>
         /// Condition on the target. 
         /// Evaluated during the build.
         /// </summary>
-        private readonly string _condition;
+        private string _condition;
 
         /// <summary>
         /// Inputs on the target
         /// </summary>
-        private readonly string _inputs;
+        private string _inputs;
 
         /// <summary>
         /// Outputs on the target
         /// </summary>
-        private readonly string _outputs;
+        private string _outputs;
 
         /// <summary>
         /// Return values on the target. 
         /// </summary>
-        private readonly string _returns;
+        private string _returns;
 
         /// <summary>
         /// Semicolon separated list of targets it depends on
         /// </summary>
-        private readonly string _dependsOnTargets;
+        private string _dependsOnTargets;
 
         /// <summary>
         /// Condition for whether to trim duplicate outputs
         /// </summary>
-        private readonly string _keepDuplicateOutputs;
+        private string _keepDuplicateOutputs;
 
         /// <summary>
         /// Child entries of the target which refer to OnError targets
         /// </summary>
-        private readonly ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> _onErrorChildren;
+        private ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> _onErrorChildren;
 
         /// <summary>
         /// Whether the project file that this target lives in has at least one target
@@ -71,52 +73,52 @@ namespace Microsoft.Build.Execution
         /// in the file without Returns attributes changes from returning the Outputs, to 
         /// returning nothing. 
         /// </summary>
-        private readonly bool _parentProjectSupportsReturnsAttribute;
+        private bool _parentProjectSupportsReturnsAttribute;
 
         /// <summary>
         /// Location of this element
         /// </summary>
-        private readonly ElementLocation _location;
+        private ElementLocation _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        private readonly ElementLocation _conditionLocation;
+        private ElementLocation _conditionLocation;
 
         /// <summary>
         /// Location of the inputs attribute, if any
         /// </summary>
-        private readonly ElementLocation _inputsLocation;
+        private ElementLocation _inputsLocation;
 
         /// <summary>
         /// Location of the outputs attribute, if any
         /// </summary>
-        private readonly ElementLocation _outputsLocation;
+        private ElementLocation _outputsLocation;
 
         /// <summary>
         /// Location of the returns attribute, if any
         /// </summary>
-        private readonly ElementLocation _returnsLocation;
+        private ElementLocation _returnsLocation;
 
         /// <summary>
         /// Location of KeepDuplicateOutputs attribute, if any
         /// </summary>
-        private readonly ElementLocation _keepDuplicateOutputsLocation;
+        private ElementLocation _keepDuplicateOutputsLocation;
 
         /// <summary>
         /// Location of the DependsOnTargets attribute ,if any
         /// </summary>
-        private readonly ElementLocation _dependsOnTargetsLocation;
+        private ElementLocation _dependsOnTargetsLocation;
 
         /// <summary>
         /// Location of the BeforeTargets attribute ,if any
         /// </summary>
-        private readonly ElementLocation _beforeTargetsLocation;
+        private ElementLocation _beforeTargetsLocation;
 
         /// <summary>
         /// Location of the AfterTargets attribute ,if any
         /// </summary>
-        private readonly ElementLocation _afterTargetsLocation;
+        private ElementLocation _afterTargetsLocation;
 
         /// <summary>
         /// Child tasks below the target (both regular tasks and "intrinsic tasks" like ItemGroup and PropertyGroup).
@@ -181,6 +183,10 @@ namespace Microsoft.Build.Execution
             _children = children;
             _onErrorChildren = onErrorChildren;
             _parentProjectSupportsReturnsAttribute = parentProjectSupportsReturnsAttribute;
+        }
+
+        private ProjectTargetInstance()
+        {
         }
 
         /// <summary>
@@ -510,6 +516,49 @@ namespace Microsoft.Build.Execution
             ProjectTaskInstance task = new ProjectTaskInstance(taskName, _location, condition ?? String.Empty, continueOnError ?? String.Empty, msbuildRuntime ?? String.Empty, msbuildArchitecture ?? String.Empty);
             this.AddProjectTargetInstanceChild(task);
             return task;
+        }
+
+        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        {
+            translator.Translate(ref _name);
+            translator.Translate(ref _condition);
+            translator.Translate(ref _inputs);
+            translator.Translate(ref _outputs);
+            translator.Translate(ref _returns);
+            translator.Translate(ref _keepDuplicateOutputs);
+            translator.Translate(ref _dependsOnTargets);
+            translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _inputsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _outputsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _returnsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _keepDuplicateOutputsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _dependsOnTargetsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _beforeTargetsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _afterTargetsLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _parentProjectSupportsReturnsAttribute);
+
+            var children = _children;
+            translator.Translate(ref children, ProjectTargetInstanceChild.FactoryForDeserialization, count => new List<ProjectTargetInstanceChild>(count));
+
+            IList<ProjectOnErrorInstance> onErrorChildren = _onErrorChildren;
+            translator.Translate(ref onErrorChildren, ProjectOnErrorInstance.FactoryForDeserialization, count => new List<ProjectOnErrorInstance>(count));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _children = new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(children);
+                _onErrorChildren = new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(onErrorChildren);
+            }
+        }
+
+        internal static ProjectTargetInstance FactoryForDeserialization(INodePacketTranslator translator)
+        {
+            var instance = new ProjectTargetInstance();
+            var translatable = (INodePacketTranslatable) instance;
+
+            translatable.Translate(translator);
+
+            return instance;
         }
     }
 }

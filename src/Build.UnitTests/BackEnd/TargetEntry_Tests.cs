@@ -663,7 +663,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Tests that we get the target ouputs correctly.
+        /// Tests that we get the target outputs correctly.
         /// </summary>
         [Fact]
         public void TestTargetOutputsOnFinishedEvent()

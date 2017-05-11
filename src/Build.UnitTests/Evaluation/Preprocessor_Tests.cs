@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using System.IO;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -869,8 +870,9 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     </PropertyGroup>
 </Project>");
 
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                using (var env = TestEnvironment.Create())
                 {
+                    env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
                     string content = @"<Project Sdk='MSBuildUnitTestSdk'>
   <PropertyGroup>
     <p>v1</p>
@@ -953,7 +955,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             xml1.AddProperty("Import", "p2");
             xml2.AddProperty("Import", "p3");
 
-            // These imports are duplicates but for each project will evaluate to seperate projects.  We expect that to NOT break
+            // These imports are duplicates but for each project will evaluate to separate projects.  We expect that to NOT break
             // the preprocessor's internal mapping.
             //
             xml1.AddImport("$(Import)");

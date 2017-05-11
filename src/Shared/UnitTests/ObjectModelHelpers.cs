@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -42,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
 
         /// <summary>
-        /// Return the the current Visual Studio version
+        /// Return the current Visual Studio version
         /// </summary>
         internal static string CurrentVisualStudioVersion
         {
@@ -53,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the default tools version 
+        /// Return the default tools version
         /// </summary>
         internal static string MSBuildDefaultToolsVersion
         {
@@ -64,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the current assembly version 
+        /// Return the current assembly version
         /// </summary>
         internal static string MSBuildAssemblyVersion
         {
@@ -118,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Helper that asserts if an exception of type specified is 
+        /// Helper that asserts if an exception of type specified is
         /// not thrown when calling specified method
         /// </summary>
         /// <example>
@@ -142,10 +144,10 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
-
-            using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles))
+            using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
             {
+                var testProject = env.CreateTestProjectWithFiles(projectContents, inputFiles);
                 var evaluatedItems = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection).Items.ToList();
 
                 if (expectedMetadataPerItem == null)
@@ -207,19 +209,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -229,19 +231,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -366,7 +368,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Used to compare the contents of two arrays. 
+        /// Used to compare the contents of two arrays.
         /// </summary>
         internal static void AssertArrayContentsMatch(object[] expected, object[] actual)
         {
@@ -381,7 +383,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
-            // Now that we've verified they're both non-null and of the same length, compare each item in the array. 
+            // Now that we've verified they're both non-null and of the same length, compare each item in the array.
             for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
@@ -499,7 +501,7 @@ namespace Microsoft.Build.UnitTests
             XmlDocument xmldoc = new XmlDocument();
             xmldoc.LoadXml(xml);
 
-            // Normalize all the whitespace by writing the Xml document out to a 
+            // Normalize all the whitespace by writing the Xml document out to a
             // string, with PreserveWhitespace=false.
             xmldoc.PreserveWhitespace = false;
 
@@ -739,7 +741,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void DeleteDirectory(string dir)
         {
-            // Manually deleting all children, but intentionally leaving the 
+            // Manually deleting all children, but intentionally leaving the
             // Temp project directory behind due to locking issues which were causing
             // failures in main on Amd64-WOW runs.
 
@@ -782,7 +784,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Creates a file in the %TEMP%\TempDirForMSBuildUnitTests directory, after cleaning
-        /// up the file contents (replacing single-back-quote with double-quote, etc.). 
+        /// up the file contents (replacing single-back-quote with double-quote, etc.).
         /// Silently OVERWRITES existing file.
         /// </summary>
         /// <param name="fileRelativePath"></param>
@@ -1022,6 +1024,30 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     internal static partial class Helpers
     {
+        internal static string GetOSPlatformAsString()
+        {
+            var currentPlatformString = string.Empty;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                currentPlatformString = "Windows";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                currentPlatformString = "Linux";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                currentPlatformString = "OSX";
+            }
+            else
+            {
+                Assert.True(false, "unrecognized current platform");
+            }
+
+            return currentPlatformString;
+        }
+
         /// <summary>
         /// Returns the count of objects returned by an enumerator
         /// </summary>
@@ -1124,6 +1150,35 @@ namespace Microsoft.Build.UnitTests
             {
                 Assert.True(one.Contains(item));
             }
+        }
+
+        internal static void AssertDictionariesEqual<K, V>(IDictionary<K, V> x, IDictionary<K, V> y, Action<KeyValuePair<K, V>, KeyValuePair<K, V>> assertPairsEqual)
+        {
+            if (x == null || y == null)
+            {
+                Assert.True(x == null && y == null);
+                return;
+            }
+
+            Assert.Equal(x.Count, y.Count);
+
+            for (var i = 0; i < x.Count; i++)
+            {
+                var xPair = x.ElementAt(i);
+                var yPair = y.ElementAt(i);
+
+                assertPairsEqual(xPair, yPair);
+            }
+        }
+
+        internal static void AssertDictionariesEqual(IDictionary<string, string> x, IDictionary<string, string> y)
+        {
+            AssertDictionariesEqual(x, y,
+                (xPair, yPair) =>
+                {
+                    Assert.Equal(xPair.Key, yPair.Key);
+                    Assert.Equal(xPair.Value, yPair.Value);
+                });
         }
 
         /// <summary>
@@ -1318,7 +1373,7 @@ namespace Microsoft.Build.UnitTests
 
         private static string[] SplitPathIntoFragments(string path)
         {
-            // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX, 
+            // Both Path.AltDirectorSeparatorChar and Path.DirectorySeparator char return '/' on OSX,
             // which renders them useless for the following case where I want to split a path that may contain either separator
             var splits = path.Split('/', '\\');
 
@@ -1502,7 +1557,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Creates a new temp path
         /// Sets all OS temp environment variables to the new path
-        /// 
+        ///
         /// Cleanup:
         /// - restores OS temp environment variables
         /// - deletes all files written to the new temp path
@@ -1606,118 +1661,31 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class TemporaryEnvironment : IDisposable
+        internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
         {
-            private bool _disposed;
-            private readonly string _name;
-            private readonly string _originalValue;
-
-            public TemporaryEnvironment(string name, string value)
+            public bool Equals(ElementLocation x, ElementLocation y)
             {
-                _name = name;
-                _originalValue = Environment.GetEnvironmentVariable(name);
-
-                Environment.SetEnvironmentVariable(name, value);
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (!_disposed)
+                if (x == null)
                 {
-                    if (disposing)
-                    {
-                        Environment.SetEnvironmentVariable(_name, _originalValue);
-                    }
-
-                    _disposed = true;
-                }
-            }
-        }
-
-        internal class TestProjectWithFiles : IDisposable
-        {
-            private bool _disposed;
-
-            private readonly string _testRoot;
-            private readonly string[] _createdFiles;
-            private readonly string _projectFile;
-
-            public string TestRoot
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _testRoot;
-                }
-            }
-
-            public string[] CreatedFiles
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _createdFiles;
-                }
-            }
-
-            public string ProjectFile
-            {
-                get
-                {
-                    ThrowIfDisposed();
-                    return _projectFile;
-                }
-            }
-
-            public TestProjectWithFiles(string projectContents, string[] files, string relativePathFromRootToProject)
-            {
-                string createdProjectFile;
-                string[] createdFiles;
-                _testRoot = CreateProjectInTempDirectoryWithFiles(projectContents, files, out createdProjectFile, out createdFiles, relativePathFromRootToProject);
-
-                _createdFiles = createdFiles;
-                _projectFile = createdProjectFile;
-            }
-
-            public TestProjectWithFiles(string projectContents, string[] files) : this(projectContents, files, ".")
-            {
-            }
-
-            private void ThrowIfDisposed()
-            {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException($"{nameof(TestProjectWithFiles)}({TestRoot}) was disposed");
-                }
-            }
-
-            public void Dispose()
-            {
-                Cleanup();
-                GC.SuppressFinalize(this);
-            }
-
-            private void Cleanup()
-            {
-                if (_disposed)
-                {
-                    return;
+                    return y == null;
                 }
 
-                FileUtilities.DeleteDirectoryNoThrow(TestRoot, true);
+                if (x.Line != y.Line || x.Column != y.Column)
+                {
+                    return false;
+                }
 
-                _disposed = true;
+                if (!String.Equals(x.File, y.File, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                return true;
             }
 
-            ~TestProjectWithFiles()
+            public int GetHashCode(ElementLocation obj)
             {
-                Cleanup();
+                return obj.Line.GetHashCode() ^ obj.Column.GetHashCode() ^ obj.File.GetHashCode();
             }
         }
     }

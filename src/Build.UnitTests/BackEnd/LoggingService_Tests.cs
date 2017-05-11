@@ -30,14 +30,14 @@ namespace Microsoft.Build.UnitTests.Logging
     {
         #region Data
         /// <summary>
-        /// An already instantiated and initialized service. 
+        /// An already instantiated and initialized service.
         /// This is used so the host object does not need to be
         /// used in every test method.
         /// </summary>
         private LoggingService _initializedService;
 
         /// <summary>
-        /// The event signalled when shutdown is complete.
+        /// The event signaled when shutdown is complete.
         /// </summary>
         private ManualResetEvent _shutdownComplete = new ManualResetEvent(false);
 
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Verify the CreateLogger method create a LoggingService in both Synchronous mode
-        /// and Asynchronous mode. 
+        /// and Asynchronous mode.
         /// </summary>
         [Fact]
         public void CreateLogger()
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(logService.LoggingMode, LoggerMode.Asynchronous);
             Assert.Equal(logService.ServiceState, LoggingServiceState.Instantiated);
 
-            // Shutdown logging thread  
+            // Shutdown logging thread
             logServiceComponent.InitializeComponent(new MockHost());
             logServiceComponent.ShutdownComponent();
             Assert.Equal(logService.ServiceState, LoggingServiceState.Shutdown);
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             logServiceComponent.InitializeComponent(loggingHost);
 
-            // Makesure that the parameters in the host are set in the logging service
+            // Make sure that the parameters in the host are set in the logging service
             LoggingService service = (LoggingService)logServiceComponent;
             Assert.Equal(service.ServiceState, LoggingServiceState.Initialized);
             Assert.Equal(4, service.MaxCPUCount);
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify an exception is thrown if in itialized is called after the service has been shutdown
+        /// Verify an exception is thrown if in initialized is called after the service has been shutdown
         /// </summary>
         [Fact]
         public void InitializeComponentAfterShutdown()
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Log some events on one thread and verify that even
-        /// when events are being logged while shutdown is occuring 
+        /// when events are being logged while shutdown is occurring
         /// that the shutdown still completes.
         /// </summary>
         [Fact]
@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Make sure an exception is thrown if shutdown is called 
+        /// Make sure an exception is thrown if shutdown is called
         /// more than once
         /// </summary>
         [Fact]
@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify a logger exception when initializing a logger is rethrown 
+        /// Verify a logger exception when initializing a logger is rethrown
         /// as a logger exception
         /// </summary>
         [Fact]
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify a general exception when initializing a logger is wrapped 
+        /// Verify a general exception when initializing a logger is wrapped
         /// as a InternalLogger exception
         /// </summary>
         [Fact]
@@ -423,7 +423,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Have a one forwarding logger which forwards build started and finished and have one which does not and a regular logger. Expect the central loggers to all get 
+        /// Have a one forwarding logger which forwards build started and finished and have one which does not and a regular logger. Expect the central loggers to all get
         /// one build started and one build finished event only.
         /// </summary>
         [Fact]
@@ -458,13 +458,13 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(1, regularILoggerB.BuildFinishedCount);
             Assert.Equal(1, regularILoggerC.BuildFinishedCount);
 
-            // Make sure if we call build started again we only get one other build started event. 
+            // Make sure if we call build started again we only get one other build started event.
             _initializedService.LogBuildStarted();
             Assert.Equal(2, regularILoggerA.BuildStartedCount);
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event. 
+            // Make sure if we call build started again we only get one other build started event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify when a non logging packet is received. 
+        /// Verify when a non logging packet is received.
         /// An invalid operation should be thrown
         /// </summary>
         [Fact]
@@ -738,7 +738,7 @@ namespace Microsoft.Build.UnitTests.Logging
            );
         }
         /// <summary>
-        /// Verify when a logging packet is received the build event is 
+        /// Verify when a logging packet is received the build event is
         /// properly passed to ProcessLoggingEvent
         /// An invalid operation should be thrown
         /// </summary>
@@ -760,8 +760,8 @@ namespace Microsoft.Build.UnitTests.Logging
         #region PrivateMethods
 
         /// <summary>
-        /// Instantiate and Initialize a new loggingService. 
-        /// This is used by the test setup method to create 
+        /// Instantiate and Initialize a new loggingService.
+        /// This is used by the test setup method to create
         /// a new logging service before each test.
         /// </summary>
         private void InitializeLoggingService()
@@ -776,8 +776,8 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Log a message every 10ms, this is used to verify 
-        /// the shutdown is not waiting forever for events as it 
+        /// Log a message every 10ms, this is used to verify
+        /// the shutdown is not waiting forever for events as it
         /// shutsdown.
         /// </summary>
         private void TightLoopLogEvents()
@@ -789,7 +789,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Register the correct logger and then call the shutdownComponent method. 
+        /// Register the correct logger and then call the shutdownComponent method.
         /// This will call shutdown on the loggers, we should expect to see certain exceptions.
         /// </summary>
         /// <param name="logger">Logger to register, this will only be used if className is null</param>
@@ -832,7 +832,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Create a logger description from the class name and logger assembly
         /// This is used in any test which needs to register a distributed logger.
         /// </summary>
-        /// <param name="loggerClassName">Fully qualified class name (dont for get ParentClass+Nestedclass, if nested)</param>
+        /// <param name="loggerClassName">Fully qualified class name (don't for get ParentClass+Nestedclass, if nested)</param>
         /// <param name="loggerAssemblyName">Assembly name which contains class</param>
         /// <returns>A logger description which can be registered</returns>
         private LoggerDescription CreateLoggerDescription(string loggerClassName, string loggerAssemblyName, bool forwardAllEvents)
@@ -880,7 +880,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region IForwardingLogger Members
 
             /// <summary>
-            /// Not used, implmented due to interface
+            /// Not used, implemented due to interface
             /// </summary>
             /// <value>Notused</value>
             public IEventRedirector BuildEventRedirector
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public class ShutdownLoggerExceptionFL : BaseFLThrowException
         {
             /// <summary>
-            /// Create a logger which will throw a logger exception 
+            /// Create a logger which will throw a logger exception
             /// in the shutdown method
             /// </summary>
             public ShutdownLoggerExceptionFL()
@@ -935,7 +935,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
 #if FEATURE_VARIOUS_EXCEPTIONS
         /// <summary>
-        /// Forwarding logger which will throw a StackOverflowException 
+        /// Forwarding logger which will throw a StackOverflowException
         /// in the shutdown method. This is to test the shutdown exception handling
         /// </summary>
         public class ShutdownStackoverflowExceptionFL : BaseFLThrowException
@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region Constructor
 
             /// <summary>
-            /// Constructor to tell the logger when to throw an exception and what excetption 
+            /// Constructor to tell the logger when to throw an exception and what exception
             /// to throw
             /// </summary>
             /// <param name="throwOnShutdown">True, throw the exception when shutdown is called</param>
@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             #endregion
 
-            #region Propeties
+            #region Properties
 
             /// <summary>
             /// Not used, implemented due to ILoggerInterface
@@ -1006,7 +1006,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
-            /// Should the exception be thrown on the call to initalize
+            /// Should the exception be thrown on the call to initialize
             /// </summary>
             /// <value>Not used</value>
             protected bool ThrowExceptionOnInitialize
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.UnitTests.Logging
             #region ILogger Members
 
             /// <summary>
-            /// Initialize the logger, throw an exception 
+            /// Initialize the logger, throw an exception
             /// if ThrowExceptionOnInitialize is set
             /// </summary>
             /// <param name="eventSource">Not used</param>
