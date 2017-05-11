@@ -485,10 +485,13 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");
         }
 
-        internal void StampWithUniqueGlobalProperty()
+        internal void CreateUniqueGlobalProperty()
         {
+            // create a copy so the mutation does not leak into the ProjectInstance
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(_globalProperties);
+
             var key = $"ProjectInstance{Guid.NewGuid():N}";
-            GlobalProperties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+            _globalProperties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
         }
 
         /// <summary>
