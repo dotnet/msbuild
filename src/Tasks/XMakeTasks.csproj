@@ -8,6 +8,8 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
+    <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
