@@ -1,5 +1,11 @@
-<Project>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="DependencyVersions.props" />
+
   <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)/..</RepoRoot>
+    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+
     <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildVersion)/build/</MicroBuildPropsAndTargetsPath>
   </PropertyGroup>
 </Project>
