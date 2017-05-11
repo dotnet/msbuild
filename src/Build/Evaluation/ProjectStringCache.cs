@@ -85,6 +85,12 @@ namespace Microsoft.Build.Construction
                 return String.Empty;
             }
 
+            // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
+            if (key.StartsWith("ProjectInstance", StringComparison.Ordinal))
+            {
+                return key;
+            }
+
             lock (_locker)
             {
                 VerifyState();

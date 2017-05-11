@@ -886,6 +886,28 @@ namespace Microsoft.Build
                             return true;
                         }
                     }
+                    // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
+                    else if (length > 15 &&
+                             candidate[0] == 'P' &&
+                             candidate[1] == 'r' &&
+                             candidate[2] == 'o' &&
+                             candidate[3] == 'j' &&
+                             candidate[4] == 'e' &&
+                             candidate[5] == 'c' &&
+                             candidate[6] == 't' &&
+                             candidate[7] == 'I' &&
+                             candidate[8] == 'n' &&
+                             candidate[9] == 's' &&
+                             candidate[10] == 't' &&
+                             candidate[11] == 'a' &&
+                             candidate[12] == 'n' &&
+                             candidate[13] == 'c' &&
+                             candidate[14] == 'e'
+                    )
+                    {
+                        interned = candidate.ExpensiveConvertToString();
+                        return null;
+                    }
                     else if (length == 24)
                     {
                         if (candidate[0] == 'R' && candidate[1] == 'e' && candidate[2] == 's' && candidate[3] == 'o' && candidate[4] == 'l' && candidate[5] == 'v' && candidate[6] == 'e')
