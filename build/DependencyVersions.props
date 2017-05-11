@@ -19,7 +19,8 @@
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
     <AspNetCoreRuntimeVersion>2.0.0-preview1-92</AspNetCoreRuntimeVersion>
-
+    <MicroBuildVersion>0.2.0</MicroBuildVersion>
+  
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
 
