@@ -137,39 +137,6 @@
     <CommonTestPath>$(SourceDir)Common\tests</CommonTestPath>
   </PropertyGroup>
 
-  <!-- Setup the default output and intermediate paths -->
-  <PropertyGroup>
-    <!--<BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
-
-    <RelativeOutputPathWithConfig>$(Configuration)$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
-    <RelativeOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
-
-    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(RelativeOutputPathWithConfig)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
-
-    <OutputPath>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig),"Output"))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
-
-    <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-
-    --><!-- BuildTools uses this path to write some files --><!--
-    <ObjDir>$(IntermediateOutputPath)</ObjDir>
-
-    --><!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way --><!--
-    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
-
-    <DeploymentDirName>$(TargetPlatformIdentifier)_Deployment</DeploymentDirName>
-    <TestDeploymentDirName>$(DeploymentDirName)_Test</TestDeploymentDirName>
-
-    <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
-    <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
-
-    --><!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property --><!--
-    <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>-->
-  </PropertyGroup>
-
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>

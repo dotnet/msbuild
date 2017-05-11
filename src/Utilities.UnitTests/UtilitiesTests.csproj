@@ -3,8 +3,15 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TrackedDependencies\**" />
+    <EmbeddedResource Remove="TrackedDependencies\**" />
+    <None Remove="TrackedDependencies\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
@@ -26,6 +33,14 @@
     <Compile Include="..\..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
+
+    <None Include="..\..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="..\..\Shared\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
