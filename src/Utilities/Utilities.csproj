@@ -10,8 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
 
-    <PackageReference Condition="!$(TargetFramework.StartsWith('netstandard'))"
-                      Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" />
+    <PackageReference Condition="!$(TargetFramework.StartsWith('netstandard'))" Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
@@ -181,6 +180,14 @@
 
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard'))">
     <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
