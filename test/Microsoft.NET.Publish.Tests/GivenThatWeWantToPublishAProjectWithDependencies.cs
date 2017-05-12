@@ -9,7 +9,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
-using Microsoft.DotNet.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -161,7 +160,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_projects_with_filter_and_rid()
         {
             string project = "SimpleDependencies";
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()

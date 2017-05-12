@@ -338,7 +338,7 @@ public static class Program
         [Fact]
         public void A_deployment_project_can_reference_the_hello_world_project()
         {
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
 
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("DeployProjectReferencingSdkProject")

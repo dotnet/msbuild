@@ -3,7 +3,6 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -31,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
 
         static GivenThatWeWantToStoreAProjectWithDependencies()
         {
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _runtimeOs = "win7";

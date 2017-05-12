@@ -2,17 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
  
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <ProjectGuid>{A33548A0-F3B0-40C3-8C4D-AD2F00596CD6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.NET.TestFramework</RootNamespace>
-    <AssemblyName>Microsoft.NET.TestFramework</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netstandard1.6</TargetFramework>
-    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
-    <OutDir>$(OutDir)Tests\</OutDir>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <NonShipping>true</NonShipping>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -26,12 +16,6 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>$(NewtonsoftJsonVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reflection.Metadata">
-      <Version>1.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="xunit">
-      <Version>$(xunitVersion)</Version>
     </PackageReference>
   </ItemGroup>
 
@@ -49,27 +33,4 @@
 
   <Import Project="..\..\build\Targets\Signing.Imports.targets"/>
 
-  <Target Name="CustomAfterBuild" AfterTargets="Build">
-    <ItemGroup>
-      <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
-        <Version>$(DotNetCliUtilsVersion)</Version>
-        <TFM>netstandard1.5</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.Build">
-        <Version>$(MSBuildPackagesVersion)</Version>
-        <TFM>netstandard1.5</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
-        <Version>$(PlatformAbstractionsVersion)</Version>
-        <TFM>netstandard1.3</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.PackageRelativePath)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
-      </CopyLocalAssembly>
-    </ItemGroup>
-    <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />
-  </Target>
 </Project>

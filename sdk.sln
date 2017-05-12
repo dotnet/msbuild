@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25916.1
+VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
 EndProject
@@ -52,6 +52,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{0C13
 		build\Targets\ProducesNoOutput.Imports.props = build\Targets\ProducesNoOutput.Imports.props
 		build\Targets\ProducesNoOutput.Settings.props = build\Targets\ProducesNoOutput.Settings.props
 		build\Targets\Templates.Imports.targets = build\Targets\Templates.Imports.targets
+		build\Targets\Test.props = build\Targets\Test.props
+		build\Targets\Test.targets = build\Targets\Test.targets
+		build\Targets\TestProgram.cs = build\Targets\TestProgram.cs
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Build.Tests", "test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj", "{EC640B7E-332E-40A2-BB6E-5B7EC788F315}"
