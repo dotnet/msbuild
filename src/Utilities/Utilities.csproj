@@ -188,6 +188,12 @@
       <SubType>Designer</SubType>
       <Generator></Generator>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <SubType>Designer</SubType>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+    </EmbeddedResource>
+
   </ItemGroup>
 
 </Project>
