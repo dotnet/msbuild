@@ -5,8 +5,5 @@
       <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
-      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win-$(Architecture)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx-x64</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(CoreCLRRid)' == '' ">linux-x64</CoreCLRRid>
     </PropertyGroup>
 </Project>
