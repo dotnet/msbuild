@@ -4,6 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
     <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
+    <IncludeAspNetCoreRuntime Condition="'$(IncludeAspNetCoreRuntime)' == ''">true</IncludeAspNetCoreRuntime>
     <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' ">true</UsePortableLinuxSharedFramework>
     <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == '' AND '$(Rid)' != 'linux-x64' ">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
     <HighEntropyVA>true</HighEntropyVA>
