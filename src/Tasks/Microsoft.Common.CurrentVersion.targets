@@ -355,8 +355,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Deterministic)' == 'true'">
-    <!-- TODO: should this be configurable? Default path obeys conventions. -->
+  <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
     <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
     <CreateDirectory Include="$(OutDir)ref" />
@@ -4074,7 +4073,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CopyRefAssembly
         SourcePath="@(IntermediateRefAssembly)"
         DestinationPath="$(TargetRefPath)"
-        Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true' and Exists('@(IntermediateRefAssembly)')"
+        Condition="'$(ProduceReferenceAssembly)' == 'true' and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'"
             >
 
       <Output TaskParameter="DestinationPath" ItemName="ReferenceAssembly"/>
@@ -4543,7 +4542,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--Record the main compile outputs.-->
     <ItemGroup>
       <FileWrites Include="@(IntermediateAssembly)" Condition="Exists('@(IntermediateAssembly)')"/>
-      <FileWrites Include="@(IntermediateRefAssembly)" Condition="'@(IntermediateRefAssembly)' != '' and Exists('@(IntermediateRefAssembly)')"/>
+      <FileWrites Include="@(IntermediateRefAssembly)" Condition="'$(ProduceReferenceAssembly)' == 'true' and Exists('@(IntermediateRefAssembly)')"/>
     </ItemGroup>
 
     <!-- Record the .xml if one was produced. -->
