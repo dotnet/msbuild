@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
     <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
   </PropertyGroup>
 
