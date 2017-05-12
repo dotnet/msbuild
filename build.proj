@@ -82,11 +82,10 @@
       (final release builds, should provide final versions (not pre-release ones))
     -->
     <PropertyGroup>
-      <WebSdkBuildVersion Condition="'$(WebSdkVersion)' == ''">$(CoreSdkBuildVersion)</WebSdkBuildVersion>
       <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
-      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">-$(BUILD_NUMBER)</CiBuildPostfix>
-      <CiBuildPostfix Condition="'$(CiBuildPostfix)' == ''">-1</CiBuildPostfix>
-      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-rel$(CurrentDate)$(CiBuildPostfix)</WebSdkVersion>
+      <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">1</BUILD_NUMBER>
+      <BuildBranchName Condition="'$(BuildBranchName)' == ''">dev</BuildBranchName>
+      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_NUMBER)</WebSdkVersion>
     </PropertyGroup>
   </Target>
   
