@@ -122,6 +122,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <DeployIisAppPath Condition="'$(DeployIisAppPath)' ==''">Default Web Site</DeployIisAppPath>
     </PropertyGroup>
 
+    <ConvertToAbsolutePath Paths="$(PackageLocation)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PackageLocation"/>
+    </ConvertToAbsolutePath>
+
   </Target>
   
   <!--
