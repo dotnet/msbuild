@@ -407,11 +407,11 @@ namespace Microsoft.NET.Build.Tests
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var oldProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.csproj");
-            var newProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.fsproj");
+            var newProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.different_language_proj");
 
             File.Move(oldProjectFile, newProjectFile);
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, libraryProjectDirectory, "TestLibrary.fsproj");
+            var restoreCommand = new RestoreCommand(Stage0MSBuild, libraryProjectDirectory, "TestLibrary.different_language_proj");
 
             restoreCommand
                 .Execute()
