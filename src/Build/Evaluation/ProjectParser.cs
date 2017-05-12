@@ -11,6 +11,7 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Microsoft.Build.Framework;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 
@@ -515,12 +516,19 @@ namespace Microsoft.Build.Construction
                 );
 
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnImport);
-
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
-
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
 
-            return new ProjectImportElement(element, parent, _project);
+            SdkReference sdk = null;
+            if (element.HasAttribute(XMakeAttributes.sdk))
+            {
+                sdk = new SdkReference(
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdk, nullIfNotExists: true),
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkVersion, nullIfNotExists: true),
+                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkMinimumVersion, nullIfNotExists: true));
+            }
+
+            return new ProjectImportElement(element, parent, _project, sdk);
         }
 
         /// <summary>
