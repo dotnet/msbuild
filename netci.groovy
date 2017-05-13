@@ -62,7 +62,7 @@ ${buildCommand}""")
         Utilities.addArchival(newJob, archiveSettings)
         Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
         Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-        Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
+        Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/*TestResults.xml", false)
         Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
     }
 }
