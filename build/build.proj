@@ -28,6 +28,11 @@
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj" />
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj" />
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
+
+    <!-- Explicitly specify task unit test project -->
+    <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
+    <!-- Discover test projects under the test folder by convention -->
+    <TestProject Include="$(RepositoryRootDirectory)test\**\*.Tests.csproj" />
   </ItemGroup>
   <Target Name="RestorePackages">
 
@@ -144,25 +149,7 @@
   </Target>
 
   <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
-
-    <ItemGroup>
-      <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
-      <XmlTestFile Include="$(TestsDirectory)TestResults.xml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <NetCoreAppProductAssets Include="$(PackagesLayoutToolsNetCoreAppDir)\*" />
-    </ItemGroup>
-
-    <Message Text="Running tests for %(SolutionFile.Filename) [$(Configuration)]" Importance="high" />
-
-    <!-- Copy all the 'netcore1.0' product assemblies to the test directory, so the tests can load them. -->
-    <Copy SourceFiles="@(NetCoreAppProductAssets)"
-          DestinationFolder="$(TestsDirectory)"
-          />
-
-<Message Text="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;" Importance="High" />
-    <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"
+    <Exec Command="$(DotNetTool) run --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
           IgnoreExitCode="true"
