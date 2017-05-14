@@ -236,7 +236,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln InvalidSolution.sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing.");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Expected file header not found.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -256,7 +256,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Invalid format in line 1: File header is missing.");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Expected file header not found.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
