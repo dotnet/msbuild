@@ -288,8 +288,28 @@ EndGlobal
         }
 
         [Theory]
+        [InlineData("Microsoft Visual Studio Solution File, Format Version ", 1)]
+        [InlineData("First Line\nMicrosoft Visual Studio Solution File, Format Version ", 2)]
+        [InlineData("First Line\nMicrosoft Visual Studio Solution File, Format Version \nThird Line", 2)]
+        [InlineData("First Line\nSecondLine\nMicrosoft Visual Studio Solution File, Format Version \nFourth Line", 3)]
+        public void WhenGivenASolutionWithMissingHeaderVersionItThrows(string fileContents, int lineNum)
+        {
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(fileContents);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage($"Invalid format in line {lineNum}: File header is missing version");
+        }
+
+        [Theory]
         [InlineData("Invalid Solution")]
-        [InlineData("Microsoft Visual Studio Solution File, Format Version ")]
+        [InlineData("Invalid Solution\nSpanning Multiple Lines")]
+        [InlineData("Microsoft Visual\nStudio Solution File,\nFormat Version ")]
         public void WhenGivenASolutionWithMissingHeaderItThrows(string fileContents)
         {
             var tmpFile = Temp.CreateFile();
@@ -301,7 +321,7 @@ EndGlobal
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
-                .WithMessage("Invalid format in line 1: File header is missing");
+                .WithMessage("Expected file header not found");
         }
 
         [Fact]
