@@ -195,8 +195,9 @@ namespace Microsoft.NET.Publish.Tests
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
 
-
-        [Theory]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyTheory]
         [InlineData("GenerateDocumentationFile=true", true, true)]
         [InlineData("GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true)]
         [InlineData("GenerateDocumentationFile=true;PublishReferencesDocumentationFiles=false", true, false)]
@@ -213,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.0");
 
             if (expectAppDocPublished)
             {

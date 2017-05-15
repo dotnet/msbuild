@@ -97,7 +97,9 @@ namespace Microsoft.NET.Build.Tests
             libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager
@@ -115,7 +117,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            var outputDir = buildCommand.GetOutputDirectory("netcoreapp2.0");
 
             var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
                 .CaptureStdOut()
