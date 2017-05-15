@@ -2370,12 +2370,15 @@ namespace Microsoft.Build.Evaluation
 
             if (importElement.ParsedSdkReference != null)
             {
-                // Try to get the solution path when available.
+                // Try to get the path to the solution and project being built. If the solution path equals "*Undefined*" 
+                // (hard coded in Microsoft.Common.CurrentVersion.targets) set to null for consistency.
                 var solutionPath = _data.GetProperty(SolutionProjectGenerator.SolutionPathPropertyName)?.EvaluatedValue;
+                var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
+                if (solutionPath == "*Undefined*") solutionPath = null;
 
                 // Combine SDK path with the "project" relative path
                 var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _loggingService,
-                    _buildEventContext, importElement.Location, solutionPath);
+                    _buildEventContext, importElement.Location, solutionPath, projectPath);
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {

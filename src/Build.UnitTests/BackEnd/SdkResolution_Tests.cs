@@ -22,7 +22,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
             
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln");
+            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
             Assert.Equal("MockSdkResolver1 running", log.ToString().Trim());
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln");
+            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
 
             var logResult = log.ToString();
             Assert.Equal("resolverpath2", result);
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln");
+            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
 
             var logResult = log.ToString();
             Assert.Null(result);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy(true));
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln");
+            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
             Assert.Contains("EXMESSAGE", log.ToString());

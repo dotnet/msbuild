@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -40,9 +41,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildEventContext">Build event context for logging.</param>
         /// <param name="sdkReferenceLocation">Location of the element within the project which referenced the SDK.</param>
         /// <param name="solutionPath">Path to the solution if known.</param>
+        /// <param name="projectPath">Path to the project being.</param>
         /// <returns>Path to the root of the referenced SDK.</returns>
         internal string GetSdkPath(SdkReference sdk, ILoggingService logger, BuildEventContext buildEventContext,
-            ElementLocation sdkReferenceLocation, string solutionPath)
+            ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
             ErrorUtilities.VerifyThrowInternalNull(logger, nameof(logger));
@@ -58,7 +60,7 @@ namespace Microsoft.Build.BackEnd
                 var buildEngineLogger = new SdkLoggerImpl(logger, buildEventContext);
                 foreach (var sdkResolver in _resolvers)
                 {
-                    var context = new SdkResolverContextImpl(buildEngineLogger, sdkReferenceLocation.File, solutionPath);
+                    var context = new SdkResolverContextImpl(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version);
                     var resultFactory = new SdkResultFactoryImpl(sdk);
                     try
                     {
@@ -98,6 +100,16 @@ namespace Microsoft.Build.BackEnd
             }
 
             return null;
+        }
+
+        internal void InitializeForTests(IList<SdkResolver> resolvers, ILoggingService logger, BuildEventContext buildEventContext, ElementLocation location)
+        {
+            _resolvers = resolvers;
+        }
+
+        internal void ResetInitializeForTests()
+        {
+            _resolvers = null;
         }
 
         private void Initialize(ILoggingService logger, BuildEventContext buildEventContext, ElementLocation location)
@@ -187,11 +199,12 @@ namespace Microsoft.Build.BackEnd
 
         private sealed class SdkResolverContextImpl : SdkResolverContext
         {
-            public SdkResolverContextImpl(SdkLogger logger, string projectFilePath, string solutionPath)
+            public SdkResolverContextImpl(SdkLogger logger, string projectFilePath, string solutionPath, Version msBuildVersion)
             {
                 Logger = logger;
                 ProjectFilePath = projectFilePath;
                 SolutionFilePath = solutionPath;
+                MSBuildVersion = msBuildVersion;
             }
         }
     }
