@@ -54,7 +54,7 @@ Ready? Set? Let's go!</String>
 
 Learn more about .NET Core at https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
 
-NET Core Tools Telemetry
+.NET Core Tools Telemetry
 
 The .NET Core Tools include a telemetry feature that collects usage information. It is important that the .NET Team understands how the tools are being used so that we can improve them.
 
