@@ -149,7 +149,7 @@
   </Target>
 
   <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
-    <Exec Command="$(DotNetTool) run --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
+    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
           IgnoreExitCode="true"
