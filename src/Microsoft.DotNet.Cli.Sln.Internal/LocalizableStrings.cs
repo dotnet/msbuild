@@ -17,7 +17,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public const string GlobalSectionNotClosedError = "Global section not closed";
 
-        public const string FileHeaderMissingError = "File header is missing";
+        public const string FileHeaderMissingVersionError = "File header is missing version";
+
+        public const string FileHeaderMissingError = "Expected file header not found";
 
         public const string ProjectSectionNotClosedError = "Project section not closed";
 
