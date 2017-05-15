@@ -9,7 +9,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
-using Microsoft.DotNet.PlatformAbstractions;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -161,7 +160,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_projects_with_filter_and_rid()
         {
             string project = "SimpleDependencies";
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
@@ -196,8 +195,9 @@ namespace Microsoft.NET.Publish.Tests
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
 
-
-        [Theory]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyTheory]
         [InlineData("GenerateDocumentationFile=true", true, true)]
         [InlineData("GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true)]
         [InlineData("GenerateDocumentationFile=true;PublishReferencesDocumentationFiles=false", true, false)]
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory();
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.0");
 
             if (expectAppDocPublished)
             {

@@ -1,0 +1,3 @@
+<Project>
+  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.targets"/>
+</Project>

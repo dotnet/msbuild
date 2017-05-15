@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.NET.TestFramework
 {
-    public class CoreMSBuildAndWindowsOnlyFactAttribute : TheoryAttribute
+    public class CoreMSBuildAndWindowsOnlyFactAttribute : FactAttribute
     {
         public CoreMSBuildAndWindowsOnlyFactAttribute()
         {

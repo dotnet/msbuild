@@ -1,3 +1,5 @@
 <Project>
-     <Import Project="$([MSBuild]::GetPathOfFileAbove('Common.props'))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Common.props'))" />
+
+  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.props"/>
 </Project>

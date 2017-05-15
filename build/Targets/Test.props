@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <OutDir>$(OutDir)Tests\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+</Project>

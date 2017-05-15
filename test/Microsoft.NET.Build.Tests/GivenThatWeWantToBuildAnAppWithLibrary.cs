@@ -86,12 +86,7 @@ namespace Microsoft.NET.Build.Tests
             appInfo.FileDescription.Should().Be("Test AssemblyTitle");
             appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
             appInfo.ProductName.Should().Be("Test Product");
-
-            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                appInfo.ProductVersion.Should().Be("1.2.3-beta");
-            }
+            appInfo.ProductVersion.Should().Be("1.2.3-beta");
 
             var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestLibrary.dll"));
             libInfo.CompanyName.Trim().Should().Be("TestLibrary");
@@ -99,15 +94,12 @@ namespace Microsoft.NET.Build.Tests
             libInfo.FileDescription.Should().Be("TestLibrary");
             libInfo.LegalCopyright.Trim().Should().BeEmpty();
             libInfo.ProductName.Should().Be("TestLibrary");
-
-            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
-            }
+            libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager
@@ -125,7 +117,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            var outputDir = buildCommand.GetOutputDirectory("netcoreapp2.0");
 
             var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
                 .CaptureStdOut()

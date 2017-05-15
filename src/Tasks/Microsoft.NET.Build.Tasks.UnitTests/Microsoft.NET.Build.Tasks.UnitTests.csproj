@@ -1,25 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.props" />
+  
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <ProjectGuid>{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.NET.Build.Tasks.UnitTests</RootNamespace>
-    <AssemblyName>Microsoft.NET.Build.Tasks.UnitTests</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
-    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
-    <OutDir>$(OutDir)Tests\</OutDir>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <NonShipping>true</NonShipping>
-    <StartAction>Program</StartAction>
-    <StartProgram>$(DotNetTool).exe</StartProgram>
-    <StartArguments>"$(OutDir)xunit.console.netcore.exe" "$(OutDir)$(AssemblyName).dll" -xml "$(OutDir)TestResults.xml" -wait</StartArguments>
-    <StartWorkingDirectory>$(OutDir)</StartWorkingDirectory>
-    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.ProjectModel">
@@ -33,9 +21,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(MsBuildPackagesVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="xunit">
-      <Version>$(xunitVersion)</Version>
     </PackageReference>
     <PackageReference Include="FluentAssertions.Json">
       <Version>$(FluentAssertionsJsonVersion)</Version>
@@ -102,23 +87,5 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
-  <Target Name="CustomAfterBuild" AfterTargets="Build">
-    <ItemGroup>
-      <CopyLocalAssembly Include="Microsoft.Build.Framework">
-        <Version>$(MsBuildPackagesVersion)</Version>
-        <TFM>netstandard1.3</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.Build.Utilities.Core">
-        <Version>$(MsBuildPackagesVersion)</Version>
-        <TFM>netstandard1.3</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.PackageRelativePath)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
-      </CopyLocalAssembly>
-    </ItemGroup>
-    <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />
-  </Target>
+  <Import Project="$(RepositoryRootDirectory)build\Targets\Test.targets" />
 </Project>

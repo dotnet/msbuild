@@ -174,7 +174,7 @@ namespace Microsoft.NET.Build.Tests
             restoreCommand.Execute().Should().Fail();
         }
 
-        [CoreMSBuildAndWindowsOnlyTheory]
+        [CoreMSBuildAndWindowsOnlyFact]
         public void It_is_possible_to_disabled_net461_implicit_package_target_fallback()
         {
             const string testProjectName = "netstandard20_disabled_ptf";

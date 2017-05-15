@@ -1,23 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <ProjectGuid>{EC640B7E-332E-40A2-BB6E-5B7EC788F315}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Microsoft.NET.Build.Tests</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
-    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
-    <OutDir>$(OutDir)Tests\</OutDir>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <NonShipping>true</NonShipping>
-    <StartAction>Program</StartAction>
-    <StartProgram>$(DotNetTool).exe</StartProgram>
-    <StartArguments>"$(OutDir)xunit.console.netcore.exe" "$(OutDir)$(AssemblyName).dll" -xml "$(OutDir)TestResults.xml" -wait</StartArguments>
-    <StartWorkingDirectory>$(OutDir)</StartWorkingDirectory>
-    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
@@ -26,22 +13,13 @@
     <PackageReference Include="FluentAssertions">
       <Version>$(FluentAssertionsVersion)</Version>
     </PackageReference>
-    <PackageReference Include="System.Diagnostics.FileVersionInfo">
-      <Version>4.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="xunit">
-      <Version>$(xunitVersion)</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj">
-      <Project>{a33548a0-f3b0-40c3-8c4d-ad2f00596cd6}</Project>
-      <Name>Microsoft.NET.TestFramework</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
   <Import Project="..\..\build\Targets\Signing.Imports.targets" />
 </Project>
