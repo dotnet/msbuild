@@ -50,7 +50,7 @@ Ready? Set? Let's go!</String>
   <String Id="FilesInUseDontCloseRadioButton">&amp;Do not close applications. A reboot will be required.</String>
   <String Id="FilesInUseOkButton">&amp;OK</String>
   <String Id="FilesInUseCancelButton">&amp;Cancel</String>
-  <String Id="FirstTimeWelcomeMessage">Installation Completed Successfully Welcome to .NET Core!
+  <String Id="FirstTimeWelcomeMessage">Installation completed successfully. Welcome to .NET Core!
 
 Learn more about .NET Core at https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
 
