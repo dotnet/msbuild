@@ -5,9 +5,7 @@
     <ProjectGuid>{BB691360-49BC-46EB-8BA9-6A69A54CD4B0}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="CopyToOutputFromProjectReference.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="CopyToOutputFromProjectReference.txt" CopyToOutputDirectory="Always" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
