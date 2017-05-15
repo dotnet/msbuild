@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
@@ -67,11 +69,14 @@ namespace Microsoft.DotNet.Cli
                 yield break;
             }
 
-            var json = JObject.Parse(result);
-
-            foreach (var id in json["data"])
+            using (var reader = new JsonTextReader(new StringReader(result)))
             {
-                yield return id["id"].Value<string>();
+                var json = JObject.Load(reader);
+
+                foreach (var id in json["data"])
+                {
+                    yield return id["id"].Value<string>();
+                }
             }
         }
     }

@@ -1,8 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved. 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information. 
- 
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq; 
-using System.IO; 
+using System.IO;
  
 namespace Microsoft.DotNet.Cli.Utils
 { 
@@ -32,8 +33,10 @@ namespace Microsoft.DotNet.Cli.Utils
         } 
  
         private JObject OpenRuntimeConfig(string runtimeConfigPath) 
-        { 
-            return JObject.Parse(File.ReadAllText(runtimeConfigPath)); 
+        {
+            var reader = new JsonTextReader(new StringReader(File.ReadAllText(runtimeConfigPath)));
+
+            return JObject.Load(reader);
         } 
  
         private RuntimeConfigFramework ParseFramework(JObject runtimeConfigRoot) 
