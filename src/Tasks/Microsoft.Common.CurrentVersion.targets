@@ -348,6 +348,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
+    <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
@@ -1814,6 +1815,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
+        <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
@@ -2065,7 +2067,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- The project system normally looks only at the inputs to the compiler in its
            fast up-to-date check, but if the implementation assembly of a ref is stale
            we still want to rerun to ensure copies, etc. happen. -->
-      <UpToDateCheckInput Include="@(ReferencePathWithRefAssemblies->'%(OriginalPath)')" />
+      <!-- The remote project might not have done anything to _its own_ assemblies, but
+           still need to invalidate the fast up-to-date check in projects that depend on
+           it because it has brought along a new implementation of one of its references. -->
+      <UpToDateCheckInput Include="@(ReferencePathWithRefAssemblies->'%(CopyUpToDateMarker)')" />
     </ItemGroup>
   </Target>
 
@@ -4235,8 +4240,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWritesShareable"/>
+      <Output TaskParameter="CopiedFiles" ItemName="ReferencesCopiedInThisBuild"/>
 
     </Copy>
+
+    <!-- If this project produces reference assemblies *and* copied (possibly transitive)
+         references on this build, subsequent builds of projects that depend on it must
+         not be considered up to date, so touch this marker file that is considered an
+         input to projects that reference this one. -->
+    <Touch Files="$(CopyUpToDateMarker)"
+           AlwaysCreate="true"
+           Condition="'$(ProduceReferenceAssembly)' == 'true' and '@(ReferencesCopiedInThisBuild)' != ''" />
 
   </Target>
 
