@@ -100,6 +100,9 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             // Turn off restore for Dotnet cli tool references so that we do not generate extra dg specs
             args.Add($"/p:RestoreDotnetCliToolReferences=false");
 
+            // Output should not include MSBuild version header
+            args.Add("/nologo");
+
             var result = new MSBuildForwardingApp(args).Execute();
 
             if (result != 0)
