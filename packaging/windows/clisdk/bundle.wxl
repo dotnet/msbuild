@@ -31,7 +31,6 @@ Ready? Set? Let's go!</String>
   <String Id="ModifyCloseButton">&amp;Close</String>
   <String Id="SuccessRepairHeader">Repair Successfully Completed</String>
   <String Id="SuccessUninstallHeader">Uninstall Successfully Completed</String>
-  <String Id="SuccessInstallHeader">Installation Successfully Completed</String>
   <String Id="SuccessHeader">Setup Successful</String>
   <String Id="SuccessLaunchButton">&amp;Launch</String>
   <String Id="SuccessRestartText">You must restart your computer before you can use the software.</String>
@@ -51,11 +50,16 @@ Ready? Set? Let's go!</String>
   <String Id="FilesInUseDontCloseRadioButton">&amp;Do not close applications. A reboot will be required.</String>
   <String Id="FilesInUseOkButton">&amp;OK</String>
   <String Id="FilesInUseCancelButton">&amp;Cancel</String>
-  <String Id="FirstTimeWelcomeMessage">Welcome to .NET Core!
+  <String Id="FirstTimeWelcomeMessage">Installation completed successfully. Welcome to .NET Core!
+
 Learn more about .NET Core at https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
-Telemetry:
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell. You can read more about .NET Core tools telemetry at https://aka.ms/dotnet-cli-telemetry.
-Configuration:
-A command is running in the end of install process to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.
+
+.NET Core Tools Telemetry
+
+The .NET Core Tools include a telemetry feature that collects usage information. It is important that the .NET Team understands how the tools are being used so that we can improve them.
+
+The data collected is anonymous and will be published in an aggregated form for use by both Microsoft and community engineers under the Creative Commons Attribution License.
+
+The .NET Core Tools telemetry feature is enabled by default. You can opt-out of the telemetry feature by setting an environment variable DOTNET_CLI_TELEMETRY_OPTOUT (for example, 'export' on macOS/Linux, 'set' on Windows) to true (for example, 'true', 1). You can read more about .NET Core tools telemetry at https://aka.ms/dotnet-cli-telemetry.
   </String>
 </WixLocalization>
