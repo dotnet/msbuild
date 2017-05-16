@@ -24,9 +24,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <!-- Publish everything under wwwroot, all JSON files, all web.config files and all Razor files -->
+    <!-- Publish everything under wwwroot, all JSON files, all config files and all Razor files -->
     <Content Include="wwwroot/**" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-    <Content Include="**/web.config" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
+    <Content Include="**/*.config" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
     <Content Include="**/*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
     <Content Include="**/*.json" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
 
@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
     
     <!-- Remove Content items from other item types (in a way that CPS understands) -->
-    <None Remove="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" />
+    <None Remove="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" />
     <Compile Remove="wwwroot/**" />
     <EmbeddedResource Remove="wwwroot/**" />
     
