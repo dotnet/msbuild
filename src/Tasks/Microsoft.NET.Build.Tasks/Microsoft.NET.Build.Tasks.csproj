@@ -1,190 +1,40 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <ProjectGuid>{DF7D2697-B3B4-45C2-8297-27245F528A99}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <OutDir>$(RawOutDir)</OutDir>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
-    <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <PackageId>Microsoft.NET.Sdk</PackageId>
+    <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
+    <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <OutputPath>$(PackageLayoutOutputPath)tools\</OutputPath>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
-    <OutDir>$(OutDir)net46\</OutDir>
-    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
-  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <PackageReference>
+      <PrivateAssets>All</PrivateAssets>
+      <Publish>true</Publish>
+    </PackageReference>
+  </ItemDefinitionGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel">
-      <Version>$(NuGetVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel">
-      <Version>$(DependencyModelVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Framework">
-      <Version>$(MsBuildPackagesVersion)</Version>
-      <ExcludeAssets>Runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>$(MsBuildPackagesVersion)</Version>
-      <ExcludeAssets>Runtime</ExcludeAssets>
-    </PackageReference>
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(DependencyModelVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetVersion)" ExcludeAssets="All" />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
-
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-    <Reference Include="System" />
-  </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckForDuplicateItems.cs" />
-    <Compile Include="CheckForImplicitPackageReferenceOverrides.cs" />
-    <Compile Include="DiagnosticMessageSeverity.cs" />
-    <Compile Include="DiagnosticsHelper.cs" />
-    <Compile Include="NETSdkError.cs" />
-    <Compile Include="LockFileLookup.cs" />
-    <Compile Include="FrameworkReferenceResolver.cs" />
-    <Compile Include="BuildErrorException.cs" />
-    <Compile Include="CollectSDKReferencesDesignTime.cs" />
-    <Compile Include="ReferenceInfo.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="TaskBase.cs" />
-    <Compile Include="PackageReferenceConverter.cs" />
-    <Compile Include="NugetContentAssetPreprocessor.cs" />
-    <Compile Include="IContentAssetPreprocessor.cs" />
-    <Compile Include="ProduceContentAssets.cs" />
-    <Compile Include="GetNearestTargetFramework.cs" />
-    <Compile Include="ItemUtilities.cs" />
-    <Compile Include="CompilationOptionsConverter.cs" />
-    <Compile Include="NuGetUtils.cs" />
-    <Compile Include="GetAssemblyVersion.cs" />
-    <Compile Include="ResourceAssemblyInfo.cs" />
-    <Compile Include="SingleProjectInfo.cs" />
-    <Compile Include="ProjectContext.cs" />
-    <Compile Include="NuGetPackageResolver.cs" />
-    <Compile Include="IPackageResolver.cs" />
-    <Compile Include="ResolvedFile.cs" />
-    <Compile Include="PublishAssembliesResolver.cs" />
-    <Compile Include="LockFileExtensions.cs" />
-    <Compile Include="ResolvePublishAssemblies.cs" />
-    <Compile Include="DependencyType.cs" />
-    <Compile Include="PreprocessPackageDependenciesDesignTime.cs" />
-    <Compile Include="RuntimeConfig.cs" />
-    <Compile Include="RuntimeConfigFramework.cs" />
-    <Compile Include="RuntimeOptions.cs" />
-    <Compile Include="DependencyContextBuilder.cs" />
-    <Compile Include="GenerateDepsFile.cs" />
-    <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
-    <Compile Include="LockFileCache.cs" />
-    <Compile Include="FileGroup.cs" />
-    <Compile Include="MetadataKeys.cs" />
-    <Compile Include="ResolvePackageDependencies.cs" />
-    <Compile Include="RemoveDuplicatePackageReferences.cs" />
-    <Compile Include="StoreArtifactParser.cs" />
-    <Compile Include="EmbedAppNameInHost.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ConflictResolution\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
-    <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.DefaultAssemblyInfo.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.DefaultOutputPaths.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.RuntimeIdentifierInference.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.DisableStandardFrameworkResolution.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.PreserveCompilationContext.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.GenerateAssemblyInfo.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.DefaultItems.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.DefaultItems.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.VisualBasic.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.CSharp.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.FSharp.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.VisualBasic.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.BeforeCommon.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.Common.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.CSharp.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.FSharp.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Sdk.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.Publish.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.ComposeStore.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.CrossGen.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.SupportedTargetFrameworks.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.TargetFrameworkInference.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.PackageDependencyResolution.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="build\Microsoft.NET.ConflictResolution.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="sdk\Sdk.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="sdk\Sdk.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="**\*.cs" />
+    <None Include="build\**\*" PackagePath="build\" />
+    <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
+    <None Include="sdk\**\*" PackagePath="Sdk\" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -193,12 +43,44 @@
     <EmbeddedResource Include="Resources\Strings.*.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>true</DesignTime>
+      <AutoGen>true</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="build\GenerateDeps\GenerateDeps.proj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
+  <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <LayoutFile Include="@(None)">
+        <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
+      </LayoutFile>
+      <PackFile Include="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\**\*" 
+                Exclude="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\*"/>
+      <LayoutFile Include="@(PackFile)">
+        <TargetPath>..\NuGet.Build.Tasks.Pack\%(PackFile.RecursiveDir)%(PackFile.Filename)%(PackFile.Extension)</TargetPath>
+      </LayoutFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyAdditionalFilesToLayout"
+          Condition="'$(TargetFramework)' == ''"
+          DependsOnTargets="PrepareAdditionalFilesToLayout"
+          AfterTargets="Build"
+          Inputs="@(LayoutFile)"
+          Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)"
+          DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="PackLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
+    <ItemGroup>
+      <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
+    </ItemGroup>
+  </Target>
+
   <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
   <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
   <Target Name="FilterCopyLocal" DependsOnTargets="RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
