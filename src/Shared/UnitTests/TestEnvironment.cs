@@ -424,7 +424,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private static void CallResetForTests(IList<SdkResolver> resolvers)
         {
             // Get the Singleton and call InitializeForTests
-            var t = typeof(Evaluation.ProjectCollection).Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution");
+            var t = typeof(Evaluation.ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution");
             var method = t.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
             var instanceMethod = t.GetProperty("Instance", BindingFlags.Static | BindingFlags.NonPublic);
             var instance = instanceMethod.GetValue(null);

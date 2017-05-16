@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildEventContext">Build event context for logging.</param>
         /// <param name="sdkReferenceLocation">Location of the element within the project which referenced the SDK.</param>
         /// <param name="solutionPath">Path to the solution if known.</param>
-        /// <param name="projectPath">Path to the project being.</param>
+        /// <param name="projectPath">Path to the project being built.</param>
         /// <returns>Path to the root of the referenced SDK.</returns>
         internal string GetSdkPath(SdkReference sdk, ILoggingService logger, BuildEventContext buildEventContext,
             ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)

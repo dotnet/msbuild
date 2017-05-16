@@ -27,6 +27,10 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         ///     Version of MSBuild currently running.
+        /// <remarks>
+        ///     File version based on commit height from our public git repository. This is informational
+        ///     and not equal to the assembly version.
+        /// </remarks>
         /// </summary>
         public virtual Version MSBuildVersion { get; protected set; }
     }
