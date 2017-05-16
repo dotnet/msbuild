@@ -6,10 +6,11 @@ using System.Linq;
 using System.IO;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class GetValuesCommand : TestCommand
+    public sealed class GetValuesCommand : MSBuildCommand
     {
         public enum ValueType
         {
@@ -28,9 +29,9 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string Configuration { get; set; }
 
-        public GetValuesCommand(MSBuildTest msbuild, string projectPath, string targetFramework,
-            string valueName, ValueType valueType = ValueType.Property)
-            : base(msbuild, projectPath)
+        public GetValuesCommand(ITestOutputHelper log, string projectPath, string targetFramework,
+            string valueName, ValueType valueType = ValueType.Property, MSBuildTest msbuild = null)
+            : base(log, "WriteValuesToFile", projectPath, relativePathToProject: null, msbuild: msbuild)
         {
             _targetFramework = targetFramework;
 
@@ -38,7 +39,7 @@ namespace Microsoft.NET.TestFramework.Commands
             _valueType = valueType;
         }
 
-        public override CommandResult Execute(params string[] args)
+        protected override ICommand CreateCommand(params string[] args)
         {
             var newArgs = new List<string>(args.Length + 2);
             newArgs.Add(FullPathProjectFile);
@@ -76,10 +77,7 @@ namespace Microsoft.NET.TestFramework.Commands
             var outputDirectory = GetOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
-            var command = MSBuild.CreateCommandForTarget("WriteValuesToFile", newArgs.ToArray());
-
-            return command.Execute();
-
+            return MSBuild.CreateCommandForTarget("WriteValuesToFile", newArgs.ToArray());
         }
 
         public List<string> GetValues()

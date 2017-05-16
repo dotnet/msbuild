@@ -14,20 +14,25 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithDependencies : SdkTest
     {
+        public GivenThatWeWantToPublishAProjectWithDependencies(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
                 .Execute()
                 .Should()
@@ -77,9 +82,9 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, testAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand
                 .Execute()
                 .Should()
@@ -105,10 +110,10 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreApp11WithP2P")
                 .WithSource()
-                .Restore("App");
+                .Restore(Log, "App");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
+            PublishCommand publishCommand = new PublishCommand(Log, appProjectDirectory);
             publishCommand
                 .Execute()
                 .Should()
@@ -123,7 +128,7 @@ namespace Microsoft.NET.Publish.Tests
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
             string manifestFileName1 = "NewtonsoftFilterProfile.xml";
@@ -131,7 +136,7 @@ namespace Microsoft.NET.Publish.Tests
             string manifestFile1 = Path.Combine(filterProjDir, manifestFileName1);
             string manifestFile2 = Path.Combine(filterProjDir, manifestFileName2);
 
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
                 .Execute( $"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
                 .Should()
@@ -164,13 +169,13 @@ namespace Microsoft.NET.Publish.Tests
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
-                .Restore("", $"/p:RuntimeIdentifier={rid}");
+                .Restore(Log, "", $"/p:RuntimeIdentifier={rid}");
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
             string manifestFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
             
 
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
                 .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetManifestFiles={manifestFile}")
                 .Should()
@@ -207,9 +212,9 @@ namespace Microsoft.NET.Publish.Tests
             var kitchenSinkAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
-            kitchenSinkAsset.Restore("TestApp");
+            kitchenSinkAsset.Restore(Log, "TestApp");
             
-            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
             var publishResult = publishCommand.Execute("/p:" + properties);
 
             publishResult.Should().Pass();
@@ -257,9 +262,9 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             var libAsset = _testAssetsManager.CreateTestProject(libProject, identifier: identifier)
-                .Restore("NetStdLib");
+                .Restore(Log, "NetStdLib");
 
-            var libPublishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(libAsset.TestRoot, "NetStdLib"));
+            var libPublishCommand = new PublishCommand(Log, Path.Combine(libAsset.TestRoot, "NetStdLib"));
             var libPublishResult = libPublishCommand.Execute("/t:Publish", "/p:GenerateDocumentationFile=true");
             libPublishResult.Should().Pass();
             var publishedLibPath = Path.Combine(libPublishCommand.GetOutputDirectory("netstandard1.0").FullName, "NetStdLib.dll");
@@ -276,8 +281,8 @@ namespace Microsoft.NET.Publish.Tests
             var appAsset = _testAssetsManager.CreateTestProject(appProject, identifier: identifier);
             var appSourcePath  = Path.Combine(appAsset.TestRoot, "TestApp");
 
-            new RestoreCommand(Stage0MSBuild, appSourcePath).Execute().Should().Pass();
-            var appPublishCommand = new PublishCommand(Stage0MSBuild, appSourcePath);
+            new RestoreCommand(Log, appSourcePath).Execute().Should().Pass();
+            var appPublishCommand = new PublishCommand(Log, appSourcePath);
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 

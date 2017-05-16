@@ -17,11 +17,16 @@ using FluentAssertions;
 using Xunit;
 
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildADesktopExe : SdkTest
     {
+        public GivenThatWeWantToBuildADesktopExe(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
 
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.
@@ -81,9 +86,9 @@ namespace Microsoft.NET.Build.Tests
                            propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
                        }
                    })
-                  .Restore();
+                  .Restore(Log);
 
-                var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
                 buildCommand
                     .Execute()
                     .Should()
@@ -140,15 +145,15 @@ namespace Microsoft.NET.Build.Tests
                             propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
                         }
                     })
-                    .Restore();
+                    .Restore(Log);
 
-                var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
                 buildCommand
                     .Execute()
                     .Should()
                     .Pass();
 
-                var publishCommand = new PublishCommand(Stage0MSBuild, testAsset.TestRoot);
+                var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
                 publishCommand
                     .Execute(multiTarget ? new[] { "/p:TargetFramework=net46" } : Array.Empty<string>())
                     .Should()
@@ -217,9 +222,9 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + runtimeIdentifier)
                 .WithSource()
-                .Restore("", $"/p:RuntimeIdentifier={runtimeIdentifier}");
+                .Restore(Log, "", $"/p:RuntimeIdentifier={runtimeIdentifier}");
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+            var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
 
             getValuesCommand
@@ -244,9 +249,9 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid")
                 .WithSource()
-                .Restore("", $"/p:RuntimeIdentifier=win7-x86");
+                .Restore(Log, "", $"/p:RuntimeIdentifier=win7-x86");
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+            var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
 
             getValuesCommand
@@ -294,12 +299,11 @@ namespace DefaultReferences
             testProject.SourceFiles.Add("TestClass.cs", sourceFile);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore("DefaultReferences");
+                .Restore(Log, "DefaultReferences");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
 
             buildCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()
@@ -334,12 +338,11 @@ namespace DefaultReferences
 
                     itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
                 })
-                .Restore(testProject.Name);
+                .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .CaptureStdOut()
                 .Execute("/v:diag")
                 .Should()
                 .Pass()
@@ -358,9 +361,9 @@ namespace DefaultReferences
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
 
             buildCommand
                 .Execute()

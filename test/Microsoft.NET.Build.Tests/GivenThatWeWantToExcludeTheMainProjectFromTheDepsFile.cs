@@ -14,11 +14,16 @@ using System.Xml.Linq;
 using Xunit;
 
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToExcludeTheMainProjectFromTheDepsFile : SdkTest
     {
+        public GivenThatWeWantToExcludeTheMainProjectFromTheDepsFile(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_successfully()
         {
@@ -63,9 +68,9 @@ namespace Microsoft.NET.Build.Tests
                         propertyGroup.Add(new XElement(ns + "IncludeMainProjectInDepsFile", "false"));
                     }
                 })
-                .Restore(testProject.Name);
+                .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testProjectInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
             buildCommand.Execute()
                 .Should()

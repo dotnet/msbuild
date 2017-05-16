@@ -11,11 +11,16 @@ using Xunit;
 using FluentAssertions;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToVerifyProjectReferenceCompat : SdkTest
     {
+        public GivenThatWeWantToVerifyProjectReferenceCompat(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("net45", "FullMatrix", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
@@ -78,23 +83,19 @@ namespace Microsoft.NET.Build.Tests
             }
 
             var testAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(Project_reference_compat), identifier);
-            var restoreCommand = testAsset.GetRestoreCommand(relativePath: referencerProject.Name);
+            var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: referencerProject.Name);
             if (restoreSucceeds)
             {
                 restoreCommand.Execute().Should().Pass();
             }
             else
             {
-                restoreCommand.CaptureStdOut().Execute().Should().Fail();
+                restoreCommand.Execute().Should().Fail();
             }
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, referencerProject.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-            if (!buildSucceeds)
-            {
-                buildCommand = buildCommand.CaptureStdOut();
-            }
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
             var result = buildCommand.Execute();
 

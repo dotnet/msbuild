@@ -9,23 +9,28 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatWeWantToPackACrossTargetedLibrary : SdkTest
     {
+        public GivenThatWeWantToPackACrossTargetedLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource()
-                .Restore("NetStandardAndNetCoreApp");
+                .Restore(Log, "NetStandardAndNetCoreApp");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
 
-            new PackCommand(Stage0MSBuild, libraryProjectDirectory)
+            new PackCommand(Log, libraryProjectDirectory)
                 .Execute()
                 .Should()
                 .Pass();

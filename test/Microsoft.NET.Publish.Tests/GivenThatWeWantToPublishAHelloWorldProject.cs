@@ -15,20 +15,25 @@ using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System;
 using Microsoft.Extensions.DependencyModel;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAHelloWorldProject : SdkTest
     {
+        public GivenThatWeWantToPublishAHelloWorldProject(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run()
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -60,9 +65,9 @@ namespace Microsoft.NET.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "SelfContained")
                 .WithSource()
-                .Restore(relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
+                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
 
             publishResult.Should().Pass();
@@ -135,8 +140,8 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            testProjectInstance.Restore(testProject.Name);
-            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            testProjectInstance.Restore(Log, testProject.Name);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -255,9 +260,9 @@ public static class Program
                             "false"));
                     }
                 })
-                .Restore(testProject.Name);
+                .Restore(Log, testProject.Name);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -343,9 +348,9 @@ public static class Program
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("DeployProjectReferencingSdkProject")
                 .WithSource()
-                .Restore(relativePath: "HelloWorld", args: $"/p:RuntimeIdentifiers={rid}");
+                .Restore(Log, relativePath: "HelloWorld", args: $"/p:RuntimeIdentifiers={rid}");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, helloWorldAsset.TestRoot, Path.Combine("DeployProj", "Deploy.proj"));
+            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot, Path.Combine("DeployProj", "Deploy.proj"));
 
             buildCommand
                 .Execute()

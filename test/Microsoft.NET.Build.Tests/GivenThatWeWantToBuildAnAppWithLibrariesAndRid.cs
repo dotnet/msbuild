@@ -10,11 +10,16 @@ using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithLibrariesAndRid : SdkTest
     {
+        public GivenThatWeWantToBuildAnAppWithLibrariesAndRid(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_a_RID_specific_runnable_output()
         {
@@ -33,13 +38,13 @@ namespace Microsoft.NET.Build.Tests
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectPath);
+            var buildCommand = new BuildCommand(Log, projectPath);
 
             buildCommand
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}")
@@ -54,11 +59,12 @@ namespace Microsoft.NET.Build.Tests
             Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .EnsureExecutable()
                 .CaptureStdOut()
+                .CaptureStdErr()
                 .Execute()
                 .Should()
                 .Pass()
-                .And
-                .HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World");
+                .And.HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World")
+                .And.NotHaveStdErr();
         }
 
         [Fact]
@@ -79,13 +85,13 @@ namespace Microsoft.NET.Build.Tests
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectPath);
+            var buildCommand = new BuildCommand(Log, projectPath);
 
             buildCommand
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}", "/p:SelfContained=false")

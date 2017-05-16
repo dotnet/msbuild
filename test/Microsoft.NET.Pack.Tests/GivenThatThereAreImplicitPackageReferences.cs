@@ -14,11 +14,16 @@ using System.Xml.Linq;
 using System.Linq;
 using FluentAssertions;
 using System.Runtime.InteropServices;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatThereAreImplicitPackageReferences : SdkTest
     {
+        public GivenThatThereAreImplicitPackageReferences(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void Packing_a_netstandard_1_x_library_includes_the_implicit_dependency()
         {
@@ -192,9 +197,9 @@ namespace Microsoft.NET.Pack.Tests
         List<XElement> PackAndGetDependencyGroups(TestProject testProject, out XNamespace ns)
         {
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(testProject.Name);
+                .Restore(Log, testProject.Name);
 
-            var packCommand = new PackCommand(Stage0MSBuild, testProjectInstance.TestRoot, testProject.Name);
+            var packCommand = new PackCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
             packCommand.Execute()
                 .Should()

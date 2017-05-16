@@ -11,11 +11,16 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildADesktopLibrary : SdkTest
     {
+        public GivenThatWeWantToBuildADesktopLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_can_use_HttpClient_and_exchange_the_type_with_a_NETStandard_library()
         {
@@ -75,9 +80,9 @@ public class NETFramework
                         itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System.Net.Http")));
                     }
                 })
-                .Restore(netFrameworkLibrary.Name);
+                .Restore(Log, netFrameworkLibrary.Name);
 
-            var buildCommand = new BuildCommand(MSBuildTest.Stage0MSBuild, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
 
             buildCommand
                 .Execute()
@@ -97,9 +102,9 @@ public class NETFramework
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var buildCommand = new BuildCommand(MSBuildTest.Stage0MSBuild, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute()
                 .Should().Pass();
@@ -153,14 +158,13 @@ public static class {project.Name}
                     }
 
                 })
-                .Restore(project.Name);
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(MSBuildTest.Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()

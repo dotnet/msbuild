@@ -5,28 +5,20 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 using System.IO;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class ComposeStore : TestCommand
+    public sealed class ComposeStoreCommand : MSBuildCommand
     {
         private const string PublishSubfolderName = "packages";
 
-        public ComposeStore(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
-            : base(msbuild, projectPath, relativePathToProject)
+        public ComposeStoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
+            : base(log, "ComposeStore", projectPath, relativePathToProject, msbuild)
         {
         }
 
-        public override CommandResult Execute(params string[] args)
-        {
-            var newArgs = args.ToList();
-
-            newArgs.Insert(0, FullPathProjectFile);
-
-            var command = MSBuild.CreateCommandForTarget("ComposeStore", newArgs.ToArray());
-
-            return command.Execute();
-        }
+       
 
         public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
         {
