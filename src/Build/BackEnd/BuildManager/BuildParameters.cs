@@ -440,7 +440,11 @@ namespace Microsoft.Build.Execution
         public bool EnableNodeReuse
         {
             get { return _enableNodeReuse; }
-            set { _enableNodeReuse = value; }
+            set {
+#if FEATURE_NODE_REUSE
+                _enableNodeReuse = value;
+#endif
+                }
         }
 
         /// <summary>
@@ -920,7 +924,7 @@ namespace Microsoft.Build.Execution
             // LegacyThreadingSemantics is not transmitted.
         }
 
-        #region INodePacketTranslatable Members
+#region INodePacketTranslatable Members
 
         /// <summary>
         /// The class factory for deserialization.
@@ -930,7 +934,7 @@ namespace Microsoft.Build.Execution
             return new BuildParameters(translator);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Gets the value of a boolean environment setting which is not expected to change.

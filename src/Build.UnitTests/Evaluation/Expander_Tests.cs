@@ -2363,6 +2363,35 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Expand property function that is defined (on CoreFX) in an assembly named after its full namespace.
+        /// </summary>
+        [Fact]
+        public void PropertyStaticFunctioLocatedFromAssemblyWithNamespaceName()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            string env = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS");
+
+            try
+            {
+                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+                string result = expander.ExpandIntoStringLeaveEscaped("$([System.Diagnostics.Process]::GetCurrentProcess().Id)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                int pid;
+                Assert.True(int.TryParse(result, out pid));
+                Assert.Equal(System.Diagnostics.Process.GetCurrentProcess().Id, pid);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", env);
+                AvailableStaticMethods.Reset_ForUnitTestsOnly();
+            }
+        }
+
+        /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1, but cannot be found
         /// </summary>
         [Fact]
