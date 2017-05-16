@@ -10,9 +10,7 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 
 
-type Startup private () =
-
-    new (configuration: IConfiguration) as this =
+type Startup (configuration: IConfiguration) =
         Startup() then
         this.Configuration <- configuration
 

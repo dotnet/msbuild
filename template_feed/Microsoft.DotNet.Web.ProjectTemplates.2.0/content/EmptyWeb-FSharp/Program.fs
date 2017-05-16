@@ -13,14 +13,14 @@ open Microsoft.Extensions.Logging
 module Program =
     let exitCode = 0
 
-    [<EntryPoint>]
-    let main args =
-        BuildWebHost(args).Run()
-
-        exitCode
-
     let BuildWebHost args =
         WebHost
             .CreateDefaultBuilder(args)
             .UseStartup<Startup>()
             .Build()
+
+    [<EntryPoint>]
+    let main args =
+        BuildWebHost(args).Run()
+
+        exitCode
