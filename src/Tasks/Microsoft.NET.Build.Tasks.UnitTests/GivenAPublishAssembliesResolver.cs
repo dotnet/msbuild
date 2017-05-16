@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     public class GivenAPublishAssembliesResolver
     {
         [Theory]
-        [MemberData("ProjectData")]
+        [MemberData(nameof(ProjectData))]
         public void ItResolvesAssembliesFromProjectLockFiles(string projectName, string runtime, object[] expectedResolvedFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Theory]
-        [MemberData("ProjectData1")]
+        [MemberData(nameof(ProjectData1))]
         public void ItResolvesAssembliesFromProjectLockFilesWithStoreLayout(string projectName, string runtime, object[] expectedResolvedFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);

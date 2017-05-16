@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tests
             TestSatelliteResources(_testAssetsManager);
         }
 
-        public static void TestSatelliteResources(TestAssetsManager testAssetsManager, Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
+        internal static void TestSatelliteResources(TestAssetsManager testAssetsManager, Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
         {
             var testAsset = testAssetsManager
                 .CopyTestAsset("AllResourcesInSatellite", callingMethod)

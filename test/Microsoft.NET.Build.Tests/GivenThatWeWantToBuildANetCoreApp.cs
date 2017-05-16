@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Tests
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts", true, true);
         }
 
-        public void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
+        private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
         {
             if (UsingFullFrameworkMSBuild)
             {
