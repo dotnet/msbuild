@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ";
 
         /// <summary>
-        /// Since when the project file is saved it may be intended we want to make sure the indent characters do not affect the evaluation against empty.
+        /// Since when the project file is saved it may be indented we want to make sure the indent characters do not affect the evaluation against empty.
         /// We test here newline, tab, and carriage return.
         /// </summary>
         [Fact]
