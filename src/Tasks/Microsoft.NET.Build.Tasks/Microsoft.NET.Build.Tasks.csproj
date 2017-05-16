@@ -15,12 +15,14 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+
   <ItemDefinitionGroup>
     <PackageReference>
       <PrivateAssets>All</PrivateAssets>
       <Publish>true</Publish>
     </PackageReference>
   </ItemDefinitionGroup>
+
   <ItemGroup>
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(DependencyModelVersion)" />
@@ -30,6 +32,7 @@
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" />
     <None Include="build\**\*" PackagePath="build\" />
@@ -75,9 +78,11 @@
     </Copy>
   </Target>
 
-  <Target Name="PackLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
+  <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
     <ItemGroup>
-      <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
+      <Content Include="$(PackageLayoutOutputPath)**\*" 
+               Exclude="$(PackageLayoutOutputPath)**\*.pdb" 
+               PackagePath="\" />
     </ItemGroup>
   </Target>
 
@@ -89,5 +94,7 @@
       <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
     </ItemGroup>
   </Target>
+
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
+
 </Project>
