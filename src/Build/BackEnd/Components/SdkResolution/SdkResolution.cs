@@ -102,14 +102,13 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        internal void InitializeForTests(IList<SdkResolver> resolvers, ILoggingService logger, BuildEventContext buildEventContext, ElementLocation location)
+        /// <summary>
+        /// Used for unit tests only.
+        /// </summary>
+        /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
+        internal void InitializeForTests(IList<SdkResolver> resolvers)
         {
             _resolvers = resolvers;
-        }
-
-        internal void ResetInitializeForTests()
-        {
-            _resolvers = null;
         }
 
         private void Initialize(ILoggingService logger, BuildEventContext buildEventContext, ElementLocation location)
