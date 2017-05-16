@@ -10,6 +10,6 @@ namespace Company.WebApplication1.Identity.Data
     public class IdentityServiceDbContextFactory : IDbContextFactory<IdentityServiceDbContext>
     {
         public IdentityServiceDbContext Create(string[] args) =>
-            Program.BuildWebHost(args).Services.GetRequiredService<IdentityServiceDbContext>();
+            Program.BuildWebHost(args).Services.CreateScope().ServiceProvider.GetRequiredService<IdentityServiceDbContext>();
     }
 }

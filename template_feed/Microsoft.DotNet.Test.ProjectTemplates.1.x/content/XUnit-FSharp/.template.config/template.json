@@ -1,8 +1,10 @@
 {
+  "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
   "classifications": ["Test", "xUnit"],
   "name": "xUnit Test Project",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project that contains xUnit.net tests that can run on .NET Core on Windows, Linux and macOS",
   "groupIdentity": "Microsoft.Test.xUnit",
   "precedence": "100",
   "identity": "Microsoft.Test.xUnit.FSharp",

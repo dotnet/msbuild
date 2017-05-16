@@ -1,8 +1,10 @@
 {
+  "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
   "classifications": ["Common", "Library"],
   "name": "Class library",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
   "groupIdentity": "Microsoft.Common.Library",
   "precedence": "2000",
   "identity": "Microsoft.Common.Library.CSharp.2.0",

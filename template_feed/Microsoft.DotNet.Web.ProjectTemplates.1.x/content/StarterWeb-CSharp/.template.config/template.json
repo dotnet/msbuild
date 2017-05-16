@@ -1,8 +1,10 @@
 {
+  "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
   "classifications": ["Web", "MVC"],
   "name": "ASP.NET Core Web App",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project template for creating an ASP.NET Core application with example ASP.NET MVC Views and Controllers. This template can also be used for RESTful HTTP services.",
   "groupIdentity": "Microsoft.Web.Mvc",
   "precedence": "100",
   "identity": "Microsoft.Web.Mvc.CSharp",
@@ -235,6 +237,12 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to use LocalDB instead of SQLite"
+    },
+    "UseBrowserLink": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to include BrowserLink in the project"
     },
     "IncludeApplicationInsights": {
       "type": "parameter",

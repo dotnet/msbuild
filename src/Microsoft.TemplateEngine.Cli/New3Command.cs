@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1620,21 +1620,21 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (ITemplateInfo templateInfo in templateGroup)
             {
                 IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
+                HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
 
                 if (firstInList)
                 {
                     invalidParametersForGroup = invalidParamsForTemplate.ToDictionary(x => x.Canonical, x => x);
+                    groupParametersToExplicitlyHide = new HashSet<string>(parametersToExplicitlyHide);
                     firstInList = false;
                 }
                 else
                 {
                     invalidParametersForGroup = InvalidParameterInfo.IntersectWithExisting(invalidParametersForGroup, invalidParamsForTemplate);
+                    groupParametersToExplicitlyHide.IntersectWith(parametersToExplicitlyHide);  // all the templates in a group must hide a param for it to be hidden in group help.
                 }
 
-                HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
-
                 groupUserParamsWithInvalidValues.IntersectWith(userParamsWithInvalidValues);    // intersect because if the value is valid for any version, it's valid.
-                groupParametersToExplicitlyHide.UnionWith(parametersToExplicitlyHide);
                 groupHasPostActionScriptRunner |= hasPostActionScriptRunner;
                 parameterSetsForAllTemplatesInGroup.Add(allParamsForTemplate);
 

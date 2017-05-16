@@ -104,7 +104,9 @@ namespace Company.WebApplication1
 #if (IndividualAuth)
                 app.UseDatabaseErrorPage();
 #endif
+#if (UseBrowserLink)
                 app.UseBrowserLink();
+#endif
             }
             else
             {

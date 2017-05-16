@@ -1,8 +1,10 @@
 {
+  "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
   "classifications": ["Web", "Empty"],
   "name": "ASP.NET Core Empty",
   "generatorVersions": "[1.0.0.0-*)",
+  "description": "An empty project template for creating an ASP.NET Core application. This template does not have any content in it.",
   "groupIdentity": "Microsoft.Web.Empty",
   "precedence": "100",
   "identity": "Microsoft.Web.Empty.CSharp",

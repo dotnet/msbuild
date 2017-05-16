@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
@@ -18,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string referenceToAdd))
             {
                 environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
-                return true;
+                return false;
             }
 
             if (!actionConfig.Args.TryGetValue("referenceType", out string referenceType))
@@ -29,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             if (string.IsNullOrEmpty(outputBasePath))
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
             }
 
             HashSet<string> extensionLimiters = new HashSet<string>(StringComparer.Ordinal);
@@ -104,13 +105,13 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             else if (nearestProjectFilesFound.Count == 0)
             {
                 // no projects found. Error.
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
                 return false;
             }
             else
             {
                 // multiple projects at the same level. Error.
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddRefPostActionUnresolvedProjFile, referenceToAdd));
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
                 environment.Host.LogMessage(LocalizableStrings.AddRefPostActionProjFileListHeader);
                 foreach (string projectFile in nearestProjectFilesFound)
                 {
@@ -123,53 +124,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         internal IReadOnlyList<string> FindProjFileAtOrAbovePath(IPhysicalFileSystem fileSystem, string startPath, HashSet<string> extensionLimiters)
         {
-            string directory;
-            if (fileSystem.DirectoryExists(startPath))
+            if (extensionLimiters.Count == 0)
             {
-                directory = startPath;
+                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj");
             }
             else
             {
-                directory = Path.GetDirectoryName(startPath);
+                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj", (filename) => extensionLimiters.Contains(Path.GetExtension(filename)));
             }
-
-            do
-            {
-                List<string> filesInDir = fileSystem.EnumerateFileSystemEntries(directory, "*.*proj", SearchOption.TopDirectoryOnly).ToList();
-                List<string> matches = new List<string>();
-
-                if (extensionLimiters.Count == 0)
-                {
-                    matches = filesInDir;
-                }
-                else
-                {
-                    foreach (string filename in filesInDir)
-                    {
-                        string extension = Path.GetExtension(filename);
-                        if (extensionLimiters.Contains(extension))
-                        {
-                            matches.Add(filename);
-                        }
-                    }
-                }
-
-                if (matches.Count > 0)
-                {
-                    return matches;
-                }
-
-                if (Path.GetPathRoot(directory) != directory)
-                {
-                    directory = Directory.GetParent(directory).FullName;
-                }
-                else
-                {
-                    directory = null;
-                }
-            } while (directory != null);
-
-            return new List<string>();
         }
     }
 }

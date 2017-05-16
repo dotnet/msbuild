@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json.schemastore.org/dotnetcli.host",
   "isHidden": true,
   "symbolInfo": {
     "TargetFrameworkOverride": {
@@ -14,7 +15,7 @@
       "shortName": ""
     }
   },
-  "UsageExamples": [
+  "usageExamples": [
     "--framework netcoreapp2.0"
   ]
 }
