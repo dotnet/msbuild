@@ -224,7 +224,7 @@ class Program
                 dotnetArgs.Add(packageFolder);
             }
 
-            dotnetArgs.Add(toolAssemblyPath);
+            dotnetArgs.Add(Path.GetFullPath(toolAssemblyPath));
 
             ICommand toolCommand = Command.Create(RepoInfo.DotNetHostPath, dotnetArgs)
                 .CaptureStdOut();
