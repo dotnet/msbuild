@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
@@ -179,6 +182,11 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             return WithTransientTestState(
                 new TransientTestProjectWithFiles(projectContents, files, relativePathFromRootToProject));
+        }
+
+        public TransientSdkResolution CustomSdkResolution(Dictionary<string, string> sdkToFolderMapping)
+        {
+            return WithTransientTestState(new TransientSdkResolution(sdkToFolderMapping));
         }
 
         #endregion
@@ -387,6 +395,63 @@ namespace Microsoft.Build.Engine.UnitTests
         public override void Revert()
         {
             _folder.Revert();
+        }
+    }
+
+    /// <summary>
+    /// Represents custom SDK resolution in the context of this test.
+    /// </summary>
+    public class TransientSdkResolution : TransientTestState
+    {
+        private readonly Dictionary<string, string> _mapping;
+
+        public TransientSdkResolution(Dictionary<string, string> mapping)
+        {
+            _mapping = mapping;
+            CallResetForTests(new List<SdkResolver> { new TestSdkResolver(_mapping) });
+        }
+
+        public override void Revert()
+        {
+            CallResetForTests(null);
+        }
+
+        /// <summary>
+        /// SdkResolution is internal (by design) and not all UnitTest projects are allowed to have
+        /// InternalsVisibleTo.
+        /// </summary>
+        /// <param name="resolvers"></param>
+        private static void CallResetForTests(IList<SdkResolver> resolvers)
+        {
+            // Get the Singleton and call InitializeForTests
+            var t = typeof(Evaluation.ProjectCollection).GetTypeInfo().Assembly.GetType("Microsoft.Build.BackEnd.SdkResolution");
+            var method = t.GetMethod("InitializeForTests", BindingFlags.NonPublic | BindingFlags.Instance);
+            var instanceMethod = t.GetProperty("Instance", BindingFlags.Static | BindingFlags.NonPublic);
+            var instance = instanceMethod.GetValue(null);
+            method.Invoke(instance, new[] { resolvers });
+        }
+
+        private class TestSdkResolver : SdkResolver
+        {
+            private readonly Dictionary<string, string> _mapping;
+
+            public TestSdkResolver(Dictionary<string, string> mapping)
+            {
+                _mapping = mapping;
+            }
+            public override string Name => "TestSdkResolver";
+            public override int Priority => int.MinValue;
+
+            public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
+            {
+                resolverContext.Logger.LogMessage($"{nameof(resolverContext.ProjectFilePath)} = {resolverContext.ProjectFilePath}", MessageImportance.High);
+                resolverContext.Logger.LogMessage($"{nameof(resolverContext.SolutionFilePath)} = {resolverContext.SolutionFilePath}", MessageImportance.High);
+                resolverContext.Logger.LogMessage($"{nameof(resolverContext.MSBuildVersion)} = {resolverContext.MSBuildVersion}", MessageImportance.High);
+
+                return _mapping.ContainsKey(sdkReference.Name)
+                    ? factory.IndicateSuccess(_mapping[sdkReference.Name], null)
+                    : factory.IndicateFailure(new[] {$"Not in {nameof(_mapping)}"});
+            }
         }
     }
 }

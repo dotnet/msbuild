@@ -2370,12 +2370,18 @@ namespace Microsoft.Build.Evaluation
 
             if (importElement.ParsedSdkReference != null)
             {
-                // Try to get the solution path when available.
+                // Try to get the path to the solution and project being built. The solution path is not directly known
+                // in MSBuild. It is passed in as a property either by the VS project system or by MSBuild's solution
+                // metaproject. Microsoft.Common.CurrentVersion.targets sets the value to *Undefined* when not set, and
+                // for backward compatibility, we shouldn't change that. But resolvers should be exposed to a string
+                // that's null or a full path, so correct that here.
                 var solutionPath = _data.GetProperty(SolutionProjectGenerator.SolutionPathPropertyName)?.EvaluatedValue;
+                if (solutionPath == "*Undefined*") solutionPath = null;
+                var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
                 var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _loggingService,
-                    _buildEventContext, importElement.Location, solutionPath);
+                    _buildEventContext, importElement.Location, solutionPath, projectPath);
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {

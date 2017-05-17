@@ -296,6 +296,43 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
+        [Theory]
+        [InlineData(ProjectTemplateSdkAsAttribute)]
+        [InlineData(ProjectTemplateSdkAsElement)]
+        [InlineData(ProjectTemplateSdkAsExplicitImport)]
+        public void ProjectResolverContextRefersToBuildingProject(string projectFormatString)
+        {
+            string projectInnerContents = @"<PropertyGroup><UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation></PropertyGroup>";
+            File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
+            File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
+
+            // Use custom SDK resolution to ensure resolver context is logged.
+            var mapping = new Dictionary<string, string> { { SdkName, _testSdkDirectory } };
+            _env.CustomSdkResolution(mapping);
+
+            // Create a normal project (p1) which imports an SDK style project (p2).
+            var projectFolder = _env.CreateFolder().FolderPath;
+
+            var p1 = @"<Project> <Import Project=""p2.proj"" /> </Project>";
+            var p2 = string.Format(projectFormatString, SdkName, projectInnerContents);
+
+            var p1Path = Path.Combine(projectFolder, "p1.proj");
+            var p2Path = Path.Combine(projectFolder, "p2.proj");
+
+            File.WriteAllText(p1Path, p1);
+            File.WriteAllText(p2Path, p2);
+
+            var logger = new MockLogger();
+            var pc = new ProjectCollection();
+            pc.RegisterLogger(logger);
+            ProjectRootElement projectRootElement = ProjectRootElement.Open(p1Path, pc);
+            var project = new Project(projectRootElement, null, null, pc);
+
+            // ProjectFilePath should be logged with the path to p1 and not the path to p2.
+            logger.AssertLogContains($"ProjectFilePath = {p1Path}");
+            logger.AssertLogDoesntContain($"ProjectFilePath = {p2Path}");
+        }
+
         /// <summary>
         /// Verifies that an empty SDK attribute works and nothing is imported.
         /// </summary>
