@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
         public ConfigurationMetadata(BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrowArgumentNull(configuration, "configuration");
-            GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.Properties);
+            GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.GlobalProperties);
             ProjectFullPath = FileUtilities.NormalizePath(configuration.ProjectFullPath);
             ToolsVersion = configuration.ToolsVersion;
         }

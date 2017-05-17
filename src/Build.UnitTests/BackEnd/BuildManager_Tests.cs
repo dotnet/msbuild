@@ -3347,6 +3347,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var mainProject = new Project(mainRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection);
                     var mainInstance = mainProject.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(isImmutable: false);
 
+                    Assert.Equal(0, mainInstance.GlobalProperties.Count);
+
                     var request = new BuildRequestData(mainInstance, new[] {"BuildOther"});
 
                     var parameters = new BuildParameters
@@ -3378,6 +3380,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         request = new BuildRequestData(p2pInstance, new[] {"Foo"});
                         submission = manager.PendBuildRequest(request);
                         results = submission.Execute();
+
+                        Assert.Equal(0, p2pInstance.GlobalProperties.Count);
 
                         Assert.Equal(BuildResultCode.Success, results.OverallResult);
                         Assert.Equal(newPropertyValue, results.ResultsByTarget["Foo"].Items.First().ItemSpec);

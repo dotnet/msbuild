@@ -13,6 +13,13 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Shared;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+    
+
 namespace Microsoft.Build
 {
     /// <summary>
@@ -752,7 +759,7 @@ namespace Microsoft.Build
             /// Try to intern the string.
             /// Return true if an interned value could be returned.
             /// Return false if it was added to the intern list, but wasn't there already.
-            /// Return null if it didn't meet the length criteria for any of the buckets.
+            /// Return null if it didn't meet the length criteria for any of the buckets. Interning was rejected
             /// </summary>
             private bool? TryIntern(IInternable candidate, out string interned)
             {
@@ -885,6 +892,36 @@ namespace Microsoft.Build
                             interned = "Release";
                             return true;
                         }
+                    }
+                    // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
+                    else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
+                             candidate[0] == 'M' &&
+                             candidate[1] == 'S' &&
+                             candidate[2] == 'B' &&
+                             candidate[3] == 'u' &&
+                             candidate[4] == 'i' &&
+                             candidate[5] == 'l' &&
+                             candidate[6] == 'd' &&
+                             candidate[7] == 'P' &&
+                             candidate[8] == 'r' &&
+                             candidate[9] == 'o' &&
+                             candidate[10] == 'j' &&
+                             candidate[11] == 'e' &&
+                             candidate[12] == 'c' &&
+                             candidate[13] == 't' &&
+                             candidate[14] == 'I' &&
+                             candidate[15] == 'n' &&
+                             candidate[16] == 's' &&
+                             candidate[17] == 't' &&
+                             candidate[18] == 'a' &&
+                             candidate[19] == 'n' &&
+                             candidate[20] == 'c' &&
+                             candidate[21] == 'e'
+                    )
+                    {
+                        // don't want to leak unique strings into the cache
+                        interned = candidate.ExpensiveConvertToString();
+                        return null;
                     }
                     else if (length == 24)
                     {

@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> props = new Dictionary<string, string>();
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", props, "toolsVersion", new string[0], null), "2.0");
 
-            Assert.Equal(props.Count, Helpers.MakeList((IEnumerable<ProjectPropertyInstance>)(config1.Properties)).Count);
+            Assert.Equal(props.Count, Helpers.MakeList((IEnumerable<ProjectPropertyInstance>)(config1.GlobalProperties)).Count);
         }
 
         [Fact]
