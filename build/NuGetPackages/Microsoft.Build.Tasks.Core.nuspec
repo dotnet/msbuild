@@ -72,7 +72,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="$configuration$\Output\$id$.dll" target="lib\net46\$id$.dll" />
-    <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.3\$id$.dll" />
+    <file src="$outputPath$$id$.dll" target="lib\net46\$id$.dll" />
+    <file src="$outputPathNetCore$$id$.dll" target="lib\netstandard1.3\$id$.dll" />
   </files>
 </package>

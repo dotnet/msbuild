@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the runtime of MSBuild.  Reference this package only if your application needs to load projects or execute in-process builds.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
+
+    <contentFiles>
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+    </contentFiles>
+  </metadata>
+  <files>
+
+    <!-- MSBuild.dll -->
+    <file src="$outputPath$cs\MSBuild.resources.dll" target="contentFiles\any\any\cs\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$de\MSBuild.resources.dll" target="contentFiles\any\any\de\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$en\MSBuild.resources.dll" target="contentFiles\any\any\en\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$es\MSBuild.resources.dll" target="contentFiles\any\any\es\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$fr\MSBuild.resources.dll" target="contentFiles\any\any\fr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$it\MSBuild.resources.dll" target="contentFiles\any\any\it\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ja\MSBuild.resources.dll" target="contentFiles\any\any\ja\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ko\MSBuild.resources.dll" target="contentFiles\any\any\ko\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pl\MSBuild.resources.dll" target="contentFiles\any\any\pl\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pt-BR\MSBuild.resources.dll" target="contentFiles\any\any\pt-BR\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ru\MSBuild.resources.dll" target="contentFiles\any\any\ru\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$tr\MSBuild.resources.dll" target="contentFiles\any\any\tr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hans\MSBuild.resources.dll" target="contentFiles\any\any\zh-Hans\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hant\MSBuild.resources.dll" target="contentFiles\any\any\zh-Hant\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+
+    <!-- Microsoft.Build.dll-->
+    <file src="$outputPath$cs\Microsoft.Build.resources.dll" target="contentFiles\any\any\cs\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$de\Microsoft.Build.resources.dll" target="contentFiles\any\any\de\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$en\Microsoft.Build.resources.dll" target="contentFiles\any\any\en\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$es\Microsoft.Build.resources.dll" target="contentFiles\any\any\es\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$fr\Microsoft.Build.resources.dll" target="contentFiles\any\any\fr\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$it\Microsoft.Build.resources.dll" target="contentFiles\any\any\it\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$ja\Microsoft.Build.resources.dll" target="contentFiles\any\any\ja\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$ko\Microsoft.Build.resources.dll" target="contentFiles\any\any\ko\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$pl\Microsoft.Build.resources.dll" target="contentFiles\any\any\pl\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$pt-BR\Microsoft.Build.resources.dll" target="contentFiles\any\any\pt-BR\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$ru\Microsoft.Build.resources.dll" target="contentFiles\any\any\ru\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$tr\Microsoft.Build.resources.dll" target="contentFiles\any\any\tr\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$zh-Hans\Microsoft.Build.resources.dll" target="contentFiles\any\any\zh-Hans\Microsoft.Build.resources.dll" />
+    <file src="$outputPath$zh-Hant\Microsoft.Build.resources.dll" target="contentFiles\any\any\zh-Hant\Microsoft.Build.resources.dll" />
+
+    <!-- Microsoft.Build.Tasks.Core.dll-->
+    <file src="$outputPath$cs\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\cs\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$de\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\de\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$en\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\en\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$es\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\es\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$fr\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\fr\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$it\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\it\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$ja\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\ja\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$ko\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\ko\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$pl\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\pl\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$pt-BR\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\pt-BR\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$ru\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\ru\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$tr\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\tr\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$zh-Hans\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\zh-Hans\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="$outputPath$zh-Hant\Microsoft.Build.Tasks.Core.resources.dll" target="contentFiles\any\any\zh-Hant\Microsoft.Build.Tasks.Core.resources.dll" />
+
+    <!-- Microsoft.Build.Utilities.Core.dll-->
+    <file src="$outputPath$cs\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\cs\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$de\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\de\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$en\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\en\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$es\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\es\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$fr\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\fr\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$it\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\it\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$ja\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\ja\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$ko\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\ko\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$pl\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\pl\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$pt-BR\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\pt-BR\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$ru\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\ru\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$tr\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\tr\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="$outputPath$zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" target="contentFiles\any\any\zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" />
+  </files>
+</package>
