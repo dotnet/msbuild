@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
