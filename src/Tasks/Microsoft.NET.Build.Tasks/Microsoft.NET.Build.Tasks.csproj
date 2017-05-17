@@ -58,31 +58,22 @@
       <LayoutFile Include="@(None)">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
-      <PackFile Include="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\**\*" 
-                Exclude="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\*"/>
+      <PackFile Include="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\**\*" Exclude="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\*" />
       <LayoutFile Include="@(PackFile)">
         <TargetPath>..\NuGet.Build.Tasks.Pack\%(PackFile.RecursiveDir)%(PackFile.Filename)%(PackFile.Extension)</TargetPath>
       </LayoutFile>
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyAdditionalFilesToLayout"
-          Condition="'$(TargetFramework)' == ''"
-          DependsOnTargets="PrepareAdditionalFilesToLayout"
-          AfterTargets="Build"
-          Inputs="@(LayoutFile)"
-          Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
-    <Copy SourceFiles="@(LayoutFile)"
-          DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+  <Target Name="CopyAdditionalFilesToLayout" Condition="'$(TargetFramework)' == ''" DependsOnTargets="PrepareAdditionalFilesToLayout" AfterTargets="Build" Inputs="@(LayoutFile)" Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
   </Target>
 
   <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
     <ItemGroup>
-      <Content Include="$(PackageLayoutOutputPath)**\*" 
-               Exclude="$(PackageLayoutOutputPath)**\*.pdb" 
-               PackagePath="\" />
+      <Content Include="$(PackageLayoutOutputPath)**\*" Exclude="$(PackageLayoutOutputPath)**\*.pdb" PackagePath="\" />
     </ItemGroup>
   </Target>
 
