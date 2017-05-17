@@ -422,4 +422,6 @@
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>
 
+  <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
+
 </Project>
