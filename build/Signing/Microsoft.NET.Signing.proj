@@ -12,7 +12,7 @@
     <!-- Make note, without actually knowing what's included in the SigningConfig,
          we just assume that everything in the output dir is, and treat them
          as inputs so that we rerun packaging if they change. -->
-    <PackageAssets Include="$(OutDir)\*.*" Exclude="*.log" />
+    <PackageAssets Include="$(OutputPath)*.*" Exclude="*.log" />
   </ItemGroup>
 
   <Target Name="Build" Outputs="@(PackageAssets)" Condition=" '@(SigningConfig)' != '' ">
@@ -21,7 +21,7 @@
 
     <!-- If RealSigning -->
     <Message Text="Performing Real Signing" Condition="'$(SignType)'=='real'"/>
-    <Exec Command="$(SignTool) -nugetPackagesPath &quot;$(NuGet_Packages)&quot; -config &quot;@(SigningConfig)&quot; &quot;$(OutDir.TrimEnd('\'))&quot;"
+    <Exec Command="$(SignTool) -nugetPackagesPath &quot;$(NuGet_Packages)&quot; -config &quot;@(SigningConfig)&quot; &quot;$(OutputPath.TrimEnd('\'))&quot;"
           Condition="'$(SignType)'=='real'"/>
   </Target>
 </Project>
