@@ -10,6 +10,7 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": "1.0.1",
+        "SourceLink.Create.CommandLine": "2.1.2",
         "System.Collections.NonGeneric": "4.0.1",
         "System.Diagnostics.FileVersionInfo": "4.0.0",
         "System.Diagnostics.Process": "4.1.0",

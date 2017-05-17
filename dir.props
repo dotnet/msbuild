@@ -131,38 +131,42 @@
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <FullFrameworkBuild>true</FullFrameworkBuild>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
-    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
-    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
-    <MonoBuild>true</MonoBuild>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <FullFrameworkBuild>true</FullFrameworkBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">portable</DebugType>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
     <NetCoreBuild>true</NetCoreBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' != 'full'">
+    <SourceLinkCreate>true</SourceLinkCreate>
   </PropertyGroup>
 
   <!-- Set the host specific OS and Architecture variables -->
@@ -427,6 +431,6 @@
     <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
   </ItemGroup>
 
-  <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
+  <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' == 'full' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
 
 </Project>

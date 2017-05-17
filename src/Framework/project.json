@@ -5,6 +5,7 @@
       "dependencies": {
         "NETStandard.Library": "1.6.0",
         "PdbGit": "3.0.41",
+        "SourceLink.Create.CommandLine": "2.1.2",
         "System.Runtime.Serialization.Primitives": "4.1.1",
         "System.Threading.Thread": "4.0.0"
       }
