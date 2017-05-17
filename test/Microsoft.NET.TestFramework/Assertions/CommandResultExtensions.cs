@@ -12,25 +12,5 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             return new CommandResultAssertions(commandResult);
         }
-
-        public static CommandResult AndLog(this CommandResult commandResult, ITestOutputHelper log)
-        {
-            log.WriteLine($"> {commandResult.StartInfo.FileName} {commandResult.StartInfo.Arguments}");
-            log.WriteLine(commandResult.StdOut);
-
-            if (!string.IsNullOrEmpty(commandResult.StdErr))
-            {
-                log.WriteLine("");
-                log.WriteLine("StdErr:");
-                log.WriteLine(commandResult.StdErr);
-            }
-
-            if (commandResult.ExitCode != 0)
-            {
-                log.WriteLine($"Exit Code: {commandResult.ExitCode}");
-            }
-
-            return commandResult;
-        }
     }
 }

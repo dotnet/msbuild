@@ -25,7 +25,5 @@ namespace Microsoft.NET.TestFramework
             }
             return command;
         }
-
-
     }
 }
