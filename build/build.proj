@@ -152,7 +152,6 @@
     <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
-          IgnoreExitCode="true"
           />
   </Target>
 
