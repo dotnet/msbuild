@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal override void ResetConsoleLoggerState()
         {
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 errorList = new ArrayList();
                 warningList = new ArrayList();
@@ -264,7 +264,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
             // specified to show the summary.
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal) || ShowSummary)
+            if (ShowSummary == true)
             {
                 if (e.Succeeded)
                 {
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // The decision whether or not to show a summary at this verbosity
             // was made during initialization. We just do what we're told.
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 // We can't display a nice nested summary unless we're at Normal or above,
                 // since we need to have gotten TargetStarted events, which aren't forwarded otherwise.
@@ -313,7 +313,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Show build time if verbosity is normal, detailed or diagnostic or the user specified to
             // show the summary.
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal) || ShowSummary)
+            if (ShowSummary == true)
             {
                 // The time elapsed is the difference between when the BuildStartedEventArg
                 // was created and when the BuildFinishedEventArg was created
@@ -943,7 +943,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile), true);
                 ShownBuildEventContext(e.BuildEventContext);
-                if (ShowSummary)
+                if (ShowSummary == true)
                 {
                     if (!errorList.Contains(e))
                     {
@@ -992,7 +992,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             ShownBuildEventContext(e.BuildEventContext);
 
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 if (!warningList.Contains(e))
                 {

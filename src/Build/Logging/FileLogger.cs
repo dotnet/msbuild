@@ -214,6 +214,11 @@ namespace Microsoft.Build.Logging
                 case "NOAUTOFLUSH":
                     _autoFlush = false;
                     break;
+                case "ERRORSONLY":
+                case "WARNINGSONLY":
+                    ShowSummary = false;
+                    SkipProjectStartedText = true;
+                    break;
                 case "ENCODING":
                     try
                     {

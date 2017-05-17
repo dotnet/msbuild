@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -339,6 +340,36 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 ObjectModelHelpers.DeleteDirectory(directory);
+            }
+        }
+
+        [Theory]
+        [InlineData("warningsonly")]
+        [InlineData("errorsonly")]
+        public void EmptyErrorLogUsingWarningsErrorsOnly(string loggerOption)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var logFile = env.CreateFile(".log").Path;
+
+                // Note: Only the ParallelConsoleLogger supports this scenario (log file empty on no error/warn). We
+                // need to explicitly enable it here with the 'ENABLEMPLOGGING' flag.
+                FileLogger fileLogger = new FileLogger {Parameters = $"{loggerOption};logfile={logFile};ENABLEMPLOGGING" };
+
+                Project project = ObjectModelHelpers.CreateInMemoryProject(@"
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`Build`>
+                        <Message Text=`Hello world from the FileLogger`/>
+                    </Target>
+                </Project>");
+
+                project.Build(fileLogger);
+                project.ProjectCollection.UnregisterAllLoggers();
+
+                // File should exist and be 0 length (no summary information, etc.)
+                var result = new FileInfo(logFile);
+                Assert.True(result.Exists);
+                Assert.Equal(0, new FileInfo(logFile).Length);
             }
         }
 
