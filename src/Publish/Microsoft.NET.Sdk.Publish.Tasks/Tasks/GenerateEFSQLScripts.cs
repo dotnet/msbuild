@@ -71,11 +71,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         private int _processExitCode;
         private StringBuilder _standardOut = new StringBuilder();
         private StringBuilder _standardError = new StringBuilder();
-
+        private const string SkipFirstTimeEnvironmentVariable = "DOTNET_SKIP_FIRST_TIME_EXPERIENCE";
+        private const string AspNetCoreEnvironment = "ASPNETCORE_ENVIRONMENT";
         private bool GenerateSQLScript(string sqlFileFullPath, string dbContextName, bool isLoggingEnabled = true)
         {
-            string previousValue = Environment.GetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE");
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true");
+            string previousSkipValue = Environment.GetEnvironmentVariable(SkipFirstTimeEnvironmentVariable);
+            string previousAspNetCoreEnvironment = Environment.GetEnvironmentVariable(AspNetCoreEnvironment); 
+            Environment.SetEnvironmentVariable(SkipFirstTimeEnvironmentVariable, "true");
+            Environment.SetEnvironmentVariable(AspNetCoreEnvironment, "Development");
             ProcessStartInfo psi = new ProcessStartInfo("dotnet", string.Format("ef migrations script --idempotent --output \"{0}\" --context {1} {2}", sqlFileFullPath, dbContextName, EFMigrationsAdditionalArgs))
             {
                 WorkingDirectory = ProjectDirectory,
@@ -120,7 +123,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 isProcessExited = proc.WaitForExit(300000);
             }
 
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", previousValue);
+            Environment.SetEnvironmentVariable(SkipFirstTimeEnvironmentVariable, previousSkipValue);
+            Environment.SetEnvironmentVariable(AspNetCoreEnvironment, previousAspNetCoreEnvironment);
             if (!isProcessExited || _processExitCode != 0)
             {
                 if (isLoggingEnabled)
