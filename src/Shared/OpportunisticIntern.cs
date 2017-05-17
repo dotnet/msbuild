@@ -13,6 +13,13 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Shared;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+    
+
 namespace Microsoft.Build
 {
     /// <summary>
@@ -752,7 +759,7 @@ namespace Microsoft.Build
             /// Try to intern the string. 
             /// Return true if an interned value could be returned.
             /// Return false if it was added to the intern list, but wasn't there already.
-            /// Return null if it didn't meet the length criteria for any of the buckets.
+            /// Return null if it didn't meet the length criteria for any of the buckets. Interning was rejected
             /// </summary>
             private bool? TryIntern(IInternable candidate, out string interned)
             {
@@ -887,24 +894,32 @@ namespace Microsoft.Build
                         }
                     }
                     // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
-                    else if (length > 15 &&
-                             candidate[0] == 'P' &&
-                             candidate[1] == 'r' &&
-                             candidate[2] == 'o' &&
-                             candidate[3] == 'j' &&
-                             candidate[4] == 'e' &&
-                             candidate[5] == 'c' &&
-                             candidate[6] == 't' &&
-                             candidate[7] == 'I' &&
-                             candidate[8] == 'n' &&
-                             candidate[9] == 's' &&
-                             candidate[10] == 't' &&
-                             candidate[11] == 'a' &&
-                             candidate[12] == 'n' &&
-                             candidate[13] == 'c' &&
-                             candidate[14] == 'e'
+                    else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
+                             candidate[0] == 'M' &&
+                             candidate[1] == 'S' &&
+                             candidate[2] == 'B' &&
+                             candidate[3] == 'u' &&
+                             candidate[4] == 'i' &&
+                             candidate[5] == 'l' &&
+                             candidate[6] == 'd' &&
+                             candidate[7] == 'P' &&
+                             candidate[8] == 'r' &&
+                             candidate[9] == 'o' &&
+                             candidate[10] == 'j' &&
+                             candidate[11] == 'e' &&
+                             candidate[12] == 'c' &&
+                             candidate[13] == 't' &&
+                             candidate[14] == 'I' &&
+                             candidate[15] == 'n' &&
+                             candidate[16] == 's' &&
+                             candidate[17] == 't' &&
+                             candidate[18] == 'a' &&
+                             candidate[19] == 'n' &&
+                             candidate[20] == 'c' &&
+                             candidate[21] == 'e'
                     )
                     {
+                        // don't want to leak unique strings into the cache
                         interned = candidate.ExpensiveConvertToString();
                         return null;
                     }

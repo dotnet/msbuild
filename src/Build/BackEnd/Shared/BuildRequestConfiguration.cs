@@ -490,10 +490,7 @@ namespace Microsoft.Build.BackEnd
             // create a copy so the mutation does not leak into the ProjectInstance
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(_globalProperties);
 
-            // if you change the key also change the following so that it does not leak into string caches:
-            // Microsoft.Build.OpportunisticIntern.BucketedPrioritizedStringList.TryIntern
-            // Microsoft.Build.Construction.ProjectStringCache.Add
-            var key = $"ProjectInstance{Guid.NewGuid():N}";
+            var key = $"{MSBuildConstants.MSBuildDummyGlobalPropertyHeader}{Guid.NewGuid():N}";
             _globalProperties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
         }
 

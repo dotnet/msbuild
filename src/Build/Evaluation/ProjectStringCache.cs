@@ -86,7 +86,7 @@ namespace Microsoft.Build.Construction
             }
 
             // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
-            if (key.StartsWith("ProjectInstance", StringComparison.Ordinal))
+            if (key.StartsWith(MSBuildConstants.MSBuildDummyGlobalPropertyHeader, StringComparison.Ordinal))
             {
                 return key;
             }
