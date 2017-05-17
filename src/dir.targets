@@ -101,6 +101,11 @@
   
   <Import Project="$(RepoRoot)\targets\GenApi.targets" Condition="'$(OS)' == 'Windows_NT'" />
 
+  <!-- https://github.com/AArnott/PdbGit - stamps the .pdbs with URLs to sources on GitHub
+       so that the debugger can download the exact matching source files during debugging -->
+  <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.targets" Condition="'$(DebugType)' == 'full' And '$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.targets')" />
+
+
   <!-- Taken from Microsoft.VisualStudio.SDK.EmbedInteropTypes NuGet package which tries to fix this issue
        (but doesn't include this assembly in their list).  -->
   <Target Name="LinkVSEmbeddableAssemblies" DependsOnTargets="ResolveReferences" AfterTargets="ResolveReferences">
@@ -161,4 +166,5 @@
     </AL>
 
   </Target>
+
 </Project>

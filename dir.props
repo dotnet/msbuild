@@ -427,4 +427,6 @@
     <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
   </ItemGroup>
 
+  <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props" Condition="'$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.props')" />
+
 </Project>
