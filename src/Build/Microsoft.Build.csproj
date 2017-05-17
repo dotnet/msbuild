@@ -570,6 +570,8 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
+    <Compile Include="Logging\BinaryLogger\SourceFileCollector.cs" />
+    <Compile Include="Logging\BinaryLogger\SourceFileCollectorExtensions.cs" />
     <Compile Include="Logging\ConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -771,6 +773,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Threading.Tasks">
       <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
     </Reference>

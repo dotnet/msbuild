@@ -1416,10 +1416,17 @@ namespace Microsoft.Build.Logging
     public sealed partial class BinaryLogger : Microsoft.Build.Framework.ILogger
     {
         public BinaryLogger() { }
+        public Microsoft.Build.Logging.BinaryLogger.SourceFileCaptureMode CaptureSourceFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
+        public enum SourceFileCaptureMode
+        {
+            Embedded = 1,
+            None = 0,
+            ZipFile = 2,
+        }
     }
     public sealed partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
     {
