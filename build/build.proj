@@ -86,7 +86,7 @@
   <Target Name="RebuildNuGetPackages" DependsOnTargets="CleanNuGetPackages;BuildNuGetPackages" />
 
   <Target Name="Test">
-    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
+    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot; -verbose"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
           IgnoreExitCode="true"
