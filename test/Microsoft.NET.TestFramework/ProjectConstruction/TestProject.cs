@@ -155,11 +155,6 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", this.RuntimeIdentifier));
                 }
 
-                if (this.IsExe && targetFrameworks.Any(identifier => GetShortTargetFrameworkIdentifier(identifier).Equals("net", StringComparison.OrdinalIgnoreCase)))
-                {
-                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", "win7-x86"));
-                }
-
                 //  Update SDK reference to the version under test
                 targetTestAsset.SetSdkVersion(projectXml);
                 
