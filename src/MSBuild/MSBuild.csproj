@@ -164,6 +164,9 @@
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>SharedTraits.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

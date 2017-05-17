@@ -179,6 +179,9 @@
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyList.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>SharedTraits.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>VersionUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
