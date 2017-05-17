@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using System.IO;
 using Microsoft.Build;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -103,6 +104,15 @@ namespace Microsoft.Build.UnitTests
         public void NonInternableTinyString()
         {
             AssertNotInternable("1234");
+        }
+
+        /// <summary>
+        /// Unique strings should not be interned
+        /// </summary>
+        [Fact]
+        public void NonInternableDummyGlobalVariable()
+        {
+            AssertNotInternable($"{MSBuildConstants.MSBuildDummyGlobalPropertyHeader}{new string('1', 100)}");
         }
 
         /// <summary>
