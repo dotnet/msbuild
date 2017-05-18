@@ -68,13 +68,7 @@ namespace Microsoft.Build.UnitTests
 
                 
                 byte[] content = ReadRawBytes(log);
-#if FEATURE_ENCODING_DEFAULT
-                // Verify no BOM (ANSI encoding)
                 Assert.Equal((byte)109, content[0]); // 'm'
-#else
-                // Verify BOM (UTF-8 encoding)
-                Assert.Equal((byte)109, content[3]); // 'm'
-#endif
             }
             finally
             {
