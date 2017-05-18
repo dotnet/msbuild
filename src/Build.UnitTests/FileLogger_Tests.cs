@@ -340,6 +340,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("warningsonly")]
         [InlineData("errorsonly")]
+        [InlineData("errorsonly;warningsonly")]
         public void EmptyErrorLogUsingWarningsErrorsOnly(string loggerOption)
         {
             using (var env = TestEnvironment.Create())
