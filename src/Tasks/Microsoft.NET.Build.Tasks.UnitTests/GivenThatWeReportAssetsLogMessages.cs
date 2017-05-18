@@ -108,8 +108,28 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(expectedPackage);
         }
 
-        // MultiTFM - Only one logged,
-        // Converts LogLevel to Error/Warning/Info
+        [Fact]
+        public void ItHandlesInfoLogLevels()
+        {
+            var log = new MockLog();
+            string lockFileContent = CreateDefaultLockFileSnippet(
+                logs: new string[] {
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "Sample message"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Minimal, "Sample message"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Verbose, "Sample message"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Debug, "Sample message"),
+                }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent, log);
+
+            log.Messages.Should().HaveCount(4);
+            task.DiagnosticMessages.Should().HaveCount(4);
+
+            task.DiagnosticMessages
+                    .Select(item => item.GetMetadata(MetadataKeys.Severity))
+                    .Should().OnlyContain(s => s == "Info");
+        }
 
         private static string CreateDefaultLockFileSnippet(string[] logs = null) =>
             CreateLockFileSnippet(

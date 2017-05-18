@@ -2,13 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using NuGet.Common;
 using NuGet.ProjectModel;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {
