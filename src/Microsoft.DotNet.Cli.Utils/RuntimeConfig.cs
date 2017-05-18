@@ -1,8 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved. 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information. 
- 
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq; 
-using System.IO; 
+using System.IO;
  
 namespace Microsoft.DotNet.Cli.Utils
 { 
@@ -12,12 +13,16 @@ namespace Microsoft.DotNet.Cli.Utils
         public RuntimeConfigFramework Framework { get; } 
  
         public RuntimeConfig(string runtimeConfigPath) 
-        { 
-            var runtimeConfigJson = OpenRuntimeConfig(runtimeConfigPath); 
- 
-            Framework = ParseFramework(runtimeConfigJson); 
- 
-            IsPortable = Framework != null; 
+        {
+            JObject runtimeConfigJson;
+            using (var streamReader = new StreamReader(new FileStream(runtimeConfigPath, FileMode.Open)))
+            {
+                runtimeConfigJson = OpenRuntimeConfig(streamReader);
+            }
+
+            Framework = ParseFramework(runtimeConfigJson);
+
+            IsPortable = Framework != null;
         } 
  
         public static bool IsApplicationPortable(string entryAssemblyPath) 
@@ -31,9 +36,11 @@ namespace Microsoft.DotNet.Cli.Utils
             return false; 
         } 
  
-        private JObject OpenRuntimeConfig(string runtimeConfigPath) 
-        { 
-            return JObject.Parse(File.ReadAllText(runtimeConfigPath)); 
+        private JObject OpenRuntimeConfig(StreamReader streamReader) 
+        {
+            var reader = new JsonTextReader(streamReader);
+
+            return JObject.Load(reader);
         } 
  
         private RuntimeConfigFramework ParseFramework(JObject runtimeConfigRoot) 
