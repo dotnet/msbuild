@@ -11,7 +11,7 @@
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
     <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
     <CurrentDate Condition="'$(CurrentDate)'==''">-$([System.DateTime]::Now.ToString(yyyyMMdd))</CurrentDate>
-    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">1.0.0-dev$(CurrentDate)-1</WebSdkVersion>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">2.0.0-dev$(CurrentDate)-1</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
