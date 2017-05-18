@@ -26,8 +26,17 @@ namespace Microsoft.NET.Build.Tasks
         // no reason for outside classes to derive from this class.
         internal TaskBase()
         {
-            _diagnostics = new DiagnosticsHelper(Log);
+            _diagnostics = new DiagnosticsHelper(new MSBuildLog(Log));
         }
+
+        #region Test Support
+
+        internal TaskBase(ILog logger)
+        {
+            _diagnostics = new DiagnosticsHelper(logger ?? new MSBuildLog(Log));
+        }
+
+        #endregion
 
         public override bool Execute()
         {
