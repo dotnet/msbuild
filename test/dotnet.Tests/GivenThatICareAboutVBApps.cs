@@ -26,7 +26,8 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass();
         }
 
-        [Fact]
+        // Enable cross-plat once https://github.com/Microsoft/msbuild/issues/422 is fixed
+        [WindowsOnlyFact]
         public void ICanBuildVBApps()
         {
             new BuildCommand()
@@ -35,7 +36,8 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass();
         }
 
-        [Fact]
+        // Enable cross-plat once https://github.com/Microsoft/msbuild/issues/422 is fixed
+        [WindowsOnlyFact]
         public void ICanRunVBApps()
         {
             new RunCommand()
@@ -44,7 +46,8 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass();
         }
 
-        [Fact]
+        // Enable cross-plat once https://github.com/Microsoft/msbuild/issues/422 is fixed
+        [WindowsOnlyFact]
         public void ICanPublicAndRunVBApps()
         {
             new PublishCommand()
