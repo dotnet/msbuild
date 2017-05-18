@@ -3,43 +3,45 @@
 internal static class HelpUsageText
 {
     public static readonly string UsageText =
-$@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [common-options]
+$@"{LocalizableStrings.Usage}: dotnet [runtime-options] [path-to-application]
+{LocalizableStrings.Usage}: dotnet [command] [arguments] [command-options]
 
-{LocalizableStrings.Arguments}:
-  [command]             {LocalizableStrings.CommandDefinition}
-  [arguments]           {LocalizableStrings.ArgumentsDefinition}
-  [host-options]        {LocalizableStrings.HostOptionsDefinition}
-  [common-options]      {LocalizableStrings.OptionsDescription}
+path-to-application:
+  {LocalizableStrings.PathToApplicationDefinition}
+
+{LocalizableStrings.Commands}:
+  new              {LocalizableStrings.NewDefinition}
+  restore          {LocalizableStrings.RestoreDefinition}
+  run              {LocalizableStrings.RunDefinition}
+  build            {LocalizableStrings.BuildDefinition}
+  publish          {LocalizableStrings.PublishDefinition}
+  test             {LocalizableStrings.TestDefinition}
+  pack             {LocalizableStrings.PackDefinition}
+  migrate          {LocalizableStrings.MigrateDefinition}
+  clean            {LocalizableStrings.CleanDefinition}
+  sln              {LocalizableStrings.SlnDefinition}
+  add              {LocalizableStrings.AddDefinition}
+  remove           {LocalizableStrings.RemoveDefinition}
+  list             {LocalizableStrings.ListDefinition}
+  nuget            {LocalizableStrings.NugetDefinition}
+  msbuild          {LocalizableStrings.MsBuildDefinition}
+  vstest           {LocalizableStrings.VsTestDefinition}
+  -v|--version     {LocalizableStrings.SDKVersionCommandDefinition}
+  -i|--info        {LocalizableStrings.SDKInfoCommandDefinition}
+  -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbose          {LocalizableStrings.VerboseDefinition}
   -h|--help             {LocalizableStrings.HelpDefinition}
 
-{LocalizableStrings.HostOptions}:
-  -d|--diagnostics      {LocalizableStrings.DiagnosticsDefinition}
-  --version             {LocalizableStrings.VersionDescription}
-  --info                {LocalizableStrings.InfoDescription}
+{LocalizableStrings.RunDotnetCommandHelpForMore}
 
-{LocalizableStrings.Commands}:
-  new           {LocalizableStrings.NewDefinition}
-  restore       {LocalizableStrings.RestoreDefinition}
-  build         {LocalizableStrings.BuildDefinition}
-  publish       {LocalizableStrings.PublishDefinition}
-  run           {LocalizableStrings.RunDefinition}
-  test          {LocalizableStrings.TestDefinition}
-  pack          {LocalizableStrings.PackDefinition}
-  migrate       {LocalizableStrings.MigrateDefinition}
-  clean         {LocalizableStrings.CleanDefinition}
-  sln           {LocalizableStrings.SlnDefinition}
-
-{LocalizableStrings.ProjectModificationCommands}:
-  add           {LocalizableStrings.AddDefinition}
-  remove        {LocalizableStrings.RemoveDefinition}
-  list          {LocalizableStrings.ListDefinition}
-
-{LocalizableStrings.AdvancedCommands}:
-  nuget         {LocalizableStrings.NugetDefinition}
-  msbuild       {LocalizableStrings.MsBuildDefinition}
-  vstest        {LocalizableStrings.VsTestDefinition}";
+runtime-options:
+  --additionalprobingpath <path>    {LocalizableStrings.AdditionalprobingpathDefinition}
+  --depsfile <path>                 {LocalizableStrings.DepsfilDefinition}
+  --runtimeconfig <path>            {LocalizableStrings.RuntimeconfigDefinition}
+  --fx-version <version>            {LocalizableStrings.FxVersionDefinition}
+  --roll-forward-on-no-candidate-fx {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
+  --additional-deps <path>          {LocalizableStrings.AdditionalDeps}
+";
 }
-
