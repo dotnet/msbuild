@@ -12,11 +12,16 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildANetStandard2Library : SdkTest
     {
+        public GivenThatWeWantToBuildANetStandard2Library(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_a_netstandard2_library_successfully()
         {
@@ -28,11 +33,11 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(project)
-                .Restore(project.Name);
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
                 .Execute()
@@ -74,11 +79,11 @@ public static class {project.Name}
                     }
 
                 })
-                .Restore(project.Name);
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
                 .Execute()

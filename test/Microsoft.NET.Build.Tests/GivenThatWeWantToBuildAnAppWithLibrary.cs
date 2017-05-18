@@ -15,11 +15,16 @@ using FluentAssertions;
 using System.Xml.Linq;
 using System.Linq;
 using System;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithLibrary : SdkTest
     {
+        public GivenThatWeWantToBuildAnAppWithLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_the_project_successfully()
         {
@@ -27,8 +32,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             VerifyAppBuilds(testAsset);
         }
@@ -40,8 +45,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
 
             for (int i = 0; i < 2; i++)
@@ -54,7 +59,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             buildCommand
@@ -106,12 +111,12 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("KitchenSink")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -160,11 +165,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore("TestApp");
+                .Restore(Log, "TestApp");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
             buildCommand
                 .Execute()
@@ -183,7 +188,7 @@ namespace Microsoft.NET.Build.Tests
                 "TestLibrary.pdb"
             });
 
-            var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
+            var cleanCommand = new MSBuildCommand(Log, "Clean", buildCommand.FullPathProjectFile);
 
             cleanCommand
                 .Execute()
@@ -191,7 +196,6 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
-
         }
 
         [Fact]
@@ -200,9 +204,9 @@ namespace Microsoft.NET.Build.Tests
             var asset = _testAssetsManager
                 .CopyTestAsset("AppxReferencingCrossTargeting")
                 .WithSource()
-                .Restore("Appx");
+                .Restore(Log, "Appx");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(asset.TestRoot, "Appx"));
+            var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot, "Appx"));
 
             buildCommand
                 .Execute()

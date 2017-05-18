@@ -11,11 +11,16 @@ using System.Linq;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildASelfContainedApp : SdkTest
     {
+        public GivenThatWeWantToBuildASelfContainedApp(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_a_runnable_output()
         {
@@ -30,9 +35,9 @@ namespace Microsoft.NET.Build.Tests
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
                 })
-                .Restore();
+                .Restore(Log);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
             buildCommand
                 .Execute()

@@ -18,11 +18,16 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToGenerateADepsFileForATool : SdkTest
     {
+        public GivenThatWeWantToGenerateADepsFileForATool(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_creates_a_deps_file_for_the_tool_and_the_tool_runs()
         {
@@ -108,9 +113,9 @@ class Program
             DeleteFolder(Path.Combine(RepoInfo.NuGetCachePath, ".tools", toolProject.Name.ToLowerInvariant()));
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name)
-                .Restore(toolProject.Name);
+                .Restore(Log, toolProject.Name);
 
-            var packCommand = new PackCommand(Stage0MSBuild, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
+            var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
             packCommand.Execute()
                 .Should()
@@ -138,7 +143,7 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
-            var restoreCommand = toolReferencerInstance.GetRestoreCommand(toolReferencer.Name);
+            var restoreCommand = toolReferencerInstance.GetRestoreCommand(Log, toolReferencer.Name);
             restoreCommand.AddSource(nupkgPath);
             restoreCommand.Execute().Should().Pass();
 
@@ -148,8 +153,7 @@ class Program
             var args = new List<string>();
 
             string generateDepsProjectPath = Path.Combine(RepoInfo.SdksPath, "Microsoft.NET.Sdk", "build", "GenerateDeps", "GenerateDeps.proj");
-            args.Add(generateDepsProjectPath);
-            
+
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");
 
             args.Add($"/p:ToolName={toolProject.Name}");
@@ -188,9 +192,9 @@ class Program
                 }
             }
 
-            var generateDepsCommand = Stage0MSBuild.CreateCommandForTarget("BuildDepsJson", args.ToArray());
+            var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectPath);
 
-            generateDepsCommand.Execute()
+            generateDepsCommand.Execute(args.ToArray())
                 .Should()
                 .Pass();
 
@@ -220,7 +224,7 @@ class Program
                 dotnetArgs.Add(packageFolder);
             }
 
-            dotnetArgs.Add(toolAssemblyPath);
+            dotnetArgs.Add(Path.GetFullPath(toolAssemblyPath));
 
             ICommand toolCommand = Command.Create(RepoInfo.DotNetHostPath, dotnetArgs)
                 .CaptureStdOut();

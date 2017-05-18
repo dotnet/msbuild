@@ -10,11 +10,16 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToSetPropertiesInDirectoryBuildProps : SdkTest
     {
+        public GivenThatWeWantToSetPropertiesInDirectoryBuildProps(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void The_default_configuration_can_be_set_to_release()
         {
@@ -39,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
 
             File.WriteAllText(directoryBuildPropsPath, directoryBuildPropsContent);
 
-            var restoreCommand = testAsset.GetRestoreCommand(project.Name);
+            var restoreCommand = testAsset.GetRestoreCommand(Log, project.Name);
 
             restoreCommand
                 .Execute()
@@ -48,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
                 .Execute()
@@ -57,7 +62,7 @@ namespace Microsoft.NET.Build.Tests
 
             string GetPropertyValue(string propertyName)
             {
-                var getValuesCommand = new GetValuesCommand(Stage0MSBuild, projectFolder,
+                var getValuesCommand = new GetValuesCommand(Log, projectFolder,
                     project.TargetFrameworks, propertyName, GetValuesCommand.ValueType.Property)
                 {
                     Configuration = "Release"

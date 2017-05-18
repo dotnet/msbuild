@@ -10,11 +10,16 @@ using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAnAppWithLibrariesAndRid : SdkTest
     {
+        public GivenThatWeWantToPublishAnAppWithLibrariesAndRid(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_publishes_a_self_contained_runnable_output()
         {
@@ -105,13 +110,13 @@ namespace Microsoft.NET.Publish.Tests
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, projectPath);
+            var publishCommand = new PublishCommand(Log, projectPath);
 
             publishCommand
                 .Execute(

@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         /// Tests that DependencyContextBuilder generates DependencyContexts correctly.
         /// </summary>
         [Theory]
-        [MemberData("ProjectData")]
+        [MemberData(nameof(ProjectData))]
         public void ItBuildsDependencyContextsFromProjectLockFiles(
             string mainProjectName,
             string mainProjectVersion,

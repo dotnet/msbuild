@@ -11,11 +11,16 @@ using Xunit;
 using FluentAssertions;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToReferenceAProject : SdkTest
     {
+        public GivenThatWeWantToReferenceAProject(ITestOutputHelper log) : base(log)
+        {
+        }
+
         //  Different types of projects which should form the test matrix:
 
         //  Desktop (non-SDK) project
@@ -80,7 +85,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(It_checks_for_valid_references), identifier);
 
-            var restoreCommand = testAsset.GetRestoreCommand(relativePath: "Referencer");
+            var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: "Referencer");
 
             if (restoreSucceeds)
             {
@@ -92,7 +97,6 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 restoreCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Fail();
@@ -102,21 +106,14 @@ namespace Microsoft.NET.Build.Tests
             {
                 //  The Restore target currently seems to be a no-op for non-SDK projects,
                 //  so we need to explicitly restore the dependency
-                testAsset.GetRestoreCommand(relativePath: "Dependency")
+                testAsset.GetRestoreCommand(Log, relativePath: "Dependency")
                     .Execute()
                     .Should()
                     .Pass();
             }
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Referencer");
-
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-
-            if (!buildSucceeds)
-            {
-                buildCommand = buildCommand.CaptureStdOut();
-            }
-
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var result = buildCommand.Execute();
 
             if (buildSucceeds)

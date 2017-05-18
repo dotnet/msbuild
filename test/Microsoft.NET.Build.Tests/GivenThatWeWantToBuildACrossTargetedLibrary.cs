@@ -11,22 +11,27 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
 using System.Linq;
 using FluentAssertions;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildACrossTargetedLibrary : SdkTest
     {
+        public GivenThatWeWantToBuildACrossTargetedLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource()
-                .Restore("NetStandardAndNetCoreApp");
+                .Restore(Log, "NetStandardAndNetCoreApp");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -56,11 +61,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
                 .WithSource()
-                .Restore("DesktopAndNetStandard");
+                .Restore(Log, "DesktopAndNetStandard");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "DesktopAndNetStandard");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -119,7 +124,7 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "RuntimeIdentifiers", secondFrameworkRids)));
                 });
 
-            var command = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot, "", valueName: "RuntimeIdentifiers");
+            var command = new GetValuesCommand(Log, testAsset.TestRoot, "", valueName: "RuntimeIdentifiers");
             command.DependsOnTargets = "GetAllRuntimeIdentifiers";
             command.Execute().Should().Pass();
             command.GetValues().Should().BeEquivalentTo(expectedCombination.Split(';'));

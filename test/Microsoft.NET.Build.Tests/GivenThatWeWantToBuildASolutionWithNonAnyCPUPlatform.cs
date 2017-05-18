@@ -7,22 +7,27 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildASolutionWithNonAnyCPUPlatform : SdkTest
     {
+        public GivenThatWeWantToBuildASolutionWithNonAnyCPUPlatform(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_solusuccessfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("x64SolutionBuild")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot, "x64SolutionBuild.sln");
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "x64SolutionBuild.sln");
             buildCommand
                 .Execute()
                 .Should()

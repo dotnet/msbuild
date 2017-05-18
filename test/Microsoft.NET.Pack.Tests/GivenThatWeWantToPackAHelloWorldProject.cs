@@ -10,20 +10,25 @@ using Microsoft.NET.TestFramework.Commands;
 using FluentAssertions;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatWeWantToPackAHelloWorldProject : SdkTest
     {
+        public GivenThatWeWantToPackAHelloWorldProject(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_packs_successfully()
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "PackHelloWorld")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var packCommand = new PackCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
                 .Execute()

@@ -13,11 +13,16 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToReferenceAnAssembly : SdkTest
     {
+        public GivenThatWeWantToReferenceAnAssembly(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("netcoreapp2.0", "net40")]
         [InlineData("netcoreapp2.0", "netstandard1.5")]
@@ -93,11 +98,11 @@ public static class Program
                 .And.HaveStdOutContaining("Hello from a direct reference.");
         }
 
-        private static string RestoreAndBuild(TestAsset testAsset, TestProject testProject)
+        private string RestoreAndBuild(TestAsset testAsset, TestProject testProject)
         {
-            testAsset.Restore(testProject.Name);
+            testAsset.Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand.Execute()
                 .Should()

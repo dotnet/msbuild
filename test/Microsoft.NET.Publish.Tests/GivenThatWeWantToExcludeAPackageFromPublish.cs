@@ -11,11 +11,16 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToExcludeAPackageFromPublish : SdkTest
     {
+        public GivenThatWeWantToExcludeAPackageFromPublish(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_does_not_publish_a_PackageReference_with_PrivateAssets_All()
         {
@@ -34,9 +39,9 @@ namespace Microsoft.NET.Publish.Tests
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("PrivateAssets", "All")));
                 })
-                .Restore();
+                .Restore(Log);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -68,9 +73,9 @@ namespace Microsoft.NET.Publish.Tests
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("Publish", "false")));
                 })
-                .Restore();
+                .Restore(Log);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -103,9 +108,9 @@ namespace Microsoft.NET.Publish.Tests
                                                                         new XAttribute("PrivateAssets", "All"),
                                                                         new XAttribute("Publish", "true")));
                 })
-                .Restore();
+                .Restore(Log);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

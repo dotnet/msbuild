@@ -15,11 +15,16 @@ using FluentAssertions;
 using System.Xml.Linq;
 using System.Linq;
 using System;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithTransitiveProjectRefs : SdkTest
     {
+        public GivenThatWeWantToBuildAnAppWithTransitiveProjectRefs(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_the_project_successfully()
         {
@@ -31,9 +36,9 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRef")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("MainLibrary");
-            testAsset.Restore("AuxLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "MainLibrary");
+            testAsset.Restore(Log, "AuxLibrary");
 
             VerifyAppBuilds(testAsset);
         }
@@ -42,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             buildCommand
@@ -84,11 +89,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithTransitiveProjectRefs")
                 .WithSource()
-                .Restore("TestApp");
+                .Restore(Log, "TestApp");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
             buildCommand
                 .Execute()
@@ -109,7 +114,7 @@ namespace Microsoft.NET.Build.Tests
                 "AuxLibrary.pdb"
             });
 
-            var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
+            var cleanCommand = new MSBuildCommand(Log, "Clean", buildCommand.FullPathProjectFile);
 
             cleanCommand
                 .Execute()

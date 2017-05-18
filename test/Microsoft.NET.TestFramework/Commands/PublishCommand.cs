@@ -7,26 +7,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class PublishCommand : TestCommand
+    public sealed class PublishCommand : MSBuildCommand
     {
         private const string PublishSubfolderName = "publish";
 
-        public PublishCommand(MSBuildTest msbuild, string projectPath)
-            : base(msbuild, projectPath)
+        public PublishCommand(ITestOutputHelper log, string projectPath, MSBuildTest msbuild = null)
+            : base(log, "Publish", projectPath, relativePathToProject: null, msbuild: msbuild)
         {
-        }
-
-        public override CommandResult Execute(params string[] args)
-        {
-            var newArgs = args.ToList();
-            newArgs.Insert(0, FullPathProjectFile);
-
-            var command = MSBuild.CreateCommandForTarget("publish", newArgs.ToArray());
-
-            return command.Execute();
         }
 
         public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.1", string configuration = "Debug", string runtimeIdentifier = "")

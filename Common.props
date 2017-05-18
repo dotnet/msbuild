@@ -8,19 +8,14 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
     <OutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutputPath>
-    <OutDir>$(OutputPath)</OutDir>
-    <RootOutDir>$(OutDir)</RootOutDir>
     <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
-    <RawOutDir>$(OutDir)Raw\</RawOutDir>
-    <PackagesLayoutDir>$(OutDir)PackagesLayout\</PackagesLayoutDir>
-    <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
-    <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
-    <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
 
     <!-- We must use Windows PDB format (overriding SDK default) in order to send symbols to symweb -->
     <DebugType>full</DebugType>

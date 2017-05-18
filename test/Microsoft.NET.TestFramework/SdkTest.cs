@@ -1,24 +1,30 @@
-﻿using System;
+﻿using Microsoft.NET.TestFramework.Commands;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
-    public class SdkTest : IDisposable
+    public abstract class SdkTest : IDisposable
     {
         protected TestAssetsManager _testAssetsManager = new TestAssetsManager();
 
-        protected bool UsingFullFrameworkMSBuild { get; private set; }
+        protected bool UsingFullFrameworkMSBuild { get; }
 
-        public SdkTest()
+        protected ITestOutputHelper Log { get; }
+
+        protected SdkTest(ITestOutputHelper log)
         {
             Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
 
             string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
             UsingFullFrameworkMSBuild = !string.IsNullOrEmpty(msbuildPath);
-        }
 
+            Log = log;
+        }
         public void Dispose()
         {
             //  Skip path length validation if running on full framework MSBuild.  We do the path length validation

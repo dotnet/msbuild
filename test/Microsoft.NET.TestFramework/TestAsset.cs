@@ -9,6 +9,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Collections.Generic;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -136,16 +137,16 @@ namespace Microsoft.NET.TestFramework
 
         }
 
-        public RestoreCommand GetRestoreCommand(string relativePath = "", params string[] args)
+        public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "", params string[] args)
         {
-            return new RestoreCommand(Stage0MSBuild, System.IO.Path.Combine(TestRoot, relativePath))
+            return new RestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
                 .AddSourcesFromCurrentConfig()
                 .AddSource(RepoInfo.PackagesPath);
         }
 
-        public TestAsset Restore(string relativePath = "", params string[] args)
+        public TestAsset Restore(ITestOutputHelper log, string relativePath = "", params string[] args)
         {
-            var commandResult = GetRestoreCommand(relativePath, args)
+            var commandResult = GetRestoreCommand(log, relativePath, args)
                 .Execute(args);
 
             commandResult.Should().Pass();

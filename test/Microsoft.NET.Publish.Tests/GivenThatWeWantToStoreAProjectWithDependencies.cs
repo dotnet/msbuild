@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -15,7 +14,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -60,6 +59,10 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
+        public GivenThatWeWantToStoreAProjectWithDependencies(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void compose_dependencies()
         {
@@ -67,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("SimpleStore")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -126,7 +129,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -160,7 +163,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -195,7 +198,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("UnmanagedStore")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot);
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -222,7 +225,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("TargetManifests", "multifile")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+            var storeCommand =  new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -271,7 +274,7 @@ namespace Microsoft.NET.Publish.Tests
             var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "StarVersion.xml")
+            new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "StarVersion.xml")
                 .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true")
                 .Should()
                 .Pass();
@@ -325,7 +328,7 @@ namespace Microsoft.NET.Publish.Tests
             var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
+            new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
                 .Execute(
                     $"/p:RuntimeIdentifier={_runtimeRid}",
                     "/p:TargetFramework=netcoreapp2.0",

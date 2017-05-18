@@ -11,12 +11,17 @@ using Xunit;
 using FluentAssertions;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToVerifyNuGetReferenceCompat : SdkTest, IClassFixture<DeleteNuGetArtifactsFixture>
     {
         private TestPackageReference _net461PackageReference;
+
+        public GivenThatWeWantToVerifyNuGetReferenceCompat(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
@@ -88,10 +93,10 @@ namespace Microsoft.NET.Build.Tests
 
                     //  Create the NuGet packages
                     var dependencyTestAsset = _testAssetsManager.CreateTestProject(dependencyProject, ConstantStringValues.TestDirectoriesNamePrefix, ConstantStringValues.NuGetSharedDirectoryNamePostfix);
-                    var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(relativePath: dependencyProject.Name).Execute().Should().Pass();
+                    var dependencyRestoreCommand = dependencyTestAsset.GetRestoreCommand(Log, relativePath: dependencyProject.Name).Execute().Should().Pass();
                     var dependencyProjectDirectory = Path.Combine(dependencyTestAsset.TestRoot, dependencyProject.Name);
 
-                    var dependencyPackCommand = new PackCommand(Stage0MSBuild, dependencyProjectDirectory);
+                    var dependencyPackCommand = new PackCommand(Log, dependencyProjectDirectory);
                     var dependencyPackResult = dependencyPackCommand.Execute().Should().Pass();
                 }
             }
@@ -111,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
 
             //  Create the referencing app and run the compat test
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.TestDirectoriesNamePrefix, referencerDirectoryNamePostfix);
-            var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(relativePath: referencerProject.Name);
+            var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(Log, relativePath: referencerProject.Name);
 
             //  Modify the restore command to refer to the created NuGet packages
             foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
@@ -125,10 +130,10 @@ namespace Microsoft.NET.Build.Tests
             }
             else
             {
-                referencerRestoreCommand.CaptureStdOut().Execute().Should().Fail();
+                referencerRestoreCommand.Execute().Should().Fail();
             }
 
-            var referencerBuildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(referencerTestAsset.TestRoot, referencerProject.Name));
+            var referencerBuildCommand = new BuildCommand(Log, Path.Combine(referencerTestAsset.TestRoot, referencerProject.Name));
             var referencerBuildResult = referencerBuildCommand.Execute();
 
             if (buildSucceeds)
@@ -150,12 +155,12 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
 
-            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.Execute().Should().Pass();
 
             var buildCommand = new BuildCommand(
-                Stage0MSBuild,
+                Log,
                 Path.Combine(testProjectTestAsset.TestRoot, testProjectName));
             buildCommand.Execute().Should().Pass();
         }
@@ -169,7 +174,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectTestAsset = CreateTestAsset(testProjectName, targetFramework);
 
-            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.CaptureStdOut();
             restoreCommand.Execute().Should().Fail();
@@ -185,7 +190,7 @@ namespace Microsoft.NET.Build.Tests
                 "netstandard2.0",
                 new Dictionary<string, string> { {"DisableImplicitPackageTargetFallback", "true" } });
 
-            var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
+            var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
             restoreCommand.CaptureStdOut();
             restoreCommand.Execute().Should().Fail();
@@ -248,10 +253,10 @@ namespace Microsoft.NET.Build.Tests
                         ConstantStringValues.TestDirectoriesNamePrefix,
                         ConstantStringValues.NuGetSharedDirectoryNamePostfix);
                 var packageRestoreCommand =
-                    net461PackageTestAsset.GetRestoreCommand(relativePath: net461Project.Name).Execute().Should().Pass();
+                    net461PackageTestAsset.GetRestoreCommand(Log, relativePath: net461Project.Name).Execute().Should().Pass();
                 var dependencyProjectDirectory = Path.Combine(net461PackageTestAsset.TestRoot, net461Project.Name);
                 var packagePackCommand =
-                    new PackCommand(Stage0MSBuild, dependencyProjectDirectory).Execute().Should().Pass();
+                    new PackCommand(Log, dependencyProjectDirectory).Execute().Should().Pass();
             }
 
             return net461PackageReference;

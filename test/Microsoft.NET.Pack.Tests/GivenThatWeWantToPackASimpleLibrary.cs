@@ -9,21 +9,26 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatWeWantToPackASimpleLibrary : SdkTest
     {
+        public GivenThatWeWantToPackASimpleLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_packs_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            new PackCommand(Stage0MSBuild, testAsset.TestRoot)
+            new PackCommand(Log, testAsset.TestRoot)
                 .Execute()
                 .Should()
                 .Pass();

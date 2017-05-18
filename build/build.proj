@@ -13,21 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
-
+    <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" />
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
-    <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Nuget.proj" />
-
-    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
-
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Dependencies\**\*.csproj" />
-
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj" />
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj" />
-    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
+    <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
 
     <!-- Explicitly specify task unit test project -->
     <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
@@ -46,8 +34,7 @@
 </__SetNuget_Packages>
     </PropertyGroup>
 
-    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal"
-          Condition="'$(BuildTemplates)' != 'true'"
+    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore $(SolutionFile) /v:minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
   </Target>
@@ -83,80 +70,30 @@
              />
   </Target>
 
-  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
-
+  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages">
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
+             Targets="Pack"
+             Properties="$(CommonMSBuildGlobalProperties);NoBuild=true"
              />
 
   </Target>
-
-  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
-
-    <MSBuild BuildInParallel="true"
-             Projects="@(NuGetProjectFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
-
+  
+  <Target Name="CleanNuGetPackages">
+    <Delete Files="$(OutputPath)Packages\*.nupkg" />
   </Target>
+ 
+  <Target Name="RebuildNuGetPackages" DependsOnTargets="CleanNuGetPackages;BuildNuGetPackages" />
 
-  <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' == 'true'">
-    <MSBuild Projects="@(VsManProjectFile)"
-             Targets="Build"
-             Condition="'$(RunningInMicroBuild)' == 'true'"
-             />
-  </Target>
-
-  <Target Name="RebuildModernVsixPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' == 'true'">
-
-    <MSBuild Projects="@(VsManProjectFile)"
-             Targets="Rebuild"
-             Condition="'$(RunningInMicroBuild)' == 'true'"
-             />
-  </Target>
-
-  <!-- Restore Sdks -->
-  <Target Name="DeployMSBuildSdks" AfterTargets="BuildNuGetPackages;RebuildNuGetPackages">
-    <ReadLinesFromFile File="$(RepositoryRootDirectory)TestAssets\buildVersion.txt">
-      <Output TaskParameter="Lines" ItemName="SdkBuildVersion" />
-    </ReadLinesFromFile>
-    
-    <PropertyGroup>
-      <SdkBuildVersion>@(SdkBuildVersion)</SdkBuildVersion>
-      <_RestoreSdkCommand>$(DotNetTool) restore</_RestoreSdkCommand>
-      <_RestoreSdkCommand>$(_RestoreSdkCommand) $(RepositoryRootDirectory)\build\Sdk\SdkRestoreProject.proj</_RestoreSdkCommand>
-      <_RestoreSdkCommand>$(_RestoreSdkCommand) /p:ExcludeRestorePackageImports=true</_RestoreSdkCommand>
-      <_RestoreSdkCommand>$(_RestoreSdkCommand) --packages $(NuGet_Packages)</_RestoreSdkCommand>
-    </PropertyGroup>
-    
-    <Exec Command="$(_RestoreSdkCommand)" />
-
-    <ItemGroup>
-      <SdkFile Include="$(PackagesLayoutDir)\**\*.*">
-        <SdkDir>Microsoft.NET.Sdk</SdkDir>
-      </SdkFile>
-      <SdkFile Include="$(NuGet_Packages)\nuget.build.tasks.pack\$(NuGetVersion)\**\*.*">
-        <SdkDir>NuGet.Build.Tasks.Pack</SdkDir>
-      </SdkFile>
-    </ItemGroup>
-
-    <Copy SourceFiles="@(SdkFile)"
-          DestinationFiles="$(RepositoryRootDirectory)bin\$(Configuration)\Sdks\%(SdkFile.SdkDir)\%(SdkFile.RecursiveDir)\%(SdkFile.Filename)%(SdkFile.Extension)" />
-    
-  </Target>
-
-  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
-    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot;"
+  <Target Name="Test">
+    <Exec Command="$(DotNetTool) run -c $(Configuration) --project &quot;%(TestProject.FullPath)&quot; -xml &quot;%(TestProject.Filename).TestResults.xml&quot; -verbose"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"
           />
   </Target>
 
-  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;DeployMSBuildSdks" />
-  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;DeployMSBuildSdks" />
+  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages" />
+  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages" />
 
   <Target Name="Build" DependsOnTargets="BuildWithoutTesting;Test" />
   <Target Name="Rebuild" DependsOnTargets="RebuildWithoutTesting;Test" />

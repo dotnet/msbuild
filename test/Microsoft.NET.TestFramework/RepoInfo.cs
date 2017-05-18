@@ -78,6 +78,14 @@ namespace Microsoft.NET.TestFramework
             get { return Path.Combine(BinPath, Configuration, "Sdks"); }
         }
 
+        public static string CliSdkPath
+        {
+            get { return Path.Combine(RepoRoot, ".dotnet_cli", "sdk", CliVersion); }
+        }
+
+        public static string CliVersion { get; }
+            = File.ReadAllText(Path.Combine(RepoRoot, "DotnetCLIVersion.txt")).Trim();
+
         public static string DotNetHostPath
         {
             get
@@ -109,6 +117,8 @@ namespace Microsoft.NET.TestFramework
             command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.NuGetCachePath);
 
             command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
+
+            command = command.EnvironmentVariable("NETCoreSdkBundledVersionsProps", Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props"));
 
             return command;
         }

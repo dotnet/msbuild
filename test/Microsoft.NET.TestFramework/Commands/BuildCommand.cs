@@ -6,37 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class BuildCommand : TestCommand
+    public sealed class BuildCommand : MSBuildCommand
     {
-        bool _captureStdOut;
-
-        public BuildCommand(MSBuildTest msbuild, string projectRootPath, string relativePathToProject = null)
-            : base(msbuild, projectRootPath, relativePathToProject)
+        public BuildCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null, MSBuildTest msbuild = null)
+            : base(log, "Build", projectRootPath, relativePathToProject, msbuild)
         {
-        }
-
-        public BuildCommand CaptureStdOut()
-        {
-            _captureStdOut = true;
-            return this;
-        }
-
-        public override CommandResult Execute(params string[] args)
-        {
-            var newArgs = args.ToList();
-            newArgs.Insert(0, FullPathProjectFile);
-
-            var command = MSBuild.CreateCommandForTarget("build", newArgs.ToArray());
-
-            if (_captureStdOut)
-            {
-                command = command.CaptureStdOut();
-            }
-
-            return command.Execute();
         }
     }
 }

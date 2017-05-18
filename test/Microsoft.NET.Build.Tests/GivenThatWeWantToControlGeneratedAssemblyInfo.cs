@@ -10,11 +10,16 @@ using Xunit;
 using FluentAssertions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Runtime.InteropServices;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToControlGeneratedAssemblyInfo : SdkTest
     {
+        public GivenThatWeWantToControlGeneratedAssemblyInfo(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("AssemblyInformationVersionAttribute")]
         [InlineData("AssemblyFileVersionAttribute")]
@@ -31,9 +36,9 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: Path.DirectorySeparatorChar + attributeToOptOut)
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute(
                     "/p:Version=1.2.3-beta",
@@ -97,9 +102,9 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .Restore("", $"/p:OutputType=Library;TargetFramework={targetFramework}");
+                .Restore(Log, "", $"/p:OutputType=Library;TargetFramework={targetFramework}");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute($"/p:OutputType=Library;TargetFramework={targetFramework};VersionPrefix=1.2.3")
                 .Should()

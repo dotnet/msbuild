@@ -13,11 +13,16 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Microsoft.DotNet.Cli.Utils;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantAllResourcesInSatellite : SdkTest
     {
+        public GivenThatWeWantAllResourcesInSatellite(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_retrieves_strings_successfully()
         {
@@ -28,10 +33,15 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
-            TestSatelliteResources(_testAssetsManager);
+            TestSatelliteResources(Log, _testAssetsManager);
         }
 
-        public static void TestSatelliteResources(TestAssetsManager testAssetsManager, Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
+        internal static void TestSatelliteResources(
+            ITestOutputHelper log,
+            TestAssetsManager testAssetsManager, 
+            Action<XDocument> projectChanges = null,
+            Action<BuildCommand> setup = null, 
+            [CallerMemberName] string callingMethod = null)
         {
             var testAsset = testAssetsManager
                 .CopyTestAsset("AllResourcesInSatellite", callingMethod)
@@ -42,9 +52,9 @@ namespace Microsoft.NET.Build.Tests
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
 
-            testAsset = testAsset.Restore();
+            testAsset = testAsset.Restore(log);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(log, testAsset.TestRoot);
 
             if (setup != null)
             {

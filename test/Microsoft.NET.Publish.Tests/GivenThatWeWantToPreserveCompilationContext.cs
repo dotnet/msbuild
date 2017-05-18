@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -25,14 +26,14 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             foreach (var targetFramework in new[] { "net46", "netcoreapp1.1" })
             {
-                var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
+                var publishCommand = new PublishCommand(Log, appProjectDirectory);
 
                 if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
@@ -285,5 +286,9 @@ System.Threading.Timer.dll
 System.Xml.ReaderWriter.dll
 System.Xml.XDocument.dll
 TestLibrary.dll".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        public GivenThatWeWantToPreserveCompilationContext(ITestOutputHelper log) : base(log)
+        {
+        }
     }
 }
