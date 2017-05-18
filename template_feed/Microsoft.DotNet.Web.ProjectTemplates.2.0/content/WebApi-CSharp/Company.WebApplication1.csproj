@@ -12,8 +12,15 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25102" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25102" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.0-preview2-25102" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25102" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.0-preview2-25102" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview2-25102" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NoTools)' != 'True'">
