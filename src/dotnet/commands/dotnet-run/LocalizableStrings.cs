@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public const string RunCommandExceptionUnableToRunSpecifyFramework = "Unable to run your project\nYour project targets multiple frameworks. Please specify which framework to run using '{0}'.";
 
-        public const string RunCommandExceptionUnableToRun = "Unable to run your project\nPlease ensure you have a runnable project type and ensure '{0}' supports this project.\nThe current {1} is '{2}'";
+        public const string RunCommandExceptionUnableToRun = "Unable to run your project.\nPlease ensure you have a runnable project type and ensure '{0}' supports this project.\nA runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.\nThe current {1} is '{2}'.";
 
         public const string RunCommandExceptionNoProjects = "Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.";
 
