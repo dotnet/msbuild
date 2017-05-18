@@ -271,5 +271,43 @@ public static class Program
                     .HaveNoDuplicateNativeAssets(""); ;
             }
         }
+
+        [Fact]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OutputPathCasing",
+                TargetFrameworks = "igored",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(testProject.Name, extraArgs);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute(extraArgs)
+                .Should()
+                .Pass();
+
+            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+
+            Directory.GetDirectories(outputFolderWithConfiguration)
+                .Select(Path.GetFileName)
+                .Should()
+                .BeEquivalentTo("netcoreapp1.1");
+
+            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+            Directory.GetDirectories(intermediateFolderWithConfiguration)
+                .Select(Path.GetFileName)
+                .Should()
+                .BeEquivalentTo("netcoreapp1.1");
+        }
     }
 }
