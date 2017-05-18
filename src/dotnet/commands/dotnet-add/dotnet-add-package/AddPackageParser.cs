@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli
         {
             var httpClient = new HttpClient();
 
-            string result;
+            Stream result;
 
             try
             {
@@ -62,21 +62,22 @@ namespace Microsoft.DotNet.Cli
                 var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/query?q={match}&skip=0&take=100&prerelease=true", cancellation.Token)
                                          .Result;
 
-                result = response.Content.ReadAsStringAsync().Result;
+                result = response.Content.ReadAsStreamAsync().Result;
             }
             catch (Exception)
             {
                 yield break;
             }
 
-            using (var reader = new JsonTextReader(new StringReader(result)))
+            JObject json;
+            using (var reader = new JsonTextReader(new StreamReader(result)))
             {
-                var json = JObject.Load(reader);
+                json = JObject.Load(reader);
+            }
 
-                foreach (var id in json["data"])
-                {
-                    yield return id["id"].Value<string>();
-                }
+            foreach (var id in json["data"])
+            {
+                yield return id["id"].Value<string>();
             }
         }
     }

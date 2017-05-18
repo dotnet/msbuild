@@ -13,12 +13,16 @@ namespace Microsoft.DotNet.Cli.Utils
         public RuntimeConfigFramework Framework { get; } 
  
         public RuntimeConfig(string runtimeConfigPath) 
-        { 
-            var runtimeConfigJson = OpenRuntimeConfig(runtimeConfigPath); 
- 
-            Framework = ParseFramework(runtimeConfigJson); 
- 
-            IsPortable = Framework != null; 
+        {
+            JObject runtimeConfigJson;
+            using (var streamReader = new StreamReader(new FileStream(runtimeConfigPath, FileMode.Open)))
+            {
+                runtimeConfigJson = OpenRuntimeConfig(streamReader);
+            }
+
+            Framework = ParseFramework(runtimeConfigJson);
+
+            IsPortable = Framework != null;
         } 
  
         public static bool IsApplicationPortable(string entryAssemblyPath) 
@@ -32,9 +36,9 @@ namespace Microsoft.DotNet.Cli.Utils
             return false; 
         } 
  
-        private JObject OpenRuntimeConfig(string runtimeConfigPath) 
+        private JObject OpenRuntimeConfig(StreamReader streamReader) 
         {
-            var reader = new JsonTextReader(new StringReader(File.ReadAllText(runtimeConfigPath)));
+            var reader = new JsonTextReader(streamReader);
 
             return JObject.Load(reader);
         } 
