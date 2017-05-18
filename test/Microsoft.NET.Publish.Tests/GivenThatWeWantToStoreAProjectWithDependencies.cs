@@ -135,7 +135,7 @@ namespace Microsoft.NET.Publish.Tests
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
 
@@ -233,7 +233,7 @@ namespace Microsoft.NET.Publish.Tests
             var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertions.xml");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
@@ -275,7 +275,7 @@ namespace Microsoft.NET.Publish.Tests
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
             new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "StarVersion.xml")
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
 
@@ -308,12 +308,6 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_creates_profiling_symbols()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // profiling symbols are not supported on OSX
-                return;
-            }
-
             if (UsingFullFrameworkMSBuild)
             {
                 //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
@@ -335,13 +329,19 @@ namespace Microsoft.NET.Publish.Tests
                     $"/p:ComposeDir={outputFolder}",
                     $"/p:ComposeWorkingDir={workingDir}",
                     "/p:DoNotDecorateComposeDir=true",
-                    "/p:PreserveComposeWorkingDir=true",
-                    "/p:CreateProfilingSymbols=true")
+                    "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
 
             var symbolFileExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ni.pdb" : ".map";
             var symbolsFolder = new DirectoryInfo(Path.Combine(outputFolder, "symbols"));
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // profiling symbols are not supported on OSX
+                symbolsFolder.Should().NotExist();
+                return;
+            }
 
             var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
             newtonsoftSymbolsFolder.Should().Exist();

@@ -244,9 +244,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RestoreProj>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Restore.csproj"))</RestoreProj>          <!-- To minimize parsing huge input files during restore stage for packages -->
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
-      <CreateProfilingSymbols Condition="'$(CreateProfilingSymbols)' == ''">false</CreateProfilingSymbols>
     </PropertyGroup>
-
+    
+    <PropertyGroup Condition="'$(CreateProfilingSymbols)' == ''">
+      <!-- There is no support for profiling symbols on OSX -->
+      <CreateProfilingSymbols Condition="$(RuntimeIdentifier.StartsWith('osx'))">false</CreateProfilingSymbols>
+      <CreateProfilingSymbols Condition="'$(CreateProfilingSymbols)' == ''">true</CreateProfilingSymbols>
+    </PropertyGroup>
 
     <NETSdkError Condition="Exists($(ComposeWorkingDir))"
                  ResourceName="FolderAlreadyExists"
