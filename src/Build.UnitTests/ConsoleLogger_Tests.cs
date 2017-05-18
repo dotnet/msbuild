@@ -2001,11 +2001,11 @@ namespace Microsoft.Build.UnitTests
 
             L.Parameters = "";
             L.ParseParameters();
-            Assert.False(L.ShowSummary);
+            Assert.Null(L.ShowSummary);
 
             L.Parameters = null;
             L.ParseParameters();
-            Assert.False(L.ShowSummary);
+            Assert.Null(L.ShowSummary);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);

@@ -123,18 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Suppresses the display of error and warnings summary.
         /// </summary>
-        internal bool ShowSummary
-        {
-            get
-            {
-                return _showSummary ?? false;
-            }
-
-            set
-            {
-                _showSummary = value;
-            }
-        }
+        internal bool? ShowSummary { get; set; }
 
         /// <summary>
         /// Provide access to the write hander delegate so that it can be redirected
@@ -1016,23 +1005,23 @@ namespace Microsoft.Build.BackEnd.Logging
 
             showTargetOutputs = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
 
-            // If not specifically instructed otherwise, show a summary in normal
-            // and higher verbosities.
-            if (_showSummary == null && IsVerbosityAtLeast(LoggerVerbosity.Normal))
-            {
-                _showSummary = true;
-            }
-
             if (showOnlyWarnings || showOnlyErrors)
             {
-                if (!_showSummary.HasValue)
+                if (ShowSummary == null)
                 {
                     // By default don't show the summary when the showOnlyWarnings / showOnlyErrors is specified.
                     // However, if the user explicitly specified summary or nosummary, use that.
-                    _showSummary = false;
+                    ShowSummary = false;
                 }
 
                 this.showPerfSummary = false;
+            }
+
+            // If not specifically instructed otherwise, show a summary in normal
+            // and higher verbosities.
+            if (ShowSummary == null && IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            {
+                ShowSummary = true;
             }
 
             // Put this after reading the parameters, since it may want to initialize something
@@ -1087,10 +1076,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     showPerfSummary = true;
                     return true;
                 case "NOSUMMARY":
-                    _showSummary = false;
+                    ShowSummary = false;
                     return true;
                 case "SUMMARY":
-                    _showSummary = true;
+                    ShowSummary = true;
                     return true;
                 case "NOITEMANDPROPERTYLIST":
                     showItemAndPropertyList = false;
@@ -1270,12 +1259,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Console logger parameter value split character.
         /// </summary>
         private static readonly char[] s_parameterValueSplitCharacter = { '=' };
-
-        /// <summary>
-        /// Console logger should show error and warning summary at the end of build?
-        /// If null, user has made no indication.
-        /// </summary>
-        private bool? _showSummary;
 
         /// <summary>
         /// When true, accumulate performance numbers.

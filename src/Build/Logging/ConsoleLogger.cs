@@ -266,7 +266,11 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                return (_consoleLogger == null ? _showSummary : _consoleLogger.ShowSummary) ?? false;
+                if (_consoleLogger == null)
+                {
+                    return _showSummary == true;
+                }
+                return _consoleLogger.ShowSummary == true;
             }
 
             set

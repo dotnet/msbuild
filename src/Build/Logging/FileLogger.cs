@@ -214,6 +214,11 @@ namespace Microsoft.Build.Logging
                 case "NOAUTOFLUSH":
                     _autoFlush = false;
                     break;
+                case "ERRORSONLY":
+                case "WARNINGSONLY":
+                    ShowSummary = false;
+                    SkipProjectStartedText = true;
+                    break;
                 case "ENCODING":
                     try
                     {
@@ -269,7 +274,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Encoding for the output. Defaults to UTF-8.
         /// </summary>
-        private Encoding _encoding = Encoding.UTF8;
+        private Encoding _encoding = new UTF8Encoding(false);
 #endif
         /// <summary>
         /// File logger parameters delimiters.

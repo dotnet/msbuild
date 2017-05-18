@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal override void ResetConsoleLoggerState()
         {
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 errorList = new ArrayList();
                 warningList = new ArrayList();
@@ -105,8 +105,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             buildStarted = e.Timestamp;
 
-            // if verbosity is detailed or diagnostic
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            if (ShowSummary == true)
             {
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
@@ -128,8 +127,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ShowPerfSummary();
             }
 
-            // if verbosity is normal, detailed or diagnostic
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            if (ShowSummary == true)
             {
                 if (e.Succeeded)
                 {
@@ -144,8 +142,8 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // The decision whether or not to show a summary at this verbosity
-            // was made during initalization. We just do what we're told.
-            if (ShowSummary)
+            // was made during initialization. We just do what we're told.
+            if (ShowSummary == true)
             {
                 ShowErrorWarningSummary();
 
@@ -171,7 +169,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            if (ShowSummary == true)
             {
                 string timeElapsed = LogFormatter.FormatTimeSpan(e.Timestamp - buildStarted);
 
@@ -227,7 +225,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // if verbosity is normal, detailed or diagnostic
-            if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            if (IsVerbosityAtLeast(LoggerVerbosity.Normal) && ShowSummary != false)
             {
                 ShowDeferredMessages();
 
@@ -474,7 +472,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile));
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 errorList.Add(e);
             }
@@ -491,7 +489,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile));
-            if (ShowSummary)
+            if (ShowSummary == true)
             {
                 warningList.Add(e);
             }
