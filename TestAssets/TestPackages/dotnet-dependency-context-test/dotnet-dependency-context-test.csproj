@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
+      <Version>$(CLI_SharedFrameworkVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
       <Version>$(DependencyModelVersion)</Version>
