@@ -24,7 +24,7 @@
     <Message Text="dotnet exec ..\tools\DependencyUpdater\bin\debug\netcoreapp1.1\DependencyUpdater.dll &quot;$(MSBuildThisFileDirectory)&quot; $(UpdateToNoTimestamp) $(UpdatePackageSources)" Importance="High" />
     <MSBuild Targets="Restore;Build" Projects="..\tools\DependencyUpdater\DependencyUpdater.csproj" />
     <Exec 
-         Command="dotnet run DependencyUpdater.csproj $(MSBuildThisFileDirectory) $(UpdateToNoTimestamp) $(UpdatePackageSources)" 
+         Command="dotnet run $(MSBuildThisFileDirectory) $(UpdateToNoTimestamp) $(UpdatePackageSources)" 
          WorkingDirectory="..\tools\DependencyUpdater\" />
   </Target>
 
