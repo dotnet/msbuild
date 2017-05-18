@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
                 { "CscToolExe", GetRunCscPath() },
+                { "VbcToolExe", GetRunVbcPath() },
                 { "MSBuildSDKsPath", GetMSBuildSDKsPath() }
             };
 
@@ -77,10 +78,20 @@ namespace Microsoft.DotNet.Cli.Utils
                 SdksDirectoryName);
         }
 
+        private static string GetRunVbcPath()
+        {
+            return GetRunToolPath("Vbc");
+        }        
+
         private static string GetRunCscPath()
         {
+            return GetRunToolPath("Csc");
+        }
+
+        private static string GetRunToolPath(string compilerName)
+        {
             var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
-            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"RunCsc{scriptExtension}");
+            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"Run{compilerName}{scriptExtension}");
         }
     }
 }
