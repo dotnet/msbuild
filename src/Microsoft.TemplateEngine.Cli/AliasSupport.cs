@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli
             inputTokens.RemoveAt(0);    // remove the command name
 
             if (aliasRegistry.TryExpandCommandAliases(inputTokens, out IReadOnlyList<string> expandedTokens))
-            {
+            {   // TryExpandCommandAliases() return value indicates error (cycle) or not error. It doesn't indicate whether or not expansions actually occurred.
                 if (!expandedTokens.SequenceEqual(inputTokens))
                 {
                     commandInput.ResetArgs(expandedTokens.ToArray());
@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (InvalidAliasRegex.IsMatch(aliasName))
             {
-                Reporter.Output.WriteLine(LocalizableStrings.AliasNameContainsInvalidCharacters);   // TODO - change this string
+                Reporter.Output.WriteLine(LocalizableStrings.AliasNameContainsInvalidCharacters);
                 return CreationResultStatus.InvalidParamValues;
             }
 
@@ -72,18 +72,18 @@ namespace Microsoft.TemplateEngine.Cli
             switch (result.Status)
             {
                 case AliasManipulationStatus.Created:
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCreated, result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCreated, result.AliasName, string.Join(" ", result.AliasTokens)));
                     returnStatus = CreationResultStatus.Success;
                     break;
                 case AliasManipulationStatus.Removed:
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoved, result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoved, result.AliasName, string.Join(" ", result.AliasTokens)));
                     returnStatus = CreationResultStatus.Success;
                     break;
                 case AliasManipulationStatus.RemoveNonExistentFailed:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoveNonExistentFailed, result.AliasName));
                     break;
                 case AliasManipulationStatus.Updated:
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasUpdated, result.AliasName, result.AliasValue));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasUpdated, result.AliasName, string.Join(" ", result.AliasTokens)));
                     returnStatus = CreationResultStatus.Success;
                     break;
                 case AliasManipulationStatus.WouldCreateCycle:
@@ -135,13 +135,13 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
         {
-            IReadOnlyDictionary<string, string> aliasesToShow;
+            IReadOnlyDictionary<string, IReadOnlyList<string>> aliasesToShow;
 
             if (!string.IsNullOrEmpty(commandInput.ShowAliasesAliasName))
             {
-                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out string aliasValue))
+                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out IReadOnlyList<string> aliasValue))
                 {
-                    aliasesToShow = new Dictionary<string, string>()
+                    aliasesToShow = new Dictionary<string, IReadOnlyList<string>>()
                     {
                         { commandInput.ShowAliasesAliasName, aliasValue }
                     };
@@ -158,9 +158,9 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
             }
 
-            HelpFormatter<KeyValuePair<string, string>> formatter = new HelpFormatter<KeyValuePair<string, string>>(environment, aliasesToShow, 2, '-', false)
+            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter = new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(environment, aliasesToShow, 2, '-', false)
                             .DefineColumn(t => t.Key, LocalizableStrings.AliasName)
-                            .DefineColumn(t => t.Value, LocalizableStrings.AliasValue);
+                            .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue);
             Reporter.Output.WriteLine(formatter.Layout());
             return CreationResultStatus.Success;
         }
