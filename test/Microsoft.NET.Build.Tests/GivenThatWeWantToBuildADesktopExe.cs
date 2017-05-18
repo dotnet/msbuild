@@ -378,13 +378,28 @@ namespace DefaultReferences
             });
         }
 
-        [WindowsOnlyFact]
-        public void It_places_package_satellites_correctly()
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_places_package_satellites_correctly(bool crossTarget)
         {
             var testAsset = _testAssetsManager
-              .CopyTestAsset("DesktopUsingPackageWithSatellites")
-              .WithSource()
-              .Restore(Log);
+              .CopyTestAsset(
+                  "DesktopUsingPackageWithSatellites", 
+                  identifier: crossTarget ? "_cross" : "")
+              .WithSource();
+
+            if (crossTarget)
+            {
+                 testAsset = testAsset.WithProjectChanges(project =>
+                 {
+                     var ns = project.Root.Name.Namespace;
+                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                     propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                 });
+            }
+
+            testAsset.Restore(Log);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
