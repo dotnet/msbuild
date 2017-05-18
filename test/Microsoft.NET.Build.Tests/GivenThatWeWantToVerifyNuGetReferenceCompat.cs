@@ -171,6 +171,7 @@ namespace Microsoft.NET.Build.Tests
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            restoreCommand.CaptureStdOut();
             restoreCommand.Execute().Should().Fail();
         }
 
@@ -186,6 +187,7 @@ namespace Microsoft.NET.Build.Tests
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
+            restoreCommand.CaptureStdOut();
             restoreCommand.Execute().Should().Fail();
         }
 
