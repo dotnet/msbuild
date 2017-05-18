@@ -16,4 +16,5 @@
   "uiFilters": [ "oneaspnet" ],
   "supportsDocker": true,
   "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.RazorPages",
+  "minFullFrameworkVersion": "4.6.1"
 }

@@ -63,5 +63,6 @@
     }
   ],
   "azureReplyUrlPortName": "HttpsPort",
-  "includeLaunchSettings": true
+  "includeLaunchSettings": true,
+  "minFullFrameworkVersion": "4.6.1"
 }
