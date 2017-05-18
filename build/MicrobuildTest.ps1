@@ -41,13 +41,10 @@ class BuildInstance {
     )
 
     [string[]] $SatelliteAssemblyNames = @(
-        "Microsoft.Build.Conversion.Core.resources.dll",
-        "Microsoft.Build.Engine.resources.dll",
         "Microsoft.Build.resources.dll",
         "Microsoft.Build.Tasks.Core.resources.dll",
         "Microsoft.Build.Utilities.Core.resources.dll",
-        "MSBuild.resources.dll",
-        "MSBuildTaskHost.resources.dll"
+        "MSBuild.resources.dll"
     )
 
     BuildInstance([String] $root) {
@@ -65,10 +62,6 @@ class BuildInstance {
     [string[]] ResolvedSatelliteAssemblies() {
         $satellites = @()
 
-        if (-Not ($this.IsLocalized())) {
-            return $satellites
-        }
-
         foreach ($l in [BuildInstance]::languages) {
              foreach ($s in $this.SatelliteAssemblyNames) {
                 $satellites += CombineAndNormalize(@($this.Root, $l, $s))
@@ -76,10 +69,6 @@ class BuildInstance {
         }
 
         return $satellites
-    }
-
-    [bool] IsLocalized() {
-        return $this.Root -match ".*(x86|x64).*" 
     }
 
     [String] ToString() {
@@ -98,6 +87,12 @@ class FullFrameworkBuildInstance : BuildInstance{
             "MSBuildTaskHost.exe",
             "Microsoft.Build.Conversion.Core.dll",
             "Microsoft.Build.Engine.dll"
+        )
+
+        ([BuildInstance]$this).SatelliteAssemblyNames += @(
+            "Microsoft.Build.Conversion.Core.resources.dll",
+            "Microsoft.Build.Engine.resources.dll",
+            "MSBuildTaskHost.resources.dll"
         )
     }
 }
@@ -196,10 +191,10 @@ class Layout {
     static [Layout] FromCPVSDrop([string] $root) {
 
         $layout = [Layout]::new(
-            (CombineAndNormalize @($root, "bin\x86\Windows_NT\Release\Output")),
-            (CombineAndNormalize @($root, "bin\x64\Windows_NT\Release\Output")),
-            (CombineAndNormalize @($root, "bin\Release\Output")),
-            (CombineAndNormalize @($root, "bin\Release-NetCore\Output")),
+            (CombineAndNormalize @($root, "bin\Release\x86\Windows_NT\Output")),
+            (CombineAndNormalize @($root, "bin\Release\x64\Windows_NT\Output")),
+            (CombineAndNormalize @($root, "bin\Release\AnyCPU\Windows_NT\Output")),
+            (CombineAndNormalize @($root, "bin\Release-NetCore\AnyCPU\Windows_NT\Output")),
             (CombineAndNormalize @($root, "bin\Packages")),
             (CombineAndNormalize @($root, "pkg")))
 
@@ -287,7 +282,7 @@ class TestChecker : Checker{
 }
 
 class FileChecker : Checker{
-    $ExpectedNumberOfNugetPackages = 7
+    $ExpectedNumberOfNugetPackages = 8
 
     [Diagnostic[]] CheckPathExists([string] $path) {
         if (-Not (Test-Path $path)) {
