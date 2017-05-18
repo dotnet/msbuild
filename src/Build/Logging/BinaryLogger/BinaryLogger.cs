@@ -165,17 +165,44 @@ namespace Microsoft.Build.Logging
         {
             if (Parameters == null)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", 0, Parameters));
+                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", ""));
             }
 
-            string[] parameters = Parameters.Split(';');
-
-            if (parameters.Length != 1)
+            var parameters = Parameters.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var parameter in parameters)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameters.Length, Parameters));
+                if (string.Equals(parameter, "Sources=None", StringComparison.OrdinalIgnoreCase))
+                {
+                    CaptureSourceFiles = SourceFileCaptureMode.None;
+                }
+                else if (string.Equals(parameter, "Sources=Embedded", StringComparison.OrdinalIgnoreCase))
+                {
+                    CaptureSourceFiles = SourceFileCaptureMode.Embedded;
+                }
+                else if (string.Equals(parameter, "Sources=ZipFile", StringComparison.OrdinalIgnoreCase))
+                {
+                    CaptureSourceFiles = SourceFileCaptureMode.ZipFile;
+                }
+                else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
+                {
+                    FilePath = parameter;
+                    if (FilePath.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        FilePath = FilePath.Substring("LogFile=".Length);
+                    }
+
+                    FilePath = parameter.TrimStart('"').TrimEnd('"');
+                }
+                else
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameter));
+                }
             }
 
-            FilePath = parameters[0].TrimStart('"').TrimEnd('"');
+            if (FilePath == null)
+            {
+                FilePath = "msbuild.binlog";
+            }
 
             try
             {

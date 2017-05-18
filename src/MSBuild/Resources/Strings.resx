@@ -621,7 +621,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </comment>
   </data>
   <data name="HelpMessage_30_BinaryLoggerSwitch" UESanitized="false" Visibility="Public">
-    <value>  /binaryLogger[:output.binlog]
+    <value>  /binaryLogger[:[LogFile=]output.binlog[;Sources={None,Embedded,ZipFile}]]
                      Serializes all build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
@@ -631,9 +631,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      diagnostic-level log, but it contains more information.
                      (Short form: /bl)
 
+                     The binary log by default captures all project and target
+                     files encountered during the build. The optional Sources
+                     switch controls this behavior:
+
+                         Sources=None      - Don't collect the sources
+                         Sources=Embedded  - Embed the sources in the log file
+                         Sources=ZipFile   - Save to output.buildsources.zip
+                                             where output is the same name as
+                                             the binary log file name.
+
+                     The default setting for Sources is Embedded.
+
                      Examples:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;Sources=None
+                       /bl:output.binlog;Sources=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </value>

@@ -2726,10 +2726,10 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string outputLogFilePath = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
+            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
 
             BinaryLogger logger = new BinaryLogger();
-            logger.Parameters = outputLogFilePath;
+            logger.Parameters = arguments;
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
