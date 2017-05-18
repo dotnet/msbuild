@@ -119,8 +119,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     targets.
    -->
   <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
-    <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
+    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
   </PropertyGroup>
 
 </Project>
