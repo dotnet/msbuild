@@ -34,9 +34,13 @@ namespace Microsoft.DotNet.Tools.Restore
             var msbuildArgs = new List<string>
             {
                 "/NoLogo",
-                "/t:Restore",
-                "/ConsoleLoggerParameters:Verbosity=Minimal"
+                "/t:Restore"
             };
+
+            if (!parsedRestore.HasOption("verbosity"))
+            {
+                msbuildArgs.Add("/ConsoleLoggerParameters:Verbosity=Minimal");
+            }
 
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 
