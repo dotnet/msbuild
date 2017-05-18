@@ -291,9 +291,9 @@ public static class Program
             string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(testProject.Name, extraArgs);
+                .Restore(Log, testProject.Name, extraArgs);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
                 .Execute(extraArgs)
