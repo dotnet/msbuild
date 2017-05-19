@@ -33,9 +33,9 @@ Geri yükleme hızını artırmak ve çevrimdışı erişimi etkinleştirmek iç
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Birincil NuGet önbelleği oluşturulamadı. {0} şu hata ile başarısız oldu: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">Birincil NuGet önbelleği oluşturulamadı. {0} şu hata ile başarısız oldu: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

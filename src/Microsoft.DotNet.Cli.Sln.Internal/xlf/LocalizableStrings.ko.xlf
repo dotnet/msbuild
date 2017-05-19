@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
-        <source>File header is missing</source>
-        <target state="translated">파일 헤더가 누락됨</target>
-        <note />
+        <source>Expected file header not found</source>
+        <target state="needs-review-translation">파일 헤더가 누락됨</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -52,6 +52,11 @@
         <source>Property set is missing '{0}'</source>
         <target state="translated">속성 설정에 '{0}'이(가) 없습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="FileHeaderMissingVersionError">
+        <source>File header is missing version</source>
+        <target state="new">File header is missing version</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

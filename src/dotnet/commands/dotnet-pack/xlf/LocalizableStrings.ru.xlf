@@ -38,26 +38,6 @@
         <target state="translated">Включение PDB-файлов и исходных файлов. Исходные файлы передаются в папку src в получившемся проекте NuGet</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdConfig">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Конфигурация, используемая для сборки проекта.  Значение по умолчанию для большинства проектов — "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffix">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">VERSION_SUFFIX</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Определяет значение для свойства $(VersionSuffix) в проекте.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
         <target state="translated">Задать флаг "подлежит обслуживанию" в пакете. Дополнительные сведения: https://aka.ms/nupkgservicing.</target>

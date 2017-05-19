@@ -3,24 +3,9 @@
   <file datatype="xml" source-language="en" target-language="tr" original="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
-      <trans-unit id="AppFullName">
-        <source>.NET Publisher</source>
-        <target state="translated">.NET Yayımcısı</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
         <target state="translated">.NET Platformunun yayımcısı.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgument">
-        <source>PROJECT</source>
-        <target state="translated">PROJE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgDescription">
-        <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Yayımlanacak MSBuild proje dosyası. Bir proje dosyası belirtilmezse MSBuild, geçerli çalışma dizininde dosya uzantısının sonu ‘proj’ olan bir dosyası arar ve bu dosyayı kullanır.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -33,16 +18,6 @@
         <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeOption">
-        <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">Projeyi belirli bir çalışma zamanı için yayımlar. Bu, kendi içinde dağıtım oluştururken kullanılır. Varsayılan seçenek, çerçeveye bağlı bir uygulama yayımlamaktır.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">ÇIKIŞ_DİZİNİ</target>
@@ -53,34 +28,19 @@
         <target state="translated">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigurationOption">
-        <source>CONFIGURATION</source>
-        <target state="translated">YAPILANDIRMA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan: "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOption">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">SÜRÜM_SONEKİ</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FilterProjOption">
-        <source>profile.xml</source>
-        <target state="needs-review-translation">profile.proj</target>
+      <trans-unit id="ManifestOption">
+        <source>manifest.xml</source>
+        <target state="new">manifest.xml</target>
         <note></note>
       </trans-unit>
-      <trans-unit id="FilterProjOptionDescription">
-        <source>The XML file that contains the list of packages to be excluded from publish step.</source>
-        <target state="needs-review-translation">The list of packages to be excluded from publish step.</target>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
+        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
         <note></note>
       </trans-unit>
     </body>

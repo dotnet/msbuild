@@ -13,35 +13,30 @@
         <target state="translated">Команда добавления ссылки на пакет</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <target state="translated">Добавляемые ссылки на пакеты</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <target state="translated">Укажите одну добавляемую ссылку на пакет.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">Добавлять ссылку только при выборе конкретной целевой платформы</target>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Добавлять ссылку только при выборе конкретной целевой платформы</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Добавление ссылки без предварительной проверки восстановления и совместимости.</target>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Добавление ссылки без предварительной проверки восстановления и совместимости.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">Указание конкретных источников пакетов NuGet, используемых во время восстановления.</target>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <target state="needs-review-translation">Указание конкретных источников пакетов NuGet, используемых во время восстановления.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <target state="translated">Восстановление пакетов в указанном каталоге.</target>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <target state="needs-review-translation">Восстановление пакетов в указанном каталоге.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -49,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="translated">Не удалось создать файл графа зависимостей для проекта {0}. Невозможно добавить ссылку на пакет.</target>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="needs-review-translation">Не удалось создать файл графа зависимостей для проекта {0}. Невозможно добавить ссылку на пакет.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -72,6 +67,16 @@
         <source>PACKAGE_DIRECTORY</source>
         <target state="translated">PACKAGE_DIRECTORY</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="new">The package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="new">PACKAGE_NAME</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

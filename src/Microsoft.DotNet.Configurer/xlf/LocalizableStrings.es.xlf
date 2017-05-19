@@ -33,9 +33,9 @@ Se está ejecutando un comando para rellenar inicialmente la memoria caché de p
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">No se pudo crear la caché de NuGet. Error de {0} con: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">No se pudo crear la caché de NuGet. Error de {0} con: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
