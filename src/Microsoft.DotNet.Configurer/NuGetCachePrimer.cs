@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
@@ -85,6 +86,14 @@ namespace Microsoft.DotNet.Configurer
                     {
                         var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
 
+                        File.WriteAllText(
+                            Path.Combine(workingDirectory, "global.json"),
+                            $@"{{
+                                 ""sdk"": {{
+                                    ""version"":""{Product.Version}""
+                                 }}
+                               }}");
+
                         succeeded &= CreateTemporaryProject(workingDirectory, templateInfo);
 
                         if (succeeded)
@@ -129,6 +138,7 @@ namespace Microsoft.DotNet.Configurer
 
             if (commandResult.ExitCode != 0)
             {
+                Reporter.Verbose.WriteLine(commandResult.StdOut);
                 Reporter.Verbose.WriteLine(commandResult.StdErr);
 
                 Reporter.Error.WriteLine(
