@@ -1528,7 +1528,7 @@ namespace Microsoft.Build.Utilities
                         // Use sh rather than bash, as not all 'nix systems necessarily have Bash installed
                         File.AppendAllText(_temporaryBatchFile, "#!/bin/sh\n"); // first line for UNIX is ANSI
                         // This is a hack..!
-                        File.AppendAllText(_temporaryBatchFile, ReplaceBackslashes(commandLineCommands), EncodingUtilities.CurrentSystemOemEncoding);
+                        File.AppendAllText(_temporaryBatchFile, AdjustCommandsForOperatingSystem(commandLineCommands), EncodingUtilities.CurrentSystemOemEncoding);
                     }
                     else
                     {
@@ -1612,11 +1612,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                if (!runningOnWindows)
-                {
-                    commandLineCommands = ReplaceBackslashes(commandLineCommands);
-                    responseFileCommands = ReplaceBackslashes(responseFileCommands);
-                }
+                commandLineCommands = AdjustCommandsForOperatingSystem(commandLineCommands);
+                responseFileCommands = AdjustCommandsForOperatingSystem(responseFileCommands);
 
                 if (UseCommandProcessor)
                 {
@@ -1723,8 +1720,13 @@ namespace Microsoft.Build.Utilities
         /// override with more-specific knowledge of what backslashes
         /// are likely to be correct.
         /// </remarks>
-        virtual protected string ReplaceBackslashes(string input)
+        virtual protected string AdjustCommandsForOperatingSystem(string input)
         {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return input;
+            }
+
             StringBuilder sb = new StringBuilder(input);
 
             int length = sb.Length;
