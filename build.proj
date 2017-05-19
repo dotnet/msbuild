@@ -1,8 +1,8 @@
-<!-- Build file -->
+  <!-- Build file -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.SubmitCodeSignJob" />
   <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.WaitForCodeSignJobs" />
-
+  
   <!-- 
     Variables that can be overriden by CI machine (official build):
     
@@ -11,11 +11,11 @@
       - WebSdkVersion -  web sdk full version
       - WebSdkPackagesDropDir [Required] - official drop folder path for web packages
   -->
-
+  
   <PropertyGroup>
     <CoreSdkDropDir Condition="'$(CoreSdkDropDir)' == ''">\\cpvsbuild\Drops\Roslyn\Roslyn-Project-System\DotNet-Core-Sdk</CoreSdkDropDir>
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
-    <NetSdkVersionPrereleasePrefix Condition="'$(NetSdkVersionPrereleasePrefix)' == ''">preview2</NetSdkVersionPrereleasePrefix>
+    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">preview2</VersionPrereleasePrefix>
     <PackagesOutputPath>$(WebSdkRoot)\bin\$(Configuration)\NuGet</PackagesOutputPath>
     <LocalDropRoot>$(WebSdkRoot)\bin\$(Configuration)</LocalDropRoot>
     <CodeSignOutputPath>$(WebSdkRoot)\bin\Signed</CodeSignOutputPath>
@@ -57,7 +57,7 @@
   </UsingTask>
 
   <Target Name="Build" DependsOnTargets="Init;_Build"/>
-
+  
   <Target Name="Init" DependsOnTargets="_InitCoreSdk;_InitWebSdk">
   </Target>
 
@@ -71,7 +71,7 @@
     </GetCoreSdkBuildVersion>
 
     <PropertyGroup>
-      <CoreSdkVersion Condition="'$(CoreSdkVersion)' == ''">$(VersionPrefix)-$(NetSdkVersionPrereleasePrefix)-$(CoreSdkBuildVersion)</CoreSdkVersion>
+      <CoreSdkVersion Condition="'$(CoreSdkVersion)' == ''">$(VersionPrefix)-$(VersionPrereleasePrefix)-$(CoreSdkBuildVersion)</CoreSdkVersion>
       <CoreSdkPackagesDropDir>$(CoreSdkDropDir)\$(CoreSdkBuildVersion)\Packages</CoreSdkPackagesDropDir>
     </PropertyGroup>
   </Target>
@@ -88,7 +88,7 @@
       <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(BuildBranchName)$(CurrentDate)-$(BUILD_NUMBER)</WebSdkVersion>
     </PropertyGroup>
   </Target>
-
+  
   <Target Name="_Build">
     <PropertyGroup>
       <!-- When C# projects have external dependencies that are shared,
@@ -126,7 +126,7 @@
       <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
     </ItemGroup>
 
-    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />
+    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />   
   </Target>
 
   <UsingTask TaskName="GenerateSemaphore" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
@@ -169,3 +169,4 @@
 
   <Import Project="$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets" Condition="Exists('$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets')"/>
 </Project>
+
