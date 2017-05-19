@@ -377,5 +377,39 @@ namespace DefaultReferences
                 "DesktopNeedsBindingRedirects.exe.config"
             });
         }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_places_package_satellites_correctly(bool crossTarget)
+        {
+            var testAsset = _testAssetsManager
+              .CopyTestAsset(
+                  "DesktopUsingPackageWithSatellites", 
+                  identifier: crossTarget ? "_cross" : "")
+              .WithSource();
+
+            if (crossTarget)
+            {
+                 testAsset = testAsset.WithProjectChanges(project =>
+                 {
+                     var ns = project.Root.Name.Namespace;
+                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                     propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                 });
+            }
+
+            testAsset.Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("net46");
+            outputDirectory.Should().NotHaveFile("FluentValidation.resources.dll");
+            outputDirectory.Should().HaveFile(@"fr\FluentValidation.resources.dll");
+        }
     }
 }
