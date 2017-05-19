@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithOutput(localAssemblyCache)
                 .WithRuntimeFrameworkVersion(_frameworkVersion)
                 .WithIntermediateWorkingDirectory(intermediateWorkingDirectory)
-                .Execute($"--preserve-working-dir")
+                .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithOutput(localAssemblyCache)
                 .WithRuntimeFrameworkVersion(_frameworkVersion)
                 .WithIntermediateWorkingDirectory(intermediateWorkingDirectory)
-                .Execute($"--preserve-working-dir")
+                .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
