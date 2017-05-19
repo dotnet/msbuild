@@ -780,5 +780,19 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(false, task.StartInfo.EnvironmentVariables.ContainsKey("a"));
 #endif
         }
+
+        [Fact]
+        public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
+        {
+            MyTool t = new MyTool();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                            ? "/C echo \"hello \\\"world\\\"\""
+                                            : "-c echo \"hello \\\"world\\\"\"";
+            t.Execute();
+            engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
+            Assert.Equal(0, engine.Errors);
+        }
     }
 }

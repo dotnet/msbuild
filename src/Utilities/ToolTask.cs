@@ -1528,7 +1528,7 @@ namespace Microsoft.Build.Utilities
                         // Use sh rather than bash, as not all 'nix systems necessarily have Bash installed
                         File.AppendAllText(_temporaryBatchFile, "#!/bin/sh\n"); // first line for UNIX is ANSI
                         // This is a hack..!
-                        File.AppendAllText(_temporaryBatchFile, commandLineCommands.Replace('\\', Path.DirectorySeparatorChar), EncodingUtilities.CurrentSystemOemEncoding);
+                        File.AppendAllText(_temporaryBatchFile, AdjustCommandsForOperatingSystem(commandLineCommands), EncodingUtilities.CurrentSystemOemEncoding);
                     }
                     else
                     {
@@ -1612,11 +1612,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                if (!runningOnWindows)
-                {
-                    commandLineCommands = commandLineCommands.Replace('\\', Path.DirectorySeparatorChar);
-                    responseFileCommands = responseFileCommands.Replace('\\', Path.DirectorySeparatorChar);
-                }
+                commandLineCommands = AdjustCommandsForOperatingSystem(commandLineCommands);
+                responseFileCommands = AdjustCommandsForOperatingSystem(responseFileCommands);
 
                 if (UseCommandProcessor)
                 {
@@ -1713,6 +1710,46 @@ namespace Microsoft.Build.Utilities
                 }
             }
         } // Execute()
+
+        /// <summary>
+        /// Replace backslashes with OS-specific path separators,
+        /// except when likely that the backslash is intentional.
+        /// </summary>
+        /// <remarks>
+        /// Not a static method so that an implementation can
+        /// override with more-specific knowledge of what backslashes
+        /// are likely to be correct.
+        /// </remarks>
+        virtual protected string AdjustCommandsForOperatingSystem(string input)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return input;
+            }
+
+            StringBuilder sb = new StringBuilder(input);
+
+            int length = sb.Length;
+
+            for (int i = 0; i < length; i++)
+            {
+                // Backslashes must be swapped, because we don't
+                // know what inputs are paths or path fragments.
+                // But it's a common pattern to have backslash-escaped
+                // quotes inside quotes--especially for VB that has a default like
+                //
+                // /define:"CONFIG=\"Debug\",DEBUG=-1,TRACE=-1,_MyType=\"Console\",PLATFORM=\"AnyCPU\""
+                //
+                // So don't replace a backslash immediately
+                // followed by a quote.
+                if (sb[i] == '\\' && (i == length - 1 || sb[i + 1] != '"'))
+                {
+                    sb[i] = Path.DirectorySeparatorChar;
+                }
+            }
+
+            return sb.ToString();
+        }
 
         /// <summary>
         /// This method takes in an exception and if MSBuildDiagnostics is set then it will display the stack trace
