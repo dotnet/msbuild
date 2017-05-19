@@ -154,6 +154,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DocumentationFileProduced>true</_DocumentationFileProduced>
     <_DocumentationFileProduced Condition="'$(DocumentationFile)'==''">false</_DocumentationFileProduced>
 
+    <!-- Whether or not a reference assembly is produced. -->
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">false</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OutputPath)' == '' ">
@@ -281,6 +283,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, c:\MyProjects\MyProject\bin\debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
+
     <!-- Example, c:\MyProjects\MyProject\ -->
     <ProjectDir Condition=" '$(ProjectDir)' == '' ">$(MSBuildProjectDirectory)\</ProjectDir>
 
@@ -344,10 +348,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
+    <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
+    <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
+    <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
+    <CreateDirectory Include="$(OutDir)ref" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
@@ -771,7 +782,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="Build"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
       DependsOnTargets="$(BuildDependsOn)"
-      Returns="$(TargetPath)" />
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
 
   <!--
     ============================================================
@@ -1360,9 +1371,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterResolveReferences
     </ResolveReferencesDependsOn>
   </PropertyGroup>
+
+  <!-- FindReferenceAssembliesForReferences needs to see a fully-populated @(ReferencePath),
+       so it should run after all of the subcomponents of ResolveReferences, including
+       user overrides of AfterResolveReferences and targets added by appending to
+       $(ResolveReferencesDependsOn) (like ImplicitlyExpandDesignTimeFacades). So list it
+       last explicitly, rather than adding it to the property.   -->
   <Target
       Name="ResolveReferences"
-      DependsOnTargets="$(ResolveReferencesDependsOn)"/>
+      DependsOnTargets="$(ResolveReferencesDependsOn);FindReferenceAssembliesForReferences"/>
 
   <!--
     ============================================================
@@ -1797,6 +1814,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+        <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
+        <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
@@ -2011,11 +2030,58 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="SerializationAssemblyFiles" ItemName="_ReferenceSerializationAssemblyPaths"/>
       <Output TaskParameter="ScatterFiles" ItemName="_ReferenceScatterPaths"/>
       <Output TaskParameter="CopyLocalFiles" ItemName="ReferenceCopyLocalPaths"/>
+      <!-- Indicate to the IDE that updated (possibly transitive) references should trigger
+           an (incremental) build. -->
+      <Output TaskParameter="CopyLocalFiles" ItemName="UpToDateCheckInput"/>
       <Output TaskParameter="SuggestedRedirects" ItemName="SuggestedBindingRedirects"/>
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
     </ResolveAssemblyReference>
   </Target>
+
+  <!--
+    ============================================================
+
+                                        FindReferenceAssembliesForReferences
+
+    Given the list of references, create a list of assemblies to pass to the compiler that
+    includes reference assemblies rather than implementation assemblies where possible.
+
+        [IN]
+        @(ReferencePath) - List of assembly references as resolved paths with ReferenceAssembly metadata
+
+        [OUT]
+        @(ReferencePathWithRefAssemblies) - Paths to resolved reference (or implementation) assemblies.
+    ============================================================
+    -->
+  <Target Name="FindReferenceAssembliesForReferences"
+          DependsOnTargets="$(ResolveReferencesDependsOn)">
+    <ItemGroup>
+      <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')"
+                                      Condition="'$(CompileUsingReferenceAssemblies)' != 'false'">
+        <OriginalPath Condition="'%(ReferencePath.Identity)' != '@(ReferencePath->'%(ReferenceAssembly)')'">%(ReferencePath.Identity)</OriginalPath>
+      </ReferencePathWithRefAssemblies>
+      <ReferencePathWithRefAssemblies Include="@(ReferencePath)"
+                                      Condition="'$(CompileUsingReferenceAssemblies)' == 'false'" />
+
+      <!-- The project system normally looks only at the inputs to the compiler in its
+           fast up-to-date check, but if the implementation assembly of a ref is stale
+           we still want to rerun to ensure copies, etc. happen. -->
+      <!-- The remote project might not have done anything to _its own_ assemblies, but
+           still need to invalidate the fast up-to-date check in projects that depend on
+           it because it has brought along a new implementation of one of its references. -->
+      <UpToDateCheckInput Include="@(ReferencePathWithRefAssemblies->'%(CopyUpToDateMarker)')" />
+    </ItemGroup>
+  </Target>
+
+  <ItemDefinitionGroup>
+    <!-- Reference assemblies are not produced in all cases, but it's easier to consume them
+         if this metadatum is always populated. This item definition ensures that it points
+         to the implementation assembly unless specified. -->
+    <ReferencePath>
+      <ReferenceAssembly>%(FullPath)</ReferenceAssembly>
+    </ReferencePath>
+  </ItemDefinitionGroup>
 
   <!--
     ====================================================================================================
@@ -4007,6 +4073,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </Copy>
 
+    <!-- Copy the reference assembly build product (.dll or .exe). -->
+    <CopyRefAssembly
+        SourcePath="@(IntermediateRefAssembly)"
+        DestinationPath="$(TargetRefPath)"
+        Condition="'$(ProduceReferenceAssembly)' == 'true' and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'"
+            >
+
+      <Output TaskParameter="DestinationPath" ItemName="ReferenceAssembly"/>
+      <Output TaskParameter="DestinationPath" ItemName="FileWrites"/>
+
+    </CopyRefAssembly>
+
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; @(MainAssembly->'%(FullPath)')" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
 
     <!-- Copy the additional modules. -->
@@ -4162,8 +4240,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWritesShareable"/>
+      <Output TaskParameter="CopiedFiles" ItemName="ReferencesCopiedInThisBuild"/>
 
     </Copy>
+
+    <!-- If this project produces reference assemblies *and* copied (possibly transitive)
+         references on this build, subsequent builds of projects that depend on it must
+         not be considered up to date, so touch this marker file that is considered an
+         input to projects that reference this one. -->
+    <Touch Files="$(CopyUpToDateMarker)"
+           AlwaysCreate="true"
+           Condition="'$(ProduceReferenceAssembly)' == 'true' and '@(ReferencesCopiedInThisBuild)' != ''" />
 
   </Target>
 
@@ -4468,6 +4555,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--Record the main compile outputs.-->
     <ItemGroup>
       <FileWrites Include="@(IntermediateAssembly)" Condition="Exists('@(IntermediateAssembly)')"/>
+      <FileWrites Include="@(IntermediateRefAssembly)" Condition="'$(ProduceReferenceAssembly)' == 'true' and Exists('@(IntermediateRefAssembly)')"/>
     </ItemGroup>
 
     <!-- Record the .xml if one was produced. -->
