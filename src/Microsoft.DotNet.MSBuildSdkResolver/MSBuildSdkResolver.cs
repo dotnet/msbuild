@@ -53,7 +53,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;;
             }
 
-            if (SemanticVersion.Parse(netcoreSdkVersion) < SemanticVersion.Parse(sdkReference.MinimumVersion))
+            if (!string.IsNullOrEmpty(sdkReference.MinimumVersion) && 
+                SemanticVersion.Parse(netcoreSdkVersion) < SemanticVersion.Parse(sdkReference.MinimumVersion))
             {
                 return factory.IndicateFailure(
                     new[]
