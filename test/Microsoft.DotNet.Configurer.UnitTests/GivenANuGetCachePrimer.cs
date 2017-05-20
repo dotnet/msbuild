@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities.Mock;
@@ -150,12 +151,26 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_uses_the_packages_archive_with_dotnet_restore()
+        public void It_writes_a_config_file_with_the_extracted_archive_as_a_package_source()
         {
+            var nugetConfigPath = Path.Combine(_temporaryDirectoryMock.DirectoryPath, "NuGet.Config");
+            _fileSystemMock.File.ReadAllText(nugetConfigPath).Should().Be(
+                $@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageSources>
+    <add key=""extractedArchive"" value=""{PACKAGES_ARCHIVE_PATH}"" />
+  </packageSources>
+</configuration>");
+        }
+
+        [Fact]
+        public void It_uses_a_config_file_with_dotnet_restore()
+        {
+            var nugetConfigPath = Path.Combine(_temporaryDirectoryMock.DirectoryPath, "NuGet.Config");
             _commandFactoryMock.Verify(
                 c => c.Create(
                     "restore",
-                    new[] { "-s", $"{PACKAGES_ARCHIVE_PATH}" },
+                    new[] { "--configfile", nugetConfigPath },
                     null,
                     Constants.DefaultConfiguration),
                 Times.Exactly(2));
