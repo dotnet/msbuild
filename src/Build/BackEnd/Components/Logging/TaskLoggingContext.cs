@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// A logging context representing a task being built.
     /// </summary>
-    internal class TaskLoggingContext : BaseLoggingContext
+    internal class TaskLoggingContext : BaseBuildLoggingContext
     {
         /// <summary>
         /// The target context in which this task is being built.

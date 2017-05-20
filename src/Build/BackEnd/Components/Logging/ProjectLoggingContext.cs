@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// A logging context for a project.
     /// </summary>
-    internal class ProjectLoggingContext : BaseLoggingContext
+    internal class ProjectLoggingContext : BaseBuildLoggingContext
     {
         /// <summary>
         /// The project's full path

@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// and a new LoggingContext is returned.  This new LoggingContext should be used for all
     /// subsequent logging within the subcontext.
     /// </summary>
-    internal class BaseLoggingContext
+    internal class BaseBuildLoggingContext
     {
         /// <summary>
         /// The logging service to which this context is attached
@@ -57,7 +57,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="loggingService">The logging service to use</param>
         /// <param name="eventContext">The event context</param>
         /// <param name="inProc">Flag indicating if this context belongs to an in-proc node.</param>
-        protected BaseLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, bool inProc)
+        protected BaseBuildLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, bool inProc)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingService, "loggingService");
             ErrorUtilities.VerifyThrowArgumentNull(eventContext, "eventContext");
@@ -74,7 +74,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// while the event context will come from a call into the logging service itself.
         /// </summary>
         /// <param name="baseContext">The context from which this context is being created.</param>
-        protected BaseLoggingContext(BaseLoggingContext baseContext)
+        protected BaseBuildLoggingContext(BaseBuildLoggingContext baseContext)
         {
             _loggingService = baseContext._loggingService;
             _eventContext = null;
