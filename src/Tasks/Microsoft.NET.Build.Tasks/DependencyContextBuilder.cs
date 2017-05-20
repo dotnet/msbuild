@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tasks
         private IEnumerable<string> _excludeFromPublishPackageIds;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
-        private Dictionary<PackageIdentity, StringBuilder> _filteredPackages;
+        private Dictionary<PackageIdentity, string> _filteredPackages;
         private bool _includeMainProjectInDepsFile = true;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
@@ -82,7 +82,7 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder WithPackagesThatWhereFiltered(Dictionary<PackageIdentity, StringBuilder> packagesThatWhereFiltered)
+        public DependencyContextBuilder WithPackagesThatWhereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
         {
             _filteredPackages = packagesThatWhereFiltered;
             return this;
@@ -223,11 +223,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             string runtimeStoreManifestName = null;
             var pkg = new PackageIdentity(name, NuGetVersion.Parse(version));
-            StringBuilder listofManifests = null;
-            if (_filteredPackages?.TryGetValue(pkg, out listofManifests) == true)
-            {
-                runtimeStoreManifestName = listofManifests.ToString();
-            }
+            _filteredPackages?.TryGetValue(pkg, out runtimeStoreManifestName);
 
             return new RuntimeLibrary(
                 type,

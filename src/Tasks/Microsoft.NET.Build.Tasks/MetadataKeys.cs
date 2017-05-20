@@ -47,5 +47,8 @@ namespace Microsoft.NET.Build.Tasks
         public const string StartColumn = "StartColumn";
         public const string EndLine = "EndLine";
         public const string EndColumn = "EndColumn";
+
+        // Publish Target Manifest
+        public const string RuntimeStoreManifestNames = "RuntimeStoreManifestNames";
     }
 }

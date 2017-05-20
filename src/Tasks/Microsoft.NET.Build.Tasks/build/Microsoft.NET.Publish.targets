@@ -29,10 +29,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolvedFileToPublish>
   </ItemDefinitionGroup>
 
-  <ItemGroup>
-    <TargetManifestFileList Include="$(TargetManifestFiles.Split('%3B'))"/>
-  </ItemGroup>
-
   <!--
     ============================================================
                                         Publish
@@ -248,6 +244,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="RunResolvePublishAssemblies"
           DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
+                            _ParseTargetManifestFiles;
                             _DefaultMicrosoftNETPlatformLibrary">
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
@@ -255,7 +252,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                              TargetManifestFiles="@(TargetManifestFileList)"
+                              RuntimeStorePackages="@(RuntimeStorePackages)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
                               IsSelfContained="$(SelfContained)" >
 
@@ -461,6 +458,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="GeneratePublishDependencyFile"
           DependsOnTargets="_ComputeExcludeFromPublishPackageReferences;
+                            _ParseTargetManifestFiles;
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _HandlePublishFileConflicts"
@@ -486,7 +484,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
-                      TargetManifestFileList="@(TargetManifestFileList)"
+                      RuntimeStorePackages="@(RuntimeStorePackages)"
                       IsSelfContained="$(SelfContained)" />
 
   </Target>
@@ -515,6 +513,25 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ExcludeFromPublishPackageReference Include="@(PackageReference)"
                                           Condition="('%(PackageReference.Publish)' == 'false')" />
     </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ParseTargetManifestFiles
+
+    Parses the $(TargetManifestFiles) which contains a list of files into @(RuntimeStorePackages) items
+    which describes which packages should be excluded from publish since they are contained in the runtime store.
+    ============================================================
+    -->
+  <UsingTask TaskName="ParseTargetManifests" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="_ParseTargetManifestFiles"
+          Condition="'$(TargetManifestFiles)' != ''"
+          Returns="@(RuntimeStorePackages)">
+
+    <ParseTargetManifests TargetManifestFiles="$(TargetManifestFiles)">
+      <Output TaskParameter="RuntimeStorePackages" ItemName="RuntimeStorePackages"/>
+    </ParseTargetManifests>
 
   </Target>
 
