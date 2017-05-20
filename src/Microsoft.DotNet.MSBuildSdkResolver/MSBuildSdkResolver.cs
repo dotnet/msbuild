@@ -53,6 +53,17 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;;
             }
 
+            if (SemanticVersion.Parse(netcoreSdkVersion) < SemanticVersion.Parse(sdkReference.MinimumVersion))
+            {
+                return factory.IndicateFailure(
+                    new[]
+                    {
+                        $"Version {netcoreSdkVersion} of the SDK is smaller than the minimum version"
+                        + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
+                        + " installed and/or increase the version specified in global.json."
+                    });
+            }
+
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
             if (!Directory.Exists(msbuildSdkDir))
             {
@@ -60,7 +71,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     new[] 
                     {
                         $"{msbuildSdkDir} not found. Check that a recent enough .NET Core SDK is installed"
-                        + " and/or increase the version specified in global.json. "
+                        + " and/or increase the version specified in global.json."
                     });
             }
 
