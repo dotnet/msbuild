@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region LogErrorFromText
         /// <summary>
-        /// Verify an InternalErrorException is thrown when BuildEventContext is null.
+        /// Verify an InternalErrorException is thrown when buildEventContext is null.
         /// </summary>
         [Fact]
         public void LogErrorFromTextNullBuildEventContext()
@@ -600,7 +600,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region LogWarningErrorFromText
         /// <summary>
-        /// Verify an InternalErrorException is thrown when a null BuildEventContext is passed in
+        /// Verify an InternalErrorException is thrown when a null buildEventContext is passed in
         /// </summary>
         [Fact]
         public void LogWarningFromTextNullBuildEventContext()

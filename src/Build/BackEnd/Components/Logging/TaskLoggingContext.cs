@@ -141,5 +141,17 @@ namespace Microsoft.Build.BackEnd.Logging
                 );
             this.IsValid = false;
         }
+
+        /// <summary>
+        /// Log a warning based on an exception
+        /// </summary>
+        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="exception">The exception to be logged as a warning</param>
+        /// <param name="taskName">The task in which the warning occurred</param>
+        internal void LogTaskWarningFromException(BuildEventFileInfo file, Exception exception, string taskName)
+        {
+            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
+        }
     }
 }
