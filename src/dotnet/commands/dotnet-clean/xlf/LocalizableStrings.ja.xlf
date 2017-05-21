@@ -13,16 +13,6 @@
         <target state="translated">以前に生成されたビルド出力を消去するコマンド。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProjDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">構築する MSBuild プロジェクト ファイル。プロジェクト ファイルを指定しなかった場合、MSBuild は現在の作業ディレクトリの中から "proj" で終わるファイル拡張子を検索し、そのファイルを使用します。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -31,26 +21,6 @@
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">ビルド出力が配置されているディレクトリ。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework.</source>
-        <target state="translated">特定のフレームワークを消去します。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration.</source>
-        <target state="translated">特定の構成を消去します。</target>
         <note />
       </trans-unit>
     </body>

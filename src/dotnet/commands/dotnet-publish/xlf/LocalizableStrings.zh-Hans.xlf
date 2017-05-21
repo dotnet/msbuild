@@ -3,24 +3,9 @@
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
-      <trans-unit id="AppFullName">
-        <source>.NET Publisher</source>
-        <target state="translated">.NET 发布服务器</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
         <target state="translated">适用于 .NET 平台的发布服务器</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgument">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgDescription">
-        <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">要发布的 MSBuild 项目文件。如果未指定项目文件，MSBuild 将搜索当前工作目录来查找文件扩展名以“proj”结尾的文件并使用该文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -33,16 +18,6 @@
         <target state="translated">要发布的目标框架。目标框架必须在项目文件中指定。</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeOption">
-        <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">RUNTIME_IDENTIFIER</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">针对给定运行时发布项目。创建自包含部署时使用此项。默认操作为发布依赖框架的应用。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -53,34 +28,19 @@
         <target state="translated">用于放置已发布项的输出目录。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigurationOption">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOption">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">VERSION_SUFFIX</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">定义项目中 $(VersionSuffix) 属性的值。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FilterProjOption">
-        <source>profile.xml</source>
-        <target state="needs-review-translation">profile.proj</target>
+      <trans-unit id="ManifestOption">
+        <source>manifest.xml</source>
+        <target state="new">manifest.xml</target>
         <note></note>
       </trans-unit>
-      <trans-unit id="FilterProjOptionDescription">
-        <source>The XML file that contains the list of packages to be excluded from publish step.</source>
-        <target state="needs-review-translation">The list of packages to be excluded from publish step.</target>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
+        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
         <note></note>
       </trans-unit>
     </body>

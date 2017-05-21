@@ -33,9 +33,9 @@ Configurazione...
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Non è possibile creare per la prima volta la cache NuGet. {0} non riuscito. Errore: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">Non è possibile creare per la prima volta la cache NuGet. {0} non riuscito. Errore: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

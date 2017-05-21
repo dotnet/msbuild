@@ -35,24 +35,12 @@
         <source>Usage:</source>
         <note />
       </trans-unit>
-      <trans-unit id="UsageItemWithoutArgs">
-        <source> {0}</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageItemWithArgs">
-        <source> {0} {1}</source>
-        <note />
-      </trans-unit>
       <trans-unit id="UsageArgumentsToken">
         <source> [arguments]</source>
         <note />
       </trans-unit>
       <trans-unit id="UsageArgumentsHeader">
         <source>Arguments:</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageArgumentItem">
-        <source>  {0}{1}</source>
         <note />
       </trans-unit>
       <trans-unit id="UsageOptionsToken">
@@ -63,20 +51,12 @@
         <source>Options:</source>
         <note />
       </trans-unit>
-      <trans-unit id="UsageOptionsItem">
-        <source>  {{0, -{0}}}{{1}}</source>
-        <note />
-      </trans-unit>
       <trans-unit id="UsageCommandToken">
         <source> [command]</source>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsHeader">
         <source>Commands:</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageCommandsItem">
-        <source>  {{0, -{0}}}{{1}}</source>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsDetailHelp">
@@ -95,18 +75,6 @@
         <source>Additional Arguments:</source>
         <note />
       </trans-unit>
-      <trans-unit id="UsageCommandsAdditionalArgsItem">
-        <source> {0}</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandItem">
-        <source> {0}</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShortVersionTemplate">
-        <source>{0} {1}</source>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidTemplateError">
         <source>Invalid template pattern '{0}'</source>
         <note />
@@ -114,6 +82,10 @@
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
         <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

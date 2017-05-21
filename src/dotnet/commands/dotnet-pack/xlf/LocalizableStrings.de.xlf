@@ -38,26 +38,6 @@
         <target state="translated">PDBs und Quelldateien einschließen. Quelldateien werden im Ordner "src" im resultierenden NuGet-Paket abgelegt.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdConfig">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts.  Standard für die meisten Projekte ist "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffix">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">VERSION_SUFFIX</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
         <target state="translated">Legt das Verarbeitungsflag im Paket fest. Weitere Informationen finden Sie unter https://aka.ms/nupkgservicing.</target>

@@ -11,37 +11,33 @@
         <source>Command to add package reference</source>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -58,6 +54,14 @@
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIRECTORY</source>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -13,16 +13,6 @@
         <target state="translated">Comando para limpiar los archivos de salida de compilaciones anteriores.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROYECTO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProjDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Archivo del proyecto de MSBuild para compilar. Si no se especifica un archivo del proyecto, MSBuild busca en el directorio de trabajo actual un archivo que tenga una extensión de archivo que acabe en “proj” y utiliza ese archivo.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIRECTORIO_DE_SALIDA</target>
@@ -31,26 +21,6 @@
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">Directorio donde se han puesto los archivos de salida de la compilación</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework.</source>
-        <target state="translated">Limpia una plataforma específica.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURACIÓN</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration.</source>
-        <target state="translated">Limpia una configuración específica.</target>
         <note />
       </trans-unit>
     </body>

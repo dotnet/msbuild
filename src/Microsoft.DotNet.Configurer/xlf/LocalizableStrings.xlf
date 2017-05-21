@@ -20,8 +20,8 @@ A command is running to initially populate your local package cache, to improve 
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -13,16 +13,6 @@
         <target state="translated">.NET uygulamalarını çalıştırmak için kullanılan komut</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan: "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandOptionFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
         <target state="translated">Uygulamayı belirtilen çerçeve için derler ve çalıştırır. Çerçevenin proje dosyasında belirtilmesi gerekir. </target>
@@ -38,80 +28,48 @@
         <target state="translated">Derleme başarısız oldu. Lütfen derleme hatalarını düzeltip yeniden çalıştırın.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RunCommandMSBuildExtensionsPath">
-        <source>MSBuildExtensionsPath</source>
-        <target state="translated">MSBuildExtensionsPath</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandConfiguration">
-        <source>Configuration</source>
-        <target state="translated">Configuration</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandTargetFramework">
-        <source>TargetFramework</source>
-        <target state="translated">TargetFramework</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandProjectInstance">
-        <source>RunCommand</source>
-        <target state="translated">RunCommand</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandOutputType">
-        <source>OutputType</source>
-        <target state="translated">OutputType</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandExceptionUnableToRun1">
-        <source>Unable to run your project.</source>
-        <target state="translated">Projeniz çalıştırılamıyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandExceptionUnableToRun2">
-        <source>Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</source>
-        <target state="translated">Çalıştırılabilir türde bir projeniz olduğundan ve 'dotnet run' komutunun bu projeyi desteklediğinden emin olun.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandExceptionUnableToRun3">
-        <source>The current OutputType is </source>
-        <target state="translated">Geçerli OutputType: </target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandRunArguments">
-        <source>RunArguments</source>
-        <target state="translated">RunArguments</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandRunWorkingDirectory">
-        <source>RunWorkingDirectory</source>
-        <target state="translated">RunWorkingDirectory</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandInvalidOperationException1">
-        <source>Couldn't find a project to run. Ensure a project exists in </source>
-        <target state="translated">Çalıştırılacak bir proje bulunamadı. Şurada bir proje bulunduğundan emin olun: </target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandInvalidOperationException2">
-        <source>Or pass the path to the project using --project</source>
-        <target state="translated">Veya proje yolunu --project kullanarak geçirin</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandInvalidOperationException3">
-        <source>Specify which project file to use because this </source>
-        <target state="translated">Burada birden fazla proje dosyası bulunduğundan, </target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunCommandInvalidOperationException4">
-        <source>contains more than one project file.</source>
-        <target state="translated">hangi proje dosyasının kullanılacağını belirtmeniz gerekiyor.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
         <target state="translated">Çalıştırılan uygulamaya geçirilen bağımsız değişkenler.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuildDescription">
+        <source>Skip building the project prior to running. By default, the project will be built.</source>
+        <target state="new">Skip building the project prior to running. By default, the project will be built.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuild">
+        <source>Do not build the project before running.</source>
+        <target state="new">Do not build the project before running.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
+        <source>Unable to run your project
+Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
+        <target state="new">Unable to run your project
+Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun">
+        <source>Unable to run your project.
+Please ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</source>
+        <target state="new">Unable to run your project.
+Please ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionNoProjects">
+        <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="new">Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionMultipleProjects">
+        <source>Specify which project file to use because {0} contains more than one project file.</source>
+        <target state="new">Specify which project file to use because {0} contains more than one project file.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

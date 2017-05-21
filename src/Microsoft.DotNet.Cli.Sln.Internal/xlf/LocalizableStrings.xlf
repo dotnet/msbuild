@@ -12,8 +12,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
-        <source>File header is missing</source>
-        <note />
+        <source>Expected file header not found</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -33,14 +33,18 @@
       </trans-unit>
       <trans-unit id="ErrorMessageFormatString">
         <source>Invalid format in line {0}: {1}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectParsingErrorFormatString">
         <source>Project section is missing '{0}' when parsing the line starting at position {1}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidPropertySetFormatString">
         <source>Property set is missing '{0}'</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileHeaderMissingVersionError">
+        <source>File header is missing version</source>
         <note></note>
       </trans-unit>
     </body>

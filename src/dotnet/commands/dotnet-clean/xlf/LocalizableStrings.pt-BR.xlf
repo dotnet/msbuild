@@ -13,16 +13,6 @@
         <target state="translated">Comando para limpar saídas de build geradas anteriormente.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJETO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProjDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">O arquivo de projeto do MSBuild para compilar. Se não houver arquivo de projeto especificado, o MSBuild pesquisará no diretório de trabalho atual um arquivo que contenha uma extensão de arquivo que termine em "proj" e usará esse arquivo.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
@@ -31,26 +21,6 @@
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">O diretório no qual as saídas do build foram colocadas.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">ESTRUTURA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework.</source>
-        <target state="translated">Limpa uma estrutura específica.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURAÇÃO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration.</source>
-        <target state="translated">Limpa uma configuração específica.</target>
         <note />
       </trans-unit>
     </body>

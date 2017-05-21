@@ -33,9 +33,9 @@ Běží příkaz pro počáteční naplnění vaší místní mezipaměti balí�
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Nepodařilo se vytvořit primární mezipaměť balíčku NuGet. {0} selhalo s: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">Nepodařilo se vytvořit primární mezipaměť balíčku NuGet. {0} selhalo s: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

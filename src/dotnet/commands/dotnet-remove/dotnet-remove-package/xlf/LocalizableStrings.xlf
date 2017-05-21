@@ -5,19 +5,19 @@
       <group id="src/dotnet/commands/dotnet-remove/dotnet-remove-package/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Remove Package reference Command.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to remove package reference.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Package reference to remove.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify only one package reference to remove.</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>
