@@ -3,36 +3,8 @@
   <file datatype="xml" source-language="en" original="LocalizableStrings.resx">
     <body>
       <group id="LocalizableStrings.resx" />
-      <trans-unit id="AppFullName">
-        <source>.NET Cache</source>
-        <note></note>
-      </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Caches the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ProjectEntries">
-        <source>ProjectEntries</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ProjectEntryDescription">
-        <source>The XML file that contains the list of packages to be cached.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="FrameworkOption">
-        <source>FRAMEWORK</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework for which to cache for.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="RuntimeOption">
-        <source>RUNTIME_IDENTIFIER</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to cache for.</source>
+        <source>Stores the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -40,7 +12,7 @@
         <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to cache the given assemblies.</source>
+        <source>Output directory in which to store the given assemblies.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
@@ -59,20 +31,28 @@
         <source>The directory used by the command to execute.</source>
         <note></note>
       </trans-unit>
-      <trans-unit id="PreserveIntermediateWorkingDirOptionDescription">
-        <source>Preserves the intermediate working directory.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="SpecifyEntries">
-        <source>Specify at least one entry with --entries.</source>
-        <note></note>
-      </trans-unit>
       <trans-unit id="IntermediateDirExists">
         <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skips the optimization phase.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectManifest">
+        <source>PROJECT_MANIFEST</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectManifestDescription">
+        <source>The XML file that contains the list of packages to be stored.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SkipSymbolsOptionDescription">
+        <source>Skips creating symbol files which can be used for profiling the optimized assemblies.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SpecifyManifests">
+        <source>Specify at least one manifest with --manifest.</source>
         <note></note>
       </trans-unit>
     </body>

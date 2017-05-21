@@ -69,9 +69,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="translated">プロジェクト間参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します</target>
-        <note />
+        <source>Set this flag to ignore project to project references and only restore the root project.</source>
+        <target state="needs-review-translation">プロジェクト間参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>

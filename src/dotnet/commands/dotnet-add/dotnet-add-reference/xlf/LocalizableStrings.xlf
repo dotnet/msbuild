@@ -5,19 +5,19 @@
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project reference Command</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to project reference</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to add</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <note />
+        <source>Add reference only when targeting a specific framework</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

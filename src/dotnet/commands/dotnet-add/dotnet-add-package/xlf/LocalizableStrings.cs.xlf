@@ -13,35 +13,30 @@
         <target state="translated">Příkaz pro přidání odkazu na balíček</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <target state="translated">Odkazy na balíčky k přidání</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <target state="translated">Zadejte prosím jeden odkaz na balíček, který chcete přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">Přidat odkaz jen při zaměření na určitou platformu</target>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Přidat odkaz jen při zaměření na určitou platformu</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">Určete konkrétní zdroje balíčků NuGet, které se mají použít při obnovení.</target>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <target state="needs-review-translation">Určete konkrétní zdroje balíčků NuGet, které se mají použít při obnovení.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <target state="translated">Obnoví balíčky do tohoto adresáře.</target>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <target state="needs-review-translation">Obnoví balíčky do tohoto adresáře.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -49,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="translated">Není možné vytvořit grafický soubor závislostí pro projekt {0}. Nejde přidat odkaz na balíček.</target>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="needs-review-translation">Není možné vytvořit grafický soubor závislostí pro projekt {0}. Nejde přidat odkaz na balíček.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -72,6 +67,16 @@
         <source>PACKAGE_DIRECTORY</source>
         <target state="translated">PACKAGE_DIRECTORY</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="new">The package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="new">PACKAGE_NAME</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Remove reference only when targetting a specific framework</source>
-        <target state="translated">特定のフレームワークを対象とする場合にのみ参照を削除する</target>
-        <note />
+        <source>Remove reference only when targeting a specific framework</source>
+        <target state="needs-review-translation">特定のフレームワークを対象とする場合にのみ参照を削除する</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>

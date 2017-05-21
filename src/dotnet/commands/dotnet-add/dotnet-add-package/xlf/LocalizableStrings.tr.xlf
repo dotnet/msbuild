@@ -13,35 +13,30 @@
         <target state="translated">Paket başvurusu ekleme komutu</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <target state="translated">Eklenecek paket başvuruları</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <target state="translated">Lütfen eklenecek paket başvurusunu belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">Yalnızca belirli bir çerçeveyi hedeflerken başvuru ekler</target>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Yalnızca belirli bir çerçeveyi hedeflerken başvuru ekler</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden başvuru ekler.</target>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden başvuru ekler.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">Geri yükleme sırasında kullanılacak belirli NuGet paket kaynaklarını kullanır.</target>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <target state="needs-review-translation">Geri yükleme sırasında kullanılacak belirli NuGet paket kaynaklarını kullanır.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <target state="translated">Paketleri bu Dizine geri yükler.</target>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <target state="needs-review-translation">Paketleri bu Dizine geri yükler.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -49,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="translated">'{0}' projesi için Bağımlılık grafiği dosyası oluşturulamadı. Paket başvurusu eklenemiyor.</target>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="needs-review-translation">'{0}' projesi için Bağımlılık grafiği dosyası oluşturulamadı. Paket başvurusu eklenemiyor.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -72,6 +67,16 @@
         <source>PACKAGE_DIRECTORY</source>
         <target state="translated">PACKAGE_DIRECTORY</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="new">The package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="new">PACKAGE_NAME</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

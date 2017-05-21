@@ -69,9 +69,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="translated">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi geri yüklemek için bu bayrağı ayarlayın</target>
-        <note />
+        <source>Set this flag to ignore project to project references and only restore the root project.</source>
+        <target state="needs-review-translation">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi geri yüklemek için bu bayrağı ayarlayın</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>

@@ -43,16 +43,6 @@
         <target state="translated">Uso:</target>
         <note />
       </trans-unit>
-      <trans-unit id="UsageItemWithoutArgs">
-        <source> {0}</source>
-        <target state="translated"> {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageItemWithArgs">
-        <source> {0} {1}</source>
-        <target state="translated"> {0} {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UsageArgumentsToken">
         <source> [arguments]</source>
         <target state="translated"> [arguments]</target>
@@ -61,11 +51,6 @@
       <trans-unit id="UsageArgumentsHeader">
         <source>Arguments:</source>
         <target state="translated">Argumentos:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageArgumentItem">
-        <source>  {0}{1}</source>
-        <target state="translated">  {0}{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageOptionsToken">
@@ -78,11 +63,6 @@
         <target state="translated">Opções:</target>
         <note />
       </trans-unit>
-      <trans-unit id="UsageOptionsItem">
-        <source>  {{0, -{0}}}{{1}}</source>
-        <target state="translated">  {{0, -{0}}}{{1}}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UsageCommandToken">
         <source> [command]</source>
         <target state="translated"> [command]</target>
@@ -91,11 +71,6 @@
       <trans-unit id="UsageCommandsHeader">
         <source>Commands:</source>
         <target state="translated">Comandos:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UsageCommandsItem">
-        <source>  {{0, -{0}}}{{1}}</source>
-        <target state="translated">  {{0, -{0}}}{{1}}</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsDetailHelp">
@@ -118,21 +93,6 @@
         <target state="translated">Argumentos adicionais:</target>
         <note />
       </trans-unit>
-      <trans-unit id="UsageCommandsAdditionalArgsItem">
-        <source> {0}</source>
-        <target state="translated"> {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandItem">
-        <source> {0}</source>
-        <target state="translated"> {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShortVersionTemplate">
-        <source>{0} {1}</source>
-        <target state="translated">{0} {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidTemplateError">
         <source>Invalid template pattern '{0}'</source>
         <target state="translated">Padrão de modelo '{0}' inválido</target>
@@ -142,6 +102,11 @@
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
         <target state="translated">Quaisquer opções extra que devam ser transmitidas para o MSBuild. Consulte 'dotnet msbuild -h' para obter opções disponíveis.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="new">Required value for option '{0}' was not provided.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

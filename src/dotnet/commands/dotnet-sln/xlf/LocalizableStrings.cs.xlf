@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
-        <source>Add a specified project(s) to the solution.</source>
-        <target state="translated">Přidá určené projekty do řešení.</target>
-        <note />
+        <source>Add one or more specified projects to the solution.</source>
+        <target state="needs-review-translation">Přidá určené projekty do řešení.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>

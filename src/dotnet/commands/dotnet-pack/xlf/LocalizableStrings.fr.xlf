@@ -38,26 +38,6 @@
         <target state="translated">Inclure les PDB et les fichiers sources. Les fichiers sources vont dans le dossier src dans le paquet NuGet résultant</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdConfig">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffix">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">SUFFIXE_VERSION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Définit la valeur de la propriété $(VersionSuffix) dans le projet.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
         <target state="translated">Définissez l'indicateur de maintenance dans le package. Pour plus d'informations, consultez https://aka.ms/nupkgservicing.</target>
