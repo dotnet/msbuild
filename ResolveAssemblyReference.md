@@ -118,7 +118,7 @@ An important part of determining CopyLocal is the Private metadata on all primar
  3. If none of the source assemblies specify `Private=true` and at least one specifies `Private=false`, `CopyLocal` is set to `False`
 
 Here's the source code:
-https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeTasks/AssemblyDependency/Reference.cs#L1243
+https://github.com/Microsoft/msbuild/blob/master/src/Tasks/AssemblyDependency/Reference.cs#L1243
 
 ## Which reference set Private to false?
 
