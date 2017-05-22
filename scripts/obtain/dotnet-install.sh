@@ -115,9 +115,11 @@ get_current_os_name() {
     if [ "$uname" = "Darwin" ]; then
         echo "osx"
         return 0
-    else [ "$uname" = "Linux" ]; then
-        echo "linux"
-        return 0
+    else
+        if [ "$uname" = "Linux" ]; then
+            echo "linux"
+            return 0
+        fi
     fi
     
     say_err "OS name could not be detected: $ID.$VERSION_ID"
@@ -160,11 +162,11 @@ machine_has() {
 check_min_reqs() {
     local hasMinimum=false
     if machine_has "curl"; then
-        hasMinimum=true;
+        hasMinimum=true
+    elif machine_has "wget"; then
+        hasMinimum=true
     fi
-    if machine_has "wget"; then
-        hasMinimum=true;
-    fi
+
     if [ "$hasMinimum" = "false" ]; then
         say_err "curl (recommended) or wget are required to download dotnet. Install missing prerequisite to proceed."
         return 1
@@ -601,10 +603,9 @@ calculate_vars() {
     download_link=$(construct_download_link $azure_feed $channel $normalized_architecture $specific_version)
     say_verbose "download_link=$download_link"
 
-    if [ "$uname" = "Linux" ]; then
+    if [ "$(uname)" = "Linux" ]; then
         alt_download_link=$(construct_alt_download_link $azure_feed $channel $normalized_architecture $specific_version)
         say_verbose "alt_download_link=$alt_download_link"
-        return 0
     fi
 
     install_root=$(resolve_installation_path $install_dir)
@@ -627,10 +628,10 @@ install_dotnet() {
     download "$download_link" $zip_path
 
     #  if the download fails, download the alt_download_link
-    if [ "$uname" = "Linux" ] && [ -r $zip_path ]; then
-        say "Downloading $alt_download_link"
+    if [ "$(uname)" = "Linux" ] && [ -r $zip_path ]; then
+        say "Cannot download $download_link"
+        say "Downloading alternate: $alt_download_link"
         download "$alt_download_link" $zip_path
-        return 0
     fi
 
     say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
@@ -754,9 +755,8 @@ check_min_reqs
 calculate_vars
 if [ "$dry_run" = true ]; then
     say "Payload URL: $download_link"
-    if [ "$uname" = "Linux" ]; then
+    if [ "$(uname)" = "Linux" ]; then
         say "Alternate payload URL: $alt_download_link"
-        return 0
     fi
     say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
     exit 0
