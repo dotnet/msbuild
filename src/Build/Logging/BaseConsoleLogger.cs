@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Collections;
 using System.Globalization;
@@ -115,14 +116,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// on DictionaryEntry's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
-        internal class DictionaryEntryKeyComparer : IComparer
+        internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
-            public int Compare(Object a, Object b)
+            public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
-                return String.Compare(
-                    (string)(((DictionaryEntry)a).Key),
-                    (string)(((DictionaryEntry)b).Key),
-                    StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -136,8 +134,8 @@ namespace Microsoft.Build.BackEnd.Logging
             public int Compare(Object a, Object b)
             {
                 return String.Compare(
-                    (string)(((ITaskItem)a).ItemSpec),
-                    (string)(((ITaskItem)b).ItemSpec),
+                    ((ITaskItem)a).ItemSpec,
+                    ((ITaskItem)b).ItemSpec,
                     StringComparison.CurrentCultureIgnoreCase);
             }
         }
@@ -476,7 +474,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="properties">List of properties</param>
-        internal void WriteProperties(ArrayList properties)
+        internal void WriteProperties(List<DictionaryEntry> properties)
         {
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
@@ -510,15 +508,14 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-
         /// <summary>
-        /// Generate an arraylist which contains the properties referenced
-        /// by the properties enumerable object
+        /// Generate a list which contains the properties referenced by the properties 
+        /// enumerable object
         /// </summary>
-        internal ArrayList ExtractPropertyList(IEnumerable properties)
+        internal List<DictionaryEntry> ExtractPropertyList(IEnumerable properties)
         {
             // Gather a sorted list of all the properties.
-            ArrayList list = new ArrayList();
+            var list = new List<DictionaryEntry>(properties.FastCountOrZero());
             foreach (DictionaryEntry prop in properties)
             {
                 list.Add(prop);
@@ -551,7 +548,7 @@ namespace Microsoft.Build.BackEnd.Logging
             resetColor();
         }
 
-        internal virtual void OutputProperties(ArrayList list)
+        internal virtual void OutputProperties(List<DictionaryEntry> list)
         {
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -575,36 +572,30 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
         {
-            if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
+            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0) return;
+
+            // Write the banner
+            setColor(ConsoleColor.Green);
+            WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("ItemListHeader"));
+
+            // Write each item type and its itemspec, one per line
+            foreach (DictionaryEntry entry in itemTypes)
             {
-                if (itemTypes.Count == 0)
+                string itemType = (string) entry.Key;
+                ArrayList itemTypeList = (ArrayList) entry.Value;
+
+                if (itemTypeList.Count == 0)
                 {
-                    return;
+                    continue;
                 }
 
-                // Write the banner
-                setColor(ConsoleColor.Green);
-                WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("ItemListHeader"));
-
-                // Write each item type and its itemspec, one per line
-                foreach (DictionaryEntry entry in itemTypes)
-                {
-                    string itemType = (string)entry.Key;
-                    ArrayList itemTypeList = (ArrayList)entry.Value;
-
-                    if (itemTypeList.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    // Sort the list by itemSpec
-                    itemTypeList.Sort(new ITaskItemItemSpecComparer());
-                    OutputItems(itemType, itemTypeList);
-                }
-
-                // Add a blank line
-                WriteNewLine();
+                // Sort the list by itemSpec
+                itemTypeList.Sort(new ITaskItemItemSpecComparer());
+                OutputItems(itemType, itemTypeList);
             }
+
+            // Add a blank line
+            WriteNewLine();
         }
 
         /// <summary>
@@ -674,18 +665,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
         /// <returns></returns>
-        internal static PerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
+        internal static PerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
         {
             // Lazily construct the performance counter table.
             if (table == null)
             {
-                table = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                table = new Dictionary<string, PerformanceCounter>(StringComparer.OrdinalIgnoreCase);
             }
 
-            PerformanceCounter counter = (PerformanceCounter)table[scopeName];
-
             // And lazily construct the performance counter itself.
-            if (counter == null)
+            PerformanceCounter counter;
+            if (!table.TryGetValue(scopeName, out counter))
             {
                 counter = new PerformanceCounter(scopeName);
                 table[scopeName] = counter;
@@ -1182,27 +1172,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// A list of the errors that have occurred during this build.
         /// </summary>
-        internal ArrayList errorList;
+        internal List<BuildErrorEventArgs> errorList;
 
         /// <summary>
-        /// A list of the warnings that have occured during this build.
+        /// A list of the warnings that have occurred during this build.
         /// </summary>
-        internal ArrayList warningList;
+        internal List<BuildWarningEventArgs> warningList;
 
         /// <summary>
         /// Accumulated project performance information.
         /// </summary>
-        internal Hashtable projectPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> projectPerformanceCounters;
 
         /// <summary>
         /// Accumulated target performance information.
         /// </summary>
-        internal Hashtable targetPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> targetPerformanceCounters;
 
         /// <summary>
         /// Accumulated task performance information.
         /// </summary>
-        internal Hashtable taskPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> taskPerformanceCounters;
 
         #endregion
 

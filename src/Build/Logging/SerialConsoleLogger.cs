@@ -79,8 +79,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (ShowSummary == true)
             {
-                errorList = new ArrayList();
-                warningList = new ArrayList();
+                errorList = new List<BuildErrorEventArgs>();
+                warningList = new List<BuildWarningEventArgs>();
             }
             else
             {
@@ -267,7 +267,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (null != e.Properties)
                 {
-                    ArrayList propertyList = ExtractPropertyList(e.Properties);
+                    var propertyList = ExtractPropertyList(e.Properties);
                     WriteProperties(propertyList);
                 }
 

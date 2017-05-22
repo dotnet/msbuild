@@ -187,8 +187,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (ShowSummary == true)
             {
-                errorList = new ArrayList();
-                warningList = new ArrayList();
+                errorList = new List<BuildErrorEventArgs>();
+                warningList = new List<BuildWarningEventArgs>();
             }
             else
             {
@@ -383,28 +383,26 @@ namespace Microsoft.Build.BackEnd.Logging
             if (warningCount > 0)
             {
                 setColor(ConsoleColor.Yellow);
-                ShowErrorWarningSummary<BuildWarningEventArgs>(warningList);
+                ShowErrorWarningSummary(warningList);
             }
 
             if (errorCount > 0)
             {
                 setColor(ConsoleColor.Red);
-                ShowErrorWarningSummary<BuildErrorEventArgs>(errorList);
+                ShowErrorWarningSummary(errorList);
             }
 
             resetColor();
         }
 
-        private void ShowErrorWarningSummary<T>(ArrayList listToProcess) where T : BuildEventArgs
+        private void ShowErrorWarningSummary(IEnumerable<BuildEventArgs> listToProcess)
         {
             // Group the build warning event args based on the entry point and the target in which the warning occurred
-            Dictionary<ErrorWarningSummaryDictionaryKey, List<T>> groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<T>>();
+            var groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
 
             // Loop through each of the warnings and put them into the correct buckets
-            for (int listCount = 0; listCount < listToProcess.Count; listCount++)
+            foreach (BuildEventArgs errorWarningEventArgs in listToProcess)
             {
-                T errorWarningEventArgs = (T)listToProcess[listCount];
-
                 // Target event may be null for a couple of reasons:
                 // 1) If the event was from a project load, or engine 
                 // 2) If the flushing of the event queue for each request and result is turned off
@@ -430,7 +428,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // If there is no bucket create a new one which contains a list of all the errors which
                     // happened for a given buildEventContext / target
-                    List<T> errorWarningEventListByTarget = new List<T>();
+                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
                     groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
                 }
 
@@ -441,7 +439,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext previousEntryPoint = null;
             string previousTarget = null;
             // Loop through each of the bucket and print out the stack trace information for the errors
-            foreach (KeyValuePair<ErrorWarningSummaryDictionaryKey, List<T>> valuePair in groupByProjectEntryPoint)
+            foreach (KeyValuePair<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>> valuePair in groupByProjectEntryPoint)
             {
                 //If the project entry point where the error occurred is the same as the previous message do not print the
                 // stack trace again
@@ -468,7 +466,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 // Print out all of the errors under the ProjectEntryPoint / target
-                foreach (T errorWarningEvent in valuePair.Value)
+                foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
@@ -631,7 +629,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void WriteProperties(BuildEventArgs e, IEnumerable properties)
         {
             if (showOnlyErrors || showOnlyWarnings) return;
-            ArrayList propertyList = ExtractPropertyList(properties);
+            var propertyList = ExtractPropertyList(properties);
 
             // if there are no properties to display return out of the method and dont print out anything related to displaying
             // the properties, this includes the multiproc prefix information or the Initial properties header
@@ -645,7 +643,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShownBuildEventContext(e.BuildEventContext);
         }
 
-        internal override void OutputProperties(ArrayList list)
+        internal override void OutputProperties(List<DictionaryEntry> list)
         {
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -1533,24 +1531,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
-        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
+        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
         {
             // Lazily construct the performance counter table.
             if (table == null)
             {
-                table = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                table = new Dictionary<string, PerformanceCounter>(StringComparer.OrdinalIgnoreCase);
             }
 
-            MPPerformanceCounter counter = (MPPerformanceCounter)table[scopeName];
-
             // And lazily construct the performance counter itself.
-            if (counter == null)
+            PerformanceCounter counter;
+            if (!table.TryGetValue(scopeName, out counter))
             {
                 counter = new MPPerformanceCounter(scopeName);
                 table[scopeName] = counter;
             }
 
-            return counter;
+            return (MPPerformanceCounter)counter;
         }
         #endregion
 
@@ -1561,7 +1558,8 @@ namespace Microsoft.Build.BackEnd.Logging
         internal class MPPerformanceCounter : PerformanceCounter
         {
             // Set of performance counters for a project
-            private Hashtable _internalPerformanceCounters;
+            private Dictionary<string, PerformanceCounter> _internalPerformanceCounters;
+
             // Dictionary mapping event context to the start number of ticks, this will be used to calculate the amount
             // of time between the start of the performance counter and the end
             // An object is being used to box the start time long value to prevent jitting when this code path is executed.
