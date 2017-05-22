@@ -2,7 +2,11 @@
 <Project DefaultTargets="CopySatellitesIntoNetcore" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <FullFrameworkSatelliteRoot>$(BinDir)\Debug\x86\Windows_NT\Output\</FullFrameworkSatelliteRoot>
+    <FullFrameworkConfiguration>$(Configuration)</FullFrameworkConfiguration>
+    <FullFrameworkConfiguration Condition="'$(Configuration)' == 'Release-NetCore'">Release</FullFrameworkConfiguration>
+    <FullFrameworkConfiguration Condition="'$(Configuration)' == 'Debug-NetCore'">Debug</FullFrameworkConfiguration>
+
+    <FullFrameworkSatelliteRoot>$(BinDir)\$(FullFrameworkConfiguration)\x86\Windows_NT\Output\</FullFrameworkSatelliteRoot>
   </PropertyGroup>
 
   <Target Name="GenerateSatelliteItems">
