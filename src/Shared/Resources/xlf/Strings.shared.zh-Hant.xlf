@@ -276,17 +276,17 @@
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>
-        <target state="new">MSB4233: There was an exception while reading the log file: {0}</target>
+        <target state="translated">MSB4233: 讀取記錄檔時發生錯誤: {0}</target>
         <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="new">Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</target>
-        <note></note>
+        <target state="translated">指派值為 "{1}" 的參數 "{0}" 不得具有無效的路徑或檔案字元。</target>
+        <note />
       </trans-unit>
       <trans-unit id="Shared.InvalidEscapeHatchValue">
         <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="new">MSB5025: Invalid escape hatch value: {0}</target>
+        <target state="translated">MSB5025: 逸出口值無效: {0}</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
     </body>

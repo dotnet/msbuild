@@ -1115,7 +1115,7 @@
       </trans-unit>
       <trans-unit id="InvalidTaskOutputSpecification">
         <source>MSB4029: The "{0}" task has an invalid output specification. The "TaskParameter" attribute is required, and either the "ItemName" or "PropertyName" attribute must be specified (but not both).</source>
-        <target state="translated">MSB4029: A tarefa "{0}" tem uma especificação de saída inválida. O atributo "TaskParameter" é obrigatório, e o atributo "ItemName" ou "PropertyName" deve ser especificado (mas não os dois).</target>
+        <target state="translated">MSB4029: A tarefa "{0}" tem uma especificação de saída inválida. O atributo "TaskParameter" é obrigatório e o atributo "ItemName" ou "PropertyName" deve ser especificado (mas não os dois).</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4029: A tarefa "{0}" tem uma especificação de saída inválida. O atributo "TaskParameter" é obrigatório, e o atributo "ItemName" ou "PropertyName" deve ser especificado (mas não os dois).</target>
@@ -1914,7 +1914,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Os projetos da Web não dão suporte ao destino "Clean". Prosseguindo com os projetos restantes...</target>
+        <target state="translated">Os projetos da Web não dão suporte ao destino "Clean".  Prosseguindo com os projetos restantes...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1924,7 +1924,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Os projetos da Web não dão suporte ao destino "Publish". Prosseguindo com os projetos restantes...</target>
+        <target state="translated">Os projetos Web não dão suporte ao destino "Publish".  Prosseguindo com os projetos restantes...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -2003,7 +2003,7 @@
       </trans-unit>
       <trans-unit id="TargetConditionHasInvalidMetadataReference">
         <source>MSB4116: The condition "{1}" on the "{0}" target has a reference to item metadata. References to item metadata are not allowed in target conditions unless they are part of an item transform.</source>
-        <target state="translated">MSB4116: A condição "{1}" no destino "{0}" tem uma referência aos metadados de item. Não são permitidas referências a metadados de item nas condições de destino, exceto se fizerem parte de uma transformação de item.</target>
+        <target state="translated">MSB4116: A condição "{1}" no destino "{0}" tem uma referência aos metadados de item. Não são permitidas referências a metadados de item nas condições de destino, a menos que façam parte de uma transformação de item.</target>
         <note>{StrBegin="MSB4116: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4116: A condição "{1}" no destino "{0}" tem uma referência aos metadados de item. Não são permitidas referências a metadados de item nas condições de destino, exceto se fizerem parte de uma transformação de item.</target>
@@ -2321,7 +2321,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: Não há suporte para o parâmetro "{0}" da tarefa "{1}". Verifique se o parâmetro existe na tarefa, e se ele é uma propriedade de instância pública que pode ser definida.</target>
+        <target state="translated">MSB4064: O parâmetro "{0}" não tem suporte na tarefa "{1}". Verifique se o parâmetro existe na tarefa e se ele é uma propriedade de instância pública que pode ser definida.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4064: Não há suporte para o parâmetro "{0}" da tarefa "{1}". Verifique se o parâmetro existe na tarefa, e se ele é uma propriedade de instância pública que pode ser definida.</target>
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: O parâmetro "{0}" não tem suporte na tarefa "{1}". Verifique se o parâmetro existe na tarefa, e se é uma propriedade de instância pública que pode ser obtida.</target>
+        <target state="translated">MSB4131: O parâmetro "{0}" não tem suporte na tarefa "{1}". Verifique se o parâmetro existe na tarefa e se é uma propriedade de instância pública que pode ser obtida.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: O parâmetro "{0}" não tem suporte na tarefa "{1}". Verifique se o parâmetro existe na tarefa, e se é uma propriedade de instância pública que pode ser obtida.</target>
