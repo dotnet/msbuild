@@ -71,8 +71,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().Contain("Version 99.99.99 of the SDK is smaller than the minimum version 999.99.99"
-                + " requested. Check that a recent enough .NET Core SDK is installed and/or increase the version"
-                + " specified in global.json.");
+                + " requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version"
+                + " specified in the project, or increase the version specified in global.json.");
         }
 
         [Fact]

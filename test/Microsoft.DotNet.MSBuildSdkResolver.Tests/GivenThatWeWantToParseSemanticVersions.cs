@@ -7,82 +7,83 @@ using FluentAssertions;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
-    public class GivenThatWeWantToParseSemanticVersions
+    public class GivenThatWeWantToParseFXVersions
     {
         [Fact]
         public void ReturnsNullWhenNoMajorSeparatorIsFound()
         {
-            var semanticVersion = SemanticVersion.Parse("1");
-
-            semanticVersion.Should().BeNull();
+            FXVersion fxVersion;
+            FXVersion.TryParse("1", out fxVersion).Should().BeFalse();
         }
 
         [Fact]
         public void ReturnsNullWhenMajorPortionIsNotANumber()
         {
-            var semanticVersion = SemanticVersion.Parse("a.0.0");
-
-            semanticVersion.Should().BeNull();
+            FXVersion fxVersion;
+            FXVersion.TryParse("a.0.0", out fxVersion).Should().BeFalse();
         }
 
         [Fact]
         public void ReturnsNullWhenNoMinorSeparatorIsFound()
         {
-            var semanticVersion = SemanticVersion.Parse("1.0");
-
-            semanticVersion.Should().BeNull();
+            FXVersion fxVersion;
+            FXVersion.TryParse("1.0", out fxVersion).Should().BeFalse();
         }
 
         [Fact]
         public void ReturnsNullWhenMinorPortionIsNotANumber()
         {
-            var semanticVersion = SemanticVersion.Parse("1.a.0");
-
-            semanticVersion.Should().BeNull();
+            FXVersion fxVersion;
+            FXVersion.TryParse("1.a.0", out fxVersion).Should().BeFalse();
         }
 
         [Fact]
         public void ReturnsNullWhenPatchPortionIsNotANumber()
         {
-            var semanticVersion = SemanticVersion.Parse("1.0.a");
-
-            semanticVersion.Should().BeNull();
+            FXVersion fxVersion;
+            FXVersion.TryParse("1.0.a", out fxVersion).Should().BeFalse();
         }
 
         [Fact]
-        public void ReturnsSemanticVersionWhenOnlyMajorMinorPatchIsFound()
+        public void ReturnsFXVersionWhenOnlyMajorMinorPatchIsFound()
         {
-            var semanticVersion = SemanticVersion.Parse("1.2.3");
+            FXVersion fxVersion;
 
-            semanticVersion.Should().NotBeNull();
-            semanticVersion.Major.Should().Be(1);
-            semanticVersion.Minor.Should().Be(2);
-            semanticVersion.Patch.Should().Be(3);
+            var result = FXVersion.TryParse("1.2.3", out fxVersion);
+
+            result.Should().BeTrue();
+            fxVersion.Major.Should().Be(1);
+            fxVersion.Minor.Should().Be(2);
+            fxVersion.Patch.Should().Be(3);
         }
 
         [Fact]
-        public void ReturnsSemanticVersionWhenOnlyMajorMinorPatchAndPreIsFound()
+        public void ReturnsFXVersionWhenOnlyMajorMinorPatchAndPreIsFound()
         {
-            var semanticVersion = SemanticVersion.Parse("1.2.3-pre");
+            FXVersion fxVersion;
 
-            semanticVersion.Should().NotBeNull();
-            semanticVersion.Major.Should().Be(1);
-            semanticVersion.Minor.Should().Be(2);
-            semanticVersion.Patch.Should().Be(3);
-            semanticVersion.Pre.Should().Be("-pre");
+            var result = FXVersion.TryParse("1.2.3-pre", out fxVersion);
+
+            result.Should().BeTrue();
+            fxVersion.Major.Should().Be(1);
+            fxVersion.Minor.Should().Be(2);
+            fxVersion.Patch.Should().Be(3);
+            fxVersion.Pre.Should().Be("-pre");
         }
 
         [Fact]
-        public void ReturnsSemanticVersionWhenMajorMinorPatchAndPreAndBuildIsFound()
+        public void ReturnsFXVersionWhenMajorMinorPatchAndPreAndBuildIsFound()
         {
-            var semanticVersion = SemanticVersion.Parse("1.2.3-pre+build");
+            FXVersion fxVersion;
+            
+            var result = FXVersion.TryParse("1.2.3-pre+build", out fxVersion);
 
-            semanticVersion.Should().NotBeNull();
-            semanticVersion.Major.Should().Be(1);
-            semanticVersion.Minor.Should().Be(2);
-            semanticVersion.Patch.Should().Be(3);
-            semanticVersion.Pre.Should().Be("-pre");
-            semanticVersion.Build.Should().Be("build");
+            result.Should().BeTrue();
+            fxVersion.Major.Should().Be(1);
+            fxVersion.Minor.Should().Be(2);
+            fxVersion.Patch.Should().Be(3);
+            fxVersion.Pre.Should().Be("-pre");
+            fxVersion.Build.Should().Be("build");
         }
     }
 }

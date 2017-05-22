@@ -53,15 +53,16 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;;
             }
 
-            if (!string.IsNullOrEmpty(sdkReference.MinimumVersion) && 
-                SemanticVersion.Parse(netcoreSdkVersion) < SemanticVersion.Parse(sdkReference.MinimumVersion))
+            if (!IsNetCoreSDKOveridden(netcoreSdkVersion) && 
+                IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
             {
                 return factory.IndicateFailure(
                     new[]
                     {
                         $"Version {netcoreSdkVersion} of the SDK is smaller than the minimum version"
                         + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
-                        + " installed and/or increase the version specified in global.json."
+                        + " installed, increase the minimum version specified in the project, or increase"
+                        + " the version specified in global.json."
                     });
             }
 
@@ -77,6 +78,42 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion);
+        }
+
+        private bool IsNetCoreSDKOveridden(string netcoreSdkVersion)
+        {
+            return netcoreSdkVersion == null;
+        }
+
+        private bool IsNetCoreSDKSmallerThanTheMinimumVersion(string netcoreSdkVersion, string minimumVersion)
+        {
+            FXVersion netCoreSdkFXVersion;
+            FXVersion minimumFXVersion;
+
+            if (string.IsNullOrEmpty(minimumVersion))
+            {
+                return false;
+            }
+
+            if (FailsToParseVersions(netcoreSdkVersion, minimumVersion, out netCoreSdkFXVersion, out minimumFXVersion))
+            {
+                return true;
+            }
+
+            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) == -1;
+        }
+
+        private bool FailsToParseVersions(
+            string netcoreSdkVersion,
+            string minimumVersion,
+            out FXVersion netCoreSdkFXVersion,
+            out FXVersion minimumFXVersion)
+        {
+            netCoreSdkFXVersion = null;
+            minimumFXVersion = null;
+
+            return !FXVersion.TryParse(netcoreSdkVersion, out netCoreSdkFXVersion) ||
+                !FXVersion.TryParse(minimumVersion, out minimumFXVersion);
         }
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
