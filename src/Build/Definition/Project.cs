@@ -494,7 +494,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                _xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, LoggingService, projectCollection.ProjectRootElementCache, s_buildEventContext, true /*Explicitly loaded*/);
+                _xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/);
             }
             catch (InvalidProjectFileException ex)
             {

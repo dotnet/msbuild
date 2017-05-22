@@ -259,7 +259,7 @@ namespace Microsoft.Build.Execution
             BuildParameters buildParameters = new BuildParameters(projectCollection);
 
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, projectCollection.LoggingService, buildParameters.ProjectRootElementCache, buildEventContext, true /*Explicitly Loaded*/);
+            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext, projectCollection.SdkResolution);
         }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
 
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, loggingService, buildParameters.ProjectRootElementCache, buildEventContext, false /*Not explicitly loaded*/);
+            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, ProjectCollection.GlobalProjectCollection.SdkResolution);
         }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -15,15 +11,25 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverLoader_Tests
     {
+        private readonly StringBuilder _log;
+        private readonly MockLoggingContext _loggingContext;
+
+        public SdkResolverLoader_Tests()
+        {
+            _log = new StringBuilder();
+
+            var logger = new MockLoggingService(message => _log.AppendLine(message));
+            var bec = new BuildEventContext(0, 0, 0, 0, 0);
+
+            _loggingContext = new MockLoggingContext(logger, bec);
+        }
+
         [Fact]
         public void AssertDefaultLoaderReturnsDefaultResolver()
         {
             var loader = new SdkResolverLoader();
-            var log = new StringBuilder();
-            var logger = new MockLoggingService(message => log.AppendLine(message));
-            var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
-            var resolvers = loader.LoadResolvers(logger, bec, new MockElementLocation("file"));
+            var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
             Assert.Equal(1, resolvers.Count);
             Assert.Equal(typeof(DefaultSdkResolver), resolvers[0].GetType());

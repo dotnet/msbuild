@@ -22,6 +22,7 @@ using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -153,11 +154,6 @@ namespace Microsoft.Build.Evaluation
         private readonly ProjectRootElement _projectRootElement;
 
         /// <summary>
-        /// The logging service for use during evaluation
-        /// </summary>
-        private readonly ILoggingService _loggingService;
-
-        /// <summary>
         /// The item factory used to create items from Xml.
         /// </summary>
         private readonly IItemFactory<I, I> _itemFactory;
@@ -190,9 +186,9 @@ namespace Microsoft.Build.Evaluation
         private readonly ProjectRootElementCache _projectRootElementCache;
 
         /// <summary>
-        /// Build event context to log evaluator events in.
+        /// The logging context to be used and piped down throughout evaluation
         /// </summary>
-        private BuildEventContext _buildEventContext = null;
+        private EvaluationLoggingContext _evaluationLoggingContext;
 
 #if FEATURE_MSBUILD_DEBUGGER
         /// <summary>
@@ -273,12 +269,12 @@ namespace Microsoft.Build.Evaluation
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
-            _loggingService = loggingService;
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
-            _buildEventContext = buildEventContext;
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
             _sdkResolution = sdkResolution;
+
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext);
         }
 
         /// <summary>
@@ -780,7 +776,7 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "EvaluationStarted", projectFile);
+            _evaluationLoggingContext.LogComment(MessageImportance.Low, "EvaluationStarted", projectFile);
 
 #if MSBUILDENABLEVSPROFILING 
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
@@ -819,7 +815,7 @@ namespace Microsoft.Build.Evaluation
             LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
 
             // comment next line to turn off lazy Evaluation
-            lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _buildEventContext, _loggingService);
+            lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext);
 
             // Pass3: evaluate project items
             foreach (ProjectItemGroupElement itemGroupElement in _itemGroupElements)
@@ -934,7 +930,7 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
-            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "EvaluationFinished", projectFile);
+            _evaluationLoggingContext.LogComment(MessageImportance.Low, "EvaluationFinished", projectFile);
 
 #if FEATURE_MSBUILD_DEBUGGER
             return _projectLevelLocalsForBuild;
@@ -1296,8 +1292,8 @@ namespace Microsoft.Build.Evaluation
 
             TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>
                 (
-                _loggingService,
-                _buildEventContext,
+                _evaluationLoggingContext.LoggingService,
+                _evaluationLoggingContext.BuildEventContext,
                 directoryOfImportingFile,
                 projectUsingTaskElement,
                 _data.TaskRegistry,
@@ -1327,7 +1323,7 @@ namespace Microsoft.Build.Evaluation
             ProjectTargetInstance otherTarget = _data.GetTarget(targetName);
             if (otherTarget != null)
             {
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
+                _evaluationLoggingContext.LogComment(MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
             }
 
             LinkedListNode<ProjectTargetElement> node;
@@ -1367,7 +1363,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
                     // It's low importance as it's addressed to build authors
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TargetDoesNotExistBeforeTargetMessage", unescapedBeforeTarget, targetElement.BeforeTargetsLocation.LocationString);
+                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "TargetDoesNotExistBeforeTargetMessage", unescapedBeforeTarget, targetElement.BeforeTargetsLocation.LocationString);
                 }
             }
 
@@ -1390,7 +1386,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
                     // It's low importance as it's addressed to build authors
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TargetDoesNotExistAfterTargetMessage", unescapedAfterTarget, targetElement.AfterTargetsLocation.LocationString);
+                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "TargetDoesNotExistAfterTargetMessage", unescapedAfterTarget, targetElement.AfterTargetsLocation.LocationString);
                 }
             }
         }
@@ -1628,7 +1624,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Once we are going to warn for a property once, remove it from the list so we do not add it again.
                     _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
-                    _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
+                    _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(propertyElement.Location), null, "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
                 }
             }
 
@@ -1658,8 +1654,7 @@ namespace Microsoft.Build.Evaluation
 
             if (newValue != oldValue)
             {
-                _loggingService.LogComment(
-                    _buildEventContext,
+                _evaluationLoggingContext.LogComment(
                     MessageImportance.Low,
                     "PropertyReassignment",
                     property.Name,
@@ -2262,7 +2257,7 @@ namespace Microsoft.Build.Evaluation
 
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
-            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
+            _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
                                         String.Join(Path.PathSeparator.ToString(), pathsToSearch));
 
@@ -2298,7 +2293,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
+                _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
                 var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath, false, out projects);
@@ -2380,8 +2375,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _loggingService,
-                    _buildEventContext, importElement.Location, solutionPath, projectPath);
+                var sdkRootPath = _sdkResolution.GetSdkPath(importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
 
                 if (string.IsNullOrEmpty(sdkRootPath))
                 {
@@ -2467,7 +2461,7 @@ namespace Microsoft.Build.Evaluation
                     // and issue a warning to that effect.
                     if (String.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
-                        _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
+                        _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
 
                         continue;
@@ -2484,7 +2478,7 @@ namespace Microsoft.Build.Evaluation
                             // Get the full path of the MSBuild file that has this import.
                             string importedBy = importElement.ContainingProject.FullPath ?? String.Empty;
 
-                            _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                            _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
                             // Throw exception if the project load settings requires us to stop the evaluation of a project when circular imports are detected.
                             if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0)
@@ -2511,7 +2505,7 @@ namespace Microsoft.Build.Evaluation
                             parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
-                        _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
+                        _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                         duplicateImport = true;
                     }
 
@@ -2534,9 +2528,7 @@ namespace Microsoft.Build.Evaluation
                                     _data.GlobalPropertiesDictionary,
                                     instance => ((IProperty)instance).EvaluatedValueEscaped),
                                 _data.ExplicitToolsVersion,
-                                _loggingService,
                                 _projectRootElementCache,
-                                _buildEventContext,
                                 explicitlyLoaded),
                             explicitlyLoaded,
                             // don't care about formatting, reuse whatever is there
@@ -2679,8 +2671,8 @@ namespace Microsoft.Build.Evaluation
                 expanderOptions,
                 GetCurrentDirectoryForConditionEvaluation(element),
                 element.ConditionLocation,
-                _loggingService,
-                _buildEventContext
+                _evaluationLoggingContext.LoggingService,
+                _evaluationLoggingContext.BuildEventContext
                 );
 
             return result;
@@ -2715,8 +2707,8 @@ namespace Microsoft.Build.Evaluation
                 _data.ConditionedProperties,
                 GetCurrentDirectoryForConditionEvaluation(element),
                 element.ConditionLocation,
-                _loggingService,
-                _buildEventContext,
+                _evaluationLoggingContext.LoggingService,
+                _evaluationLoggingContext.BuildEventContext,
                 projectRootElementCache
                 );
 

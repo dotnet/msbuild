@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
 {
     internal class SdkResolverLoader
     {
-        internal virtual IList<SdkResolver> LoadResolvers(ILoggingService logger, BuildEventContext buildEventContext,
+        internal virtual IList<SdkResolver> LoadResolvers(BaseLoggingContext loggingContext,
             ElementLocation location)
         {
             // Always add the default resolver
@@ -46,8 +46,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (Exception e)
                 {
-                    logger.LogWarning(buildEventContext, string.Empty, new BuildEventFileInfo(location),
-                        "CouldNotLoadSdkResolver", e.Message);
+                    loggingContext.LogWarning(new BuildEventFileInfo(location), string.Empty, "CouldNotLoadSdkResolver", e.Message);
                 }
 
             return resolvers.OrderBy(t => t.Priority).ToList();
