@@ -281,7 +281,8 @@
     <CallTarget Targets="CleanSrcLockFiles" />
 
     <DotNetRestore ToolPath="$(DotNetPath)"
-                   ProjectPath="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
+                   ProjectPath="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;"
+                   ConfigFile="$(RepoRoot)\NuGet.Config" />
 
   </Target>
 
@@ -306,7 +307,8 @@
     <CallTarget Targets="CleanToolsLockFiles" />
 
     <DotNetRestore ToolPath="$(DotNetPath)"
-                   ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;" />
+                   ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;"
+                   ConfigFile="$(RepoRoot)\NuGet.Config" />
 
   </Target>
 
