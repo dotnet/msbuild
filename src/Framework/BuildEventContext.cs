@@ -49,6 +49,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private int submissionId;
 
+        /// <summary>
+        /// The id of the evaluation
+        /// </summary>
+        private int evaluationID;
+
         #endregion
 
         #region Constructor
@@ -63,7 +68,7 @@ namespace Microsoft.Build.Framework
             int projectContextId,
             int taskId
         )
-            : this(InvalidSubmissionId, nodeId, InvalidProjectInstanceId, projectContextId, targetId, taskId)
+            : this(InvalidSubmissionId, nodeId, InvalidEvaluationID, InvalidProjectInstanceId, projectContextId, targetId, taskId)
         {
             // UNDONE: This is obsolete.
         }
@@ -79,7 +84,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            : this(InvalidSubmissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId)
+            : this(InvalidSubmissionId, nodeId, InvalidEvaluationID, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
@@ -95,9 +100,27 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
+            :this(submissionId, nodeId, InvalidEvaluationID, projectInstanceId, projectContextId, targetId, taskId)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a BuildEventContext
+        /// </summary>
+        public BuildEventContext
+        (
+            int submissionId,
+            int nodeId,
+            int evaluationID,
+            int projectInstanceId,
+            int projectContextId,
+            int targetId,
+            int taskId
+        )
         {
             this.submissionId = submissionId;
             this.nodeId = nodeId;
+            this.evaluationID = evaluationID;
             this.targetId = targetId;
             this.projectContextId = projectContextId;
             this.taskId = taskId;
@@ -116,6 +139,17 @@ namespace Microsoft.Build.Framework
             get
             {
                 return new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the Evaluation id.
+        /// </summary>
+        public int EvaluationID => _submissionId;
+        {
+            get
+            {
+                return evaluationID;
             }
         }
 
@@ -223,6 +257,11 @@ namespace Microsoft.Build.Framework
         /// Indicates an invalid submission identifier.
         /// </summary>
         public const int InvalidSubmissionId = -1;
+        /// <summary>
+        /// Indicates an invalid evaluation identifier.
+        /// </summary>
+        public const int InvalidEvaluationID = -1;
+
         #endregion
 
         #region Equals
@@ -307,10 +346,11 @@ namespace Microsoft.Build.Framework
         /// <returns>True if the value fields are the same, false if otherwise</returns>
         private bool InternalEquals(BuildEventContext buildEventContext)
         {
-            return ((nodeId == buildEventContext.NodeId)
-                   && (projectContextId == buildEventContext.ProjectContextId)
-                   && (targetId == buildEventContext.TargetId)
-                   && (taskId == buildEventContext.TaskId));
+            return nodeId == buildEventContext.NodeId
+                   && projectContextId == buildEventContext.ProjectContextId
+                   && targetId == buildEventContext.TargetId
+                   && taskId == buildEventContext.TaskId
+                   && evaluationID == buildEventContext.evaluationID;
         }
         #endregion
 
