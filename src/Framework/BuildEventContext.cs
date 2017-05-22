@@ -222,13 +222,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Retrieves the BuildRequest id.  Note that this is not the same as the global request id on a BuildRequest or BuildResult.
         /// </summary>
-        public long BuildRequestId
-        {
-            get
-            {
-                return ((long)nodeId << 32) + projectContextId;
-            }
-        }
+        public long BuildRequestId => GetHashCode();
 
         #endregion
 
@@ -272,7 +266,17 @@ namespace Microsoft.Build.Framework
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return (ProjectContextId + (NodeId << 24));
+            var hash = 17;
+            // submission ID does not contribute to equality
+            //hash = hash * 31 + submissionId;
+            hash = hash * 31 + nodeId;
+            hash = hash * 31 + evaluationID;
+            hash = hash * 31 + targetId;
+            hash = hash * 31 + projectContextId;
+            hash = hash * 31 + taskId;
+            hash = hash * 31 + projectInstanceId;
+
+            return hash;
         }
 
         /// <summary>
@@ -351,6 +355,7 @@ namespace Microsoft.Build.Framework
                    && targetId == buildEventContext.TargetId
                    && taskId == buildEventContext.TaskId
                    && evaluationID == buildEventContext.evaluationID;
+                   && projectInstanceId == buildEventContext.projectInstanceId;
         }
         #endregion
 
