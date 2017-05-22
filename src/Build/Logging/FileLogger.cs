@@ -36,7 +36,7 @@ namespace Microsoft.Build.Logging
                 colorSet: BaseConsoleLogger.DontSetColor,
                 colorReset: BaseConsoleLogger.DontResetColor)
         {
-            this.WriteHandler = new WriteHandler(Write);
+            WriteHandler = Write;
         }
 
         #endregion
@@ -49,16 +49,13 @@ namespace Microsoft.Build.Logging
         public override void Initialize(IEventSource eventSource)
         {
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
-            eventSource.BuildFinished += new BuildFinishedEventHandler(FileLoggerBuildFinished);
+            eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }
 
         private void FileLoggerBuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            if (_fileWriter != null)
-            {
-                _fileWriter.Flush();
-            }
+            _fileWriter?.Flush();
         }
 
         /// <summary>
@@ -78,7 +75,7 @@ namespace Microsoft.Build.Logging
                 Parameters = "FORCENOALIGN;";
             }
 
-            this.ParseFileLoggerParameters();
+            ParseFileLoggerParameters();
 
             // Finally, ask the base console logger class to initialize. It may
             // want to make decisions based on our verbosity, so we do this last.
@@ -111,10 +108,8 @@ namespace Microsoft.Build.Logging
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
-                if (_fileWriter != null)
-                {
-                    _fileWriter.Dispose();
-                }
+                _fileWriter?.Dispose();
+
                 throw new LoggerException(message, e.InnerException, errorCode, helpKeyword);
             }
         }
@@ -142,10 +137,8 @@ namespace Microsoft.Build.Logging
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);
-                if (_fileWriter != null)
-                {
-                    _fileWriter.Dispose();
-                }
+                _fileWriter?.Dispose();
+
                 throw new LoggerException(message, ex.InnerException, errorCode, helpKeyword);
             }
         }
@@ -162,10 +155,7 @@ namespace Microsoft.Build.Logging
             finally
             {
                 // Keep FxCop happy by closing in a Finally.
-                if (_fileWriter != null)
-                {
-                    _fileWriter.Dispose();
-                }
+                _fileWriter?.Dispose();
             }
         }
 
@@ -174,27 +164,16 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ParseFileLoggerParameters()
         {
-            if (this.Parameters != null)
+            if (Parameters == null) return;
+
+            foreach (string parameter in Parameters.Split(s_fileLoggerParameterDelimiters))
             {
-                string[] parameterComponents;
+                if (parameter.Length <= 0) continue;
 
-                parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
-                for (int param = 0; param < parameterComponents.Length; param++)
-                {
-                    if (parameterComponents[param].Length > 0)
-                    {
-                        string[] parameterAndValue = parameterComponents[param].Split(s_fileLoggerParameterValueSplitCharacter);
+                var parameterAndValue = parameter.Split(s_fileLoggerParameterValueSplitCharacter);
 
-                        if (parameterAndValue.Length > 1)
-                        {
-                            ApplyFileLoggerParameter(parameterAndValue[0], parameterAndValue[1]);
-                        }
-                        else
-                        {
-                            ApplyFileLoggerParameter(parameterAndValue[0], null);
-                        }
-                    }
-                }
+                ApplyFileLoggerParameter(parameterAndValue[0],
+                    parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
             }
         }
 
@@ -250,13 +229,13 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// fileWriter is the stream that has been opened on our log file.
         /// </summary>
-        private StreamWriter _fileWriter = null;
+        private StreamWriter _fileWriter;
 
         /// <summary>
         /// Whether the logger should append to any existing file.
         /// Default is to overwrite.
         /// </summary>
-        private bool _append = false;
+        private bool _append;
 
         /// <summary>
         /// Whether the logger should flush aggressively to disk.

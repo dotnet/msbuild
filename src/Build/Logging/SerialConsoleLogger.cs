@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
         {
-            // Show the performance summary iff the verbosity is diagnostic or the user specifically asked for it
+            // Show the performance summary if the verbosity is diagnostic or the user specifically asked for it
             // with a logger parameter.
             if (this.showPerfSummary)
             {
