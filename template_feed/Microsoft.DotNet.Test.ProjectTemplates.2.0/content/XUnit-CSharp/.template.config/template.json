@@ -42,6 +42,10 @@
       "defaultValue": "false",
       "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
     },
+    "HostIdentifier": {
+      "type": "bind",
+      "binding": "HostIdentifier"
+    },
     "skipRestore": {
       "type": "parameter",
       "datatype": "bool",
@@ -49,7 +53,13 @@
       "defaultValue": "false"
     }
   },
-  "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ],
+  "primaryOutputs": [
+    { "path": "Company.TestProject1.csproj" },
+    {
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
+      "path": "UnitTest1.cs"
+    }
+  ],
   "defaultName": "TestProject1",
   "postActions": [
     {
@@ -59,6 +69,16 @@
         { "text": "Run 'dotnet restore'" }
       ],
       "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    },
+    {
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
+      "description": "Opens Class1.cs in the editor",
+      "manualInstructions": [ ],
+      "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
+      "args": {
+        "files": "1"
+      },
       "continueOnError": true
     }
   ]

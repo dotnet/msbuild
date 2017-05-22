@@ -14,8 +14,14 @@
     <None Remove="**/*.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25102" />
+  <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25149" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25149" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25149" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25149" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview2-25149" />
   </ItemGroup>
 
 </Project>
