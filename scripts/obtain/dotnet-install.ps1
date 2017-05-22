@@ -189,7 +189,7 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel, [string]$
 
     switch ($Response.Content.Headers.ContentType) {
         { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($StringContent) }
-        { ($_ -eq "text/plain") } { ($_ -eq "text/plain; charset=UTF-8") } { $VersionText = $StringContent }
+        { ($_.StartsWith("text/plain")) } { $VersionText = $StringContent }
         default { throw "``$Response.Content.Headers.ContentType`` is an unknown .version file content type." }
     }
 
