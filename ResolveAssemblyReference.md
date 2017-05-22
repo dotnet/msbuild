@@ -13,7 +13,7 @@ http://source.roslyn.io/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd6
 This is where the RAR task is invoked in the targets file.
 
 The source code for RAR is at:
-https://github.com/Microsoft/msbuild/blob/master/src/XMakeTasks/AssemblyDependency/ResolveAssemblyReference.cs
+https://github.com/Microsoft/msbuild/blob/master/src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs
 
 ## Inputs
 RAR is very detailed about logging its inputs:
