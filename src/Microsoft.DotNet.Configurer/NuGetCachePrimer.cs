@@ -96,13 +96,13 @@ namespace Microsoft.DotNet.Configurer
   </packageSources>
 </configuration>");
 
-                        File.WriteAllText(
+                        _file.WriteAllText(
                             Path.Combine(workingDirectory, "global.json"),
                             $@"{{
-                                 ""sdk"": {{
-                                    ""version"":""{Product.Version}""
-                                 }}
-                               }}");
+ ""sdk"": {{
+    ""version"":""{Product.Version}""
+ }}
+}}");
 
                         succeeded &= CreateTemporaryProject(workingDirectory, templateInfo);
 

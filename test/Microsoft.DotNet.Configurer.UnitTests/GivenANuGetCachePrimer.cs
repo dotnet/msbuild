@@ -164,6 +164,18 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
+        public void It_writes_a_global_json_file_with_the_current_cli_version()
+        {
+            var nugetConfigPath = Path.Combine(_temporaryDirectoryMock.DirectoryPath, "global.json");
+            _fileSystemMock.File.ReadAllText(nugetConfigPath).Should().Be(
+                $@"{{
+ ""sdk"": {{
+    ""version"":""{Product.Version}""
+ }}
+}}");
+        }
+
+        [Fact]
         public void It_uses_a_config_file_with_dotnet_restore()
         {
             var nugetConfigPath = Path.Combine(_temporaryDirectoryMock.DirectoryPath, "NuGet.Config");
