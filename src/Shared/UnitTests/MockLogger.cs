@@ -206,6 +206,8 @@ namespace Microsoft.Build.UnitTests
             get { return _buildFinishedEvents; }
         }
 
+        internal List<BuildEventArgs> AllBuildEvents { get; } = new List<BuildEventArgs>();
+
         /*
          * Method:  FullLog
          *
@@ -301,6 +303,8 @@ namespace Microsoft.Build.UnitTests
          */
         internal void LoggerEventHandler(object sender, BuildEventArgs eventArgs)
         {
+            AllBuildEvents.Add(eventArgs);
+
             if (eventArgs is BuildWarningEventArgs)
             {
                 BuildWarningEventArgs w = (BuildWarningEventArgs) eventArgs;

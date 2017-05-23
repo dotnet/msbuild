@@ -3808,6 +3808,33 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        [Fact]
+        public void ProjectInstanceShouldInitiallyHaveSameEvaluationIDAsTheProjectItCameFrom()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var project = new Project(null, null, projectCollection);
+                var initialEvaluationID = project.LastEvaluationID;
+
+                var projectInstance = project.CreateProjectInstance();
+
+                Assert.NotEqual(BuildEventContext.InvalidEvaluationID, initialEvaluationID);
+                Assert.Equal(initialEvaluationID, projectInstance.EvaluationID);
+
+                // trigger a new evaluation which increments the evaluation ID in the Project
+                project.AddItem("foo", "bar");
+                project.ReevaluateIfNecessary();
+
+                Assert.NotEqual(initialEvaluationID, project.LastEvaluationID);
+                Assert.Equal(initialEvaluationID, projectInstance.EvaluationID);
+
+                var newProjectInstance = project.CreateProjectInstance();
+                Assert.Equal(project.LastEvaluationID, newProjectInstance.EvaluationID);
+            }
+        }
+
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
