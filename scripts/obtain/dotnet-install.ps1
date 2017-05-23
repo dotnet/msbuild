@@ -173,7 +173,7 @@ function GetHTTPResponse([Uri] $Uri)
 }
 
 
-function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel, [string]$CLIArchitecture) {
+function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel) {
     Say-Invocation $MyInvocation
 
     $VersionFileUrl = $null
@@ -189,7 +189,8 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel, [string]$
 
     switch ($Response.Content.Headers.ContentType) {
         { ($_ -eq "application/octet-stream") } { $VersionText = [Text.Encoding]::UTF8.GetString($StringContent) }
-        { ($_.StartsWith("text/plain")) } { $VersionText = $StringContent }
+        { ($_ -eq "text/plain") } { $VersionText = $StringContent }
+        { ($_ -eq "text/plain; charset=UTF-8") } { $VersionText = $StringContent }
         default { throw "``$Response.Content.Headers.ContentType`` is an unknown .version file content type." }
     }
 
@@ -199,12 +200,12 @@ function Get-Latest-Version-Info([string]$AzureFeed, [string]$Channel, [string]$
 }
 
 
-function Get-Specific-Version-From-Version([string]$AzureFeed, [string]$Channel, [string]$CLIArchitecture, [string]$Version) {
+function Get-Specific-Version-From-Version([string]$AzureFeed, [string]$Channel, [string]$Version) {
     Say-Invocation $MyInvocation
 
     switch ($Version.ToLower()) {
         { $_ -eq "latest" } {
-            $LatestVersionInfo = Get-Latest-Version-Info -AzureFeed $AzureFeed -Channel $Channel -CLIArchitecture $CLIArchitecture
+            $LatestVersionInfo = Get-Latest-Version-Info -AzureFeed $AzureFeed -Channel $Channel
             return $LatestVersionInfo.Version
         }
         default { return $Version }
@@ -383,7 +384,7 @@ function Prepend-Sdk-InstallRoot-To-Path([string]$InstallRoot, [string]$BinFolde
 }
 
 $CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
-$SpecificVersion = Get-Specific-Version-From-Version -AzureFeed $AzureFeed -Channel $Channel -CLIArchitecture $CLIArchitecture -Version $Version
+$SpecificVersion = Get-Specific-Version-From-Version -AzureFeed $AzureFeed -Channel $Channel -Version $Version
 $DownloadLinks = Get-Download-Links -AzureFeed $AzureFeed -Channel $Channel -SpecificVersion $SpecificVersion -CLIArchitecture $CLIArchitecture
 
 if ($DryRun) {
