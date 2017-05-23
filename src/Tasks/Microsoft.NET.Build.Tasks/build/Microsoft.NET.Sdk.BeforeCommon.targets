@@ -13,9 +13,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <_IsExecutable Condition="'$(_IsExecutable)' == '' and '$(OutputType)'=='Exe'">true</_IsExecutable>
-    <_IsExecutable Condition="'$(_IsExecutable)' == '' and '$(OutputType)'=='WinExe'">true</_IsExecutable>
-    <HasRuntimeOutput Condition="'$(HasRuntimeOutput)' == ''">$(_IsExecutable)</HasRuntimeOutput>
+    <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
+    <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
+    <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
