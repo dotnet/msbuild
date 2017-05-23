@@ -137,9 +137,17 @@ namespace Microsoft.NET.Build.Tasks
 
         public static PackageIdentity GetPackageIdentity(ITaskItem item)
         {
+            string packageName = item.GetMetadata(MetadataKeys.PackageName);
+            string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+
+            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
+            {
+                return null;
+            }
+
             return new PackageIdentity(
-                item.GetMetadata(MetadataKeys.PackageName),
-                NuGetVersion.Parse(item.GetMetadata(MetadataKeys.PackageVersion)));
+                packageName,
+                NuGetVersion.Parse(packageVersion));
         }
     }
 }
