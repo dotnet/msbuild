@@ -1994,7 +1994,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="translated">MSB4232: Hedef öğeler dışındaki öğelerde şu işleçlerden biri olmalıdır: Include, Update veya Remove.</target>
+        <target state="translated">MSB4232: Target öğeleri dışındaki öğelerde şu işlemlerden biri olmalıdır: Include, Update veya Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">

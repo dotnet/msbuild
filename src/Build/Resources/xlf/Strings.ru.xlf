@@ -1939,7 +1939,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="translated">Элемент, не имеющий родительского элемента в целевом объекте (Target), должен иметь значение для включения (Include), обновления (Update) или удаления (Remove).</target>
+        <target state="translated">Элемент, не имеющий элемента в Target, должен иметь значение для Include, Update или Remove.</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
@@ -1994,7 +1994,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="translated">MSB4232: элементы за пределами целевых элементов должны содержать одну из следующих операций: Include, Update или Remove.</target>
+        <target state="translated">MSB4232: элементы за пределами элементов Target должны содержать одну из следующих операций: Include, Update или Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
