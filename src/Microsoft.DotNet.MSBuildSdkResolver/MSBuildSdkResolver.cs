@@ -95,25 +95,13 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return false;
             }
 
-            if (FailsToParseVersions(netcoreSdkVersion, minimumVersion, out netCoreSdkFXVersion, out minimumFXVersion))
+            if (!FXVersion.TryParse(netcoreSdkVersion, out netCoreSdkFXVersion) ||
+                !FXVersion.TryParse(minimumVersion, out minimumFXVersion))
             {
                 return true;
             }
 
             return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) == -1;
-        }
-
-        private bool FailsToParseVersions(
-            string netcoreSdkVersion,
-            string minimumVersion,
-            out FXVersion netCoreSdkFXVersion,
-            out FXVersion minimumFXVersion)
-        {
-            netCoreSdkFXVersion = null;
-            minimumFXVersion = null;
-
-            return !FXVersion.TryParse(netcoreSdkVersion, out netCoreSdkFXVersion) ||
-                !FXVersion.TryParse(minimumVersion, out minimumFXVersion);
         }
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
