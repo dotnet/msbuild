@@ -333,26 +333,20 @@ namespace Company.WebApplication1.Identity.Data.Migrations
             // Seed client application
             var clientAppId = "ab1d2251-be0b-4457-abfe-4686ff9286c0";
             var clientId = "53bc9b9d-9d6a-45d4-8429-2a2761773502";
-            migrationBuilder.Insert(
+            migrationBuilder.InsertData(
                 table: "AspNetApplications",
                 columns: new[] { "Id", "ClientId", "Name" },
-                values: new object[,]
-                {
-                    { clientAppId, clientId, IdentityServiceClientConstants.ClientName }
-                });
+                values: new object[] { clientAppId, clientId, IdentityServiceClientConstants.ClientName });
 
             var clientOpenIdScopeId = "d2e0a81e-e08e-42ea-bbae-bec4c4ac6aed";
-            migrationBuilder.Insert(
+            migrationBuilder.InsertData(
                 table: "AspNetScopes",
                 columns: new[] { "Id", "ApplicationId", "Value" },
-                values: new object[,]
-                {
-                    { clientOpenIdScopeId, clientAppId, ApplicationScope.OpenId.Scope },
-                });
+                values: new object[] { clientOpenIdScopeId, clientAppId, ApplicationScope.OpenId.Scope });
 
             var clientRedirectUriId = "8f87a3e2-5ac9-4852-8cc9-35799e66f898";
             var clientLogoutRedirectUriId = "c9c97e6d-e0fc-4f75-b7ca-d43515b68ee3";
-            migrationBuilder.Insert(
+            migrationBuilder.InsertData(
                 table: "AspNetRedirectUris", 
                 columns: new[] { "Id", "ApplicationId", "IsLogout", "Value" },
                 values: new object[,]
