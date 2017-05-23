@@ -12,7 +12,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     internal class EnvironmentProvider
     {
         private IEnumerable<string> _searchPaths;
-        private IEnumerable<string> _executableExtensions;
 
         private readonly Func<string, string> _getEnvironmentVariable;
 
@@ -21,21 +20,11 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             _getEnvironmentVariable = getEnvironmentVariable;
         }
 
-        public IEnumerable<string> ExecutableExtensions
+        public string ExecutableExtension
         {
             get
             {
-                if (_executableExtensions == null)
-                {
-
-                    _executableExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                        ? _getEnvironmentVariable("PATHEXT")
-                            .Split(';')
-                            .Select(e => e.ToLower().Trim('"'))
-                        : new [] { string.Empty };
-                }
-
-                return _executableExtensions;
+                return Interop.RunningOnWindows ? ".exe" : string.Empty;
             }
         }
 
@@ -45,7 +34,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 if (_searchPaths == null)
                 {
-                    var searchPaths = new List<string> { GetApplicationBasePath() };
+                    var searchPaths = new List<string>();
 
                     searchPaths.AddRange(
                         _getEnvironmentVariable("PATH")
@@ -61,18 +50,12 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         public string GetCommandPath(string commandName)
         {
-            var commandPath = SearchPaths.Join(
-                ExecutableExtensions.ToArray(),
-                    p => true, s => true,
-                    (p, s) => Path.Combine(p, commandName + s))
+            var commandNameWithExtension = commandName + ExecutableExtension;
+            var commandPath = SearchPaths
+                .Select(p => Path.Combine(p, commandNameWithExtension))
                 .FirstOrDefault(File.Exists);
 
             return commandPath;
-        }
-
-        private static string GetApplicationBasePath()
-        {
-            return Path.GetFullPath(AppContext.BaseDirectory);
         }
     }
 }

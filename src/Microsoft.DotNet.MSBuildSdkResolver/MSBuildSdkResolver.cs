@@ -106,14 +106,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
         {
-            string exeDir = GetDotnetExeDirectoryCandidates();
+            string exeDir = GetDotnetExeDirectory();
             string workingDir = context.SolutionFilePath ?? context.ProjectFilePath;
             string netcoreSdkDir = Interop.hostfxr_resolve_sdk(exeDir, workingDir);
 
             return netcoreSdkDir;
         }
 
-        private string GetDotnetExeDirectoryCandidates()
+        private string GetDotnetExeDirectory()
         {
             string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
             if (environmentOverride != null)

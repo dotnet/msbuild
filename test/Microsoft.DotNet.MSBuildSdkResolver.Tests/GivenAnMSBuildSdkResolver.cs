@@ -175,8 +175,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 {
                     case "PATH":
                         return PathEnvironmentVariable;
-                    case "PATHEX":
-                        return ".exe";
                     default:
                         return null;
                 }
