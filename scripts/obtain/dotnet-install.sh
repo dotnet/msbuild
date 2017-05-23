@@ -626,15 +626,17 @@ install_dotnet() {
     
     say "Downloading $download_link"
     download "$download_link" $zip_path
-
-    #  if the download fails, download the alt_download_link
-    if [ "$(uname)" = "Linux" ] && [ -r $zip_path ]; then
-        say "Cannot download $download_link"
-        say "Downloading alternate: $alt_download_link"
-        download "$alt_download_link" $zip_path
-    fi
-
     say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
+
+    #  if the download fails, download the alt_download_link [Linux only]
+    if [ "$(uname)" = "Linux" ] && [ ! -r $zip_path ]; then
+        say "Cannot download $download_link"
+        alt_zip_path=$(mktemp $temporary_file_template)
+        say_verbose "Alternate zip path: $alt_zip_path"
+        say "Downloading alternate: $alt_download_link"
+        download "$alt_download_link" $alt_zip_path
+        say_verbose "Downloaded alternate file exists and readable? $(if [ -r $alt_zip_path ]; then echo "yes"; else echo "no"; fi)"
+    fi
     
     say "Extracting zip"
     extract_dotnet_package $zip_path $install_root
