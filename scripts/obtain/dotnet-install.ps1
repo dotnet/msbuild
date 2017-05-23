@@ -217,7 +217,7 @@ function Get-Download-Links([string]$AzureFeed, [string]$Channel, [string]$Speci
     $ret = @()
     
     if ($SharedRuntime) {
-        $PayloadURL = "$AzureFeed/Runtime/$SpecificVersion/dotnet-sharedframework-win-$CLIArchitecture.$SpecificVersion.zip"
+        $PayloadURL = "$AzureFeed/Runtime/$SpecificVersion/dotnet-win-$CLIArchitecture.$SpecificVersion.zip"
     }
     else {
         $PayloadURL = "$AzureFeed/Sdk/$SpecificVersion/dotnet-dev-win-$CLIArchitecture.$SpecificVersion.zip"

@@ -277,12 +277,12 @@ get_normalized_architecture_from_architecture() {
             return 0
             ;;
         x86)
-            say_err "Architecture ``x86`` currently not supported"
+            say_err "Architecture \`x86\` currently not supported"
             return 1
             ;;
     esac
    
-    say_err "Architecture ``$architecture`` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
+    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
     return 1
 }
 
@@ -399,7 +399,7 @@ construct_download_link() {
 
     local download_link=null
     if [ "$shared_runtime" = true ]; then
-        download_link="$azure_feed/Runtime/$specific_version/dotnet-sharedframework-$osname-$normalized_architecture.$specific_version.tar.gz"
+        download_link="$azure_feed/Runtime/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
     else
         download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
     fi
@@ -426,7 +426,7 @@ construct_alt_download_link() {
 
     local alt_download_link=null
     if [ "$shared_runtime" = true ]; then
-        alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-sharedframework-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
+        alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     else
         alt_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     fi
@@ -554,11 +554,14 @@ download() {
         downloadcurl $remote_path $out_path || failed=true
     elif machine_has "wget"; then
         downloadwget $remote_path $out_path || failed=true
+    else
+        failed=true
     fi
     if [ "$failed" = true ]; then
-        say_err "Download failed"
+        say_verbose "Download failed: $remote_path"
         return 1
     fi
+    return 0
 }
 
 downloadcurl() {
@@ -572,6 +575,11 @@ downloadcurl() {
     else
         curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
     fi
+    if [ "$failed" = true ]; then
+        say_verbose "Curl download failed"
+        return 1
+    fi
+    return 0
 }
 
 downloadwget() {
@@ -585,6 +593,11 @@ downloadwget() {
     else
         wget -v --tries 10 -O $out_path $remote_path || failed=true
     fi
+    if [ "$failed" = true ]; then
+        say_verbose "Wget download failed"
+        return 1
+    fi
+    return 0
 }
 
 calculate_vars() {
@@ -614,7 +627,8 @@ calculate_vars() {
 
 install_dotnet() {
     eval $invocation
-    
+    local download_failed=false
+
     if is_dotnet_package_installed $install_root "sdk" $specific_version; then
         say ".NET SDK version $specific_version is already installed."
         return 0
@@ -623,19 +637,17 @@ install_dotnet() {
     mkdir -p $install_root
     zip_path=$(mktemp $temporary_file_template)
     say_verbose "Zip path: $zip_path"
-    
+
     say "Downloading $download_link"
-    download "$download_link" $zip_path
-    say_verbose "Downloaded file exists and readable? $(if [ -r $zip_path ]; then echo "yes"; else echo "no"; fi)"
+    download "$download_link" $zip_path || download_failed=true
 
     #  if the download fails, download the alt_download_link [Linux only]
-    if [ "$(uname)" = "Linux" ] && [ ! -r $zip_path ]; then
+    if [ "$(uname)" = "Linux" ] && [ "$download_failed" = true ]; then
         say "Cannot download $download_link"
-        alt_zip_path=$(mktemp $temporary_file_template)
-        say_verbose "Alternate zip path: $alt_zip_path"
+        zip_path=$(mktemp $temporary_file_template)
+        say_verbose "Alternate zip path: $zip_path"
         say "Downloading alternate: $alt_download_link"
-        download "$alt_download_link" $alt_zip_path
-        say_verbose "Downloaded alternate file exists and readable? $(if [ -r $alt_zip_path ]; then echo "yes"; else echo "no"; fi)"
+        download "$alt_download_link" $zip_path
     fi
     
     say "Extracting zip"
@@ -719,7 +731,7 @@ do
             echo "Options:"
             echo "  -c,--channel <CHANNEL>         Download from the CHANNEL specified (default: $channel)."
             echo "      -Channel"
-            echo "  -v,--version <VERSION>         Use specific version, ``latest``. Defaults to ``latest``."
+            echo "  -v,--version <VERSION>         Use specific version, or \`latest\`. Defaults to \`latest\`."
             echo "      -Version"
             echo "  -i,--install-dir <DIR>         Install under specified location (see Install Location below)"
             echo "      -InstallDir"
@@ -769,7 +781,7 @@ install_dotnet
 
 bin_path=$(get_absolute_path $(combine_paths $install_root $bin_folder_relative_path))
 if [ "$no_path" = false ]; then
-    say "Adding to current process PATH: ``$bin_path``. Note: This change will be visible only when sourcing script."
+    say "Adding to current process PATH: \`$bin_path\`. Note: This change will be visible only when sourcing script."
     export PATH=$bin_path:$PATH
 else
     say "Binaries of dotnet can be found in $bin_path"
