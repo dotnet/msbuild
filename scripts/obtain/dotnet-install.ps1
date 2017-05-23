@@ -10,7 +10,7 @@
     Installs dotnet cli. If dotnet installation already exists in the given directory
     it will update it only if the requested version differs from the one already installed.
 .PARAMETER Channel
-    Default: master
+    Default: release/1.0.0
     Download from the Channel specified
 .PARAMETER Version
     Default: latest
@@ -55,7 +55,7 @@
 #>
 [cmdletbinding()]
 param(
-   [string]$Channel="master",
+   [string]$Channel="release/1.0.0",
    [string]$Version="Latest",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",

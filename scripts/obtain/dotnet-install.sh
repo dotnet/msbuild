@@ -659,7 +659,7 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="master"
+channel="release/1.0.0"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"
