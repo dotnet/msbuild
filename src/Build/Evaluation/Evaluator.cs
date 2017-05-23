@@ -22,6 +22,8 @@ using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using System.Globalization;
+using System.Threading;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
@@ -93,6 +95,11 @@ namespace Microsoft.Build.Evaluation
                 "ItemDefinitions",
                 "Items"
         };
+
+        /// <summary>
+        /// Each evaluation has a unique ID.
+        /// </summary>
+        private static int s_evaluationID = BuildEventContext.InvalidEvaluationID;
 
         /// <summary>
         /// Expander for evaluating conditions
@@ -245,7 +252,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
-        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, ILoggingService loggingService, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
+        private Evaluator(IEvaluatorData<P, I, M, D> data, ProjectRootElement projectRootElement, ProjectLoadSettings loadSettings, int maxNodeCount, PropertyDictionary<ProjectPropertyInstance> environmentProperties, IItemFactory<I, I> itemFactory, IToolsetProvider toolsetProvider, ProjectRootElementCache projectRootElementCache, ProjectInstance projectInstanceIfAnyForDebuggerOnly, SdkResolution sdkResolution)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, "data");
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
@@ -273,8 +280,6 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _projectInstanceIfAnyForDebuggerOnly = projectInstanceIfAnyForDebuggerOnly;
             _sdkResolution = sdkResolution;
-
-            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext);
         }
 
         /// <summary>
@@ -387,8 +392,8 @@ namespace Microsoft.Build.Evaluation
                 string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
                 DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
 #endif
-                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, loggingService, itemFactory, toolsetProvider, projectRootElementCache, buildEventContext, projectInstanceIfAnyForDebuggerOnly, sdkResolution);
-                IDictionary<string, object> projectLevelLocalsForBuild = evaluator.Evaluate();
+                Evaluator<P, I, M, D> evaluator = new Evaluator<P, I, M, D>(data, root, loadSettings, maxNodeCount, environmentProperties, itemFactory, toolsetProvider, projectRootElementCache, projectInstanceIfAnyForDebuggerOnly, sdkResolution);
+                IDictionary<string, object> projectLevelLocalsForBuild = evaluator.Evaluate(loggingService, buildEventContext);
                 return projectLevelLocalsForBuild;
 #if MSBUILDENABLEVSPROFILING 
             }
@@ -720,8 +725,13 @@ namespace Microsoft.Build.Evaluation
         /// Called by the static helper method.
         /// If debugging is enabled, returns a dictionary of name/value pairs such as properties, for debugger display.
         /// </summary>
-        private IDictionary<string, object> Evaluate()
+        private IDictionary<string, object> Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
+            ErrorUtilities.VerifyThrow(_data.EvaluationID == BuildEventContext.InvalidEvaluationID, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+
+            _data.EvaluationID = NextEvaluationID();
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationID);
+
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
 #endif
@@ -2822,6 +2832,8 @@ namespace Microsoft.Build.Evaluation
 
             return sb.ToString();
         }
+
+        private static int NextEvaluationID() => Interlocked.Increment(ref s_evaluationID);
     }
 
     /// <summary>

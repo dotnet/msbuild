@@ -92,6 +92,12 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            public int EvaluationID
+            {
+                get { return _wrappedData.EvaluationID; }
+                set { _wrappedData.EvaluationID = value; }
+            }
+
             public string Directory
             {
                 get

@@ -1027,6 +1027,14 @@ namespace Microsoft.Build.Evaluation
             get { return _xml.ProjectFileLocation; }
         }
 
+
+        /// <summary>
+        /// The ID of the last evaluation for this Project.
+        /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
+        /// <see cref="Project.ReevaluateIfNecessary()" />
+        /// </summary>
+        public int LastEvaluationID => _data.EvaluationID;
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
         /// </summary>
@@ -3121,6 +3129,9 @@ namespace Microsoft.Build.Evaluation
                 private set;
             }
 
+            /// <inheritdoc />
+            public int EvaluationID { get; set; }
+
             /// <summary>
             /// The root directory for this project
             /// </summary>
@@ -3306,6 +3317,7 @@ namespace Microsoft.Build.Evaluation
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
                 this.EvaluatedItemElements = new List<ProjectItemElement>();
+                this.EvaluationID = BuildEventContext.InvalidEvaluationID;
 
                 if (_globalPropertiesToTreatAsLocal != null)
                 {

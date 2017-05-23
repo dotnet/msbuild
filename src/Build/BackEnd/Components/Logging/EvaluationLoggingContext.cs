@@ -3,18 +3,27 @@
 //-----------------------------------------------------------------------
 // </copyright>
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-
-namespace Microsoft.Build.BackEnd.Logging
+namespace Microsoft.Build.BackEnd.Components.Logging
 {
     /// <summary>
-    /// Logging context and helpers for evaluation logging
+    ///     Logging context and helpers for evaluation logging
     /// </summary>
     internal class EvaluationLoggingContext : BaseLoggingContext
     {
-        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext) : base(loggingService, eventContext)
+        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, int evaluationID) : base(
+            loggingService,
+            new BuildEventContext(
+                eventContext.SubmissionId,
+                eventContext.NodeId,
+                evaluationID,
+                eventContext.ProjectInstanceId,
+                eventContext.ProjectContextId,
+                eventContext.TargetId,
+                eventContext.TaskId
+            ))
         {
             IsValid = true;
         }
