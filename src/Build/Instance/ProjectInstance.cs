@@ -647,6 +647,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The ID of the evaluation that produced this ProjectInstance.
+        /// 
+        /// See <see cref="Project.LastEvaluationID"/>.
         /// </summary>
         public int EvaluationID
         {

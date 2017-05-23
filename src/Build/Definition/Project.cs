@@ -73,12 +73,6 @@ namespace Microsoft.Build.Evaluation
         private static BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
         /// <summary>
-        /// The last used evaluation counter anywhere in this appdomain.
-        /// Used such that even after unload and reload, the evaluation counter changes.
-        /// </summary>
-        private static int s_globalEvaluationCounter;
-
-        /// <summary>
         /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
         /// in on re-evaluation, without having to expose property setters for that purpose.
         /// Also it makes it easy to re-evaluate this project without creating a new project object.
@@ -96,13 +90,6 @@ namespace Microsoft.Build.Evaluation
         /// The version of the tools information in the project collection against we were last evaluated.
         /// </summary>
         private int _evaluatedToolsetCollectionVersion;
-
-        /// <summary>
-        /// The number of evaluations that have occurred to this project object since it was created.
-        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
-        /// their previously stored value to find out, and if so perhaps decide to update their own state.
-        /// </summary>
-        private int _evaluationCounter;
 
         /// <summary>
         /// Whether the project has been explicitly marked as dirty. Generally this is not necessary to set; all edits affecting
@@ -637,18 +624,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// An arbitrary number that changes when this project reevaluates.
-        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
-        /// their previously stored value to find out, and if so perhaps decide to update their own state.
-        /// Note that the number may not increase monotonically.
-        /// Unloading a project does not reset the number, so it does not break the guarantee.
-        /// </summary>
-        public int EvaluationCounter
-        {
-            get { return _evaluationCounter; }
-        }
-
-        /// <summary>
         /// Read only dictionary of the global properties used in the evaluation
         /// of this project.
         /// </summary>
@@ -1027,11 +1002,32 @@ namespace Microsoft.Build.Evaluation
             get { return _xml.ProjectFileLocation; }
         }
 
+        /// <summary>
+        /// An arbitrary number that changes when this project reevaluates.
+        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
+        /// their previously stored value to find out, and if so perhaps decide to update their own state.
+        /// Note that the number may not increase monotonically.
+        /// Unloading a project does not reset the number, so it does not break the guarantee.
+        /// 
+        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationID"/> and can be used to connect
+        /// evaluation logging events back to the Project instance.
+        /// 
+        /// </summary>
+        [Obsolete("Use Project.LastEvaluationID instead")] // deprecated added in 15.3
+        public int EvaluationCounter => LastEvaluationID;
 
         /// <summary>
         /// The ID of the last evaluation for this Project.
         /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
         /// <see cref="Project.ReevaluateIfNecessary()" />
+        /// 
+        /// It is an arbitrary number that changes when this project reevaluates.
+        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
+        /// their previously stored value to find out, and if so perhaps decide to update their own state.
+        /// Note that the number may not increase monotonically.
+        /// 
+        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationID"/> and can be used to connect
+        /// evaluation logging events back to the Project instance.
         /// </summary>
         public int LastEvaluationID => _data.EvaluationID;
 
@@ -2528,17 +2524,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Get the next global evaluation counter number
-        /// in a thread safe fashion.
-        /// </summary>
-        private static int GetNextEvaluationCounter()
-        {
-            // We build without /checked, so this 
-            // will wrap, which is fine as it's incredibly unlikely
-            return Interlocked.Increment(ref s_globalEvaluationCounter);
-        }
-
-        /// <summary>
         /// Common code for the AddItem methods.
         /// </summary>
         private List<ProjectItem> AddItemHelper(ProjectItemElement itemElement, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
@@ -2665,7 +2650,6 @@ namespace Microsoft.Build.Evaluation
             _explicitlyMarkedDirty = false;
             _evaluatedVersion = highestXmlVersion;
             _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
-            _evaluationCounter = GetNextEvaluationCounter();
             _data.HasUnsavedChanges = false;
 
             ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
@@ -2681,8 +2665,6 @@ namespace Microsoft.Build.Evaluation
         private void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings)
         {
             _xml.MarkAsExplicitlyLoaded();
-
-            _evaluationCounter = GetNextEvaluationCounter();
 
             PropertyDictionary<ProjectPropertyInstance> globalPropertiesCollection = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -2714,7 +2696,11 @@ namespace Microsoft.Build.Evaluation
 
             _loadSettings = loadSettings;
 
+            ErrorUtilities.VerifyThrow(LastEvaluationID == BuildEventContext.InvalidEvaluationID, "This is the first evaluation therefore the last evaluation id is invalid");
+
             ReevaluateIfNecessary();
+
+            ErrorUtilities.VerifyThrow(LastEvaluationID != BuildEventContext.InvalidEvaluationID, "Last evaluation ID must be valid after the first evaluation");
 
             // Cause the project to be actually loaded into the collection, and register for
             // rename notifications so we can subsequently update the collection.
@@ -3130,7 +3116,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <inheritdoc />
-            public int EvaluationID { get; set; }
+            public int EvaluationID { get; set; } = BuildEventContext.InvalidEvaluationID;
 
             /// <summary>
             /// The root directory for this project

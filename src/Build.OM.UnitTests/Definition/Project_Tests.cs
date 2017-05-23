@@ -1357,25 +1357,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reevaluation should update the evaluation counter.
         /// </summary>
         [Fact]
-        public void ReevaluationCounter()
+        public void LastEvaluationID()
         {
             Project project = new Project();
-            int last = project.EvaluationCounter;
+            int last = project.LastEvaluationID;
 
             project.ReevaluateIfNecessary();
-            Assert.Equal(project.EvaluationCounter, last);
-            last = project.EvaluationCounter;
+            Assert.Equal(project.LastEvaluationID, last);
+            last = project.LastEvaluationID;
 
             project.SetProperty("p", "v");
             project.ReevaluateIfNecessary();
-            Assert.NotEqual(project.EvaluationCounter, last);
+            Assert.NotEqual(project.LastEvaluationID, last);
         }
 
         /// <summary>
         /// Unload should not reset the evaluation counter.
         /// </summary>
         [Fact]
-        public void ReevaluationCounterUnload()
+        public void LastEvaluationIDAndUnload()
         {
             string path = null;
 
@@ -1385,12 +1385,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement.Create().Save(path);
 
                 Project project = new Project(path);
-                int last = project.EvaluationCounter;
+                int last = project.LastEvaluationID;
 
                 project.ProjectCollection.UnloadAllProjects();
 
                 project = new Project(path);
-                Assert.NotEqual(project.EvaluationCounter, last);
+                Assert.NotEqual(project.LastEvaluationID, last);
             }
             finally
             {
@@ -1414,25 +1414,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 import.Save();
 
                 Project project = new Project();
-                int last = project.EvaluationCounter;
+                int last = project.LastEvaluationID;
 
                 project.Xml.AddImport(path);
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.EvaluationCounter, last);
-                last = project.EvaluationCounter;
+                Assert.NotEqual(project.LastEvaluationID, last);
+                last = project.LastEvaluationID;
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.EvaluationCounter, last);
+                Assert.Equal(project.LastEvaluationID, last);
 
                 import.AddProperty("p", "v");
                 Assert.Equal(true, project.IsDirty);
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.EvaluationCounter, last);
-                last = project.EvaluationCounter;
+                Assert.NotEqual(project.LastEvaluationID, last);
+                last = project.LastEvaluationID;
                 Assert.Equal("v", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.EvaluationCounter, last);
+                Assert.Equal(project.LastEvaluationID, last);
             }
             finally
             {
