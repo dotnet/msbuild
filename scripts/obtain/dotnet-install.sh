@@ -193,7 +193,6 @@ check_pre_reqs() {
 
         [ -z "$($LDCONFIG_COMMAND -p | grep libunwind)" ] && say_err "Unable to locate libunwind. Install libunwind to continue" && failing=true
         [ -z "$($LDCONFIG_COMMAND -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && failing=true
-        [ -z "$($LDCONFIG_COMMAND -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && failing=true
         [ -z "$($LDCONFIG_COMMAND -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && failing=true
     fi
 
@@ -571,9 +570,9 @@ downloadcurl() {
 
     local failed=false
     if [ -z "$out_path" ]; then
-        curl --retry 10 -sSL --create-dirs $remote_path || failed=true
+        curl --retry 10 -sSL -f --create-dirs $remote_path || failed=true
     else
-        curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
+        curl --retry 10 -sSL -f --create-dirs -o $out_path $remote_path || failed=true
     fi
     if [ "$failed" = true ]; then
         say_verbose "Curl download failed"
@@ -638,15 +637,15 @@ install_dotnet() {
     zip_path=$(mktemp $temporary_file_template)
     say_verbose "Zip path: $zip_path"
 
-    say "Downloading $download_link"
+    say "Downloading link: $download_link"
     download "$download_link" $zip_path || download_failed=true
 
     #  if the download fails, download the alt_download_link [Linux only]
     if [ "$(uname)" = "Linux" ] && [ "$download_failed" = true ]; then
-        say "Cannot download $download_link"
+        say "Cannot download: $download_link"
         zip_path=$(mktemp $temporary_file_template)
         say_verbose "Alternate zip path: $zip_path"
-        say "Downloading alternate: $alt_download_link"
+        say "Downloading alternate link: $alt_download_link"
         download "$alt_download_link" $zip_path
     fi
     
