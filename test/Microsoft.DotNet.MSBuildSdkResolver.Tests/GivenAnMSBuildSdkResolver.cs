@@ -47,9 +47,68 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
                 new MockFactory());
 
-            result.Success.Should().Be(true);
+            result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
             result.Version.Should().Be("99.99.98");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void ItReturnsNullIfTheVersionFoundDoesNotSatisfyTheMinVersion()
+        {
+            var environment = new TestEnvironment();
+            environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "999.99.99"),
+                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().Contain("Version 99.99.99 of the SDK is smaller than the minimum version 999.99.99"
+                + " requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version"
+                + " specified in the project, or increase the version specified in global.json.");
+        }
+
+        [Fact]
+        public void ItReturnsTheVersionIfItIsEqualToTheMinVersion()
+        {
+            var environment = new TestEnvironment();
+            var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "99.99.99"),
+                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(expected.FullName);
+            result.Version.Should().Be("99.99.99");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void ItReturnsTheVersionIfItIsHigherThanTheMinVersion()
+        {
+            var environment = new TestEnvironment();
+            var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "999.99.99");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "99.99.99"),
+                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(expected.FullName);
+            result.Version.Should().Be("999.99.99");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
         }
