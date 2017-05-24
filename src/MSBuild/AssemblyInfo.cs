@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 #if (LOCALIZED_BUILD)
 // Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
 // We want "en" to require a satellite assembly for debug builds in order to flush out localization
-// issues, but we want release builds to work without it.
+// issues, but we want release builds to work without it. Also, .net core does not have resource fallbacks
 #if (DEBUG && !RUNTIME_TYPE_NETCORE)
 [assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]
 #else
