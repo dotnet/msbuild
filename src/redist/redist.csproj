@@ -21,6 +21,12 @@
     <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
+    <PackageReference Include="NuGet.Packaging.Core.Types" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
+    <!-- The project json migration commands depend on an older version of Roslyn.
+         Lift the version here to match what tool_roslyn depends on (otherwise an older version will
+         be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +72,14 @@
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+  </Target>
+
+  <Target Name="PublishFSharp"
+          BeforeTargets="Publish">
+          
+    <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Configuration="$(Configuration)"
+                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
@@ -199,26 +213,18 @@
                                      $(SharedFrameworkNameVersionPath)" />
   </Target>
 
-  <Target Name="RemoveVbc"
-          AfterTargets="CrossgenPublishDir">
-    <ItemGroup>
-      <_VbcPath Include="$(PublishDir)/**/vbc.exe" />
-    </ItemGroup>
-
-    <Delete Files="@(_VbcPath)" />
-  </Target>
-
   <Target Name="ChmodPublishDir"
-          AfterTargets="RemoveVbc"
+          AfterTargets="CrossgenPublishDir"
           Condition=" '$(OSName)' != 'win' ">
     
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunVbc.sh" />
   </Target>
 
   <Target Name="CreateSymbolsDirectory"
-          AfterTargets="RemoveVbc">
+          AfterTargets="CrossgenPublishDir">
     <ItemGroup>
       <_AllSdkFiles Include="$(PublishDir)/**/*" />
     </ItemGroup>

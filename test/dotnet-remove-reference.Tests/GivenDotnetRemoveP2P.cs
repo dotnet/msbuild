@@ -22,8 +22,23 @@ Arguments:
   <args>      Project to project references to remove
 
 Options:
-  -h, --help                    Show help information
+  -h, --help                    Show help information.
   -f, --framework <FRAMEWORK>   Remove reference only when targeting a specific framework
+";
+
+        private const string RemoveCommandHelpText = @".NET Remove Command
+
+Usage: dotnet remove [options] <PROJECT> [command]
+
+Arguments:
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information.
+
+Commands:
+  package <PACKAGE_NAME>   .NET Remove Package reference Command.
+  reference <args>         .NET Remove Project to Project reference Command
 ";
 
         const string FrameworkNet451Arg = "-f net451";
@@ -129,6 +144,7 @@ Options:
                 .ExecuteWithCapturedOutput($"remove {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(RemoveCommandHelpText);
         }
 
         [Fact]

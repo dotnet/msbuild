@@ -13,26 +13,6 @@
         <target state="translated">Construtor do .NET</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">A configuração a ser usada para criar o projeto. O padrão para a maioria dos projetos é “Depurar”.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionName">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURAÇÃO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="translated">A estrutura de destino para a qual compilar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">ESTRUTURA</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
         <target state="translated">Defina esse sinalizador para ignorar as referências projeto a projeto e compilar apenas o projeto raiz</target>
@@ -51,36 +31,6 @@
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">O arquivo de projeto do MSBuild para compilar. Se não houver arquivo de projeto especificado, o MSBuild pesquisará no diretório de trabalho atual um arquivo que contenha uma extensão de arquivo que termine em "proj" e usará esse arquivo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentValueName">
-        <source>PROJECT</source>
-        <target state="translated">PROJETO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to build for. The default is to build a portable application.</source>
-        <target state="translated">Tempo de execução de destino para o qual compilar. O padrão é compilar um aplicativo portátil.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionName">
-        <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">RUNTIME_IDENTIFIER</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">Define o valor da propriedade $(VersionSuffix) no projeto</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionName">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">SUFIXO_DA_VERSÃO</target>
         <note />
       </trans-unit>
     </body>

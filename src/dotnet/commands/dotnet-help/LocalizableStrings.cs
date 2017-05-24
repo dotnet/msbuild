@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string InfoDescription = "Display .NET CLI Info";
 
-        public const string Commands = "Commands";
+        public const string Commands = "SDK commands";
 
         public const string NewDefinition = "Initialize .NET projects.";
 
@@ -51,11 +51,11 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string ProjectModificationCommands = "Project modification commands";
 
-        public const string AddDefinition = "Add items to the project.";
+        public const string AddDefinition = "Add reference to the project.";
 
-        public const string RemoveDefinition = "Remove items from the project.";
+        public const string RemoveDefinition = "Remove reference from the project.";
 
-	public const string ListDefinition = "List items in the project.";
+        public const string ListDefinition = "List reference in the project.";
 
         public const string AdvancedCommands = "Advanced Commands";
 
@@ -79,7 +79,26 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string CommandArgumentDescription = "CLI command for which to view more detailed help.";
 
+        public const string PathToApplicationDefinition = "The path to an application .dll file to execute.";
 
+        public const string SDKVersionCommandDefinition = "Display .NET Core SDK version.";
 
+        public const string SDKInfoCommandDefinition = "Display .NET Core information.";
+
+        public const string SDKDiagnosticsCommandDefinition = "Enable diagnostic output.";
+
+        public const string RunDotnetCommandHelpForMore = "Run 'dotnet COMMAND --help' for more information on a command.";
+
+        public const string AdditionalprobingpathDefinition = "Path containing probing policy and assemblies to probe for.";
+
+        public const string DepsfilDefinition = "Path to <application>.deps.json file.";
+
+        public const string RuntimeconfigDefinition = "Path to <application>.runtimeconfig.json file.";
+
+        public const string FxVersionDefinition = "Version of the installed Shared Framework to use to run the application.";
+
+        public const string RollForwardOnNoCandidateFxDefinition = "Roll forward on no candidate shared framework is enabled.";
+
+        public const string AdditionalDeps = "Path to additonal deps.json file.";
     }
 }

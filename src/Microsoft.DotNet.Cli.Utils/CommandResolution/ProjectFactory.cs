@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else if (projectFiles.Count() > 1)
             {
-                throw new InvalidOperationException(string.Format(
+                throw new GracefulException(string.Format(
                     LocalizableStrings.MultipleProjectFilesFound,
                     projectDirectory));
             }

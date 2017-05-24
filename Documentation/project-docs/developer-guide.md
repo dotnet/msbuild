@@ -35,8 +35,8 @@ Using the `dotnet` built in the previous step:
 
 1. `cd {new directory}`
 2. `dotnet new`
-3. `dotnet restore3`
-4. `dotnet run3`
+3. `dotnet restore`
+4. `dotnet run`
 
 ## Running tests
 

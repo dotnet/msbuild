@@ -13,35 +13,30 @@
         <target state="translated">添加包引用的命令</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <target state="translated">要添加的包引用</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <target state="translated">请指定一个要添加的包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">仅针对特定框架添加引用</target>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">仅针对特定框架添加引用</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="translated">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">使用还原期间使用的特定 NuGet 包源。</target>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <target state="needs-review-translation">使用还原期间使用的特定 NuGet 包源。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <target state="translated">将包还原到此目录。</target>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <target state="needs-review-translation">将包还原到此目录。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -49,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="translated">无法为项目“{0}”创建依赖关系图文件。无法添加包引用。</target>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="needs-review-translation">无法为项目“{0}”创建依赖关系图文件。无法添加包引用。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -72,6 +67,16 @@
         <source>PACKAGE_DIRECTORY</source>
         <target state="translated">PACKAGE_DIRECTORY</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="new">The package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="new">PACKAGE_NAME</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

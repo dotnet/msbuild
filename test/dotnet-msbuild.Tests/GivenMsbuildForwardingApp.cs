@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData("MSBuildExtensionsPath")]
         [InlineData("CscToolExe")]
+        [InlineData("VbcToolExe")]
         [InlineData("MSBuildSDKsPath")]
         [InlineData("DOTNET_CLI_TELEMETRY_SESSIONID")]
         public void ItSetsEnvironmentalVariables(string envVarName)
@@ -70,6 +71,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             var msbuildPath = "<msbuildpath>";
             var envVar = "CscToolExe";
+            new FileInfo(new MSBuildForwardingApp(new string[0], msbuildPath)
+                                .GetProcessStartInfo()
+                                .Environment[envVar])
+                .Should().NotBeNull("constructor will throw on invalid path");
+        }
+
+        [Fact]
+        public void ItSetsVbcToolExePathToValidPath()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var envVar = "VbcToolExe";
             new FileInfo(new MSBuildForwardingApp(new string[0], msbuildPath)
                                 .GetProcessStartInfo()
                                 .Environment[envVar])

@@ -80,21 +80,21 @@ This, however, does have one specific constraint: **newer versions must be insta
 ## Layout on disk
 ```
 <INSTALL_DIR>/ (%PATH%)
-	dotnet ("muxer", has platform dependant file extension)
+    dotnet ("muxer", has platform dependant file extension)
     hostfxr (implementation detail for "muxer", platform dependant file extension)
-	sdk/
+    sdk/
         <sdk-version-0>/ (i.e. "1.0.0-rc2-002543")
             ... (binaries like: dotnet.dll, csc.dll)
         <sdk-version-1>/
             ... (binaries)
         ...
-	shared/ ("redist" or "shared framework")
+    shared/ ("redist" or "shared framework")
         <target-framework-name>/ (currently only "Microsoft.NETCore.App")
-			<redist-version-0>/ (i.e. "1.0.0-rc2-3002543")
+            <redist-version-0>/ (i.e. "1.0.0-rc2-3002543")
                 ... (binaries like: coreclr.dll, mscorlib.ni.dll, System.*.dll, dotnet-hostimpl.dll, dotnet, netcoreapp.deps.json)
-			<redist-version-1>/
-				... (binaries)
-```	
+            <redist-version-1>/
+                ... (binaries)
+```
 
 ## Native dependencies
 .NET Core CLI is built on top of CoreFX and CoreCLR and as such its' dependencies set is defined by the platform that those two combine. Whether or not those dependencies will be installed depends on the installer being used. The table below lists out the installers and whether or not they bring in dependencies. 

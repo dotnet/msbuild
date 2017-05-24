@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
-        <source>File header is missing</source>
-        <target state="translated">缺少文件标头</target>
-        <note />
+        <source>Expected file header not found</source>
+        <target state="needs-review-translation">缺少文件标头</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -52,6 +52,11 @@
         <source>Property set is missing '{0}'</source>
         <target state="translated">属性集缺少“{0}”</target>
         <note />
+      </trans-unit>
+      <trans-unit id="FileHeaderMissingVersionError">
+        <source>File header is missing version</source>
+        <target state="new">File header is missing version</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

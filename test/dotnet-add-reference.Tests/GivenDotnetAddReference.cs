@@ -23,8 +23,23 @@ Arguments:
   <args>      Project to project references to add
 
 Options:
-  -h, --help                    Show help information
+  -h, --help                    Show help information.
   -f, --framework <FRAMEWORK>   Add reference only when targeting a specific framework
+";
+
+        private const string AddCommandHelpText = @".NET Add Command
+
+Usage: dotnet add [options] <PROJECT> [command]
+
+Arguments:
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information.
+
+Commands:
+  package <PACKAGE_NAME>   .NET Add Package reference Command
+  reference <args>         .NET Add Project to Project reference Command
 ";
 
         const string FrameworkNet451Arg = "-f net451";
@@ -103,6 +118,7 @@ Options:
                 .ExecuteWithCapturedOutput($"add {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(AddCommandHelpText);
         }
 
         [Fact]

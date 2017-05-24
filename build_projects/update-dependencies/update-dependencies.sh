@@ -42,11 +42,7 @@ fi
 # Put the stage 0 on the path
 export PATH=$DOTNET_INSTALL_DIR:$PATH
 
-# Generate some props files that are imported by update-dependencies
-echo "Generating property files..."
-dotnet msbuild "$REPO_ROOT/build.proj" /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
-
-echo "Resotring $PROJECT_PATH..."
+echo "Restoring $PROJECT_PATH..."
 dotnet restore "$PROJECT_PATH"
 
 if [ $? -ne 0 ]; then

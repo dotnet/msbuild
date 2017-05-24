@@ -21,7 +21,21 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
+";
+
+        private const string ListCommandHelpText = @".NET List Command
+
+Usage: dotnet list [options] <PROJECT> [command]
+
+Arguments:
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information.
+
+Commands:
+  reference   .NET Core Project-to-Project dependency viewer
 ";
 
         const string FrameworkNet451Arg = "-f net451";
@@ -48,6 +62,7 @@ Options:
                 .ExecuteWithCapturedOutput($"list {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(ListCommandHelpText);
         }
 
         [Fact]

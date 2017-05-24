@@ -117,6 +117,27 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
         }
 
         [Fact]
+        public void WhenValidPackageIsPassedMSBuildDoesNotPrintVersionHeader()
+        {
+            var testAsset = "TestAppSimple";
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var packageName = "Newtonsoft.Json";
+            var packageVersion = "9.0.1";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add package {packageName} --version {packageVersion}");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().NotContain("Microsoft (R) Build Engine version");
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
         public void WhenMultiplePackagesArePassedCommandFails()
         {
             var projectDirectory = TestAssets

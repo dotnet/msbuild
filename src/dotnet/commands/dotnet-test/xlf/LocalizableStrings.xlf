@@ -16,8 +16,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgDescription">
-        <source>The project to test, defaults to the current directory.</source>
-        <note />
+        <source>The project to test. Defaults to the current directory.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
@@ -55,8 +55,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
-        <source>Specify a logger for test results. 
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <source>Specify a logger for test results.
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        More info on logger arguments support:https://aka.ms/vstest-report</source>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -64,8 +65,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <note />
+        <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -96,9 +97,36 @@
         <source>Do not build project before testing.</source>
         <note />
       </trans-unit>
-      <trans-unit id="RunSettingsArgsHelpText">
-        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
-                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+      <trans-unit id="CmdTestAdapterPath">
+        <source>PATH_TO_ADAPTER</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdResultsDirectoryDescription">
+        <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
+                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPathToResultsDirectory">
+        <source>PATH_TO_RESULTS_DIRECTORY</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunSettingsArgumentsDescription">
+        <source>
+
+RunSettings arguments:
+  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
+  Use a space to separate multiple[name] =[value].
+  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
+  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="cmdCollectFriendlyName">
+        <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="cmdCollectDescription">
+        <source>Enables data collector for the test run.
+                                        More info here : https://aka.ms/vstest-collect</source>
         <note></note>
       </trans-unit>
     </body>

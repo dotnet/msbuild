@@ -13,26 +13,6 @@
         <target state="translated">.NET Oluşturucusu</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan: "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionName">
-        <source>CONFIGURATION</source>
-        <target state="translated">YAPILANDIRMA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Derlemenin yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
         <target state="translated">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi derlemek için bu bayrağı ayarlayın</target>
@@ -51,36 +31,6 @@
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
         <target state="translated">ÇIKIŞ_DİZİNİ</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Derlenecek MSBuild proje dosyası. Bir proje dosyası belirtilmezse MSBuild, geçerli çalışma dizininde dosya uzantısının sonu ‘proj’ olan bir dosyası arar ve bu dosyayı kullanır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentValueName">
-        <source>PROJECT</source>
-        <target state="translated">PROJE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to build for. The default is to build a portable application.</source>
-        <target state="translated">Derlemenin yapılacağı hedef çalışma zamanı. Varsayılan değer, taşınabilir bir uygulama derlenmesidir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionName">
-        <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionName">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">SÜRÜM_SONEKİ</target>
         <note />
       </trans-unit>
     </body>

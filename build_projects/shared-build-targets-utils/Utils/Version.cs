@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Cli.Build
         public virtual int Minor { get; set; }
         public virtual int Patch { get; set; }
         public virtual int CommitCount { get; set; }
-        public virtual string CommitCountString => CommitCount.ToString("000000");
-        public virtual string ReleaseSuffix { get; set; }
 
         public string GenerateMsiVersion()
         {

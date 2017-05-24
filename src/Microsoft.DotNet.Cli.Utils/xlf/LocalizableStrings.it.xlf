@@ -215,6 +215,26 @@
         <target state="translated">Non è possibile richiamare {0} dopo l'esecuzione del comando</target>
         <note />
       </trans-unit>
+      <trans-unit id="IgnoringPreferCLIRuntimeFile">
+        <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
+        <target state="new">{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotFindToolRuntimeConfigFile">
+        <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
+        <target state="new">{0}: Could not find runtimeconfig.json file for tool {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DepsJsonGeneratorProjectNotSet">
+        <source>Unable to find deps.json generator project.</source>
+        <target state="new">Unable to find deps.json generator project.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandAssembliesNotFound">
+        <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="new">The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -15,13 +15,26 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         // Default resolver has priority 10000 and we want to go before it and leave room on either side of us. 
         public override int Priority => 5000;
 
+        private readonly Func<string, string> _getEnvironmentVariable;
+
+        public DotNetMSBuildSdkResolver() 
+            : this(Environment.GetEnvironmentVariable)
+        {
+        }
+
+        // Test hook to provide environment variables without polluting the test process.
+        internal DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable)
+        {
+            _getEnvironmentVariable = getEnvironmentVariable;
+        }
+
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
             // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
             // base directory and report a given version to msbuild (which may be null if unknown. One key use case
             // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
-            string msbuildSdksDir = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
-            string netcoreSdkVersion = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+            string msbuildSdksDir = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
+            string netcoreSdkVersion = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
 
             if (msbuildSdksDir == null)
             {
@@ -40,6 +53,19 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;;
             }
 
+            if (!IsNetCoreSDKOveridden(netcoreSdkVersion) && 
+                IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
+            {
+                return factory.IndicateFailure(
+                    new[]
+                    {
+                        $"Version {netcoreSdkVersion} of the SDK is smaller than the minimum version"
+                        + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
+                        + " installed, increase the minimum version specified in the project, or increase"
+                        + " the version specified in global.json."
+                    });
+            }
+
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
             if (!Directory.Exists(msbuildSdkDir))
             {
@@ -47,80 +73,57 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     new[] 
                     {
                         $"{msbuildSdkDir} not found. Check that a recent enough .NET Core SDK is installed"
-                        + " and/or increase the version specified in global.json. "
+                        + " and/or increase the version specified in global.json."
                     });
             }
 
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion);
         }
 
-        private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
+        private bool IsNetCoreSDKOveridden(string netcoreSdkVersion)
         {
-            foreach (string exeDir in GetDotnetExeDirectoryCandidates())
-            {
-                string workingDir = context.SolutionFilePath ?? context.ProjectFilePath;
-                string netcoreSdkDir = Interop.hostfxr_resolve_sdk(exeDir, workingDir);
-
-                if (netcoreSdkDir != null)
-                {
-                    return netcoreSdkDir;
-                }
-            }
-
-            return null;
+            return netcoreSdkVersion == null;
         }
 
-        // Search for [ProgramFiles]\dotnet in this order.
-        private static readonly string[] s_programFiles = new[]
+        private bool IsNetCoreSDKSmallerThanTheMinimumVersion(string netcoreSdkVersion, string minimumVersion)
         {
-            // "c:\Program Files" on x64 machine regardless process architecture.
-            // Undefined on x86 machines.
-            "ProgramW6432",
+            FXVersion netCoreSdkFXVersion;
+            FXVersion minimumFXVersion;
 
-            // "c:\Program Files (x86)" on x64 machine regardless of process architecture
-            // Undefined on x86 machines.
-            "ProgramFiles(x86)",
+            if (string.IsNullOrEmpty(minimumVersion))
+            {
+                return false;
+            }
 
-            // "c:\Program Files" or "C:\Program Files (x86)" on x64 machine depending on process architecture. 
-            // "c:\Program Files" on x86 machines (therefore not redundant with the two locations above in that case).
-            //
-            // NOTE: hostfxr will search this on its own if multilevel lookup is not disable, but we do it explicitly
-            // to prevent an environment with disabled multilevel lookup from crippling desktop msbuild and VS.
-            "ProgramFiles",
-        };
+            if (!FXVersion.TryParse(netcoreSdkVersion, out netCoreSdkFXVersion) ||
+                !FXVersion.TryParse(minimumVersion, out minimumFXVersion))
+            {
+                return true;
+            }
 
-        private List<string> GetDotnetExeDirectoryCandidates()
+            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) == -1;
+        }
+
+        private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
         {
-            string environmentOverride = Environment.GetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
+            string exeDir = GetDotnetExeDirectory();
+            string workingDir = context.SolutionFilePath ?? context.ProjectFilePath;
+            string netcoreSdkDir = Interop.hostfxr_resolve_sdk(exeDir, workingDir);
+
+            return netcoreSdkDir;
+        }
+
+        private string GetDotnetExeDirectory()
+        {
+            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
             if (environmentOverride != null)
             {
-                return new List<string>(capacity: 1) { environmentOverride };
+                return environmentOverride;
             }
 
-            // Initial capacity is 2 because while there are 3 candidates, we expect at most 2 unique ones (x64 + x86)
-            // Also, N=3 here means that we needn't be concerned with the O(N^2) complexity of the foreach + contains.
-            var candidates = new List<string>(capacity: 2); 
-            foreach (string variable in s_programFiles)
-            {
-                string directory = Environment.GetEnvironmentVariable(variable);
-                if (directory == null)
-                {
-                    continue;
-                }
+            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
 
-                directory = Path.Combine(directory, "dotnet");
-                if (!candidates.Contains(directory))
-                {
-                    candidates.Add(directory);
-                }
-            }
-
-            if (candidates.Count == 0)
-            {
-                candidates.Add(null); 
-            }
-
-            return candidates;
+            return Path.GetDirectoryName(environmentProvider.GetCommandPath("dotnet"));
         }
     }
 }

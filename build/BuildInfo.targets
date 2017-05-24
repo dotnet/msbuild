@@ -15,7 +15,7 @@
       <OSPlatform Condition=" '$(OSPlatform)' == '' ">$(HostOSPlatform)</OSPlatform>
 
       <BuildInfoPropsContent>
-&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+&lt;Project ToolsVersion=&quot;14.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     &lt;PropertyGroup&gt;
         &lt;Rid&gt;$(Rid)&lt;/Rid&gt;
         &lt;Architecture&gt;$(Architecture)&lt;/Architecture&gt;

@@ -49,7 +49,6 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.FrameworkVersionOption)
                         .ForwardAsSingle(o => $"/p:RuntimeFrameworkVersion={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(),
-                CommonOptions.ConfigurationOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
@@ -63,15 +62,15 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
                         .ForwardAsSingle(o => $"/p:ComposeWorkingDir={o.Arguments.Single()}")),
                 Create.Option(
-                    "--preserve-working-dir",
-                    LocalizableStrings.PreserveIntermediateWorkingDirOptionDescription,
-                    Accept.NoArguments()
-                        .ForwardAsSingle(o => $"/p:PreserveComposeWorkingDir=true")),
-                Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:SkipOptimization=true")),
+                Create.Option(
+                    "--skip-symbols",
+                    LocalizableStrings.SkipSymbolsOptionDescription,
+                    Accept.NoArguments()
+                          .ForwardAs("/p:CreateProfilingSymbols=false")),
                 CommonOptions.VerbosityOption());
     }
 }

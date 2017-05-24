@@ -42,11 +42,6 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
-# Generate some props files that are imported by update-dependencies
-Write-Host "Generating property files..."
-dotnet msbuild $RepoRoot\build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
-if($LASTEXITCODE -ne 0) { throw "Failed to generate intermidates" }
-
 # Restore the app
 Write-Host "Restoring $ProjectPath..."
 dotnet restore "$ProjectPath"

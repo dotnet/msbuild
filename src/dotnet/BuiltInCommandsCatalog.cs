@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli
             },
             ["migrate"] = new BuiltInCommandMetadata
             {
-                Command = MigrateCommand.Run,
+                Command = MigrateCommandCompose.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-migrate
                 DocLink = "http://aka.ms/dotnet-migrate"
 

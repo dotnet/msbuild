@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
         public static Option HelpOption() =>
             Create.Option(
                 "-h|--help",
-                "Show help information",
+                CommonLocalizableStrings.ShowHelpDescription,
                 Accept.NoArguments(),
                 materialize: o => o.Option.Command().HelpView());
 

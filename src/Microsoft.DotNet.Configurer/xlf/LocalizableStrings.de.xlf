@@ -33,9 +33,9 @@ Ein Befehl wird ausgeführt, um Ihren lokalen Paketcache erstmals aufzufüllen, 
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Fehler beim Vorbereiten des NuGet-Cache. Fehler von {0} mit: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">Fehler beim Vorbereiten des NuGet-Cache. Fehler von {0} mit: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

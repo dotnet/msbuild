@@ -13,35 +13,30 @@
         <target state="translated">Comando para adicionar a referência do pacote</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
-        <target state="translated">Referências do pacote a serem adicionadas</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
         <target state="translated">Especifique uma referência do pacote a ser adicionada.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">Adicionar referência apenas ao visar uma estrutura específica</target>
-        <note />
+        <source>Adds reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Adicionar referência apenas ao visar uma estrutura específica</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Adicionar referência ser executar a restauração de visualização e verificação de compatibilidade.</target>
-        <note />
+        <source>Adds reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Adicionar referência ser executar a restauração de visualização e verificação de compatibilidade.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="translated">Usa fontes de pacote do NuGet especificadas a serem usadas durante a restauração.</target>
-        <note />
+        <source>Specifies NuGet package sources to use during the restore.</source>
+        <target state="needs-review-translation">Usa fontes de pacote do NuGet especificadas a serem usadas durante a restauração.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restore the packages to this Directory .</source>
-        <target state="translated">Restaurar os pacotes para esse Diretório.</target>
-        <note />
+        <source>Restores the packages to the specified directory.</source>
+        <target state="needs-review-translation">Restaurar os pacotes para esse Diretório.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -49,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
-        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="translated">Não é possível criar o arquivo de gráfico Criar Dependência para o projeto '{0}'. Não é possível adicionar a referência do pacote.</target>
-        <note />
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="needs-review-translation">Não é possível criar o arquivo de gráfico Criar Dependência para o projeto '{0}'. Não é possível adicionar a referência do pacote.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -72,6 +67,16 @@
         <source>PACKAGE_DIRECTORY</source>
         <target state="translated">PACKAGE_DIRECTORY</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="new">The package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="new">PACKAGE_NAME</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
