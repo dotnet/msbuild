@@ -73,13 +73,13 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (Exception e)
                     {
-                        loggingContext.LogFatalBuildError(new BuildEventFileInfo(sdkReferenceLocation), e);
+                        loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
                     }
                 }
             }
             catch (Exception e)
             {
-                loggingContext.LogFatalBuildError(new BuildEventFileInfo(sdkReferenceLocation), e);
+                loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
                 throw;
             }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Build.BackEnd
             if (result.Warnings == null) return;
 
             foreach (var warning in result.Warnings)
-                loggingContext.LogWarningFromText(new BuildEventFileInfo(location), null, null, null, warning);
+                loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
         }
 
         private class SdkLoggerImpl : SdkLogger

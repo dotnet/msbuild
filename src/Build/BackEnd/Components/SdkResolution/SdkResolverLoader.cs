@@ -46,7 +46,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (Exception e)
                 {
-                    loggingContext.LogWarning(new BuildEventFileInfo(location), string.Empty, "CouldNotLoadSdkResolver", e.Message);
+                    loggingContext.LogWarning(string.Empty, new BuildEventFileInfo(location), "CouldNotLoadSdkResolver", e.Message);
                 }
 
             return resolvers.OrderBy(t => t.Priority).ToList();

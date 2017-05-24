@@ -144,11 +144,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="file">The file in which the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogErrorWithSubcategory(BuildEventFileInfo file, string subcategoryResourceName, string messageResourceName, params object[] messageArgs)
+        internal void LogErrorWithSubcategory(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
@@ -157,12 +157,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
+        /// <param name="file">The file in which the error occurred</param>
         /// <param name="message">Error message</param>
-        internal void LogErrorFromText(BuildEventFileInfo file, string subcategoryResourceName, string errorCode, string helpKeyword, string message)
+        internal void LogErrorFromText(string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
@@ -181,11 +181,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error based on an exception
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
+        /// <param name="file">The file in which the error occurred</param>
         /// <param name="messageResourceName">The string resource which has the formatting string for the error</param>
         /// <param name="messageArgs">The arguments for the error message</param>
-        internal void LogFatalError(BuildEventFileInfo file, Exception exception, string messageResourceName, params object[] messageArgs)
+        internal void LogFatalError(Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
@@ -194,11 +194,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log a warning
         /// </summary>
-        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        internal void LogWarning(BuildEventFileInfo file, string subcategoryResourceName, string messageResourceName, params object[] messageArgs)
+        internal void LogWarning(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
@@ -207,12 +207,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log a warning based on a text message
         /// </summary>
-        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
+        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        internal void LogWarningFromText(BuildEventFileInfo file, string subcategoryResourceName, string warningCode, string helpKeyword, string message)
+        internal void LogWarningFromText(string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
@@ -231,9 +231,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error based on an exception
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
-        internal void LogFatalBuildError(BuildEventFileInfo file, Exception exception)
+        /// <param name="file">The file in which the error occurred</param>
+        internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);

@@ -348,7 +348,7 @@ namespace Microsoft.Build.BackEnd
             if (!NodePacketTranslator.IsSerializable(e))
 #endif
             {
-                _loggingContext.LogWarning(new BuildEventFileInfo(string.Empty), null, "ExpectedEventToBeSerializable", e.GetType().Name);
+                _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 

@@ -1634,7 +1634,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Once we are going to warn for a property once, remove it from the list so we do not add it again.
                     _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
-                    _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(propertyElement.Location), null, "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
+                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
                 }
             }
 
@@ -2471,7 +2471,7 @@ namespace Microsoft.Build.Evaluation
                     // and issue a warning to that effect.
                     if (String.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
-                        _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "SelfImport", importFileUnescaped);
+                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
 
                         continue;
@@ -2488,7 +2488,7 @@ namespace Microsoft.Build.Evaluation
                             // Get the full path of the MSBuild file that has this import.
                             string importedBy = importElement.ContainingProject.FullPath ?? String.Empty;
 
-                            _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                            _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
                             // Throw exception if the project load settings requires us to stop the evaluation of a project when circular imports are detected.
                             if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0)
@@ -2515,7 +2515,7 @@ namespace Microsoft.Build.Evaluation
                             parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
-                        _evaluationLoggingContext.LogWarning(new BuildEventFileInfo(importLocationInProject), null, "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
+                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                         duplicateImport = true;
                     }
 
