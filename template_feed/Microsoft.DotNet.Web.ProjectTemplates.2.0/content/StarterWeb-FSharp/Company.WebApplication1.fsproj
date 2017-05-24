@@ -7,11 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="**/*.fs" />
     <Compile Include="Controllers/*.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
-
-    <None Remove="**/*.fs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
