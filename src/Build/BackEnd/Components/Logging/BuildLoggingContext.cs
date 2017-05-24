@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// and a new LoggingContext is returned.  This new LoggingContext should be used for all
     /// subsequent logging within the subcontext.
     /// </summary>
-    internal class BaseBuildLoggingContext : BaseLoggingContext
+    internal class BuildLoggingContext : LoggingContext
     {
         /// <summary>
         /// True if this context comes from the in-proc node.
@@ -38,13 +38,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="loggingService">The logging service to use</param>
         /// <param name="buildEventContext">The event context</param>
         /// <param name="inProc">Flag indicating if this context belongs to an in-proc node.</param>
-        protected BaseBuildLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, bool inProc) : base(loggingService, buildEventContext)
+        protected BuildLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, bool inProc) : base(loggingService, buildEventContext)
         {
             _isInProcNode = inProc;
         }
 
-        /// <inheritdoc cref="BaseLoggingContext"/>
-        protected BaseBuildLoggingContext(BaseBuildLoggingContext baseContext) : base(baseContext)
+        /// <inheritdoc cref="LoggingContext"/>
+        protected BuildLoggingContext(BuildLoggingContext baseContext) : base(baseContext)
         {
             _isInProcNode = baseContext._isInProcNode;
         }

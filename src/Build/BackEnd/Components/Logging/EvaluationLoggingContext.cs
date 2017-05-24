@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd.Components.Logging
     /// <summary>
     ///     Logging context and helpers for evaluation logging
     /// </summary>
-    internal class EvaluationLoggingContext : BaseLoggingContext
+    internal class EvaluationLoggingContext : LoggingContext
     {
         public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, int evaluationID) : base(
             loggingService,

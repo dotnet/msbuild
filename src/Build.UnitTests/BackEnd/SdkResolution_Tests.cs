@@ -107,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 _includeErrorResolver = includeErrorResolver;
             }
 
-            internal override IList<SdkResolver> LoadResolvers(BaseLoggingContext loggingContext, ElementLocation location)
+            internal override IList<SdkResolver> LoadResolvers(LoggingContext loggingContext, ElementLocation location)
             {
                 return _includeErrorResolver
                     ? new List<SdkResolver> {new MockSdkResolverThrows(),new MockSdkResolver1(),new MockSdkResolver2()}

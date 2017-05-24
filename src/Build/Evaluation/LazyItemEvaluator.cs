@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
         private readonly IEvaluatorData<P, I, M, D> _evaluatorData;
         private readonly Expander<P, I> _expander;
         private readonly IItemFactory<I, I> _itemFactory;
-        private readonly BaseLoggingContext _loggingContext;
+        private readonly LoggingContext _loggingContext;
 
         private int _nextElementOrder = 0;
 
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BaseLoggingContext loggingContext)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);

@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
 {
     internal class SdkResolverLoader
     {
-        internal virtual IList<SdkResolver> LoadResolvers(BaseLoggingContext loggingContext,
+        internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
             // Always add the default resolver

@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// hides the requirement to pass BuildEventContexts to the logging service or query the
     /// host for the logging service all of the time.
     /// </summary>
-    internal class BaseLoggingContext
+    internal class LoggingContext
     {
         /// <summary>
         /// The logging service to which this context is attached
@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="loggingService">The logging service to use</param>
         /// <param name="eventContext">The event context</param>
-        public BaseLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
+        public LoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingService, "loggingService");
             ErrorUtilities.VerifyThrowArgumentNull(eventContext, "eventContext");
@@ -49,7 +49,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// while the event context will come from a call into the logging service itself.
         /// </summary>
         /// <param name="baseContext">The context from which this context is being created.</param>
-        public BaseLoggingContext(BaseLoggingContext baseContext)
+        public LoggingContext(LoggingContext baseContext)
         {
             _loggingService = baseContext._loggingService;
             _eventContext = null;

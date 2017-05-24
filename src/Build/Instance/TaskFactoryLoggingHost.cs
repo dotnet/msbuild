@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task factory logging context
         /// </summary>
-        private BaseBuildLoggingContext _loggingContext;
+        private BuildLoggingContext _loggingContext;
 
         /// <summary>
         /// Is the system running in multi-process mode and requires events to be serializable
@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BaseBuildLoggingContext loggingContext)
+        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets or retrieves the logging context
         /// </summary>
-        internal BaseBuildLoggingContext LoggingContext
+        internal BuildLoggingContext LoggingContext
         {
             [DebuggerStepThrough]
             get

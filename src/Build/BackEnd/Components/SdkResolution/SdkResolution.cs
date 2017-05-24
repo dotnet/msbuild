@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="solutionPath">Path to the solution if known.</param>
         /// <param name="projectPath">Path to the project being built.</param>
         /// <returns>Path to the root of the referenced SDK.</returns>
-        internal string GetSdkPath(SdkReference sdk, BaseLoggingContext loggingContext,
+        internal string GetSdkPath(SdkReference sdk, LoggingContext loggingContext,
             ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
@@ -109,7 +109,7 @@ namespace Microsoft.Build.BackEnd
             _resolvers = resolvers;
         }
 
-        private void Initialize(BaseLoggingContext loggingContext, ElementLocation location)
+        private void Initialize(LoggingContext loggingContext, ElementLocation location)
         {
             lock (_lockObject)
             {
@@ -118,7 +118,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static void LogWarnings(BaseLoggingContext loggingContext, ElementLocation location,
+        private static void LogWarnings(LoggingContext loggingContext, ElementLocation location,
             SdkResultImpl result)
         {
             if (result.Warnings == null) return;
@@ -129,9 +129,9 @@ namespace Microsoft.Build.BackEnd
 
         private class SdkLoggerImpl : SdkLogger
         {
-            private readonly BaseLoggingContext _loggingContext;
+            private readonly LoggingContext _loggingContext;
 
-            public SdkLoggerImpl(BaseLoggingContext loggingContext)
+            public SdkLoggerImpl(LoggingContext loggingContext)
             {
                 _loggingContext = loggingContext;
             }
