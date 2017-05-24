@@ -24,23 +24,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private readonly HashSet<string> _processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Extensions to exclude from the .buildsources.zip archive
-        /// </summary>
-        private static readonly HashSet<string> _extensionsToExclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ".sln",
-            ".cs",
-            ".h",
-            ".cpp",
-            ".fs",
-            ".vb"
-        };
-
         // this will form a chain of file write tasks, running sequentially on a background thread
         private Task _currentTask = Task.CompletedTask;
 
-        public ProjectImportsCollector(string logFilePath, string sourcesArchiveExtension = ".buildsources.zip")
+        public ProjectImportsCollector(string logFilePath, string sourcesArchiveExtension = ".projectimports.zip")
         {
             ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
 
@@ -96,12 +83,6 @@ namespace Microsoft.Build.Logging
 
             var fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists || fileInfo.Length == 0)
-            {
-                _processedFiles.Add(filePath);
-                return;
-            }
-
-            if (_extensionsToExclude.Contains(Path.GetExtension(filePath)))
             {
                 _processedFiles.Add(filePath);
                 return;

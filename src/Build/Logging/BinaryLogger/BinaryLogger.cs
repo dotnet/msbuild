@@ -42,7 +42,7 @@ namespace Microsoft.Build.Logging
             Embedded,
 
             /// <summary>
-            /// Create an external .buildsources.zip archive for the project files.
+            /// Create an external .projectimports.zip archive for the project files.
             /// </summary>
             ZipFile
         }

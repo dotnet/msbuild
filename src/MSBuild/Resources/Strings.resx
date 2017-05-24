@@ -636,9 +636,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      files encountered during the build. The optional 
                      ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     - Don't collect the sources
-                      ProjectImports=Embed    - Embed sources in the log file
-                      ProjectImports=ZipFile  - Save to output.buildsources.zip
+                      ProjectImports=None     - Don't collect the project
+                                                imports
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file
+                      ProjectImports=ZipFile  - Save project files to 
+                                                output.projectimports.zip
                                                 where output is the same name
                                                 as the binary log file name.
 
