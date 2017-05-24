@@ -1994,7 +1994,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="translated">MSB4232: Elemente außerhalb der Target element müssen einen der folgenden Vorgänge aufweisen: Include, Update oder Remove.</target>
+        <target state="translated">MSB4232: Elemente außerhalb von Target-Elementen müssen einen der folgenden Vorgänge aufweisen: Include, Update oder Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
