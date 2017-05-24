@@ -106,71 +106,24 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)
         {
-            foreach (string exeDir in GetDotnetExeDirectoryCandidates())
-            {
-                string workingDir = context.SolutionFilePath ?? context.ProjectFilePath;
-                string netcoreSdkDir = Interop.hostfxr_resolve_sdk(exeDir, workingDir);
+            string exeDir = GetDotnetExeDirectory();
+            string workingDir = context.SolutionFilePath ?? context.ProjectFilePath;
+            string netcoreSdkDir = Interop.hostfxr_resolve_sdk(exeDir, workingDir);
 
-                if (netcoreSdkDir != null)
-                {
-                    return netcoreSdkDir;
-                }
-            }
-
-            return null;
+            return netcoreSdkDir;
         }
 
-        // Search for [ProgramFiles]\dotnet in this order.
-        private static readonly string[] s_programFiles = new[]
-        {
-            // "c:\Program Files" on x64 machine regardless process architecture.
-            // Undefined on x86 machines.
-            "ProgramW6432",
-
-            // "c:\Program Files (x86)" on x64 machine regardless of process architecture
-            // Undefined on x86 machines.
-            "ProgramFiles(x86)",
-
-            // "c:\Program Files" or "C:\Program Files (x86)" on x64 machine depending on process architecture. 
-            // "c:\Program Files" on x86 machines (therefore not redundant with the two locations above in that case).
-            //
-            // NOTE: hostfxr will search this on its own if multilevel lookup is not disable, but we do it explicitly
-            // to prevent an environment with disabled multilevel lookup from crippling desktop msbuild and VS.
-            "ProgramFiles",
-        };
-
-        private List<string> GetDotnetExeDirectoryCandidates()
+        private string GetDotnetExeDirectory()
         {
             string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
             if (environmentOverride != null)
             {
-                return new List<string>(capacity: 1) { environmentOverride };
+                return environmentOverride;
             }
 
-            // Initial capacity is 2 because while there are 3 candidates, we expect at most 2 unique ones (x64 + x86)
-            // Also, N=3 here means that we needn't be concerned with the O(N^2) complexity of the foreach + contains.
-            var candidates = new List<string>(capacity: 2); 
-            foreach (string variable in s_programFiles)
-            {
-                string directory = _getEnvironmentVariable(variable);
-                if (directory == null)
-                {
-                    continue;
-                }
+            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
 
-                directory = Path.Combine(directory, "dotnet");
-                if (!candidates.Contains(directory))
-                {
-                    candidates.Add(directory);
-                }
-            }
-
-            if (candidates.Count == 0)
-            {
-                candidates.Add(null); 
-            }
-
-            return candidates;
+            return Path.GetDirectoryName(environmentProvider.GetCommandPath("dotnet"));
         }
     }
 }

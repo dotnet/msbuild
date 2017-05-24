@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 using System;
@@ -40,6 +41,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.98");
             environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
             environment.CreateGlobalJson(environment.TestDirectory, "99.99.98");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -59,6 +61,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -80,6 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -99,6 +103,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "999.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -122,6 +127,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
         private sealed class TestEnvironment : SdkResolverContext
         {
+            public string Muxer => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dotnet.exe" : "dotnet";
+
+            public string PathEnvironmentVariable { get; set; }
+
             public DirectoryInfo TestDirectory { get; }
 
             public TestEnvironment(string identifier = "", [CallerMemberName] string callingMethod = "")
@@ -130,6 +139,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     "temp",
                     identifier: identifier,
                     callingMethod: callingMethod);
+
+                PathEnvironmentVariable = string.Empty;
             }
 
             public SdkResolver CreateResolver()
@@ -148,30 +159,28 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 return dir;
             }
 
+            public void CreateMuxerAndAddToPath(ProgramFiles programFiles)
+            {
+                var muxerDirectory = TestDirectory.GetDirectory(GetProgramFilesDirectory(programFiles).FullName, "dotnet");
+
+                new FileInfo(Path.Combine(muxerDirectory.FullName, Muxer)).Create();
+
+                PathEnvironmentVariable = $"{muxerDirectory}{Path.PathSeparator}{PathEnvironmentVariable}";
+            }
+
             public void CreateGlobalJson(DirectoryInfo directory, string version)
                 => File.WriteAllText(directory.GetFile("global.json").FullName, 
                     $@"{{ ""sdk"": {{ ""version"":  ""{version}"" }} }}");
 
             public string GetEnvironmentVariable(string variable)
             {
-                ProgramFiles programFiles;
-
                 switch (variable)
                 {
-                    case "ProgramW6432":
-                        programFiles = ProgramFiles.X64;
-                        break;
-                    case "ProgramFiles(x86)":
-                        programFiles = ProgramFiles.X86;
-                        break;
-                    case "ProgramFiles":
-                        programFiles = ProgramFiles.Default;
-                        break;
+                    case "PATH":
+                        return PathEnvironmentVariable;
                     default:
                         return null;
                 }
-
-                return GetProgramFilesDirectory(programFiles).FullName;
             }
         }
 
