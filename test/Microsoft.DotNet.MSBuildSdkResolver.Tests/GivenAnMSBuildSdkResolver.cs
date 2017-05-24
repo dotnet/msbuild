@@ -61,6 +61,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -82,6 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -101,6 +103,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "999.99.99");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
