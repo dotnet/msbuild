@@ -33,16 +33,14 @@ def branch = GithubBranchName
                     newJob.with{
                         steps{
                             // all windows builds do a full framework localized build to produce satellite assemblies
-                            def script = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\" && cibuild.cmd --target Full --localized-build"
+                            def script = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
 
                             if (runtime == "Full") {
-                                script += " --scope Test"
+                                script += " && cibuild.cmd --target Full --scope Test"
                             }
                             // .net core builds are localized (they need the satellites from the full framework build), run tests, and also build the nuget packages
                             else if (runtime == "CoreCLR") {
-                                script == " --scope Compile --build-only"
-                                script += " && cibuild.cmd --target CoreCLR --scope test --localized-Build"
-                                script += " && msbuild build/NugetPackages/CreateNuGetPackages.proj"
+                                script += " && cibuild.cmd --windows-core-localized-job"
                             }
 
                             batchFile(script)

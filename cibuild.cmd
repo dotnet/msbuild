@@ -13,6 +13,16 @@ if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArgu
 if /i "%1"=="--localized-build" set LOCALIZED_BUILD=true&& shift && goto parseArguments
 if /i "%1"=="--sync-xlf" set SYNC_XLF=true&& shift && goto parseArguments
 
+if /i "%1"=="--windows-core-localized-job" (
+    CALL "!_originalScript!" --target Full --scope Compile --build-only --localized-build
+    IF ERRORLEVEL 1 GOTO :error
+    CALL "!_originalScript!" --target CoreCLR --scope test --localized-Build
+    IF ERRORLEVEL 1 GOTO :error
+    CALL "msbuild" build/NugetPackages/CreateNuGetPackages.proj
+    IF ERRORLEVEL 1 GOTO :error
+    EXIT /B 0
+    )
+
 :: Unknown parameters
 goto :usage
 
