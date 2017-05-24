@@ -12,7 +12,7 @@ namespace Microsoft.Build.Logging
     /// The .zip file can be used to correlate the file names and positions in the build log file with the
     /// actual sources.
     /// </summary>
-    internal class SourceFileCollector
+    internal class ProjectImportsCollector
     {
         private FileStream _fileStream;
         private ZipArchive _zipArchive;
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Logging
         // this will form a chain of file write tasks, running sequentially on a background thread
         private Task _currentTask = Task.CompletedTask;
 
-        public SourceFileCollector(string logFilePath, string sourcesArchiveExtension = ".buildsources.zip")
+        public ProjectImportsCollector(string logFilePath, string sourcesArchiveExtension = ".buildsources.zip")
         {
             ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
 

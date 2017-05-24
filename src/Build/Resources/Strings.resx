@@ -433,6 +433,15 @@
     <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
     <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
+  <data name="ImportingProject" UESanitized="false" Visibility="Public">
+    <value>Importing project "{0}" at: {1}</value>
+  </data>
+  <data name="ImportingProjectBecauseConditionTrue" UESanitized="false" Visibility="Public">
+    <value>Importing project "{0}" at: {1} because condition "{2}" evaluates to true.</value>
+  </data>
+  <data name="NotImportingProjectBecauseConditionFalse" UESanitized="false" Visibility="Public">
+    <value>Not importing project "{0}" at: {1} because condition "{2}" evaluates to false.</value>
+  </data>
   <data name="IncorrectNumberOfFunctionArguments" UESanitized="false" Visibility="Public">
     <value>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</value>
     <comment>{StrBegin="MSB4089: "}</comment>
@@ -451,7 +460,7 @@
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
   <data name="InvalidBinaryLoggerParameters" UESanitized="false" Visibility="Public">
-    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: Sources={None,Embedded,ZipFile} and/or [LogFile=]filePath.binlog (the log file name or path, must have ".binlog" extension).</value>
+    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
     <comment>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed incorrect parameters.</comment>
   </data>
   <data name="InvalidContinueOnErrorAttribute" UESanitized="false" Visibility="Public">

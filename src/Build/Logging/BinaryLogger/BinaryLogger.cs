@@ -21,28 +21,28 @@ namespace Microsoft.Build.Logging
         private Stream stream;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
-        private SourceFileCollector sourceFileCollector;
+        private ProjectImportsCollector projectImportsCollector;
 
         private string FilePath { get; set; }
 
         /// <summary>
-        /// Describes whether to capture the project and target source files used during the build.
-        /// If the source files are captured, they can be embedded in the log file or as a separate zip archive.
+        /// Describes whether to collect the project files (including imported project files) used during the build.
+        /// If the project files are collected they can be embedded in the log file or as a separate zip archive.
         /// </summary>
-        public enum SourceFileCaptureMode
+        public enum ProjectImportsCollectionMode
         {
             /// <summary>
-            /// Don't capture the source files during the build.
+            /// Don't collect any files during the build.
             /// </summary>
             None,
 
             /// <summary>
-            /// Embed the source files directly in the log file.
+            /// Embed all project files directly in the log file.
             /// </summary>
             Embedded,
 
             /// <summary>
-            /// Create an external .buildsources.zip archive for the files.
+            /// Create an external .buildsources.zip archive for the project files.
             /// </summary>
             ZipFile
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Gets or sets whether to capture and embed project and target source files used during the build.
         /// </summary>
-        public SourceFileCaptureMode CaptureSourceFiles { get; set; } = SourceFileCaptureMode.Embedded;
+        public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embedded;
 
         /// <summary>
         /// The binary logger Verbosity is always maximum (Diagnostic). It tries to capture as much
@@ -76,9 +76,9 @@ namespace Microsoft.Build.Logging
             {
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CaptureSourceFiles != SourceFileCaptureMode.None)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None)
                 {
-                    sourceFileCollector = new SourceFileCollector(FilePath);
+                    projectImportsCollector = new ProjectImportsCollector(FilePath);
                 }
             }
             catch (Exception e)
@@ -103,24 +103,24 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Shutdown()
         {
-            if (sourceFileCollector != null)
+            if (projectImportsCollector != null)
             {
-                sourceFileCollector.Close();
+                projectImportsCollector.Close();
 
-                if (CaptureSourceFiles == SourceFileCaptureMode.Embedded)
+                if (CollectProjectImports == ProjectImportsCollectionMode.Embedded)
                 {
-                    var archiveFilePath = sourceFileCollector.ArchiveFilePath;
+                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
 
                     // It is possible that the archive couldn't be created for some reason.
                     // Only embed it if it actually exists.
                     if (File.Exists(archiveFilePath))
                     {
-                        eventArgsWriter.WriteBlob(BinaryLogRecordKind.SourceArchive, File.ReadAllBytes(archiveFilePath));
+                        eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, File.ReadAllBytes(archiveFilePath));
                         File.Delete(archiveFilePath);
                     }
                 }
 
-                sourceFileCollector = null;
+                projectImportsCollector = null;
             }
 
             if (stream != null)
@@ -149,9 +149,9 @@ namespace Microsoft.Build.Logging
                     eventArgsWriter.Write(e);
                 }
 
-                if (sourceFileCollector != null)
+                if (projectImportsCollector != null)
                 {
-                    sourceFileCollector.IncludeSourceFiles(e);
+                    projectImportsCollector.IncludeSourceFiles(e);
                 }
             }
         }
@@ -171,17 +171,17 @@ namespace Microsoft.Build.Logging
             var parameters = Parameters.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
-                if (string.Equals(parameter, "Sources=None", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
                 {
-                    CaptureSourceFiles = SourceFileCaptureMode.None;
+                    CollectProjectImports = ProjectImportsCollectionMode.None;
                 }
-                else if (string.Equals(parameter, "Sources=Embedded", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
                 {
-                    CaptureSourceFiles = SourceFileCaptureMode.Embedded;
+                    CollectProjectImports = ProjectImportsCollectionMode.Embedded;
                 }
-                else if (string.Equals(parameter, "Sources=ZipFile", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
                 {
-                    CaptureSourceFiles = SourceFileCaptureMode.ZipFile;
+                    CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
                 }
                 else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
                 {

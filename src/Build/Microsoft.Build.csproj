@@ -570,8 +570,8 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
-    <Compile Include="Logging\BinaryLogger\SourceFileCollector.cs" />
-    <Compile Include="Logging\BinaryLogger\SourceFileCollectorExtensions.cs" />
+    <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
+    <Compile Include="Logging\BinaryLogger\ProjectImportsCollectorExtensions.cs" />
     <Compile Include="Logging\ConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

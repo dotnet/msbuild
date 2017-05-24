@@ -16,6 +16,6 @@
         Message,
         TaskCommandLine,
         CriticalBuildMessage,
-        SourceArchive
+        ProjectImportArchive
     }
 }
