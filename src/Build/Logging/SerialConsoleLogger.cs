@@ -79,8 +79,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (ShowSummary == true)
             {
-                errorList = new ArrayList();
-                warningList = new ArrayList();
+                errorList = new List<BuildErrorEventArgs>();
+                warningList = new List<BuildWarningEventArgs>();
             }
             else
             {
@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
         {
-            // Show the performance summary iff the verbosity is diagnostic or the user specifically asked for it
+            // Show the performance summary if the verbosity is diagnostic or the user specifically asked for it
             // with a logger parameter.
             if (this.showPerfSummary)
             {
@@ -267,7 +267,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (null != e.Properties)
                 {
-                    ArrayList propertyList = ExtractPropertyList(e.Properties);
+                    var propertyList = ExtractPropertyList(e.Properties);
                     WriteProperties(propertyList);
                 }
 

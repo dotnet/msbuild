@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void Initialize(IEventSource eventSource)
         {
             // If the logger is being used in singleproc do not show EventId after each message unless it is set as part of a console parameter
-            if (numberOfProcessors == 1)
+            if (NumberOfProcessors == 1)
             {
                 _showEventId = false;
             }
@@ -187,8 +187,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (ShowSummary == true)
             {
-                errorList = new ArrayList();
-                warningList = new ArrayList();
+                errorList = new List<BuildErrorEventArgs>();
+                warningList = new List<BuildWarningEventArgs>();
             }
             else
             {
@@ -383,35 +383,33 @@ namespace Microsoft.Build.BackEnd.Logging
             if (warningCount > 0)
             {
                 setColor(ConsoleColor.Yellow);
-                ShowErrorWarningSummary<BuildWarningEventArgs>(warningList);
+                ShowErrorWarningSummary(warningList);
             }
 
             if (errorCount > 0)
             {
                 setColor(ConsoleColor.Red);
-                ShowErrorWarningSummary<BuildErrorEventArgs>(errorList);
+                ShowErrorWarningSummary(errorList);
             }
 
             resetColor();
         }
 
-        private void ShowErrorWarningSummary<T>(ArrayList listToProcess) where T : BuildEventArgs
+        private void ShowErrorWarningSummary(IEnumerable<BuildEventArgs> listToProcess)
         {
             // Group the build warning event args based on the entry point and the target in which the warning occurred
-            Dictionary<ErrorWarningSummaryDictionaryKey, List<T>> groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<T>>();
+            var groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
 
             // Loop through each of the warnings and put them into the correct buckets
-            for (int listCount = 0; listCount < listToProcess.Count; listCount++)
+            foreach (BuildEventArgs errorWarningEventArgs in listToProcess)
             {
-                T errorWarningEventArgs = (T)listToProcess[listCount];
-
                 // Target event may be null for a couple of reasons:
                 // 1) If the event was from a project load, or engine 
                 // 2) If the flushing of the event queue for each request and result is turned off
                 // as this could cause errors and warnings to be seen by the logger after the target finished event
                 // which would cause the error or warning to have no matching target started event as they are removed
                 // when a target finished event is logged.
-                // 3) On NORMAL verbosity if the error or warning occurres in a project load then the error or warning and the target started event will be forwarded to 
+                // 3) On NORMAL verbosity if the error or warning occurs in a project load then the error or warning and the target started event will be forwarded to 
                 // different forwarding loggers which cannot communicate to each other, meaning there will be no matching target started event logged 
                 // as the forwarding logger did not know to forward the target started event
                 string targetName = null;
@@ -430,7 +428,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // If there is no bucket create a new one which contains a list of all the errors which
                     // happened for a given buildEventContext / target
-                    List<T> errorWarningEventListByTarget = new List<T>();
+                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
                     groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
                 }
 
@@ -441,9 +439,9 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext previousEntryPoint = null;
             string previousTarget = null;
             // Loop through each of the bucket and print out the stack trace information for the errors
-            foreach (KeyValuePair<ErrorWarningSummaryDictionaryKey, List<T>> valuePair in groupByProjectEntryPoint)
+            foreach (KeyValuePair<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>> valuePair in groupByProjectEntryPoint)
             {
-                //If the project entrypoint where the error occurred is the same as the previous message do not print the
+                //If the project entry point where the error occurred is the same as the previous message do not print the
                 // stack trace again
                 if (previousEntryPoint != valuePair.Key.EntryPointContext)
                 {
@@ -468,7 +466,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 // Print out all of the errors under the ProjectEntryPoint / target
-                foreach (T errorWarningEvent in valuePair.Value)
+                foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
@@ -606,7 +604,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // In single proc only make a space between the project done event and the next line, this 
                         // is to increase the readability on the single proc log when there are a number of done events
                         // or a mix of done events and project started events. Also only do this on the console and not any log file.
-                        if (numberOfProcessors == 1 && runningWithCharacterFileType)
+                        if (NumberOfProcessors == 1 && runningWithCharacterFileType)
                         {
                             WriteNewLine();
                         }
@@ -631,7 +629,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void WriteProperties(BuildEventArgs e, IEnumerable properties)
         {
             if (showOnlyErrors || showOnlyWarnings) return;
-            ArrayList propertyList = ExtractPropertyList(properties);
+            var propertyList = ExtractPropertyList(properties);
 
             // if there are no properties to display return out of the method and dont print out anything related to displaying
             // the properties, this includes the multiproc prefix information or the Initial properties header
@@ -645,7 +643,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShownBuildEventContext(e.BuildEventContext);
         }
 
-        internal override void OutputProperties(ArrayList list)
+        internal override void OutputProperties(List<DictionaryEntry> list)
         {
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -696,7 +694,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (showOnlyErrors || showOnlyWarnings) return;
             SortedList itemList = ExtractItemList(items);
 
-            // if there are no Items to display return out of the method and dont print out anything related to displaying
+            // if there are no Items to display return out of the method and don't print out anything related to displaying
             // the items, this includes the multiproc prefix information or the Initial items header
             if (itemList.Count == 0)
             {
@@ -713,10 +711,8 @@ namespace Microsoft.Build.BackEnd.Logging
             bool haveWrittenItemType = false;
             foreach (ITaskItem item in itemTypeList)
             {
-                string itemString = null;
                 if (!haveWrittenItemType)
                 {
-                    itemString = itemType;
                     setColor(ConsoleColor.DarkGray);
                     WriteMessageAligned(itemType, false);
                     haveWrittenItemType = true;
@@ -724,7 +720,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Gray);
 
                 // Indent the text by two tab lengths
-                StringBuilder result = new StringBuilder();
+                StringBuilder result = new StringBuilder(2 * tabWidth + item.ItemSpec.Length);
                 result.Append(' ', 2 * tabWidth).Append(item.ItemSpec);
                 WriteMessageAligned(result.ToString(), false);
 
@@ -914,7 +910,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
-            // Keep track of the number of error events raisd 
+            // Keep track of the number of error events raised 
             errorCount++;
 
             // If there is an error we need to walk up the call stack and make sure that 
@@ -923,7 +919,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
 
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e.BuildEventContext);
-            // Can be null if the error occurred outside of a target, or the error occurres before the targetStartedEvent
+            // Can be null if the error occurred outside of a target, or the error occurred before the targetStartedEvent
             if (targetStartedEvent != null)
             {
                 targetStartedEvent.ErrorInTarget = true;
@@ -964,12 +960,12 @@ namespace Microsoft.Build.BackEnd.Logging
             warningCount++;
 
             // If there is a warning we need to walk up the call stack and make sure that 
-            // the project started events back to the root project know a warning has ocured
+            // the project started events back to the root project know a warning has occurred
             // and are not removed when they finish
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e.BuildEventContext);
 
-            // Can be null if the error occurred outside of a target, or the error occurres before the targetStartedEvent
+            // Can be null if the error occurred outside of a target, or the error occurs before the targetStartedEvent
             if (targetStartedEvent != null)
             {
                 targetStartedEvent.ErrorInTarget = true;
@@ -1099,7 +1095,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage = null;
+            string nonNullMessage;
 
             // Include file information if present.
             if (e.File != null)
@@ -1108,7 +1104,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                nonNullMessage = e.Message ?? string.Empty;
             }
 
             int prefixAdjustment = 0;
@@ -1180,10 +1176,6 @@ namespace Microsoft.Build.BackEnd.Logging
                         writeTargetName = true;
                     }
                 }
-                else
-                {
-                    writeTargetName = false;
-                }
 
                 if (writeTargetName)
                 {
@@ -1246,7 +1238,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="prefixAdjustment">An amount to adjust the prefix by.</param>
         private void WriteMessageAligned(string message, bool prefixAlreadyWritten, int prefixAdjustment)
         {
-            // This method may require the splitting of lines inorder to format them to the console, this must be an atomic operation
+            // This method may require the splitting of lines in order to format them to the console; this must be an atomic operation
             lock (_lockObject)
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
@@ -1272,12 +1264,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         // If the message and the prefix are too large for one line in the console, split the string to fit
                         int index = 0;
                         int messageLength = nonNullMessage.Length;
-                        int amountToCopy = 0;
                         // Loop until all the string has been sent to the console
                         while (index < messageLength)
                         {
                             // Calculate how many chars will fit on the console buffer
-                            amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
+                            int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
                             WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
                             index = index + amountToCopy;
                         }
@@ -1292,18 +1283,18 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Write message takinginto account whether or not the prefix (timestamp and key) have already been written on the line
+        /// Write message taking into account whether or not the prefix (timestamp and key) have already been written on the line
         /// </summary>
         private void WriteBasedOnPrefix(string nonNullMessage, bool prefixAlreadyWritten, int adjustedPrefixWidth)
         {
             if (prefixAlreadyWritten)
             {
-                write(nonNullMessage + Environment.NewLine);
+                WriteHandler(nonNullMessage + Environment.NewLine);
             }
             else
             {
                 // No prefix info has been written, indent the line to the proper location
-                write(IndentString(nonNullMessage, adjustedPrefixWidth));
+                WriteHandler(IndentString(nonNullMessage, adjustedPrefixWidth));
             }
         }
 
@@ -1332,9 +1323,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e);
                 ErrorUtilities.VerifyThrow(startedEvent != null, "Project Started should not be null in deferred target started");
-                string currentProjectFile = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                string currentProjectFile = startedEvent.ProjectFile ?? string.Empty;
 
-                string targetName = null;
+                string targetName;
                 if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || _showEventId)
                 {
                     targetName = ResourceUtilities.FormatResourceString("TargetMessageWithId", targetStartedEvent.TargetName, targetStartedEvent.ProjectBuildEventContext.TargetId);
@@ -1403,8 +1394,8 @@ namespace Microsoft.Build.BackEnd.Logging
                         DisplayDeferredStartedEvents(parentStartedEvent.ProjectBuildEventContext);
                     }
 
-                    string current = projectStartedEvent.ProjectFile == null ? string.Empty : projectStartedEvent.ProjectFile;
-                    string previous = parentStartedEvent == null ? null : parentStartedEvent.ProjectFile;
+                    string current = projectStartedEvent.ProjectFile ?? string.Empty;
+                    string previous = parentStartedEvent?.ProjectFile;
                     string targetNames = projectStartedEvent.TargetNames;
 
                     // Log 0-based node id's, where 0 is the parent. This is a little unnatural for the reader,
@@ -1414,7 +1405,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        string message = string.Empty;
+                        string message;
                         if ((targetNames == null) || (targetNames.Length == 0))
                         {
                             message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
@@ -1442,7 +1433,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         resetColor();
                     }
 
-                    // Make the last shown buildevent context to be null so that the next message will always print out the target name. If this is not null 
+                    // Make the last shown build event context to be null so that the next message will always print out the target name. If this is not null 
                     // then the first message after the project started event will not have the target name printed out which was causing some confusion.
                     ShownBuildEventContext(null);
                 }
@@ -1476,13 +1467,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void WriteLinePrefix(BuildEventContext e, DateTime eventTimeStamp, bool isMessagePrefix)
         {
-            WriteLinePrefix(GetFullProjectKey(e).ToString(verbosity), eventTimeStamp, isMessagePrefix);
+            WriteLinePrefix(GetFullProjectKey(e).ToString(Verbosity), eventTimeStamp, isMessagePrefix);
         }
 
         private void WriteLinePrefix(string key, DateTime eventTimeStamp, bool isMessagePrefix)
         {
-            // Dont want any prefix for single proc
-            if (numberOfProcessors == 1)
+            // Don't want any prefix for single proc
+            if (NumberOfProcessors == 1)
             {
                 return;
             }
@@ -1495,7 +1486,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 context = LogFormatter.FormatLogTimeStamp(eventTimeStamp);
             }
 
-            string prefixString = string.Empty;
+            string prefixString;
 
             if (!isMessagePrefix || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
@@ -1529,14 +1520,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             //Project started event can be null, if the message has come before the project started event
             // or the message is not part of a project such as if the message came from the engine
-            if (startedEvent == null)
-            {
-                return new ProjectFullKey(0, 0);
-            }
-            else
-            {
-                return new ProjectFullKey(startedEvent.ProjectKey, startedEvent.EntryPointKey);
-            }
+            return startedEvent == null
+                ? new ProjectFullKey(0, 0)
+                : new ProjectFullKey(startedEvent.ProjectKey, startedEvent.EntryPointKey);
         }
 
         /// <summary>
@@ -1545,24 +1531,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
-        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
+        internal new static MPPerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
         {
             // Lazily construct the performance counter table.
             if (table == null)
             {
-                table = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                table = new Dictionary<string, PerformanceCounter>(StringComparer.OrdinalIgnoreCase);
             }
 
-            MPPerformanceCounter counter = (MPPerformanceCounter)table[scopeName];
-
             // And lazily construct the performance counter itself.
-            if (counter == null)
+            PerformanceCounter counter;
+            if (!table.TryGetValue(scopeName, out counter))
             {
                 counter = new MPPerformanceCounter(scopeName);
                 table[scopeName] = counter;
             }
 
-            return counter;
+            return (MPPerformanceCounter)counter;
         }
         #endregion
 
@@ -1573,18 +1558,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal class MPPerformanceCounter : PerformanceCounter
         {
             // Set of performance counters for a project
-            private Hashtable _internalPerformanceCounters;
+            private Dictionary<string, PerformanceCounter> _internalPerformanceCounters;
+
             // Dictionary mapping event context to the start number of ticks, this will be used to calculate the amount
             // of time between the start of the performance counter and the end
             // An object is being used to box the start time long value to prevent jitting when this code path is executed.
             private Dictionary<BuildEventContext, object> _startedEvent;
-            private int _messageIdentLevel = 2;
 
-            internal int MessageIdentLevel
-            {
-                get { return _messageIdentLevel; }
-                set { _messageIdentLevel = value; }
-            }
+            internal int MessageIndentLevel { get; set; } = 2;
 
             internal MPPerformanceCounter(string scopeName)
                 : base(scopeName)
@@ -1597,32 +1578,27 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal void AddEventStarted(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp, IEqualityComparer<BuildEventContext> comparer)
             {
-                //If the projectTargetNames are set then we should be a projectstarted event
+                //If the projectTargetNames are set then we should be a project started event
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     // Create a new performance counter for the project entry point to calculate how much time and how many calls
                     // were made to the entry point
                     MPPerformanceCounter entryPoint = GetPerformanceCounter(projectTargetNames, ref _internalPerformanceCounters);
                     entryPoint.AddEventStarted(null, buildEventContext, eventTimeStamp, s_compareContextNodeIdTargetId);
-                    // Indent the output so it is intented with respect to its parent project
-                    entryPoint._messageIdentLevel = 7;
+                    // Indent the output so it is indented with respect to its parent project
+                    entryPoint.MessageIndentLevel = 7;
                 }
 
                 if (_startedEvent == null)
                 {
-                    if (comparer == null)
-                    {
-                        _startedEvent = new Dictionary<BuildEventContext, object>();
-                    }
-                    else
-                    {
-                        _startedEvent = new Dictionary<BuildEventContext, object>(comparer);
-                    }
+                    _startedEvent = comparer == null
+                        ? new Dictionary<BuildEventContext, object>()
+                        : new Dictionary<BuildEventContext, object>(comparer);
                 }
 
                 if (!_startedEvent.ContainsKey(buildEventContext))
                 {
-                    _startedEvent.Add(buildEventContext, (object)eventTimeStamp.Ticks);
+                    _startedEvent.Add(buildEventContext, eventTimeStamp.Ticks);
                     ++calls;
                 }
             }
@@ -1654,25 +1630,21 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal override void PrintCounterMessage(WriteLinePrettyFromResourceDelegate WriteLinePrettyFromResource, ColorSetter setColor, ColorResetter resetColor)
             {
-                // round: submillisecond values are not meaningful
+                // round: sub-millisecond values are not meaningful
                 string time = String.Format(CultureInfo.CurrentCulture,
                        "{0,5}", Math.Round(elapsedTime.TotalMilliseconds, 0));
 
-                WriteLinePrettyFromResource
-                   (
-                       _messageIdentLevel,
-                       "PerformanceLine",
-                       time,
-                       String.Format(CultureInfo.CurrentCulture,
-                               "{0,-40}" /* pad to 40 align left */, scopeName),
-                       String.Format(CultureInfo.CurrentCulture,
-                               "{0,3}", calls)
-                   );
+                WriteLinePrettyFromResource(
+                    MessageIndentLevel,
+                    "PerformanceLine",
+                    time,
+                    String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
+                    String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
 
                 if (_internalPerformanceCounters != null && _internalPerformanceCounters.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
-                    foreach (MPPerformanceCounter counter in _internalPerformanceCounters.Values)
+                    foreach (var counter in _internalPerformanceCounters.Values)
                     {
                         setColor(ConsoleColor.White);
                         counter.PrintCounterMessage(WriteLinePrettyFromResource, setColor, resetColor);
@@ -1684,17 +1656,17 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region internal MemberData
-        private static ComparerContextNodeId<BuildEventContext> s_compareContextNodeId = new ComparerContextNodeId<BuildEventContext>();
-        private static ComparerContextNodeIdTargetId<BuildEventContext> s_compareContextNodeIdTargetId = new ComparerContextNodeIdTargetId<BuildEventContext>();
+        private static readonly ComparerContextNodeId<BuildEventContext> s_compareContextNodeId = new ComparerContextNodeId<BuildEventContext>();
+        private static readonly ComparerContextNodeIdTargetId<BuildEventContext> s_compareContextNodeIdTargetId = new ComparerContextNodeIdTargetId<BuildEventContext>();
         private BuildEventContext _lastDisplayedBuildEventContext;
         private int _bufferWidth = -1;
-        private object _lockObject = new Object();
+        private readonly object _lockObject = new Object();
         private int _prefixWidth = 0;
         private ProjectFullKey _lastProjectFullKey = new ProjectFullKey(-1, -1);
         private bool _alignMessages;
         private bool _forceNoAlign;
         private bool _showEventId;
-        // According to the documentaion for ENABLE_PROCESSED_OUTPUT tab width for the console is 8 characters
+        // According to the documentation for ENABLE_PROCESSED_OUTPUT tab width for the console is 8 characters
         private const string consoleTab = "        ";
         #endregion
 

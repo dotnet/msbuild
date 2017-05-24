@@ -75,15 +75,8 @@ namespace Microsoft.Build.Logging
         /// the default console.
         /// </summary>
         /// <param name="verbosity">Verbosity level.</param>
-        public ConsoleLogger(LoggerVerbosity verbosity)
-            :
-            this
-            (
-                verbosity,
-                new WriteHandler(Console.Out.Write),
-                new ColorSetter(BaseConsoleLogger.SetColor),
-                new ColorResetter(BaseConsoleLogger.ResetColor)
-            )
+        public ConsoleLogger(LoggerVerbosity verbosity) :
+            this(verbosity, Console.Out.Write, BaseConsoleLogger.SetColor, BaseConsoleLogger.ResetColor)
         {
             // do nothing
         }
@@ -115,71 +108,71 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeBaseConsoleLogger()
         {
-            if (_consoleLogger == null)
+            if (_consoleLogger != null) return;
+
+            bool useMPLogger = false;
+            bool disableConsoleColor = false;
+            bool forceConsoleColor = false;
+            if (!string.IsNullOrEmpty(_parameters))
             {
-                bool useMPLogger = false;
-                bool disableConsoleColor = false;
-                bool forceConsoleColor = false;
-                if (!string.IsNullOrEmpty(_parameters))
+                string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
+                foreach (string param in parameterComponents)
                 {
-                    string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
-                    for (int param = 0; param < parameterComponents.Length; param++)
+                    if (param.Length <= 0) continue;
+
+                    if (0 == string.Compare(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (parameterComponents[param].Length > 0)
-                        {
-                            if (0 == String.Compare(parameterComponents[param], "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
-                            {
-                                useMPLogger = true;
-                            }
-                            if (0 == String.Compare(parameterComponents[param], "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
-                            {
-                                useMPLogger = false;
-                            }
-                            if (0 == String.Compare(parameterComponents[param], "DISABLECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
-                            {
-                                disableConsoleColor = true;
-                            }
-                            if (0 == String.Compare(parameterComponents[param], "FORCECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
-                            {
-                                forceConsoleColor = true;
-                            }
-                        }
+                        useMPLogger = true;
+                    }
+                    if (0 == string.Compare(param, "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
+                    {
+                        useMPLogger = false;
+                    }
+                    if (0 == string.Compare(param, "DISABLECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        disableConsoleColor = true;
+                    }
+                    if (0 == string.Compare(param, "FORCECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        forceConsoleColor = true;
                     }
                 }
-
-                if (forceConsoleColor)
-                {
-                    _colorSet = new ColorSetter(BaseConsoleLogger.SetColorANSI);
-                    _colorReset = new ColorResetter(BaseConsoleLogger.ResetColorANSI);
-                }
-                else if (disableConsoleColor)
-                {
-                    _colorSet = new ColorSetter(BaseConsoleLogger.DontSetColor);
-                    _colorReset = new ColorResetter(BaseConsoleLogger.DontResetColor);
-                }
-
-                if (_numberOfProcessors == 1 && !useMPLogger)
-                {
-                    _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
-                }
-                else
-                {
-                    _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
-                }
-
-                if (!string.IsNullOrEmpty(_parameters))
-                {
-                    _consoleLogger.Parameters = _parameters;
-                    _parameters = null;
-                }
-
-                if (_showSummary != null)
-                {
-                    _consoleLogger.ShowSummary = (bool)_showSummary;
-                }
-
-                _consoleLogger.SkipProjectStartedText = _skipProjectStartedText;
             }
+
+            if (forceConsoleColor)
+            {
+                _colorSet = BaseConsoleLogger.SetColorAnsi;
+                _colorReset = BaseConsoleLogger.ResetColorAnsi;
+            }
+            else if (disableConsoleColor)
+            {
+                _colorSet = BaseConsoleLogger.DontSetColor;
+                _colorReset = BaseConsoleLogger.DontResetColor;
+            }
+
+            if (_numberOfProcessors == 1 && !useMPLogger)
+            {
+                _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+            }
+            else
+            {
+                _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+            }
+
+            if (_showSummary != null)
+            {
+                _consoleLogger.ShowSummary = _showSummary;
+            }
+
+            if (!string.IsNullOrEmpty(_parameters))
+            {
+                _consoleLogger.Parameters = _parameters;
+                _parameters = null;
+            }
+
+            
+
+            _consoleLogger.SkipProjectStartedText = _skipProjectStartedText;
         }
 
         #endregion
@@ -194,7 +187,7 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                return _consoleLogger == null ? _verbosity : _consoleLogger.Verbosity;
+                return _consoleLogger?.Verbosity ?? _verbosity;
             }
 
             set
@@ -243,7 +236,7 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                return _consoleLogger == null ? _skipProjectStartedText : _consoleLogger.SkipProjectStartedText;
+                return _consoleLogger?.SkipProjectStartedText ?? _skipProjectStartedText;
             }
 
             set
@@ -294,7 +287,7 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                return _consoleLogger == null ? _write : _consoleLogger.write;
+                return _consoleLogger == null ? _write : _consoleLogger.WriteHandler;
             }
 
             set
@@ -305,7 +298,7 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    _consoleLogger.write = value;
+                    _consoleLogger.WriteHandler = value;
                 }
             }
         }
@@ -351,10 +344,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public virtual void Shutdown()
         {
-            if (_consoleLogger != null)
-            {
-                _consoleLogger.Shutdown();
-            }
+            _consoleLogger?.Shutdown();
         }
 
         /// <summary>

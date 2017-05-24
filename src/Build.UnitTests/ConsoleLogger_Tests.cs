@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.UnitTests
 
             if (cl is SerialConsoleLogger)
             {
-                ArrayList propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
+                var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
                 ((SerialConsoleLogger)cl).WriteProperties(propertyList);
                 prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
                 prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
@@ -1904,30 +1904,21 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable properties = new Hashtable();
 
-
             for (int i = 0; i < 2; i++)
             {
-                BaseConsoleLogger cl = null;
                 SimulatedConsole sc = new SimulatedConsole();
                 if (i == 0)
                 {
-                    cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+                    var cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+                    var propertyList = cl.ExtractPropertyList(properties);
+                    cl.WriteProperties(propertyList);
                 }
                 else
                 {
-                    cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
-
-                if (cl is SerialConsoleLogger)
-                {
-                    ArrayList propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
-                    ((SerialConsoleLogger)cl).WriteProperties(propertyList);
-                }
-                else
-                {
+                    var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
                     BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
                     buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
+                    cl.WriteProperties(buildEvent, properties);
                 }
 
                 string log = sc.ToString();
