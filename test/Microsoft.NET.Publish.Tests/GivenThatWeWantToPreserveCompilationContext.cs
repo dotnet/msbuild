@@ -19,6 +19,10 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPreserveCompilationContext : SdkTest
     {
+        public GivenThatWeWantToPreserveCompilationContext(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
@@ -123,11 +127,73 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
+        [Fact]
+        public void It_excludes_runtime_store_packages_from_the_refs_folder()
+        {
+            var targetFramework = "netcoreapp2.0";
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("CompilationContext", "PreserveCompilationContextRefs")
+                .WithSource()
+                .WithProjectChanges((path, project) =>
+                {
+                    if (Path.GetFileName(path).Equals("TestApp.csproj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").Single();
+                        targetFrameworkElement.SetValue(targetFramework);
+                    }
+                })
+                .Restore(Log, "TestApp");
+
+            var manifestFile = Path.Combine(testAsset.TestRoot, "manifest.xml");
+
+            File.WriteAllLines(manifestFile, new[]
+            {
+                "<StoreArtifacts>",
+                @"  <Package Id=""Newtonsoft.Json"" Version=""9.0.1"" />",
+                @"  <Package Id=""System.Data.SqlClient"" Version=""4.3.0"" />",
+                "</StoreArtifacts>",
+            });
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            var publishCommand = new PublishCommand(Log, appProjectDirectory);
+            publishCommand
+                .Execute($"/p:TargetFramework={targetFramework}", $"/p:TargetManifestFiles={manifestFile}")
+                .Should()
+                .Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: "win7-x86");
+
+            publishDirectory.Should().HaveFiles(new[] {
+                "TestApp.dll",
+                "TestLibrary.dll"});
+
+            // excluded through TargetManifestFiles
+            publishDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+            publishDirectory.Should().NotHaveFile("System.Data.SqlClient.dll");
+
+            var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
+            // Should have compilation time assemblies
+            refsDirectory.Should().HaveFile("System.IO.dll");
+            // System.Data.SqlClient has separate compile and runtime assemblies, so the compile assembly
+            // should be copied to refs even though the runtime assembly is listed in TargetManifestFiles
+            refsDirectory.Should().HaveFile("System.Data.SqlClient.dll");
+
+            // Libraries in which lib==ref should be deduped
+            refsDirectory.Should().NotHaveFile("TestLibrary.dll");
+            refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+        }
+
         string[] Net46CompileLibraryNames = @"TestApp.exe
 mscorlib.dll
 System.ComponentModel.Composition.dll
 System.Core.dll
+System.Data.Common.dll
 System.Data.dll
+System.Data.SqlClient.dll
 System.dll
 System.Drawing.dll
 System.IO.Compression.FileSystem.dll
@@ -206,7 +272,7 @@ System.Security.Cryptography.X509Certificates.dll
 System.Xml.ReaderWriter.dll
 TestLibrary.dll".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-        string [] NetCoreAppCompileLibraryNames = @"TestApp.dll
+        string[] NetCoreAppCompileLibraryNames = @"TestApp.dll
 Microsoft.CSharp.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll
@@ -219,6 +285,8 @@ System.Collections.Immutable.dll
 System.ComponentModel.dll
 System.ComponentModel.Annotations.dll
 System.Console.dll
+System.Data.Common.dll
+System.Data.SqlClient.dll
 System.Diagnostics.Debug.dll
 System.Diagnostics.DiagnosticSource.dll
 System.Diagnostics.Process.dll
@@ -286,9 +354,5 @@ System.Threading.Timer.dll
 System.Xml.ReaderWriter.dll
 System.Xml.XDocument.dll
 TestLibrary.dll".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        public GivenThatWeWantToPreserveCompilationContext(ITestOutputHelper log) : base(log)
-        {
-        }
     }
 }

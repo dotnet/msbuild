@@ -1,9 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
+using NuGet.Packaging.Core;
+using NuGet.Versioning;
+using System;
 using System.IO;
 
 namespace Microsoft.NET.Build.Tasks
@@ -131,6 +133,21 @@ namespace Microsoft.NET.Build.Tasks
             var sourcePath = GetSourcePath(item);
 
             return Path.GetFileName(sourcePath);
+        }
+
+        public static PackageIdentity GetPackageIdentity(ITaskItem item)
+        {
+            string packageName = item.GetMetadata(MetadataKeys.PackageName);
+            string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+
+            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
+            {
+                return null;
+            }
+
+            return new PackageIdentity(
+                packageName,
+                NuGetVersion.Parse(packageVersion));
         }
     }
 }
