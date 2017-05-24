@@ -134,8 +134,8 @@ Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issu
 
 ## Obtaining binaries
 
-Add debian feed:
-
+### Add debian feed:
+Ubuntu 14.04
 ```
 sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
 
@@ -144,12 +144,39 @@ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
 sudo apt-get update
 ```
 
-Install:
+Ubuntu 16.04
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+Ubuntu 16.10
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ yakkety main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+Debian 8
+```
+sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ jessie main" > /etc/apt/sources.list.d/dotnetdev.list'
+
+sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
+
+sudo apt-get update
+```
+
+### Install:
 ```
 sudo apt-get install <DebianPackageName>=<Version>
 ```
 
-To list available packages:
+### To list available packages:
 ```
 apt-cache search dotnet-sdk | grep 2.0.0
 ```
@@ -167,17 +194,17 @@ When you have the .NET Command Line Interface installed on your OS of choice, yo
 
 First, you will need to restore the packages:
 
-	dotnet restore
+    dotnet restore
 
 This will restore all of the packages that are specified in the project.json file of the given sample.
 
 Then you can either run from source or compile the sample. Running from source is straightforward:
 
-	dotnet run
+    dotnet run
 
 Compiling to IL is done using:
 
-	dotnet build
+    dotnet build
 
 This will drop an IL assembly in `./bin/[configuration]/[framework]/[binary name]`
 that you can run using `dotnet bin/[configuration]/[framework]/[binaryname.dll]`.
