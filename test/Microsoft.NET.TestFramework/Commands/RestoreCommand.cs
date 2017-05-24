@@ -6,16 +6,16 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Configuration;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class RestoreCommand : TestCommand
+    public sealed class RestoreCommand : MSBuildCommand
     {
         private List<string> _sources = new List<string>();
-        private bool _captureStdOut;
 
-        public RestoreCommand(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
-            : base(msbuild, projectPath, relativePathToProject)
+        public RestoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
+            : base(log, "Restore", projectPath, relativePathToProject, msbuild)
         {
         }
 
@@ -38,13 +38,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        public RestoreCommand CaptureStdOut()
-        {
-            _captureStdOut = true;
-            return this;
-        }
-
-        public override CommandResult Execute(params string[] args)
+        protected override ICommand CreateCommand(params string[] args)
         {
             var newArgs = new List<string>();
 
@@ -57,14 +51,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             newArgs.AddRange(args);
 
-            var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
-
-            if (_captureStdOut)
-            {
-                command = command.CaptureStdOut();
-            }
-
-            return command.Execute();
+            return MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
         }
     }
 }

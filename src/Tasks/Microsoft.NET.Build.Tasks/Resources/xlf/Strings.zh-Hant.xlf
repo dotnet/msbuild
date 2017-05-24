@@ -203,11 +203,6 @@
         <target state="new">Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</target>
         <note></note>
       </trans-unit>
-      <trans-unit id="IncorrectFilterFormat">
-        <source>The filter profile {0} provided is of not the correct format</source>
-        <target state="new">The filter profile {0} provided is of not the correct format</target>
-        <note></note>
-      </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
         <target state="new">Parsing the Files : '{0}'</target>
@@ -221,6 +216,86 @@
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
         <target state="new">Specify a RuntimeIdentifier</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IncorrectTargetFormat">
+        <source>The target manifest {0} provided is of not the correct format</source>
+        <target state="new">The target manifest {0} provided is of not the correct format</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
+        <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="new">It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ChoosingAssemblyVersion">
+        <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
+        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ChoosingFileVersion">
+        <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
+        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ChoosingPlatformItem">
+        <source>Choosing '{0}' because it is a platform item.</source>
+        <target state="new">Choosing '{0}' because it is a platform item.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ChoosingPreferredPackage">
+        <source>Choosing '{0}' because it comes from a package that is preferred.</source>
+        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConflictCouldNotDetermineWinner">
+        <source>Could not determine winner due to equal file and assembly versions.</source>
+        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_DoesntExist">
+        <source>Could not determine winner because '{0}' does not exist.</source>
+        <target state="new">Could not determine winner because '{0}' does not exist.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_FileVersion">
+        <source>Could not determine a winner because '{0}' has no file version.</source>
+        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
+        <source>Could not determine a winner because '{0}' is not an assembly.</source>
+        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="EncounteredConflict">
+        <source>Encountered conflict between '{0}' and '{1}'.</source>
+        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotLoadPlatformManifest">
+        <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
+        <target state="new">Could not load PlatformManifest from '{0}' because it did not exist.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ErrorParsingPlatformManifest">
+        <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
+        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
+        <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
+        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</target>
         <note></note>
       </trans-unit>
     </body>

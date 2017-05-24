@@ -15,22 +15,27 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildALibrary : SdkTest
     {
-       [Fact]
+        public GivenThatWeWantToBuildALibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
+        [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -51,11 +56,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
@@ -85,7 +90,7 @@ namespace Microsoft.NET.Build.Tests
             List<string> expectedAllProjects = new List<string>();
             string baseIntermediateDirectory = null;
 
-            var allProjectsFromProperty = GetValuesFromTestLibrary(_testAssetsManager, "MSBuildAllProjects", getValuesCommand =>
+            var allProjectsFromProperty = GetValuesFromTestLibrary(Log, _testAssetsManager, "MSBuildAllProjects", getValuesCommand =>
             {
                 baseIntermediateDirectory = getValuesCommand.GetBaseIntermediateDirectory().FullName;
 
@@ -156,9 +161,14 @@ namespace Microsoft.NET.Build.Tests
 
         
 
-        internal static List<string> GetValuesFromTestLibrary(TestAssetsManager testAssetsManager,
-            string itemTypeOrPropertyName, Action<GetValuesCommand> setup = null, string[] msbuildArgs = null,
-            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, [CallerMemberName] string callingMethod = "", 
+        internal static List<string> GetValuesFromTestLibrary(
+            ITestOutputHelper log,
+            TestAssetsManager testAssetsManager,
+            string itemTypeOrPropertyName,
+            Action<GetValuesCommand> setup = null, 
+            string[] msbuildArgs = null,
+            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, 
+            [CallerMemberName] string callingMethod = "", 
             Action<XDocument> projectChanges = null)
         {
             msbuildArgs = msbuildArgs ?? Array.Empty<string>();
@@ -174,11 +184,11 @@ namespace Microsoft.NET.Build.Tests
                 testAsset.WithProjectChanges(projectChanges);
             }
 
-            testAsset.Restore(relativePath: "TestLibrary");
+            testAsset.Restore(log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+            var getValuesCommand = new GetValuesCommand(log, libraryProjectDirectory,
                 targetFramework, itemTypeOrPropertyName, valueType);
 
             if (setup != null)
@@ -220,7 +230,7 @@ namespace Microsoft.NET.Build.Tests
                         propertyGroup.Add(new XElement(ns + "DocumentationFile", documentationFile));
                     }
                 })
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             return testAsset;
         }
@@ -232,11 +242,9 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
 
             buildCommand
-                //  Capture standard output so that warnings about missing XML documentation don't show up as warnings at the end of the SDK build
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass();
@@ -266,11 +274,9 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
 
             buildCommand
-                //  Capture standard output so that warnings about missing XML documentation don't show up as warnings at the end of the SDK build
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass();
@@ -303,7 +309,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
 
             buildCommand
                 .Execute()
@@ -352,7 +358,6 @@ namespace Microsoft.NET.Build.Tests
 
             var args = new[]
             {
-                projectFile,
                 "/p:DesignTimeBuild=true",
                 "/p:SkipCompilerExecution=true",
                 "/p:ProvideCommandLineArgs=true",
@@ -363,11 +368,8 @@ namespace Microsoft.NET.Build.Tests
                 "/t:ResolvePackageDependenciesDesignTime"
             };
 
-            var command = Stage0MSBuild.CreateCommandForTarget("ResolveAssemblyReferencesDesignTime", args);
-
-            var result = command
-                .CaptureStdOut()
-                .Execute();
+            var command = new MSBuildCommand(Log, "ResolveAssemblyReferencesDesignTime", projectFile);
+            var result = command.Execute(args);
 
             //  In CI builds, VSINSTALLDIR is set but the CompileDesignTime target doesn't exist, probably because
             //  it's an earlier version of Visual Studio
@@ -389,9 +391,8 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Fail();
@@ -407,11 +408,11 @@ namespace Microsoft.NET.Build.Tests
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var oldProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.csproj");
-            var newProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.fsproj");
+            var newProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.different_language_proj");
 
             File.Move(oldProjectFile, newProjectFile);
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, libraryProjectDirectory, "TestLibrary.fsproj");
+            var restoreCommand = new RestoreCommand(Log, libraryProjectDirectory, "TestLibrary.different_language_proj");
 
             restoreCommand
                 .Execute()
@@ -429,11 +430,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitConfigurationConstants", configuration)
                 .WithSource()
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+            var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 "netstandard1.5", "DefineConstants");
 
             getValuesCommand.ShouldCompile = true;
@@ -503,7 +504,7 @@ namespace Microsoft.NET.Build.Tests
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 })
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -512,7 +513,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+            var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
                 ShouldCompile = shouldCompile
@@ -542,13 +543,12 @@ namespace Microsoft.NET.Build.Tests
                         .Single()
                         .SetValue("");
                 })
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
 
             buildCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Fail()
@@ -562,18 +562,16 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "RidlessLib")
                 .WithSource()
-                .Restore(relativePath: "TestLibrary");
+                .Restore(Log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var fullPathProjectFile = new BuildCommand(Stage0MSBuild, libraryProjectDirectory).FullPathProjectFile;
+            var fullPathProjectFile = new BuildCommand(Log, libraryProjectDirectory).FullPathProjectFile;
 
             // compile should still pass with unknown RID because references are always pulled 
             // from RIDLess target
-            var buildCommand = Stage0MSBuild.CreateCommandForTarget(
-                "Compile", fullPathProjectFile, "/p:RuntimeIdentifier=unknownrid");
-
+            var buildCommand = new MSBuildCommand(Log, "Compile", fullPathProjectFile);
             buildCommand
-                .Execute()
+                .Execute("/p:RuntimeIdentifier=unkownrid")
                 .Should()
                 .Pass();
         }

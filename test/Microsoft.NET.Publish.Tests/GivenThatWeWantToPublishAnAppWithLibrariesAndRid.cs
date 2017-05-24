@@ -10,11 +10,16 @@ using Microsoft.NET.TestFramework.Commands;
 using System.IO;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAnAppWithLibrariesAndRid : SdkTest
     {
+        public GivenThatWeWantToPublishAnAppWithLibrariesAndRid(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_publishes_a_self_contained_runnable_output()
         {
@@ -45,10 +50,10 @@ namespace Microsoft.NET.Publish.Tests
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-                $"{FileConstants.DynamicLibPrefix}sqlite3{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}coreclr{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostfxr{Constants.DynamicLibSuffix}",
-                $"{FileConstants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}coreclr{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
             });
 
             Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
@@ -86,7 +91,7 @@ namespace Microsoft.NET.Publish.Tests
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-                $"{FileConstants.DynamicLibPrefix}sqlite3{Constants.DynamicLibSuffix}",
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}",
             });
 
             Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(publishDirectory.FullName, "App.dll") })
@@ -105,13 +110,13 @@ namespace Microsoft.NET.Publish.Tests
 
             var projectPath = Path.Combine(testAsset.TestRoot, "App");
 
-            var restoreCommand = new RestoreCommand(Stage0MSBuild, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, projectPath);
+            var publishCommand = new PublishCommand(Log, projectPath);
 
             publishCommand
                 .Execute(

@@ -17,11 +17,16 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildANetCoreApp : SdkTest
     {
+        public GivenThatWeWantToBuildANetCoreApp(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         //  TargetFramework, RuntimeFrameworkVersion, ExpectedPackageVersion, ExpectedRuntimeFrameworkVersion
         [InlineData("netcoreapp1.0", null, "1.0.5", "1.0.5")]
@@ -45,9 +50,9 @@ namespace Microsoft.NET.Build.Tests
             string testIdentifier = string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, nameof(It_targets_the_right_shared_framework), testIdentifier)
-                .Restore(testProject.Name);
+                .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
                 .Execute()
@@ -83,9 +88,9 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+            var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item);
 
             getValuesCommand
@@ -124,7 +129,7 @@ namespace Microsoft.NET.Build.Tests
             RunAppFromOutputFolder("RunFromOutputFolderWithRIDConflicts", true, true);
         }
 
-        public void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
+        private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
         {
             if (UsingFullFrameworkMSBuild)
             {
@@ -177,11 +182,11 @@ public static class Program
                         }
                     }
                 })
-                .Restore(project.Name);
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
                 .Execute()
@@ -247,11 +252,11 @@ public static class Program
                     }
 
                 })
-                .Restore(project.Name);
+                .Restore(Log, project.Name);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, projectFolder);
+            var buildCommand = new BuildCommand(Log, projectFolder);
 
             buildCommand
                 .Execute()
@@ -270,6 +275,44 @@ public static class Program
                     .And
                     .HaveNoDuplicateNativeAssets(""); ;
             }
+        }
+
+        [Fact]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OutputPathCasing",
+                TargetFrameworks = "igored",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name, extraArgs);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute(extraArgs)
+                .Should()
+                .Pass();
+
+            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+
+            Directory.GetDirectories(outputFolderWithConfiguration)
+                .Select(Path.GetFileName)
+                .Should()
+                .BeEquivalentTo("netcoreapp1.1");
+
+            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+            Directory.GetDirectories(intermediateFolderWithConfiguration)
+                .Select(Path.GetFileName)
+                .Should()
+                .BeEquivalentTo("netcoreapp1.1");
         }
     }
 }

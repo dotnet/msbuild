@@ -13,11 +13,16 @@ using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAppsWithFrameworkRefs : SdkTest
     {
+        public GivenThatWeWantToBuildAppsWithFrameworkRefs(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_the_projects_successfully()
         {
@@ -30,8 +35,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
 
-            testAsset.Restore("EntityFrameworkApp");
-            testAsset.Restore("StopwatchLib");
+            testAsset.Restore(Log, "EntityFrameworkApp");
+            testAsset.Restore(Log, "StopwatchLib");
 
             VerifyProjectsBuild(testAsset);
         }
@@ -48,8 +53,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
 
-            testAsset.Restore("EntityFrameworkApp");
-            testAsset.Restore("StopwatchLib");
+            testAsset.Restore(Log, "EntityFrameworkApp");
+            testAsset.Restore(Log, "StopwatchLib");
 
             VerifyProjectsBuild(testAsset, "/p:DisableImplicitFrameworkReferences=true");
         }
@@ -68,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
 
             // Try running EntityFrameworkApp.exe
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "EntityFrameworkApp");
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: "win7-x86");
 
             Command.Create(Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"), Enumerable.Empty<string>())
@@ -86,7 +91,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand
@@ -109,8 +114,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppsWithFrameworkReferences", "CleanTargetRemovesAll")
                 .WithSource();
 
-            testAsset.Restore("EntityFrameworkApp");
-            testAsset.Restore("StopwatchLib");
+            testAsset.Restore(Log, "EntityFrameworkApp");
+            testAsset.Restore(Log, "StopwatchLib");
 
             VerifyClean(testAsset, "StopwatchLib", "net45", "",
                 "StopwatchLib.dll",
@@ -128,7 +133,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand
@@ -138,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().HaveFiles(expectedFiles);
 
-            var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
+            var cleanCommand = new MSBuildCommand(Log, "Clean", buildCommand.FullPathProjectFile);
 
             cleanCommand
                 .Execute()

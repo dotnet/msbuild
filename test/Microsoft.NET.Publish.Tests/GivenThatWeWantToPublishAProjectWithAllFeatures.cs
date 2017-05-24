@@ -15,13 +15,18 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
+        public GivenThatWeWantToPublishAProjectWithAllFeatures(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
-        [MemberData("PublishData")]
+        [MemberData(nameof(PublishData))]
         public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
         {
             TestAsset testAsset = _testAssetsManager
@@ -38,12 +43,12 @@ namespace Microsoft.NET.Publish.Tests
                     }
                 });
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
+            PublishCommand publishCommand = new PublishCommand(Log, appProjectDirectory);
             publishCommand
                 .Execute()
                 .Should()

@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -16,7 +14,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -31,7 +29,7 @@ namespace Microsoft.NET.Publish.Tests
 
         static GivenThatWeWantToStoreAProjectWithDependencies()
         {
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _runtimeOs = "win7";
@@ -61,6 +59,10 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
+        public GivenThatWeWantToStoreAProjectWithDependencies(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void compose_dependencies()
         {
@@ -68,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("SimpleStore")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -81,14 +83,14 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{FileConstants.DynamicLibSuffix}",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
                };
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{FileConstants.DynamicLibSuffix}");
             }
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
@@ -127,20 +129,20 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
 
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{FileConstants.DynamicLibSuffix}",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
                $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
@@ -148,7 +150,7 @@ namespace Microsoft.NET.Publish.Tests
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{FileConstants.DynamicLibSuffix}");
             }
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
@@ -161,7 +163,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "SimpleStore.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -175,7 +177,7 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{FileConstants.DynamicLibSuffix}",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h",
                $"runtime.{_runtimeOs}.system.private.uri/4.4.0-beta-24821-02/runtimes/{_runtimeLibOs}/lib/netstandard1.0/System.Private.Uri.dll"
                };
@@ -183,7 +185,7 @@ namespace Microsoft.NET.Publish.Tests
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _testArch != "x86")
             {
                 files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native.a");
-                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{Constants.DynamicLibSuffix}");
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{_runtimeRid}/native/System.Native{FileConstants.DynamicLibSuffix}");
             }
 
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
@@ -196,7 +198,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("UnmanagedStore")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot);
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -209,7 +211,7 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/{_libPrefix}coredistools{FileConstants.DynamicLibSuffix}",
                $"runtime.{_runtimeRid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{_runtimeRid}/native/coredistools.h"
                };
 
@@ -223,7 +225,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("TargetManifests", "multifile")
                 .WithSource();
 
-            ComposeStore storeCommand = new ComposeStore(Stage0MSBuild, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+            var storeCommand =  new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");
@@ -231,7 +233,7 @@ namespace Microsoft.NET.Publish.Tests
             var additonalproj2 = Path.Combine(simpleDependenciesAsset.TestRoot, "FluentAssertions.xml");
 
             storeCommand
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:Additionalprojects={additonalproj1}%3b{additonalproj2}", $"/p:ComposeDir={OutputFolder}", $"/p:ComposeWorkingDir={WorkingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
             DirectoryInfo storeDirectory = new DirectoryInfo(OutputFolder);
@@ -272,8 +274,8 @@ namespace Microsoft.NET.Publish.Tests
             var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "StarVersion.xml")
-                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true")
+            new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "StarVersion.xml")
+                .Execute($"/p:RuntimeIdentifier={_runtimeRid}", $"/p:TargetFramework={_tfm}", $"/p:ComposeDir={outputFolder}", $"/p:ComposeWorkingDir={workingDir}", "/p:DoNotDecorateComposeDir=true", "/p:CreateProfilingSymbols=false")
                 .Should()
                 .Pass();
 
@@ -306,12 +308,6 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_creates_profiling_symbols()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // profiling symbols are not supported on OSX
-                return;
-            }
-
             if (UsingFullFrameworkMSBuild)
             {
                 //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
@@ -326,20 +322,26 @@ namespace Microsoft.NET.Publish.Tests
             var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeStore(Stage0MSBuild, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
+            new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
                 .Execute(
                     $"/p:RuntimeIdentifier={_runtimeRid}",
                     "/p:TargetFramework=netcoreapp2.0",
                     $"/p:ComposeDir={outputFolder}",
                     $"/p:ComposeWorkingDir={workingDir}",
                     "/p:DoNotDecorateComposeDir=true",
-                    "/p:PreserveComposeWorkingDir=true",
-                    "/p:CreateProfilingSymbols=true")
+                    "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
 
             var symbolFileExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ni.pdb" : ".map";
             var symbolsFolder = new DirectoryInfo(Path.Combine(outputFolder, "symbols"));
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // profiling symbols are not supported on OSX
+                symbolsFolder.Should().NotExist();
+                return;
+            }
 
             var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
             newtonsoftSymbolsFolder.Should().Exist();

@@ -10,21 +10,26 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
+using Xunit.Abstractions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAnUnpublishableProject : SdkTest
     {
+        public GivenThatWeWantToPublishAnUnpublishableProject(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_does_not_publish_to_the_publish_folder()
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("Unpublishable")
                 .WithSource()
-                .Restore();
+                .Restore(Log);
 
-            var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

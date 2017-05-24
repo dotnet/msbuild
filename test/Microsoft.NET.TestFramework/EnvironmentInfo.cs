@@ -12,7 +12,7 @@ namespace Microsoft.NET.TestFramework
     {
         public static string GetCompatibleRid(string targetFramework)
         {
-            string rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            string rid = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
 
             if (string.Equals(targetFramework, "netcoreapp1.0", StringComparison.OrdinalIgnoreCase))
             {
@@ -20,7 +20,7 @@ namespace Microsoft.NET.TestFramework
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     Version osVersion;
-                    if (Version.TryParse(RuntimeEnvironment.OperatingSystemVersion, out osVersion) &&
+                    if (Version.TryParse(DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion, out osVersion) &&
                         osVersion > new Version(10, 11))
                     {
                         rid = "osx.10.11-x64";

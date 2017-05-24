@@ -83,7 +83,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForUnsupportedTargetFramework" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
     <NETSdkError Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'" 
                  ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
-                 FormatArguments="$(TargetFramework)" />
+                 FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
   <!-- 
@@ -119,8 +119,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     targets.
    -->
   <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
-    <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
+    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
   </PropertyGroup>
 
 </Project>

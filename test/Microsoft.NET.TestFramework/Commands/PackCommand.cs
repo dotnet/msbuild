@@ -5,24 +5,15 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class PackCommand : TestCommand
+    public sealed class PackCommand : MSBuildCommand
     {
-        public PackCommand(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
-            : base(msbuild, projectPath, relativePathToProject)
+        public PackCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null, MSBuildTest msbuild = null)
+            : base(log, "Pack", projectPath, relativePathToProject, msbuild)
         {
-        }
-
-        public override CommandResult Execute(params string[] args)
-        {
-            var newArgs = args.ToList();
-            newArgs.Insert(0, FullPathProjectFile);
-
-            var command = MSBuild.CreateCommandForTarget("pack", newArgs.ToArray());
-
-            return command.Execute();
         }
 
         public string GetIntermediateNuspecPath(string packageId = null, string packageVersion = "1.0.0")

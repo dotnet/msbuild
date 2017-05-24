@@ -11,7 +11,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\Microsoft.NETCoreSdk.BundledVersions.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\Microsoft.NETCoreSdk.BundledVersions.props')" />
+  <PropertyGroup Condition="'$(NETCoreSdkBundledVersionsProps)' == ''">
+    <NETCoreSdkBundledVersionsProps>$(MSBuildThisFileDirectory)..\..\..\Microsoft.NETCoreSdk.BundledVersions.props</NETCoreSdkBundledVersionsProps>
+  </PropertyGroup>
+
+  <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>

@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         private static readonly string _packageRoot = "\\root\\packages".Replace('\\', Path.DirectorySeparatorChar);
 
         [Theory]
-        [MemberData("ItemCounts")]
+        [MemberData(nameof(ItemCounts))]
         public void ItRaisesLockFileToMSBuildItems(string projectName, int [] counts)
         {
             var task = GetExecutedTaskFromPrefix(projectName);

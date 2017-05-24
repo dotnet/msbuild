@@ -13,6 +13,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
+    <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
+    <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
@@ -43,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and $(OutputType) == 'Library'">true</AutoUnifyAssemblyReferences>
     <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and '$(_IsNETCoreOrNETStandard)' == 'true'">true</AutoUnifyAssemblyReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(HasRuntimeOutput)' == 'true'">
     <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == ''">true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 

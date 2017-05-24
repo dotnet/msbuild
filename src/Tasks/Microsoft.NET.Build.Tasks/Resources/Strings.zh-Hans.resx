@@ -237,9 +237,6 @@
   <data name="FolderAlreadyExists" xml:space="preserve">
     <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
   </data>
-  <data name="IncorrectFilterFormat" xml:space="preserve">
-    <value>The filter profile {0} provided is of not the correct format</value>
-  </data>
   <data name="ParsingFiles" xml:space="preserve">
     <value>Parsing the Files : '{0}'</value>
   </data>
@@ -248,5 +245,53 @@
   </data>
   <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
     <value>Specify a RuntimeIdentifier</value>
+  </data>
+  <data name="IncorrectTargetFormat" xml:space="preserve">
+    <value>The target manifest {0} provided is of not the correct format</value>
+  </data>
+  <data name="AppHostHasBeenModified" xml:space="preserve">
+    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+  </data>
+  <data name="FileNameIsTooLong" xml:space="preserve">
+    <value>Given file name '{0}' is longer than 1024 bytes</value>
+  </data>
+  <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
+    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+  </data>
+  <data name="ChoosingAssemblyVersion" xml:space="preserve">
+    <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+  </data>
+  <data name="ChoosingFileVersion" xml:space="preserve">
+    <value>Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+  </data>
+  <data name="ChoosingPlatformItem" xml:space="preserve">
+    <value>Choosing '{0}' because it is a platform item.</value>
+  </data>
+  <data name="ChoosingPreferredPackage" xml:space="preserve">
+    <value>Choosing '{0}' because it comes from a package that is preferred.</value>
+  </data>
+  <data name="ConflictCouldNotDetermineWinner" xml:space="preserve">
+    <value>Could not determine winner due to equal file and assembly versions.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
+    <value>Could not determine winner because '{0}' does not exist.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
+    <value>Could not determine a winner because '{0}' has no file version.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_NotAnAssembly" xml:space="preserve">
+    <value>Could not determine a winner because '{0}' is not an assembly.</value>
+  </data>
+  <data name="EncounteredConflict" xml:space="preserve">
+    <value>Encountered conflict between '{0}' and '{1}'.</value>
+  </data>
+  <data name="CouldNotLoadPlatformManifest" xml:space="preserve">
+    <value>Could not load PlatformManifest from '{0}' because it did not exist.</value>
+  </data>
+  <data name="ErrorParsingPlatformManifest" xml:space="preserve">
+    <value>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+  </data>
+  <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
+    <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
   </data>
 </root>

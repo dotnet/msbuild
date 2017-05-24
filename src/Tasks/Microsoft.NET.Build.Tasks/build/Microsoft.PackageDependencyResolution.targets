@@ -494,7 +494,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Add the copy local items -->
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
+      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" Exclude="@(ResourceCopyLocalItems)" />
+      <ReferenceCopyLocalPaths Include="@(ResourceCopyLocalItems)" Condition="'@(ResourceCopyLocalItems)' != ''">
+        <DestinationSubDirectory>$([System.IO.Directory]::GetParent(%(ResourceCopyLocalItems.FullPath)).get_Name())\</DestinationSubDirectory>
+      </ReferenceCopyLocalPaths>
     </ItemGroup>
 
   </Target>

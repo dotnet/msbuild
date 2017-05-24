@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             .GetMethod("ConvertFrom");
         
         [Theory]
-        [MemberData("CompilerOptionsData")]
+        [MemberData(nameof(CompilerOptionsData))]
         public void ItConvertsFromITaskItemsCorrectly(ITaskItem taskItem, CompilationOptions expectedOptions)
         {
             CompilationOptions resultOptions = (CompilationOptions)s_convertFromMethod.Invoke(null, new object[] {taskItem});

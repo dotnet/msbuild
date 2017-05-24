@@ -15,11 +15,16 @@ using FluentAssertions;
 using System.Xml.Linq;
 using System.Linq;
 using System;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithLibrary : SdkTest
     {
+        public GivenThatWeWantToBuildAnAppWithLibrary(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void It_builds_the_project_successfully()
         {
@@ -27,8 +32,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             VerifyAppBuilds(testAsset);
         }
@@ -40,8 +45,8 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
 
             for (int i = 0; i < 2; i++)
@@ -54,7 +59,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             buildCommand
@@ -86,12 +91,7 @@ namespace Microsoft.NET.Build.Tests
             appInfo.FileDescription.Should().Be("Test AssemblyTitle");
             appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
             appInfo.ProductName.Should().Be("Test Product");
-
-            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                appInfo.ProductVersion.Should().Be("1.2.3-beta");
-            }
+            appInfo.ProductVersion.Should().Be("1.2.3-beta");
 
             var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestLibrary.dll"));
             libInfo.CompanyName.Trim().Should().Be("TestLibrary");
@@ -99,33 +99,30 @@ namespace Microsoft.NET.Build.Tests
             libInfo.FileDescription.Should().Be("TestLibrary");
             libInfo.LegalCopyright.Trim().Should().BeEmpty();
             libInfo.ProductName.Should().Be("TestLibrary");
-
-            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
-            }
+            libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
         }
 
-        [Fact]
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink")
                 .WithSource();
 
-            testAsset.Restore("TestApp");
-            testAsset.Restore("TestLibrary");
+            testAsset.Restore(Log, "TestApp");
+            testAsset.Restore(Log, "TestLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            var outputDir = buildCommand.GetOutputDirectory("netcoreapp2.0");
 
             var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
                 .CaptureStdOut()
@@ -168,11 +165,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .Restore("TestApp");
+                .Restore(Log, "TestApp");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
             buildCommand
                 .Execute()
@@ -191,7 +188,7 @@ namespace Microsoft.NET.Build.Tests
                 "TestLibrary.pdb"
             });
 
-            var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
+            var cleanCommand = new MSBuildCommand(Log, "Clean", buildCommand.FullPathProjectFile);
 
             cleanCommand
                 .Execute()
@@ -199,7 +196,6 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
-
         }
 
         [Fact]
@@ -208,9 +204,9 @@ namespace Microsoft.NET.Build.Tests
             var asset = _testAssetsManager
                 .CopyTestAsset("AppxReferencingCrossTargeting")
                 .WithSource()
-                .Restore("Appx");
+                .Restore(Log, "Appx");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(asset.TestRoot, "Appx"));
+            var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot, "Appx"));
 
             buildCommand
                 .Execute()
