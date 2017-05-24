@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: "{0}" パラメーターは "{1}" タスクではサポートされません。パラメーターがタスクに存在することと、取得可能なパブリック インスタンス プロパティであることを確認してください。</target>
+        <target state="translated">MSB4131: "{0}" パラメーターは "{1}" タスクではサポートされていません。タスク上にパラメーターが存在し、取得可能なパブリック インスタンス プロパティであることを確認してください。</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: "{0}" パラメーターは "{1}" タスクではサポートされません。パラメーターがタスクに存在することと、取得可能なパブリック インスタンス プロパティであることを確認してください。</target>

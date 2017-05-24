@@ -465,7 +465,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
         <source>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</source>
-        <target state="translated">MSB4226: il progetto importato "{0}" non è stato trovato. È stato anche effettuato un tentativo di trovare "{1}" nei percorsi di ricerca di fallback per {2} - {3} . Questi percorsi di ricerca sono definiti in "{4}". Verificare che il percorso nella dichiarazione &lt;Import&gt; sia corretto e che il file sia presente sul disco in uno dei percorsi di ricerca.</target>
+        <target state="translated">MSB4226: il progetto importato "{0}" non è stato trovato. È stato anche effettuato un tentativo di trovare "{1}" nei percorsi di ricerca di fallback per {2} - {3}. Questi percorsi di ricerca sono definiti in "{4}". Verificare che il percorso nella dichiarazione &lt;Import&gt; sia corretto e che il file sia presente sul disco in uno dei percorsi di ricerca.</target>
         <note>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFound">
@@ -1979,47 +1979,47 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="EvaluationStarted">
         <source>Evaluation started ("{0}")</source>
-        <target state="new">Evaluation started ("{0}")</target>
-        <note></note>
+        <target state="translated">Valutazione avviata ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="EvaluationFinished">
         <source>Evaluation finished ("{0}")</source>
-        <target state="new">Evaluation finished ("{0}")</target>
-        <note></note>
+        <target state="translated">Valutazione terminata ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <target state="translated">MSB4234: con il logger binario è previsto un singolo parametro (nome del file di output). Sono stati passati {0} parametri: "{1}".</target>
         <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <target state="translated">MSB4232: gli elementi esterni agli elementi Target devono contenere una delle operazioni seguenti: Include, Update o Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
-        <note></note>
+        <target state="translated">Riassegnazione della proprietà: $({0})="{1}" (valore precedente: "{2}") in {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">
         <source>MSB4236: The SDK '{0}' specified could not be found.</source>
-        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <target state="translated">MSB4236: l'SDK '{0}' specificato non è stato trovato.</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <target state="translated">MSB4237: è stato trovato un resolver di SDK che però non è stato caricato. Errore: {0}.</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
         <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
-        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <target state="translated">MSB4238: "{0}" non è un nome di SDK valido.</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <target state="translated">MSB4235: la versione del formato del file di log è la {0}, ma questa versione di MSBuild supporta solo le versioni fino alla {1}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>

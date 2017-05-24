@@ -3001,7 +3001,7 @@
       </trans-unit>
       <trans-unit id="TaskFactoryNotSupportedFailure">
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
-        <target state="new">MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</target>
+        <target state="translated">MSB4801: Fabryka zadań „{0}” nie jest obsługiwana przez wersję programu MSBuild dla platformy .NET Core.</target>
         <note>{StrBegin="MSB4801: "}</note>
       </trans-unit>
     </body>

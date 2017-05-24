@@ -1979,47 +1979,47 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="EvaluationStarted">
         <source>Evaluation started ("{0}")</source>
-        <target state="new">Evaluation started ("{0}")</target>
-        <note></note>
+        <target state="translated">Szacowanie zostało rozpoczęte („{0}”)</target>
+        <note />
       </trans-unit>
       <trans-unit id="EvaluationFinished">
         <source>Evaluation finished ("{0}")</source>
-        <target state="new">Evaluation finished ("{0}")</target>
-        <note></note>
+        <target state="translated">Szacowanie zostało zakończone („{0}”)</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <target state="translated">MSB4234: Rejestrator danych binarnych oczekuje pojedynczego parametru (nazwy pliku wyjściowego). Liczba przekazanych parametrów to {0}: „{1}”.</target>
         <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <target state="translated">MSB4232: Elementy spoza elementów Target muszą mieć co najmniej jedną z następujących operacji: Include, Update lub Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
-        <note></note>
+        <target state="translated">Ponowny przydział właściwości: $({0})=„{1}” (poprzednia wartość: „{2}”) w {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">
         <source>MSB4236: The SDK '{0}' specified could not be found.</source>
-        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <target state="translated">MSB4236: Nie można znaleźć określonego zestawu SDK „{0}”.</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <target state="translated">MSB4237: Znaleziono program rozpoznawania zestawu SDK, ale nie można go załadować. Błąd: {0}.</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
         <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
-        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <target state="translated">MSB4238: Nazwa „{0}” nie jest prawidłową nazwą zestawu SDK.</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <target state="translated">MSB4235: Wersja formatu pliku dziennika to {0}, podczas gdy ta wersja programu MSBuild obsługuje wyłącznie wersje do {1}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>

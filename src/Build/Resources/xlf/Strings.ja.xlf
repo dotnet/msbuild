@@ -1979,47 +1979,47 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="EvaluationStarted">
         <source>Evaluation started ("{0}")</source>
-        <target state="new">Evaluation started ("{0}")</target>
-        <note></note>
+        <target state="translated">評価を開始しました ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="EvaluationFinished">
         <source>Evaluation finished ("{0}")</source>
-        <target state="new">Evaluation finished ("{0}")</target>
-        <note></note>
+        <target state="translated">評価を完了しました ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <target state="translated">MSB4234: バイナリ ロガーには単一のパラメーター (出力ファイル名) が必要です。{0} 個のパラメーターが渡されました: "{1}"。</target>
         <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <target state="translated">MSB4232: Target 要素以外の項目には、次の操作のいずれか 1 つが必要です: Include、Update、Remove。</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
-        <note></note>
+        <target state="translated">プロパティの再割り当て: $({0})="{1}" (以前の値: "{2}") {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">
         <source>MSB4236: The SDK '{0}' specified could not be found.</source>
-        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <target state="translated">MSB4236: 指定された SDK '{0}' は見つかりませんでした。</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <target state="translated">MSB4237: SDK リゾルバーが見つかりましたが、読み込めませんでした。エラー: {0}.</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
         <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
-        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <target state="translated">MSB4238: "{0}" は有効な SDK 名ではありません。</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <target state="translated">MSB4235: ログ ファイル形式のバージョンは {0} ですが、このバージョンの MSBuild がサポートしているのは {1} のバージョンまでのみです。</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>

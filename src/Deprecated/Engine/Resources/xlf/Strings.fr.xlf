@@ -799,7 +799,7 @@
       </trans-unit>
       <trans-unit id="IllFormedEqualsInCondition">
         <source>MSB4105: Found an unexpected character '{2}' at position {1} in condition "{0}". Did you intend to use "=="?</source>
-        <target state="translated">MSB4105: Un caractère inattendu '{2}' a été trouvé à la position {1} dans la condition "{0}". Vouliez-vous l'utiliser "==" ?</target>
+        <target state="translated">MSB4105: Un caractère inattendu '{2}' a été trouvé à la position {1} dans la condition "{0}". Vouliez-vous utiliser "==" ?</target>
         <note>{StrBegin="MSB4105: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4105: Un caractère inattendu '{2}' a été trouvé à la position {1} dans la condition "{0}". Vouliez-vous l'utiliser "==" ?</target>
@@ -817,7 +817,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '@' ? Pour utiliser un '@' littéral, utilisez '%40' à la place.</target>
+        <target state="translated">MSB4107: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '@' ? Pour utiliser un '@' littéral, utilisez plutôt '%40'.</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4107: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '@' ? Pour utiliser un '@' littéral, utilisez '%40' à la place.</target>
@@ -826,7 +826,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListQuoteInCondition">
         <source>MSB4108: Expected an item list at position {1} in condition "{0}". Did you forget to close a quote inside the item list expression?</source>
-        <target state="translated">MSB4108: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié de fermer un guillemet à l'intérieur de l'expression de liste d'éléments ?</target>
+        <target state="translated">MSB4108: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié un guillemet fermant à l'intérieur de l'expression de liste d'éléments ?</target>
         <note>{StrBegin="MSB4108: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4108: Liste d'éléments attendue à la position {1} dans la condition "{0}". Avez-vous oublié de fermer un guillemet à l'intérieur de l'expression de liste d'éléments ?</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: Propriété attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '$'? Pour utiliser un '$' littéral, utilisez plutôt '%24'.</target>
+        <target state="translated">MSB4110: Propriété attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '$' ? Pour utiliser un '$' littéral, utilisez plutôt '%24'.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: Propriété attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '$'? Pour utiliser un '$' littéral, utilisez plutôt '%24'.</target>
@@ -1115,7 +1115,7 @@
       </trans-unit>
       <trans-unit id="InvalidTaskOutputSpecification">
         <source>MSB4029: The "{0}" task has an invalid output specification. The "TaskParameter" attribute is required, and either the "ItemName" or "PropertyName" attribute must be specified (but not both).</source>
-        <target state="translated">MSB4029: La sortie spécifiée de la tâche "{0}" n'est pas valide. L'attribut "TaskParameter" est requis et l'attribut "ItemName" ou "PropertyName" doit être spécifié (mais pas les deux).</target>
+        <target state="translated">MSB4029: La sortie spécifiée de la tâche "{0}" n'est pas valide. L'attribut "TaskParameter" est obligatoire et l'attribut "ItemName" ou "PropertyName" doit être spécifié (mais pas les deux).</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4029: La sortie spécifiée de la tâche "{0}" n'est pas valide. L'attribut "TaskParameter" est requis et l'attribut "ItemName" ou "PropertyName" doit être spécifié (mais pas les deux).</target>
@@ -1198,7 +1198,7 @@
       </trans-unit>
       <trans-unit id="InternalLoggerExceptionOnlyThrownByEngine">
         <source>An InternalLoggerException can only be thrown by the MSBuild engine. The public constructors of this class cannot be used to create an instance of the exception.</source>
-        <target state="translated">Une exception InternalLoggerException ne peut être levée que par le moteur MSBuild. Impossible d'utiliser les constructeurs publics de cette classe pour créer une instance de l'exception.</target>
+        <target state="translated">Une exception InternalLoggerException peut être levée uniquement par le moteur MSBuild. Impossible d'utiliser les constructeurs publics de cette classe pour créer une instance de l'exception.</target>
         <note>UE: This message is shown when a user tries to instantiate a special exception called InternalLoggerException through the OM --
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
@@ -1914,7 +1914,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Les projets web ne prennent pas en charge la cible "Clean". Les projets restants seront utilisés...</target>
+        <target state="translated">Les projets web ne prennent pas en charge la cible "Clean".  Les projets restants sont utilisés...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1924,7 +1924,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Les projets web ne prennent pas en charge la cible "Publish". Les projets restants seront utilisés...</target>
+        <target state="translated">Les projets web ne prennent pas en charge la cible "Publish".  Les projets restants sont utilisés...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1994,7 +1994,7 @@
       </trans-unit>
       <trans-unit id="TargetAlreadyCompleteSuccess">
         <source>Target "{0}" skipped. Previously built successfully.</source>
-        <target state="translated">Cible "{0}" ignorée. Avait été générée correctement.</target>
+        <target state="translated">Cible "{0}" ignorée. Elle a été générée.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Cible "{0}" ignorée. Avait été générée correctement.</target>
@@ -2003,7 +2003,7 @@
       </trans-unit>
       <trans-unit id="TargetConditionHasInvalidMetadataReference">
         <source>MSB4116: The condition "{1}" on the "{0}" target has a reference to item metadata. References to item metadata are not allowed in target conditions unless they are part of an item transform.</source>
-        <target state="translated">MSB4116: La condition "{1}" sur la cible "{0}" a une référence à des métadonnées d'élément. Les références à des métadonnées d'élément ne sont pas autorisées dans les conditions cibles, sauf si elles font partie d'une transformation d'élément.</target>
+        <target state="translated">MSB4116: La condition "{1}" sur la cible "{0}" contient une référence à des métadonnées d'élément. Les références à des métadonnées d'élément ne sont pas autorisées dans les conditions cibles, sauf si elles font partie d'une transformation d'élément.</target>
         <note>{StrBegin="MSB4116: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4116: La condition "{1}" sur la cible "{0}" a une référence à des métadonnées d'élément. Les références à des métadonnées d'élément ne sont pas autorisées dans les conditions cibles, sauf si elles font partie d'une transformation d'élément.</target>
@@ -2321,7 +2321,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe sur la tâche et qu'il représente une propriété d'instance publique définissable.</target>
+        <target state="translated">MSB4064: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe pour la tâche et qu'il représente une propriété d'instance publique définissable.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4064: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe sur la tâche et qu'il représente une propriété d'instance publique définissable.</target>
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe sur la tâche et qu'il représente une propriété d'instance publique pouvant être obtenue.</target>
+        <target state="translated">MSB4131: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe pour la tâche et qu'il représente une propriété d'instance publique pouvant être obtenue.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe sur la tâche et qu'il représente une propriété d'instance publique pouvant être obtenue.</target>

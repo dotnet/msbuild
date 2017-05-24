@@ -817,7 +817,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了“@”后面的左括号? 若要使用“@”，请改用“%40”。</target>
+        <target state="translated">MSB4107: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了“@”后面的左括号?若要使用“@”，请改用“%40”。</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4107: 条件“{0}”中的位置 {1} 处应为项列表。是否忘记了“@”后面的左括号? 若要使用“@”，请改用“%40”。</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了“$”后面的左括号? 若要使用“$”，请改用“%24”。</target>
+        <target state="translated">MSB4110: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了“$”后面的左括号?若要使用“$”，请改用“%24”。</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: 条件“{0}”中的位置 {1} 处应为属性。是否忘记了“$”后面的左括号? 若要使用“$”，请改用“%24”。</target>
@@ -1914,7 +1914,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Web 项目不支持“Clean”目标。 继续余下的项目...</target>
+        <target state="translated">Web 项目不支持“Clean”目标。继续余下的项目...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1924,7 +1924,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Web 项目不支持“Publish”目标。 继续余下的项目...</target>
+        <target state="translated">Web 项目不支持“Publish”目标。继续余下的项目...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可获取的公共实例属性。</target>
+        <target state="translated">MSB4131: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可获得的公共实例属性。</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: “{1}”任务不支持“{0}”参数。请确认该参数存在于此任务中，并且是可获取的公共实例属性。</target>

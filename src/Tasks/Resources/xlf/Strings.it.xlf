@@ -294,7 +294,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: attualmente sono in uso tutte le lettere di unità comprese tra A: e Z:. Poiché la cartella di lavoro "{0}" è un percorso UNC, per l'attività "Exec" è necessaria una lettera di unità disponibile a cui mappare il percorso UNC. Eseguire la disconnessione da una o più risorse condivise per rendere disponibili lettere di unità oppure specificare una cartella di lavoro locale prima di provare a eseguire nuovamente questo comando.</target>
+        <target state="translated">MSB3071: attualmente sono in uso tutte le lettere di unità comprese tra A: e Z:. Poiché la directory di lavoro "{0}" è un percorso UNC, per l'attività "Exec" è necessaria una lettera di unità disponibile a cui mappare il percorso UNC. Eseguire la disconnessione da una o più risorse condivise per rendere disponibili lettere di unità oppure specificare una directory di lavoro locale prima di provare a eseguire nuovamente questo comando.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandFailed">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="Exec.InvalidWorkingDirectory">
         <source>The working directory "{0}" does not exist.</source>
-        <target state="translated">La cartella di lavoro "{0}" non esiste.</target>
+        <target state="translated">La directory di lavoro "{0}" non esiste.</target>
         <note>No error code because an error will be prefixed.</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
@@ -3001,7 +3001,7 @@
       </trans-unit>
       <trans-unit id="TaskFactoryNotSupportedFailure">
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
-        <target state="new">MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</target>
+        <target state="translated">MSB4801: la factory delle attività "{0}" non è supportata nella versione .NET Core di MSBuild.</target>
         <note>{StrBegin="MSB4801: "}</note>
       </trans-unit>
     </body>

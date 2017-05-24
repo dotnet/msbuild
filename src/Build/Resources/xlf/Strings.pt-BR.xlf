@@ -1939,7 +1939,7 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="translated">Um item sem pai em um Destino deve ter um valor para Incluir ou Atualizar ou Remover.</target>
+        <target state="translated">Um item sem pai em um Target deve ter um valor para Include, Update ou Remove.</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
@@ -1979,47 +1979,47 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="EvaluationStarted">
         <source>Evaluation started ("{0}")</source>
-        <target state="new">Evaluation started ("{0}")</target>
-        <note></note>
+        <target state="translated">Avaliação iniciada ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="EvaluationFinished">
         <source>Evaluation finished ("{0}")</source>
-        <target state="new">Evaluation finished ("{0}")</target>
-        <note></note>
+        <target state="translated">Avaliação encerrada ("{0}")</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <target state="translated">MSB4234: o agente binário espera um parâmetro único (o nome do arquivo de saída). Os parâmetros {0} foram transmitidos: "{1}".</target>
         <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <target state="translated">MSB4232: os itens que estão fora dos elementos Target devem ter uma das seguintes operações: Include, Update ou Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
-        <note></note>
+        <target state="translated">Reatribuição de propriedade: $({0})="{1}" (valor anterior: "{2}") em {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">
         <source>MSB4236: The SDK '{0}' specified could not be found.</source>
-        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <target state="translated">MSB4236: o SDK '{0}' especificado não pôde ser encontrado.</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <target state="translated">MSB4237: um resolvedor de SDK foi encontrado, mas não pôde ser carregado. Erro: {0}.</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
         <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
-        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <target state="translated">MSB4238: o nome "{0}" não é um nome de SDK válido.</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <target state="translated">MSB4235: a versão de formato do arquivo de log é {0}, enquanto esta versão do MSBuild dá suporte apenas para versões até {1}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>

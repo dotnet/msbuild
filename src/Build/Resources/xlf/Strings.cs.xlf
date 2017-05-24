@@ -1471,7 +1471,7 @@
       </trans-unit>
       <trans-unit id="InvalidHostObjectOnOutOfProcProject">
         <source>MSB4206: A non-null host object cannot be specified for a project which has an affinity set to out-of-process.</source>
-        <target state="translated">MSB4206: V projektu se spřažením nastaveným na hodnotu vněprocesorové nelze zadat objekt hostitele s hodnotou null.</target>
+        <target state="translated">MSB4206: V projektu se spřažením nastaveným na hodnotu vněprocesové nelze zadat objekt hostitele s hodnotou null.</target>
         <note>{StrBegin="MSB4206: "}</note>
       </trans-unit>
       <trans-unit id="InvalidAffinityForProjectWithHostObject">
@@ -1979,47 +1979,47 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="EvaluationStarted">
         <source>Evaluation started ("{0}")</source>
-        <target state="new">Evaluation started ("{0}")</target>
-        <note></note>
+        <target state="translated">Hodnocení spuštěno ({0})</target>
+        <note />
       </trans-unit>
       <trans-unit id="EvaluationFinished">
         <source>Evaluation finished ("{0}")</source>
-        <target state="new">Evaluation finished ("{0}")</target>
-        <note></note>
+        <target state="translated">Hodnocení dokončeno ({0})</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="new">MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</target>
+        <target state="translated">MSB4234: Binární protokolovací nástroj očekává jediný parametr (název výstupního souboru). Předané parametry ({0}): {1}</target>
         <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
-        <target state="new">MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</target>
+        <target state="translated">MSB4232: Položky, které jsou mimo elementy Target, musí obsahovat jednu z těchto operací: Include, Update nebo Remove.</target>
         <note>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</note>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="new">Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</target>
-        <note></note>
+        <target state="translated">Opětovné přiřazení vlastnosti: $({0})={1} (předchozí hodnota: {2}) v {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">
         <source>MSB4236: The SDK '{0}' specified could not be found.</source>
-        <target state="new">MSB4236: The SDK '{0}' specified could not be found.</target>
+        <target state="translated">MSB4236: Zadanou sadu SDK {0} se nepovedlo najít.</target>
         <note>{StrBegin="MSB4236: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadSdkResolver">
         <source>MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</source>
-        <target state="new">MSB4237: An SDK resolver was found but could not be loaded. Error: {0}.</target>
+        <target state="translated">MSB4237: Překladač SDK byl nalezen, ale nejde zavést. Chyba: {0}</target>
         <note>{StrBegin="MSB4237: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkElementName">
         <source>MSB4238: The name "{0}" is not a valid SDK name.</source>
-        <target state="new">MSB4238: The name "{0}" is not a valid SDK name.</target>
+        <target state="translated">MSB4238: Název {0} není platný název sady SDK.</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="new">MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</target>
+        <target state="translated">MSB4235: Verze formátu souboru protokolu je {0}, ale tato verze nástroje MSBuild podporuje jenom verze do {1}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
     </body>
