@@ -111,7 +111,7 @@
     </ItemGroup>
   </Target>
 
-  <!-- copied from Microsoft.Common.CurrentVersion.targets and modified to force anycpy -->
+  <!-- copied from Microsoft.Common.CurrentVersion.targets and modified to force anycpu -->
   <!-- remove when https://github.com/Microsoft/msbuild/issues/1588 is done-->
   <Target Name="GenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
