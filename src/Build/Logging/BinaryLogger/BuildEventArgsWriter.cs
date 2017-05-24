@@ -73,6 +73,14 @@ namespace Microsoft.Build.Logging
             {
                 Write((BuildFinishedEventArgs)e);
             }
+            else if (e is ProjectEvaluationStartedEventArgs)
+            {
+                Write((ProjectEvaluationStartedEventArgs)e);
+            }
+            else if (e is ProjectEvaluationFinishedEventArgs)
+            {
+                Write((ProjectEvaluationFinishedEventArgs)e);
+            }
             else
             {
                 // convert all unrecognized objects to message
@@ -98,6 +106,20 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.BuildFinished);
             WriteBuildEventArgsFields(e);
             Write(e.Succeeded);
+        }
+
+        private void Write(ProjectEvaluationStartedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ProjectEvaluationStarted);
+            WriteBuildEventArgsFields(e);
+            Write(e.ProjectFile);
+        }
+
+        private void Write(ProjectEvaluationFinishedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ProjectEvaluationFinished);
+            WriteBuildEventArgsFields(e);
+            Write(e.ProjectFile);
         }
 
         private void Write(ProjectStartedEventArgs e)

@@ -83,6 +83,12 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.TaskCommandLine:
                     result = ReadTaskCommandLineEventArgs();
                     break;
+                case BinaryLogRecordKind.ProjectEvaluationStarted:
+                    result = ReadProjectEvaluationStartedEventArgs();
+                    break;
+                case BinaryLogRecordKind.ProjectEvaluationFinished:
+                    result = ReadProjectEvaluationFinishedEventArgs();
+                    break;
                 default:
                     break;
             }
@@ -113,6 +119,32 @@ namespace Microsoft.Build.Logging
                 fields.HelpKeyword,
                 succeeded,
                 fields.Timestamp);
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadProjectEvaluationStartedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var projectFile = ReadString();
+
+            var e = new ProjectEvaluationStartedEventArgs(fields.Message)
+            {
+                ProjectFile = projectFile
+            };
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadProjectEvaluationFinishedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var projectFile = ReadString();
+
+            var e = new ProjectEvaluationFinishedEventArgs(fields.Message)
+            {
+                ProjectFile = projectFile
+            };
             SetCommonFields(e, fields);
             return e;
         }
