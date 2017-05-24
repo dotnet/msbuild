@@ -152,6 +152,12 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.IO.StringWriter.#ctor(System.Text.StringBuilder)", Justification = "Reads fine to me")]
         private string GenerateCode(out string extension)
         {
+            if (Language.ToLowerInvariant() == "f#")
+            {
+                //no codedoom for F#, fallback to coreclr version
+                return GenerateCodeCoreClr(out extension);
+            }
+
             extension = null;
             bool haveGeneratedContent = false;
 
