@@ -18,8 +18,6 @@ namespace Microsoft.NET.Build.Tasks
     /// </remarks>
     public sealed class FindItemsFromPackages : TaskBase
     {
-        private readonly List<ITaskItem> _itemsFromPackages = new List<ITaskItem>();
-
         [Required]
         public ITaskItem[] Items { get; set; }
 
@@ -27,24 +25,24 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] Packages { get; set; }
 
         [Output]
-        public ITaskItem[] ItemsFromPackages
-        {
-            get { return _itemsFromPackages.ToArray(); }
-        }
+        public ITaskItem[] ItemsFromPackages { get; private set; }
 
         protected override void ExecuteCore()
         {
-            HashSet<PackageIdentity> packageIdentities = new HashSet<PackageIdentity>(
+            var packageIdentities = new HashSet<PackageIdentity>(
                 Packages.Select(p => ItemUtilities.GetPackageIdentity(p)));
-            
+
+            var itemsFromPackages = new List<ITaskItem>();
             foreach (ITaskItem item in Items)
             {
                 PackageIdentity identity = ItemUtilities.GetPackageIdentity(item);
                 if (identity != null && packageIdentities.Contains(identity))
                 {
-                    _itemsFromPackages.Add(item);
+                    itemsFromPackages.Add(item);
                 }
             }
+
+            ItemsFromPackages = itemsFromPackages.ToArray();
         }
     }
 }

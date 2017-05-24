@@ -130,9 +130,21 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_excludes_runtime_store_packages_from_the_refs_folder()
         {
+            var targetFramework = "netcoreapp2.0";
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContextRefs")
                 .WithSource()
+                .WithProjectChanges((path, project) =>
+                {
+                    if (Path.GetFileName(path).Equals("TestApp.csproj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").Single();
+                        targetFrameworkElement.SetValue(targetFramework);
+                    }
+                })
                 .Restore(Log, "TestApp");
 
             var manifestFile = Path.Combine(testAsset.TestRoot, "manifest.xml");
@@ -141,14 +153,12 @@ namespace Microsoft.NET.Publish.Tests
             {
                 "<StoreArtifacts>",
                 @"  <Package Id=""Newtonsoft.Json"" Version=""9.0.1"" />",
-                @"  <Package Id=""System.Data.Common"" Version=""4.3.0"" />",
                 @"  <Package Id=""System.Data.SqlClient"" Version=""4.3.0"" />",
                 "</StoreArtifacts>",
             });
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            var targetFramework = "netcoreapp1.1";
             var publishCommand = new PublishCommand(Log, appProjectDirectory);
             publishCommand
                 .Execute($"/p:TargetFramework={targetFramework}", $"/p:TargetManifestFiles={manifestFile}")
@@ -163,15 +173,13 @@ namespace Microsoft.NET.Publish.Tests
 
             // excluded through TargetManifestFiles
             publishDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
-            publishDirectory.Should().NotHaveFile("System.Data.Common.dll");
             publishDirectory.Should().NotHaveFile("System.Data.SqlClient.dll");
 
             var refsDirectory = new DirectoryInfo(Path.Combine(publishDirectory.FullName, "refs"));
             // Should have compilation time assemblies
             refsDirectory.Should().HaveFile("System.IO.dll");
-            // System.Data.Common|SqlClient have separate compile and runtime assemblies, so the compile assembly
+            // System.Data.SqlClient has separate compile and runtime assemblies, so the compile assembly
             // should be copied to refs even though the runtime assembly is listed in TargetManifestFiles
-            refsDirectory.Should().HaveFile("System.Data.Common.dll");
             refsDirectory.Should().HaveFile("System.Data.SqlClient.dll");
 
             // Libraries in which lib==ref should be deduped

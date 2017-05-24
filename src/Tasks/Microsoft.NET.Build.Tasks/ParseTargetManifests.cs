@@ -17,15 +17,10 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ParseTargetManifests : TaskBase
     {
-        private readonly List<ITaskItem> _runtimeStorePackages = new List<ITaskItem>();
-
         public string TargetManifestFiles { get; set; }
 
         [Output]
-        public ITaskItem[] RuntimeStorePackages
-        {
-            get { return _runtimeStorePackages.ToArray(); }
-        }
+        public ITaskItem[] RuntimeStorePackages { get; private set; }
 
         protected override void ExecuteCore()
         {
@@ -55,6 +50,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
+                var resultPackages = new List<ITaskItem>();
                 foreach (var storeEntry in runtimeStorePackages)
                 {
                     string packageName = storeEntry.Key.Id;
@@ -65,8 +61,10 @@ namespace Microsoft.NET.Build.Tasks
                     item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
                     item.SetMetadata(MetadataKeys.RuntimeStoreManifestNames, storeEntry.Value.ToString());
 
-                    _runtimeStorePackages.Add(item);
+                    resultPackages.Add(item);
                 }
+
+                RuntimeStorePackages = resultPackages.ToArray();
             }
         }
     }
