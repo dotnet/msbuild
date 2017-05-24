@@ -4487,66 +4487,6 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
-    <!-- Following items are declared here to get rid of schema validation warnings,         -->
-    <!-- but are not intended for overriding, so they do not have documentation annotations. -->
-
-    <xs:element name="_AppxBundleContent" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleMainPackageMapGeneratedFiles" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleMainPackageMapInputs" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleResourceFileMaps" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleResourcePack" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleSplitResourcesGeneratedFiles" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxBundleSplitResourcesPriPathItem" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxPriConfigXmlDefaultSnippetItem" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxPriConfigXmlPackagingSnippetItem" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_AppxStoreContainer" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_CreateAppStoreBundleContainerInputs" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_CreateBundleInputs" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_GenerateAppxPackageRecipeInput" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_GenerateCurrentProjectAppxManifestInput" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_GenerateProjectPriFileCoreInput" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_LayoutFile" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_LibrariesUnfiltered" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_MainPackageToBundle" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_OtherPlatformToBundle" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PackageLayoutFileSource" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PackageLayoutFileTarget" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PlatformSpecificBundleArtifact" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PowerShellScriptsDestination" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PowerShellScriptsSource" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PriFile" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PriFilesFromPayloadRaw" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_PriFilesToExpand" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_RecursiveProjectArchitecture" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_ResourcePackToBundle" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_SymbolPackageToBundle" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_TestLayoutSourceFiles" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_TestLayoutTargetFiles" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_UnfilteredAppxPackagePayload" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_UnfilteredRecursiveResolvedSDKReference" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_WinmdFilesFromOtherGroups" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_WinmdFilesFromReferences" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_WinmdFilesFromSDKs" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_WinmdFilesFromWinmdArtifacts" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="_WinmdWithImplementation" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="AppxBundlePlatformWithAnyCPU" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="AppxManifestForBundle" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="CustomAppxManifest" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FileReads" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FileWrites" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FinalAppxManifest" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FinalAppxPackageItem" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FinalAppxSymbolPackageItem" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="FrameworkSdkReference" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="NonFrameworkSdkReference" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="PackagingDirectoryWrites" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="PackagingFileWrites" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="PackagingOutputs" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="PDBPayload" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="ProjectArchitecture" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="SourceAppxManifest" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-    <xs:element name="UpToDateCheckOutput" type="msb:SimpleItemType" substitutionGroup="msb:Item" />
-
     <xs:element name="AppxPackagePayload" substitutionGroup="msb:Item">
         <xs:complexType>
             <xs:complexContent>
