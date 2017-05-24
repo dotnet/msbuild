@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
@@ -52,7 +54,7 @@ namespace Microsoft.DotNet.Cli
         {
             var httpClient = new HttpClient();
 
-            string result;
+            Stream result;
 
             try
             {
@@ -60,14 +62,18 @@ namespace Microsoft.DotNet.Cli
                 var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/query?q={match}&skip=0&take=100&prerelease=true", cancellation.Token)
                                          .Result;
 
-                result = response.Content.ReadAsStringAsync().Result;
+                result = response.Content.ReadAsStreamAsync().Result;
             }
             catch (Exception)
             {
                 yield break;
             }
 
-            var json = JObject.Parse(result);
+            JObject json;
+            using (var reader = new JsonTextReader(new StreamReader(result)))
+            {
+                json = JObject.Load(reader);
+            }
 
             foreach (var id in json["data"])
             {

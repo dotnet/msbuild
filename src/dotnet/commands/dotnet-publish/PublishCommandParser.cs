@@ -15,14 +15,14 @@ namespace Microsoft.DotNet.Cli
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments(),
                 CommonOptions.HelpOption(),
-                CommonOptions.FrameworkOption(),
-                CommonOptions.RuntimeOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAsSingle(o => $"/p:PublishDir={o.Arguments.Single()}")),
+                CommonOptions.FrameworkOption(),
+                CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(

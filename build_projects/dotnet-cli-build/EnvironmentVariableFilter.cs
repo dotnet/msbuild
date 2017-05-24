@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private IEnumerable<string> _environmentVariablesToRemove = new string []
         {
-            "CscToolExe"
+            "CscToolExe", "VbcToolExe"
         };
 
         private IEnumerable<string> _environmentVariablesToKeep = new string []

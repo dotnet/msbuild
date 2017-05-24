@@ -6,11 +6,11 @@
 
       <InstallerExtension Condition=" '$(OSName)' == 'win' ">.msi</InstallerExtension>
       <InstallerExtension Condition=" '$(OSName)' == 'osx' ">.pkg</InstallerExtension>
-      <InstallerExtension Condition=" '$(OSName)' == 'ubuntu' ">.deb</InstallerExtension>
+      <InstallerExtension Condition=" '$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">.deb</InstallerExtension>
 
       <BundleExtension Condition=" '$(OSName)' == 'win' ">.exe</BundleExtension>
       <BundleExtension Condition=" '$(OSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(OSName)' == 'ubuntu' ">$(InstallerExtension)</BundleExtension>
+      <BundleExtension Condition=" '$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">$(InstallerExtension)</BundleExtension>
 
       <DynamicLibPrefix>lib</DynamicLibPrefix>
       <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>

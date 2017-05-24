@@ -89,5 +89,30 @@ namespace Microsoft.DotNet.Restore.Tests
             Directory.Exists(fullPath).Should().BeTrue();
             Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count().Should().BeGreaterThan(0);
         }
+
+        [Fact]
+        public void ItRestoresWithTheSpecifiedVerbosity()
+        {
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
+
+            string dir = "pkgs";
+            string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
+
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
+
+            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\" --verbosity quiet";
+            new RestoreCommand()
+                 .WithWorkingDirectory(rootPath)
+                 .ExecuteWithCapturedOutput(args)
+                 .Should()
+                 .Pass()
+                 .And.NotHaveStdErr()
+                 .And.NotHaveStdOut();
+        }
     }
 }

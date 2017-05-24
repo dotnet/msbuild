@@ -21,7 +21,23 @@ Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information
+  -h, --help   Show help information.
+";
+
+        private const string SlnCommandHelpText = @".NET modify solution file command
+
+Usage: dotnet sln [options] <SLN_FILE> [command]
+
+Arguments:
+  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+
+Options:
+  -h, --help   Show help information.
+
+Commands:
+  add <args>      .NET Add project(s) to a solution file Command
+  list            .NET List project(s) in a solution file Command
+  remove <args>   .NET Remove project(s) from a solution file Command
 ";
 
         [Theory]
@@ -44,6 +60,7 @@ Options:
                 .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(SlnCommandHelpText);
         }
 
         [Fact]
@@ -84,7 +101,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln InvalidSolution.sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Expected file header not found.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -103,7 +120,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Invalid format in line 1: File header is missing");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Expected file header not found.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 

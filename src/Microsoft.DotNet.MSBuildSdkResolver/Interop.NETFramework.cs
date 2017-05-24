@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     internal static partial class Interop
     {
+        internal static readonly bool RunningOnWindows = true;
+
         static Interop()
         {
             PreloadLibrary("hostfxr.dll");

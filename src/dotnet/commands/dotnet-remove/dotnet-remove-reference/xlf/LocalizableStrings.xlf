@@ -5,15 +5,15 @@
       <group id="src/dotnet/commands/dotnet-remove/dotnet-remove-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Remove Project to Project reference Command</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to remove project to project reference</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Remove reference only when targetting a specific framework</source>
-        <note />
+        <source>Remove reference only when targeting a specific framework</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>

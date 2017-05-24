@@ -13,16 +13,6 @@
         <target state="translated">用于清除先前产生的生成输出的命令。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProjDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">要生成的 MSBuild 项目文件。如果未指定项目文件，MSBuild 将搜索当前工作目录来查找文件扩展名以“proj”结尾的文件并使用该文件。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -31,26 +21,6 @@
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">放置了生成输出的目录。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework.</source>
-        <target state="translated">清理特定的框架。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration.</source>
-        <target state="translated">清理特定的配置。</target>
         <note />
       </trans-unit>
     </body>

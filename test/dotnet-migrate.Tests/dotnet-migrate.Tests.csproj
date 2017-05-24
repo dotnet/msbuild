@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\Microsoft.DotNet.ProjectJsonMigration.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
@@ -29,5 +28,6 @@
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
     <PackageReference Include="moq.netcore" Version="4.4.0-beta8" />
+    <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(CliMigrateVersion)" />
   </ItemGroup>
 </Project>

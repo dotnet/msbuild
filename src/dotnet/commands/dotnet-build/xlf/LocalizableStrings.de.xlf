@@ -13,26 +13,6 @@
         <target state="translated">.NET-Generator</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionName">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Zielframework für die Erstellung. Das Zielframework muss in der Projektdatei angegeben werden.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
         <target state="translated">Legen Sie dieses Flag fest, um Projekt-zu-Projekt-Verweise zu ignorieren und nur das Stammprojekt zu erstellen.</target>
@@ -51,36 +31,6 @@
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Die zu erstellende MSBuild-Projektdatei. Wenn keine Projektdatei angegeben ist, durchsucht MSBuild das aktuelle Arbeitsverzeichnis nach einer Datei mit einer Dateierweiterung, die auf "proj" endet, und verwendet diese Datei.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectArgumentValueName">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to build for. The default is to build a portable application.</source>
-        <target state="translated">Ziellaufzeit für die Erstellung. Standardmäßig wird eine portable Anwendung erstellt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionName">
-        <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">RUNTIME_IDENTIFIER</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionSuffixOptionName">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

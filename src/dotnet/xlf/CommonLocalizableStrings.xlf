@@ -485,31 +485,59 @@
       </trans-unit>
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
-{1}</source>
-        <note />
+{1}.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Unsupported project type. Please check with your sdk provider.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
-        <source>Invalid solution `{0}`. {1}</source>
+        <source>Invalid solution `{0}`. {1}.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsSolutionDescription">
         <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSlnFile">
-        <source>&lt;SLN_FILE&gt;</source>
+        <source>SLN_FILE</source>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdProjectFile">
-        <source>&lt;PROJECT&gt;</source>
+        <source>PROJECT</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show help information.</source>
         <note></note>
       </trans-unit>
     </body>

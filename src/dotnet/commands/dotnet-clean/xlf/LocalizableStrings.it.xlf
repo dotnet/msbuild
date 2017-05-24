@@ -13,16 +13,6 @@
         <target state="translated">Comando per pulire gli output di compilazione generati in precedenza.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROGETTO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProjDescription">
-        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">File di progetto MSBuild da compilare. Se non si specifica un file di progetto, MSBuild cerca nella directory di lavoro corrente un file la cui estensione termina con `proj` e usa tale file.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIR_OUTPUT</target>
@@ -31,26 +21,6 @@
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">Directory in cui sono stati inseriti gli output di compilazione.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework.</source>
-        <target state="translated">Pulisce un framework specifico.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURAZIONE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration.</source>
-        <target state="translated">Pulisce una configurazione specifica.</target>
         <note />
       </trans-unit>
     </body>

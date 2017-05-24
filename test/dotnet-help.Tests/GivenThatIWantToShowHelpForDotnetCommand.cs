@@ -15,44 +15,46 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetCommand : TestBase
     {
         private const string HelpText =
-@"Usage: dotnet [host-options] [command] [arguments] [common-options]
+@"Usage: dotnet [runtime-options] [path-to-application]
+Usage: dotnet [command] [arguments] [command-options]
 
-Arguments:
-  [command]             The command to execute
-  [arguments]           Arguments to pass to the command
-  [host-options]        Options specific to dotnet (host)
-  [common-options]      Options common to all commands
+path-to-application:
+  The path to an application .dll file to execute.
+
+SDK commands:
+  new              Initialize .NET projects.
+  restore          Restore dependencies specified in the .NET project.
+  run              Compiles and immediately executes a .NET project.
+  build            Builds a .NET project.
+  publish          Publishes a .NET project for deployment (including the runtime).
+  test             Runs unit tests using the test runner specified in the project.
+  pack             Creates a NuGet package.
+  migrate          Migrates a project.json based project to a msbuild based project.
+  clean            Clean build output(s).
+  sln              Modify solution (SLN) files.
+  add              Add reference to the project.
+  remove           Remove reference from the project.
+  list             List reference in the project.
+  nuget            Provides additional NuGet commands.
+  msbuild          Runs Microsoft Build Engine (MSBuild).
+  vstest           Runs Microsoft Test Execution Command Line Tool.
+  -v|--version     Display .NET Core SDK version.
+  -i|--info        Display .NET Core information.
+  -d|--diagnostics Enable diagnostic output.
 
 Common options:
   -v|--verbose          Enable verbose output
   -h|--help             Show help
 
-Host options (passed before the command):
-  -d|--diagnostics      Enable diagnostic output
-  --version             Display .NET CLI Version Number
-  --info                Display .NET CLI Info
+Run 'dotnet COMMAND --help' for more information on a command.
 
-Commands:
-  new           Initialize .NET projects.
-  restore       Restore dependencies specified in the .NET project.
-  build         Builds a .NET project.
-  publish       Publishes a .NET project for deployment (including the runtime).
-  run           Compiles and immediately executes a .NET project.
-  test          Runs unit tests using the test runner specified in the project.
-  pack          Creates a NuGet package.
-  migrate       Migrates a project.json based project to a msbuild based project.
-  clean         Clean build output(s).
-  sln           Modify solution (SLN) files.
-
-Project modification commands:
-  add           Add items to the project.
-  remove        Remove items from the project.
-  list          List items in the project.
-
-Advanced Commands:
-  nuget         Provides additional NuGet commands.
-  msbuild       Runs Microsoft Build Engine (MSBuild).
-  vstest        Runs Microsoft Test Execution Command Line Tool.";
+runtime-options:
+  --additionalprobingpath <path>    Path containing probing policy and assemblies to probe for.
+  --depsfile <path>                 Path to <application>.deps.json file.
+  --runtimeconfig <path>            Path to <application>.runtimeconfig.json file.
+  --fx-version <version>            Version of the installed Shared Framework to use to run the application.
+  --roll-forward-on-no-candidate-fx Roll forward on no candidate shared framework is enabled.
+  --additional-deps <path>          Path to additonal deps.json file.";
 
         [Theory]
         [InlineData("--help")]

@@ -64,9 +64,9 @@
         <note />
       </trans-unit>
       <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Comandos</target>
-        <note />
+        <source>SDK commands</source>
+        <target state="needs-review-translation">Comandos</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
@@ -114,14 +114,14 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add items to the project.</source>
-        <target state="translated">Adiciona itens ao projeto.</target>
-        <note />
+        <source>Add reference to the project.</source>
+        <target state="needs-review-translation">Adiciona itens ao projeto.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove items from the project.</source>
-        <target state="translated">Remove itens do projeto.</target>
-        <note />
+        <source>Remove reference from the project.</source>
+        <target state="needs-review-translation">Remove itens do projeto.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -157,6 +157,91 @@
         <source>Modify solution (SLN) files.</source>
         <target state="translated">Modificar arquivos de solução (SLN).</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ListDefinition">
+        <source>List reference in the project.</source>
+        <target state="new">List reference in the project.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandDoesNotExist">
+        <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
+        <target state="new">Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET CLI help utility</source>
+        <target state="new">.NET CLI help utility</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Utility to get more detailed help about each of the CLI commands.</source>
+        <target state="new">Utility to get more detailed help about each of the CLI commands.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="new">COMMAND_NAME</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandArgumentDescription">
+        <source>CLI command for which to view more detailed help.</source>
+        <target state="new">CLI command for which to view more detailed help.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PathToApplicationDefinition">
+        <source>The path to an application .dll file to execute.</source>
+        <target state="new">The path to an application .dll file to execute.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SDKVersionCommandDefinition">
+        <source>Display .NET Core SDK version.</source>
+        <target state="new">Display .NET Core SDK version.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SDKInfoCommandDefinition">
+        <source>Display .NET Core information.</source>
+        <target state="new">Display .NET Core information.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SDKDiagnosticsCommandDefinition">
+        <source>Enable diagnostic output.</source>
+        <target state="new">Enable diagnostic output.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunDotnetCommandHelpForMore">
+        <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
+        <target state="new">Run 'dotnet COMMAND --help' for more information on a command.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AdditionalprobingpathDefinition">
+        <source>Path containing probing policy and assemblies to probe for.</source>
+        <target state="new">Path containing probing policy and assemblies to probe for.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DepsfilDefinition">
+        <source>Path to &lt;application&gt;.deps.json file.</source>
+        <target state="new">Path to &lt;application&gt;.deps.json file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeconfigDefinition">
+        <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
+        <target state="new">Path to &lt;application&gt;.runtimeconfig.json file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FxVersionDefinition">
+        <source>Version of the installed Shared Framework to use to run the application.</source>
+        <target state="new">Version of the installed Shared Framework to use to run the application.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
+        <source>Roll forward on no candidate shared framework is enabled.</source>
+        <target state="new">Roll forward on no candidate shared framework is enabled.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AdditionalDeps">
+        <source>Path to additonal deps.json file.</source>
+        <target state="new">Path to additonal deps.json file.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -21,20 +20,16 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public int VersionPatch { get; set; }
 
-        [Required]
-        public string ReleaseSuffix { get; set; }
-
         [Output]
         public string MsiVersion { get; set; }
 
         public override bool Execute()
         {
-            var buildVersion = new BuildVersion()
+            var buildVersion = new Version()
             {
                 Major = VersionMajor,
                 Minor = VersionMinor,
                 Patch = VersionPatch,
-                ReleaseSuffix = ReleaseSuffix,
                 CommitCount = CommitCount
             };
 

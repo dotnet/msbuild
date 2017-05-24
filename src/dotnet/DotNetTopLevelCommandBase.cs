@@ -42,14 +42,19 @@ namespace Microsoft.DotNet.Cli
             }
             catch (KeyNotFoundException)
             {
-                throw new GracefulException(CommonLocalizableStrings.RequiredCommandNotPassed);
+                return ReportError(CommonLocalizableStrings.RequiredCommandNotPassed);
             }
             catch (GracefulException e)
             {
-                Reporter.Error.WriteLine(e.Message.Red());
-                ParseResult.ShowHelp();
-                return 1;
+                return ReportError(e.Message);
             }
+        }
+
+        private int ReportError(string errorMessage)
+        {
+            Reporter.Error.WriteLine(errorMessage.Red());
+            ParseResult.ShowHelp();
+            return 1;
         }
     }
 }

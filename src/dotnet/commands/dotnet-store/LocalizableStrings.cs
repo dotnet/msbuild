@@ -21,11 +21,11 @@ namespace Microsoft.DotNet.Tools.Store
 
         public const string SkipOptimizationOptionDescription = "Skips the optimization phase.";
 
+        public const string SkipSymbolsOptionDescription = "Skips creating symbol files which can be used for profiling the optimized assemblies.";
+
         public const string IntermediateWorkingDirOption = "IntermediateWorkingDir";
 
         public const string IntermediateWorkingDirOptionDescription = "The directory used by the command to execute.";
-
-        public const string PreserveIntermediateWorkingDirOptionDescription = "Preserves the intermediate working directory.";
 
         public const string SpecifyManifests = "Specify at least one manifest with --manifest.";
 

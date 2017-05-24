@@ -14,13 +14,13 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     internal static partial class Interop
     {
-        internal static readonly bool s_runningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        internal static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         private static int hostfxr_resolve_sdk(string exe_dir, string working_dir, [Out] StringBuilder buffer, int buffer_size)
         {
             // hostfxr string encoding is platform -specific so dispatch to the 
             // appropriately annotated P/Invoke for the current platform.
-            return s_runningOnWindows
+            return RunningOnWindows
                 ? windows_hostfxr_resolve_sdk(exe_dir, working_dir, buffer, buffer_size)
                 : unix_hostfxr_resolve_sdk(exe_dir, working_dir, buffer, buffer_size);
         }

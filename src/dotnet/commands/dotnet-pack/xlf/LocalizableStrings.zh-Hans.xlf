@@ -38,26 +38,6 @@
         <target state="translated">包括 PDB 和源文件。源文件放入 nuget 结果包的 src 文件夹中</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdConfig">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffix">
-        <source>VERSION_SUFFIX</source>
-        <target state="translated">VERSION_SUFFIX</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">定义项目中 $(VersionSuffix) 属性的值。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
         <target state="translated">在包中设置可用标志。有关详细信息，请参阅 https://aka.ms/nupkgservicing。</target>

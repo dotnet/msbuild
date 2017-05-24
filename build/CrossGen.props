@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <RuntimeNETCoreAppPackageName>runtime.$(CoreCLRRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
+    <RuntimeNETCoreAppPackageName>runtime.$(SharedFrameworkRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
     <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
-    <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
+    <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(SharedFrameworkRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
     <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
   </PropertyGroup>
 </Project>

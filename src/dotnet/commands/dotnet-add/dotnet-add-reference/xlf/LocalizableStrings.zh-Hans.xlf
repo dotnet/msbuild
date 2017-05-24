@@ -19,9 +19,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">仅针对特定框架添加引用</target>
-        <note />
+        <source>Add reference only when targeting a specific framework</source>
+        <target state="needs-review-translation">仅针对特定框架添加引用</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

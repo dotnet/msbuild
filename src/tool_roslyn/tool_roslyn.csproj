@@ -16,23 +16,23 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.1" />
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="$(CLI_DiaSymNative_Version)" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="RunCsc.sh;RunCsc.cmd">
+    <Content Include="RunCsc.sh;RunCsc.cmd;RunVbc.sh;RunVbc.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 
-  <Target Name="MakeCscRunnableAndMoveToPublishDir"
+  <Target Name="MakeCscAndVbcRunnableAndMoveToPublishDir"
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
     <ItemGroup>
-      <AssetsToRemoveFromDeps Include="runtimes/any/native/csc.exe" 
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/csc.dll" 
                               SectionName="runtimeTargets" />
-      <AssetsToRemoveFromDeps Include="runtimes/any/native/vbc.exe" 
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/vbc.dll" 
                               SectionName="runtimeTargets" />
       <AssetsToRemoveFromDeps Include="tool_roslyn.dll" 
                               SectionName="runtime"/>
@@ -42,12 +42,19 @@
                                  SectionName="%(AssetsToRemoveFromDeps.SectionName)"
                                  AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
    
-    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.exe;
+    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.dll;
                        $(PublishDir)/$(TargetName).runtimeconfig.json;
                        $(PublishDir)/$(TargetName).deps.json;"
           DestinationFiles="$(PublishDir)/csc.exe;
                             $(PublishDir)/csc.runtimeconfig.json;
                             $(PublishDir)/csc.deps.json;" />
+
+    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/vbc.dll;
+                       $(PublishDir)/$(TargetName).runtimeconfig.json;
+                       $(PublishDir)/$(TargetName).deps.json;"
+          DestinationFiles="$(PublishDir)/vbc.exe;
+                            $(PublishDir)/vbc.runtimeconfig.json;
+                            $(PublishDir)/vbc.deps.json;" />
   </Target>
 
   <Target Name="RemoveFilesAfterPublish"

@@ -5,8 +5,8 @@
     <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
 
     <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
-    <LayoutDirectory Condition=" '$(OSName)' == 'ubuntu' ">$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
-    <LayoutDirectory Condition=" '$(OSName)' != 'ubuntu' ">$(IntermediateDirectory)/layouts</LayoutDirectory>
+    <LayoutDirectory Condition=" '$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
+    <LayoutDirectory Condition=" '$(OSName)' != 'ubuntu' AND '$(OSName)' != 'debian' ">$(IntermediateDirectory)/layouts</LayoutDirectory>
     <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
   </PropertyGroup>
 </Project>

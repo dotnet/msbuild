@@ -33,9 +33,9 @@ A command is running to initially populate your local package cache, to improve 
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">無法建立主要 NuGet 快取。{0} 失敗，發生: {1}</target>
-        <note />
+        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
+        <target state="needs-review-translation">無法建立主要 NuGet 快取。{0} 失敗，發生: {1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

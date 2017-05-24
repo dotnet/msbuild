@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         private void Read(TextReader reader)
         {
-            const string HeaderPrefix = "Microsoft Visual Studio Solution File, Format Version ";
+            const string HeaderPrefix = "Microsoft Visual Studio Solution File, Format Version";
 
             string line;
             int curLineNum = 0;
@@ -137,10 +137,10 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                     {
                         throw new InvalidSolutionFormatException(
                             curLineNum,
-                            LocalizableStrings.FileHeaderMissingError);
+                            LocalizableStrings.FileHeaderMissingVersionError);
                     }
 
-                    FormatVersion = line.Substring(HeaderPrefix.Length);
+                    FormatVersion = line.Substring(HeaderPrefix.Length).Trim();
                     _prefixBlankLines = curLineNum - 1;
                 }
                 if (line.StartsWith("# ", StringComparison.Ordinal))
@@ -199,9 +199,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             if (FormatVersion == null)
             {
-                throw new InvalidSolutionFormatException(
-                    curLineNum,
-                    LocalizableStrings.FileHeaderMissingError);
+                throw new InvalidSolutionFormatException(LocalizableStrings.FileHeaderMissingError);
             }
         }
 
@@ -1167,6 +1165,11 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
     public class InvalidSolutionFormatException : Exception
     {
+        public InvalidSolutionFormatException(string details)
+            : base(details)
+        {
+        }
+
         public InvalidSolutionFormatException(int line, string details)
             : base(string.Format(LocalizableStrings.ErrorMessageFormatString, line, details))
         {

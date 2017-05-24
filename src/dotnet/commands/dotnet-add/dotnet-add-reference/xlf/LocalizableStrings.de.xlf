@@ -19,9 +19,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targetting a specific framework</source>
-        <target state="translated">Verweis nur bei Verwendung eines bestimmten Zielframeworks hinzufügen</target>
-        <note />
+        <source>Add reference only when targeting a specific framework</source>
+        <target state="needs-review-translation">Verweis nur bei Verwendung eines bestimmten Zielframeworks hinzufügen</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
