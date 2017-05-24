@@ -76,12 +76,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     If RuntimeFrameworkVersion is not specified, the following logic applies:
     
-    - When targeting .NET Core 2.0 or higher, Shared Framework apps use the target framework version with a ".0" patch version
+    - When targeting .NET Core 2.0 or higher, Framework-dependent apps use the target framework version with a ".0" patch version
     - When targeting .NET Core 2.0 or higher, Self-contained apps use the latest patch version (from when the SDK shipped) for
       the specified major.minor version of .NET Core
-    - When targeting .NET Core 1.x, the latest patch version (from when the SDK shipped) is used for both Shared Framework and
-      Self-Contained apps.  This is to preserve the same behavior between 1.x and 2.0 SDKs.  If we ship further patch versions
-      after 1.0.5 and 1.1.2, we may choose to apply the Shared / Self-contained split to 1.x for those versions.  
+    - When targeting .NET Core 1.x, the latest patch version (from when the SDK shipped) is used for both Framework-dependent and
+      Self-contained apps.  This is to preserve the same behavior between 1.x and 2.0 SDKs.  If we ship further patch versions
+      after 1.0.5 and 1.1.2, we may choose to apply the Framework-dependent / Self-contained split to 1.x for those versions.  
   -->
 
   <!-- These properties are mainly here as a test hook, as at the time we're implementing the logic which will choose
@@ -91,12 +91,12 @@ Copyright (c) .NET Foundation. All rights reserved.
        Once there is a patch version of .NET Core, we may want to remove these properties and just put the version
        numbers directly inside the <Choose> element below. -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''"> 
-    <ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_0
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_0>
+    <ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0
+      Condition="'$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0>
     <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0
       Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0>
-    <ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_1
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_1>
+    <ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1
+      Condition="'$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1>
     <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1
       Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1>    
   </PropertyGroup>
@@ -108,13 +108,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForSharedApp>$(ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForSharedApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForSharedApp>$(ImplicitRuntimeFrameworkVersionForSharedNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForSharedApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
@@ -122,7 +122,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForSharedApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForSharedApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
@@ -130,7 +130,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If not covered by the previous cases, use the target framework version for the implicit RuntimeFrameworkVersions -->
     <Otherwise>
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForSharedApp>$(_TargetFrameworkVersionWithoutV)</ImplicitRuntimeFrameworkVersionForSharedApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(_TargetFrameworkVersionWithoutV)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(_TargetFrameworkVersionWithoutV)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </Otherwise>
@@ -138,7 +138,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''">
     <RuntimeFrameworkVersion Condition="'$(SelfContained)' == 'true' ">$(ImplicitRuntimeFrameworkVersionForSelfContainedApp)</RuntimeFrameworkVersion>
-    <RuntimeFrameworkVersion Condition="'$(SelfContained)' != 'true' ">$(ImplicitRuntimeFrameworkVersionForSharedApp)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(SelfContained)' != 'true' ">$(ImplicitRuntimeFrameworkVersionForFrameworkDependentApp)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
