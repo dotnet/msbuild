@@ -102,9 +102,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DirectorySeparatorChar>$([System.IO.Path]::DirectorySeparatorChar)</DirectorySeparatorChar>
+  </PropertyGroup>
+  
+  <!--
+    Automatically add Link metadata to items of specific types if they are outside of the project folder and don't already have the Link metadata set.
+    This will cause them to be shown in the Solution Explorer.  If an item has LinkBase metadata, the automatic Link will start with that value, and
+    the items will appear in the Solution Explorer under the folder specified by LinkBase.
+    -->
   <ItemGroup Condition="'$(SetLinkMetadataAutomatically)' != 'false'">
     <Compile Update="@(Compile)">
-      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))\'))">*NeedsLink*</Link>
+      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))$(DirectorySeparatorChar)'))">*NeedsLink*</Link>
 
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' == ''">%(RecursiveDir)%(Filename)%(Extension)</Link>
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' != ''">%(LinkBase)\%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -113,7 +122,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Compile>
 
     <AdditionalFiles Update="@(AdditionalFiles)">
-      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))\'))">*NeedsLink*</Link>
+      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))$(DirectorySeparatorChar)'))">*NeedsLink*</Link>
 
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' == ''">%(RecursiveDir)%(Filename)%(Extension)</Link>
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' != ''">%(LinkBase)\%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -122,7 +131,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </AdditionalFiles>
     
     <None Update="@(None)">
-      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))\'))">*NeedsLink*</Link>
+      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))$(DirectorySeparatorChar)'))">*NeedsLink*</Link>
 
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' == ''">%(RecursiveDir)%(Filename)%(Extension)</Link>
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' != ''">%(LinkBase)\%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -131,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </None>
 
     <Content Update="@(Content)">
-      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))\'))">*NeedsLink*</Link>
+      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))$(DirectorySeparatorChar)'))">*NeedsLink*</Link>
 
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' == ''">%(RecursiveDir)%(Filename)%(Extension)</Link>
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' != ''">%(LinkBase)\%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -140,7 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Content>
 
     <EmbeddedResource Update="@(EmbeddedResource )">
-      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))\'))">*NeedsLink*</Link>
+      <Link Condition="'%(Link)' == '' And !$([System.IO.Path]::GetFullPath('%(FullPath)').StartsWith('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))$(DirectorySeparatorChar)'))">*NeedsLink*</Link>
 
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' == ''">%(RecursiveDir)%(Filename)%(Extension)</Link>
       <Link Condition="'%(Link)' == '*NeedsLink*' And '%(RecursiveDir)' != '' And '%(LinkBase)' != ''">%(LinkBase)\%(RecursiveDir)%(Filename)%(Extension)</Link>
