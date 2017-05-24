@@ -3,7 +3,8 @@
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>2.0.0-preview2-25319-02</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.3.0-preview-000246-05</CLI_MSBuild_Version>
-    <CLI_Roslyn_Version>2.0.0-rc4-61325-08</CLI_Roslyn_Version>
+    <CLI_Roslyn_Version>2.3.0-beta2-61716-09</CLI_Roslyn_Version>
+    <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
     <CLI_FSharp_Version>1.0.0-rc-170511-0</CLI_FSharp_Version>
     <CLI_NETSDK_Version>2.0.0-preview2-20170506-1</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-preview1-2500</CLI_NuGet_Version>
@@ -20,7 +21,7 @@
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-  
+
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
     <AspNetCoreRuntimeVersion>dev-123</AspNetCoreRuntimeVersion>
