@@ -641,6 +641,32 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
+        /// <summary>
+        /// Test with the VB language
+        /// </summary>
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "fsharp")]
+        public void OneAttributeNoParamsFSharp()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("System.AssemblyTrademarkAttribute");
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "f#";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            CheckContentFSharp(content, "[<assembly: System.AssemblyTrademarkAttribute()>]");
+        }
+
+
         private static void CheckContentCSharp(string actualContent, params string[] expectedAttributes)
         {
             CheckContent(
@@ -661,6 +687,16 @@ namespace Microsoft.Build.UnitTests
                 "Option Explicit On",
                 "Imports System",
                 "Imports System.Reflection");
+        }
+
+        private static void CheckContentFSharp(string actualContent, params string[] expectedAttributes)
+        {
+            CheckContent(
+                actualContent,
+                expectedAttributes,
+                "//",
+                "open System",
+                "open System.Reflection");
         }
 
         private static void CheckContent(string actualContent, string[] expectedAttributes, string commentStart, params string[] expectedHeader)
