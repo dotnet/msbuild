@@ -440,7 +440,10 @@
     <value>Importing project "{0}" at: {1} because condition "{2}" evaluates to true.</value>
   </data>
   <data name="NotImportingProjectBecauseConditionFalse" UESanitized="false" Visibility="Public">
-    <value>Not importing project "{0}" at: {1} because condition "{2}" evaluates to false.</value>
+    <value>Not importing project(s) "{0}" at: {1} because condition "{2}" evaluates to false.</value>
+  </data>
+  <data name="NotImportingProjects" UESanitized="false" Visibility="Public">
+    <value>Not importing project(s) "{0}" at: {1}</value>
   </data>
   <data name="IncorrectNumberOfFunctionArguments" UESanitized="false" Visibility="Public">
     <value>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</value>

@@ -2102,15 +2102,27 @@ namespace Microsoft.Build.Evaluation
                 PerformDepthFirstPass(importedProjectRootElement);
             }
 
-            if (!importedAnything && hasCondition)
+            if (!importedAnything)
             {
-                _loggingService.LogComment(
-                    _buildEventContext,
-                    MessageImportance.Low,
-                    "NotImportingProjectBecauseConditionFalse",
-                    importElement.Project,
-                    location,
-                    importElement.Condition);
+                if (hasCondition)
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "NotImportingProjectBecauseConditionFalse",
+                        importElement.Project,
+                        location,
+                        importElement.Condition);
+                }
+                else
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "NotImportingProjects",
+                        importElement.Project,
+                        location);
+                }
             }
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -2627,7 +2639,7 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
             }
 
             if (imports.Count > 0)
