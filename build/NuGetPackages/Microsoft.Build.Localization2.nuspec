@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the localized satellite assemblies for MSBuild. Reference this package only if you want msbuild output to be localized in cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
+
+    <contentFiles>
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+    </contentFiles>
+  </metadata>
+  <files>
+
+    <file src="$outputPath$cs\*" target="lib\net46\cs\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$de\*" target="lib\net46\de\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$en\*" target="lib\net46\en\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$es\*" target="lib\net46\es\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$fr\*" target="lib\net46\fr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$it\*" target="lib\net46\it\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ja\*" target="lib\net46\ja\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ko\*" target="lib\net46\ko\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pl\*" target="lib\net46\pl\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pt-BR\*" target="lib\net46\pt-BR\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ru\*" target="lib\net46\ru\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$tr\*" target="lib\net46\tr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hans\*" target="lib\net46\zh-Hans\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hant\*" target="lib\net46\zh-Hant\" buildAction="None" copyToOutput="true"/>
+
+    <file src="$outputPath$cs\*" target="lib\netstandard1.3\cs\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$de\*" target="lib\netstandard1.3\de\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$en\*" target="lib\netstandard1.3\en\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$es\*" target="lib\netstandard1.3\es\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$fr\*" target="lib\netstandard1.3\fr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$it\*" target="lib\netstandard1.3\it\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ja\*" target="lib\netstandard1.3\ja\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ko\*" target="lib\netstandard1.3\ko\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pl\*" target="lib\netstandard1.3\pl\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pt-BR\*" target="lib\netstandard1.3\pt-BR\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ru\*" target="lib\netstandard1.3\ru\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$tr\*" target="lib\netstandard1.3\tr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hans\*" target="lib\netstandard1.3\zh-Hans\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hant\*" target="lib\netstandard1.3\zh-Hant\" buildAction="None" copyToOutput="true"/>
+
+    <file src="$outputPath$cs\*" target="lib\netstandard1.5\cs\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$de\*" target="lib\netstandard1.5\de\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$en\*" target="lib\netstandard1.5\en\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$es\*" target="lib\netstandard1.5\es\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$fr\*" target="lib\netstandard1.5\fr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$it\*" target="lib\netstandard1.5\it\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ja\*" target="lib\netstandard1.5\ja\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ko\*" target="lib\netstandard1.5\ko\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pl\*" target="lib\netstandard1.5\pl\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pt-BR\*" target="lib\netstandard1.5\pt-BR\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ru\*" target="lib\netstandard1.5\ru\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$tr\*" target="lib\netstandard1.5\tr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hans\*" target="lib\netstandard1.5\zh-Hans\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hant\*" target="lib\netstandard1.5\zh-Hant\" buildAction="None" copyToOutput="true"/>
+
+    <file src="$outputPath$cs\*" target="lib\netcoreapp1.0\cs\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$de\*" target="lib\netcoreapp1.0\de\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$en\*" target="lib\netcoreapp1.0\en\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$es\*" target="lib\netcoreapp1.0\es\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$fr\*" target="lib\netcoreapp1.0\fr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$it\*" target="lib\netcoreapp1.0\it\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ja\*" target="lib\netcoreapp1.0\ja\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ko\*" target="lib\netcoreapp1.0\ko\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pl\*" target="lib\netcoreapp1.0\pl\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$pt-BR\*" target="lib\netcoreapp1.0\pt-BR\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$ru\*" target="lib\netcoreapp1.0\ru\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$tr\*" target="lib\netcoreapp1.0\tr\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hans\*" target="lib\netcoreapp1.0\zh-Hans\" buildAction="None" copyToOutput="true"/>
+    <file src="$outputPath$zh-Hant\*" target="lib\netcoreapp1.0\zh-Hant\" buildAction="None" copyToOutput="true"/>
+
+  </files>
+</package>
