@@ -1208,6 +1208,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void SkippedTargetWithFailedDependenciesStopsBuild()
+        {
+            string projectContents = @"
+  <Target Name=""Build"" DependsOnTargets=""ProduceError1;ProduceError2"" />
+  <Target Name=""ProduceError1"" Condition=""false"" />
+  <Target Name=""ProduceError2"">
+    <ErrorTask2 />
+  </Target>
+  <Target Name=""_Error1"" BeforeTargets=""ProduceError1"">
+    <ErrorTask1 />
+  </Target>
+";
+
+            var project = CreateTestProject(projectContents, string.Empty, "Build");
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
+            // Fail the first task
+            taskBuilder.FailTaskNumber = 1;
+
+            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, new[] { "Build" }), cache[1]);
+
+            var buildResult = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
+
+            IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Build"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError1"));
+            Assert.False(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError2"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("_Error1"));
+
+            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Build"].ResultCode);
+            Assert.Equal(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["ProduceError1"].ResultCode);
+            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["_Error1"].ResultCode);
+        }
+
         #region IRequestBuilderCallback Members
 
         /// <summary>
