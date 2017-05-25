@@ -73,8 +73,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         new[]
                         {
                             $"Version {netcoreSdkVersion} of the .NET Core SDK requires at least version {minimumMSBuildVersionString}"
-                            + $" of msbuild. The current available version of msbuild is {context.MSBuildVersion.ToString()}."
-                            + " Change the .NET Core SDK specified in global.json to an older version that requires the msbuild"
+                            + $" of MSBuild. The current available version of MSBuild is {context.MSBuildVersion.ToString()}."
+                            + " Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild"
                             + " version currently available."
                         });
                 }

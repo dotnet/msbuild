@@ -99,9 +99,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of msbuild."
-                + " The current available version of msbuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
-                + " version that requires the msbuild version currently available.");
+            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of MSBuild."
+                + " The current available version of MSBuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
+                + " version that requires the MSBuild version currently available.");
         }
 
         [Fact]
