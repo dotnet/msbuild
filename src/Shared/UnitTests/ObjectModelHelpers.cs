@@ -1035,11 +1035,11 @@ namespace Microsoft.Build.UnitTests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                currentPlatformString = "Windows";
+                currentPlatformString = "WINDOWS";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                currentPlatformString = "Linux";
+                currentPlatformString = "LINUX";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
