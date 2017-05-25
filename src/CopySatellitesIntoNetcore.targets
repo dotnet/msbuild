@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="CopySatellitesIntoNetcore" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <FullFrameworkConfiguration>$(Configuration)</FullFrameworkConfiguration>
+    <FullFrameworkConfiguration Condition="'$(Configuration)' == 'Release-NetCore'">Release</FullFrameworkConfiguration>
+    <FullFrameworkConfiguration Condition="'$(Configuration)' == 'Debug-NetCore'">Debug</FullFrameworkConfiguration>
+
+    <FullFrameworkSatelliteRoot>$(BinDir)\$(FullFrameworkConfiguration)\x86\Windows_NT\Output\</FullFrameworkSatelliteRoot>
+  </PropertyGroup>
+
+  <Target Name="GenerateSatelliteItems">
+    <ItemGroup>
+        <SourceSatelliteDirectories Include="@(Languages->'$(FullFrameworkSatelliteRoot)%(Identity)\')"/>
+        <SourceSatelliteAssemblies Include="%(SourceSatelliteDirectories.Identity)$(AssemblyName).resources.dll"/>
+    </ItemGroup>
+
+    <Error
+      Condition="!Exists(%(SourceSatelliteAssemblies.Identity))"
+      Text="Can't find full framework satellite assembly (%(SourceSatelliteAssemblies.Identity)). Please do '.\cibuild --target Full --scope Compile --build-only --localized-build'"/>
+  </Target>
+
+  <Target Name="CopySatellitesIntoNetcore"
+          DependsOnTargets="GenerateSatelliteItems"
+          AfterTargets="Build"
+          BeforeTargets="CopyBuildOutputToDeploymentDirectories">
+
+    <ItemGroup>
+      <OutputDirDestination Include="$([System.String]::Copy('%(SourceSatelliteAssemblies.Identity)').Replace('$(FullFrameworkSatelliteRoot)', '$(OutputPath)\'))"/>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SourceSatelliteAssemblies)"
+          DestinationFiles="@(OutputDirDestination)"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

@@ -86,6 +86,8 @@
   <!-- Do not attempt to localize src/dirs.proj since it does not represent a C# project-->
   <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizationBuildAssetsRequired)' == 'true' and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true' and '$(AssemblyName)' != 'dirs'" />
 
+  <Import Project="CopySatellitesIntoNetcore.targets" Condition="'$(NetCoreBuild)' == 'true' and '$(LocalizedBuild)' == 'true'  and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true' and '$(AssemblyName)' != 'dirs'" />
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
@@ -107,5 +109,56 @@
         <EmbedInteropTypes>true</EmbedInteropTypes>
       </ReferencePath>
     </ItemGroup>
+  </Target>
+
+  <!-- copied from Microsoft.Common.CurrentVersion.targets and modified to force anycpu -->
+  <!-- remove when https://github.com/Microsoft/msbuild/issues/1588 is done-->
+  <Target Name="GenerateSatelliteAssemblies"
+          Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+          Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+
+    <MakeDir
+        Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
+
+    <AL AlgorithmId="$(Satellite_AlgorithmId)"
+        BaseAddress="$(Satellite_BaseAddress)"
+        CompanyName="$(Satellite_CompanyName)"
+        Configuration="$(Satellite_Configuration)"
+        Copyright="$(Satellite_Copyright)"
+        Culture="%(Culture)"
+        DelaySign="$(DelaySign)"
+        Description="$(Satellite_Description)"
+        EmbedResources="@(_SatelliteAssemblyResourceInputs)"
+        EnvironmentVariables="$(AlEnvironment)"
+        EvidenceFile="$(Satellite_EvidenceFile)"
+        FileVersion="$(Satellite_FileVersion)"
+        Flags="$(Satellite_Flags)"
+        GenerateFullPaths="$(Satellite_GenerateFullPaths)"
+        KeyContainer="$(KeyContainerName)"
+        KeyFile="$(KeyOriginatorFile)"
+        LinkResources="@(Satellite_LinkResource)"
+        MainEntryPoint="$(Satellite_MainEntryPoint)"
+        OutputAssembly="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
+        Platform="anycpu"
+        ProductName="$(Satellite_ProductName)"
+        ProductVersion="$(Satellite_ProductVersion)"
+        ResponseFiles="@(AlResponseFile)"
+        SourceModules="@(Satellite_SourceModule)"
+        TargetType="$(Satellite_TargetType)"
+        TemplateFile="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+        Title="$(Satellite_Title)"
+        ToolPath="$(AlToolPath)"
+        ToolExe ="$(AlToolExe)"
+        SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
+        Trademark="$(Satellite_Trademark)"
+        Version="$(Satellite_Version)"
+        Win32Icon="$(Satellite_Win32Icon)"
+        Win32Resource="$(Satellite_Win32Resource)">
+
+      <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
+
+    </AL>
+
   </Target>
 </Project>

@@ -22,14 +22,6 @@
     <IncludeNuGetImports Condition="'$(IncludeNuGetImports)' == ''">false</IncludeNuGetImports>
   </PropertyGroup>
 
-  <!-- Localization switches -->
-  <PropertyGroup>
-    <LocalizationBuildAssetsRequired Condition="'$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true'">true</LocalizationBuildAssetsRequired>
-
-    <!-- Syncing xlf files in parallel leads to races because of the shared resources under /Shared/Resources/xlf -->
-    <BuildInParallel Condition="'$(SyncXlf)' == 'true'">false</BuildInParallel>
-  </PropertyGroup>
-
   <PropertyGroup>
     <SerializeProjects>false</SerializeProjects>
   </PropertyGroup>
@@ -389,30 +381,26 @@
   <PropertyGroup>
     <BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
 
-    <RelativeOutputPathWithConfig>$(Configuration)$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
-    <RelativeOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
+    <RelativeOutputPathWithConfig>$([System.IO.Path]::Combine($(Configuration), $(Platform), $(TargetPlatformIdentifier)))</RelativeOutputPathWithConfig>
 
-    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(RelativeOutputPathWithConfig)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(RelativeOutputPathWithConfig)))</BaseOutputPathWithConfig>
 
     <OutputPath>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig),"Output"))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
 
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath), $(RelativeOutputPathWithConfig), $(MSBuildProjectName)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
 
     <!-- BuildTools uses this path to write some files -->
     <ObjDir>$(IntermediateOutputPath)</ObjDir>
 
-    <!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way -->
-    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
-
     <DeploymentDirName>$(TargetPlatformIdentifier)_Deployment</DeploymentDirName>
     <TestDeploymentDirName>$(DeploymentDirName)_Test</TestDeploymentDirName>
 
-    <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
-    <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
+    <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
+    <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
+    <!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way -->
+    <TestPath>$(TestDeploymentDir)</TestPath>
+    <TestWorkingDir>$(TestDeploymentDir)</TestWorkingDir>
 
     <!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property -->
     <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>
@@ -421,5 +409,22 @@
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
+  </PropertyGroup>
+
+    <!-- Localization switches -->
+  <PropertyGroup>
+    <!--.net core can't generate the assets. It instead copies them form a full framework build-->
+    <LocalizationBuildAssetsRequired Condition="'$(NetCoreBuild)' != 'true' and ('$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true')">true</LocalizationBuildAssetsRequired>
+
+    <!-- Syncing xlf files in parallel leads to races because of the shared resources under /Shared/Resources/xlf -->
+    <BuildInParallel Condition="'$(SyncXlf)' == 'true'">false</BuildInParallel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
+  </ItemGroup>
 
 </Project>
