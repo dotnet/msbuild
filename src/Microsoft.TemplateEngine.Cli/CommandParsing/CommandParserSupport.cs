@@ -69,12 +69,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 Option option;
                 IList<string> aliasesForParam = new List<string>();
 
-                if (assignmentCoordinator.LongNameOverrides.TryGetValue(parameter.Name, out string longVersion))
+                if (assignmentCoordinator.LongNameAssignments.TryGetValue(parameter.Name, out string longVersion))
                 {
                     aliasesForParam.Add(longVersion);
                 }
 
-                if (assignmentCoordinator.ShortNameOverrides.TryGetValue(parameter.Name, out string shortVersion))
+                if (assignmentCoordinator.ShortNameAssignments.TryGetValue(parameter.Name, out string shortVersion))
                 {
                     aliasesForParam.Add(shortVersion);
                 }

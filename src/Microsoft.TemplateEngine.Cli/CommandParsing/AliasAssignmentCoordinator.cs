@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             _calculatedAssignments = false;
         }
 
-        public IReadOnlyDictionary<string, string> LongNameOverrides
+        public IReadOnlyDictionary<string, string> LongNameAssignments
         {
             get
             {
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
-        public IReadOnlyDictionary<string, string> ShortNameOverrides
+        public IReadOnlyDictionary<string, string> ShortNameAssignments
         {
             get
             {
