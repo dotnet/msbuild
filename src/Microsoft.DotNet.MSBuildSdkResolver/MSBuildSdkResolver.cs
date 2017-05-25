@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     return factory.IndicateFailure(
                         new[]
                         {
-                            $"Version {netcoreSdkVersion} of the SDK is smaller than the minimum version"
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK is smaller than the minimum version"
                             + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
                             + " installed, increase the minimum version specified in the project, or increase"
                             + " the version specified in global.json."
@@ -67,14 +67,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 var minimumMSBuildVersionString =
                     File.ReadAllLines(Path.Combine(netcoreSdkDir, "minimumMSBuildVersion"))[0];
                 var minimumMSBuildVersion = Version.Parse(minimumMSBuildVersionString);
-                if (context.MSBuildVersion.CompareTo(minimumMSBuildVersion) == -1)
+                if (context.MSBuildVersion < minimumMSBuildVersion)
                 {
                     return factory.IndicateFailure(
                         new[]
                         {
-                            $"Version {netcoreSdkVersion} of the SDK requires at least version {minimumMSBuildVersionString}"
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK requires at least version {minimumMSBuildVersionString}"
                             + $" of msbuild. The current available version of msbuild is {context.MSBuildVersion.ToString()}."
-                            + " Change the SDK specified in global.json to an older version that requires the msbuild"
+                            + " Change the .NET Core SDK specified in global.json to an older version that requires the msbuild"
                             + " version currently available."
                         });
                 }
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return true;
             }
 
-            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) == -1;
+            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) < 0;
         }
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)

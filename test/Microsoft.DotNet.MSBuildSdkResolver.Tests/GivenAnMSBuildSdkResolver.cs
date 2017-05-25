@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the SDK is smaller than the minimum version 999.99.99"
+            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK is smaller than the minimum version 999.99.99"
                 + " requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version"
                 + " specified in the project, or increase the version specified in global.json.");
         }
@@ -99,8 +99,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the SDK requires at least version 2.0 of msbuild."
-                + " The current available version of msbuild is 1.0. Change the SDK specified in global.json to an older"
+            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of msbuild."
+                + " The current available version of msbuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
                 + " version that requires the msbuild version currently available.");
         }
 
