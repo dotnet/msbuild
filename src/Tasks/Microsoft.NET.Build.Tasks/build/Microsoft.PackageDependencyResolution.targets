@@ -44,7 +44,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' != 'true'">$(TargetFrameworkMoniker)</NuGetTargetMoniker>
 
-    <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">false</EmitAssetsLogMessages>
+    <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">true</EmitAssetsLogMessages>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->

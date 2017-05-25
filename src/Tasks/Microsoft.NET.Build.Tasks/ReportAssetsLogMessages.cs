@@ -42,7 +42,7 @@ namespace Microsoft.NET.Build.Tasks
 
         #region Test Support
 
-        internal ReportAssetsLogMessages(LockFile lockFile, ILog logger)
+        public ReportAssetsLogMessages(LockFile lockFile, ILog logger)
             : base(logger)
         {
             _lockFile = lockFile;

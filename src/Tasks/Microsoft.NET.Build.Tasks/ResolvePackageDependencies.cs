@@ -344,7 +344,6 @@ namespace Microsoft.NET.Build.Tasks
                 string version;
                 if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
                 {
-                    Log.LogError(Strings.UnexpectedDependencyWithNoVersionNumber, deps.Id);
                     continue;
                 }
 
