@@ -28,20 +28,11 @@ namespace Microsoft.Build.Evaluation
         private readonly Expander<P, I> _outerExpander;
         private readonly IEvaluatorData<P, I, M, D> _evaluatorData;
         private readonly Expander<P, I> _expander;
-
         private readonly IItemFactory<I, I> _itemFactory;
+        private readonly LoggingContext _loggingContext;
 
         private int _nextElementOrder = 0;
 
-        /// <summary>
-        /// Build event context to log evaluator events in.
-        /// </summary>
-        private BuildEventContext _buildEventContext = null;
-
-        /// <summary>
-        /// The logging service for use during evaluation
-        /// </summary>
-        private readonly ILoggingService _loggingService;
 
         /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for
@@ -57,16 +48,14 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType).Select(itemData => itemData.Item).ToList());
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
             _itemFactory = itemFactory;
-
-            _buildEventContext = buildEventContext;
-            _loggingService = loggingService;
+            _loggingContext = loggingContext;
         }
 
         private ICollection<ItemData> GetItems(string itemType)
@@ -99,8 +88,8 @@ namespace Microsoft.Build.Evaluation
                 expanderOptions,
                 GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                 element.ConditionLocation,
-                lazyEvaluator._loggingService,
-                lazyEvaluator._buildEventContext
+                lazyEvaluator._loggingContext.LoggingService,
+                lazyEvaluator._loggingContext.BuildEventContext
                 );
 
             return result;

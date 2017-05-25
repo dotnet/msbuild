@@ -9,13 +9,13 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
-using BaseLoggingContext = Microsoft.Build.BackEnd.Logging.BaseLoggingContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 #endif
 using System.Reflection;
+using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task factory logging context
         /// </summary>
-        private BaseLoggingContext _loggingContext;
+        private BuildLoggingContext _loggingContext;
 
         /// <summary>
         /// Is the system running in multi-process mode and requires events to be serializable
@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BaseLoggingContext loggingContext)
+        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets or retrieves the logging context
         /// </summary>
-        internal BaseLoggingContext LoggingContext
+        internal BuildLoggingContext LoggingContext
         {
             [DebuggerStepThrough]
             get
@@ -348,7 +348,7 @@ namespace Microsoft.Build.BackEnd
             if (!NodePacketTranslator.IsSerializable(e))
 #endif
             {
-                _loggingContext.LogWarning(new BuildEventFileInfo(string.Empty), null, "ExpectedEventToBeSerializable", e.GetType().Name);
+                _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 

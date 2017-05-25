@@ -493,10 +493,12 @@ namespace Microsoft.Build.Logging
             int taskId = ReadInt32();
             int submissionId = ReadInt32();
             int projectInstanceId = ReadInt32();
+            int evaluationID = ReadInt32();
 
             var result = new BuildEventContext(
                 submissionId,
                 nodeId,
+                evaluationID,
                 projectInstanceId,
                 projectContextId,
                 targetId,

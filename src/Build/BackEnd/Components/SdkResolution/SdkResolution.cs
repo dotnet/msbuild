@@ -37,27 +37,25 @@ namespace Microsoft.Build.BackEnd
         ///     Get path on disk to the referenced SDK.
         /// </summary>
         /// <param name="sdk">SDK referenced by the Project.</param>
-        /// <param name="logger">Logging service.</param>
-        /// <param name="buildEventContext">Build event context for logging.</param>
+        /// <param name="loggingContext">The logging service</param>
         /// <param name="sdkReferenceLocation">Location of the element within the project which referenced the SDK.</param>
         /// <param name="solutionPath">Path to the solution if known.</param>
         /// <param name="projectPath">Path to the project being built.</param>
         /// <returns>Path to the root of the referenced SDK.</returns>
-        internal string GetSdkPath(SdkReference sdk, ILoggingService logger, BuildEventContext buildEventContext,
+        internal string GetSdkPath(SdkReference sdk, LoggingContext loggingContext,
             ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             ErrorUtilities.VerifyThrowInternalNull(sdk, nameof(sdk));
-            ErrorUtilities.VerifyThrowInternalNull(logger, nameof(logger));
-            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
+            ErrorUtilities.VerifyThrowInternalNull(loggingContext, nameof(loggingContext));
             ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation, nameof(sdkReferenceLocation));
 
-            if (_resolvers == null) Initialize(logger, buildEventContext, sdkReferenceLocation);
+            if (_resolvers == null) Initialize(loggingContext, sdkReferenceLocation);
 
             var results = new List<SdkResultImpl>();
 
             try
             {
-                var buildEngineLogger = new SdkLoggerImpl(logger, buildEventContext);
+                var buildEngineLogger = new SdkLoggerImpl(loggingContext);
                 foreach (var sdkResolver in _resolvers)
                 {
                     var context = new SdkResolverContextImpl(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version);
@@ -67,7 +65,7 @@ namespace Microsoft.Build.BackEnd
                         var result = (SdkResultImpl)sdkResolver.Resolve(sdk, context, resultFactory);
                         if (result != null && result.Success)
                         {
-                            LogWarnings(logger, buildEventContext, sdkReferenceLocation, result);
+                            LogWarnings(loggingContext, sdkReferenceLocation, result);
                             return result.Path;
                         }
 
@@ -75,25 +73,25 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (Exception e)
                     {
-                        logger.LogFatalBuildError(buildEventContext, e, new BuildEventFileInfo(sdkReferenceLocation));
+                        loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
                     }
                 }
             }
             catch (Exception e)
             {
-                logger.LogFatalBuildError(buildEventContext, e, new BuildEventFileInfo(sdkReferenceLocation));
+                loggingContext.LogFatalBuildError(e, new BuildEventFileInfo(sdkReferenceLocation));
                 throw;
             }
 
             foreach (var result in results)
             {
-                LogWarnings(logger, buildEventContext, sdkReferenceLocation, result);
+                LogWarnings(loggingContext, sdkReferenceLocation, result);
 
                 if (result.Errors != null)
                 {
                     foreach (var error in result.Errors)
                     {
-                        logger.LogErrorFromText(buildEventContext, subcategoryResourceName: null, errorCode: null,
+                        loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null,
                             helpKeyword: null, file: new BuildEventFileInfo(sdkReferenceLocation), message: error);
                     }
                 }
@@ -111,38 +109,36 @@ namespace Microsoft.Build.BackEnd
             _resolvers = resolvers;
         }
 
-        private void Initialize(ILoggingService logger, BuildEventContext buildEventContext, ElementLocation location)
+        private void Initialize(LoggingContext loggingContext, ElementLocation location)
         {
             lock (_lockObject)
             {
                 if (_resolvers != null) return;
-                _resolvers = _sdkResolverLoader.LoadResolvers(logger, buildEventContext, location);
+                _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
             }
         }
 
-        private static void LogWarnings(ILoggingService logger, BuildEventContext bec, ElementLocation location,
+        private static void LogWarnings(LoggingContext loggingContext, ElementLocation location,
             SdkResultImpl result)
         {
             if (result.Warnings == null) return;
 
             foreach (var warning in result.Warnings)
-                logger.LogWarningFromText(bec, null, null, null, new BuildEventFileInfo(location), warning);
+                loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
         }
 
         private class SdkLoggerImpl : SdkLogger
         {
-            private readonly BuildEventContext _buildEventContext;
-            private readonly ILoggingService _loggingService;
+            private readonly LoggingContext _loggingContext;
 
-            public SdkLoggerImpl(ILoggingService loggingService, BuildEventContext buildEventContext)
+            public SdkLoggerImpl(LoggingContext loggingContext)
             {
-                _loggingService = loggingService;
-                _buildEventContext = buildEventContext;
+                _loggingContext = loggingContext;
             }
 
             public override void LogMessage(string message, MessageImportance messageImportance = MessageImportance.Low)
             {
-                _loggingService.LogCommentFromText(_buildEventContext, messageImportance, message);
+                _loggingContext.LogCommentFromText(messageImportance, message);
             }
         }
 

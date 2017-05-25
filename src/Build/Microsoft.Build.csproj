@@ -192,7 +192,9 @@
     <Compile Include="BackEnd\Components\Caching\IRegisteredTaskObjectCache.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
     <Compile Include="BackEnd\Components\Caching\RegisteredTaskObjectCache.cs" />
-    <Compile Include="BackEnd\Components\Logging\BaseLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\EvaluationLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\LoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildEventArgTransportSink.cs" />
     <Compile Include="BackEnd\Components\Logging\CentralForwardingLogger.cs" />
     <Compile Include="BackEnd\Components\Logging\EventRedirectorToSink.cs" />

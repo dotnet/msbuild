@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -153,6 +154,16 @@ namespace Microsoft.Build.Engine.UnitTests
         public TransientTestFolder CreateFolder()
         {
             return WithTransientTestState(new TransientTestFolder());
+        }
+
+        /// <summary>
+        ///     Creates a test variant that corresponds to a project collection which will have its projects unloaded,
+        ///     loggers unregistered, toolsets removed and disposed when the test completes
+        /// </summary>
+        /// <returns></returns>
+        public TransientProjectCollection CreateProjectCollection()
+        {
+            return WithTransientTestState(new TransientProjectCollection());
         }
 
         /// <summary>
@@ -452,6 +463,24 @@ namespace Microsoft.Build.Engine.UnitTests
                     ? factory.IndicateSuccess(_mapping[sdkReference.Name], null)
                     : factory.IndicateFailure(new[] {$"Not in {nameof(_mapping)}"});
             }
+        }
+    }
+
+    public class TransientProjectCollection : TransientTestState
+    {
+        public ProjectCollection Collection { get; }
+
+        public TransientProjectCollection()
+        {
+            Collection = new ProjectCollection();
+        }
+
+        public override void Revert()
+        {
+            Collection.UnloadAllProjects();
+            Collection.UnregisterAllLoggers();
+            Collection.RemoveAllToolsets();
+            Collection.Dispose();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// The logging context for an entire node.
     /// </summary>
-    internal class NodeLoggingContext : BaseLoggingContext
+    internal class NodeLoggingContext : BuildLoggingContext
     {
         /// <summary>
         /// Used to create the initial, base logging context for the node.

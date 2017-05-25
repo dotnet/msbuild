@@ -17,6 +17,7 @@ using System.IO;
 using System.Xml;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
@@ -679,6 +680,68 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new ProjectInstanceComparer());
+        }
+
+        public delegate ProjectInstance ProjectInstanceFactory(string file, ProjectRootElement xml, ProjectCollection collection);
+
+        public static IEnumerable<object[]> ProjectInstanceHasEvaluationIDTestData()
+        {
+            // from file
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => new ProjectInstance(f, null, null, c)
+            };
+
+            // from Project
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => new Project(f, null, null, c).CreateProjectInstance()
+            };
+
+            // from DeepCopy
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => new ProjectInstance(f, null, null, c).DeepCopy()
+            };
+
+            // from ProjectRootElement
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => new ProjectInstance(xml, null, null, c).DeepCopy()
+            };
+
+            // from translated project instance
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) =>
+                {
+                    var pi = new ProjectInstance(f, null, null, c);
+                    pi.AddItem("foo", "bar");
+                    pi.TranslateEntireState = true;
+
+                    ((INodePacketTranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+                    return copy;
+                }
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(ProjectInstanceHasEvaluationIDTestData))]
+        public void ProjectInstanceHasEvaluationID(ProjectInstanceFactory projectInstanceFactory)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var file = env.CreateFile().Path;
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                var xml = ProjectRootElement.Create(projectCollection);
+                xml.Save(file);
+
+                var projectInstance = projectInstanceFactory.Invoke(file, xml, projectCollection);
+                Assert.NotEqual(BuildEventContext.InvalidEvaluationID, projectInstance.EvaluationID);
+            }
         }
 
         /// <summary>

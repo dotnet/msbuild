@@ -13,19 +13,29 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolution_Tests
     {
+        private readonly StringBuilder _log;
+        private readonly MockLoggingContext _loggingContext;
+
+        public SdkResolution_Tests()
+        {
+            _log = new StringBuilder();
+
+            var logger = new MockLoggingService(message => _log.AppendLine(message));
+            var bec = new BuildEventContext(0, 0, 0, 0, 0);
+
+            _loggingContext = new MockLoggingContext(logger, bec);
+        }
+
         [Fact]
         public void AssertFirstResolverCanResolve()
         {
-            var log = new StringBuilder();
             var sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
-            var logger = new MockLoggingService(message => log.AppendLine(message));
-            var bec = new BuildEventContext(0, 0, 0, 0, 0);
             
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
+            var result = resolution.GetSdkPath(sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
-            Assert.Equal("MockSdkResolver1 running", log.ToString().Trim());
+            Assert.Equal("MockSdkResolver1 running", _log.ToString().Trim());
         }
 
         [Fact]
@@ -39,9 +49,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
+            var result = resolution.GetSdkPath(sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            var logResult = log.ToString();
+            var logResult = _log.ToString();
             Assert.Equal("resolverpath2", result);
 
             // Both resolvers should run, and no ERROR string.
@@ -62,9 +72,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy());
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
+            var result = resolution.GetSdkPath(sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
-            var logResult = log.ToString();
+            var logResult = _log.ToString();
             Assert.Null(result);
             Assert.Contains("MockSdkResolver1 running", logResult);
             Assert.Contains("MockSdkResolver2 running", logResult);
@@ -82,10 +92,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var bec = new BuildEventContext(0, 0, 0, 0, 0);
 
             SdkResolution resolution = new SdkResolution(new MockLoaderStrategy(true));
-            var result = resolution.GetSdkPath(sdk, logger, bec, new MockElementLocation("file"), "sln", "projectPath");
+            var result = resolution.GetSdkPath(sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath");
 
             Assert.Equal("resolverpath1", result);
-            Assert.Contains("EXMESSAGE", log.ToString());
+            Assert.Contains("EXMESSAGE", _log.ToString());
         }
 
         private class MockLoaderStrategy : SdkResolverLoader
@@ -97,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 _includeErrorResolver = includeErrorResolver;
             }
 
-            internal override IList<SdkResolver> LoadResolvers(ILoggingService logger, BuildEventContext bec, ElementLocation location)
+            internal override IList<SdkResolver> LoadResolvers(LoggingContext loggingContext, ElementLocation location)
             {
                 return _includeErrorResolver
                     ? new List<SdkResolver> {new MockSdkResolverThrows(),new MockSdkResolver1(),new MockSdkResolver2()}

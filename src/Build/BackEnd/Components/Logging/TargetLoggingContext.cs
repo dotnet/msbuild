@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// A logging context for building a specific target within a project.
     /// </summary>
-    internal class TargetLoggingContext : BaseLoggingContext
+    internal class TargetLoggingContext : BuildLoggingContext
     {
         /// <summary>
         /// Should target outputs be logged also.

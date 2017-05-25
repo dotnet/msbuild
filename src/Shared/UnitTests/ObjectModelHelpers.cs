@@ -492,6 +492,11 @@ namespace Microsoft.Build.UnitTests
             return projectFileContents;
         }
 
+        public static string Cleanup(this string aString)
+        {
+            return CleanupFileContents(aString);
+        }
+
         /// <summary>
         /// Normalizes all the whitespace in an xml string so that two documents that
         /// differ only in whitespace can be easily compared to each other for sameness.

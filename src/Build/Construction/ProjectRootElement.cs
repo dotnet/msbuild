@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -155,11 +156,6 @@ namespace Microsoft.Build.Construction
         private string _dirtyParameter = String.Empty;
 
         /// <summary>
-        /// The build event context errors should be logged in.
-        /// </summary>
-        private BuildEventContext _buildEventContext;
-
-        /// <summary>
         /// Initialize a ProjectRootElement instance from a XmlReader.
         /// May throw InvalidProjectFileException.
         /// Leaves the project dirty, indicating there are unsaved changes.
@@ -217,16 +213,14 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext,
+        private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache,
             bool preserveFormatting)
             : base()
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowInternalRooted(path);
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
-            ErrorUtilities.VerifyThrowArgumentNull(buildEventContext, "buildEventContext");
             _projectRootElementCache = projectRootElementCache;
-            _buildEventContext = buildEventContext;
 
             IncrementVersion();
             _versionOnDisk = _version;
@@ -1805,13 +1799,13 @@ namespace Microsoft.Build.Construction
         /// Path provided must be a canonicalized full path.
         /// May throw InvalidProjectFileException or an IO-related exception.
         /// </summary>
-        internal static ProjectRootElement OpenProjectOrSolution(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, ProjectRootElementCache projectRootElementCache, BuildEventContext buildEventContext, bool isExplicitlyLoaded)
+        internal static ProjectRootElement OpenProjectOrSolution(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded)
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(
                 fullPath,
-                (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext,
+                (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, cache,
                                     preserveFormatting: false),
                 isExplicitlyLoaded,
                 // don't care about formatting, reuse whatever is there
@@ -1973,7 +1967,6 @@ namespace Microsoft.Build.Construction
             return new ProjectRootElement(
                 path,
                 projectRootElementCache,
-                new BuildEventContext(0, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId),
                 preserveFormatting);
         }
 
@@ -1989,9 +1982,7 @@ namespace Microsoft.Build.Construction
                 string projectFile,
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
-                ILoggingService loggingService,
                 ProjectRootElementCache projectRootElementCache,
-                BuildEventContext buildEventContext,
                 bool preserveFormatting
             )
         {
@@ -2005,7 +1996,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 // OK it's a regular project file, load it normally.
-                return new ProjectRootElement(projectFile, projectRootElementCache, buildEventContext, preserveFormatting);
+                return new ProjectRootElement(projectFile, projectRootElementCache, preserveFormatting);
             }
             catch (InvalidProjectFileException)
             {

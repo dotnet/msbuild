@@ -498,6 +498,7 @@ namespace Microsoft.Build.Logging
             Write(buildEventContext.TaskId);
             Write(buildEventContext.SubmissionId);
             Write(buildEventContext.ProjectInstanceId);
+            Write(buildEventContext.EvaluationID);
         }
 
         private void Write<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)

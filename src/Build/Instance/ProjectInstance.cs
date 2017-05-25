@@ -187,6 +187,7 @@ namespace Microsoft.Build.Execution
         private string _subToolsetVersion;
         private TaskRegistry _taskRegistry;
         private bool _translateEntireState;
+        private int _evaluationID = BuildEventContext.InvalidEvaluationID;
 
 
         /// <summary>
@@ -259,7 +260,7 @@ namespace Microsoft.Build.Execution
             BuildParameters buildParameters = new BuildParameters(projectCollection);
 
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, projectCollection.LoggingService, buildParameters.ProjectRootElementCache, buildEventContext, true /*Explicitly Loaded*/);
+            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext, projectCollection.SdkResolution);
         }
@@ -386,7 +387,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
 
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, loggingService, buildParameters.ProjectRootElementCache, buildEventContext, false /*Not explicitly loaded*/);
+            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, ProjectCollection.GlobalProjectCollection.SdkResolution);
         }
@@ -417,6 +418,8 @@ namespace Microsoft.Build.Execution
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
+
+            EvaluationID = data.EvaluationID;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
             this.CreatePropertiesSnapshot(data, immutable);
@@ -474,6 +477,7 @@ namespace Microsoft.Build.Execution
             _projectFileLocation = that._projectFileLocation;
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
+            _evaluationID = that.EvaluationID;
 
             TranslateEntireState = that.TranslateEntireState;
 
@@ -639,6 +643,17 @@ namespace Microsoft.Build.Execution
                     _translateEntireState = value;
                 }
             }
+        }
+
+        /// <summary>
+        /// The ID of the evaluation that produced this ProjectInstance.
+        /// 
+        /// See <see cref="Project.LastEvaluationID"/>.
+        /// </summary>
+        public int EvaluationID
+        {
+            get { return _evaluationID; }
+            set { _evaluationID = value; }
         }
 
         /// <summary>
@@ -1764,6 +1779,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _projectFileLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _taskRegistry, TaskRegistry.FactoryForDeserialization);
             translator.Translate(ref _isImmutable);
+            translator.Translate(ref _evaluationID);
 
             translator.TranslateDictionary(
                 ref _itemDefinitions,
@@ -2427,7 +2443,11 @@ namespace Microsoft.Build.Execution
                 Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Creating a ProjectInstance from an unevaluated state [{0}]", FullPath));
             }
 
+            ErrorUtilities.VerifyThrow(EvaluationID == BuildEventContext.InvalidEvaluationID, "Evaluation ID is invalid prior to evaluation");
+
             _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(this, xml, ProjectLoadSettings.Default, buildParameters.MaxNodeCount, buildParameters.EnvironmentPropertiesInternal, loggingService, new ProjectItemInstanceFactory(this), buildParameters.ToolsetProvider, ProjectRootElementCache, buildEventContext, this /* for debugging only */, sdkResolution);
+
+            ErrorUtilities.VerifyThrow(EvaluationID != BuildEventContext.InvalidEvaluationID, "Evaluation should produce an evaluation ID");
         }
 
         /// <summary>
