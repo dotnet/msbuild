@@ -17,33 +17,33 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25159" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25179" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25159" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.0-preview2-25159" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.0.0-preview2-25159" Condition="'$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.0-preview2-25159" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0-preview2-25159" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25159" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25159" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0-preview2-25159" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0-preview2-25159" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.0-preview2-25159" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview2-25159" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25159" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25179" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.0-preview2-25179" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.0.0-preview2-25179" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.0-preview2-25179" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0-preview2-25179" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25179" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25179" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0-preview2-25179" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0-preview2-25179" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.0-preview2-25179" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview2-25179" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25179" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NoTools)' != 'True'">
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0-preview2-25159" Condition="'$(IndividualLocalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25159" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25159" />
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0-preview2-25179" Condition="'$(IndividualLocalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25179" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25179" />
   </ItemGroup>
 
 </Project>
