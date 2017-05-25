@@ -340,6 +340,32 @@ namespace Microsoft.Build.Tasks
                         haveGeneratedContent = true;
                     }
                     break;
+                case "f#":
+                    if (AssemblyAttributes == null) return string.Empty;
+
+                    extension = "fs";
+                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
+                    code.AppendLine();
+                    code.AppendLine("open System");
+                    code.AppendLine("open System.Reflection");
+                    code.AppendLine();
+
+                    foreach (ITaskItem attributeItem in AssemblyAttributes)
+                    {
+                        string args = GetAttributeArguments(attributeItem, "=", QuoteSnippetStringCSharp);
+                        if (args == null) return null;
+
+                        code.AppendLine(string.Format($"[<assembly: {attributeItem.ItemSpec}({args})>]"));
+                        haveGeneratedContent = true;
+                    }
+
+                    if (haveGeneratedContent)
+                    {
+                        code.AppendLine("()");
+                        code.AppendLine();
+                    }
+
+                    break;
                 default:
                     Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, string.Empty);
                     return null;
