@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5",
+    "PdbGit": "3.0.41"
   },
   "frameworks": {
     "net35": { }
