@@ -89,11 +89,36 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.ProjectEvaluationFinished:
                     result = ReadProjectEvaluationFinishedEventArgs();
                     break;
+                case BinaryLogRecordKind.ProjectImported:
+                    result = ReadProjectImportedEventArgs();
+                    break;
                 default:
                     break;
             }
 
             return result;
+        }
+
+        private BuildEventArgs ReadProjectImportedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+            var importedProjectFile = ReadOptionalString();
+            var unexpandedProject = ReadOptionalString();
+
+            var e = new ProjectImportedEventArgs(
+                fields.LineNumber,
+                fields.ColumnNumber,
+                fields.Message);
+
+            SetCommonFields(e, fields);
+
+            e.ProjectFile = fields.ProjectFile;
+
+            e.ImportedProjectFile = importedProjectFile;
+            e.UnexpandedProject = unexpandedProject;
+            return e;
         }
 
         private BuildEventArgs ReadBuildStartedEventArgs()

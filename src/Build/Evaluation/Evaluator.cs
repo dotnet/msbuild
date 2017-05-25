@@ -2375,6 +2375,29 @@ namespace Microsoft.Build.Evaluation
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
                 ParserOptions.AllowProperties, _projectRootElementCache))
             {
+                if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                {
+                    // Expand the expression for the Log.
+                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties, importElement.ConditionLocation);
+
+                    string message = ResourceUtilities.FormatResourceString(
+                        "ProjectImportSkippedFalseCondition",
+                        importElement.Project,
+                        importElement.ContainingProject.FullPath,
+                        importElement.Location.Line,
+                        importElement.Location.Column,
+                        importElement.Condition,
+                        expanded);
+
+                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(importElement.Location.Line, importElement.Location.Column, message)
+                    {
+                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                        UnexpandedProject = importElement.Project,
+                        ProjectFile = importElement.ContainingProject.FullPath
+                    };
+
+                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                }
                 projects = new List<ProjectRootElement>();
                 return;
             }
@@ -2453,6 +2476,28 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Keep track of any imports that evaluated to empty
                     atleastOneImportEmpty = true;
+
+                    if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                    {
+                        string message = ResourceUtilities.FormatResourceString(
+                            "ProjectImportSkippedNoMatches",
+                            importExpressionEscapedItem,
+                            importElement.ContainingProject.FullPath,
+                            importElement.Location.Line,
+                            importElement.Location.Column);
+
+                        ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                            importElement.Location.Line,
+                            importElement.Location.Column,
+                            message)
+                        {
+                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                            UnexpandedProject = importElement.Project,
+                            ProjectFile = importElement.ContainingProject.FullPath
+                        };
+
+                        _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                    }
                 }
 
                 foreach (string importFileEscaped in importFilesEscaped)
@@ -2568,6 +2613,29 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                            {
+                                string message = ResourceUtilities.FormatResourceString(
+                                    "ProjectImported",
+                                    importedProjectElement.FullPath,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column);
+
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    message)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    ImportedProjectFile = importedProjectElement.FullPath,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                            }
                         }
                     }
                     catch (InvalidProjectFileException ex) when (ExceptionHandling.IsIoRelatedException(ex.InnerException))

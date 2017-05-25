@@ -353,6 +353,13 @@ namespace Microsoft.Build.Framework
         public bool Succeeded { get { throw null; } }
     }
     public delegate void ProjectFinishedEventHandler(object sender, Microsoft.Build.Framework.ProjectFinishedEventArgs e);
+    public partial class ProjectImportedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public ProjectImportedEventArgs() { }
+        public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message) { }
+        public string ImportedProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string UnexpandedProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class ProjectStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         public const int InvalidProjectId = -1;

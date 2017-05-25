@@ -17,6 +17,7 @@
         TaskCommandLine,
         CriticalBuildMessage,
         ProjectEvaluationStarted,
-        ProjectEvaluationFinished
+        ProjectEvaluationFinished,
+        ProjectImported
     }
 }
