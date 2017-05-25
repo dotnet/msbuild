@@ -16,6 +16,14 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes a new instance of the ProjectEvaluationFinishedEventArgs class.
         /// </summary>
+        public ProjectEvaluationFinishedEventArgs()
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ProjectEvaluationFinishedEventArgs class.
+        /// </summary>
         public ProjectEvaluationFinishedEventArgs(string message)
             : base(message, null, null)
         {
