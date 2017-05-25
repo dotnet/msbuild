@@ -19,11 +19,9 @@ namespace Microsoft.DotNet.Tools.Help
 
         public const string CommonOptions = "Common options";
 
-        public const string VerboseDefinition = "Enable verbose output";
-
         public const string DiagnosticsDefinition = "Enable diagnostic output";
 
-        public const string HelpDefinition = "Show help";
+        public const string HelpDefinition = "Show help.";
 
         public const string HostOptions = "Host options (passed before the command)";
 
