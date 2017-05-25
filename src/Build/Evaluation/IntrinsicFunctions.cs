@@ -435,7 +435,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal static bool IsOSPlatform(string platformString)
         {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Create(platformString));
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Create(platformString.ToUpperInvariant()));
         }
 
         /// <summary>

@@ -2637,7 +2637,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void IsOsPlatformShouldBeCaseSensitiveToParameter()
+        public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
@@ -2646,7 +2646,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::IsOsPlatform({osPlatformLowerCase}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal("False", result);
+            Assert.Equal("True", result);
         }
 
         /// <summary>
