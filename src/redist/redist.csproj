@@ -36,6 +36,12 @@
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="minimumMSBuildVersion">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="PublishAspNetRuntimePackageStore"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
