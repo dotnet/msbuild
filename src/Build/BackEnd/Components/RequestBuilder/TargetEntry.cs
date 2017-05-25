@@ -753,6 +753,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// This method is used by the Target Builder to indicate that a child of this target has failed and that work should not
+        /// continue in Completed / Skipped mode. We do not want to mark the state to run in ErrorExecution mode so that the
+        /// OnError targets do not run (the target was skipped due to condition so OnError targets should not run).
+        /// </summary>
+        internal void MarkForStop()
+        {
+            ErrorUtilities.VerifyThrow(_state == TargetEntryState.Completed, "State must be Completed. State is {0}.", _state);
+            ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, "ResultCode must be Skipped. ResultCode is {0}.", _state);
+            ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, "ActionCode must be Continue. ActionCode is {0}.", _state);
+
+            _targetResult.WorkUnitResult.ActionCode = WorkUnitActionCode.Stop;
+        }
+
+        /// <summary>
         /// Leaves all the call target scopes in the order they were entered.
         /// </summary>
         internal void LeaveLegacyCallTargetScopes()

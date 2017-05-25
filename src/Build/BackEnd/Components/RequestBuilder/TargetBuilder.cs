@@ -609,10 +609,16 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                // Mark our parent for error execution
+                // Mark our parent for error execution when it is not Completed (e.g. Executing)
                 if (topEntry.ParentEntry != null && topEntry.ParentEntry.State != TargetEntryState.Completed)
                 {
                     topEntry.ParentEntry.MarkForError();
+                }
+                // In cases where we need to indicate a failure but the ParentEntry was Skipped (due to condition) it must be
+                // marked stop to prevent other targets from executing.
+                else if (topEntry.ParentEntry?.Result?.ResultCode == TargetResultCode.Skipped)
+                {
+                    topEntry.ParentEntry.MarkForStop();
                 }
             }
         }

@@ -115,6 +115,7 @@ namespace Microsoft.Build.BackEnd
         internal WorkUnitActionCode ActionCode
         {
             get { return _actionCode; }
+            set { _actionCode = value; }
         }
 
         /// <summary>
