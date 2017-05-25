@@ -142,10 +142,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Link Condition="'%(Link)' == '' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
 
-    <EmbeddedResource Update="@(EmbeddedResource )">
+    <EmbeddedResource Update="@(EmbeddedResource)">
       <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
       <Link Condition="'%(Link)' == '' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </EmbeddedResource >
+    </EmbeddedResource>
   </ItemGroup>
 
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
