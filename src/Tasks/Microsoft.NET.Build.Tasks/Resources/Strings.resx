@@ -294,4 +294,7 @@
   <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
     <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
   </data>
+  <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
+    <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+  </data>
 </root>
