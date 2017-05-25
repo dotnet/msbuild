@@ -45,10 +45,11 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
   <Target Name="GenerateAssemblyInfo"
           BeforeTargets="CoreCompile"
-          DependsOnTargets="PrepareForBuild;GetAssemblyVersion;CoreGenerateAssemblyInfo"
+          DependsOnTargets="PrepareForBuild;CoreGenerateAssemblyInfo"
           Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
-  <Target Name="_CalculateAssemblyAttributes">
+  <Target Name="GetAssemblyAttributes"
+          DependsOnTargets="GetAssemblyVersion">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Company)' != '' and '$(GenerateAssemblyCompanyAttribute)' == 'true'">
         <_Parameter1>$(Company)</_Parameter1>
@@ -85,12 +86,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- 
     To allow version changes to be respected on incremental builds (e.g. through CLI parameters),
-    create a hash of all assembly attributes so that the lock file name will change with the calculated
+    create a hash of all assembly attributes so that the cache file will change with the calculated
     assembly attribute values and msbuild will then execute CoreGenerateAssembly to generate a new file.
   -->
-  <Target Name="_CreateGeneratedAssemblyInfoInputsCacheFile"
-          DependsOnTargets="_CalculateAssemblyAttributes"
-          BeforeTargets="CoreGenerateAssemblyInfo">
+  <Target Name="CreateGeneratedAssemblyInfoInputsCacheFile"
+          DependsOnTargets="GetAssemblyAttributes">
     <PropertyGroup>
       <GeneratedAssemblyInfoInputsCacheFile>$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfoInputs.cache</GeneratedAssemblyInfoInputsCacheFile>
     </PropertyGroup>
@@ -108,7 +108,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="CoreGenerateAssemblyInfo"
           Condition="'$(Language)'=='VB' or '$(Language)'=='C#'"
-          Inputs="$(MSBuildAllProjects);$(GeneratedAssemblyInfoInputsCacheFile)"
+          DependsOnTargets="CreateGeneratedAssemblyInfoInputsCacheFile"
+          Inputs="$(GeneratedAssemblyInfoInputsCacheFile)"
           Outputs="$(GeneratedAssemblyInfoFile)">
     <ItemGroup>
       <!-- Ensure the generated assemblyinfo file is not already part of the Compile sources, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
