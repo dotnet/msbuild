@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -554,6 +555,37 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
                 .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
+        }
+
+        [Theory]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netstandard2.1")]
+        public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "TargetFrameworkVersionCap",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, targetFramework);
+
+            var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: testProject.Name);
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("The current .NET SDK does not support targeting");
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("The current .NET SDK does not support targeting");
         }
 
         [Fact]
