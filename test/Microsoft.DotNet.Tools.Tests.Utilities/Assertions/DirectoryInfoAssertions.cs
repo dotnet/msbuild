@@ -191,6 +191,22 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> BeEmpty()
+        {
+            Execute.Assertion.ForCondition(!_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is not empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotBeEmpty()
+        {
+            Execute.Assertion.ForCondition(_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> NotExist(string because = "", params object[] reasonArgs)
         {
             Execute.Assertion
