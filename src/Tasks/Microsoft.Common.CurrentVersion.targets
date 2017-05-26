@@ -1372,14 +1372,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ResolveReferencesDependsOn>
   </PropertyGroup>
 
-  <!-- FindReferenceAssembliesForReferences needs to see a fully-populated @(ReferencePath),
-       so it should run after all of the subcomponents of ResolveReferences, including
-       user overrides of AfterResolveReferences and targets added by appending to
-       $(ResolveReferencesDependsOn) (like ImplicitlyExpandDesignTimeFacades). So list it
-       last explicitly, rather than adding it to the property.   -->
   <Target
       Name="ResolveReferences"
-      DependsOnTargets="$(ResolveReferencesDependsOn);FindReferenceAssembliesForReferences"/>
+      DependsOnTargets="$(ResolveReferencesDependsOn)"/>
 
   <!--
     ============================================================
@@ -2055,7 +2050,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="FindReferenceAssembliesForReferences"
-          DependsOnTargets="$(ResolveReferencesDependsOn)">
+          DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')"
                                       Condition="'$(CompileUsingReferenceAssemblies)' != 'false'">
@@ -3130,6 +3125,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveReferences;
       ResolveKeySource;
       SetWin32ManifestProperties;
+      FindReferenceAssembliesForReferences;
       _GenerateCompileInputs;
       BeforeCompile;
       _TimeStampBeforeCompile;
