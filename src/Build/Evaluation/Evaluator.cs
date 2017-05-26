@@ -2064,11 +2064,37 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
+            bool hasCondition = !string.IsNullOrEmpty(importElement.Condition);
+            bool importedAnything = false;
+            string location = importElement.Location.LocationString;
+
             List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement);
 
             foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
             {
                 _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version);
+
+                importedAnything = true;
+
+                if (hasCondition)
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "ImportingProjectBecauseConditionTrue",
+                        importedProjectRootElement.ProjectFileLocation,
+                        location,
+                        importElement.Condition);
+                }
+                else
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "ImportingProject",
+                        importedProjectRootElement.ProjectFileLocation,
+                        location);
+                }
 
                 // This key should be unique, as duplicate imports were already discarded
 #if FEATURE_MSBUILD_DEBUGGER
@@ -2079,6 +2105,29 @@ namespace Microsoft.Build.Evaluation
 #endif
 
                 PerformDepthFirstPass(importedProjectRootElement);
+            }
+
+            if (!importedAnything)
+            {
+                if (hasCondition)
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "NotImportingProjectBecauseConditionFalse",
+                        importElement.Project,
+                        location,
+                        importElement.Condition);
+                }
+                else
+                {
+                    _loggingService.LogComment(
+                        _buildEventContext,
+                        MessageImportance.Low,
+                        "NotImportingProjects",
+                        importElement.Project,
+                        location);
+                }
             }
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -2592,7 +2641,7 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
             }
 
             if (imports.Count > 0)

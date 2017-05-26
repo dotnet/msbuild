@@ -33,11 +33,24 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Raised when the log reader encounters a binary blob embedded in the stream.
+        /// The arguments include the blob kind and the byte buffer with the contents.
+        /// </summary>
+        internal event Action<BinaryLogRecordKind, byte[]> OnBlobRead;
+
+        /// <summary>
         /// Reads the next log record from the binary reader. If there are no more records, returns null.
         /// </summary>
         public BuildEventArgs Read()
         {
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
+
+            while (IsBlob(recordKind))
+            {
+                ReadBlob(recordKind);
+
+                recordKind = (BinaryLogRecordKind)ReadInt32();
+            }
 
             BuildEventArgs result = null;
             switch (recordKind)
@@ -88,6 +101,21 @@ namespace Microsoft.Build.Logging
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// For now it's just the ProjectImportArchive.
+        /// </summary>
+        private static bool IsBlob(BinaryLogRecordKind recordKind)
+        {
+            return recordKind == BinaryLogRecordKind.ProjectImportArchive;
+        }
+
+        private void ReadBlob(BinaryLogRecordKind kind)
+        {
+            int length = ReadInt32();
+            byte[] bytes = binaryReader.ReadBytes(length);
+            OnBlobRead?.Invoke(kind, bytes);
         }
 
         private BuildEventArgs ReadBuildStartedEventArgs()
