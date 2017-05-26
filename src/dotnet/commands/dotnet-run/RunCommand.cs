@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Tools.Run.LaunchSettings;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -22,6 +23,10 @@ namespace Microsoft.DotNet.Tools.Run
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
 
+        public string LaunchProfile { get; private set; }
+        public bool NoLaunchProfile { get; private set; }
+
+
         public int Start()
         {
             Initialize();
@@ -33,6 +38,27 @@ namespace Microsoft.DotNet.Tools.Run
 
             ICommand runCommand = GetRunCommand();
 
+            if (!NoLaunchProfile)
+            {
+                var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
+                var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
+                if (File.Exists(launchSettingsPath))
+                {
+                    var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
+                    if (!LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, out string runAfterLaunch, LaunchProfile))
+                    {
+                        string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
+                        //Error that the launch profile couldn't be applied
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName));
+                    }
+                }
+                else if (!string.IsNullOrEmpty(LaunchProfile))
+                {
+                    //Error that the launch profile couldn't be found
+                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile);
+                }
+            }
+
             return runCommand
                 .Execute()
                 .ExitCode;
@@ -42,12 +68,16 @@ namespace Microsoft.DotNet.Tools.Run
             string framework,
             bool noBuild,
             string project,
+            string launchProfile,
+            bool noLaunchProfile,
             IReadOnlyCollection<string> args)
         {
             Configuration = configuration;
             Framework = framework;
             NoBuild = noBuild;
             Project = project;
+            LaunchProfile = launchProfile;
+            NoLaunchProfile = noLaunchProfile;
             Args = args;
         }
 
@@ -55,6 +85,8 @@ namespace Microsoft.DotNet.Tools.Run
             string framework = null,
             bool? noBuild = null,
             string project = null,
+            string launchProfile = null,
+            bool? noLaunchProfile = null,
             IReadOnlyCollection<string> args = null)
         {
             return new RunCommand(
@@ -62,6 +94,8 @@ namespace Microsoft.DotNet.Tools.Run
                 framework ?? this.Framework,
                 noBuild ?? this.NoBuild,
                 project ?? this.Project,
+                launchProfile ?? this.LaunchProfile,
+                noLaunchProfile ?? this.NoLaunchProfile,
                 args ?? this.Args
             );
         }

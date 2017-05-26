@@ -21,6 +21,8 @@ namespace Microsoft.DotNet.Cli
                         framework: o.SingleArgumentOrDefault("--framework"),
                         noBuild: o.HasOption("--no-build"),
                         project: o.SingleArgumentOrDefault("--project"),
+                        launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
+                        noLaunchProfile: o.HasOption("--no-launch-profile"),
                         args: o.Arguments
                     )),
                 options: new[]
@@ -32,6 +34,14 @@ namespace Microsoft.DotNet.Cli
                         "-p|--project",
                         LocalizableStrings.CommandOptionProjectDescription,
                         Accept.ExactlyOneArgument()),
+                    Create.Option(
+                        "--launch-profile",
+                        LocalizableStrings.CommandOptionLaunchProfileDescription,
+                        Accept.ExactlyOneArgument()),
+                    Create.Option(
+                        "--no-launch-profile",
+                        LocalizableStrings.CommandOptionNoLaunchProfileDescription,
+                        Accept.NoArguments()),
                     Create.Option(
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
