@@ -44,6 +44,12 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 else
                 {
                     profileObject = profilesObject[profileName] as JObject;
+
+                    if (profileObject == null)
+                    {
+                        runAfterLaunch = null;
+                        return false;
+                    }
                 }
 
                 if (profileObject == null)
