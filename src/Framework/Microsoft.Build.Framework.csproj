@@ -115,6 +115,8 @@
     <Compile Include="OutputAttribute.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ProjectEvaluationFinishedEventArgs.cs" />
+    <Compile Include="ProjectEvaluationStartedEventArgs.cs" />
     <Compile Include="ProjectFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

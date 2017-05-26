@@ -335,6 +335,18 @@ namespace Microsoft.Build.Framework
     {
         public OutputAttribute() { }
     }
+    public sealed partial class ProjectEvaluationFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    {
+        public ProjectEvaluationFinishedEventArgs() { }
+        public ProjectEvaluationFinishedEventArgs(string message) { }
+        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    {
+        public ProjectEvaluationStartedEventArgs() { }
+        public ProjectEvaluationStartedEventArgs(string message) { }
+        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class ProjectFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected ProjectFinishedEventArgs() { }

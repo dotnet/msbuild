@@ -786,7 +786,11 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _evaluationLoggingContext.LogComment(MessageImportance.Low, "EvaluationStarted", projectFile);
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.FormatResourceString("EvaluationStarted", projectFile))
+            {
+                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                ProjectFile = projectFile
+            });
 
 #if MSBUILDENABLEVSPROFILING 
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
@@ -940,7 +944,11 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
-            _evaluationLoggingContext.LogComment(MessageImportance.Low, "EvaluationFinished", projectFile);
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.FormatResourceString("EvaluationFinished", projectFile))
+            {
+                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                ProjectFile = projectFile
+            });
 
 #if FEATURE_MSBUILD_DEBUGGER
             return _projectLevelLocalsForBuild;
