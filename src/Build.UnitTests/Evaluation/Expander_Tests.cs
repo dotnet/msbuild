@@ -2612,7 +2612,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             "$$architecture$$"
         )]
         [InlineData(
-            "$([MSBuild]::IsOsPlatform($$platform$$))",
+            "$([MSBuild]::IsOSPlatform($$platform$$))",
             "True"
         )]
         public void PropertyFunctionRuntimeInformation(string propertyFunction, string expectedExpansion)
@@ -2634,18 +2634,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(expectedExpansion, result);
-        }
-
-        [Fact]
-        public void InvalidIsOsPlatformArgumentShouldPrintAvailablePlatforms()
-        {
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
-            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
-
-            var exception = Assert.Throws<InvalidProjectFileException>(
-                () => expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::IsOsPlatform(Foo))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
-
-            Assert.Contains("Linux, OSX, Windows", exception.Message);
         }
 
         [Fact]

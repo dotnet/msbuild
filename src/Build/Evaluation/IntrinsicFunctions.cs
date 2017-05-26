@@ -433,22 +433,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="platformString">The platform string. Must be a member of <see cref="OSPlatform"/>. Case Insensitive</param>
         /// <returns></returns>
-        internal static bool IsOsPlatform(string platformString)
+        internal static bool IsOSPlatform(string platformString)
         {
-            var typeInfo = typeof(OSPlatform).GetTypeInfo();
-            var propertyInfo = typeInfo.GetProperty(platformString, BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase);
-
-            if (propertyInfo == null || propertyInfo.PropertyType != typeof(OSPlatform))
-            {
-
-                ErrorUtilities.ThrowArgument("UnsupportedOSPlatformString", platformString, _validOsPlatforms.Value);
-
-                return false;
-            }
-
-            var platform = (OSPlatform) propertyInfo.GetValue(typeof(OSPlatform));
-
-            return RuntimeInformation.IsOSPlatform(platform);
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Create(platformString.ToUpperInvariant()));
         }
 
         /// <summary>
