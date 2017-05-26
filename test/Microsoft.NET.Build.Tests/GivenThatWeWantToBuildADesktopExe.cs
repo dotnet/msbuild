@@ -18,6 +18,7 @@ using Xunit;
 
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -310,6 +311,41 @@ namespace DefaultReferences
                 .And
                 .NotHaveStdOutMatching("Could not resolve this reference", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
+        }
+
+        [Fact]
+        public void It_reports_a_single_failure_if_reference_assemblies_are_not_found()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "MissingReferenceAssemblies",
+                //  A version of .NET we don't expect to exist
+                TargetFrameworks = "net469",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var result = buildCommand.Execute();
+
+            result.Should().Fail();
+
+            //  Error code for reference assemblies not found
+            result.StdOut.Should().Contain("MSB3644");
+
+            //  Error code for exception generated from task
+            result.StdOut.Should().NotContain("MSB4018");
+
+            Regex.Matches(result.StdOut, "error").Count.Should().Be(1);
         }
 
         [Fact]
