@@ -16,14 +16,14 @@ param(
 
 if($Help)
 {
-    Write-Host "Usage: .\build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
-    Write-Host ""
-    Write-Host "Options:"
-    Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
-    Write-Host "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
-    Write-Host "  -NoPackage                         Skip packaging targets"
-    Write-Host "  -NoBuild                           Skip building the product"
-    Write-Host "  -Help                              Display this help message"
+    Write-Output "Usage: .\build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-Help]"
+    Write-Output ""
+    Write-Output "Options:"
+    Write-Output "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+    Write-Output "  -Architecture <ARCHITECTURE>       Build the specified architecture (x64 or x86 (supported only on Windows), default: x64)"
+    Write-Output "  -NoPackage                         Skip packaging targets"
+    Write-Output "  -NoBuild                           Skip building the product"
+    Write-Output "  -Help                              Display this help message"
     exit 0
 }
 
@@ -80,7 +80,7 @@ $env:VSTEST_TRACE_BUILD=1
 # install a stage0
 $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
-Write-Host "$dotnetInstallPath -Channel ""master"" -Version ""2.0.0-preview1-005867"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Write-Output "$dotnetInstallPath -Channel ""master"" -Version ""2.0.0-preview1-005867"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 Invoke-Expression "$dotnetInstallPath -Channel ""master"" ""2.0.0-preview1-005867"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 if ($LastExitCode -ne 0)
 {
@@ -89,7 +89,7 @@ if ($LastExitCode -ne 0)
 }
 
 
-Write-Host "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
+Write-Output "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
 Invoke-Expression "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
 if ($LastExitCode -ne 0)
 {
@@ -102,8 +102,8 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
 if ($NoBuild)
 {
-    Write-Host "Not building due to --nobuild"
-    Write-Host "Command that would be run: 'dotnet msbuild build.proj /m /p:Architecture=$Architecture $ExtraParameters'"
+    Write-Output "Not building due to --nobuild"
+    Write-Output "Command that would be run: 'dotnet msbuild build.proj /m /p:Architecture=$Architecture $ExtraParameters'"
 }
 else
 {

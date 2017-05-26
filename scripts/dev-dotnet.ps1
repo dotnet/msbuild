@@ -15,7 +15,7 @@ try {
     if (Test-Path $stage2) {
         $env:PATH="$stage2;$env:PATH"
     } else {
-        Write-Host "You don't have a dev build in the 'artifacts\$rid\stage2' folder!"
+        Write-Output "You don't have a dev build in the 'artifacts\$rid\stage2' folder!"
     }
 
     dotnet @args
