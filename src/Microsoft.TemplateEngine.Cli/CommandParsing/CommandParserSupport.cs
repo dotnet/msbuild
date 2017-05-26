@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -53,55 +53,54 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         {
             IList<Option> paramOptionList = new List<Option>();
             Option[] allBuiltInArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, NewCommandReservedArgs, DebuggingCommandArgs);
-            HashSet<string> takenAliases = VariantsForOptions(allBuiltInArgs);
-            HashSet<string> invalidParams = new HashSet<string>();
+
+            HashSet<string> initiallyTakenAliases = VariantsForOptions(allBuiltInArgs);
             Dictionary<string, IReadOnlyList<string>> canonicalToVariantMap = new Dictionary<string, IReadOnlyList<string>>();
+            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameterDefinitions, longNameOverrides, shortNameOverrides, initiallyTakenAliases);
+
+            if (assignmentCoordinator.InvalidParams.Count > 0)
+            {
+                string unusableDisplayList = string.Join(", ", assignmentCoordinator.InvalidParams);
+                throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
+            }
 
             foreach (ITemplateParameter parameter in parameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit))
             {
-                string canonical = parameter.Name;
-                longNameOverrides.TryGetValue(canonical, out string longOverride);
-                shortNameOverrides.TryGetValue(canonical, out string shortOverride);
+                Option option;
+                IList<string> aliasesForParam = new List<string>();
 
-                if (CommandAliasAssigner.TryAssignAliasesForParameter((x) => takenAliases.Contains(x), canonical, longOverride, shortOverride, out IReadOnlyList<string> assignedAliases))
+                if (assignmentCoordinator.LongNameAssignments.TryGetValue(parameter.Name, out string longVersion))
                 {
-                    Option option;
+                    aliasesForParam.Add(longVersion);
+                }
 
-                    if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
-                    {
-                        IList<string> choices = parameter.Choices.Keys.ToList();
-                        option = Create.Option(string.Join("|", assignedAliases), parameter.Documentation,
+                if (assignmentCoordinator.ShortNameAssignments.TryGetValue(parameter.Name, out string shortVersion))
+                {
+                    aliasesForParam.Add(shortVersion);
+                }
+
+                if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
+                {
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
                                             Accept.ExactlyOneArgument()
                                                 //.WithSuggestionsFrom(parameter.Choices.Keys.ToArray())
                                                 .With(defaultValue: () => parameter.DefaultValue));
-                    }
-                    else if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                    {
-                        option = Create.Option(string.Join("|", assignedAliases), parameter.Documentation,
-                                            Accept.ZeroOrOneArgument()
-                                                .WithSuggestionsFrom(new[] { "true", "false" }));
+                }
+                else if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                {
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
+                                        Accept.ZeroOrOneArgument()
+                                            .WithSuggestionsFrom(new[] { "true", "false" }));
 
-                    }
-                    else
-                    {
-                        option = Create.Option(string.Join("|", assignedAliases), parameter.Documentation,
-                                            Accept.ExactlyOneArgument());
-                    }
-
-                    paramOptionList.Add(option);    // add the option
-                    canonicalToVariantMap.Add(canonical, assignedAliases.ToList());   // map the template canonical name to its aliases.
-                    takenAliases.UnionWith(assignedAliases);  // add the aliases to the taken aliases
                 }
                 else
                 {
-                    invalidParams.Add(canonical);
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
+                                        Accept.ExactlyOneArgument());
                 }
-            }
 
-            if (invalidParams.Count > 0)
-            {
-                string unusableDisplayList = string.Join(", ", invalidParams);
-                throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
+                paramOptionList.Add(option);    // add the option
+                canonicalToVariantMap.Add(parameter.Name, aliasesForParam.ToList());   // map the template canonical name to its aliases.
             }
 
             templateParamMap = canonicalToVariantMap;
