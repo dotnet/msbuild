@@ -130,7 +130,7 @@
     <value>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
   </data>
   <data name="AssetsFileMissingTarget" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</value>
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</value>
   </data>
   <data name="AssetsFilePathNotRooted" xml:space="preserve">
     <value>Assets file path '{0}' is not rooted. Only full paths are supported.</value>
@@ -296,5 +296,8 @@
   </data>
   <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
     <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+  </data>
+  <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
+    <value>You may also need to include '{0}' in your project's RuntimeIdentifiers.</value>
   </data>
 </root>

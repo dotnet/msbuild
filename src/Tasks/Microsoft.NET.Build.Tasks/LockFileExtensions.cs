@@ -37,7 +37,13 @@ namespace Microsoft.NET.Build.Tasks
                     frameworkString :
                     $"{frameworkString}/{runtime}";
 
-                throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                string message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                if (!string.IsNullOrEmpty(runtime))
+                {
+                    message += " " + string.Format(Strings.AssetsFileMissingRuntimeIdentifier, runtime);
+                }
+
+                throw new BuildErrorException(message);
             }
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
