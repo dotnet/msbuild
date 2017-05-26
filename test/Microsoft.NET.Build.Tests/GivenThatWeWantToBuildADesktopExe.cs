@@ -351,6 +351,46 @@ namespace DefaultReferences
         }
 
         [Fact]
+        public void It_does_not_report_conflicts_when_referencing_a_nuget_package()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "DesktopConflictsNuGet",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                                    new XAttribute("Include", "NewtonSoft.Json"),
+                                    new XAttribute("Version", "9.0.1")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:diag")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Fact]
         public void It_generates_binding_redirects_if_needed()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
