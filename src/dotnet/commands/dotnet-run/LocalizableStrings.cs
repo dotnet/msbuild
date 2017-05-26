@@ -17,6 +17,10 @@ namespace Microsoft.DotNet.Tools.Run
 
         public const string CommandOptionProjectDescription = "The path to the project file to run (defaults to the current directory if there is only one project).";
 
+        public const string CommandOptionLaunchProfileDescription = "The name of the launch profile (if any) to use when launching the application.";
+
+        public const string CommandOptionNoLaunchProfileDescription = "Do not attempt to use launchSettings.json to configure the application.";
+
         public const string RunCommandException = "The build failed. Please fix the build errors and run again.";
 
         public const string RunCommandExceptionUnableToRunSpecifyFramework = "Unable to run your project\nYour project targets multiple frameworks. Please specify which framework to run using '{0}'.";
@@ -28,5 +32,11 @@ namespace Microsoft.DotNet.Tools.Run
         public const string RunCommandExceptionMultipleProjects = "Specify which project file to use because {0} contains more than one project file.";
 
         public const string RunCommandAdditionalArgsHelpText = "Arguments passed to the application that is being run.";
+
+        public const string RunCommandExceptionCouldNotLocateALaunchSettingsFile = "The specified launch profile could not be located.";
+
+        public const string RunCommandExceptionCouldNotApplyLaunchSettings = "The launch profile \"{0}\" could not be applied.";
+
+        public const string DefaultLaunchProfileDisplayName = "(Default)";
     }
 }
