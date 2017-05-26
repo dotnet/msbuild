@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Number of nodes after the build has to be greater than the original number
             int numberProcsAfterBuild = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
             _output.WriteLine($"numberProcsAfterBuild = {numberProcsAfterBuild}");
-            Assert.True(numberProcsOriginally < numberProcsAfterBuild);
+            Assert.True(numberProcsOriginally < numberProcsAfterBuild, $"Expected '{numberProcsOriginally}' < '{numberProcsAfterBuild}'");
 
             // Shutdown all nodes
             shutdownManager.ShutdownAllNodes();
