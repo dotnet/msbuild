@@ -335,7 +335,8 @@ namespace DefaultReferences
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            var result = buildCommand.Execute();
+            //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
+            var result = buildCommand.Execute("/clp:summary");
 
             result.Should().Fail();
 
@@ -345,7 +346,8 @@ namespace DefaultReferences
             //  Error code for exception generated from task
             result.StdOut.Should().NotContain("MSB4018");
 
-            Regex.Matches(result.StdOut, "error").Count.Should().Be(1);
+            //  Ensure no other errors are generated
+            result.StdOut.Should().Contain("1 Error(s)");
         }
 
         [Fact]
