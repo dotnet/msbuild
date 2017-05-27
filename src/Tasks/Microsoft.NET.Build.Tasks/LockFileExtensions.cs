@@ -12,22 +12,8 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
-        public static ProjectContext CreateProjectContext(
-            this LockFile lockFile,
-            NuGetFramework framework,
-            string runtime,
-            string platformLibraryName,
-            bool isSelfContained)
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime)
         {
-            if (lockFile == null)
-            {
-                throw new ArgumentNullException(nameof(lockFile));
-            }
-            if (framework == null)
-            {
-                throw new ArgumentNullException(nameof(framework));
-            }
-
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
 
             if (lockFileTarget == null)
@@ -45,6 +31,27 @@ namespace Microsoft.NET.Build.Tasks
 
                 throw new BuildErrorException(message);
             }
+
+            return lockFileTarget;
+        }
+
+        public static ProjectContext CreateProjectContext(
+            this LockFile lockFile,
+            NuGetFramework framework,
+            string runtime,
+            string platformLibraryName,
+            bool isSelfContained)
+        {
+            if (lockFile == null)
+            {
+                throw new ArgumentNullException(nameof(lockFile));
+            }
+            if (framework == null)
+            {
+                throw new ArgumentNullException(nameof(framework));
+            }
+
+            var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
             bool isFrameworkDependent = platformLibrary != null && (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
