@@ -91,6 +91,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new SdkReference("Some.Test.Sdk", null, "99.99.99"),
                 new MockContext
                 {
+                    MSBuildVersion = new Version(1, 0),
                     ProjectFilePath = environment.TestDirectory.FullName
                 },
                 new MockFactory());
@@ -194,7 +195,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 var dir = GetSdkDirectory(programFiles, sdkName, sdkVersion);
                 dir.Create();
 
-                CreateMSBuildRequiredVersionFile(programFiles, sdkVersion, minimumMSBuildVersion);
+                if (minimumMSBuildVersion != null)
+                {
+                    CreateMSBuildRequiredVersionFile(programFiles, sdkVersion, minimumMSBuildVersion);
+                }
 
                 return dir;
             }
@@ -254,7 +258,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             public MockContext()
             {
-                MSBuildVersion = new Version(1, 0);
+                MSBuildVersion = new Version(15, 3, 0);
             }
         }
 
