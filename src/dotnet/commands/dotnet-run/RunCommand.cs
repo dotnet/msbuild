@@ -44,18 +44,30 @@ namespace Microsoft.DotNet.Tools.Run
                 var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
                 if (File.Exists(launchSettingsPath))
                 {
-                    var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
-                    if (!LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, out string runAfterLaunch, LaunchProfile))
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
+                    string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
+
+                    try
                     {
-                        string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
-                        //Error that the launch profile couldn't be applied
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName));
+                        var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
+                        var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, LaunchProfile);
+                        if (!applyResult.Success)
+                        {                            
+                            //Error that the launch profile couldn't be applied
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName).Bold().Red());
+                        Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                        return -1;
                     }
                 }
                 else if (!string.IsNullOrEmpty(LaunchProfile))
                 {
                     //Error that the launch profile couldn't be found
-                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile);
+                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
                 }
             }
 

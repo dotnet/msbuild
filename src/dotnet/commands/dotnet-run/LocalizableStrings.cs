@@ -35,8 +35,20 @@ namespace Microsoft.DotNet.Tools.Run
 
         public const string RunCommandExceptionCouldNotLocateALaunchSettingsFile = "The specified launch profile could not be located.";
 
-        public const string RunCommandExceptionCouldNotApplyLaunchSettings = "The launch profile \"{0}\" could not be applied.";
+        public const string RunCommandExceptionCouldNotApplyLaunchSettings = "The launch profile \"{0}\" could not be applied.\n{1}";
 
         public const string DefaultLaunchProfileDisplayName = "(Default)";
+
+        public const string UsingLaunchSettingsFromMessage = "Using launch settings from {0}...";
+
+        public const string LaunchProfileIsNotAJsonObject = "Launch profile is not a JSON object.";
+
+        public const string LaunchProfileHandlerCannotBeLocated = "The launch profile type '{0}' is not supported.";
+
+        public const string UsableLaunchProfileCannotBeLocated = "A usable launch profile could not be located.";
+
+        public const string UnexpectedExceptionProcessingLaunchSettings = "An unexpected exception occurred while processing launch settings:\n{0}";
+
+        public const string LaunchProfilesCollectionIsNotAJsonObject = "The 'profiles' property of the launch settings document is not a JSON object.";
     }
 }
