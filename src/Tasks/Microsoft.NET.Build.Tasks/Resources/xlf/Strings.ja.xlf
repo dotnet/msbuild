@@ -10,8 +10,8 @@
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="needs-review-translation">プロジェクト '{0}' には、'{1}' と互換性のあるターゲット フレームワークがありません。</target>
-        <note></note>
+        <target state="translated">プロジェクト '{0}' は、'{2}' を対象としています。'{1}' を対象とするプロジェクトは、これを参照できません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -180,8 +180,8 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="needs-review-translation">重複する '{0}' 個のアイテムが含められました。.NET SDK には、既定でプロジェクト ディレクトリからのアイテムが '{0}' 個含まれています。これらのアイテムをプロジェクト ファイルから削除するか、プロジェクト ファイルに明示的に含める場合は '{1}' プロパティを '{2}' に設定します。重複するアイテムは、{3} でした。</target>
-        <note></note>
+        <target state="translated">重複する '{0}' 個のアイテムが含められました。.NET SDK には、既定でプロジェクト ディレクトリからのアイテムが '{0}' 個含まれています。これらのアイテムをプロジェクト ファイルから削除するか、プロジェクト ファイルに明示的に含める場合は '{1}' プロパティを '{2}' に設定します。詳細については、{4} を参照してください。重複するアイテムは、{3} でした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
@@ -190,113 +190,113 @@
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="new">Package Root {0} was incorrectly given for Resolved library {1}</target>
-        <note></note>
+        <target state="translated">解決されたライブラリ {1} に対して指定されたパッケージ ルート {0} が正しくありません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>More than one file found for {0}</source>
-        <target state="new">More than one file found for {0}</target>
-        <note></note>
+        <target state="translated">{0} で複数のファイルが見つかりました。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="new">Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</target>
-        <note></note>
+        <target state="translated">フォルダー '{0}' が既に存在します。そのフォルダーを削除するか、別の ComposeWorkingDir を指定してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
-        <target state="new">Parsing the Files : '{0}'</target>
-        <note></note>
+        <target state="translated">次のファイルを解析しています: '{0}'</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="new">Package Name='{0}', Version='{1}' was parsed</target>
-        <note></note>
+        <target state="translated">パッケージ名='{0}'、バージョン='{1}' が解析されました</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
-        <target state="new">Specify a RuntimeIdentifier</target>
-        <note></note>
+        <target state="translated">RuntimeIdentifier の指定</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="new">The target manifest {0} provided is of not the correct format</target>
-        <note></note>
+        <target state="translated">指定されたターゲット マニフェスト {0} の形式が正しくありません</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
-        <note></note>
+        <target state="translated">'{0}' は、本来アプリケーション名が書き込まれる場所を示す、必要なプレースホルダー バイト シーケンス '{1}' が含まれていないため、実行可能アプリケーション ホストとして使用できません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
-        <note></note>
+        <target state="translated">指定されたファイル名 '{0}' が 1024 バイトを超えています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="new">It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</target>
-        <note></note>
+        <target state="translated">RuntimeIdentifier を指定せずに自己完結型アプリケーションをビルドおよび発行することはサポートされていません。RuntimeIdentifier を指定するか SelfContained を false に設定してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">AssemblyVersion '{1}' が '{2}' より大きいため、'{0}' を選択しています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">ファイルのバージョン '{1}' が '{2}' より大きいため、'{0}' を選択しています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="new">Choosing '{0}' because it is a platform item.</target>
-        <note></note>
+        <target state="translated">'{0}' はプラットフォーム項目であるため、これを選択しています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
-        <note></note>
+        <target state="translated">'{0}' は優先されるパッケージからのものであるため、これを選択しています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
-        <note></note>
+        <target state="translated">ファイルとアセンブリのバージョンが等しいため、勝者を判別できませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="new">Could not determine winner because '{0}' does not exist.</target>
-        <note></note>
+        <target state="translated">'{0}' が存在しないため勝者を判別できませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
-        <note></note>
+        <target state="translated">'{0}' にファイルのバージョンがないため勝者を判別できませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
-        <note></note>
+        <target state="translated">'{0}' がアセンブリでないため勝者を判別できませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
-        <note></note>
+        <target state="translated">'{0}' と '{1}' の間で競合が発生しました。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="new">Could not load PlatformManifest from '{0}' because it did not exist.</target>
-        <note></note>
+        <target state="translated">'{0}' は存在しなかったため、PlatformManifest を読み込めませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</target>
-        <note></note>
+        <target state="translated">'{0}' 行目の {1} から PlatformManifest を解析できませんでした。行の形式は {2} である必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</target>
-        <note></note>
+        <target state="translated">'{0}' 行目の {1} から PlatformManifest を解析できませんでした。{2} '{3}' は無効でした。</target>
+        <note />
       </trans-unit>
     </body>
   </file>
