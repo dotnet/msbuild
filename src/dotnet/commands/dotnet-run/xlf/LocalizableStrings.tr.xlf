@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="translated">Uygulamayı belirtilen çerçeve için derler ve çalıştırır. Çerçevenin proje dosyasında belirtilmesi gerekir. </target>
+        <target state="translated">Uygulamayı belirtilen çerçeveyi kullanarak derleyin ve çalıştırın. Çerçevenin proje dosyasında belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -35,41 +35,41 @@
       </trans-unit>
       <trans-unit id="CommandOptionNoBuildDescription">
         <source>Skip building the project prior to running. By default, the project will be built.</source>
-        <target state="new">Skip building the project prior to running. By default, the project will be built.</target>
-        <note></note>
+        <target state="translated">Projeyi çalıştırmadan önce derlemeyi atlayın. Varsayılan olarak, proje derlenir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoBuild">
         <source>Do not build the project before running.</source>
-        <target state="new">Do not build the project before running.</target>
-        <note></note>
+        <target state="translated">Projeyi çalıştırmadan önce derleme.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
-        <target state="new">Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</target>
-        <note></note>
+        <target state="translated">Projeniz çalıştırılamıyor
+Projeniz birden fazla çerçeveyi hedefliyor. Lütfen '{0}' kullanılarak hangi çerçevenin çalıştırılacağını belirtin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
 Please ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="new">Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
-A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
-The current {1} is '{2}'.</target>
-        <note></note>
+        <target state="translated">Projeniz çalıştırılamıyor.
+Lütfen çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
+Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi hedeflemeli (örneğin, netcoreapp2.0) ve OutputType 'Exe' dosyasına sahip olmalıdır.
+Geçerli {1}: '{2}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionNoProjects">
         <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
-        <target state="new">Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</target>
-        <note></note>
+        <target state="translated">Çalıştırılacak bir proje bulunamadı. {0} içinde bir projenin bulunduğundan emin olun veya {1} kullanarak yolu projeye geçirin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionMultipleProjects">
         <source>Specify which project file to use because {0} contains more than one project file.</source>
-        <target state="new">Specify which project file to use because {0} contains more than one project file.</target>
-        <note></note>
+        <target state="translated">{0} birden fazla proje dosyası içerdiğinden, kullanılacak proje dosyasını belirtin.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -560,7 +560,7 @@
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
         <source>Mandatory parameter {0} missing for template {1}. </source>
-        <target state="translated">範本 {1} 遺漏強制參數 {0}。 </target>
+        <target state="translated">遺漏範本 {1} 的強制參數 {0}。 </target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceOneOrMore">
@@ -570,7 +570,7 @@
       </trans-unit>
       <trans-unit id="RequiredCommandNotPassed">
         <source>Required command was not provided.</source>
-        <target state="translated">未提供必要命令。</target>
+        <target state="translated">未提供所需的命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
@@ -585,17 +585,17 @@
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
         <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
-        <target state="translated">要操作的專案或解決方案。若未指定檔案，即會搜尋目前目錄。</target>
+        <target state="translated">要運作的專案或解決方案。若未指定檔案，即會搜尋目前目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
+        <target state="translated">架構</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">因為兩個專案之前的目標 Framework 不相容，所以無法新增專案 `{0}`。請檢閱您嘗試新增的專案，並驗證該專案與下列目標相容:</target>
+        <target state="translated">因為兩個專案間的目標 Framework 不相容，所以無法新增專案 `{0}`。請檢閱您嘗試新增的專案，並驗證其與下列目標相容:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,74 +606,74 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}.</source>
-        <target state="needs-review-translation">無法評估專案 `{0}`。評估失敗，發生下列錯誤:
-{1}</target>
-        <note></note>
+        <target state="translated">無法評估專案 `{0}`。評估失敗，發生下列錯誤:
+{1}。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">不支援的專案類型。請向您的 sdk 提供者確認。</target>
+        <target state="translated">不支援的專案類型。請與 SDK 提供者連絡。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}.</source>
-        <target state="needs-review-translation">解決方案 `{0}` 無效。{1}</target>
-        <note></note>
+        <target state="translated">解決方案 `{0}` 無效。{1}。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">要操作的專案檔。若未指定檔案，命令將會搜尋目前目錄以取得一個。</target>
+        <target state="translated">要進行作業的專案檔。若未指定檔案，此命令將會搜尋目前的目錄以取得一個檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentsSolutionDescription">
         <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">要操作的方案檔。若未指定，命令將會搜尋目前目錄以取得一個。</target>
+        <target state="translated">要進行作業的解決方案檔。若未指定檔案，此命令將會搜尋目前的目錄以取得一個檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSlnFile">
         <source>SLN_FILE</source>
-        <target state="needs-review-translation">&lt;SLN_FILE&gt;</target>
-        <note></note>
+        <target state="translated">SLN_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectFile">
         <source>PROJECT</source>
-        <target state="needs-review-translation">&lt;PROJECT&gt;</target>
-        <note></note>
+        <target state="translated">專案</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
-        <target state="new">Invalid project `{0}`. {1}.</target>
-        <note></note>
+        <target state="translated">專案 `{0}` 無效。{1}。</target>
+        <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="new">Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</target>
-        <note></note>
+        <target state="translated">設定命令的詳細資訊層級。允許的值為 q[uiet]、m[inimal]、n[ormal]、d[etailed] 及 diag[nostic]。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="new">Target framework to publish for. The target framework has to be specified in the project file.</target>
-        <note></note>
+        <target state="translated">要為其發行的目標 Framework。其必須在專案檔中指定。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="new">Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</target>
-        <note></note>
+        <target state="translated">為指定的執行階段發行專案。建立獨立的部署時會使用該專案。預設會發行與架構相依的應用程式。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="new">Configuration to use for building the project.  Default for most projects is  "Debug".</target>
-        <note></note>
+        <target state="translated">建置專案用的組態。多數專案預設為 "Debug"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project.</target>
-        <note></note>
+        <target state="translated">在專案中定義 $(VersionSuffix) 屬性的值。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show help information.</source>
-        <target state="new">Show help information.</target>
-        <note></note>
+        <target state="translated">顯示說明資訊。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

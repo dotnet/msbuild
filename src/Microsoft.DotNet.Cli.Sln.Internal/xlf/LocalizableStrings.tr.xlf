@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>Expected file header not found</source>
-        <target state="needs-review-translation">Dosya üst bilgisi eksik</target>
-        <note></note>
+        <target state="translated">Beklenen dosya üst bilgisi bulunamadı</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -55,8 +55,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingVersionError">
         <source>File header is missing version</source>
-        <target state="new">File header is missing version</target>
-        <note></note>
+        <target state="translated">Dosya üst bilgisinde sürüm eksik</target>
+        <note />
       </trans-unit>
     </body>
   </file>

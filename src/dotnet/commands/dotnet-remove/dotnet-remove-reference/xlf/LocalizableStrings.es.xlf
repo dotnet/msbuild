@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove reference only when targeting a specific framework</source>
-        <target state="needs-review-translation">Se quita la referencia solo cuando hay una plataforma de destino específica</target>
-        <note></note>
+        <target state="translated">Quita una referencia solo cuando el destino es una plataforma específica</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>

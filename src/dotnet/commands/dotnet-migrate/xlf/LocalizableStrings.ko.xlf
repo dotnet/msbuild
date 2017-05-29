@@ -40,8 +40,8 @@ Defaults to current directory if nothing is specified.</source>
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">마이그레이션된 앱에서 참조되는 sdk 패키지의 버전입니다. 기본값은 새 dotnet의 sdk 버전입니다.</target>
-        <note></note>
+        <target state="translated">마이그레이션된 앱에서 참조되는 SDK 패키지의 버전입니다. 기본값은 새 dotnet의 SDK 버전입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
@@ -50,8 +50,8 @@ Defaults to current directory if nothing is specified.</source>
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default, project references are migrated recursively.</source>
-        <target state="needs-review-translation">프로젝트 참조 마이그레이션을 건너뜁니다. 기본적으로 프로젝트 참조가 재귀적으로 마이그레이션됩니다.</target>
-        <note></note>
+        <target state="translated">프로젝트 참조 마이그레이션을 건너뜁니다. 기본적으로 프로젝트 참조가 재귀적으로 마이그레이션됩니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
@@ -75,78 +75,78 @@ Defaults to current directory if nothing is specified.</source>
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
         <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="new">The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</target>
-        <note></note>
+        <target state="translated">프로젝트 마이그레이션이 완료되었습니다. https://aka.ms/coremigration을 방문하여 발생한 문제를 보고하거나 지원을 요청하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">
         <source>Summary</source>
-        <target state="new">Summary</target>
-        <note></note>
+        <target state="translated">요약</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportTotalProjects">
         <source>Total Projects: {0}</source>
-        <target state="new">Total Projects: {0}</target>
-        <note></note>
+        <target state="translated">총 프로젝트: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportSucceededProjects">
         <source>Succeeded Projects: {0}</source>
-        <target state="new">Succeeded Projects: {0}</target>
-        <note></note>
+        <target state="translated">성공한 프로젝트: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportFailedProjects">
         <source>Failed Projects: {0}</source>
-        <target state="new">Failed Projects: {0}</target>
-        <note></note>
+        <target state="translated">실패한 프로젝트: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectMigrationSucceeded">
         <source>Project {0} migration succeeded ({1}).</source>
-        <target state="new">Project {0} migration succeeded ({1}).</target>
-        <note></note>
+        <target state="translated">프로젝트 {0} 마이그레이션에 성공했습니다({1}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectMigrationFailed">
         <source>Project {0} migration failed ({1}).</source>
-        <target state="new">Project {0} migration failed ({1}).</target>
-        <note></note>
+        <target state="translated">프로젝트 {0} 마이그레이션에 실패했습니다({1}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedToFindProjectInGlobalJson">
         <source>Unable to find any projects in global.json.</source>
-        <target state="new">Unable to find any projects in global.json.</target>
-        <note></note>
+        <target state="translated">global.json에서 프로젝트를 찾을 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindProjects">
         <source>Unable to find any projects in {0}.</source>
-        <target state="new">Unable to find any projects in {0}.</target>
-        <note></note>
+        <target state="translated">{0}에서 프로젝트를 찾을 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationProjectJsonNotFound">
         <source>No project.json file found in '{0}'.</source>
-        <target state="new">No project.json file found in '{0}'.</target>
-        <note></note>
+        <target state="translated">'{0}'에서 project.json 파일을 찾지 못했습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationInvalidProjectArgument">
         <source>Invalid project argument - '{0}' is not a project.json, global.json, or solution.sln file and a directory named '{0}' doesn't exist.</source>
-        <target state="new">Invalid project argument - '{0}' is not a project.json, global.json, or solution.sln file and a directory named '{0}' doesn't exist.</target>
-        <note></note>
+        <target state="translated">잘못된 프로젝트 인수 - '{0}'은(는) project.json, global.json 또는 solution.sln 파일이 아니며 이름이 '{0}'인 디렉터리가 존재하지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigratonUnableToFindProjectJson">
         <source>Unable to find project.json file at {0}.</source>
-        <target state="new">Unable to find project.json file at {0}.</target>
-        <note></note>
+        <target state="translated">{0}에서 project.json 파일을 찾을 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindGlobalJson">
         <source>Unable to find global settings file at {0}.</source>
-        <target state="new">Unable to find global settings file at {0}.</target>
-        <note></note>
+        <target state="translated">{0}에서 전역 설정 파일을 찾을 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindSolutionFile">
         <source>Unable to find the solution file at {0}.</source>
-        <target state="new">Unable to find the solution file at {0}.</target>
-        <note></note>
+        <target state="translated">{0}에서 솔루션 파일을 찾을 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateFilesBackupLocation">
         <source>Files backed up to {0}</source>
-        <target state="new">Files backed up to {0}</target>
-        <note></note>
+        <target state="translated">파일이 {0}에 백업되었습니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

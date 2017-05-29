@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="CmdArgDescription">
         <source>The project to test. Defaults to the current directory.</source>
-        <target state="needs-review-translation">Výchozí hodnotou pro testovaný projekt je aktuální adresář.</target>
-        <note></note>
+        <target state="translated">Projekt, který se má testovat. Standardně se nastaví aktuální adresář.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
@@ -54,15 +54,16 @@
         <target state="translated">Spustí testy, které odpovídají danému výrazu.
                                         Příklady:
                                         Spustí testy s prioritou nastavenou na 1: --filter "Priority = 1"
-                                        Spustí test se zadaným celým názvem: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Spustí testy obsahující zadaný název: --filter "FullyQualifiedName~Namespace.Class"
-                                        Další informace o podpoře filtrování: https://aka.ms/vstest-filtering</target>
+                                        Spustí test se zadaným plným názvem: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Spustí testy, které obsahují zadaný název: --filter "FullyQualifiedName~Namespace.Class"
+                                        Další informace o podpoře filtrování: https://aka.ms/vstest-filtering
+                                        </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">Při spuštění testu použijte vlastní adaptéry z dané cesty.
+        <target state="translated">Při spuštění testu použít vlastní adaptéry z dané cesty.
                                         Příklad: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
         <note />
       </trans-unit>
@@ -75,9 +76,10 @@
         <source>Specify a logger for test results.
                                         Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Zadejte protokolovací nástroj pro výsledky testů. 
-                                        Příklad: --logger "trx[;LogFileName=&lt;Standardně se nastaví jedinečný název souboru&gt;]"</target>
-        <note></note>
+        <target state="translated">Zadejte protokolovací nástroj pro výsledky testů. 
+                                        Příklad: --logger "trx[;LogFileName=&lt;Standardně se nastaví jedinečný název souboru&gt;]"
+                                        Další informace o podpoře argumentů protokolovacího nástroje: https://aka.ms/vstest-report</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -86,8 +88,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">Konfigurace použitá k sestavení projektu.  Výchozí možnost u většiny projektů je „Debug“.</target>
-        <note></note>
+        <target state="translated">Konfigurace použitá k sestavení projektu. U většiny projektů se standardně nastaví Debug.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -128,20 +130,20 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>PATH_TO_ADAPTER</source>
-        <target state="new">PATH_TO_ADAPTER</target>
-        <note></note>
+        <target state="translated">PATH_TO_ADAPTER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
                                         Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
-        <target state="new">The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
-                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
-        <note></note>
+        <target state="translated">Adresář, kam se mají umístit výsledky testu. Zadaný adresář se vytvoří, pokud neexistuje.
+                                        Příklad: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>PATH_TO_RESULTS_DIRECTORY</source>
-        <target state="new">PATH_TO_RESULTS_DIRECTORY</target>
-        <note></note>
+        <target state="translated">PATH_TO_RESULTS_DIRECTORY</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
@@ -151,26 +153,26 @@ RunSettings arguments:
   Use a space to separate multiple[name] =[value].
   More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="new">
+        <target state="translated">
 
-RunSettings arguments:
-  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
-  Use a space to separate multiple[name] =[value].
-  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
-  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
-        <note></note>
+Argumenty RunSettings:
+  Argumenty, které se mají předat konfiguracím runsettings prostřednictvím příkazového řádku. Lze je zadat jako dvojice název-hodnota ve formě [název]=[hodnota] za -- . Za -- následuje mezera. 
+  K oddělení více dvojic [název] =[hodnota] použijte mezeru.
+  Další informace o podpoře argumentů RunSettings: https://aka.ms/vstest-runsettings-arguments
+  Příklad: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
-        <target state="new">DATA_COLLECTOR_FRIENDLY_NAME</target>
-        <note></note>
+        <target state="translated">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="new">Enables data collector for the test run.
-                                        More info here : https://aka.ms/vstest-collect</target>
-        <note></note>
+        <target state="translated">Povolí shromažďování dat pro testovací běh.
+                                        Další informace: https://aka.ms/vstest-collect</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="CmdArgDescription">
         <source>The project to test. Defaults to the current directory.</source>
-        <target state="needs-review-translation">Projet à tester, par défaut le répertoire actif.</target>
-        <note></note>
+        <target state="translated">Projet à tester. Correspond par défaut au répertoire actif.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
@@ -51,19 +51,20 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="translated">Exécutez les tests qui correspondent à l'expression donnée.
+        <target state="translated">Permet d'exécuter les tests qui correspondent à l'expression indiquée.
                                         Exemples :
-                                        Exécutez des tests avec la priorité définie sur 1 : --filter "Priority = 1"
-                                        Exécutez un test avec le nom complet spécifié : --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Exécutez des tests contenant le nom spécifié : --filter "FullyQualifiedName~Namespace.Class"
-                                        Informations supplémentaires disponibles dans la page de support sur le filtrage : https://aka.ms/vstest-filtering</target>
+                                        Exécuter les tests de priorité 1 : --filter "Priority = 1"
+                                        Exécuter un test avec le nom complet spécifié : --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Exécuter les tests qui contiennent le nom spécifié : --filter "FullyQualifiedName~Namespace.Class"
+                                        En savoir plus sur la prise en charge du filtrage : https://aka.ms/vstest-filtering
+                                        </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">Utilisez des adaptateurs personnalisés à partir du chemin donné dans la série de tests.
-                                        Exemple : --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
+        <target state="translated">Utilisez des adaptateurs personnalisés provenant du chemin indiqué dans la série de tests.
+                                        Exemple : --test-adapter-path &lt;CHEMIN_ADAPTATEUR&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -75,9 +76,10 @@
         <source>Specify a logger for test results.
                                         Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">Spécifiez un enregistreur pour les résultats des tests. 
-                                        Exemple : --logger "trx[;LogFileName=&lt;par défaut un nom de fichier unique&gt;]"</target>
-        <note></note>
+        <target state="translated">Spécifiez un enregistreur d'événements pour les résultats des tests.
+                                        Exemple : --logger "trx[;LogFileName=&lt;Nom de fichier unique par défaut&gt;]"
+                                        En savoir plus sur la prise en charge des arguments de l'enregistreur d'événements : https://aka.ms/vstest-report</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -86,8 +88,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
-        <note></note>
+        <target state="translated">Configuration à utiliser pour la génération du projet. La valeur par défaut pour la plupart des projets est "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -128,20 +130,20 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>PATH_TO_ADAPTER</source>
-        <target state="new">PATH_TO_ADAPTER</target>
-        <note></note>
+        <target state="translated">PATH_TO_ADAPTER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
                                         Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
-        <target state="new">The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
-                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
-        <note></note>
+        <target state="translated">Répertoire où les résultats des tests vont être placés. Le répertoire spécifié est créé, s'il n'existe pas déjà.
+                                        Exemple : --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>PATH_TO_RESULTS_DIRECTORY</source>
-        <target state="new">PATH_TO_RESULTS_DIRECTORY</target>
-        <note></note>
+        <target state="translated">PATH_TO_RESULTS_DIRECTORY</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
@@ -151,26 +153,26 @@ RunSettings arguments:
   Use a space to separate multiple[name] =[value].
   More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="new">
+        <target state="translated">
 
-RunSettings arguments:
-  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
-  Use a space to separate multiple[name] =[value].
-  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
-  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
-        <note></note>
+Arguments de RunSettings :
+  Arguments permettant de passer les configurations des paramètres d'exécution via la ligne de commande. Vous pouvez spécifier les arguments en tant que paires nom-valeur sous la forme [name]=[value] après "-- ". Notez l'espace après --. 
+  Utilisez un espace pour séparer plusieurs [name]=[value].
+  En savoir plus sur la prise en charge des arguments de RunSettings : https://aka.ms/vstest-runsettings-arguments
+  Exemple : dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
-        <target state="new">DATA_COLLECTOR_FRIENDLY_NAME</target>
-        <note></note>
+        <target state="translated">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="new">Enables data collector for the test run.
-                                        More info here : https://aka.ms/vstest-collect</target>
-        <note></note>
+        <target state="translated">Active le collecteur de données pour la série de tests.
+                                        Plus d'informations ici : https://aka.ms/vstest-collect</target>
+        <note />
       </trans-unit>
     </body>
   </file>

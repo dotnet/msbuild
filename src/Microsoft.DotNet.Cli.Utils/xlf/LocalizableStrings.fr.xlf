@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0} : Tentative de résolution de la spécification de commande à partir de l'outil {1}</target>
+        <target state="translated">{0} : tentative de résolution de la spécification de commande à partir de l'outil {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">En attente de l'attachement du débogueur. Appuyez sur Entrée pour continuer</target>
+        <target state="translated">En attente d'attachement du débogueur. Appuyez sur ENTRÉE pour continuer</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">
@@ -217,23 +217,23 @@
       </trans-unit>
       <trans-unit id="IgnoringPreferCLIRuntimeFile">
         <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
-        <target state="new">{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</target>
-        <note></note>
+        <target state="translated">{0} : fichier prefercliruntime ignoré, car le framework cible de l'outil ({1}) a une autre version principale que celle du runtime CLI actuel ({2})</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotFindToolRuntimeConfigFile">
         <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
-        <target state="new">{0}: Could not find runtimeconfig.json file for tool {1}</target>
-        <note></note>
+        <target state="translated">{0} : le fichier runtimeconfig.json est introuvable pour l'outil {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsJsonGeneratorProjectNotSet">
         <source>Unable to find deps.json generator project.</source>
-        <target state="new">Unable to find deps.json generator project.</target>
-        <note></note>
+        <target state="translated">Le projet de générateur deps.json est introuvable.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="new">The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</target>
-        <note></note>
+        <target state="translated">La commande exécutable pour "{0}" est introuvable. Le projet n'a peut-être pas été restauré, ou la restauration n'a pas fonctionné - exécutez 'dotnet restore'</target>
+        <note />
       </trans-unit>
     </body>
   </file>

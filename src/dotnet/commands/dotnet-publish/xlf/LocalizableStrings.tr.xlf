@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="translated">ÇIKIŞ_DİZİNİ</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">Yayımlama adımının dışında tutulacak paketlerin listesini içeren bir hedef bildirim dosyasının yolu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

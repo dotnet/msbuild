@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">게시 단계에서 제외할 패키지 목록이 들어 있는 대상 매니페스트 파일의 경로입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 응용 프로그램과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

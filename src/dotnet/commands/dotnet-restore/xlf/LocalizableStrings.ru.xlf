@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="needs-review-translation">Задайте этот флаг, чтобы пропускать ссылки проектов на проекты и выполнять восстановление только корневого проекта.</target>
-        <note></note>
+        <target state="translated">Задайте этот флаг, чтобы пропускать ссылки проектов на проекты и выполнять восстановление только корневого проекта.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
