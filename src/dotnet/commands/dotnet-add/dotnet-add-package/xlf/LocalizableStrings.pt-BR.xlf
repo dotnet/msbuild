@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Adicionar referência apenas ao visar uma estrutura específica</target>
-        <note></note>
+        <target state="translated">Adiciona referência apenas ao definir uma estrutura específica como destino.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Adicionar referência ser executar a restauração de visualização e verificação de compatibilidade.</target>
-        <note></note>
+        <target state="translated">Adiciona referência sem executar a visualização da restauração e a verificação de compatibilidade.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Usa fontes de pacote do NuGet especificadas a serem usadas durante a restauração.</target>
-        <note></note>
+        <target state="translated">Especifica as fontes de pacote NuGet a serem usadas durante a restauração.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Restaurar os pacotes para esse Diretório.</target>
-        <note></note>
+        <target state="translated">Restaura os pacotes para o diretório especificado.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">Não é possível criar o arquivo de gráfico Criar Dependência para o projeto '{0}'. Não é possível adicionar a referência do pacote.</target>
-        <note></note>
+        <target state="translated">Não é possível criar o arquivo de gráfico de dependência para o projeto '{0}'. Não é possível adicionar a referência do pacote.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">A referência do pacote a adicionar.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

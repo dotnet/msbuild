@@ -5,68 +5,68 @@
       <group id="LocalizableStrings.resx" />
       <trans-unit id="AppDescription">
         <source>Stores the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
-        <target state="needs-review-translation">Cahes Assemblies specified for the .NET Platform</target>
-        <note></note>
+        <target state="translated">Armazena os assemblies especificados para a Plataforma .NET. Por padrão, serão otimizados para o tempo de execução e a estrutura de destino.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to store the given assemblies.</source>
-        <target state="needs-review-translation">Path in which to cache the given assemblies</target>
-        <note></note>
+        <target state="translated">Diretório de saída em que armazenar os assemblies determinados.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FrameworkVersion</source>
-        <target state="new">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FrameworkVersion</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
         <source>The Microsoft.NETCore.App package version that will be used to run the assemblies.</source>
-        <target state="needs-review-translation">The Microsoft.NETCore.App package version that will be used to run the assemblies</target>
-        <note></note>
+        <target state="translated">A versão do pacote Microsoft.NETCore.App que será usada para executar os assemblies.</target>
+        <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>IntermediateWorkingDir</source>
-        <target state="new">IntermediateWorkingDir</target>
-        <note></note>
+        <target state="translated">IntermediateWorkingDir</target>
+        <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
         <source>The directory used by the command to execute.</source>
-        <target state="needs-review-translation">The directory used by the command to do its work</target>
-        <note></note>
+        <target state="translated">O diretório usado pelo comando para executar.</target>
+        <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
         <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
-        <target state="needs-review-translation">Intermediate working directory {0} exists, remove {0} or specify another directory with -w</target>
-        <note></note>
+        <target state="translated">O diretório de trabalho intermediário {0} já existe. Remova {0} ou especifique outro diretório com -w.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skips the optimization phase.</source>
-        <target state="new">Skips the optimization phase.</target>
-        <note></note>
+        <target state="translated">Ignora a fase de otimização.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
         <source>PROJECT_MANIFEST</source>
-        <target state="new">PROJECT_MANIFEST</target>
-        <note></note>
+        <target state="translated">PROJECT_MANIFEST</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectManifestDescription">
         <source>The XML file that contains the list of packages to be stored.</source>
-        <target state="new">The XML file that contains the list of packages to be stored.</target>
-        <note></note>
+        <target state="translated">O arquivo XML que contém a lista de pacotes a serem armazenados.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
         <source>Skips creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="new">Skips creating symbol files which can be used for profiling the optimized assemblies.</target>
-        <note></note>
+        <target state="translated">Ignora criação de arquivos de símbolo que podem ser usados para criar o perfil de assemblies otimizados.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
         <source>Specify at least one manifest with --manifest.</source>
-        <target state="new">Specify at least one manifest with --manifest.</target>
-        <note></note>
+        <target state="translated">Especifique pelo menos um manifesto com --manifest.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

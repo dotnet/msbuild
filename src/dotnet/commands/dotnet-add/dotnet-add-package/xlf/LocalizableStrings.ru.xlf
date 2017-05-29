@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Добавлять ссылку только при выборе конкретной целевой платформы</target>
-        <note></note>
+        <target state="translated">Добавляет ссылку только при выборе конкретной целевой платформы.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Добавление ссылки без предварительной проверки восстановления и совместимости.</target>
-        <note></note>
+        <target state="translated">Добавляет ссылку без предварительной проверки восстановления и совместимости.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Указание конкретных источников пакетов NuGet, используемых во время восстановления.</target>
-        <note></note>
+        <target state="translated">Указывает источники пакетов NuGet, используемые во время восстановления.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Восстановление пакетов в указанном каталоге.</target>
-        <note></note>
+        <target state="translated">Восстанавливает пакеты в указанном каталоге.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">Не удалось создать файл графа зависимостей для проекта {0}. Невозможно добавить ссылку на пакет.</target>
-        <note></note>
+        <target state="translated">Не удалось создать файл графа зависимостей для проекта "{0}". Невозможно добавить ссылку на пакет.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">Добавляемая ссылка на пакет.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

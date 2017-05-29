@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="translated">Dołącz pakiety z symbolami oprócz regularnych pakietów w katalogu wyjściowym.</target>
+        <target state="translated">Dołącz pakiety z symbolami oprócz regularnych pakietów w folderze wyjściowym.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">

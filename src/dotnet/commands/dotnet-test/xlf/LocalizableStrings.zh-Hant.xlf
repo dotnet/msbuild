@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="CmdArgDescription">
         <source>The project to test. Defaults to the current directory.</source>
-        <target state="needs-review-translation">要測試的專案，預設為目前的目錄。</target>
-        <note></note>
+        <target state="translated">要測試的專案。預設為目前的目錄。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
@@ -52,18 +52,19 @@
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
         <target state="translated">執行符合指定運算式的測試。
-                                       範例:
-                                       執行優先順序設為 1 的測試: --filter "Priority = 1"
-                                       執行具有指定完整名稱的測試: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                       執行包含指定名稱的測試: --filter "FullyQualifiedName~Namespace.Class"
-                                       篩選支援的詳細資訊: https://aka.ms/vstest-filtering</target>
+                                        範例:
+                                        執行測試，其中優先順序設為 1: --filter "Priority = 1"
+                                        使用指定的全名執行測試: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        執行內含指定名稱的測試: --filter "FullyQualifiedName~Namespace.Class"
+                                        篩選資源的詳細資訊: https://aka.ms/vstest-filtering
+                                        </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">在測試回合中使用來自指定路徑的自訂配接器。
-                                       範例: --test-adapter-path &lt;配接器路徑&gt;</target>
+        <target state="translated">從測試回合中的指定路徑使用自訂配接器。
+                                        範例: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -75,9 +76,10 @@
         <source>Specify a logger for test results.
                                         Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">指定測試結果的記錄器。
-                                       例如: --logger "trx[;LogFileName=&lt;預設為唯一的檔案名稱&gt;]"</target>
-        <note></note>
+        <target state="translated">指定測試結果的記錄器。
+                                        範例: --logger "trx[;LogFileName=&lt;預設為唯一的檔案名稱&gt;]"
+                                        記錄器引數支援的詳細資訊: https://aka.ms/vstest-report</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -86,8 +88,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
-        <note></note>
+        <target state="translated">用於建置專案的組態。大多數專案的預設為 "Debug"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -128,20 +130,20 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>PATH_TO_ADAPTER</source>
-        <target state="new">PATH_TO_ADAPTER</target>
-        <note></note>
+        <target state="translated">PATH_TO_ADAPTER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
                                         Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
-        <target state="new">The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
-                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
-        <note></note>
+        <target state="translated">用於置放測試結果的目錄。若指定的目錄不存在，則會建立該目錄。
+                                        範例: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>PATH_TO_RESULTS_DIRECTORY</source>
-        <target state="new">PATH_TO_RESULTS_DIRECTORY</target>
-        <note></note>
+        <target state="translated">PATH_TO_RESULTS_DIRECTORY</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
@@ -151,26 +153,26 @@ RunSettings arguments:
   Use a space to separate multiple[name] =[value].
   More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="new">
+        <target state="translated">
 
-RunSettings arguments:
-  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
-  Use a space to separate multiple[name] =[value].
-  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
-  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
-        <note></note>
+RunSettings 引數:
+  透過命令列傳遞 runsettings 組態的引數。引數可以接在 "-- " 之後，以 [名稱]=[值] 的格式指定為成對的「名稱/值」。請注意 -- 之後的空格。
+  請使用空格隔開多個 [名稱]=[值]。
+  RunSettings 引數支援的詳細資訊: https://aka.ms/vstest-runsettings-arguments
+  範例: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
-        <target state="new">DATA_COLLECTOR_FRIENDLY_NAME</target>
-        <note></note>
+        <target state="translated">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="new">Enables data collector for the test run.
-                                        More info here : https://aka.ms/vstest-collect</target>
-        <note></note>
+        <target state="translated">為測試回合啟用資料收集器。
+                                        如需詳細資訊，請參閱: https://aka.ms/vstest-collect</target>
+        <note />
       </trans-unit>
     </body>
   </file>

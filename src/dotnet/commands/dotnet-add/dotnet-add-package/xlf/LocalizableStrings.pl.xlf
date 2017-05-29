@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Dodaj odwołanie tylko w przypadku określenia konkretnej platformy docelowej</target>
-        <note></note>
+        <target state="translated">Dodaje odwołanie tylko w przypadku określenia konkretnej platformy docelowej.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Dodaj odwołanie bez tworzenia podglądu przywracania i sprawdzania zgodności.</target>
-        <note></note>
+        <target state="translated">Dodaje odwołanie bez tworzenia podglądu przywracania i sprawdzania zgodności.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Użyj konkretnych źródeł pakietów NuGet podczas przywracania.</target>
-        <note></note>
+        <target state="translated">Określa źródła pakietów NuGet podczas przywracania.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Przywróć pakiety do tego katalogu.</target>
-        <note></note>
+        <target state="translated">Przywraca pakiety do określonego katalogu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">Nie można utworzyć pliku wykresu tworzenia zależności dla projektu „{0}”. Nie można dodać odwołania do pakietu.</target>
-        <note></note>
+        <target state="translated">Nie można utworzyć pliku wykresu tworzenia zależności dla projektu „{0}”. Nie można dodać odwołania do pakietu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">Odwołanie do pakietu do dodania.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">NAZWA_PAKIETU</target>
+        <note />
       </trans-unit>
     </body>
   </file>

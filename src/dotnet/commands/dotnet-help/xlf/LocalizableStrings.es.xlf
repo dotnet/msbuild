@@ -65,8 +65,8 @@
       </trans-unit>
       <trans-unit id="Commands">
         <source>SDK commands</source>
-        <target state="needs-review-translation">Comandos</target>
-        <note></note>
+        <target state="translated">Comandos de SDK</target>
+        <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add reference to the project.</source>
-        <target state="needs-review-translation">Agrega elementos al proyecto.</target>
-        <note></note>
+        <target state="translated">Agrega referencias al proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove reference from the project.</source>
-        <target state="needs-review-translation">Quita elementos del proyecto.</target>
-        <note></note>
+        <target state="translated">Quita referencias del proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -160,88 +160,88 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List reference in the project.</source>
-        <target state="new">List reference in the project.</target>
-        <note></note>
+        <target state="translated">Muestra referencias en el proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="new">Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</target>
-        <note></note>
+        <target state="translated">El comando especificado "{0}" no es un comando de la CLI válido. Especifique uno válido. Para más información, ejecute la ayuda de dotnet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET CLI help utility</source>
-        <target state="new">.NET CLI help utility</target>
-        <note></note>
+        <target state="translated">Utilidad de ayuda de la CLI de .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="new">Utility to get more detailed help about each of the CLI commands.</target>
-        <note></note>
+        <target state="translated">Utilidad para obtener ayuda más detallada sobre cada uno de los comandos de la CLI.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="new">COMMAND_NAME</target>
-        <note></note>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>CLI command for which to view more detailed help.</source>
-        <target state="new">CLI command for which to view more detailed help.</target>
-        <note></note>
+        <target state="translated">Comando de la CLI para el que ver ayuda más detallada.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
         <source>The path to an application .dll file to execute.</source>
-        <target state="new">The path to an application .dll file to execute.</target>
-        <note></note>
+        <target state="translated">La ruta de acceso al archivo .dll de una aplicación que se ejecutará.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET Core SDK version.</source>
-        <target state="new">Display .NET Core SDK version.</target>
-        <note></note>
+        <target state="translated">Muestra la versión del SDK de .NET Core.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET Core information.</source>
-        <target state="new">Display .NET Core information.</target>
-        <note></note>
+        <target state="translated">Muestra la información de .NET Core.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
-        <target state="new">Enable diagnostic output.</target>
-        <note></note>
+        <target state="translated">Habilita la salida de diagnóstico.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="new">Run 'dotnet COMMAND --help' for more information on a command.</target>
-        <note></note>
+        <target state="translated">Ejecute "dotnet COMMAND --help" para más información sobre un comando.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="new">Path containing probing policy and assemblies to probe for.</target>
-        <note></note>
+        <target state="translated">Ruta de acceso que contiene la directiva de sondeo y los ensamblados para los que realizar el sondeo.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="new">Path to &lt;application&gt;.deps.json file.</target>
-        <note></note>
+        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.deps.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="new">Path to &lt;application&gt;.runtimeconfig.json file.</target>
-        <note></note>
+        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.runtimeconfig.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
-        <target state="new">Version of the installed Shared Framework to use to run the application.</target>
-        <note></note>
+        <target state="translated">Versión de la instancia de Shared Framework instalada que se usará para ejecutar la aplicación.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
         <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="new">Roll forward on no candidate shared framework is enabled.</target>
-        <note></note>
+        <target state="translated">Puesta al día activada, no hay ninguna instancia de Shared Framework habilitada.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additonal deps.json file.</source>
-        <target state="new">Path to additonal deps.json file.</target>
-        <note></note>
+        <target state="translated">Ruta de acceso al archivo deps.json adicional.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

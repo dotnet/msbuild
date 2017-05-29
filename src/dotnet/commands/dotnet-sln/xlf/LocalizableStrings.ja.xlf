@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add one or more specified projects to the solution.</source>
-        <target state="needs-review-translation">指定のプロジェクトをソリューションに追加します。</target>
-        <note></note>
+        <target state="translated">1 つ以上の指定のプロジェクトをソリューションに追加します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>

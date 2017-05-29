@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">La ruta de acceso a un archivo de manifiesto de destino que contiene la lista de paquetes que se excluirán del paso de publicación.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">Publica el tiempo de ejecución de .NET Core con su aplicación para que no sea necesario instalarlo en la máquina de destino. Si se especifica un identificador de tiempo de ejecución, se toma como predeterminado el valor "true".</target>
+        <note />
       </trans-unit>
     </body>
   </file>
