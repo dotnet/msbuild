@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public string CommandName => CommandNameValue;
 
-        public bool TryApplySettings(JObject document, JObject model, ref ICommand command, out string runAfterLaunch)
+        public LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command)
         {
             try
             {
@@ -26,13 +26,16 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     command.EnvironmentVariable(entry.Key, value);
                 }
 
-                runAfterLaunch = null;
-                return true;
+                if (!string.IsNullOrEmpty(config.ApplicationUrl))
+                {
+                    command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
+                }
+
+                return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);
             }
-            catch
+            catch (Exception ex)
             {
-                runAfterLaunch = null;
-                return false;
+                return new LaunchSettingsApplyResult(false, ex.Message);
             }
         }
 

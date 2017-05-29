@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
-        public void ItPrintsAnErrorWhenLaunchSettingsArCorrupted()
+        public void ItPrintsAnErrorWhenLaunchSettingsAreCorrupted()
         {
             var testAppName = "MSBuildTestAppWithCorruptedLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)

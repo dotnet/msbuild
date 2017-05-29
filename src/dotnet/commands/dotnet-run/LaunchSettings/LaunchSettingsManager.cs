@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             };
         }
 
-        public static bool TryApplyLaunchSettings(string launchSettingsJsonContents, ref ICommand command, out string runAfterLaunch, string profileName = null)
+        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, ref ICommand command, string profileName = null)
         {
             try
             {
@@ -30,8 +30,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                 if (profilesObject == null)
                 {
-                    runAfterLaunch = null;
-                    return false;
+                    return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
                 }
 
                 JObject profileObject;
@@ -47,8 +46,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                     if (profileObject == null)
                     {
-                        runAfterLaunch = null;
-                        return false;
+                        return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
                     }
                 }
 
@@ -72,18 +70,21 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                 var commandName = profileObject?[CommandNameKey]?.Value<string>();
 
-                if (profileObject == null || !TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
+                if (profileObject == null)
                 {
-                    runAfterLaunch = null;
-                    return false;
+                    return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
                 }
 
-                return provider.TryApplySettings(model, profileObject, ref command, out runAfterLaunch);
+                if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
+                {
+                    return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
+                }
+
+                return provider.TryApplySettings(model, profileObject, ref command);
             }
-            catch
+            catch (Exception ex)
             {
-                runAfterLaunch = null;
-                return false;
+                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.UnexpectedExceptionProcessingLaunchSettings, ex.Message));
             }
         }
 

@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
     {
         string CommandName { get; }
 
-        bool TryApplySettings(JObject document, JObject model, ref ICommand command, out string runAfterLaunch);
+        LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command);
     }
 
 }
