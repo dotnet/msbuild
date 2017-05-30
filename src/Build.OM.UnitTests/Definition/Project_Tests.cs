@@ -3835,6 +3835,139 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        [Fact]
+        public void ProjectImportedEventFalseCondition()
+        {
+            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
+
+            try
+            {
+                
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    pre.AddPropertyGroup().AddProperty("NotUsed", "");
+
+                    var import = pre.AddImport(@"$(MSBuildExtensionsPath)\Foo");
+                    import.Condition = " '$(Something)' == 'nothing' ";
+
+                    pre.Save();
+                    pre.Reload();
+
+                    Project unused = new Project(pre, null, null, collection);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Null(eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to false condition; ( \'$(Something)\' == \'nothing\' ) was evaluated as ( \'\' == \'nothing\' )."); 
+                }
+            }
+            finally
+            {
+                File.Delete(pre.FullPath);
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventNoMatchingFiles()
+        {
+            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
+
+            try
+            {
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+                var import = pre.AddImport(@"Foo\*");
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Null(eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
+                }
+            }
+            finally
+            {
+                File.Delete(pre.FullPath);
+            }
+        }
+
+        [Fact]
+        public void ProjectImportEvent()
+        {
+            ProjectRootElement pre1 = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
+            ProjectRootElement pre2 = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
+
+            try
+            {
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    pre1.Save();
+
+                    pre2.AddPropertyGroup().AddProperty("NotUsed", "");
+                    var import = pre2.AddImport(pre1.FullPath);
+
+                    pre2.Save();
+                    pre2.Reload();
+
+                    Project unused = new Project(pre2, null, null, collection);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Equal(pre1.FullPath, eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre2.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Importing project \"{pre1.FullPath}\" into project \"{pre2.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}).");
+                }
+            }
+            finally
+            {
+                File.Delete(pre1.FullPath);
+                File.Delete(pre2.FullPath);
+            }
+        }
+
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
