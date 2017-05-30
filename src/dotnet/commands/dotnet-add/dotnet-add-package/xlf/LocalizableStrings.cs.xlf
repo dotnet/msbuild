@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Přidat odkaz jen při zaměření na určitou platformu</target>
-        <note></note>
+        <target state="translated">Přidá odkaz jen v případě, že cílem je konkrétní architektura.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
-        <note></note>
+        <target state="translated">Přidá odkaz bez provedení náhledu obnovení a kontroly kompatibility.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Určete konkrétní zdroje balíčků NuGet, které se mají použít při obnovení.</target>
-        <note></note>
+        <target state="translated">Určuje zdroje balíčků NuGet, které se mají použít při obnovení.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Obnoví balíčky do tohoto adresáře.</target>
-        <note></note>
+        <target state="translated">Obnoví balíčky do zadaného adresáře.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">Není možné vytvořit grafický soubor závislostí pro projekt {0}. Nejde přidat odkaz na balíček.</target>
-        <note></note>
+        <target state="translated">Není možné vytvořit soubor grafu závislostí pro projekt {0}. Nelze přidat odkaz na balíček.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">Odkaz na balíček, který se má přidat</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

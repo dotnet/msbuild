@@ -575,7 +575,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um arquivo de solução em {0}. Especifique qual usar.</target>
+        <target state="translated">Foi encontrado mais de um arquivo de solução em {0}. Especifique qual deles deve ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -595,7 +595,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">O projeto ‘{0}’ não pode ser adicionado devido Pa estruturas de destino incompatíveis entre os dois projetos. Examine o projeto que você está tentando adicionar e verifique se ele é compatível com os seguintes destinos:</target>
+        <target state="translated">O projeto '{0}' não pode ser adicionado devido a estruturas de destino incompatíveis entre os dois projetos. Examine o projeto que você está tentando adicionar e verifique se ele é compatível com os seguintes destinos:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,9 +606,9 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}.</source>
-        <target state="needs-review-translation">Não foi possível avaliar o projeto "{0}". A avaliação falhou com o seguinte erro:
-{1}</target>
-        <note></note>
+        <target state="translated">O projeto '{0}' não pôde ser avaliado. A avaliação falhou com o seguinte erro:
+{1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Unsupported project type. Please check with your sdk provider.</source>
@@ -617,63 +617,63 @@
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}.</source>
-        <target state="needs-review-translation">Solução inválida `{0}`. {1}</target>
-        <note></note>
+        <target state="translated">Solução inválida `{0}`. {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">O arquivo de projeto a ser operado. Se um arquivo não for especificado, o comando pesquisará um no diretório atual.</target>
+        <target state="translated">O arquivo de projeto no qual operar. Se um arquivo não for especificado, o comando pesquisará um no diretório atual.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentsSolutionDescription">
         <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">O arquivo de solução a ser operado. Se não for especificado, o comando pesquisará um no diretório atual.</target>
+        <target state="translated">O arquivo de solução no qual operar. Se não for especificado, o comando pesquisará um no diretório atual.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSlnFile">
         <source>SLN_FILE</source>
-        <target state="needs-review-translation">&lt;SLN_FILE&gt;</target>
-        <note></note>
+        <target state="translated">SLN_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectFile">
         <source>PROJECT</source>
-        <target state="needs-review-translation">&lt;PROJECT&gt;</target>
-        <note></note>
+        <target state="translated">PROJETO</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
-        <target state="new">Invalid project `{0}`. {1}.</target>
-        <note></note>
+        <target state="translated">Projeto inválido `{0}`. {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="new">Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</target>
-        <note></note>
+        <target state="translated">Defina o nível de detalhes do comando. Os valores permitidos são: q[uiet], m[inimal], n[ormal], d[etailed] e diag[nostic].</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="new">Target framework to publish for. The target framework has to be specified in the project file.</target>
-        <note></note>
+        <target state="translated">Estrutura de destino na qual publicar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="new">Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</target>
-        <note></note>
+        <target state="translated">Publica o projeto em um tempo de execução específico. Usado durante a criação da implantação independente. O padrão é publicar um aplicativo dependente de estrutura.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="new">Configuration to use for building the project.  Default for most projects is  "Debug".</target>
-        <note></note>
+        <target state="translated">Configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project.</target>
-        <note></note>
+        <target state="translated">Define o valor da propriedade $(VersionSuffix) no projeto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show help information.</source>
-        <target state="new">Show help information.</target>
-        <note></note>
+        <target state="translated">Mostrar informações de ajuda.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

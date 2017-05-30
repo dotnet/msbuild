@@ -620,12 +620,12 @@
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
         <source>Specified name {0} already exists. Please specify a different name.</source>
-        <target state="translated">Il nome specificato {0} esiste già. Specificare un nome diverso.</target>
+        <target state="translated">Il nome specificato {0} esiste già. Specificarne uno diverso.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
         <source>Specified alias {0} already exists. Please specify a different alias.</source>
-        <target state="translated">L'alias specificato {0} esiste già. Specificare un alias diverso.</target>
+        <target state="translated">L'alias specificato {0} esiste già. Specificarne uno diverso.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">

@@ -105,8 +105,8 @@
       </trans-unit>
       <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
         <source>Required value for option '{0}' was not provided.</source>
-        <target state="new">Required value for option '{0}' was not provided.</target>
-        <note></note>
+        <target state="translated">Il valore obbligatorio per l'opzione '{0}' non è stato specificato.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

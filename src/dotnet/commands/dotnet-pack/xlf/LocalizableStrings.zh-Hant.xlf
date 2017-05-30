@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">跳過在封裝前建置專案。根據預設，會建置專案。</target>
+        <target state="translated">在封裝前跳過建置專案。預設會建置專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>
-        <target state="translated">專案</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">

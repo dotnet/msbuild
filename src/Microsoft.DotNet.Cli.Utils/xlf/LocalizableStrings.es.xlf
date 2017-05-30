@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: Buscando el archivo prefercliruntime en "{1}"</target>
+        <target state="translated">{0}: buscando el archivo prefercliruntime en "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
         <source>{0}: Did not find a matching project {1}.</source>
-        <target state="translated">{0}: No se encontró un proyecto coincidente {1}.</target>
+        <target state="translated">{0}: no se encontró un proyecto coincidente {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
@@ -75,7 +75,7 @@
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: Ruta del proyecto MSBuild = {1}</target>
+        <target state="translated">{0}: ruta del proyecto MSBuild = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: Intentando resolver especificaciones de comando desde la herramienta {1}</target>
+        <target state="translated">{0}: intentando resolver especificaciones de comando desde la herramienta {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Esperando a que se asocie el depurador. Presione ENTRAR para continuar.</target>
+        <target state="translated">Esperando anexar el depurador. Presione ENTRAR para continuar</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">
@@ -217,23 +217,23 @@
       </trans-unit>
       <trans-unit id="IgnoringPreferCLIRuntimeFile">
         <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
-        <target state="new">{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</target>
-        <note></note>
+        <target state="translated">{0}: se ignorará el archivo prefercliruntime dado que la plataforma de destino de la herramienta ({1}) tiene una versión mayor que el entorno de tiempo de ejecución actual de la CLI ({2})</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotFindToolRuntimeConfigFile">
         <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
-        <target state="new">{0}: Could not find runtimeconfig.json file for tool {1}</target>
-        <note></note>
+        <target state="translated">{0}: no se pudo encontrar el archivo runtimeconfig.json para la herramienta {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsJsonGeneratorProjectNotSet">
         <source>Unable to find deps.json generator project.</source>
-        <target state="new">Unable to find deps.json generator project.</target>
-        <note></note>
+        <target state="translated">No se puede encontrar el proyecto de generador deps.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="new">The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</target>
-        <note></note>
+        <target state="translated">No se encontró el comando ejecutable para "{0}". Puede que el proyecto no se haya restaurado o que la restauración no haya tenido éxito. Ejecute "dotnet restore"</target>
+        <note />
       </trans-unit>
     </body>
   </file>

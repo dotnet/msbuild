@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">特定のフレームワークを対象とする場合にのみ参照を追加する</target>
-        <note></note>
+        <target state="translated">特定のフレームワークを対象とする場合にのみ参照を追加します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">復元のプレビューや互換性チェックを行わずに参照を追加します。</target>
-        <note></note>
+        <target state="translated">復元のプレビューや互換性チェックを行わずに参照を追加します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">復元中には特定の NuGet パッケージ ソースを使用します。</target>
-        <note></note>
+        <target state="translated">復元中に使用する NuGet パッケージ ソースを指定します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">パッケージをこのディレクトリに復元します。</target>
-        <note></note>
+        <target state="translated">指定されたディレクトリにパッケージを復元します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">プロジェクト '{0}' の依存関係グラフ ファイルを作成できません。パッケージ参照を追加できません。</target>
-        <note></note>
+        <target state="translated">プロジェクト '{0}' の依存関係グラフ ファイルを作成できません。パッケージ参照を追加できません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">追加するパッケージ参照。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>Expected file header not found</source>
-        <target state="needs-review-translation">Chybí hlavička souboru</target>
-        <note></note>
+        <target state="translated">Nenalezena očekávaná hlavička souboru</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -55,8 +55,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingVersionError">
         <source>File header is missing version</source>
-        <target state="new">File header is missing version</target>
-        <note></note>
+        <target state="translated">Chybějící verze v hlavičce souboru</target>
+        <note />
       </trans-unit>
     </body>
   </file>

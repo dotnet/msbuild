@@ -34,8 +34,8 @@ Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podr�
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="needs-review-translation">Nie udało się utworzyć głównej pamięci podręcznej NuGet. Operacja {0} zakończyła się niepowodzeniem: {1}</target>
-        <note></note>
+        <target state="translated">Nie można utworzyć głównej pamięci podręcznej NuGet. Operacja {0} zakończyła się niepowodzeniem: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

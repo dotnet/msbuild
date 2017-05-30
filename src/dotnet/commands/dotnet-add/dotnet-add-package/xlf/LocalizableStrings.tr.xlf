@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Yalnızca belirli bir çerçeveyi hedeflerken başvuru ekler</target>
-        <note></note>
+        <target state="translated">Yalnızca belirli bir çerçeveyi hedeflerken başvuru ekler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden başvuru ekler.</target>
-        <note></note>
+        <target state="translated">Geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden başvuru ekler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Geri yükleme sırasında kullanılacak belirli NuGet paket kaynaklarını kullanır.</target>
-        <note></note>
+        <target state="translated">Geri yükleme sırasında kullanılacak NuGet paketi kaynaklarını belirtir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Paketleri bu Dizine geri yükler.</target>
-        <note></note>
+        <target state="translated">Paketleri belirtilen dizine geri yükler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">'{0}' projesi için Bağımlılık grafiği dosyası oluşturulamadı. Paket başvurusu eklenemiyor.</target>
-        <note></note>
+        <target state="translated">'{0}' projesi için bağımlılık grafiği dosyası oluşturulamadı. Paket başvurusu eklenemiyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">Eklenecek paket başvurusu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Verweis nur bei Verwendung eines bestimmten Zielframeworks hinzufügen</target>
-        <note></note>
+        <target state="translated">Fügt nur bei Verwendung eines bestimmten Zielframeworks einen Verweis hinzu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Fügt einen Verweis hinzu, ohne dass eine Wiederherstellungsvorschau oder eine Kompatibilitätsprüfung durchgeführt wird.</target>
-        <note></note>
+        <target state="translated">Fügt ohne Durchführen einer Wiederherstellungsvorschau und einer Kompatibilitätsprüfung einen Verweis hinzu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">Gibt spezifische NuGet-Paketquellen für die Wiederherstellung an.</target>
-        <note></note>
+        <target state="translated">Gibt NuGet-Paketquellen für die Wiederherstellung an.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">Stellt die Pakete in diesem Verzeichnis wieder her.</target>
-        <note></note>
+        <target state="translated">Stellt die Pakete im angegebenen Verzeichnis wieder her.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">Die Abhängigkeitsdiagrammdatei für das Projekt "{0}" konnte nicht wiederhergestellt werden. Der Paketverweis kann nicht hinzugefügt werden.</target>
-        <note></note>
+        <target state="translated">Die Abhängigkeitsdiagrammdatei für das Projekt "{0}" konnte nicht erstellt werden. Der Paketverweis kann nicht hinzugefügt werden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">Der hinzuzufügende Paketverweis.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

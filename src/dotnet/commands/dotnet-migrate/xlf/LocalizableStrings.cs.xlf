@@ -40,8 +40,8 @@ Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">Verze balíčku SDK, na který bude odkazovat migrovaná aplikace. Výchozí hodnotou je verze SDK v příkazu dotnet new.</target>
-        <note></note>
+        <target state="translated">Verze balíčku sady SDK, na kterou bude odkazovat migrovaná aplikace. Výchozí hodnotou je verze sady SDK v příkazu dotnet new.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
@@ -50,8 +50,8 @@ Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default, project references are migrated recursively.</source>
-        <target state="needs-review-translation">Přeskočit migraci odkazů na projekt. Odkazy na projekt se automaticky migrují rekurzivně.</target>
-        <note></note>
+        <target state="translated">Vynechá migraci odkazů na projekt. Odkazy na projekt se automaticky migrují rekurzivně.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
@@ -75,78 +75,78 @@ Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).
       </trans-unit>
       <trans-unit id="MigrationAdditionalHelp">
         <source>The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</source>
-        <target state="new">The project migration has finished. Please visit https://aka.ms/coremigration to report any issues you've encountered or ask for help.</target>
-        <note></note>
+        <target state="translated">Migrace projektu je hotová. Přejděte prosím na https://aka.ms/coremigration, kde můžete nahlásit jakékoli problémy, nebo požádat o pomoc.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportSummary">
         <source>Summary</source>
-        <target state="new">Summary</target>
-        <note></note>
+        <target state="translated">Shrnutí</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportTotalProjects">
         <source>Total Projects: {0}</source>
-        <target state="new">Total Projects: {0}</target>
-        <note></note>
+        <target state="translated">Celkový počet projektů: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportSucceededProjects">
         <source>Succeeded Projects: {0}</source>
-        <target state="new">Succeeded Projects: {0}</target>
-        <note></note>
+        <target state="translated">Počet úspěšných projektů: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationReportFailedProjects">
         <source>Failed Projects: {0}</source>
-        <target state="new">Failed Projects: {0}</target>
-        <note></note>
+        <target state="translated">Počet neúspěšných projektů: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectMigrationSucceeded">
         <source>Project {0} migration succeeded ({1}).</source>
-        <target state="new">Project {0} migration succeeded ({1}).</target>
-        <note></note>
+        <target state="translated">Migrace projektu {0} byla úspěšná ({1}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectMigrationFailed">
         <source>Project {0} migration failed ({1}).</source>
-        <target state="new">Project {0} migration failed ({1}).</target>
-        <note></note>
+        <target state="translated">Migrace projektu {0} byla neúspěšná ({1}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedToFindProjectInGlobalJson">
         <source>Unable to find any projects in global.json.</source>
-        <target state="new">Unable to find any projects in global.json.</target>
-        <note></note>
+        <target state="translated">V souboru global.json se nenašly žádné projekty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindProjects">
         <source>Unable to find any projects in {0}.</source>
-        <target state="new">Unable to find any projects in {0}.</target>
-        <note></note>
+        <target state="translated">V {0} se nenašly žádné projekty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationProjectJsonNotFound">
         <source>No project.json file found in '{0}'.</source>
-        <target state="new">No project.json file found in '{0}'.</target>
-        <note></note>
+        <target state="translated">V {0} se nenašel žádný soubor project.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationInvalidProjectArgument">
         <source>Invalid project argument - '{0}' is not a project.json, global.json, or solution.sln file and a directory named '{0}' doesn't exist.</source>
-        <target state="new">Invalid project argument - '{0}' is not a project.json, global.json, or solution.sln file and a directory named '{0}' doesn't exist.</target>
-        <note></note>
+        <target state="translated">Neplatný argument projektu – {0} není souborem project.json, global.json ani solution.sln a adresář s názvem {0} neexistuje.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigratonUnableToFindProjectJson">
         <source>Unable to find project.json file at {0}.</source>
-        <target state="new">Unable to find project.json file at {0}.</target>
-        <note></note>
+        <target state="translated">V umístění {0} se nenašel soubor project.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindGlobalJson">
         <source>Unable to find global settings file at {0}.</source>
-        <target state="new">Unable to find global settings file at {0}.</target>
-        <note></note>
+        <target state="translated">V umístění {0} se nenašel soubor globálního nastavení.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationUnableToFindSolutionFile">
         <source>Unable to find the solution file at {0}.</source>
-        <target state="new">Unable to find the solution file at {0}.</target>
-        <note></note>
+        <target state="translated">V umístění {0} se nenašel soubor řešení.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateFilesBackupLocation">
         <source>Files backed up to {0}</source>
-        <target state="new">Files backed up to {0}</target>
-        <note></note>
+        <target state="translated">Soubory byly zálohovány do {0}.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

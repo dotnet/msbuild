@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add one or more specified projects to the solution.</source>
-        <target state="needs-review-translation">將指定的專案新增到解決方案。</target>
-        <note></note>
+        <target state="translated">將一或多個指定的專案新增至解決方案。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>
@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="translated">將指定的專案從解決方案移除。專案不會受到影響。</target>
+        <target state="translated">從解決方案移除指定的專案。專案不會受到影響。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">

@@ -10,12 +10,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="translated">架構</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">要對其發行的目標 Framework。目標 Framework 必須在專案檔中指定。</target>
+        <target state="translated">要為其發行的目標 Framework。其必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">目標資訊清單檔案的路徑，其包含要從發行步驟中排除的套件清單。</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">隨著應用程式一併發行 .NET Core 執行階段，因此不需要在目標電腦上安裝此執行階段。若指定了執行階段識別碼，則預設為 'true'。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

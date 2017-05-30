@@ -65,8 +65,8 @@
       </trans-unit>
       <trans-unit id="Commands">
         <source>SDK commands</source>
-        <target state="needs-review-translation">Команды</target>
-        <note></note>
+        <target state="translated">Команды SDK</target>
+        <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add reference to the project.</source>
-        <target state="needs-review-translation">Добавление элементов в проект.</target>
-        <note></note>
+        <target state="translated">Добавление ссылки в проект.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove reference from the project.</source>
-        <target state="needs-review-translation">Удаление элементов из проекта.</target>
-        <note></note>
+        <target state="translated">Удаление ссылки из проекта.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -160,88 +160,88 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List reference in the project.</source>
-        <target state="new">List reference in the project.</target>
-        <note></note>
+        <target state="translated">Список ссылок в проекте.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="new">Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</target>
-        <note></note>
+        <target state="translated">Указанная команда "{0}" не является допустимой командой CLI. Укажите допустимые команды CLI. Чтобы получить дополнительные сведения, откройте справку dotnet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET CLI help utility</source>
-        <target state="new">.NET CLI help utility</target>
-        <note></note>
+        <target state="translated">Вспомогательная программа .NET CLI</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="new">Utility to get more detailed help about each of the CLI commands.</target>
-        <note></note>
+        <target state="translated">Служебная программа для получения более подробной справки по каждой из команд CLI.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="new">COMMAND_NAME</target>
-        <note></note>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>CLI command for which to view more detailed help.</source>
-        <target state="new">CLI command for which to view more detailed help.</target>
-        <note></note>
+        <target state="translated">Команда CLI, подробную справку по которой необходимо просмотреть.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
         <source>The path to an application .dll file to execute.</source>
-        <target state="new">The path to an application .dll file to execute.</target>
-        <note></note>
+        <target state="translated">Путь к DLL-файлу приложения, который необходимо выполнить.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET Core SDK version.</source>
-        <target state="new">Display .NET Core SDK version.</target>
-        <note></note>
+        <target state="translated">Отображение версии пакета SDK для .NET Core.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET Core information.</source>
-        <target state="new">Display .NET Core information.</target>
-        <note></note>
+        <target state="translated">Отображение сведений о .NET Core.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
-        <target state="new">Enable diagnostic output.</target>
-        <note></note>
+        <target state="translated">Включение выходных данных диагностики.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="new">Run 'dotnet COMMAND --help' for more information on a command.</target>
-        <note></note>
+        <target state="translated">Выполните команду "dotnet КОМАНДА --help" для получения дополнительной информации о команде.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="new">Path containing probing policy and assemblies to probe for.</target>
-        <note></note>
+        <target state="translated">Путь к политике проверки и проверяемым сборкам.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="new">Path to &lt;application&gt;.deps.json file.</target>
-        <note></note>
+        <target state="translated">Путь к файлу &lt;приложение&gt;.deps.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="new">Path to &lt;application&gt;.runtimeconfig.json file.</target>
-        <note></note>
+        <target state="translated">Путь к файлу &lt;приложение&gt;.runtimeconfig.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
-        <target state="new">Version of the installed Shared Framework to use to run the application.</target>
-        <note></note>
+        <target state="translated">Версия установленной общей платформы, которую следует использовать для запуска приложения.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
         <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="new">Roll forward on no candidate shared framework is enabled.</target>
-        <note></note>
+        <target state="translated">Если потенциальная общая платформа не включена, выполняется накат.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additonal deps.json file.</source>
-        <target state="new">Path to additonal deps.json file.</target>
-        <note></note>
+        <target state="translated">Путь к дополнительному файлу deps.json.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

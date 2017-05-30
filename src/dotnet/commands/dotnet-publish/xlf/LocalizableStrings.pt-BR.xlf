@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">A estrutura de destino para a qual publicar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
+        <target state="translated">Estrutura de destino na qual publicar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">O caminho para um arquivo de manifesto de destino que contém a lista de pacotes a serem excluídos da etapa de publicação.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">Publique o tempo de execução .NET Core com seu aplicativo para que o tempo de execução não precise ser instalado no computador de destino. Assumirá 'true' como padrão se um identificador de tempo de execução for especificado.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

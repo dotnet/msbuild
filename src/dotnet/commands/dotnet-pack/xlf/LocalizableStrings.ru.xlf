@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Задать флаг "подлежит обслуживанию" в пакете. Дополнительные сведения: https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Установка флага "подлежит обслуживанию" в пакете. Дополнительные сведения см. на странице https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
