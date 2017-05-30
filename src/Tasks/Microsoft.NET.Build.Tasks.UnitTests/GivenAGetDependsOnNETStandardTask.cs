@@ -1,0 +1,152 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+using FluentAssertions;
+using Microsoft.Build.Framework;
+using Microsoft.Extensions.DependencyModel;
+using Xunit;
+using Microsoft.NET.Build.Tasks.ConflictResolution;
+using System.Linq;
+using System.IO;
+
+namespace Microsoft.NET.Build.Tasks.UnitTests
+{
+    public class GivenAGetDependsOnNETStandardTask
+    {
+        [Fact]
+        public void CanCheckThisAssembly()
+        {
+            var thisAssemblyPath = typeof(GivenAGetDependsOnNETStandardTask).GetTypeInfo().Assembly.Location;
+            var task = new GetDependsOnNETStandard()
+            {
+                BuildEngine = new MockBuildEngine(),
+                References = new[] { new MockTaskItem() { ItemSpec = thisAssemblyPath } }
+            };
+            task.Execute().Should().BeTrue();
+
+            // this test happens to compile against System.Runtime, update if the test TFM changes to netstandard2.x
+            task.DependsOnNETStandard.Should().BeFalse();
+        }
+
+        [Fact]
+        public void CanCheckThisAssemblyByHintPath()
+        {
+            var thisAssemblyPath = typeof(GivenAGetDependsOnNETStandardTask).GetTypeInfo().Assembly.Location;
+            var task = new GetDependsOnNETStandard()
+            {
+                BuildEngine = new MockBuildEngine(),
+                References = new[]
+                {
+                    new MockTaskItem(
+                        Path.GetFileNameWithoutExtension(thisAssemblyPath),
+                        new Dictionary<string, string>
+                        {
+                            {"HintPath", thisAssemblyPath }
+                        })
+                }
+            };
+            task.Execute().Should().BeTrue();
+
+            // this test happens to compile against System.Runtime, update if the test TFM changes to netstandard2.x
+            task.DependsOnNETStandard.Should().BeFalse();
+        }
+
+
+        [Fact]
+        public void ReturnsFalseForNonPE()
+        {
+            string testFile = $"testFile.{nameof(GivenAGetDependsOnNETStandardTask)}.{nameof(ReturnsFalseForNonPE)}.txt";
+            try
+            {
+                File.WriteAllText(testFile, "test file");
+                var task = new GetDependsOnNETStandard()
+                {
+                    BuildEngine = new MockBuildEngine(),
+                    References = new[] { new MockTaskItem() { ItemSpec = testFile } }
+                };
+                // ensure that false is returned and no exception is thrown
+                task.Execute().Should().BeTrue();
+                task.DependsOnNETStandard.Should().BeFalse();
+                // warn for a non-PE file
+                ((MockBuildEngine)task.BuildEngine).Warnings.Count.Should().BeGreaterThan(0);
+            }
+            finally
+            {
+                File.Delete(testFile);
+            }
+        }
+
+        [Fact]
+        public void ReturnsFalseForNativeLibrary()
+        {
+            var corelibLocation = typeof(object).GetTypeInfo().Assembly.Location;
+            var corelibFolder = Path.GetDirectoryName(corelibLocation);
+
+            // do our best to try and find it
+            var coreclrLocation = Directory.EnumerateFiles(corelibFolder, "*coreclr*").FirstOrDefault();
+
+            // if we can't find it, skip the test
+            if (coreclrLocation != null)
+            {
+                // ensure that false is returned and no warning is logged for native library
+                var task = new GetDependsOnNETStandard()
+                {
+                    BuildEngine = new MockBuildEngine(),
+                    References = new[] { new MockTaskItem() { ItemSpec = coreclrLocation } }
+                };
+
+                task.Execute().Should().BeTrue();
+                task.DependsOnNETStandard.Should().BeFalse();
+                // don't warn for PE with no metadata
+                ((MockBuildEngine)task.BuildEngine).Warnings.Count.Should().Be(0);
+            }
+        }
+
+        [Fact]
+        public void SucceedsOnMissingFileReturnsFalse()
+        {
+            var missingFile = $"{nameof(SucceedsOnMissingFileReturnsFalse)}.shouldNotExist.dll";
+            File.Exists(missingFile).Should().BeFalse();
+            var task = new GetDependsOnNETStandard()
+            {
+                BuildEngine = new MockBuildEngine(),
+                References = new[] { new MockTaskItem() { ItemSpec = missingFile } }
+            };
+
+            task.Execute().Should().BeTrue();
+            task.DependsOnNETStandard.Should().BeFalse();
+            ((MockBuildEngine)task.BuildEngine).Warnings.Count.Should().Be(0);
+        }
+
+        [Fact]
+        public void SuccedsWithWarningOnLockedFile()
+        {
+            var lockedFile = $"{nameof(SuccedsWithWarningOnLockedFile)}.dll";
+
+            try
+            {
+                var task = new GetDependsOnNETStandard()
+                {
+                    BuildEngine = new MockBuildEngine(),
+                    References = new[] { new MockTaskItem() { ItemSpec = lockedFile } }
+                };
+
+                // create file with no sharing
+                using (var fileHandle = new FileStream(lockedFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                {
+                    task.Execute().Should().BeTrue();
+                    task.DependsOnNETStandard.Should().BeFalse();
+                    ((MockBuildEngine)task.BuildEngine).Warnings.Count.Should().BeGreaterThan(0);
+                }
+            }
+            finally
+            {
+                File.Delete(lockedFile);
+            }
+        }
+    }
+}

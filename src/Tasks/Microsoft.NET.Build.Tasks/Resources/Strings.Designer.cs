@@ -368,6 +368,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}.
+        /// </summary>
+        internal static string GetDependsOnNETStandardFailedWithException {
+            get {
+                return ResourceManager.GetString("GetDependsOnNETStandardFailedWithException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
         internal static string IncorrectPackageRoot {
