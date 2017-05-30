@@ -10,8 +10,8 @@
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="needs-review-translation">El proyecto '{0}' no tiene una plataforma de destino compatible con '{1}'.</target>
-        <note></note>
+        <target state="translated">El proyecto "{0}" tiene como destino "{2}". No se puede hacer referencia a él mediante un proyecto que tenga como destino "{1}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -180,8 +180,8 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="needs-review-translation">Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Los elementos duplicados eran: {3}</target>
-        <note></note>
+        <target state="translated">Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Para más información, consulte {4}. Los elementos duplicados eran: {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
@@ -190,113 +190,113 @@
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="new">Package Root {0} was incorrectly given for Resolved library {1}</target>
-        <note></note>
+        <target state="translated">Se proporcionó incorrectamente la raíz del paquete {0} para la biblioteca resuelta {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>More than one file found for {0}</source>
-        <target state="new">More than one file found for {0}</target>
-        <note></note>
+        <target state="translated">Se encontró más de un archivo para {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="new">Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</target>
-        <note></note>
+        <target state="translated">La carpeta "{0}" ya existe; elimínela o proporcione otro valor para ComposeWorkingDir</target>
+        <note />
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
-        <target state="new">Parsing the Files : '{0}'</target>
-        <note></note>
+        <target state="translated">Analizando los archivos: "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="new">Package Name='{0}', Version='{1}' was parsed</target>
-        <note></note>
+        <target state="translated">Nombre del paquete="{0}", versión analizada="{1}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
-        <target state="new">Specify a RuntimeIdentifier</target>
-        <note></note>
+        <target state="translated">Especificar un valor para RuntimeIdentifier</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="new">The target manifest {0} provided is of not the correct format</target>
-        <note></note>
+        <target state="translated">El manifiesto de destino {0} proporcionado no tiene el formato correcto</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
-        <note></note>
+        <target state="translated">No se puede usar "{0}" como ejecutable del host de aplicación ya que no contiene la secuencia de bytes esperada del marcador de posición "{1}" que marcaría dónde escribir el nombre de la aplicación.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
-        <note></note>
+        <target state="translated">El nombre de archivo especificado "{0}" tiene más de 1024 bytes</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="new">It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</target>
-        <note></note>
+        <target state="translated">No se admite compilar o publicar una aplicación autocontenida sin especificar un valor para RuntimeIdentifier. Especifique un valor para RuntimeIdentifier o establezca SelfContained en false.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">Se elegirá "{0}" porque AssemblyVersion "{1}" es mayor que "{2}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">Se elegirá "{0}" porque la versión del archivo "{1}" es mayor que "{2}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="new">Choosing '{0}' because it is a platform item.</target>
-        <note></note>
+        <target state="translated">Se elegirá "{0}" porque es un elemento de la plataforma.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
-        <note></note>
+        <target state="translated">Se elegirá "{0}" porque viene de un paquete que es preferido.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
-        <note></note>
+        <target state="translated">No se pudo determinar el ganador porque las versiones de archivo y ensamblado son iguales.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="new">Could not determine winner because '{0}' does not exist.</target>
-        <note></note>
+        <target state="translated">No se pudo determinar el ganador porque "{0}" no existe.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
-        <note></note>
+        <target state="translated">No se pudo determinar un ganador porque "{0}" no tiene una versión de archivo.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
-        <note></note>
+        <target state="translated">No se pudo determinar un ganador porque "{0}" no es un ensamblado.</target>
+        <note />
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
-        <note></note>
+        <target state="translated">Se encontró un conflicto entre "{0}" y "{1}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="new">Could not load PlatformManifest from '{0}' because it did not exist.</target>
-        <note></note>
+        <target state="translated">No se pudo cargar PlatformManifest desde "{0}" porque no existe.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</target>
-        <note></note>
+        <target state="translated">Error al analizar PlatformManifest desde la línea "{0}" {1}. Las líneas deben tener el formato {2}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</target>
-        <note></note>
+        <target state="translated">Error al analizar PlatformManifest desde la línea "{0}" {1}. {2} "{3}" no era válido.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

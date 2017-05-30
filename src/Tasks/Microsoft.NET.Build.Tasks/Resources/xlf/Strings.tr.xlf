@@ -10,8 +10,8 @@
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="needs-review-translation">'{0}' projesinde '{1}' ile uyumlu bir hedef çerçeve yok.</target>
-        <note></note>
+        <target state="translated">'{0}' projesi, '{2}' çerçevesini hedefliyor. Bu projeye '{1}' çerçevesini hedefleyen bir proje tarafından başvurulamaz.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -180,8 +180,8 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="needs-review-translation">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Yinelenen öğeler: {3}</target>
-        <note></note>
+        <target state="translated">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Daha fazla bilgi için bkz. {4}. Yinelenen öğeler: {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
@@ -190,113 +190,113 @@
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="new">Package Root {0} was incorrectly given for Resolved library {1}</target>
-        <note></note>
+        <target state="translated">{0} Paket Kökü, Çözümlenmiş kitaplık {1} için yanlışlıkla verildi</target>
+        <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>More than one file found for {0}</source>
-        <target state="new">More than one file found for {0}</target>
-        <note></note>
+        <target state="translated">{0} için birden fazla dosya bulundu</target>
+        <note />
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="new">Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</target>
-        <note></note>
+        <target state="translated">'{0}' klasörü zaten var, klasörü silin veya farklı bir ComposeWorkingDir değeri belirtin</target>
+        <note />
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
-        <target state="new">Parsing the Files : '{0}'</target>
-        <note></note>
+        <target state="translated">Dosyalar ayrıştırılıyor: '{0}'</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="new">Package Name='{0}', Version='{1}' was parsed</target>
-        <note></note>
+        <target state="translated">Paket Adı='{0}', Sürüm='{1}' ayrıştırıldı</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
-        <target state="new">Specify a RuntimeIdentifier</target>
-        <note></note>
+        <target state="translated">Bir RuntimeIdentifier belirtin</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="new">The target manifest {0} provided is of not the correct format</target>
-        <note></note>
+        <target state="translated">Belirtilen hedef bildirimi {0} doğru biçimde değil</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="new">Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</target>
-        <note></note>
+        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama ana bilgisayarı yürütülebiliri olarak kullanılamıyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="new">Given file name '{0}' is longer than 1024 bytes</target>
-        <note></note>
+        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="new">It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</target>
-        <note></note>
+        <target state="translated">Bir RuntimeIdentifier belirtilmeden, bağımsız çalışan uygulama derlenmesi veya yayımlanması desteklenmez. Lütfen bir RuntimeIdentifier belirtin veya SelfContained değerini false olarak ayarlayın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">AssemblyVersion '{1}', '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
-        <note></note>
+        <target state="translated">'{1}' dosya sürümü '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="new">Choosing '{0}' because it is a platform item.</target>
-        <note></note>
+        <target state="translated">Bir platform öğesi olduğu için '{0}' seçiliyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
-        <note></note>
+        <target state="translated">Tercih edilen bir paketten geldiği için '{0}' seçiliyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
-        <note></note>
+        <target state="translated">Dosya ve bütünleştirilmiş kod sürümlerinin eşit olması nedeniyle kazanan belirlenemedi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="new">Could not determine winner because '{0}' does not exist.</target>
-        <note></note>
+        <target state="translated">'{0}' mevcut olmadığından kazanan belirlenemedi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
-        <note></note>
+        <target state="translated">'{0}' bir dosya sürümüne sahip olmadığından kazanan belirlenemedi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
-        <note></note>
+        <target state="translated">'{0}' bir bütünleştirilmiş kod olmadığından kazanan belirlenemedi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
-        <note></note>
+        <target state="translated">'{0}' ile '{1}' arasında çakışmayla karşılaşıldı.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="new">Could not load PlatformManifest from '{0}' because it did not exist.</target>
-        <note></note>
+        <target state="translated">'{0}' mevcut olmadığından buradan PlatformManifest yüklenemedi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</target>
-        <note></note>
+        <target state="translated">'{0}' içindeki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. Satırlar {2} biçiminde olmalıdır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="new">Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</target>
-        <note></note>
+        <target state="translated">'{0}' konumundaki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. {2} '{3}' geçersizdi.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
