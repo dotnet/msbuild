@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -145,7 +145,7 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
@@ -153,90 +153,94 @@
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>More than one file found for {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>The target manifest {0} provided is of not the correct format</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetFrameworkVersion">
+        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <note></note>
       </trans-unit>
     </body>

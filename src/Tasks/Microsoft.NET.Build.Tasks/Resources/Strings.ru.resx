@@ -121,7 +121,7 @@
     <value>Необходимо указать хотя бы одну целевую платформу.</value>
   </data>
   <data name="NoCompatibleTargetFramework" xml:space="preserve">
-    <value>Проект "{0}" не содержит целевую платформу, совместимую с "{1}".</value>
+    <value>Проект "{0}" предназначен для "{2}". На него не может ссылаться проект, предназначенный для "{1}".</value>
   </data>
   <data name="InvalidFrameworkName" xml:space="preserve">
     <value>Недопустимое имя платформы: "{0}".</value>
@@ -223,75 +223,78 @@
     <value>Конфликт зависимостей. "{0}" ожидал "{1}", но получил "{2}".</value>
   </data>
   <data name="DuplicateItemsError" xml:space="preserve">
-    <value>Были включены повторяющиеся элементы ("{0}"). Пакет .NET SDK по умолчанию включает элементы "{0}" из каталога проекта. Можно удалить эти элементы из файла проекта или присвоить свойству "{1}" значение "{2}", если нужно явно включить их в файл проекта. Повторяющиеся элементы: {3}</value>
+    <value>Были включены повторяющиеся элементы ("{0}"). Пакет .NET SDK по умолчанию включает элементы "{0}" из каталога проекта. Можно удалить эти элементы из файла проекта или присвоить свойству "{1}" значение "{2}", если нужно явно включить их в файл проекта. Дополнительные сведения см. в разделе {4}. Повторяющиеся элементы: {3}</value>
   </data>
   <data name="PackageReferenceOverrideWarning" xml:space="preserve">
     <value>PackageReference для "{0}" был включен в проект. На этот пакет неявно указывает пакет .NET SDK и обычно не нужно ссылаться на него из проекта. Дополнительные сведения: {1}</value>
   </data>
   <data name="IncorrectPackageRoot" xml:space="preserve">
-    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+    <value>Корневой каталог пакета {0} неправильно указан для разрешаемой библиотеки {1}</value>
   </data>
   <data name="MultipleFilesResolved" xml:space="preserve">
-    <value>More than one file found for {0}</value>
+    <value>Для {0} найдено несколько файлов</value>
   </data>
   <data name="FolderAlreadyExists" xml:space="preserve">
-    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+    <value>Папка "{0}" уже существует. Удалите ее или укажите другой каталог ComposeWorkingDir</value>
   </data>
   <data name="ParsingFiles" xml:space="preserve">
-    <value>Parsing the Files : '{0}'</value>
+    <value>Анализируются файлы: "{0}"</value>
   </data>
   <data name="PackageInfoLog" xml:space="preserve">
-    <value>Package Name='{0}', Version='{1}' was parsed</value>
+    <value>Пакет с именем "{0}" версии "{1}" был проанализирован</value>
   </data>
   <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
-    <value>Specify a RuntimeIdentifier</value>
+    <value>Укажите RuntimeIdentifier</value>
   </data>
   <data name="IncorrectTargetFormat" xml:space="preserve">
-    <value>The target manifest {0} provided is of not the correct format</value>
+    <value>Указанный целевой манифест {0} имеет неправильный формат</value>
   </data>
   <data name="AppHostHasBeenModified" xml:space="preserve">
-    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+    <value>Невозможно использовать файл "{0}" в качестве исполняемого файла узла приложения, так как он не содержит требуемой последовательности байтов "{1}", которая отмечает место, где должно записываться имя приложения.</value>
   </data>
   <data name="FileNameIsTooLong" xml:space="preserve">
-    <value>Given file name '{0}' is longer than 1024 bytes</value>
+    <value>Длина указанного имени файла "{0}" превышает 1024 байта</value>
   </data>
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+    <value>Сборка или публикация автономного приложения без указания идентификатора RuntimeIdentifier не поддерживается. Укажите RuntimeIdentifier или присвойте свойству SelfContained значение false.</value>
   </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
-    <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+    <value>Выбирается "{0}", так как значение AssemblyVersion "{1}" больше "{2}".</value>
   </data>
   <data name="ChoosingFileVersion" xml:space="preserve">
-    <value>Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+    <value>Выбирается "{0}", так как версия файла "{1}" больше "{2}".</value>
   </data>
   <data name="ChoosingPlatformItem" xml:space="preserve">
-    <value>Choosing '{0}' because it is a platform item.</value>
+    <value>Выбирается "{0}", так как это элемент платформы.</value>
   </data>
   <data name="ChoosingPreferredPackage" xml:space="preserve">
-    <value>Choosing '{0}' because it comes from a package that is preferred.</value>
+    <value>Выбирается "{0}", так как источником является предпочтительный пакет.</value>
   </data>
   <data name="ConflictCouldNotDetermineWinner" xml:space="preserve">
-    <value>Could not determine winner due to equal file and assembly versions.</value>
+    <value>Не удалось определить победителя, так как версии файла и сборки одинаковы.</value>
   </data>
   <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
-    <value>Could not determine winner because '{0}' does not exist.</value>
+    <value>Не удалось определить победителя, так как "{0}" не существует.</value>
   </data>
   <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' has no file version.</value>
+    <value>Не удалось определить победителя, так как "{0}" не имеет версии файла.</value>
   </data>
   <data name="CouldNotDetermineWinner_NotAnAssembly" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' is not an assembly.</value>
+    <value>Не удалось определить победителя, так как "{0}" не является сборкой.</value>
   </data>
   <data name="EncounteredConflict" xml:space="preserve">
-    <value>Encountered conflict between '{0}' and '{1}'.</value>
+    <value>Обнаружен конфликт между "{0}" и "{1}".</value>
   </data>
   <data name="CouldNotLoadPlatformManifest" xml:space="preserve">
-    <value>Could not load PlatformManifest from '{0}' because it did not exist.</value>
+    <value>Не удалось загрузить манифест PlatformManifest из "{0}", так как он не существует.</value>
   </data>
   <data name="ErrorParsingPlatformManifest" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+    <value>Ошибка при анализе PlatformManifest со строки "{0}" {1}. Строки должны иметь формат {2}.</value>
   </data>
   <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
+    <value>Ошибка анализа PlatformManifest со строки "{0}" {1}. Недопустимый {2} "{3}".</value>
+  </data>
+  <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
+    <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
   </data>
 </root>

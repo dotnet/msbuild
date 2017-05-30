@@ -298,6 +298,11 @@
         <target state="translated">Error al analizar PlatformManifest desde la línea "{0}" {1}. {2} "{3}" no era válido.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnsupportedTargetFrameworkVersion">
+        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
+        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
