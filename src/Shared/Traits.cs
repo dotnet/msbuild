@@ -56,7 +56,7 @@ namespace Microsoft.Build.Utilities
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            ErrorUtilities.ThrowInvalidOperation("Shared.InvalidEscapeHatchValue", mode);
+            ErrorUtilities.ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
 
             return null;
         }
