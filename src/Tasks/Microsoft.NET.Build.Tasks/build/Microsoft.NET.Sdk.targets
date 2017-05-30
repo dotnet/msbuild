@@ -280,7 +280,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     Computes references that are only used at compile-time.
     ============================================================
     -->
-  <Target Name="_ComputeReferenceAssemblies">
+  <Target Name="_ComputeReferenceAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences">
 
     <ItemGroup>
       <_FrameworkReferenceAssemblies Include="@(ReferencePath)"
