@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks
         /// The path to the file that was generated.
         /// If this is set, and a file name, the destination folder will be prepended.
         /// If this is set, and is rooted, the destination folder will be ignored.
-        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and 
+        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and
         /// the default extension for the language selected.
         /// </summary>
         [Output]
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Tasks
             switch (Language.ToLowerInvariant())
             {
                 case "c#":
-                    if (AssemblyAttributes == null) return string.Empty; 
+                    if (AssemblyAttributes == null) return string.Empty;
 
                     extension = "cs";
                     code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
@@ -334,6 +334,27 @@ namespace Microsoft.Build.Tasks
                         haveGeneratedContent = true;
                     }
                     break;
+                case "f#":
+                case "fsharp":
+                    if (AssemblyAttributes == null) return string.Empty;
+
+                    extension = "fs";
+                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
+                    code.AppendLine();
+                    code.AppendLine("using System;");
+                    code.AppendLine("using System.Reflection;");
+                    code.AppendLine();
+
+                    foreach (ITaskItem attributeItem in AssemblyAttributes)
+                    {
+                        string args = GetAttributeArguments(attributeItem, "=", QuoteSnippetStringFSharp);
+                        if (args == null) return null;
+
+                        code.AppendLine(string.Format($"[<assembly: {attributeItem.ItemSpec}({args})>]"));
+                        haveGeneratedContent = true;
+                    }
+                    code.Append("do()");
+                    break;
                 default:
                     Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, string.Empty);
                     return null;
@@ -341,7 +362,7 @@ namespace Microsoft.Build.Tasks
 
             // If we just generated infrastructure, don't bother returning anything
             // as there's no point writing the file
-            return haveGeneratedContent ? code.ToString() : string.Empty; 
+            return haveGeneratedContent ? code.ToString() : string.Empty;
         }
 
         private string GetAttributeArguments(ITaskItem attributeItem, string namedArgumentString, Func<string, string> quoteString)
@@ -350,7 +371,7 @@ namespace Microsoft.Build.Tasks
             // To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
             // If a parameter index is skipped, it's an error.
             IDictionary customMetadata = attributeItem.CloneCustomMetadata();
-            
+
             // Initialize count + 1 to access starting at 1
             List<string> orderedParameters = new List<string>(new string[customMetadata.Count + 1]);
             List<string> namedParameters = new List<string>();
@@ -386,7 +407,7 @@ namespace Microsoft.Build.Tasks
             }
 
             bool encounteredNull = false;
-            
+
             for (int i = 0; i < orderedParameters.Count; i++)
             {
                 if (orderedParameters[i] == null)
@@ -467,11 +488,11 @@ namespace Microsoft.Build.Tasks
                 if (i > 0 && i%MaxLineLength == 0)
                 {
                     //
-                    // If current character is a high surrogate and the following 
-                    // character is a low surrogate, don't break them. 
-                    // Otherwise when we write the string to a file, we might lose 
+                    // If current character is a high surrogate and the following
+                    // character is a low surrogate, don't break them.
+                    // Otherwise when we write the string to a file, we might lose
                     // the characters.
-                    // 
+                    //
                     if (Char.IsHighSurrogate(value[i])
                         && (i < value.Length - 1)
                         && Char.IsLowSurrogate(value[i + 1]))
@@ -527,7 +548,7 @@ namespace Microsoft.Build.Tasks
                 switch (ch)
                 {
                     case '\"':
-                    // These are the inward sloping quotes used by default in some cultures like CHS. 
+                    // These are the inward sloping quotes used by default in some cultures like CHS.
                     // VBC.EXE does a mapping ANSI that results in it treating these as syntactically equivalent to a
                     // regular double quote.
                     case '\u201C':
@@ -572,11 +593,11 @@ namespace Microsoft.Build.Tasks
                 if (i > 0 && i%MaxLineLength == 0)
                 {
                     //
-                    // If current character is a high surrogate and the following 
-                    // character is a low surrogate, don't break them. 
-                    // Otherwise when we write the string to a file, we might lose 
+                    // If current character is a high surrogate and the following
+                    // character is a low surrogate, don't break them.
+                    // Otherwise when we write the string to a file, we might lose
                     // the characters.
-                    // 
+                    //
                     if (Char.IsHighSurrogate(value[i])
                         && (i < value.Length - 1)
                         && Char.IsLowSurrogate(value[i + 1]))
@@ -599,6 +620,10 @@ namespace Microsoft.Build.Tasks
                 b.Append("\"");
 
             return b.ToString();
+        }
+
+        private string QuoteSnippetStringFSharp(string value) {
+            return QuoteSnippetStringCSharp(value);
         }
 
         private void EnsureNotInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
