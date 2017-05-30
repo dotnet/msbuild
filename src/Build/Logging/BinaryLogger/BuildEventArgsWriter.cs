@@ -231,6 +231,7 @@ namespace Microsoft.Build.Logging
                 Write((CriticalBuildMessageEventArgs)e);
                 return;
             }
+
             if (e is TaskCommandLineEventArgs)
             {
                 Write((TaskCommandLineEventArgs)e);
