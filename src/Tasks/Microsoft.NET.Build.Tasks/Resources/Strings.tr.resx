@@ -121,7 +121,7 @@
     <value>En az bir olası hedef çerçeve belirtilmelidir.</value>
   </data>
   <data name="NoCompatibleTargetFramework" xml:space="preserve">
-    <value>'{0}' projesinde '{1}' ile uyumlu bir hedef çerçeve yok.</value>
+    <value>'{0}' projesi, '{2}' çerçevesini hedefliyor. Bu projeye '{1}' çerçevesini hedefleyen bir proje tarafından başvurulamaz.</value>
   </data>
   <data name="InvalidFrameworkName" xml:space="preserve">
     <value>Geçersiz çerçeve adı: '{0}'.</value>
@@ -223,75 +223,78 @@
     <value>Bağımlılık çakışması. '{0}' '{1}' bekliyordu ancak '{2}' alındı</value>
   </data>
   <data name="DuplicateItemsError" xml:space="preserve">
-    <value>Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Yinelenen öğeler: {3}</value>
+    <value>Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Daha fazla bilgi için bkz. {4}. Yinelenen öğeler: {3}</value>
   </data>
   <data name="PackageReferenceOverrideWarning" xml:space="preserve">
     <value>Projenize '{0}' için bir paket başvurusu eklendi. .NET SDK bu pakete örtük olarak başvuruyor; buna projenizden başvurmanız genellikle gerekli değildir. Daha fazla bilgi için bkz. {1}</value>
   </data>
   <data name="IncorrectPackageRoot" xml:space="preserve">
-    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+    <value>{0} Paket Kökü, Çözümlenmiş kitaplık {1} için yanlışlıkla verildi</value>
   </data>
   <data name="MultipleFilesResolved" xml:space="preserve">
-    <value>More than one file found for {0}</value>
+    <value>{0} için birden fazla dosya bulundu</value>
   </data>
   <data name="FolderAlreadyExists" xml:space="preserve">
-    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+    <value>'{0}' klasörü zaten var, klasörü silin veya farklı bir ComposeWorkingDir değeri belirtin</value>
   </data>
   <data name="ParsingFiles" xml:space="preserve">
-    <value>Parsing the Files : '{0}'</value>
+    <value>Dosyalar ayrıştırılıyor: '{0}'</value>
   </data>
   <data name="PackageInfoLog" xml:space="preserve">
-    <value>Package Name='{0}', Version='{1}' was parsed</value>
+    <value>Paket Adı='{0}', Sürüm='{1}' ayrıştırıldı</value>
   </data>
   <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
-    <value>Specify a RuntimeIdentifier</value>
+    <value>Bir RuntimeIdentifier belirtin</value>
   </data>
   <data name="IncorrectTargetFormat" xml:space="preserve">
-    <value>The target manifest {0} provided is of not the correct format</value>
+    <value>Belirtilen hedef bildirimi {0} doğru biçimde değil</value>
   </data>
   <data name="AppHostHasBeenModified" xml:space="preserve">
-    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+    <value>'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama ana bilgisayarı yürütülebiliri olarak kullanılamıyor.</value>
   </data>
   <data name="FileNameIsTooLong" xml:space="preserve">
-    <value>Given file name '{0}' is longer than 1024 bytes</value>
+    <value>Belirtilen dosya adı ('{0})' 1024 bayttan uzun</value>
   </data>
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+    <value>Bir RuntimeIdentifier belirtilmeden, bağımsız çalışan uygulama derlenmesi veya yayımlanması desteklenmez. Lütfen bir RuntimeIdentifier belirtin veya SelfContained değerini false olarak ayarlayın.</value>
   </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
-    <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+    <value>AssemblyVersion '{1}', '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</value>
   </data>
   <data name="ChoosingFileVersion" xml:space="preserve">
-    <value>Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+    <value>'{1}' dosya sürümü '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</value>
   </data>
   <data name="ChoosingPlatformItem" xml:space="preserve">
-    <value>Choosing '{0}' because it is a platform item.</value>
+    <value>Bir platform öğesi olduğu için '{0}' seçiliyor.</value>
   </data>
   <data name="ChoosingPreferredPackage" xml:space="preserve">
-    <value>Choosing '{0}' because it comes from a package that is preferred.</value>
+    <value>Tercih edilen bir paketten geldiği için '{0}' seçiliyor.</value>
   </data>
   <data name="ConflictCouldNotDetermineWinner" xml:space="preserve">
-    <value>Could not determine winner due to equal file and assembly versions.</value>
+    <value>Dosya ve bütünleştirilmiş kod sürümlerinin eşit olması nedeniyle kazanan belirlenemedi.</value>
   </data>
   <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
-    <value>Could not determine winner because '{0}' does not exist.</value>
+    <value>'{0}' mevcut olmadığından kazanan belirlenemedi.</value>
   </data>
   <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' has no file version.</value>
+    <value>'{0}' bir dosya sürümüne sahip olmadığından kazanan belirlenemedi.</value>
   </data>
   <data name="CouldNotDetermineWinner_NotAnAssembly" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' is not an assembly.</value>
+    <value>'{0}' bir bütünleştirilmiş kod olmadığından kazanan belirlenemedi.</value>
   </data>
   <data name="EncounteredConflict" xml:space="preserve">
-    <value>Encountered conflict between '{0}' and '{1}'.</value>
+    <value>'{0}' ile '{1}' arasında çakışmayla karşılaşıldı.</value>
   </data>
   <data name="CouldNotLoadPlatformManifest" xml:space="preserve">
-    <value>Could not load PlatformManifest from '{0}' because it did not exist.</value>
+    <value>'{0}' mevcut olmadığından buradan PlatformManifest yüklenemedi.</value>
   </data>
   <data name="ErrorParsingPlatformManifest" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+    <value>'{0}' içindeki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. Satırlar {2} biçiminde olmalıdır.</value>
   </data>
   <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
+    <value>'{0}' konumundaki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. {2} '{3}' geçersizdi.</value>
+  </data>
+  <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
+    <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
   </data>
 </root>
