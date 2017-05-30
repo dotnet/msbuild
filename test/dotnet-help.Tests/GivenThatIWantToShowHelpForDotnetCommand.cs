@@ -43,8 +43,8 @@ SDK commands:
   -d|--diagnostics Enable diagnostic output.
 
 Common options:
-  -v|--verbose          Enable verbose output
-  -h|--help             Show help
+  -v|--verbosity        Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].
+  -h|--help             Show help.
 
 Run 'dotnet COMMAND --help' for more information on a command.
 
