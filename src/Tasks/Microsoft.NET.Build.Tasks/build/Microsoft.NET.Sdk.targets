@@ -82,7 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildDependencyFile"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;_HandlePackageFileConflicts"
-          BeforeTargets="_CheckForCompileOutputs"
+          BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
           Outputs="$(ProjectDepsFilePath)">
@@ -126,7 +126,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
-          BeforeTargets="_CheckForCompileOutputs"
+          BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">

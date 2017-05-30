@@ -18,6 +18,7 @@ using Xunit;
 
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Xunit.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -313,6 +314,43 @@ namespace DefaultReferences
         }
 
         [Fact]
+        public void It_reports_a_single_failure_if_reference_assemblies_are_not_found()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "MissingReferenceAssemblies",
+                //  A version of .NET we don't expect to exist
+                TargetFrameworks = "net469",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
+            var result = buildCommand.Execute("/clp:summary");
+
+            result.Should().Fail();
+
+            //  Error code for reference assemblies not found
+            result.StdOut.Should().Contain("MSB3644");
+
+            //  Error code for exception generated from task
+            result.StdOut.Should().NotContain("MSB4018");
+
+            //  Ensure no other errors are generated
+            result.StdOut.Should().Contain("1 Error(s)");
+        }
+
+        [Fact]
         public void It_does_not_report_conflicts_if_the_same_framework_assembly_is_referenced_multiple_times()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -337,6 +375,46 @@ namespace DefaultReferences
                     p.Root.Add(itemGroup);
 
                     itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:diag")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Fact]
+        public void It_does_not_report_conflicts_when_referencing_a_nuget_package()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "DesktopConflictsNuGet",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                                    new XAttribute("Include", "NewtonSoft.Json"),
+                                    new XAttribute("Version", "9.0.1")));
                 })
                 .Restore(Log, testProject.Name);
 

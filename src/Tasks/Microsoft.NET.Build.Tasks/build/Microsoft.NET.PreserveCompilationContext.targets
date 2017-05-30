@@ -41,17 +41,32 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <UsingTask TaskName="FindItemsFromPackages" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeRefAssembliesToPublish"
           Condition="'$(PreserveCompilationContext)' == 'true'"
+          DependsOnTargets="_ComputeLockFileCopyLocal;
+                            _ParseTargetManifestFiles"
           AfterTargets="ComputeFilesToPublish"
           BeforeTargets="CopyFilesToPublishDirectory">
 
+    <FindItemsFromPackages Items="@(_RuntimeCopyLocalItems)"
+                           Packages="@(RuntimeStorePackages)">
+      <Output TaskParameter="ItemsFromPackages" ItemName="_RuntimeItemsInRuntimeStore"/>
+    </FindItemsFromPackages>
+    
     <ItemGroup>
       <!--
       Don't copy a compilation assembly if it's also a runtime assembly. There is no need to copy the same
       assembly to the 'refs' folder, if it is already in the publish directory.
       -->
-      <ResolvedFileToPublish Include="@(ReferencePath)" Exclude="@(ResolvedAssembliesToPublish->'%(FullPath)')">
+      <_RefAssembliesToExclude Include="@(ResolvedAssembliesToPublish->'%(FullPath)')" />
+      <!--
+      Similarly, don't copy a compilation assembly if it's also a runtime assembly that is in a runtime store.
+      It will be resolved from the runtime store directory at runtime.
+      -->
+      <_RefAssembliesToExclude Include="@(_RuntimeItemsInRuntimeStore->'%(ResolvedPath)')" />
+
+      <ResolvedFileToPublish Include="@(ReferencePath)" Exclude="@(_RefAssembliesToExclude)">
         <RelativePath>$(RefAssembliesFolderName)\%(Filename)%(Extension)</RelativePath>
       </ResolvedFileToPublish>
     </ItemGroup>

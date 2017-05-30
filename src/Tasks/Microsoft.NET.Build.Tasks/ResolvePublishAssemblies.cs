@@ -1,12 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Globalization;
-using NuGet.ProjectModel;
 using NuGet.Packaging.Core;
+using NuGet.ProjectModel;
+using NuGet.Versioning;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool PreserveStoreLayout { get; set; }
 
-        public string[] TargetManifestFiles { get; set; }
+        public ITaskItem[] RuntimeStorePackages { get; set; }
 
         public bool IsSelfContained { get; set; }
 
@@ -54,7 +54,6 @@ namespace Microsoft.NET.Build.Tasks
             get { return _packagesResolved.ToArray(); }
         }
 
-
         protected override void ExecuteCore()
         {
             var lockFileCache = new LockFileCache(BuildEngine4);
@@ -63,19 +62,12 @@ namespace Microsoft.NET.Build.Tasks
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
             HashSet<PackageIdentity> packagestoBeFiltered = null;
 
-            if (TargetManifestFiles != null && TargetManifestFiles.Length > 0)
+            if (RuntimeStorePackages != null && RuntimeStorePackages.Length > 0)
             {
                 packagestoBeFiltered = new HashSet<PackageIdentity>();
-                foreach (var manifestFile in TargetManifestFiles)
+                foreach (var package in RuntimeStorePackages)
                 {
-                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, manifestFile));
-                    var packagesSpecified = StoreArtifactParser.Parse(manifestFile);
-
-                    foreach (var pkg in packagesSpecified)
-                    {
-                        Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.PackageInfoLog, pkg.Id, pkg.Version));
-                    }
-                    packagestoBeFiltered.UnionWith(packagesSpecified);
+                    packagestoBeFiltered.Add(ItemUtilities.GetPackageIdentity(package));
                 }
             }
 
