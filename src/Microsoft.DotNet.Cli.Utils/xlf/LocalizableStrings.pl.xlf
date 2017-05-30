@@ -90,7 +90,7 @@
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
         <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
-        <target state="translated">{0}: Rozpoznawanie elementu commandspec z bibliotek narzędzi {1}.</target>
+        <target state="translated">{0}: Rozpoznawanie elementu commandspec z bibliotek narzędzia {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToResolveCommandSpec">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Trwa oczekiwanie na dołączenie debugera. Naciśnij klawisz ENTER, aby kontynuować</target>
+        <target state="translated">Oczekiwanie na dołączenie debugera. Naciśnij klawisz ENTER, aby kontynuować</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">
@@ -217,23 +217,23 @@
       </trans-unit>
       <trans-unit id="IgnoringPreferCLIRuntimeFile">
         <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
-        <target state="new">{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</target>
-        <note></note>
+        <target state="translated">{0}: plik prefercliruntime zostanie zignorowany, ponieważ wersja platforma docelowa narzędzia ({1}) różni się od wersji bieżącego środowiska uruchomieniowego interfejsu wiersza polecenia ({2})</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldNotFindToolRuntimeConfigFile">
         <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
-        <target state="new">{0}: Could not find runtimeconfig.json file for tool {1}</target>
-        <note></note>
+        <target state="translated">{0}: nie można odnaleźć pliku runtimeconfig.json dla narzędzia {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsJsonGeneratorProjectNotSet">
         <source>Unable to find deps.json generator project.</source>
-        <target state="new">Unable to find deps.json generator project.</target>
-        <note></note>
+        <target state="translated">Nie można odnaleźć projektu generatora deps.json.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="new">The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</target>
-        <note></note>
+        <target state="translated">Nie znaleziono pliku wykonywalnego polecenia dla elementu „{0}”. Projekt mógł nie zostać przywrócony lub przywracanie zakończyło się niepowodzeniem — uruchom polecenie „dotnet restore”</target>
+        <note />
       </trans-unit>
     </body>
   </file>

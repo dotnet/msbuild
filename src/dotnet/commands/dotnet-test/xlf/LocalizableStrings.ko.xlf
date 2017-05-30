@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="CmdArgDescription">
         <source>The project to test. Defaults to the current directory.</source>
-        <target state="needs-review-translation">테스트할 프로젝트입니다. 현재 디렉터리로 기본 설정됩니다.</target>
-        <note></note>
+        <target state="translated">테스트할 프로젝트입니다. 현재 디렉터리로 기본 설정됩니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
@@ -56,7 +56,8 @@
                                         우선 순위를 1로 설정하여 테스트 실행: --filter "Priority = 1"
                                         지정된 전체 이름으로 테스트 실행: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
                                         지정된 이름을 포함하는 테스트 실행: --filter "FullyQualifiedName~Namespace.Class"
-                                        필터링 지원에 대한 추가 정보: https://aka.ms/vstest-filtering</target>
+                                        필터링 지원에 대한 추가 정보: https://aka.ms/vstest-filtering
+                                        </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
@@ -75,9 +76,10 @@
         <source>Specify a logger for test results.
                                         Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="needs-review-translation">테스트 결과에 대해 로거를 지정합니다. 
-                                        예: --logger "trx[;LogFileName=&lt;고유한 파일 이름을 기본값으로 설정&gt;]"</target>
-        <note></note>
+        <target state="translated">테스트 결과에 대해 로거를 지정합니다. 
+                                        예: --logger "trx[;LogFileName=&lt;고유한 파일 이름을 기본값으로 설정&gt;]"
+                                        로거 인수 지원에 대한 추가 정보: https://aka.ms/vstest-report</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -86,8 +88,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">프로젝트 빌드에 사용할 구성입니다.  대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
-        <note></note>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -128,20 +130,20 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>PATH_TO_ADAPTER</source>
-        <target state="new">PATH_TO_ADAPTER</target>
-        <note></note>
+        <target state="translated">PATH_TO_ADAPTER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
                                         Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
-        <target state="new">The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
-                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
-        <note></note>
+        <target state="translated">테스트 결과를 배치할 디렉터리입니다. 지정한 디렉터리가 존재하지 않는 경우 생성됩니다.
+                                        예: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>PATH_TO_RESULTS_DIRECTORY</source>
-        <target state="new">PATH_TO_RESULTS_DIRECTORY</target>
-        <note></note>
+        <target state="translated">PATH_TO_RESULTS_DIRECTORY</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
@@ -151,26 +153,26 @@ RunSettings arguments:
   Use a space to separate multiple[name] =[value].
   More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="new">
+        <target state="translated">
 
-RunSettings arguments:
-  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
-  Use a space to separate multiple[name] =[value].
-  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
-  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
-        <note></note>
+RunSettings 인수:
+  명령줄을 통해 runsettings 구성을 전달하기 위한 인수입니다. 인수는 "-- " 뒤에 [name]=[value] 형식의 이름-값 쌍으로 지정될 수 있습니다. -- 뒤의 공백에 주의하세요. 
+  여러 [name] =[value]를 구분하려면 공백을 사용합니다.
+  RunSettings 인수 지원에 대한 자세한 정보: https://aka.ms/vstest-runsettings-arguments
+  예: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
-        <target state="new">DATA_COLLECTOR_FRIENDLY_NAME</target>
-        <note></note>
+        <target state="translated">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="new">Enables data collector for the test run.
-                                        More info here : https://aka.ms/vstest-collect</target>
-        <note></note>
+        <target state="translated">테스트 실행에 대해 데이터 수집기를 사용하도록 설정합니다.
+                                        자세한 정보: https://aka.ms/vstest-collect</target>
+        <note />
       </trans-unit>
     </body>
   </file>

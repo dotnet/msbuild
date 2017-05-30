@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>Expected file header not found</source>
-        <target state="needs-review-translation">遺漏檔案標頭</target>
-        <note></note>
+        <target state="translated">找不到預期的檔案標頭</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
@@ -55,8 +55,8 @@
       </trans-unit>
       <trans-unit id="FileHeaderMissingVersionError">
         <source>File header is missing version</source>
-        <target state="new">File header is missing version</target>
-        <note></note>
+        <target state="translated">檔案標頭遺漏版本</target>
+        <note />
       </trans-unit>
     </body>
   </file>

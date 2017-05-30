@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targeting a specific framework</source>
-        <target state="needs-review-translation">Aggiunge il riferimento solo se destinato a un framework specifico</target>
-        <note></note>
+        <target state="translated">Aggiunge il riferimento solo se destinato a un framework specifico</target>
+        <note />
       </trans-unit>
     </body>
   </file>

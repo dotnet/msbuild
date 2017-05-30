@@ -65,8 +65,8 @@
       </trans-unit>
       <trans-unit id="Commands">
         <source>SDK commands</source>
-        <target state="needs-review-translation">Komutlar</target>
-        <note></note>
+        <target state="translated">SDK komutları</target>
+        <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add reference to the project.</source>
-        <target state="needs-review-translation">Projeye öğe ekler.</target>
-        <note></note>
+        <target state="translated">Projeye başvuru ekleyin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove reference from the project.</source>
-        <target state="needs-review-translation">Projeden öğeleri kaldırır.</target>
-        <note></note>
+        <target state="translated">Projeden başvuru kaldırın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -160,88 +160,88 @@
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List reference in the project.</source>
-        <target state="new">List reference in the project.</target>
-        <note></note>
+        <target state="translated">Projede başvuruyu listeleyin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="new">Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</target>
-        <note></note>
+        <target state="translated">Belirtilen '{0}' komutu geçerli bir CLI komutu değil. Lütfen geçerli bir CLI komutu belirtin. Daha fazla bilgi için dotnet yardımını çalıştırın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET CLI help utility</source>
-        <target state="new">.NET CLI help utility</target>
-        <note></note>
+        <target state="translated">.NET CLI yardımcı programı</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="new">Utility to get more detailed help about each of the CLI commands.</target>
-        <note></note>
+        <target state="translated">CLI komutlarının her biri hakkında daha ayrıntılı yardım sunan yardımcı program.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="new">COMMAND_NAME</target>
-        <note></note>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>CLI command for which to view more detailed help.</source>
-        <target state="new">CLI command for which to view more detailed help.</target>
-        <note></note>
+        <target state="translated">Daha ayrıntılı yardım bilgileri görüntülenecek olan CLI komutu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
         <source>The path to an application .dll file to execute.</source>
-        <target state="new">The path to an application .dll file to execute.</target>
-        <note></note>
+        <target state="translated">Çalıştırılacak uygulama .dll dosyasının yolu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET Core SDK version.</source>
-        <target state="new">Display .NET Core SDK version.</target>
-        <note></note>
+        <target state="translated">.NET Core SDK sürümünü gösterir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET Core information.</source>
-        <target state="new">Display .NET Core information.</target>
-        <note></note>
+        <target state="translated">.NET Core bilgilerini gösterir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
         <source>Enable diagnostic output.</source>
-        <target state="new">Enable diagnostic output.</target>
-        <note></note>
+        <target state="translated">Tanılama çıkışını etkinleştirir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="new">Run 'dotnet COMMAND --help' for more information on a command.</target>
-        <note></note>
+        <target state="translated">Bir komut hakkında daha fazla bilgi için 'dotnet COMMAND --help' komutunu çalıştırın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
-        <target state="new">Path containing probing policy and assemblies to probe for.</target>
-        <note></note>
+        <target state="translated">Araştırma ilkesini ve araştırılacak bütünleştirilmiş kodları içeren yol.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="new">Path to &lt;application&gt;.deps.json file.</target>
-        <note></note>
+        <target state="translated">&lt;uygulama&gt;.deps.json dosyasının yolu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="new">Path to &lt;application&gt;.runtimeconfig.json file.</target>
-        <note></note>
+        <target state="translated">&lt;uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
-        <target state="new">Version of the installed Shared Framework to use to run the application.</target>
-        <note></note>
+        <target state="translated">Uygulamayı çalıştırmak için kullanılacak olan yüklü Paylaşılan Çerçevenin sürümü</target>
+        <note />
       </trans-unit>
       <trans-unit id="RollForwardOnNoCandidateFxDefinition">
         <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="new">Roll forward on no candidate shared framework is enabled.</target>
-        <note></note>
+        <target state="translated">Aday paylaşılan çerçevelerin hiçbirinde ileri sarma etkin değil.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additonal deps.json file.</source>
-        <target state="new">Path to additonal deps.json file.</target>
-        <note></note>
+        <target state="translated">Ek deps.json dosyasının yolu.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

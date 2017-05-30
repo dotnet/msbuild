@@ -5,7 +5,7 @@
       <group id="src/dotnet/CommandLine/LocalizableStrings.resx" />
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
-        <target state="translated">Последний аргумент {0} принимает несколько значений. Дополнительные аргументы добавить невозможно.</target>
+        <target state="translated">Последний аргумент "{0}" принимает несколько значений. Добавить дополнительные аргументы нельзя.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
@@ -100,13 +100,13 @@
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">Все дополнительные параметры, которые следует передать в MSBuild. Доступные параметры: dotnet msbuild -h</target>
+        <target state="translated">Все дополнительные параметры, которые следует передать в MSBuild. Для получения сведений о доступных параметрах см. "dotnet msbuild -h".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
         <source>Required value for option '{0}' was not provided.</source>
-        <target state="new">Required value for option '{0}' was not provided.</target>
-        <note></note>
+        <target state="translated">Не указано обязательное значение параметра "{0}".</target>
+        <note />
       </trans-unit>
     </body>
   </file>

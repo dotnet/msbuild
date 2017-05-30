@@ -20,23 +20,23 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Adds reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">仅针对特定框架添加引用</target>
-        <note></note>
+        <target state="translated">仅针对特定框架添加引用。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
-        <note></note>
+        <target state="translated">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="needs-review-translation">使用还原期间使用的特定 NuGet 包源。</target>
-        <note></note>
+        <target state="translated">使用还原期间所用的特定 NuGet 包源。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restores the packages to the specified directory.</source>
-        <target state="needs-review-translation">将包还原到此目录。</target>
-        <note></note>
+        <target state="translated">将包还原到指定目录。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="needs-review-translation">无法为项目“{0}”创建依赖关系图文件。无法添加包引用。</target>
-        <note></note>
+        <target state="translated">无法为项目“{0}”创建依赖关系图文件。无法添加包引用。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
@@ -70,13 +70,13 @@
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
         <source>The package reference to add.</source>
-        <target state="new">The package reference to add.</target>
-        <note></note>
+        <target state="translated">要添加的包引用。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackage">
         <source>PACKAGE_NAME</source>
-        <target state="new">PACKAGE_NAME</target>
-        <note></note>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
       </trans-unit>
     </body>
   </file>

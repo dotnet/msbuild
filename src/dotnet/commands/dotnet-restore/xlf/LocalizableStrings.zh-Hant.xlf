@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="needs-review-translation">將此旗標設定為略過專案對專案參考並僅還原根專案</target>
-        <note></note>
+        <target state="translated">將此旗標設定為略過專案對專案參考，且僅還原根專案。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>

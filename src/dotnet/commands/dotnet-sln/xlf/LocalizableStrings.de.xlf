@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add one or more specified projects to the solution.</source>
-        <target state="needs-review-translation">Fügt der Projektmappe bestimmte Projekte hinzu.</target>
-        <note></note>
+        <target state="translated">Fügt der Projektmappe mindestens ein angegebenes Projekt hinzu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>
@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="translated">Entfernt bestimmte Projekte aus der Projektmappe. Dies hat keine Auswirkungen auf das Projekt.</target>
+        <target state="translated">Entfernt die angegebenen Projekte aus der Projektmappe. Dies hat keine Auswirkungen auf das Projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">

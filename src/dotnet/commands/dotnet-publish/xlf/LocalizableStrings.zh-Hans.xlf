@@ -30,18 +30,18 @@
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>manifest.xml</source>
-        <target state="new">manifest.xml</target>
-        <note></note>
+        <target state="translated">manifest.xml</target>
+        <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="new">The path to a target manifest file that contains the list of packages to be excluded from the publish step.</target>
-        <note></note>
+        <target state="translated">指向目标清单文件的路径，该文件包含要通过发布步骤执行的包的列表。</target>
+        <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</target>
-        <note></note>
+        <target state="translated">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。如果指定了运行时标识符，则默认为 “true”。</target>
+        <note />
       </trans-unit>
     </body>
   </file>
