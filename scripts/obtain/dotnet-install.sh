@@ -419,26 +419,17 @@ construct_alt_download_link() {
     local channel=$2
     local normalized_architecture=$3
     local specific_version=${4//[$'\t\r\n']}
-    
+
     local distro_specific_osname
     distro_specific_osname=$(get_distro_specific_os_name) || return 1
 
     local alt_download_link=null
-    if [ "$(uname)" = "Linux" ]; then
-        if [ "$shared_runtime" = true ]; then
-            alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
-        else
-            alt_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
-        fi
+    if [ "$shared_runtime" = true ]; then
+        alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     else
-        if [ "$shared_runtime" = true ]; then
-            alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-$osname-$normalized_architecture.$specific_version.tar.gz"
-        else
-            alt_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$osname-$normalized_architecture.$specific_version.tar.gz"
-        fi
+        alt_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     fi
 
-    
     echo "$alt_download_link"
     return 0
 }
