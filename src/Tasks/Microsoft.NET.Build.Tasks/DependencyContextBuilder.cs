@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tasks
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
-        private IEnumerable<ReferenceInfo> _frameworkReferences;
+        private IEnumerable<ReferenceInfo> _referenceAssemblyReferences;
         private IEnumerable<ReferenceInfo> _directReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _excludeFromPublishPackageIds;
@@ -44,11 +44,11 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder WithFrameworkReferences(IEnumerable<ReferenceInfo> frameworkReferences)
+        public DependencyContextBuilder WithReferenceAssemblyReferences(IEnumerable<ReferenceInfo> referenceAssemblyReferences)
         {
-            // note: Framework libraries only export compile-time stuff
+            // note: ReferenceAssembly libraries only export compile-time stuff
             // since they assume the runtime library is present already
-            _frameworkReferences = frameworkReferences;
+            _referenceAssemblyReferences = referenceAssemblyReferences;
             return this;
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 compilationLibraries = compilationLibraries
-                    .Concat(GetFrameworkLibraries())
+                    .Concat(GetReferenceAssemblyLibraries())
                     .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>())
                     .Concat(GetDirectReferenceCompilationLibraries());
             }
@@ -197,7 +197,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var referenceInfos = Enumerable.Concat(
-                _frameworkReferences ?? Enumerable.Empty<ReferenceInfo>(),
+                _referenceAssemblyReferences ?? Enumerable.Empty<ReferenceInfo>(),
                 _directReferences ?? Enumerable.Empty<ReferenceInfo>());
 
             foreach (ReferenceInfo referenceInfo in referenceInfos)
@@ -452,9 +452,9 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IEnumerable<CompilationLibrary> GetFrameworkLibraries()
+        private IEnumerable<CompilationLibrary> GetReferenceAssemblyLibraries()
         {
-            return _frameworkReferences
+            return _referenceAssemblyReferences
                 ?.Select(r => new CompilationLibrary(
                     type: "referenceassembly",
                     name: r.Name,
