@@ -114,7 +114,7 @@ namespace Microsoft.NET.Build.Tasks
                     AssemblyVersion,
                     AssemblySatelliteAssemblies);            
 
-            IEnumerable<ReferenceInfo> referenceAssemblyReferences =
+            IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
             IEnumerable<ReferenceInfo> directReferences =
@@ -134,7 +134,7 @@ namespace Microsoft.NET.Build.Tasks
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithMainProjectInDepsFile(IncludeMainProject)
-                .WithReferenceAssemblyReferences(referenceAssemblyReferences)
+                .WithReferenceAssemblies(referenceAssemblyInfos)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithExcludeFromPublishAssets(excludeFromPublishAssets)

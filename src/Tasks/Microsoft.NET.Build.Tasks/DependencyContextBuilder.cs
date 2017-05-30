@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tasks
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
-        private IEnumerable<ReferenceInfo> _referenceAssemblyReferences;
+        private IEnumerable<ReferenceInfo> _referenceAssemblies;
         private IEnumerable<ReferenceInfo> _directReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _excludeFromPublishPackageIds;
@@ -44,11 +44,11 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContextBuilder WithReferenceAssemblyReferences(IEnumerable<ReferenceInfo> referenceAssemblyReferences)
+        public DependencyContextBuilder WithReferenceAssemblies(IEnumerable<ReferenceInfo> referenceAssemblies)
         {
             // note: ReferenceAssembly libraries only export compile-time stuff
             // since they assume the runtime library is present already
-            _referenceAssemblyReferences = referenceAssemblyReferences;
+            _referenceAssemblies = referenceAssemblies;
             return this;
         }
 
@@ -197,7 +197,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var referenceInfos = Enumerable.Concat(
-                _referenceAssemblyReferences ?? Enumerable.Empty<ReferenceInfo>(),
+                _referenceAssemblies ?? Enumerable.Empty<ReferenceInfo>(),
                 _directReferences ?? Enumerable.Empty<ReferenceInfo>());
 
             foreach (ReferenceInfo referenceInfo in referenceInfos)
@@ -454,7 +454,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private IEnumerable<CompilationLibrary> GetReferenceAssemblyLibraries()
         {
-            return _referenceAssemblyReferences
+            return _referenceAssemblies
                 ?.Select(r => new CompilationLibrary(
                     type: "referenceassembly",
                     name: r.Name,
