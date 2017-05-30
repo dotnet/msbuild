@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You may also need to include &apos;{0}&apos; in your project&apos;s RuntimeIdentifiers..
+        ///   Looks up a localized string similar to Assets file &apos;{0}&apos; doesn&apos;t have a target for &apos;{1}&apos;. Ensure you have included &apos;{2}&apos; in the TargetFrameworks for your project. You may also need to include &apos;{3}&apos; in your project&apos;s RuntimeIdentifiers..
         /// </summary>
         internal static string AssetsFileMissingRuntimeIdentifier {
             get {

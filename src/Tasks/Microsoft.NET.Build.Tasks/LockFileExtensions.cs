@@ -23,10 +23,14 @@ namespace Microsoft.NET.Build.Tasks
                     frameworkString :
                     $"{frameworkString}/{runtime}";
 
-                string message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
-                if (!string.IsNullOrEmpty(runtime))
+                string message;
+                if (string.IsNullOrEmpty(runtime))
                 {
-                    message += " " + string.Format(Strings.AssetsFileMissingRuntimeIdentifier, runtime);
+                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                }
+                else
+                {
+                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
                 }
 
                 throw new BuildErrorException(message);
