@@ -557,6 +557,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for the &apos;TargetFramework&apos; property. To multi-target, use the &apos;TargetFrameworks&apos; property instead..
+        /// </summary>
+        internal static string TargetFrameworkWithSemicolon {
+            get {
+                return ResourceManager.GetString("TargetFrameworkWithSemicolon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to find resolved path for &apos;{0}&apos;..
         /// </summary>
         internal static string UnableToFindResolvedPath {
