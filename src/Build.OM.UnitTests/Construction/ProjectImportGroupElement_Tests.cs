@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Read import group with a contained import that has no no project attribute
+        /// Read import group with a contained import that has no project attribute
         /// </summary>
         [Fact]
         public void ReadInvalidChildMissingProject()

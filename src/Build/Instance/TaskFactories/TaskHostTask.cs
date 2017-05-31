@@ -490,7 +490,7 @@ namespace Microsoft.Build.BackEnd
                         string.Empty };
                 }
 
-                _taskLoggingContext.LogFatalError(new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskException, taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
+                _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
             }
 
             // Set the output parameters for later

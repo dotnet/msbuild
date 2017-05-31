@@ -12,7 +12,7 @@ def branch = GithubBranchName
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
-            runtimes.add('Desktop')
+            runtimes.add('Full')
         }
 
         // TODO: Mono
@@ -32,14 +32,18 @@ def branch = GithubBranchName
                 case 'Windows_NT':
                     newJob.with{
                         steps{
-                            def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\" && cibuild.cmd --target ${runtime}"
+                            // all windows builds do a full framework localized build to produce satellite assemblies
+                            def script = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat\""
 
-                            // only Desktop support localized builds 
-                            if (runtime == "Desktop") {
-                                windowsScript += " --localized-build"
+                            if (runtime == "Full") {
+                                script += " && cibuild.cmd --target Full --scope Test"
+                            }
+                            // .net core builds are localized (they need the satellites from the full framework build), run tests, and also build the nuget packages
+                            else if (runtime == "CoreCLR") {
+                                script += " && cibuild.cmd --windows-core-localized-job"
                             }
 
-                            batchFile(windowsScript)
+                            batchFile(script)
                         }
 
                         skipTestsWhenResultsNotFound = false

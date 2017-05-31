@@ -192,7 +192,9 @@
     <Compile Include="BackEnd\Components\Caching\IRegisteredTaskObjectCache.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
     <Compile Include="BackEnd\Components\Caching\RegisteredTaskObjectCache.cs" />
-    <Compile Include="BackEnd\Components\Logging\BaseLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\EvaluationLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\LoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildEventArgTransportSink.cs" />
     <Compile Include="BackEnd\Components\Logging\CentralForwardingLogger.cs" />
     <Compile Include="BackEnd\Components\Logging\EventRedirectorToSink.cs" />
@@ -771,9 +773,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Runtime">
-      <HintPath>$(FrameworkPathOverride)\System.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="System.Threading.Tasks">
       <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
     </Reference>
@@ -792,19 +791,4 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets" />
-  <Target Name="CopyImmutableAndDataflowLocal" BeforeTargets="ResolveAssemblyReferences" AfterTargets="ResolveNuGetPackages">
-    <!-- The VSIX installer manifest references System.Collections.Immutable and System.Threading.Tasks.Dataflow
-         from the Output folder, but they won't be placed there by default because NuGet references come in as CopyLocal false.
-
-         Work around this by munging the references after NuGet emits them but before RAR.
-
-         TODO: this shouldn't be here. After moving to a better binplacing model (like "publish
-         msbuild.exe to a folder") it should be removed.
-    -->
-    <ItemGroup>
-      <Reference Condition="'%(Reference.NuGetPackageId)' == 'System.Collections.Immutable' or '%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Dataflow'">
-        <Private>true</Private>
-      </Reference>
-    </ItemGroup>
-  </Target>
 </Project>

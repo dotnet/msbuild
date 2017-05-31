@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If the file does nto exist then we should report this is not a winmd file.
+        /// If the file does not exist then we should report this is not a winmd file.
         /// </summary>
         [Fact]
         public void IsWinMDFileFileDoesNotExistFilePath()
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We should report that a regluar net assembly is not a winmd file.
+        /// We should report that a regular net assembly is not a winmd file.
         /// </summary>
         [Fact]
         public void IsWinMDFileRegularNetAssemblyFile()
@@ -114,8 +114,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
         [Fact]
         public void VerifyP2PHaveCorrectMetadataWinMD()
@@ -175,8 +175,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
         [Fact]
         public void VerifyP2PHaveCorrectMetadataWinMDManaged()
@@ -213,8 +213,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
         [Fact]
         public void VerifyP2PHaveCorrectMetadataNonWinMD()
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We have a winmd file and a dll depend on a winmd, there are copies of the winmd beside each of the files. 
+        /// We have a winmd file and a dll depend on a winmd, there are copies of the winmd beside each of the files.
         /// we want to make sure that the winmd file is resolved beside the winmd since that is the first file resolved.
         /// </summary>
         [Fact]
@@ -446,9 +446,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure when a dot net assembly depends on a WinMDFile that 
-        /// we get the winmd file resolved. Also make sure that if there is Implementation, ImageRuntime, or IsWinMD set on the dll that 
-        /// it does not get propigated to the winmd file dependency.
+        /// Make sure when a dot net assembly depends on a WinMDFile that
+        /// we get the winmd file resolved. Also make sure that if there is Implementation, ImageRuntime, or IsWinMD set on the dll that
+        /// it does not get propagated to the winmd file dependency.
         /// </summary>
         [Fact]
         public void DotNetAssemblyDependsOnAWinMDFile()
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header. 
+        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header.
         /// This will always result in an error since the dll is malformed
         /// </summary>
         [Fact]
@@ -515,7 +515,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, engine.Errors);
             Assert.Equal(0, engine.Warnings);
 
-            // The original winmd will resolve but its impelmentation dll must not be there
+            // The original winmd will resolve but its implementation dll must not be there
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(0, t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
 
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header. 
+        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header.
         /// A warning or error is expected in the log depending on the WarnOrErrorOnTargetArchitecture property value.
         /// </summary>
         [Fact]

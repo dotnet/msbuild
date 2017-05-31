@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="CannotPassMultipleItemsIntoScalarParameter">
         <source>MSB4094: "{0}" is an invalid value for the "{1}" parameter of the "{3}" task. Multiple items cannot be passed into a parameter of type "{2}".</source>
-        <target state="translated">MSB4094: "{0}" es un valor no válido para el parámetro "{1}" de la tarea "{3}". No se pueden pasar varios elementos en un parámetro del tipo "{2}".</target>
+        <target state="translated">MSB4094: "{0}" no es un valor válido para el parámetro "{1}" de la tarea "{3}". No se pueden pasar varios elementos en un parámetro del tipo "{2}".</target>
         <note>{StrBegin="MSB4094: "}
             UE: This error is shown when a project tries to pass multiple items into a task parameter of type ITaskItem (singular).
     </note>
@@ -817,7 +817,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: Se esperaba una lista de elementos en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '@'? Para usar '@' literal, utilice '%40' en su lugar.</target>
+        <target state="translated">MSB4107: Se esperaba una lista de elementos en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '@'? Para usar '@' literal, use '%40' en su lugar.</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4107: Se esperaba una lista de elementos en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '@'? Para usar '@' literal, utilice '%40' en su lugar.</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: Se esperaba una propiedad en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '$'? Para usar '$' literal, utilice '%24' en su lugar.</target>
+        <target state="translated">MSB4110: Se esperaba una propiedad en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '$'? Para usar '$' literal, use '%24' en su lugar.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: Se esperaba una propiedad en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '$'? Para usar '$' literal, utilice '%24' en su lugar.</target>
@@ -1115,7 +1115,7 @@
       </trans-unit>
       <trans-unit id="InvalidTaskOutputSpecification">
         <source>MSB4029: The "{0}" task has an invalid output specification. The "TaskParameter" attribute is required, and either the "ItemName" or "PropertyName" attribute must be specified (but not both).</source>
-        <target state="translated">MSB4029: La tarea "{0}" tiene una especificación de resultados no válida. Es necesario el atributo "TaskParameter" y debe especificarse el atributo "ItemName" o "PropertyName" (pero no ambos al mismo tiempo).</target>
+        <target state="translated">MSB4029: La tarea "{0}" tiene una especificación de salida no válida. Es necesario el atributo "TaskParameter" y debe especificarse el atributo "ItemName" o "PropertyName" (pero no ambos).</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4029: La tarea "{0}" tiene una especificación de resultados no válida. Es necesario el atributo "TaskParameter" y debe especificarse el atributo "ItemName" o "PropertyName" (pero no ambos al mismo tiempo).</target>
@@ -1822,7 +1822,7 @@
       </trans-unit>
       <trans-unit id="SolutionInvalidSolutionConfiguration">
         <source>MSB4126: The specified solution configuration "{0}" is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") or leave those properties blank to use the default solution configuration.</source>
-        <target state="translated">MSB4126: La configuración de soluciones especificada "{0}" no es válida. Especifique una configuración de soluciones válida con las propiedades Configuration y Platform (p. ej., MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") o deje esas propiedades en blanco para utilizar la configuración de soluciones predeterminada.</target>
+        <target state="translated">MSB4126: La configuración de soluciones especificada "{0}" no es válida. Especifique una configuración de soluciones válida con las propiedades Configuration y Platform (p. ej., MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") o deje esas propiedades en blanco para usar la configuración de soluciones predeterminada.</target>
         <note>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4126: La configuración de soluciones especificada "{0}" no es válida. Especifique una configuración de soluciones válida con las propiedades Configuration y Platform (p. ej., MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") o deje esas propiedades en blanco para utilizar la configuración de soluciones predeterminada.</target>
@@ -1914,7 +1914,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Los proyectos web no admiten el destino "Clean". Continuando con los proyectos restantes...</target>
+        <target state="translated">Los proyectos web no admiten el destino "Clean".  Continuando con los proyectos restantes...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1924,7 +1924,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Los proyectos web no admiten el destino "Publish". Continuando con los proyectos restantes...</target>
+        <target state="translated">Los proyectos web no admiten el destino "Publish".  Continuando con los proyectos restantes...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -2003,7 +2003,7 @@
       </trans-unit>
       <trans-unit id="TargetConditionHasInvalidMetadataReference">
         <source>MSB4116: The condition "{1}" on the "{0}" target has a reference to item metadata. References to item metadata are not allowed in target conditions unless they are part of an item transform.</source>
-        <target state="translated">MSB4116: La condición "{1}" del destino "{0}" tiene una referencia a metadatos del elemento. No se permiten las referencias a metadatos del elemento en condiciones de destino a menos que formen parte de una transformación de elemento.</target>
+        <target state="translated">MSB4116: La condición "{1}" del destino "{0}" tiene una referencia a metadatos de elemento. No se permiten las referencias a metadatos de elemento en condiciones de destino a menos que formen parte de una transformación de elemento.</target>
         <note>{StrBegin="MSB4116: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4116: La condición "{1}" del destino "{0}" tiene una referencia a metadatos del elemento. No se permiten las referencias a metadatos del elemento en condiciones de destino a menos que formen parte de una transformación de elemento.</target>
@@ -2321,7 +2321,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que puede establecerse en una propiedad de instancia Public.</target>
+        <target state="translated">MSB4064: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que es una propiedad de instancia Public que se puede establecer.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4064: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que puede establecerse en una propiedad de instancia Public.</target>
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que puede establecerse en una propiedad de instancia Public.</target>
+        <target state="translated">MSB4131: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que es una propiedad de instancia Public que se puede obtener.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que puede establecerse en una propiedad de instancia Public.</target>

@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using System.IO;
 using Microsoft.Build;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -106,6 +107,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Unique strings should not be interned
+        /// </summary>
+        [Fact]
+        public void NonInternableDummyGlobalVariable()
+        {
+            AssertNotInternable($"{MSBuildConstants.MSBuildDummyGlobalPropertyHeader}{new string('1', 100)}");
+        }
+
+        /// <summary>
         /// This is the list of hard-coded interns. They should report interned even though they are too small for normal interning.
         /// </summary>
         [Fact]
@@ -132,7 +142,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test a set of strings that are similar to eachother
+        /// Test a set of strings that are similar to each other
         /// </summary>
         [Fact]
         public void InternableDifferingOnlyByNthCharacter()

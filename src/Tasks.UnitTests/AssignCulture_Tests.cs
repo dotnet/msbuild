@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   AttributeForwarding
         *
-        * Make sure that attributes set on input items are forwarded to ouput items.
+        * Make sure that attributes set on input items are forwarded to output items.
         * This applies to every attribute except for the one pointed to by CultureAttribute.
         */
         [Fact]

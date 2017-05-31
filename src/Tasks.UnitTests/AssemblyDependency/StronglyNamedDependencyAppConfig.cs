@@ -160,14 +160,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// In this case,
         /// - A single reference to DependsOnUnified was passed in.
         ///   - This assembly depends on version 1.0.0.0 of UnifyMe.
-        /// - An app.config was passed in that promotes a *different* assembly version name from 
+        /// - An app.config was passed in that promotes a *different* assembly version name from
         //    1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of the file exists.
         /// - Version 2.0.0.0 of the file exists.
         /// Expected:
         /// -- The resulting assembly returned should be 1.0.0.0.
         /// Rationale:
-        /// An unrelated bindingRedirect in the app.config should have no bearing on unification 
+        /// An unrelated bindingRedirect in the app.config should have no bearing on unification
         /// of another file.
         /// </summary>
         [Fact]
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Expected:
         /// - The resulting assembly returned should be 2.0.0.0.
         /// Rationale:
-        /// The lower (unified-from) version need not exist on disk (in fact we shouldn't even try to 
+        /// The lower (unified-from) version need not exist on disk (in fact we shouldn't even try to
         /// resolve it) in order to arrive at the correct answer.
         /// </summary>
         [Fact]
@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
         /// <summary>
         /// In this case,
-        /// - An app.config is passed in that has a missing oldVersion in a bindingRedirect. 
+        /// - An app.config is passed in that has a missing oldVersion in a bindingRedirect.
         /// Expected:
         /// - An error and task failure.
         /// Rationale:
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
         /// <summary>
         /// In this case,
-        /// - An app.config is passed in that has a missing newVersion in a bindingRedirect. 
+        /// - An app.config is passed in that has a missing newVersion in a bindingRedirect.
         /// Expected:
         /// - An error and task failure.
         /// Rationale:
@@ -583,7 +583,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
         /// <summary>
         /// In this case,
-        /// - An app.config is specified 
+        /// - An app.config is specified
         /// *and*
         /// - AutoUnify=true.
         /// Expected:
@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Expected:
         /// - An error and task failure.
         /// Rationale:
-        /// App.config must exist if specifed.
+        /// App.config must exist if specified.
         /// </summary>
         [Fact]
         public void AppConfigDoesntExist()

@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var itemsForI = items.Where(i => i.ItemType == "i").ToList();
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, new [] {a, b, c});
 
-            var metadataForI2 = new Dictionary<string, string>()
+            var metadataForI2 = new Dictionary<string, string>
             {
                 {"m1", "m1_updated"},
                 {"m2", "m2_updated"},
@@ -332,6 +332,78 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void OnlyPropertyReferencesGetExpandedInPropertyFunctionArgumentsInsideIncludeAttributes()
+        {
+            var projectContent =
+@"<Project>
+        <ItemGroup>
+            <A Include=`1`/>
+            <B Include=`$([System.String]::new('@(A)'))`/>
+            <C Include=`$([System.String]::new('$(P)'))`/>
+        </ItemGroup>
+
+        <PropertyGroup>
+            <P>@(A)</P>
+        </PropertyGroup>
+</Project>";
+
+            var items = ObjectModelHelpers.GetItems(projectContent, allItems: true);
+
+            ObjectModelHelpers.AssertItems(new[] { "1", "@(A)", "@(A)" }, items);
+        }
+
+        [Fact]
+        public void MetadataAndPropertyReferencesGetExpandedInPropertyFunctionArgumentsInsideMetadataElements()
+        {
+            var projectContent =
+@"<Project>
+        <ItemGroup>
+            <A Include=`1` />
+            <B Include=`B`>
+               <M>$([System.String]::new(`%(Identity)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
+            </B>
+            <C Include=`C`>
+               <M>$([System.String]::new(`$(P)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
+            </C>
+            <D Include=`D`>
+               <M>$([System.String]::new(`@(A)`))</M>
+               <M2>$([System.String]::new(`%(M)`))</M2>
+            </D>
+        </ItemGroup>
+
+        <PropertyGroup>
+            <P>@(A)</P>
+        </PropertyGroup>
+</Project>";
+
+            var items = ObjectModelHelpers.GetItems(projectContent, allItems: true);
+
+            var expectedMetadata = new[]
+            {
+                new Dictionary<string, string>(),
+                new Dictionary<string, string>
+                {
+                    {"M", "B"},
+                    {"M2", "B"}
+                },
+                new Dictionary<string, string>
+                {
+                    {"M", "@(A)"},
+                    {"M2", "@(A)"}
+                },
+                new Dictionary<string, string>
+                {
+                    {"M", "@(A)"},
+                    {"M2", "@(A)"}
+                }
+            };
+
+            ObjectModelHelpers.AssertItems(new[] { "1", "B", "C", "D" }, items, expectedMetadata);
+        }
+
+        [Fact]
         public void ExcludeSeesIntermediaryState()
         {
             var projectContent =
@@ -378,7 +450,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, allItems: true);
 
-            var i1BaseMetadata = new Dictionary<string, string>()
+            var i1BaseMetadata = new Dictionary<string, string>
             {
                 {"m", "i1"}
             };
@@ -398,7 +470,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             //i2 items: i1_1; i1_2; i1_3
             var i2Metadata = new Dictionary<string, string>[]
             {
-                new Dictionary<string, string>()
+                new Dictionary<string, string>
                 {
                     {"m", "i2"}
                 }, 

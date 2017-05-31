@@ -1344,7 +1344,14 @@ namespace Microsoft.Build.CommandLine
                 )
             {
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
+                return;
             }
+#endif
+#if RUNTIME_TYPE_NETCORE
+            // https://github.com/dotnet/roslyn/issues/10785#issuecomment-238940601
+            // by default, .NET Core doesn't have all code pages needed for Console apps.
+            // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
         }
 
@@ -3312,11 +3319,17 @@ namespace Microsoft.Build.CommandLine
         private static void DisplayCopyrightMessage()
         {
             string msg = ProjectCollection.Version.ToString();
-#if MONO
+#if RUNTIME_TYPE_NETCORE
+            const string frameworkName = ".NET Core";
+#elif MONO
+            const string frameworkName = "Mono";
             if (!String.IsNullOrEmpty(GitBuildInfoForMono.BuildInfo))
                 msg += $" ({GitBuildInfoForMono.BuildInfo})";
+#else
+            const string frameworkName = ".NET Framework";
 #endif
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", msg));
+
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", msg, frameworkName));
         }
 
         /// <summary>

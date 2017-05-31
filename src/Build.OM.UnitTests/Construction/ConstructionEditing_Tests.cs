@@ -15,7 +15,9 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -747,7 +749,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.VerifyAssertProjectContent(expected, project);
         }
-        
+
         /// <summary>
         /// Add item with remove in itemgroup in target
         /// </summary>
@@ -1904,7 +1906,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project with a single item group with existing items of
         /// various item types and item specs; should add in alpha order of item type,
         /// then item spec, keeping different item specs in different groups; different
-        /// item groups are not mutally sorted
+        /// item groups are not mutually sorted
         /// </summary>
         [Fact]
         public void AddItem_ExistingItemGroupWithVariousItems()
@@ -3206,11 +3208,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void AddProperty_WithSdk_KeepsSdkAndImplicitImports()
         {
-            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
-
-            try
+            using (var env = TestEnvironment.Create())
             {
+                var testSdkRoot = env.CreateFolder().FolderPath;
+                var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
                 Directory.CreateDirectory(testSdkDirectory);
 
                 string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
@@ -3219,40 +3220,53 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 File.WriteAllText(sdkPropsPath, "<Project />");
                 File.WriteAllText(sdkTargetsPath, "<Project />");
 
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
-                {
-                    using (var testProject = new Helpers.TestProjectWithFiles(@"
-                    <Project Sdk='MSBuildUnitTestSdk' >
-                    </Project>", null))
-                    {
+                var testProject = env.CreateTestProjectWithFiles(@"
+                    <Project Sdk='MSBuildUnitTestSdk'>
+                    </Project>", null);
+                env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
 
-                        string content = @"
+                string content = @"
                     <Project Sdk='MSBuildUnitTestSdk' >
                     </Project>";
 
-                        File.WriteAllText(testProject.ProjectFile, content);
+                File.WriteAllText(testProject.ProjectFile, content);
 
-                        var p = new Project(testProject.ProjectFile);
+                var p = new Project(testProject.ProjectFile);
 
-                        var addedProperty = p.Xml.AddProperty("propName", "propValue");
+                var addedProperty = p.Xml.AddProperty("propName", "propValue");
 
-                        var updated = Path.Combine(testProject.TestRoot, "updated.proj");
+                var updated = Path.Combine(testProject.TestRoot, "updated.proj");
 
-                        p.Save(updated);
+                p.Save(updated);
 
-                        var updatedContents = File.ReadAllText(updated);
+                var updatedContents = File.ReadAllText(updated);
 
-                        Assert.False(updatedContents.Contains("<Import"));
-                    }
-                }
+                Assert.False(updatedContents.Contains("<Import"));
             }
-            finally
-            {
-                if (Directory.Exists(testSdkDirectory))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
-                }
-            }
+        }
+
+        public void UpdateSdkImportProperty()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectImportElement import = project.AddImport("file");
+
+            // Add properties and assert that the SdkReference is updated accordingly.
+            import.Sdk = "Name";
+            AssertSdkEquals(import, "Name", null, null);
+
+            import.Version = "Version";
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            import.MinimumVersion = "Min";
+            AssertSdkEquals(import, "Name", "Version", "Min");
+
+            import.MinimumVersion = null;
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            import.Version = null;
+            AssertSdkEquals(import, "Name", "Version", null);
+
+            Assert.Throws<ArgumentException>(() => import.Sdk = null);
         }
 
         private static string AdjustSpacesForItem(string expectedItem)
@@ -3287,6 +3301,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             expectedItem = sb.ToString();
             return expectedItem;
+        }
+
+        private void AssertSdkEquals(ProjectImportElement importElement, string name, string version, string minimumVersion)
+        {
+            // Use reflection to verify the value. The property is not public and we do not have InternalsVisibleTo (by design).
+            PropertyInfo pi = importElement.GetType().GetProperty("ParsedSdkReference");
+
+            var expected = new SdkReference(name, version, minimumVersion);
+            var actual = (SdkReference) pi.GetValue(importElement);
+
+            Assert.Equal(expected, actual);
         }
     }
 }

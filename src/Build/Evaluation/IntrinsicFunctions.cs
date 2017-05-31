@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
@@ -26,6 +28,14 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class IntrinsicFunctions
     {
+        private static Lazy<string> _validOsPlatforms = new Lazy<string>(
+            () => typeof(OSPlatform).GetTypeInfo()
+                .GetProperties(BindingFlags.Static | BindingFlags.Public)
+                .Where(pi => pi.PropertyType == typeof(OSPlatform))
+                .Select(pi => pi.Name)
+                .Aggregate("", (a, b) => string.IsNullOrEmpty(a) ? b : $"{a}, {b}"),
+            true);
+
         /// <summary>
         /// Add two doubles
         /// </summary>
@@ -416,6 +426,25 @@ namespace Microsoft.Build.Evaluation
         internal static string NormalizePath(params string[] path)
         {
             return FileUtilities.NormalizePath(Path.Combine(path));
+        }
+
+        /// <summary>
+        /// Specify whether the current OS platform is <paramref name="platformString"/>
+        /// </summary>
+        /// <param name="platformString">The platform string. Must be a member of <see cref="OSPlatform"/>. Case Insensitive</param>
+        /// <returns></returns>
+        internal static bool IsOSPlatform(string platformString)
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Create(platformString.ToUpperInvariant()));
+        }
+
+        /// <summary>
+        /// True if current OS is a Unix system.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsOsUnixLike()
+        {
+            return NativeMethodsShared.IsUnixLike;
         }
 
         public static string GetCurrentToolsDirectory()

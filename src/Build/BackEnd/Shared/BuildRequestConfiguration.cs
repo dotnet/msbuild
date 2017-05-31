@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the global properties to use to build this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> Properties
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties
         {
             [DebuggerStepThrough]
             get
@@ -483,6 +483,15 @@ namespace Microsoft.Build.BackEnd
             }
 
             ErrorUtilities.VerifyThrow(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");
+        }
+
+        internal void CreateUniqueGlobalProperty()
+        {
+            // create a copy so the mutation does not leak into the ProjectInstance
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(_globalProperties);
+
+            var key = $"{MSBuildConstants.MSBuildDummyGlobalPropertyHeader}{Guid.NewGuid():N}";
+            _globalProperties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
         }
 
         /// <summary>
@@ -1056,6 +1065,5 @@ namespace Microsoft.Build.BackEnd
                 throw;
             }
         }
-
     }
 }

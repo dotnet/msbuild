@@ -19,6 +19,7 @@
         <dependency id="System.Diagnostics.Debug" version="4.0.11" />
         <dependency id="System.Globalization" version="4.0.11" />
         <dependency id="System.Linq" version="4.1.0" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.1" />
         <dependency id="System.Runtime" version="4.1.0" />
         <dependency id="System.Runtime.InteropServices" version="4.1.0" />
         <dependency id="System.Threading" version="4.0.11" />
@@ -27,9 +28,9 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="$configuration$\Output\$id$.dll" target="lib\net46\$id$.dll" />
-    <file src="$configuration$\Output\$id$.xml" target="lib\net46\$id$.xml" />
-    <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.3\$id$.dll" />
-    <file src="$configuration$-NetCore\Output\$id$.xml" target="lib\netstandard1.3\$id$.xml" />
+    <file src="$outputPath$$id$.dll" target="lib\net46\$id$.dll" />
+    <file src="$outputPath$$id$.xml" target="lib\net46\$id$.xml" />
+    <file src="$outputPathNetCore$$id$.dll" target="lib\netstandard1.3\$id$.dll" />
+    <file src="$outputPathNetCore$$id$.xml" target="lib\netstandard1.3\$id$.xml" />
   </files>
 </package>

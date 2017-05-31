@@ -911,7 +911,7 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
-            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.Properties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, buildEventContext, false /* loaded by solution parser*/, config.TargetNames);
+            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.GlobalProperties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, buildEventContext, false /* loaded by solution parser*/, config.TargetNames);
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -1311,9 +1311,7 @@ namespace Microsoft.Build.Execution
                 // built on another node (e.g. the project was encountered as a p2p reference and scheduled to a node).
                 // Add a dummy property to force cache invalidation in the scheduler and the nodes.
                 // TODO find a better solution than a dummy property
-
-                var key = $"ProjectInstance{Guid.NewGuid():N}";
-                unresolvedConfiguration.Properties[key] = ProjectPropertyInstance.Create(key, "Forces unique project identity in the MSBuild engine");
+                unresolvedConfiguration.CreateUniqueGlobalProperty();
 
                 resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
             }

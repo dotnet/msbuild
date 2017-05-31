@@ -7,7 +7,11 @@
     "xunit.assert": "2.1.0"
   },
   "frameworks": {
-    "net46": { },
+    "net46": { 
+      "dependencies": {
+        "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
+      }
+    },
     "netstandard1.3": {
       "dependencies": {
         "System.Net.NetworkInformation": "4.1.0",
@@ -21,7 +25,8 @@
         "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0",
         "System.Xml.XmlDocument": "4.0.1",
-        "System.Reflection.Metadata": "1.4.1"
+        "System.Reflection.Metadata": "1.4.1",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0"
       },
       "imports": [ "portable-net451+win81", "dnxcore50" ]
     }

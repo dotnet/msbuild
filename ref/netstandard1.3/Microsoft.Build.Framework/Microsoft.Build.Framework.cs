@@ -38,6 +38,7 @@ namespace Microsoft.Build.Framework
     }
     public partial class BuildEventContext
     {
+        public const int InvalidEvaluationID = -1;
         public const int InvalidNodeId = -2;
         public const int InvalidProjectContextId = -2;
         public const int InvalidProjectInstanceId = -1;
@@ -47,7 +48,9 @@ namespace Microsoft.Build.Framework
         public BuildEventContext(int nodeId, int targetId, int projectContextId, int taskId) { }
         public BuildEventContext(int nodeId, int projectInstanceId, int projectContextId, int targetId, int taskId) { }
         public BuildEventContext(int submissionId, int nodeId, int projectInstanceId, int projectContextId, int targetId, int taskId) { }
+        public BuildEventContext(int submissionId, int nodeId, int evaluationID, int projectInstanceId, int projectContextId, int targetId, int taskId) { }
         public long BuildRequestId { get { throw null; } }
+        public int EvaluationID { get { throw null; } }
         public static Microsoft.Build.Framework.BuildEventContext Invalid { get { throw null; } }
         public int NodeId { get { throw null; } }
         public int ProjectContextId { get { throw null; } }
@@ -329,6 +332,18 @@ namespace Microsoft.Build.Framework
     {
         public OutputAttribute() { }
     }
+    public sealed partial class ProjectEvaluationFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    {
+        public ProjectEvaluationFinishedEventArgs() { }
+        public ProjectEvaluationFinishedEventArgs(string message) { }
+        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
+    {
+        public ProjectEvaluationStartedEventArgs() { }
+        public ProjectEvaluationStartedEventArgs(string message) { }
+        public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
     public partial class ProjectFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         protected ProjectFinishedEventArgs() { }
@@ -411,6 +426,7 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResolverContext() { }
         public virtual Microsoft.Build.Framework.SdkLogger Logger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
+        public virtual System.Version MSBuildVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
         public virtual string ProjectFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
         public virtual string SolutionFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
     }

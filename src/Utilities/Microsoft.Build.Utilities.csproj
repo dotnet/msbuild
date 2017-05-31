@@ -177,7 +177,7 @@
       <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Traits.cs">
-      <Link>Traits</Link>
+      <Link>SharedTraits.cs</Link>
     </Compile>
     <Compile Include="ApiContract.cs" />
     <Compile Include="AppDomainIsolatedTask.cs">

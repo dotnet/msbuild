@@ -267,12 +267,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Returns the value of the attribute. 
         /// If the attribute is not present, returns either null or an empty string, depending on the value 
-        /// of returnNullForNonexistentAttributes.
+        /// of nullIfNotExists.
         /// </summary>
-        internal static string GetAttributeValue(XmlElementWithLocation element, string attributeName, bool returnNullForNonexistentAttributes)
+        internal static string GetAttributeValue(XmlElementWithLocation element, string attributeName, bool nullIfNotExists)
         {
             XmlAttributeWithLocation attribute = (XmlAttributeWithLocation)element.GetAttributeNode(attributeName);
-            return GetAttributeValue(attribute, returnNullForNonexistentAttributes);
+            return GetAttributeValue(attribute, nullIfNotExists);
         }
     }
 }

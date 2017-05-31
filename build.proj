@@ -21,7 +21,7 @@
 
   <Import Project="dir.targets" />
   <Import Project="dir.traversal.targets" />
-  
+
   <!-- Ensure the BuildTools package has been restored when doing a Rebuild. This needs to happen 
        after import dir.traversal.targets. If this isn't done, Imports will fail because the Clean 
        target will load all projects. -->

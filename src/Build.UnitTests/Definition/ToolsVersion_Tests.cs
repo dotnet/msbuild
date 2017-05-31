@@ -210,8 +210,8 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Make sure when we read in the tasks files off disk that they come in in a sorted order so that there is a deterministric way of 
-        /// figurting out the order the files were read in.
+        /// Make sure when we read in the tasks files off disk that they come in a sorted order so that there is a deterministic way of
+        /// figuring out the order the files were read in.
         /// </summary>
         [Fact]
         public void VerifyTasksFilesAreInSortedOrder()
@@ -478,7 +478,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
+        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
@@ -506,8 +506,8 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
         [Fact]
         public void ToolsVersionFromEnvironmentVariable()
@@ -544,8 +544,8 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable()
@@ -625,7 +625,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
 #if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
+        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
@@ -654,8 +654,8 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
         [Fact]
         public void ToolsVersionFromEnvironmentVariable_CreateProjectInstance()
@@ -695,8 +695,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
 #if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable_CreateProjectInstance()
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
 #if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
+        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
@@ -807,8 +807,8 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
         [Fact]
         public void ToolsVersionFromEnvironmentVariable_ProjectInstance()
@@ -848,8 +848,8 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
-        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
+        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
+        /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable_ProjectInstance()
@@ -906,7 +906,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(null, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
-            // Did not crash due to trying to expand items without having items      
+            // Did not crash due to trying to expand items without having items
         }
 
         public ToolsetState_Tests()
@@ -920,7 +920,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private bool directoryExists(string path)
         {
-            // run throught directory exits to throw the correct exceptions if there are any
+            // run through directory exits to throw the correct exceptions if there are any
             Directory.Exists(path);
             return path.Contains("msbuildoverridetasks");
         }

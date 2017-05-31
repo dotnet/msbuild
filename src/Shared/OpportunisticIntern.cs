@@ -13,34 +13,41 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Shared;
 
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
+    
+
 namespace Microsoft.Build
 {
     /// <summary>
     /// This class is used to selectively intern strings. It should be used at the point of new string creation.
     /// For example,
-    /// 
+    ///
     ///     string interned = OpportunisticIntern.Intern(String.Join(",",someStrings));
-    ///     
+    ///
     /// This class uses heuristics to decide whether it will be efficient to intern a string or not. There is no
     /// guarantee that a string will intern.
-    /// 
+    ///
     /// The thresholds and sizes were determined by experimentation to give the best number of bytes saved
     /// at reasonable elapsed time cost.
     /// </summary>
     static internal class OpportunisticIntern
     {
         /// <summary>
-        /// The size of the small mru list. 
+        /// The size of the small mru list.
         /// </summary>
         private static readonly int s_smallMruSize = AssignViaEnvironment("MSBUILDSMALLINTERNSIZE", 50);
 
         /// <summary>
-        /// The size of the large mru list. 
+        /// The size of the large mru list.
         /// </summary>
         private static readonly int s_largeMruSize = AssignViaEnvironment("MSBUILDLARGEINTERNSIZE", 100);
 
         /// <summary>
-        /// The size of the huge mru list. 
+        /// The size of the huge mru list.
         /// </summary>
         private static readonly int s_hugeMruSize = AssignViaEnvironment("MSBUILDHUGEINTERNSIZE", 100);
 
@@ -175,7 +182,7 @@ namespace Microsoft.Build
             string result = s_si.InterningToString(candidate);
 #if _DEBUG
             string expected = candidate.ExpensiveConvertToString();
-            if (!String.Equals(result, expected)) 
+            if (!String.Equals(result, expected))
             {
                 ErrorUtilities.ThrowInternalError("Interned string {0} should have been {1}", result, expected);
             }
@@ -286,7 +293,7 @@ namespace Microsoft.Build
             public string ExpensiveConvertToString()
             {
                 // PERF NOTE: This will be an allocation hot-spot because the StringBuilder is finally determined to
-                // not be internable. There is still only one conversion of StringBuilder into string it has just 
+                // not be internable. There is still only one conversion of StringBuilder into string it has just
                 // moved into this single spot.
                 return _target.ToString();
             }
@@ -408,7 +415,7 @@ namespace Microsoft.Build
             public string ExpensiveConvertToString()
             {
                 // PERF NOTE: This will be an allocation hot-spot because the char[] is finally determined to
-                // not be internable. There is still only one conversion of char[] into string it has just 
+                // not be internable. There is still only one conversion of char[] into string it has just
                 // moved into this single spot.
                 return new String(_target, _startIndex, _count);
             }
@@ -482,7 +489,7 @@ namespace Microsoft.Build
             }
 
             /// <summary>
-            /// Returs the target which is already a string.
+            /// Returns the target which is already a string.
             /// </summary>
             /// <returns>The target string.</returns>
             public string ExpensiveConvertToString()
@@ -749,10 +756,10 @@ namespace Microsoft.Build
             }
 
             /// <summary>
-            /// Try to intern the string. 
+            /// Try to intern the string.
             /// Return true if an interned value could be returned.
             /// Return false if it was added to the intern list, but wasn't there already.
-            /// Return null if it didn't meet the length criteria for any of the buckets.
+            /// Return null if it didn't meet the length criteria for any of the buckets. Interning was rejected
             /// </summary>
             private bool? TryIntern(IInternable candidate, out string interned)
             {
@@ -885,6 +892,36 @@ namespace Microsoft.Build
                             interned = "Release";
                             return true;
                         }
+                    }
+                    // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
+                    else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
+                             candidate[0] == 'M' &&
+                             candidate[1] == 'S' &&
+                             candidate[2] == 'B' &&
+                             candidate[3] == 'u' &&
+                             candidate[4] == 'i' &&
+                             candidate[5] == 'l' &&
+                             candidate[6] == 'd' &&
+                             candidate[7] == 'P' &&
+                             candidate[8] == 'r' &&
+                             candidate[9] == 'o' &&
+                             candidate[10] == 'j' &&
+                             candidate[11] == 'e' &&
+                             candidate[12] == 'c' &&
+                             candidate[13] == 't' &&
+                             candidate[14] == 'I' &&
+                             candidate[15] == 'n' &&
+                             candidate[16] == 's' &&
+                             candidate[17] == 't' &&
+                             candidate[18] == 'a' &&
+                             candidate[19] == 'n' &&
+                             candidate[20] == 'c' &&
+                             candidate[21] == 'e'
+                    )
+                    {
+                        // don't want to leak unique strings into the cache
+                        interned = candidate.ExpensiveConvertToString();
+                        return null;
                     }
                     else if (length == 24)
                     {
@@ -1076,7 +1113,7 @@ namespace Microsoft.Build
                         {
                             if (!candidate.ReferenceEquals(head.Value))
                             {
-                                // Wasn't at the top already, so move it there. 
+                                // Wasn't at the top already, so move it there.
                                 prior.Next = head.Next;
                                 head.Next = _mru;
                                 _mru = head;

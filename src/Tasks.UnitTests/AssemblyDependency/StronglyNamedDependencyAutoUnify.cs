@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
         /// - Version 3.0.0.0 of UnifyMe exists.
-        /// - Vesion 3.0.0.0 of DependsOn is on black list
+        /// - Version 3.0.0.0 of DependsOn is on black list
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 2.0.0.0.
         /// - There should be messages saying that 2.0.0.0 was unified from 1.0.0.0.

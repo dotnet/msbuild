@@ -1,20 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A base class providing type-safe methods of logging in various contexts.</summary>
-//-----------------------------------------------------------------------
-
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Xml;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -22,19 +10,13 @@ namespace Microsoft.Build.BackEnd.Logging
     /// This object encapsulates the logging service plus the current BuildEventContext and
     /// hides the requirement to pass BuildEventContexts to the logging service or query the
     /// host for the logging service all of the time.
-    /// 
-    /// Its intended use is in the nodes, where a base LoggingContext is created when the node
-    /// initializes for a build (this is the public constructor.)  When a new project, target batch
-    /// or task batch is started, the appropriate method on the current LoggingContext is invoked
-    /// and a new LoggingContext is returned.  This new LoggingContext should be used for all
-    /// subsequent logging within the subcontext.
     /// </summary>
-    internal class BaseLoggingContext
+    internal class LoggingContext
     {
         /// <summary>
         /// The logging service to which this context is attached
         /// </summary>
-        private ILoggingService _loggingService;
+        private readonly ILoggingService _loggingService;
 
         /// <summary>
         /// The build event context understood by the logging service.
@@ -47,17 +29,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _isValid;
 
         /// <summary>
-        /// True if this context comes from the in-proc node.
-        /// </summary>
-        private bool _isInProcNode;
-
-        /// <summary>
         /// Constructs the logging context from a logging service and an event context.
         /// </summary>
         /// <param name="loggingService">The logging service to use</param>
         /// <param name="eventContext">The event context</param>
-        /// <param name="inProc">Flag indicating if this context belongs to an in-proc node.</param>
-        protected BaseLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, bool inProc)
+        public LoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingService, "loggingService");
             ErrorUtilities.VerifyThrowArgumentNull(eventContext, "eventContext");
@@ -65,7 +41,6 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingService = loggingService;
             _eventContext = eventContext;
             _isValid = false;
-            _isInProcNode = inProc;
         }
 
         /// <summary>
@@ -74,12 +49,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// while the event context will come from a call into the logging service itself.
         /// </summary>
         /// <param name="baseContext">The context from which this context is being created.</param>
-        protected BaseLoggingContext(BaseLoggingContext baseContext)
+        public LoggingContext(LoggingContext baseContext)
         {
             _loggingService = baseContext._loggingService;
             _eventContext = null;
             _isValid = baseContext._isValid;
-            _isInProcNode = baseContext._isInProcNode;
         }
 
         /// <summary>
@@ -133,16 +107,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Flag indicating if the context is being used for the in-proc node.
-        /// </summary>
-        public bool IsInProcNode
-        {
-            [DebuggerStepThrough]
-            get
-            { return _isInProcNode; }
-        }
-        #region Log comments
-        /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
         /// <param name="importance">Importance level of the message</param>
@@ -164,22 +128,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogCommentFromText(_eventContext, importance, message);
         }
-        #endregion
 
-        #region Log events
-        /// <summary>
-        /// Will Log a build Event. Will also take into account OnlyLogCriticalEvents when determining if to drop the event or to log it.
-        /// </summary>
-        /// <param name="buildEvent">The event to log</param>
-        internal void LogBuildEvent(BuildEventArgs buildEvent)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogBuildEvent(buildEvent);
-        }
-
-        #endregion
-
-        #region Log errors
         /// <summary>
         /// Log an error
         /// </summary>
@@ -195,11 +144,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="file">The file in which the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogErrorWithSubcategory(BuildEventFileInfo file, string subcategoryResourceName, string messageResourceName, params object[] messageArgs)
+        internal void LogErrorWithSubcategory(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
@@ -208,12 +157,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
+        /// <param name="file">The file in which the error occurred</param>
         /// <param name="message">Error message</param>
-        internal void LogErrorFromText(BuildEventFileInfo file, string subcategoryResourceName, string errorCode, string helpKeyword, string message)
+        internal void LogErrorFromText(string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
@@ -232,62 +181,24 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error based on an exception
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
-        internal void LogFatalBuildError(BuildEventFileInfo file, Exception exception)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogFatalBuildError(_eventContext, exception, file);
-        }
-
-        /// <summary>
-        /// Log an error based on an exception during the execution of a task
-        /// </summary>
         /// <param name="file">The file in which the error occurred</param>
-        /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="taskName">The task in which the error occurred</param>
-        internal void LogFatalTaskError(BuildEventFileInfo file, Exception exception, string taskName)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogFatalTaskError(_eventContext, exception, file, taskName);
-        }
-
-        /// <summary>
-        /// Log an error based on an exception
-        /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
-        /// <param name="exception">The exception wich is to be logged</param>
         /// <param name="messageResourceName">The string resource which has the formatting string for the error</param>
         /// <param name="messageArgs">The arguments for the error message</param>
-        internal void LogFatalError(BuildEventFileInfo file, Exception exception, string messageResourceName, params object[] messageArgs)
+        internal void LogFatalError(Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
         }
 
-        #endregion
-
-        #region Log warnings
-        /// <summary>
-        /// Log a warning based on an exception
-        /// </summary>
-        /// <param name="file">The file in which the warning occurred</param>
-        /// <param name="exception">The exception to be logged as a warning</param>
-        /// <param name="taskName">The task in which the warning occurred</param>
-        internal void LogTaskWarningFromException(BuildEventFileInfo file, Exception exception, string taskName)
-        {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-            _loggingService.LogTaskWarningFromException(_eventContext, exception, file, taskName);
-        }
-
         /// <summary>
         /// Log a warning
         /// </summary>
-        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        internal void LogWarning(BuildEventFileInfo file, string subcategoryResourceName, string messageResourceName, params object[] messageArgs)
+        internal void LogWarning(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
@@ -296,17 +207,36 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log a warning based on a text message
         /// </summary>
-        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
+        /// <param name="file">The file in which the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        internal void LogWarningFromText(BuildEventFileInfo file, string subcategoryResourceName, string warningCode, string helpKeyword, string message)
+        internal void LogWarningFromText(string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }
 
-        #endregion
+        /// <summary>
+        /// Will Log a build Event. Will also take into account OnlyLogCriticalEvents when determining if to drop the event or to log it.
+        /// </summary>
+        /// <param name="buildEvent">The event to log</param>
+        internal void LogBuildEvent(BuildEventArgs buildEvent)
+        {
+            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            LoggingService.LogBuildEvent(buildEvent);
+        }
+
+        /// <summary>
+        /// Log an error based on an exception
+        /// </summary>
+        /// <param name="exception">The exception wich is to be logged</param>
+        /// <param name="file">The file in which the error occurred</param>
+        internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
+        {
+            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
+        }
     }
 }

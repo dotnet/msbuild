@@ -35,7 +35,7 @@ namespace TaskUsageLogger
     ///   conditions, they are in general correct.
     /// - Does not keep track of override tasks, so any overridden task will likewise also be incorrectly
     ///   reported.
-    /// - Because MSBuild's property expansion functionality is not publically exposed, this contains
+    /// - Because MSBuild's property expansion functionality is not publicly exposed, this contains
     ///   a very hacky simplified version sufficient to cover most patterns actually seen in UsingTask
     ///   definitions, but is not guaranteed correct in all cases.
     /// - Keeps everything in memory, so would probably run into issues if run against very large

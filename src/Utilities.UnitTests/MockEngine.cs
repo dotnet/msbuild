@@ -2,14 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -36,8 +32,7 @@ namespace Microsoft.Build.UnitTests
         private int _warnings = 0;
         private int _errors = 0;
         private int _commandLine = 0;
-        private string _log = "";
-        private string _upperLog = null;
+        private StringBuilder _log = new StringBuilder();
         private MessageImportance _minimumMessageImportance = MessageImportance.Low;
 
         public MessageImportance MinimumMessageImportance
@@ -79,29 +74,21 @@ namespace Microsoft.Build.UnitTests
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            _log += EventArgsFormatting.FormatEventMessage(eventArgs);
+            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++_errors;
-
-            _log += "\n";
-            _upperLog = null;
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            _log += EventArgsFormatting.FormatEventMessage(eventArgs);
+            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++_warnings;
-
-            _log += "\n";
-            _upperLog = null;
         }
 
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
         {
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
-            _upperLog = null;
+            _log.AppendLine(eventArgs.Message);
         }
 
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
@@ -110,9 +97,7 @@ namespace Microsoft.Build.UnitTests
             if (eventArgs.Importance <= _minimumMessageImportance)
             {
                 Console.WriteLine(eventArgs.Message);
-                _log += eventArgs.Message;
-                _log += "\n";
-                _upperLog = null;
+                _log.AppendLine(eventArgs.Message);
                 ++_messages;
             }
         }
@@ -120,9 +105,7 @@ namespace Microsoft.Build.UnitTests
         public void LogCommandLine(TaskCommandLineEventArgs eventArgs)
         {
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
-            _upperLog = null;
+            _log.AppendLine(eventArgs.Message);
             ++_commandLine;
         }
 
@@ -160,8 +143,8 @@ namespace Microsoft.Build.UnitTests
 
         internal string Log
         {
-            set { _log = value; _upperLog = null; }
-            get { return _log; }
+            set { _log = new StringBuilder(value); }
+            get { return _log.ToString(); }
         }
 
         public bool BuildProjectFile
@@ -194,17 +177,10 @@ namespace Microsoft.Build.UnitTests
         /// <param name="contains"></param>
         internal void AssertLogContains(string contains)
         {
-            if (_upperLog == null)
-            {
-                _upperLog = _log;
-                _upperLog = _upperLog.ToUpperInvariant();
-            }
-
-            Assert.True(
-                _upperLog.Contains
-                (
-                    contains.ToUpperInvariant()
-                )
+            Assert.Contains(
+                contains,
+                Log,
+                StringComparison.OrdinalIgnoreCase
             );
         }
 
@@ -245,21 +221,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Assert that the log doesnt contain the given string.
+        /// Assert that the log doesn't contain the given string.
         /// </summary>
         /// <param name="contains"></param>
         internal void AssertLogDoesntContain(string contains)
         {
-            if (_upperLog == null)
-            {
-                _upperLog = _log;
-                _upperLog = _upperLog.ToUpperInvariant();
-            }
-
-            Assert.False(_upperLog.Contains
-                (
-                    contains.ToUpperInvariant()
-                ));
+            Assert.DoesNotContain(contains, Log, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

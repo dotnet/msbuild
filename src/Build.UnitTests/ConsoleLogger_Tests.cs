@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
-        /// project name for for project started event and the target started event. 
+        /// project name for project started event and the target started event.
         /// Test for BUG 579935
         /// </summary>
         [Fact]
@@ -1333,7 +1333,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            //Clear time dependant build started message
+            //Clear time dependent build started message
             sc.Clear();
 
             es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
 
-            //Clear time dependant build started message
+            //Clear time dependent build started message
             string expectedOutput = null;
             string actualOutput = null;
             sc.Clear();
@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.UnitTests
 
             if (cl is SerialConsoleLogger)
             {
-                ArrayList propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
+                var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
                 ((SerialConsoleLogger)cl).WriteProperties(propertyList);
                 prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
                 prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
@@ -1904,30 +1904,21 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable properties = new Hashtable();
 
-
             for (int i = 0; i < 2; i++)
             {
-                BaseConsoleLogger cl = null;
                 SimulatedConsole sc = new SimulatedConsole();
                 if (i == 0)
                 {
-                    cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+                    var cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+                    var propertyList = cl.ExtractPropertyList(properties);
+                    cl.WriteProperties(propertyList);
                 }
                 else
                 {
-                    cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
-
-                if (cl is SerialConsoleLogger)
-                {
-                    ArrayList propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
-                    ((SerialConsoleLogger)cl).WriteProperties(propertyList);
-                }
-                else
-                {
+                    var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
                     BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
                     buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
+                    cl.WriteProperties(buildEvent, properties);
                 }
 
                 string log = sc.ToString();
@@ -2001,11 +1992,11 @@ namespace Microsoft.Build.UnitTests
 
             L.Parameters = "";
             L.ParseParameters();
-            Assert.False(L.ShowSummary);
+            Assert.Null(L.ShowSummary);
 
             L.Parameters = null;
             L.ParseParameters();
-            Assert.False(L.ShowSummary);
+            Assert.Null(L.ShowSummary);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
@@ -2104,7 +2095,7 @@ namespace Microsoft.Build.UnitTests
             // BuildStarted event
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.Consume(new BuildFinishedEventArgs("bf",
                                                      null, true));
             // Log so far
@@ -2171,8 +2162,8 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(beea);
 
-            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this 
-            // would call ResetConsoleLoggerState and we will fail to detect if Initialize() 
+            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this
+            // would call ResetConsoleLoggerState and we will fail to detect if Initialize()
             // is not calling it.
 
             // Log so far
@@ -2189,13 +2180,13 @@ namespace Microsoft.Build.UnitTests
             // Clear the log obtained so far
             sc.Clear();
 
-            //Initilialize (This should call ResetConsoleLoggerState(...))
+            // Initialize (This should call ResetConsoleLoggerState(...))
             L.Initialize(es);
 
             // BuildStarted event
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.Consume(new BuildFinishedEventArgs("bf",
                                                      null, true));
             // Log so far
@@ -2256,7 +2247,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted1 = new TaskStartedEventArgs(null, null, null, null, "task");
                 taskStarted1.BuildEventContext = project1Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.Consume(taskStarted1);
 
                 BuildMessageEventArgs messsage1 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -2284,7 +2275,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted2 = new TaskStartedEventArgs(null, null, null, null, "task2");
                 taskStarted2.BuildEventContext = project2Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.Consume(taskStarted2);
 
                 BuildMessageEventArgs messsage2 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -2332,7 +2323,7 @@ namespace Microsoft.Build.UnitTests
 
                 // BuildStarted event
                 es.Consume(new BuildStartedEventArgs("bs", null));
-                // BuildFinished 
+                // BuildFinished
                 es.Consume(new BuildFinishedEventArgs("bf",
                                                          null, true));
                 // Log so far
@@ -2484,9 +2475,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event. 
+        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event.
         /// We cannot verify there is a newline after the project done event for the MP single proc log because
-        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a 
+        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a
         /// text file.
         /// </summary>
         [Fact]

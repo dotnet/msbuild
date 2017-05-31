@@ -25,31 +25,41 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
-        public ProjectInstanceTranslationMode? ProjectInstanceTranslation => new Lazy<ProjectInstanceTranslationMode?>(
-            () =>
+        /// <summary>
+        /// Always use the accurate-but-slow CreateFile approach to timestamp extraction.
+        /// </summary>
+        public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
+
+        public readonly ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
+
+        /// <summary>
+        /// Never use the slow (but more accurate) CreateFile approach to timestamp extraction.
+        /// </summary>
+        public readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
+
+        private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
+        {
+            var mode = Environment.GetEnvironmentVariable("MSBUILD_PROJECTINSTANCE_TRANSLATION_MODE");
+
+            if (mode == null)
             {
-                var mode = Environment.GetEnvironmentVariable("MSBUILD_PROJECTINSTANCE_TRANSLATION_MODE");
-
-                if (mode == null)
-                {
-                    return null;
-                }
-
-                if (mode.Equals("full", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ProjectInstanceTranslationMode.Full;
-                }
-
-                if (mode.Equals("partial", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ProjectInstanceTranslationMode.Partial;
-                }
-
-                ErrorUtilities.ThrowInvalidOperation("Shared.InvalidEscapeHatchValue", mode);
-
                 return null;
-            },
-            true).Value;
+            }
+
+            if (mode.Equals("full", StringComparison.OrdinalIgnoreCase))
+            {
+                return ProjectInstanceTranslationMode.Full;
+            }
+
+            if (mode.Equals("partial", StringComparison.OrdinalIgnoreCase))
+            {
+                return ProjectInstanceTranslationMode.Partial;
+            }
+
+            ErrorUtilities.ThrowInvalidOperation("Shared.InvalidEscapeHatchValue", mode);
+
+            return null;
+        }
 
         public enum ProjectInstanceTranslationMode
         {

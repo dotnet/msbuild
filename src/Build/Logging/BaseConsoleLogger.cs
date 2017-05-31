@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Collections;
 using System.Globalization;
@@ -20,12 +21,12 @@ namespace Microsoft.Build.BackEnd.Logging
     internal delegate void WriteLinePrettyFromResourceDelegate(int indentLevel, string resourceString, params object[] args);
     #endregion
 
-    abstract internal class BaseConsoleLogger : INodeLogger
+    internal abstract class BaseConsoleLogger : INodeLogger
     {
         /// <summary>
         /// When set, we'll try reading background color.
         /// </summary>
-        internal static bool _supportReadingBackgroundColor = true;
+        private static bool _supportReadingBackgroundColor = true;
 
         #region Properties
 
@@ -58,100 +59,40 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Gets or sets the level of detail to show in the event log.
         /// </summary>
         /// <value>Verbosity level.</value>
-        public LoggerVerbosity Verbosity
-        {
-            get
-            {
-                return verbosity;
-            }
+        public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
-            set
-            {
-                verbosity = value;
-            }
-        }
-
-        public int NumberOfProcessors
-        {
-            get
-            {
-                return numberOfProcessors;
-            }
-
-            set
-            {
-                numberOfProcessors = value;
-            }
-        }
+        /// <summary>
+        /// Gets or sets the number of MSBuild processes participating in the build. If greater than 1,
+        /// include the node ID 
+        /// </summary>
+        public int NumberOfProcessors { get; set; } = 1;
 
         /// <summary>
         /// The console logger takes a single parameter to suppress the output of the errors
         /// and warnings summary at the end of a build.
         /// </summary>
         /// <value>null</value>
-        public string Parameters
-        {
-            get
-            {
-                return loggerParameters;
-            }
-
-            set
-            {
-                loggerParameters = value;
-            }
-        }
+        public string Parameters { get; set; } = null;
 
         /// <summary>
         /// Suppresses the display of project headers. Project headers are
         /// displayed by default unless this property is set.
         /// </summary>
         /// <remarks>This is only needed by the IDE logger.</remarks>
-        internal bool SkipProjectStartedText
-        {
-            get
-            {
-                return skipProjectStartedText;
-            }
-
-            set
-            {
-                skipProjectStartedText = value;
-            }
-        }
+        internal bool SkipProjectStartedText { get; set; } = false;
 
         /// <summary>
         /// Suppresses the display of error and warnings summary.
+        /// If null, user has made no indication.
         /// </summary>
-        internal bool ShowSummary
-        {
-            get
-            {
-                return _showSummary ?? false;
-            }
-
-            set
-            {
-                _showSummary = value;
-            }
-        }
+        internal bool? ShowSummary { get; set; }
 
         /// <summary>
         /// Provide access to the write hander delegate so that it can be redirected
         /// if necessary (e.g. to a file)
         /// </summary>
-        protected WriteHandler WriteHandler
-        {
-            get
-            {
-                return write;
-            }
+        protected internal WriteHandler WriteHandler { get; set; }
 
-            set
-            {
-                write = value;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -159,27 +100,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            if (loggerParameters != null)
+            if (Parameters == null) return;
+
+            foreach (string parameter in Parameters.Split(parameterDelimiters))
             {
-                string[] parameterComponents;
+                if (string.IsNullOrWhiteSpace(parameter)) continue;
 
-                parameterComponents = loggerParameters.Split(parameterDelimiters);
-                for (int param = 0; param < parameterComponents.Length; param++)
-                {
-                    if (parameterComponents[param].Length > 0)
-                    {
-                        string[] parameterAndValue = parameterComponents[param].Split(s_parameterValueSplitCharacter);
-
-                        if (parameterAndValue.Length > 1)
-                        {
-                            ApplyParameter(parameterAndValue[0], parameterAndValue[1]);
-                        }
-                        else
-                        {
-                            ApplyParameter(parameterAndValue[0], null);
-                        }
-                    }
-                }
+                string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
+                ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
             }
         }
 
@@ -188,14 +116,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// on DictionaryEntry's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
-        internal class DictionaryEntryKeyComparer : IComparer
+        internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
-            public int Compare(Object a, Object b)
+            public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
-                return String.Compare(
-                    (string)(((DictionaryEntry)a).Key),
-                    (string)(((DictionaryEntry)b).Key),
-                    StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -209,8 +134,8 @@ namespace Microsoft.Build.BackEnd.Logging
             public int Compare(Object a, Object b)
             {
                 return String.Compare(
-                    (string)(((ITaskItem)a).ItemSpec),
-                    (string)(((ITaskItem)b).ItemSpec),
+                    ((ITaskItem)a).ItemSpec,
+                    ((ITaskItem)b).ItemSpec,
                     StringComparison.CurrentCultureIgnoreCase);
             }
         }
@@ -223,10 +148,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (null == s)
-            {
-                s = String.Empty;
-            }
+            if (s == null) return string.Empty;
 
             // This will never return an empty array.  The returned array will always
             // have at least one non-null element, even if "s" is totally empty.
@@ -247,7 +169,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Splits strings on 'newLines' with tollerance for Everett and Dogfood builds.
+        /// Splits strings on 'newLines' with tolerance for Everett and Dogfood builds.
         /// </summary>
         /// <param name="s">String to split.</param>
         internal static string[] SplitStringOnNewLines(string s)
@@ -261,7 +183,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteNewLine()
         {
-            write(Environment.NewLine);
+            WriteHandler(Environment.NewLine);
         }
 
         /// <summary>
@@ -343,9 +265,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(indentLevel * tabWidth + formattedString.Length);
             result.Append(' ', indentLevel * tabWidth).Append(formattedString);
-            write(result.ToString());
+            WriteHandler(result.ToString());
         }
 
         /// <summary>
@@ -354,7 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="formattedString"></param>
         internal void WriteLinePretty(string formattedString)
         {
-            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? this.currentIndentLevel : 0;
+            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? currentIndentLevel : 0;
             WriteLinePretty(indentLevel, formattedString);
         }
 
@@ -364,7 +286,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void WriteLinePretty(int indentLevel, string formattedString)
         {
             indentLevel = indentLevel > 0 ? indentLevel : 0;
-            write(IndentString(formattedString, indentLevel * tabWidth));
+            WriteHandler(IndentString(formattedString, indentLevel * tabWidth));
         }
 
         /// <summary>
@@ -394,10 +316,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Determines whether the current verbosity setting is at least the value
         /// passed in.
         /// </summary>
-        internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
-        {
-            return (this.verbosity >= checkVerbosity);
-        }
+        internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity) => Verbosity >= checkVerbosity;
 
         /// <summary>
         /// Sets foreground color to color specified
@@ -410,7 +329,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 if (UseAnsiColors)
                 {
-                    SetColorANSI(c);
+                    SetColorAnsi(c);
                 }
                 else
                 {
@@ -432,7 +351,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (UseAnsiColors)
                 {
-                    ResetColorANSI();
+                    ResetColorAnsi();
                 }
                 else
                 {
@@ -449,7 +368,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Sets foreground color to color specified using ANSI escape codes
         /// </summary>
         /// <param name="c">foreground color</param>
-        internal static void SetColorANSI(ConsoleColor c)
+        internal static void SetColorAnsi(ConsoleColor c)
         {
             string colorString = "\x1b[";
             switch (c)
@@ -482,7 +401,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Resets the color using ANSI escape codes
         /// </summary>
-        internal static void ResetColorANSI()
+        internal static void ResetColorAnsi()
         {
             Console.Out.Write("\x1b[m");
         }
@@ -549,21 +468,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="foreground">foreground color for black</param>
         /// <param name="background">current background</param>
-        internal static ConsoleColor TransformColor(ConsoleColor foreground,
-                                                   ConsoleColor background)
+        internal static ConsoleColor TransformColor(ConsoleColor foreground, ConsoleColor background)
         {
             ConsoleColor result = foreground; //typically do nothing ...
 
             if (foreground == background)
             {
-                if (background != ConsoleColor.Black)
-                {
-                    result = ConsoleColor.Black;
-                }
-                else
-                {
-                    result = ConsoleColor.Gray;
-                }
+                result = background != ConsoleColor.Black ? ConsoleColor.Black : ConsoleColor.Gray;
             }
 
             return result;
@@ -588,8 +499,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal void InitializeConsoleMethods(LoggerVerbosity logverbosity, WriteHandler logwriter, ColorSetter colorSet, ColorResetter colorReset)
         {
-            this.verbosity = logverbosity;
-            this.write = logwriter;
+            Verbosity = logverbosity;
+            WriteHandler = logwriter;
             IsRunningWithCharacterFileType();
             // This is a workaround, because the Console class provides no way to check that a color
             // can actually be set or not. Color cannot be set if the console has been redirected
@@ -608,22 +519,22 @@ namespace Microsoft.Build.BackEnd.Logging
                 canSetColor = false;
             }
 
-            if ((colorSet != null) && canSetColor)
+            if (colorSet != null && canSetColor)
             {
                 this.setColor = colorSet;
             }
             else
             {
-                this.setColor = new ColorSetter(DontSetColor);
+                this.setColor = DontSetColor;
             }
 
-            if ((colorReset != null) && canSetColor)
+            if (colorReset != null && canSetColor)
             {
                 this.resetColor = colorReset;
             }
             else
             {
-                this.resetColor = new ColorResetter(DontResetColor);
+                this.resetColor = DontResetColor;
             }
         }
 
@@ -634,7 +545,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="properties">List of properties</param>
-        internal void WriteProperties(ArrayList properties)
+        internal void WriteProperties(List<DictionaryEntry> properties)
         {
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
@@ -648,7 +559,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteNewLine();
             }
         }
-
 
         /// <summary>
         /// Writes out the environment as seen on build started.
@@ -669,15 +579,14 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-
         /// <summary>
-        /// Generate an arraylist which contains the properties referenced
-        /// by the properties enumerable object
+        /// Generate a list which contains the properties referenced by the properties 
+        /// enumerable object
         /// </summary>
-        internal ArrayList ExtractPropertyList(IEnumerable properties)
+        internal List<DictionaryEntry> ExtractPropertyList(IEnumerable properties)
         {
             // Gather a sorted list of all the properties.
-            ArrayList list = new ArrayList();
+            var list = new List<DictionaryEntry>(properties.FastCountOrZero());
             foreach (DictionaryEntry prop in properties)
             {
                 list.Add(prop);
@@ -710,7 +619,7 @@ namespace Microsoft.Build.BackEnd.Logging
             resetColor();
         }
 
-        internal virtual void OutputProperties(ArrayList list)
+        internal virtual void OutputProperties(List<DictionaryEntry> list)
         {
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -734,36 +643,30 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
         {
-            if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
+            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0) return;
+
+            // Write the banner
+            setColor(ConsoleColor.Green);
+            WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("ItemListHeader"));
+
+            // Write each item type and its itemspec, one per line
+            foreach (DictionaryEntry entry in itemTypes)
             {
-                if (itemTypes.Count == 0)
+                string itemType = (string) entry.Key;
+                ArrayList itemTypeList = (ArrayList) entry.Value;
+
+                if (itemTypeList.Count == 0)
                 {
-                    return;
+                    continue;
                 }
 
-                // Write the banner
-                setColor(ConsoleColor.Green);
-                WriteLinePretty(currentIndentLevel, ResourceUtilities.FormatResourceString("ItemListHeader"));
-
-                // Write each item type and its itemspec, one per line
-                foreach (DictionaryEntry entry in itemTypes)
-                {
-                    string itemType = (string)entry.Key;
-                    ArrayList itemTypeList = (ArrayList)entry.Value;
-
-                    if (itemTypeList.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    // Sort the list by itemSpec
-                    itemTypeList.Sort(new ITaskItemItemSpecComparer());
-                    OutputItems(itemType, itemTypeList);
-                }
-
-                // Add a blank line
-                WriteNewLine();
+                // Sort the list by itemSpec
+                itemTypeList.Sort(new ITaskItemItemSpecComparer());
+                OutputItems(itemType, itemTypeList);
             }
+
+            // Add a blank line
+            WriteNewLine();
         }
 
         /// <summary>
@@ -833,18 +736,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="scopeName">Task name or target name.</param>
         /// <param name="table">Table that has tasks or targets.</param>
         /// <returns></returns>
-        internal static PerformanceCounter GetPerformanceCounter(string scopeName, ref Hashtable table)
+        internal static PerformanceCounter GetPerformanceCounter(string scopeName, ref Dictionary<string, PerformanceCounter> table)
         {
             // Lazily construct the performance counter table.
             if (table == null)
             {
-                table = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                table = new Dictionary<string, PerformanceCounter>(StringComparer.OrdinalIgnoreCase);
             }
 
-            PerformanceCounter counter = (PerformanceCounter)table[scopeName];
-
             // And lazily construct the performance counter itself.
-            if (counter == null)
+            PerformanceCounter counter;
+            if (!table.TryGetValue(scopeName, out counter))
             {
                 counter = new PerformanceCounter(scopeName);
                 table[scopeName] = counter;
@@ -854,10 +756,10 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Display the timings for each counter in the hashtable
+        /// Display the timings for each counter in the dictionary.
         /// </summary>
         /// <param name="counters"></param>
-        internal void DisplayCounters(Hashtable counters)
+        internal void DisplayCounters(Dictionary<string, PerformanceCounter> counters)
         {
             ArrayList perfCounters = new ArrayList(counters.Values.Count);
             perfCounters.AddRange(counters.Values);
@@ -866,7 +768,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             bool reentrantCounterExists = false;
 
-            WriteLinePrettyFromResourceDelegate lineWriter = new WriteLinePrettyFromResourceDelegate(WriteLinePrettyFromResource);
+            WriteLinePrettyFromResourceDelegate lineWriter = WriteLinePrettyFromResource;
 
             foreach (PerformanceCounter counter in perfCounters)
             {
@@ -890,12 +792,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal class PerformanceCounter
         {
-            protected string scopeName = String.Empty;
-            protected int calls = 0;
+            protected string scopeName;
+            protected int calls;
             protected TimeSpan elapsedTime = new TimeSpan(0);
-            protected bool inScope = false;
+            protected bool inScope;
             protected DateTime scopeStartTime;
-            protected bool reenteredScope = false;
+            protected bool reenteredScope;
 
             /// <summary>
             /// Construct.
@@ -909,34 +811,22 @@ namespace Microsoft.Build.BackEnd.Logging
             /// <summary>
             /// Name of the scope.
             /// </summary>
-            internal string ScopeName
-            {
-                get { return scopeName; }
-            }
+            internal string ScopeName => scopeName;
 
             /// <summary>
             /// Total number of calls so far.
             /// </summary>
-            internal int Calls
-            {
-                get { return calls; }
-            }
+            internal int Calls => calls;
 
             /// <summary>
-            /// Total accumalated time so far.
+            /// Total accumulated time so far.
             /// </summary>
-            internal TimeSpan ElapsedTime
-            {
-                get { return elapsedTime; }
-            }
+            internal TimeSpan ElapsedTime => elapsedTime;
 
             /// <summary>
             /// Whether or not this scope was reentered. Timing information is not recorded in these cases.
             /// </summary>
-            internal bool ReenteredScope
-            {
-                get { return reenteredScope; }
-            }
+            internal bool ReenteredScope => reenteredScope;
 
             /// <summary>
             /// Whether or not this task or target is executing right now.
@@ -973,12 +863,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            internal virtual void PrintCounterMessage(WriteLinePrettyFromResourceDelegate WriteLinePrettyFromResource, ColorSetter setColor, ColorResetter resetColor)
+            internal virtual void PrintCounterMessage(WriteLinePrettyFromResourceDelegate writeLinePrettyFromResource, ColorSetter setColor, ColorResetter resetColor)
             {
                 string time;
                 if (!reenteredScope)
                 {
-                    // round: submillisecond values are not meaningful
+                    // round: sub-millisecond values are not meaningful
                     time = String.Format(CultureInfo.CurrentCulture,
                         "{0,5}", Math.Round(elapsedTime.TotalMilliseconds, 0));
                 }
@@ -988,26 +878,19 @@ namespace Microsoft.Build.BackEnd.Logging
                     time = "    *";
                 }
 
-                WriteLinePrettyFromResource
-                    (
-                        2,
-                        "PerformanceLine",
-                        time,
-                        String.Format(CultureInfo.CurrentCulture,
-                                "{0,-40}" /* pad to 40 align left */, scopeName),
-                        String.Format(CultureInfo.CurrentCulture,
-                                "{0,3}", calls)
-                    );
+                writeLinePrettyFromResource(
+                    2,
+                    "PerformanceLine",
+                    time,
+                    String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
+                    String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
             }
 
             /// <summary>
-            /// Returns an IComparer that will put erformance counters 
+            /// Returns an IComparer that will put performance counters 
             /// in descending order by elapsed time.
             /// </summary>
-            static internal IComparer DescendingByElapsedTimeComparer
-            {
-                get { return new DescendingByElapsedTime(); }
-            }
+            internal static IComparer DescendingByElapsedTimeComparer => new DescendingByElapsedTime();
 
             /// <summary>
             /// Private IComparer class for sorting performance counters 
@@ -1066,7 +949,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Initialize(IEventSource eventSource, int nodeCount)
         {
-            numberOfProcessors = nodeCount;
+            NumberOfProcessors = nodeCount;
             Initialize(eventSource);
         }
 
@@ -1086,23 +969,23 @@ namespace Microsoft.Build.BackEnd.Logging
 
             showTargetOutputs = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
 
-            // If not specifically instructed otherwise, show a summary in normal
-            // and higher verbosities.
-            if (_showSummary == null && IsVerbosityAtLeast(LoggerVerbosity.Normal))
-            {
-                _showSummary = true;
-            }
-
             if (showOnlyWarnings || showOnlyErrors)
             {
-                if (!_showSummary.HasValue)
+                if (ShowSummary == null)
                 {
                     // By default don't show the summary when the showOnlyWarnings / showOnlyErrors is specified.
                     // However, if the user explicitly specified summary or nosummary, use that.
-                    _showSummary = false;
+                    ShowSummary = false;
                 }
 
                 this.showPerfSummary = false;
+            }
+
+            // If not specifically instructed otherwise, show a summary in normal
+            // and higher verbosities.
+            if (ShowSummary == null && IsVerbosityAtLeast(LoggerVerbosity.Normal))
+            {
+                ShowSummary = true;
             }
 
             // Put this after reading the parameters, since it may want to initialize something
@@ -1114,32 +997,18 @@ namespace Microsoft.Build.BackEnd.Logging
             // to call its event handlers directly. The VS HostLogger does this.
             if (eventSource != null)
             {
-                eventSource.BuildStarted +=
-                        new BuildStartedEventHandler(BuildStartedHandler);
-                eventSource.BuildFinished +=
-                        new BuildFinishedEventHandler(BuildFinishedHandler);
-                eventSource.ProjectStarted +=
-                        new ProjectStartedEventHandler(ProjectStartedHandler);
-                eventSource.ProjectFinished +=
-                        new ProjectFinishedEventHandler(ProjectFinishedHandler);
-                eventSource.TargetStarted +=
-                        new TargetStartedEventHandler(TargetStartedHandler);
-                eventSource.TargetFinished +=
-                        new TargetFinishedEventHandler(TargetFinishedHandler);
-                eventSource.TaskStarted +=
-                        new TaskStartedEventHandler(TaskStartedHandler);
-                eventSource.TaskFinished +=
-                        new TaskFinishedEventHandler(TaskFinishedHandler);
-
-                eventSource.ErrorRaised +=
-                        new BuildErrorEventHandler(ErrorHandler);
-                eventSource.WarningRaised +=
-                        new BuildWarningEventHandler(WarningHandler);
-                eventSource.MessageRaised +=
-                        new BuildMessageEventHandler(MessageHandler);
-
-                eventSource.CustomEventRaised +=
-                        new CustomBuildEventHandler(CustomEventHandler);
+                eventSource.BuildStarted += BuildStartedHandler;
+                eventSource.BuildFinished +=BuildFinishedHandler;
+                eventSource.ProjectStarted += ProjectStartedHandler;
+                eventSource.ProjectFinished += ProjectFinishedHandler;
+                eventSource.TargetStarted += TargetStartedHandler;
+                eventSource.TargetFinished += TargetFinishedHandler;
+                eventSource.TaskStarted += TaskStartedHandler;
+                eventSource.TaskFinished += TaskFinishedHandler;
+                eventSource.ErrorRaised += ErrorHandler;
+                eventSource.WarningRaised += WarningHandler;
+                eventSource.MessageRaised += MessageHandler;
+                eventSource.CustomEventRaised += CustomEventHandler;
             }
         }
 
@@ -1157,10 +1026,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     showPerfSummary = true;
                     return true;
                 case "NOSUMMARY":
-                    _showSummary = false;
+                    ShowSummary = false;
                     return true;
                 case "SUMMARY":
-                    _showSummary = true;
+                    ShowSummary = true;
                     return true;
                 case "NOITEMANDPROPERTYLIST":
                     showItemAndPropertyList = false;
@@ -1203,9 +1072,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "V":
                 case "VERBOSITY":
-                    {
-                        return ApplyVerbosityParameter(parameterValue);
-                    }
+                    return ApplyVerbosityParameter(parameterValue);
             }
 
             return false;
@@ -1220,23 +1087,23 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 case "Q":
                 case "QUIET":
-                    verbosity = LoggerVerbosity.Quiet;
+                    Verbosity = LoggerVerbosity.Quiet;
                     return true;
                 case "M":
                 case "MINIMAL":
-                    verbosity = LoggerVerbosity.Minimal;
+                    Verbosity = LoggerVerbosity.Minimal;
                     return true;
                 case "N":
                 case "NORMAL":
-                    verbosity = LoggerVerbosity.Normal;
+                    Verbosity = LoggerVerbosity.Normal;
                     return true;
                 case "D":
                 case "DETAILED":
-                    verbosity = LoggerVerbosity.Detailed;
+                    Verbosity = LoggerVerbosity.Detailed;
                     return true;
                 case "DIAG":
                 case "DIAGNOSTIC":
-                    verbosity = LoggerVerbosity.Diagnostic;
+                    Verbosity = LoggerVerbosity.Diagnostic;
                     return true;
                 default:
                     string errorCode;
@@ -1275,19 +1142,9 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Internal member data
 
         /// <summary>
-        /// Controls the amount of text displayed by the logger
-        /// </summary>
-        internal LoggerVerbosity verbosity = LoggerVerbosity.Normal;
-
-        /// <summary>
         /// Time the build started
         /// </summary>
         internal DateTime buildStarted;
-
-        /// <summary>
-        /// Delegate used to write text
-        /// </summary>
-        internal WriteHandler write = null;
 
         /// <summary>
         /// Delegate used to change text color.
@@ -1298,11 +1155,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Delegate used to reset text color
         /// </summary>
         internal ColorResetter resetColor = null;
-
-        /// <summary>
-        /// Indicates if project header should not be displayed.
-        /// </summary>
-        internal bool skipProjectStartedText = false;
 
         /// <summary>
         /// Number of spaces that each level of indentation is worth
@@ -1327,11 +1179,6 @@ namespace Microsoft.Build.BackEnd.Logging
                  "__________________________________________________";
 
         /// <summary>
-        /// Console logger parameters.
-        /// </summary>
-        internal string loggerParameters = null;
-
-        /// <summary>
         /// Console logger parameters delimiters.
         /// </summary>
         internal static readonly char[] parameterDelimiters = { ';' };
@@ -1340,12 +1187,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Console logger parameter value split character.
         /// </summary>
         private static readonly char[] s_parameterValueSplitCharacter = { '=' };
-
-        /// <summary>
-        /// Console logger should show error and warning summary at the end of build?
-        /// If null, user has made no indication.
-        /// </summary>
-        private bool? _showSummary;
 
         /// <summary>
         /// When true, accumulate performance numbers.
@@ -1388,41 +1229,41 @@ namespace Microsoft.Build.BackEnd.Logging
 
 
         #region Per-build Members
-        internal int numberOfProcessors = 1;
+
         /// <summary>
-        /// Number of errors enountered in this build
+        /// Number of errors encountered in this build
         /// </summary>
         internal int errorCount = 0;
 
         /// <summary>
-        /// Number of warnings enountered in this build
+        /// Number of warnings encountered in this build
         /// </summary>
         internal int warningCount = 0;
 
         /// <summary>
-        /// A list of the errors that have occured during this build.
+        /// A list of the errors that have occurred during this build.
         /// </summary>
-        internal ArrayList errorList;
+        internal List<BuildErrorEventArgs> errorList;
 
         /// <summary>
-        /// A list of the warnings that have occured during this build.
+        /// A list of the warnings that have occurred during this build.
         /// </summary>
-        internal ArrayList warningList;
+        internal List<BuildWarningEventArgs> warningList;
 
         /// <summary>
         /// Accumulated project performance information.
         /// </summary>
-        internal Hashtable projectPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> projectPerformanceCounters;
 
         /// <summary>
         /// Accumulated target performance information.
         /// </summary>
-        internal Hashtable targetPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> targetPerformanceCounters;
 
         /// <summary>
         /// Accumulated task performance information.
         /// </summary>
-        internal Hashtable taskPerformanceCounters;
+        internal Dictionary<string, PerformanceCounter> taskPerformanceCounters;
 
         #endregion
 

@@ -529,10 +529,9 @@ namespace Microsoft.Build.BackEnd
                 // because this will be a hard error anyway.
                 _targetLoggingContext.LogFatalTaskError
                 (
-                    new BuildEventFileInfo(parameterLocation),
                     e.InnerException,
-                    _taskName
-                );
+                    new BuildEventFileInfo(parameterLocation),
+                    _taskName);
 
                 // We do not recover from a task exception while getting outputs,
                 // so do not merely set gatheredGeneratedOutputsSuccessfully = false; here
@@ -707,7 +706,7 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        _taskLoggingContext.LogFatalTaskError(new BuildEventFileInfo(_taskLocation), e, ((ProjectTaskInstance)_taskLoggingContext.Task).Name);
+                        _taskLoggingContext.LogFatalTaskError(e, new BuildEventFileInfo(_taskLocation), ((ProjectTaskInstance)_taskLoggingContext.Task).Name);
                     }
                     catch (InternalErrorException)
                     {
@@ -1413,10 +1412,9 @@ namespace Microsoft.Build.BackEnd
                 // Log the stack, so the task vendor can fix their code
                 _taskLoggingContext.LogFatalTaskError
                 (
-                    new BuildEventFileInfo(_taskLocation),
                     e.InnerException,
-                    _taskName
-                );
+                    new BuildEventFileInfo(_taskLocation),
+                    _taskName);
             }
             catch (Exception e)
             {
@@ -1428,10 +1426,9 @@ namespace Microsoft.Build.BackEnd
 
                 _taskLoggingContext.LogFatalTaskError
                 (
-                    new BuildEventFileInfo(_taskLocation),
                     e,
-                    _taskName
-                );
+                    new BuildEventFileInfo(_taskLocation),
+                    _taskName);
             }
 
             return success;
@@ -1662,7 +1659,7 @@ namespace Microsoft.Build.BackEnd
             string message = ResourceUtilities.FormatResourceString(out warningCode, out helpKeyword, "UnableToCancelTask", _taskName);
             try
             {
-                _taskLoggingContext.LogWarningFromText(new BuildEventFileInfo(_taskLocation), null, warningCode, helpKeyword, message);
+                _taskLoggingContext.LogWarningFromText(null, warningCode, helpKeyword, new BuildEventFileInfo(_taskLocation), message);
             }
             catch (InternalErrorException) // BUGBUG, should never catch this
             {

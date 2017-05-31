@@ -58,6 +58,9 @@
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -126,6 +129,8 @@
     <Compile Include="BackEnd\TaskHostTaskCancelled_Tests.cs" />
     <Compile Include="BackEnd\TaskHostTaskComplete_Tests.cs" />
     <Compile Include="BackEnd\TaskHost_Tests.cs" />
+    <Compile Include="Evaluation\EvaluationLogging_Tests.cs" />
+    <Compile Include="MockLoggingContext.cs" />
     <Compile Include="TestComparers\TaskRegistryComparers.cs" />
     <Compile Include="BackEnd\TaskRegistry_Tests.cs" />
     <Compile Include="BackEnd\TranslationHelpers.cs" />
@@ -214,9 +219,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="Compat\TempFileCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">

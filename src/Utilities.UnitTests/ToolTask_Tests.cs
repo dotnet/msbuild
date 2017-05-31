@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Collections;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -696,15 +697,15 @@ namespace Microsoft.Build.UnitTests
         public void ToolPathIsFoundWhenDirectoryExistsWithNameOfTool()
         {
             string toolName = NativeMethodsShared.IsWindows ? "cmd" : "sh";
-
             string savedCurrentDirectory = Directory.GetCurrentDirectory();
-
-            string tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))).FullName;
 
             try
             {
-                using (new Helpers.TemporaryEnvironment("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}"))
+                using (var env = TestEnvironment.Create())
                 {
+                    string tempDirectory = env.CreateFolder().FolderPath;
+                    env.SetCurrentDirectory(tempDirectory);
+                    env.SetEnvironmentVariable("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
                     Directory.SetCurrentDirectory(tempDirectory);
 
                     string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
@@ -724,8 +725,6 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Directory.SetCurrentDirectory(savedCurrentDirectory);
-
-                FileUtilities.DeleteDirectoryNoThrow(tempDirectory, recursive: true);
             }
         }
 
@@ -780,6 +779,20 @@ namespace Microsoft.Build.UnitTests
 #else
             Assert.Equal(false, task.StartInfo.EnvironmentVariables.ContainsKey("a"));
 #endif
+        }
+
+        [Fact]
+        public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
+        {
+            MyTool t = new MyTool();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                            ? "/C echo \"hello \\\"world\\\"\""
+                                            : "-c echo \"hello \\\"world\\\"\"";
+            t.Execute();
+            engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
+            Assert.Equal(0, engine.Errors);
         }
     }
 }

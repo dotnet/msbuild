@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure that I can use the CreateProperty task to create a property
-        /// that has a parseable semicolon in it.
+        /// that has a parsable semicolon in it.
         /// </summary>
         [Fact]
         public void CreatePropertyWithSemicolon()

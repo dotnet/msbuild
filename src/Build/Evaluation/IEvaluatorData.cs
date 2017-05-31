@@ -29,6 +29,16 @@ namespace Microsoft.Build.Evaluation
         where M : class, IMetadatum
         where D : class, IItemDefinition<M>
     {
+
+        /// <summary>
+        /// The ID of this evaluation
+        /// </summary>
+        int EvaluationID
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// The (project) directory that should be used during evaluation
         /// </summary>

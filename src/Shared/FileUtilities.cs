@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
 {
     /// <summary>
     /// This class contains utility methods for file IO.
-    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in 
+    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in
     /// each class get pulled into the resulting assembly.
     /// </summary>
     internal static partial class FileUtilities
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared
 
         // This is the fake current executable we use in case we are running tests.
 
-        // MaxPath accounts for the null-terminating character, for example, the maximum path on the D drive is "D:\<256 chars>\0". 
+        // MaxPath accounts for the null-terminating character, for example, the maximum path on the D drive is "D:\<256 chars>\0".
         // See: ndp\clr\src\BCL\System\IO\Path.cs
         internal const int MaxPath = 260;
 
@@ -44,8 +44,8 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// FOR UNIT TESTS ONLY
-        /// Clear out the static variable used for the cache directory so that tests that 
-        /// modify it can validate their modifications. 
+        /// Clear out the static variable used for the cache directory so that tests that
+        /// modify it can validate their modifications.
         /// </summary>
         internal static void ClearCacheDirectoryPath()
         {
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates if the given character is a slash. 
+        /// Indicates if the given character is a slash.
         /// </summary>
         /// <param name="c"></param>
         /// <returns>true, if slash</returns>
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Gets the canonicalized full path of the provided path.
-        /// Path.GetFullPath The pre .Net 4.6.2 implementation of Path.GetFullPath is slow and creates strings in its work. 
+        /// Path.GetFullPath The pre .Net 4.6.2 implementation of Path.GetFullPath is slow and creates strings in its work.
         /// Therefore MSBuild has its own implementation on full framework.
         /// Guidance for use: call this on all paths accepted through public entry
         /// points that need normalization. After that point, only verify the path
@@ -369,7 +369,7 @@ namespace Microsoft.Build.Shared
                                // Check for \\?\Globalroot, an internal mechanism to the kernel
                                // that provides aliases for drives and other undocumented stuff.
                                // The kernel team won't even describe the full set of what
-                               // is available here - we don't want managed apps mucking 
+                               // is available here - we don't want managed apps mucking
                                // with this for security reasons.
                             */
                     if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", PathComparison) != -1)
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Shared
 
             var firstSlash = value.IndexOf('/');
 
-            // The first slash will either be at the beginning of the string or after the first directory name 
+            // The first slash will either be at the beginning of the string or after the first directory name
             if (firstSlash == 0)
             {
                 firstSlash = value.Substring(1).IndexOf('/') + 1;
@@ -563,7 +563,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// A variation of Path.GetFullPath that will return the input value 
+        /// A variation of Path.GetFullPath that will return the input value
         /// instead of throwing any IO exception.
         /// Useful to get a better path for an error message, without the risk of throwing
         /// if the error message was itself caused by the path being invalid!
@@ -606,7 +606,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Normalizes a path for path comparison
         /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string)"/>
-        /// 
+        ///
         /// </summary>
         internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
         {
@@ -900,11 +900,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
+        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
         /// Throws UriFormatException.
         /// </summary>
         /// <param name="basePath">
-        /// The base path we want to relativize to. Must be absolute.  
+        /// The base path we want to be relative to. Must be absolute.
         /// Should <i>not</i> include a filename as the last segment will be interpreted as a directory.
         /// </param>
         /// <param name="path">
@@ -1054,7 +1054,7 @@ namespace Microsoft.Build.Shared
 
             return string.Equals(slash1, slash2, PathComparison);
         }
-		
+
 		internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;

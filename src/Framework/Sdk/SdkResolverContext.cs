@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -22,5 +24,14 @@ namespace Microsoft.Build.Framework
         ///     Path to the solution file being built, if known. May be null.
         /// </summary>
         public virtual string SolutionFilePath { get; protected set; }
+
+        /// <summary>
+        ///     Version of MSBuild currently running.
+        /// <remarks>
+        ///     File version based on commit height from our public git repository. This is informational
+        ///     and not equal to the assembly version.
+        /// </remarks>
+        /// </summary>
+        public virtual Version MSBuildVersion { get; protected set; }
     }
 }

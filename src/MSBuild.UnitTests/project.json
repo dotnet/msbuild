@@ -8,7 +8,8 @@
   "frameworks": {
     "net46": {
       "dependencies": {
-        "xunit.runner.visualstudio": "2.1.0"
+        "xunit.runner.visualstudio": "2.1.0",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
       }
     },
     "netstandard1.3": {
@@ -25,7 +26,8 @@
         "Microsoft.Win32.Primitives":  "4.0.1",
         "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
         "Microsoft.NETCore.TestHost": "1.0.0",
-        "System.Reflection.Metadata": "1.4.1"
+        "System.Reflection.Metadata": "1.4.1",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0"
       },
       "imports": [ "portable-net451+win81", "dnxcore50" ]
     }

@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
 
         internal static string myexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\myexisting.txt" : @"/touch/myexisting.txt";
         internal static string mynonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\mynonexisting.txt" : @"/touch/mynonexisting.txt";
-        internal static string nonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch-nonexisting\file.txt" : @"/touch-nonexisting/file.txt";
+        internal static string nonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch-nonexistent\file.txt" : @"/touch-nonexistent/file.txt";
         internal static string myreadonly_txt = NativeMethodsShared.IsWindows ? @"c:\touch\myreadonly.txt" : @"/touch/myreadonly.txt";
 
         private bool Execute(Touch t)

@@ -2318,7 +2318,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (int config in configurations)
                         {
                             file.WriteLine("Config {0} Node {1} TV: {2} File {3}", config, _schedulingData.GetAssignedNodeForRequestConfiguration(config), _configCache[config].ToolsVersion, _configCache[config].ProjectFullPath);
-                            foreach (ProjectPropertyInstance property in _configCache[config].Properties)
+                            foreach (ProjectPropertyInstance property in _configCache[config].GlobalProperties)
                             {
                                 file.WriteLine("{0} = \"{1}\"", property.Name, property.EvaluatedValue);
                             }

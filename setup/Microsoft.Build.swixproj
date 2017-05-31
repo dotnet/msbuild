@@ -20,8 +20,8 @@
   <PropertyGroup>
     <OutDir>$(BaseOutputPath)setup\</OutDir>
     <OutputPath>$(BaseOutputPath)setup\</OutputPath>
-    <X86BinPath>$(BaseOutputPath)X86\$(OS)\$(Configuration)\Output\</X86BinPath>
-    <X64BinPath>$(BaseOutputPath)X64\$(OS)\$(Configuration)\Output\</X64BinPath>
+    <X86BinPath>$(BaseOutputPath)$(Configuration)\x86\$(TargetPlatformIdentifier)\Output\</X86BinPath>
+    <X64BinPath>$(BaseOutputPath)$(Configuration)\x64\$(TargetPlatformIdentifier)\Output\</X64BinPath>
   </PropertyGroup>
 
   <!-- Needed for the MicroBuild signing plugin -->

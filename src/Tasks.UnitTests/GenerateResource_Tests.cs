@@ -22,20 +22,30 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [Fact]
-        public void BasicResX2Resources()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BasicResX2Resources(bool resourceReadOnly)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing BasicResX2Resources() test");
 
+            string resxFile = null;
+
             GenerateResource t = Utilities.CreateTask();
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
             {
-                string resxFile = Utilities.WriteTestResX(false, null, null);
+                resxFile = Utilities.WriteTestResX(false, null, null);
+
+                if (resourceReadOnly)
+                {
+                    File.SetAttributes(resxFile, FileAttributes.ReadOnly);
+                }
+
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.Sources[0].SetMetadata("Attribute", "InputValue");
 
@@ -57,6 +67,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             finally
             {
                 // Done, so clean up.
+                if (resourceReadOnly && !string.IsNullOrEmpty(resxFile))
+                {
+                    File.SetAttributes(resxFile, FileAttributes.Normal);
+                }
+
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
                 {
@@ -154,7 +169,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
-        /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
+        /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
         public void ResX2ResourcesWithReferences()
         {
@@ -2299,8 +2314,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Cannot create strongly typed resource file
                 Utilities.AssertLogContains(t, "MSB3570");
 
-                // it didn't write the STR class successfully, but it did still do some processing, so the 
-                // state file is still around. 
+                // it didn't write the STR class successfully, but it did still do some processing, so the
+                // state file is still around.
                 Assert.Equal(1, t.FilesWritten.Length);
             }
             finally
@@ -2661,10 +2676,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         /// <summary>
-        /// A reference is being passed into the GenerateResource task, but it's specified 
-        /// using a relative path.  GenerateResource was failing on this, because in the 
-        /// ResolveAssembly handler, it was calling Assembly.LoadFile on that relative path, 
-        /// which fails (LoadFile requires an absolute path).  The fix was to use 
+        /// A reference is being passed into the GenerateResource task, but it's specified
+        /// using a relative path.  GenerateResource was failing on this, because in the
+        /// ResolveAssembly handler, it was calling Assembly.LoadFile on that relative path,
+        /// which fails (LoadFile requires an absolute path).  The fix was to use
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
@@ -3016,10 +3031,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
         /// <summary>
         /// In order to make GenerateResource multitargetable, a property, ExecuteAsTool, was added.
-        /// In order to have correct behavior when using pre-4.0 
+        /// In order to have correct behavior when using pre-4.0
         /// toolsversions, ExecuteAsTool must default to true, and the paths to the tools will be the
-        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
-        /// this was done by ad hoc testing and will be maintained by the dev suites.  
+        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so
+        /// this was done by ad hoc testing and will be maintained by the dev suites.
         /// </summary>
         [Fact]
         public void MultiTargetingDefaultsSetCorrectly()
@@ -3091,8 +3106,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         /// <summary>
-        /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one 
-        /// write tlog exist, and that they were written to disk.  If that is not true, asserts. 
+        /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one
+        /// write tlog exist, and that they were written to disk.  If that is not true, asserts.
         /// </summary>
         public static void AssertStateFileWasWritten(GenerateResource t)
         {
@@ -3176,7 +3191,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
         /// <summary>
         /// This method creates and returns a string that is the contents of a canonical .txt resource file.
-        /// <param name="tagName">Gives the opportunity to create a warning/error in the text by specifying a [tag] value, null for nothiing.</param>
+        /// <param name="tagName">Gives the opportunity to create a warning/error in the text by specifying a [tag] value, null for nothing.</param>
         /// <param name="oneLine">Gives the opportunity to add one name-value pair to the text.  Null for nothing.</param>
         /// </summary>
         /// <returns>The content of the text blob as a string</returns>
@@ -3239,7 +3254,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
         /// <summary>
         /// This method creates a temporary file based on the canonical .txt resource file.
-        /// <param name="tagName">Gives the opportunity to create a warning/error in the text by specifying a [tag] value, null for nothiing.</param>
+        /// <param name="tagName">Gives the opportunity to create a warning/error in the text by specifying a [tag] value, null for nothing.</param>
         /// <param name="oneLine">Gives the opportunity to add one name-value pair to the text.  Null for nothing.</param>
         /// </summary>
         public static string WriteTestText(string tagName, string oneLine)
@@ -3422,7 +3437,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             string f = FileUtilities.GetTemporaryFile();
             string filename = Path.ChangeExtension(f, extension);
             File.Delete(f);
-            // Make sure that the new file doesn't already exist, since the test is probably 
+            // Make sure that the new file doesn't already exist, since the test is probably
             // expecting it not to
             File.Delete(filename);
             return filename;
@@ -3436,7 +3451,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="classNamespace"></param>
         public static void STRNamespaceTestHelper(string strLanguage, string resourcesNamespace, string classNamespace)
         {
-            // these two parameters shouldnot be null
+            // these two parameters should not be null
             Assert.NotNull(strLanguage);
             Assert.NotNull(resourcesNamespace);
             // Generate Task
@@ -3465,7 +3480,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 // Execute task
                 Utilities.ExecuteTask(t);
 
-                // Get the OutputResources 
+                // Get the OutputResources
                 string resourcesFile = t.OutputResources[0].ItemSpec;
 
                 // Verify that the OutputResources has the same name as Sources (=textFile)
@@ -3484,7 +3499,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 Utilities.AssertStateFileWasWritten(t);
 
-                // Files written should contain STR class file            
+                // Files written should contain STR class file
                 Assert.Equal(Path.ChangeExtension(t.Sources[0].ItemSpec, codeFileExtension), t.StronglyTypedFileName);
                 Assert.Equal(t.FilesWritten[2].ItemSpec, t.StronglyTypedFileName);
 
@@ -3495,9 +3510,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 string STRFile = Path.ChangeExtension(textFile, codeFileExtension);
                 // Verify that the ResourceManager in the STR class is instantiated correctly
                 Assert.True(Utilities.ReadFileContent(STRFile).Contains("ResourceManager(\"" + resourcesNamespace + "." + t.StronglyTypedClassName));
-                // Verify that the class name of the STR class is as expected 
+                // Verify that the class name of the STR class is as expected
                 Assert.True(Utilities.ReadFileContent(STRFile).ToLower().Contains("class " + Path.GetFileNameWithoutExtension(textFile).ToLower()));
-                // Verify that the namespace of the STR class is as expected 
+                // Verify that the namespace of the STR class is as expected
 
                 Assert.False(Utilities.ReadFileContent(STRFile).ToLower().Contains("namespace " + resourcesNamespace.ToLower()));
                 if (classNamespace != null)

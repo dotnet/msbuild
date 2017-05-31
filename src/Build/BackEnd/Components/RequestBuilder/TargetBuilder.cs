@@ -474,21 +474,27 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     case TargetEntryState.ErrorExecution:
-                        // Push the error targets onto the stack.  This target will now be marked as completed.
-                        // When that state is processed, it will mark its parent for error execution
-                        List<TargetSpecification> errorTargets = currentTargetEntry.GetErrorTargets(_projectLoggingContext);
-                        try
+                        if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
-                            await PushTargets(errorTargets, currentTargetEntry, currentTargetEntry.Lookup, true, false, TargetPushType.Normal);
-                        }
-                        catch
-                        {
-                            if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(currentTargetEntry.Name))
+                            // Push the error targets onto the stack.  This target will now be marked as completed.
+                            // When that state is processed, it will mark its parent for error execution
+                            var errorTargets = currentTargetEntry.GetErrorTargets(_projectLoggingContext);
+                            try
                             {
-                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
+                                await PushTargets(errorTargets, currentTargetEntry, currentTargetEntry.Lookup, true,
+                                    false, TargetPushType.Normal);
                             }
+                            catch
+                            {
+                                if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(
+                                    currentTargetEntry.Name))
+                                {
+                                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry
+                                        .Name);
+                                }
 
-                            throw;
+                                throw;
+                            }
                         }
 
                         break;
@@ -603,10 +609,16 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                // Mark our parent for error execution
+                // Mark our parent for error execution when it is not Completed (e.g. Executing)
                 if (topEntry.ParentEntry != null && topEntry.ParentEntry.State != TargetEntryState.Completed)
                 {
                     topEntry.ParentEntry.MarkForError();
+                }
+                // In cases where we need to indicate a failure but the ParentEntry was Skipped (due to condition) it must be
+                // marked stop to prevent other targets from executing.
+                else if (topEntry.ParentEntry?.Result?.ResultCode == TargetResultCode.Skipped)
+                {
+                    topEntry.ParentEntry.MarkForStop();
                 }
             }
         }

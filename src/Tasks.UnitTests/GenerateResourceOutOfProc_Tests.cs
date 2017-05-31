@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
-        /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
+        /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
         public void ResX2ResourcesWithReferences()
         {
@@ -1876,7 +1876,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Task should have failed
                 Assert.False(success);
 
-                // Invalid resx file: "Resource file cannot be found". 
+                // Invalid resx file: "Resource file cannot be found".
                 Utilities.AssertLogContains(t, "ERROR MSB3552");
 
                 // Should have processed remaining file
@@ -1946,7 +1946,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             t.Execute();
 
-            // "unsupported file extension" -- An error from resgen.exe 
+            // "unsupported file extension" -- An error from resgen.exe
             // should be in the log
             Utilities.AssertLogContains(t, "ERROR RG0000");
 
@@ -2040,7 +2040,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             t.Execute();
 
-            // "no codedom provider defined" -- An error from resgen.exe 
+            // "no codedom provider defined" -- An error from resgen.exe
             // should be in the log
             Utilities.AssertLogContains(t, "ERROR RG0000");
 
@@ -2092,7 +2092,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
 
         /// <summary>
-        ///  STR class name derived from output file transormation
+        ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -2118,7 +2118,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Assert.False(success);
 
                 // Other messages in InProc.PropertyErrors.BadStronglyTypedFilename() will not
-                // show up because their equivalents (in sentiment but not exact syntax) will 
+                // show up because their equivalents (in sentiment but not exact syntax) will
                 // be logged through resgen.exe instead.
 
                 // We should get at least one error from resgen.exe because of the bad STR filename
@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Task should have failed
                 Assert.False(success);
 
-                // "AccessDeniedException" -- StronglyTypedFileName can't be 
+                // "AccessDeniedException" -- StronglyTypedFileName can't be
                 // a directory
                 Utilities.AssertLogContains(t, "ERROR RG0000");
                 Utilities.AssertLogContains(t, t.StronglyTypedClassName);
@@ -2664,7 +2664,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Execute();
 
                 // Since this is resgen 4.0, will be in a response-file, which is line-delineated
-                // and doesn't like spaces in filenames. 
+                // and doesn't like spaces in filenames.
                 Utilities.AssertLogContains(t, "/compile");
                 Utilities.AssertLogContains(t, resxFile + "," + resourcesFile);
             }
@@ -2780,7 +2780,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Execute();
 
                 // Since this is resgen 4.0, will be in a response-file, which is line-delineated
-                // and doesn't like spaces in filenames. 
+                // and doesn't like spaces in filenames.
                 Utilities.AssertLogContains(t, "/compile");
                 Utilities.AssertLogContains(t, resxFile + "," + resourcesFile);
                 Utilities.AssertLogContains(t, resxFile1 + "," + resourcesFile1);
@@ -2890,7 +2890,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.UseSourcePath = false;
                 t.NeverLockTypeAssemblies = false;
                 t.SdkToolsPath = sdkToolsPath;
-                Assert.True(t.Execute()); // "Task should have completed succesfully"
+                Assert.True(t.Execute()); // "Task should have completed successfully"
 
                 Utilities.AssertLogContains(t, "/compile");
                 foreach (ITaskItem i in sources)
@@ -2936,10 +2936,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
         /// <summary>
         /// In order to make GenerateResource multitargetable, a property, ExecuteAsTool, was added.
-        /// In order to have correct behavior when using pre-4.0 
+        /// In order to have correct behavior when using pre-4.0
         /// toolsversions, ExecuteAsTool must default to true, and the paths to the tools will be the
-        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
-        /// this was done by ad hoc testing and will be maintained by the dev suites.  
+        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so
+        /// this was done by ad hoc testing and will be maintained by the dev suites.
         /// </summary>
         [Fact]
         public void MultiTargetingDefaultsSetCorrectly()

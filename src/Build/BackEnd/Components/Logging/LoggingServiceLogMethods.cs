@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         properties,
                         items,
                         parentBuildEventContext,
-                        buildRequestConfiguration.Properties.ToDictionary(),
+                        buildRequestConfiguration.GlobalProperties.ToDictionary(),
                         buildRequestConfiguration.ToolsVersion
                     );
                 buildEvent.BuildEventContext = projectBuildEventContext;

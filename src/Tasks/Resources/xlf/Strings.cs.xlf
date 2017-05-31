@@ -2999,6 +2999,11 @@
         <target state="translated">(Není zadaná žádná zpráva.)</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
+        <target state="translated">MSB4801: Objekt pro vytváření úloh {0} se ve verzi .NET Core nástroje MSBuild nepodporuje.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

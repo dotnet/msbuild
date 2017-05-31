@@ -587,7 +587,7 @@ namespace Microsoft.Build.Internal
         {
             ICollection collection = enumerable as ICollection;
 
-            return (collection == null) ? 0 : collection.Count;
+            return collection?.Count ?? 0;
         }
 
         /// <summary>

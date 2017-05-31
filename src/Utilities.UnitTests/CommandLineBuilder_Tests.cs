@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   JoinAppendEmpty
         *
-        * Append append and empty array. Result should be NOP.
+        * Append an empty array. Result should be NOP.
         */
         [Fact]
         public void JoinAppendEmpty()
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   JoinAppendNull
         *
-        * Append append and empty array. Result should be NOP.
+        * Append an empty array. Result should be NOP.
         */
         [Fact]
         public void JoinAppendNull()

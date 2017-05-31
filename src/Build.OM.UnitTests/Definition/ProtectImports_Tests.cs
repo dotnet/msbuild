@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         #region Property Tests
 
         /// <summary>
-        /// Tests against edits into imported properties thru the property itself.
+        /// Tests against edits into imported properties through the property itself.
         /// </summary>
         [Fact]
         public void PropertySetViaProperty()
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
            );
         }
         /// <summary>
-        /// Tests against edits into imported properties thru the project.
+        /// Tests against edits into imported properties through the project.
         /// Instead of editing the existing property, because it originated
         /// in an imported file, it should create a new one in the main project.
         /// </summary>
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Tests against edits into imported properties thru the property itself.
+        /// Tests against edits into imported properties through the property itself.
         /// </summary>
         [Fact]
         public void PropertyRemove()

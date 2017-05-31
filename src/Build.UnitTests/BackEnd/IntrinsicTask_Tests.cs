@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             @"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
-                <PropertyGroup Condition=""'%(i0.m)'=='m2'""> 
+                <PropertyGroup Condition=""'%(i0.m)'=='m2'"">
                     <p1>@(i0)</p1>
                     <p2>%(i0.m)</p2>
                 </PropertyGroup>
@@ -899,7 +899,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
-                <ItemGroup Condition=""'%(i0.m)'!='m1'""> 
+                <ItemGroup Condition=""'%(i0.m)'!='m1'"">
                     <i1 Include='a1'/>
                     <i2 Include='%(i0.m)'/>
                     <i3 Include='%(i0.identity)'/>
@@ -1115,7 +1115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
-                <PropertyGroup Condition=""'%(i0.m)' != m1""> 
+                <PropertyGroup Condition=""'%(i0.m)' != m1"">
                     <p1>%(i0.m)</p1>
                 </PropertyGroup>
             </Target></Project>"))));
@@ -1413,16 +1413,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <ItemGroup>
                     <i Include='" + oldFiles.First() + "'><output>" + newFiles.First() + @"</output></i>
                     <i Include='" + newFiles.ElementAt(1) + "'><output>" + oldFiles.ElementAt(1) + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name='t2' DependsOnTargets='t'>
-                    <Message Text='final:[@(j)]'/>                    
+                    <Message Text='final:[@(j)]'/>
                   </Target>
                   <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                     <Message Text='start:[@(j)]'/>
                     <ItemGroup>
                       <j Include='%(i.identity)'/>
                     </ItemGroup>
-                    <Message Text='end:[@(j)]'/>                    
+                    <Message Text='end:[@(j)]'/>
                 </Target>
                 </Project>
             "))));
@@ -1454,16 +1454,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <ItemGroup>
                     <i Include='" + oldFiles.First() + "'><output>" + newFiles.First() + @"</output></i>
                     <i Include='" + newFiles.ElementAt(1) + "'><output>" + oldFiles.ElementAt(1) + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name='t2' DependsOnTargets='t'>
-                    <Message Text='final:[$(p)]'/>                    
+                    <Message Text='final:[$(p)]'/>
                   </Target>
                   <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                     <Message Text='start:[$(p)]'/>
                     <PropertyGroup>
                       <p>@(i)</p>
                     </PropertyGroup>
-                    <Message Text='end:[$(p)]'/>                    
+                    <Message Text='end:[$(p)]'/>
                 </Target>
                 </Project>
             "))));
@@ -1500,20 +1500,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <ItemGroup>
                     <i Include='" + oldInput + "'><output>" + newOutput + @"</output></i>
                     <i Include='" + newInput + "'><output>" + oldOutput + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name='t2' DependsOnTargets='t'>
-                    <Message Text='final:[@(i)]'/>                    
+                    <Message Text='final:[@(i)]'/>
                   </Target>
                   <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                     <Message Text='start:[@(i)]'/>
                     <ItemGroup>
                       <j Include='%(i.identity)'/>
                     </ItemGroup>
-                    <Message Text='middle:[@(i)][@(j)]'/> 
+                    <Message Text='middle:[@(i)][@(j)]'/>
                     <CreateItem Include='@(j)'>
                       <Output TaskParameter='Include' ItemName='i'/>
                     </CreateItem>
-                    <Message Text='end:[@(i)]'/>                    
+                    <Message Text='end:[@(i)]'/>
                 </Target>
                 </Project>
             "))));
@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // We should only see messages for the out of date inputs, but the itemgroup should do its work for both inputs;
                 // The final result should include the out of date inputs (twice) and the up to date inputs (twice).
                 // NOTE: outputs from regular tasks, like CreateItem, are gathered up and included in the project in the order (1) inferred (2) executed.
-                // Intrinsic tasks, because they affect the project directly, don't do this. So the final order we see is 
+                // Intrinsic tasks, because they affect the project directly, don't do this. So the final order we see is
                 // two inputs (old, new) from the ItemGroup; followed by the inferred CreateItem output, then the executed CreateItem output.
                 // I suggest this ordering isn't important: it's a new feature, so nobody will get broken.
                 logger.AssertLogContains(new string[] { "start:[" + newInput + "]",
@@ -1727,7 +1727,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
+        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions
         /// should be allowed
         /// </summary>
         [Fact]
@@ -1750,7 +1750,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
-                <PropertyGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'""> 
+                <PropertyGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">
                   <p1>v1</p1>
                 </PropertyGroup>
             </Target></Project>");
@@ -1766,7 +1766,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
+        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions
         /// should be allowed
         /// </summary>
         [Fact]
@@ -1789,7 +1789,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
-                <ItemGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">  
+                <ItemGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">
                   <i1 Include='x'/>
                 </ItemGroup>
             </Target></Project>");
@@ -1808,9 +1808,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This bug was caused by batching over the ItemGroup as well as over each child.
         /// If the condition on a child did not exclude it, an unwitting child could be included multiple times,
-        /// once for each outer batch. The fix was to abandon the idea of outer batching and just 
+        /// once for each outer batch. The fix was to abandon the idea of outer batching and just
         /// prohibit batchable expressions on the ItemGroup conditions. It's just too hard to write such expressions
-        /// in a comprehensible way.    
+        /// in a comprehensible way.
         /// </summary>
         [Fact]
         public void RegressPCHBug()
@@ -2097,7 +2097,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                 <Target Name='t'>
                     <ItemGroup>
-                        <i1 Include='" + files.First() + ";" + files.ElementAt(1) + @";other'/> 
+                        <i1 Include='" + files.First() + ";" + files.ElementAt(1) + @";other'/>
                         <i1 Remove='$(temp)" + Path.DirectorySeparatorChar + @"*.tmp'/>
                     </ItemGroup>
                 </Target></Project>");
@@ -2248,7 +2248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Items and properties should be visible within a CallTarget, even if the CallTargets are seperate tasks
+        /// Items and properties should be visible within a CallTarget, even if the CallTargets are separate tasks
         /// </summary>
         [Fact]
         public void CalledTargetItemsAreVisibleWhenTargetsRunFromSeperateTasks()
@@ -2292,7 +2292,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Items and properties should be visible within a CallTarget, even if the targets
-        /// are Run Seperately
+        /// are Run Separately
         /// </summary>
         [Fact]
         public void CalledTargetItemsAreVisibleWhenTargetsRunSeperately()
@@ -2378,7 +2378,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Whidbey behavior was that items/properties emitted by a target calling another target, were
-        /// not visible to the calling target. (That was because the project items and properties had been cloned for the target batches.) 
+        /// not visible to the calling target. (That was because the project items and properties had been cloned for the target batches.)
         /// We must match that behavior. (For now)
         /// </summary>
         [Fact]
@@ -2880,7 +2880,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                        <Content Include='a.dll' />
                        <Content Include=""@(Content->'%(FileName).pdb')"" Condition=""'%(Content.Extension)' == '.dll'""/>
                       </ItemGroup>
-                  
+
                       <Message Text='[%(Content.Identity)]->[%(Content.Extension)]' Importance='High'/>
                    </Target>
                 </Project> "))));
@@ -2907,7 +2907,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                        <Content Include=""@(Content->'%(FileName)%(Extension).pdb')""/>
                        <Content Include=""@(Content->'%(FileName)%(Extension).pdb')"" Condition=""'%(Content.Identity)' != ''""/>
                       </ItemGroup>
-                  
+
                       <Message Text='[%(Content.Identity)]->[%(Content.Extension)]' Importance='High'/>
                    </Target>
                 </Project> "))));
@@ -2920,7 +2920,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Make sure that recursive dir still gets the right file
-        /// 
+        ///
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -3154,16 +3154,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='" + files.First() + "'><output>" + files.ElementAt(1) + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name='t2' DependsOnTargets='t'>
-                    <Message Text='final:[$(p)]'/>                    
+                    <Message Text='final:[$(p)]'/>
                   </Target>
                   <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                     <Message Text='start:[$(p)]'/>
                     <CreateProperty Value='@(i)'>
                       <Output TaskParameter='Value' PropertyName='p'/>
                     </CreateProperty>
-                    <Message Text='end:[$(p)]'/>                    
+                    <Message Text='end:[$(p)]'/>
                 </Target>
                 </Project>
             "))));
@@ -3308,7 +3308,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </x>
                       <x Condition=""'%(x.m1)'=='1'"">
                         <m1>2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text='[%(x.m1)]'/>
                   </Target>
@@ -3336,7 +3336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </x>
                       <x>
                         <m1 Condition=""'%(x.m1)'=='1'"">2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text='[%(x.m1)]'/>
                   </Target>

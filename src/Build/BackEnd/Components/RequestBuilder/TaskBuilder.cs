@@ -897,10 +897,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogTaskWarningFromException
                             (
-                                new BuildEventFileInfo(_targetChildInstance.Location),
                                 exceptionToLog,
-                                _taskNode.Name
-                            );
+                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _taskNode.Name);
 
                             // Log a message explaining why we converted the previous error into a warning.
                             taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
@@ -909,10 +908,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogFatalTaskError
                             (
-                                new BuildEventFileInfo(_targetChildInstance.Location),
                                 exceptionToLog,
-                                _taskNode.Name
-                            );
+                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _taskNode.Name);
                         }
                     }
                     else

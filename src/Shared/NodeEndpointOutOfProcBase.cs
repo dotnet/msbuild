@@ -275,11 +275,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The new status of the endpoint link.</param>
         private void RaiseLinkStatusChanged(LinkStatus newStatus)
         {
-            if (null != OnLinkStatusChanged)
-            {
-                LinkStatusChangedDelegate linkStatusDelegate = OnLinkStatusChanged;
-                linkStatusDelegate(this, newStatus);
-            }
+            OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
         #region Private Methods

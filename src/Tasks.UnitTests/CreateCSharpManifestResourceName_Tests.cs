@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
         /// Test for a namespace that has ANSI but non-ascii characters.
         ///
         /// NOTE: namespace dÃa {} get's compiled into different IL depending on the language of the OS
-        /// that its running on. This is because 'Ã' is a high ANSI character which is interpretted differently
+        /// that its running on. This is because 'Ã' is a high ANSI character which is interpreted differently
         /// for different codepages.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
@@ -57,13 +57,13 @@ namespace Microsoft.Build.UnitTests
 
             // Instead, directly write the ANSI character into the memory buffer.
             sourcesStream.Seek(11, SeekOrigin.Begin);
-            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in 
+            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in
             sourcesStream.Seek(0, SeekOrigin.Begin);
 
             string result =
             CreateCSharpManifestResourceName.CreateManifestNameImpl
                 (
-                    @"irrelevent",
+                    @"irrelevant",
                     null,
                     true,
                     null,    // Root namespace
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
             string result =
             CreateCSharpManifestResourceName.CreateManifestNameImpl
                 (
-                    @"irrelevent",
+                    @"irrelevant",
                     null,
                     true,
                     null,    // Root namespace
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A dependent class plus there is a culture that was expressed in the metadata of the 
+        /// A dependent class plus there is a culture that was expressed in the metadata of the
         /// item rather than the filename.
         /// </summary>
         [Fact]
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests
                 new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream)
             );
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceNames = t.ManifestResourceNames;
 
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Need to convert any spaces in the directory name of embedded resource files to underscores. 
+        /// Need to convert any spaces in the directory name of embedded resource files to underscores.
         /// Leave spaces in the file name itself alone. That's how Everett did it.
         /// </summary>
         [Fact]
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// The folder part of embedded resource names (not the file name though) needs to be a proper identifier, 
+        /// The folder part of embedded resource names (not the file name though) needs to be a proper identifier,
         /// since that's how Everett used to do this
         /// </summary>
         [Fact]
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
             // with an underscore. Invalid subsequent characters are replaced with an underscore.
             VerifyExpectedManifestResourceName(@"1abc()\pic.bmp", "_1abc__.pic.bmp");
 
-            // if the first character is not a valid id character at all, it's replaced with an underscore instead of 
+            // if the first character is not a valid id character at all, it's replaced with an underscore instead of
             // prepending an underscore to it
             VerifyExpectedManifestResourceName(@"@abc\pic.bmp", "_abc.pic.bmp");
 
@@ -435,14 +435,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        /// 
+        ///
         ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        /// 
+        ///
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  In
         /// the case of:
-        /// 
+        ///
         ///     Form1.ro.resx == DependentUpon ==> Form1.vb
-        /// 
+        ///
         /// we continue to treat "ro" as the culture.
         /// </summary>
         [Fact]
@@ -467,9 +467,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        /// 
+        ///
         ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        /// 
+        ///
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  If
         /// The parent source file doesn't have a class name in it, we just use the culture neutral
         /// filename of the resource file.
@@ -574,7 +574,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -600,7 +600,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -626,7 +626,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
@@ -651,7 +651,7 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.True(success); // "Expected the task to succceed."
+            Assert.True(success); // "Expected the task to succeed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 

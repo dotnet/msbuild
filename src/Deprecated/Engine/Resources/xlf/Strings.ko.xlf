@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="CannotPassMultipleItemsIntoScalarParameter">
         <source>MSB4094: "{0}" is an invalid value for the "{1}" parameter of the "{3}" task. Multiple items cannot be passed into a parameter of type "{2}".</source>
-        <target state="translated">MSB4094: "{0}"은(는) "{3}" 작업의 "{1}" 매개 변수에 사용할 수 없는 값입니다. 여러 개의 항목을 "{2}" 형식의 매개 변수에 전달할 수 없습니다.</target>
+        <target state="translated">MSB4094: "{0}"은(는) "{3}" 작업의 "{1}" 매개 변수에 사용할 수 없는 값입니다. 여러 개의 항목을 "{2}" 형식의 매개 변수로 전달할 수 없습니다.</target>
         <note>{StrBegin="MSB4094: "}
             UE: This error is shown when a project tries to pass multiple items into a task parameter of type ITaskItem (singular).
     </note>
@@ -799,7 +799,7 @@
       </trans-unit>
       <trans-unit id="IllFormedEqualsInCondition">
         <source>MSB4105: Found an unexpected character '{2}' at position {1} in condition "{0}". Did you intend to use "=="?</source>
-        <target state="translated">MSB4105: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다. "=="를 사용하려고 했습니까?</target>
+        <target state="translated">MSB4105: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다. "=="를 사용하려고 했나요?</target>
         <note>{StrBegin="MSB4105: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4105: "{0}" 조건의 {1} 위치에 예기치 않은 '{2}' 문자가 있습니다. "=="를 사용하려고 했습니까?</target>
@@ -817,7 +817,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. '@' 뒤에 여는 괄호가 없습니다. '@' 리터럴을 사용하려면 '%40'을 대신 사용하십시오.</target>
+        <target state="translated">MSB4107: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. '@' 뒤에 여는 괄호가 없습니다. '@' 리터럴을 사용하려면 '%40'을 대신 사용하세요.</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4107: "{0}" 조건의 {1} 위치에 항목 목록이 필요합니다. '@' 뒤에 여는 괄호가 없습니다. '@' 리터럴을 사용하려면 '%40'을 대신 사용하십시오.</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하십시오.</target>
+        <target state="translated">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하세요.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하십시오.</target>
@@ -1822,7 +1822,7 @@
       </trans-unit>
       <trans-unit id="SolutionInvalidSolutionConfiguration">
         <source>MSB4126: The specified solution configuration "{0}" is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") or leave those properties blank to use the default solution configuration.</source>
-        <target state="translated">MSB4126: 지정된 솔루션 구성 "{0}"이(가) 잘못되었습니다. Configuration 및 Platform 속성을 사용하여 올바른 솔루션 구성을 지정(예: MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")하거나 기본 솔루션 구성을 사용하도록 이 속성을 빈 상태로 두십시오.</target>
+        <target state="translated">MSB4126: 지정된 솔루션 구성 "{0}"이(가) 잘못되었습니다. Configuration 및 Platform 속성을 사용하여 올바른 솔루션 구성을 지정(예: MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")하거나 기본 솔루션 구성을 사용하도록 이 속성을 빈 상태로 두세요.</target>
         <note>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4126: 지정된 솔루션 구성 "{0}"이(가) 잘못되었습니다. Configuration 및 Platform 속성을 사용하여 올바른 솔루션 구성을 지정(예: MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU")하거나 기본 솔루션 구성을 사용하도록 이 속성을 빈 상태로 두십시오.</target>
@@ -2321,7 +2321,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 설정 가능한 public 인스턴스 속성인지 확인하십시오.</target>
+        <target state="translated">MSB4064: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 설정 가능한 public 인스턴스 속성인지 확인하세요.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4064: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 설정 가능한 public 인스턴스 속성인지 확인하십시오.</target>
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 가져올 수 있는 public 인스턴스 속성인지 확인하십시오.</target>
+        <target state="translated">MSB4131: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 가져올 수 있는 public 인스턴스 속성인지 확인하세요.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: "{1}" 작업에서 "{0}" 매개 변수를 지원하지 않습니다. 해당 매개 변수가 작업에 있는지 그리고 가져올 수 있는 public 인스턴스 속성인지 확인하십시오.</target>
