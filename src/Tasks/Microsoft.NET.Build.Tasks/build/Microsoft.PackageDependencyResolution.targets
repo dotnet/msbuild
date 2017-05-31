@@ -157,14 +157,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <!-- Verify that the assets file has a target for the right framework.  Otherwise, if we restored for the
          wrong framework, we'd end up finding no references to pass to the compiler, and we'd get a ton of
-         compile errors.
-         
-         The RuntimeIdentifier isn't used to select references to pass to the compiler, so we don't include
-         it here. -->
+         compile errors. -->
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
-      RuntimeIdentifier="" />
+      RuntimeIdentifier="$(RuntimeIdentifier)" />
     
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
