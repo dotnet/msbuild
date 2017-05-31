@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.AspNetCore.Authentication.Extensions;
+#if (IndividualLocalAuth)
+using Company.WebApplication1.Data;
+using Company.WebApplication1.Models;
+using Company.WebApplication1.Services;
 #endif
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -11,14 +13,17 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
-using Microsoft.AspNetCore.Diagnostics.Identity.Service;
+using Microsoft.AspNetCore.Identity;
 #endif
 #if (OrganizationalAuth || IndividualAuth)
 using Microsoft.AspNetCore.Http;
 #endif
+#if (IndividualAuth)
+using Microsoft.EntityFrameworkCore;
+#endif
 using Microsoft.AspNetCore.Hosting;
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.AspNetCore.Rewrite;
+#if (OrganizationalAuth || IndividualB2CAuth)
+using Microsoft.AspNetCore.Authentication.Extensions;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,15 +52,32 @@ namespace Company.WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
 #if (IndividualLocalAuth)
-            services.AddIdentityServiceAuthentication();
+            services.AddDbContext<ApplicationDbContext>(options =>
+  #if (UseLocalDB)
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+  #else
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+  #endif
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 #elseif (IndividualB2CAuth)
             services.AddAzureAdB2CAuthentication();
 #elseif (OrganizationalAuth)
             services.AddAzureAdAuthentication();
 #endif
-#if (OrganizationalAuth || IndividualAuth)
+#if (IndividualLocalAuth)
 
+            // Add application services.
+            services.AddTransient<IEmailSender, AuthMessageSender>();
+            services.AddTransient<ISmsSender, AuthMessageSender>();
+#elseif (OrganizationalAuth)
+
+            services.AddAuthentication(
+                SharedOptions => SharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 #endif
+
             services.AddMvc();
         }
 
@@ -70,7 +92,6 @@ namespace Company.WebApplication1
 #endif
 #if (IndividualLocalAuth)
                 app.UseDatabaseErrorPage();
-                app.UseDevelopmentCertificateErrorPage(Configuration);
 #endif
             }
             else
@@ -81,8 +102,6 @@ namespace Company.WebApplication1
             app.UseStaticFiles();
 
 #if (OrganizationalAuth || IndividualAuth)
-            app.UseRewriter(new RewriteOptions().AddIISUrlRewrite(env.ContentRootFileProvider, "urlRewrite.config"));
-
             app.UseAuthentication();
 
 #endif

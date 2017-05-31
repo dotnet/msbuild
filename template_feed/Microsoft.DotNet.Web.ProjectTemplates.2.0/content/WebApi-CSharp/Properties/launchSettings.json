@@ -32,19 +32,11 @@
     "Company.WebApplication1": {
       "commandName": "Project",
       "launchBrowser": true,
-//#if (RequiresHttps)
-      "launchUrl": "https://localhost:43434/",
-//#else
       "launchUrl": "api/values",
-//#endif
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-//#if (RequiresHttps)
-      "applicationUrl": "http://localhost:55555/"
-//#else
-      "applicationUrl": "https://localhost:43434/"
-//#endif
+      "applicationUrl": "http://localhost:5000/"
     }
   }
 }
