@@ -536,25 +536,29 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "EmptyTargetFramework")
                 .WithSource()
-                .WithProjectChanges(project => 
+                .WithProjectChanges(project =>
                 {
                     project.Root
                         .Elements("PropertyGroup")
                         .Elements("TargetFramework")
                         .Single()
                         .SetValue("");
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+                });
 
+            var restoreCommand = testAsset.GetRestoreCommand(Log, "TestLibrary");
+            
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
 
-            buildCommand
-                .Execute()
-                .Should()
-                .Fail()
-                .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
-                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
+            foreach (var command in new TestCommand[] { restoreCommand, buildCommand })
+            {
+                command
+                    .Execute()
+                    .Should()
+                    .Fail()
+                    .And.HaveStdOutContaining("The TargetFramework value ''") // new deliberate error
+                    .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
+            }                
         }
 
         [Theory]
