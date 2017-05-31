@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-       [Fact]
+        [Fact]
         public void It_builds_the_library_twice_in_a_row()
         {
             var testAsset = _testAssetsManager
@@ -530,35 +530,105 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [Fact]
-        public void It_fails_gracefully_if_targetframework_is_empty()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_is_empty(bool useSolution)
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "EmptyTargetFramework")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    project.Root
-                        .Elements("PropertyGroup")
-                        .Elements("TargetFramework")
-                        .Single()
-                        .SetValue("");
-                });
+            string targetFramework = "";
+            TestInvalidTargetFramework("EmptyTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' was not recognized");
+        }
 
-            var restoreCommand = testAsset.GetRestoreCommand(Log, "TestLibrary");
-            
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_is_invalid(bool useSolution)
+        {
+            string targetFramework = "notaframework";
+            TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' was not recognized");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
+        {
+            string targetFramework = "netcoreapp2.0;net461";
+            TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
+        }
+
+        private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
+        {
+            var testProject = new TestProject()
+            {
+                Name = testName,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            string identifier = useSolution ? "_Solution" : "";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
+
+            if (targetFramework.Contains(";"))
+            {
+                //  The TestProject class doesn't differentiate between TargetFramework and TargetFrameworks, and helpfully selects
+                //  which property to use based on whether there's a semicolon.
+                //  For this test, we need to override this behavior
+                testAsset = testAsset.WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Element(ns + "PropertyGroup")
+                        .Element(ns + "TargetFrameworks")
+                        .Name = ns + "TargetFramework";
+                });
+            }
+
+            TestCommand restoreCommand;
+            TestCommand buildCommand;
+
+            if (useSolution)
+            {
+                var dotnetCommand = new DotnetCommand(Log)
+                {
+                    WorkingDirectory = testAsset.TestRoot
+                };
+
+                dotnetCommand.Execute("new", "sln")
+                    .Should()
+                    .Pass();
+
+                var relativePathToProject = Path.Combine(testProject.Name, testProject.Name + ".csproj");
+                dotnetCommand.Execute($"sln", "add", relativePathToProject)
+                    .Should()
+                    .Pass();
+
+                var relativePathToSln = testProject.Name + identifier + ".sln";
+
+                restoreCommand = testAsset.GetRestoreCommand(Log, relativePathToSln);
+                buildCommand = new BuildCommand(Log, testAsset.TestRoot, relativePathToSln);
+            }
+            else
+            {
+                restoreCommand = testAsset.GetRestoreCommand(Log, testProject.Name);
+                buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            }
 
             foreach (var command in new TestCommand[] { restoreCommand, buildCommand })
             {
+                //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
+                //  See https://github.com/NuGet/Home/issues/5309
                 command
-                    .Execute()
+                    .Execute("/p:RestoreContinueOnError=ErrorAndContinue")
                     .Should()
                     .Fail()
-                    .And.HaveStdOutContaining("The TargetFramework value ''") // new deliberate error
-                    .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
-            }                
+                    .And
+                    .HaveStdOutContaining(expectedOutput)
+                    .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version when TargetFramework was blank;
+            }
         }
 
         [Theory]
