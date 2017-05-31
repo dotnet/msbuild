@@ -1,0 +1,111 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <PackageId>Microsoft.NET.Sdk</PackageId>
+    <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
+    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <PackageOutputPath>$(OutputPath)Packages\</PackageOutputPath>
+    <PackageLayoutOutputPath>$(OutputPath)Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <OutputPath>$(PackageLayoutOutputPath)tools\</OutputPath>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <PackageReference>
+      <PrivateAssets>All</PrivateAssets>
+      <Publish>true</Publish>
+    </PackageReference>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\BuildErrorException.cs">
+      <Link>BuildErrorException.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\ConflictResolution\*.cs">
+      <Link>ConflictResolution\%(FileName)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticsHelper.cs">
+      <Link>DiagnosticsHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticMessageSeverity.cs">
+      <Link>DiagnosticMessageSeverity.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\ItemUtilities.cs">
+      <Link>ItemUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\GetDependsOnNETStandard*.cs">
+      <Link>%(FileName)%(Exetnsion)</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\MetadataKeys.cs">
+      <Link>MetadataKeys.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\NuGetUtils.cs">
+      <Link>NuGetUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\TaskBase.cs">
+      <Link>TaskBase.cs</Link>
+    </Compile>
+    <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.resx">
+      <Link>Resources\%(FileName)%(Extension)</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.*.resx">
+      <Link>Resources\%(FileName)%(Extension)</Link>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.Designer.cs">
+      <Link>Resources\%(FileName)%(Extension)</Link>
+      <DesignTime>true</DesignTime>
+      <AutoGen>true</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+
+  </ItemGroup>
+
+  <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <LayoutFile Include="@(None)">
+        <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
+      </LayoutFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyAdditionalFilesToLayout" Condition="'$(TargetFramework)' == ''" DependsOnTargets="PrepareAdditionalFilesToLayout" AfterTargets="Build" Inputs="@(LayoutFile)" Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
+    <ItemGroup>
+      <Content Include="$(PackageLayoutOutputPath)**\*" Exclude="$(PackageLayoutOutputPath)**\*.pdb" PackagePath="\" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
+  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
+  <Target Name="FilterCopyLocal" DependsOnTargets="RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
+    <ItemGroup>
+      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
+      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
+    </ItemGroup>
+  </Target>
+
+  <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
+
+</Project>
