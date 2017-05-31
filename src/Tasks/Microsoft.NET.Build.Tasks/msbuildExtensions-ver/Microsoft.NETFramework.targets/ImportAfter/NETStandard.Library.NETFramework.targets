@@ -1,0 +1,3 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\NETStandard.Library.NETFramework\NETStandard.Library.NETFramework.targets" />
+</Project>

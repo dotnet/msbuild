@@ -86,8 +86,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var corelibLocation = typeof(object).GetTypeInfo().Assembly.Location;
             var corelibFolder = Path.GetDirectoryName(corelibLocation);
 
-            // do our best to try and find it
-            var coreclrLocation = Directory.EnumerateFiles(corelibFolder, "*coreclr*").FirstOrDefault();
+            // do our best to try and find it, intentionally only use the windows name since linux will not be a PE.
+            var coreclrLocation = Directory.EnumerateFiles(corelibFolder, "coreclr.dll").FirstOrDefault();
 
             // if we can't find it, skip the test
             if (coreclrLocation != null)

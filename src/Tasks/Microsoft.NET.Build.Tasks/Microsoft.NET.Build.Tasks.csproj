@@ -29,6 +29,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetVersion)" ExcludeAssets="All" />
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
   </ItemGroup>
@@ -37,6 +38,8 @@
     <Compile Include="**\*.cs" />
     <None Include="build\**\*" PackagePath="build\" />
     <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
+    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
+    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -54,6 +57,9 @@
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+    <PropertyGroup>
+      <_netstandardLibraryNetFrameworkPath>$(NUGET_PACKAGES)\NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_netstandardLibraryNetFrameworkPath>
+    </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
@@ -61,6 +67,10 @@
       <PackFile Include="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\**\*" Exclude="$(NUGET_PACKAGES)\nuget.build.tasks.pack\$(NuGetVersion)\*" />
       <LayoutFile Include="@(PackFile)">
         <TargetPath>..\NuGet.Build.Tasks.Pack\%(PackFile.RecursiveDir)%(PackFile.Filename)%(PackFile.Extension)</TargetPath>
+      </LayoutFile>
+      <NetStandardNetFxFile Include="$(_netstandardLibraryNetFrameworkPath)\**\*" Exclude="$(_netstandardLibraryNetFrameworkPath)\**\*.props;$(_netstandardLibraryNetFrameworkPath)\**\*.targets" />
+      <LayoutFile Include="@(NetStandardNetFxFile)">
+        <TargetPath>msbuildExtensions\NETStandard.Library.NETFramework\%(NetStandardNetFxFile.RecursiveDir)%(NetStandardNetFxFile.FileName)%(NetStandardNetFxFile.Extension)</TargetPath>
       </LayoutFile>
     </ItemGroup>
   </Target>
