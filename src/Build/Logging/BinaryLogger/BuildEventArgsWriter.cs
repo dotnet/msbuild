@@ -231,14 +231,29 @@ namespace Microsoft.Build.Logging
                 Write((CriticalBuildMessageEventArgs)e);
                 return;
             }
-            else if (e is TaskCommandLineEventArgs)
+
+            if (e is TaskCommandLineEventArgs)
             {
                 Write((TaskCommandLineEventArgs)e);
                 return;
             }
 
+            if (e is ProjectImportedEventArgs)
+            {
+                Write((ProjectImportedEventArgs)e);
+                return;
+            }
+
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
+        }
+
+        private void Write(ProjectImportedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ProjectImported);
+            WriteMessageFields(e);
+            WriteOptionalString(e.ImportedProjectFile);
+            WriteOptionalString(e.UnexpandedProject);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
