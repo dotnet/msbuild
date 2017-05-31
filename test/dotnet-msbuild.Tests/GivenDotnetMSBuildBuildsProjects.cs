@@ -190,10 +190,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     {
         private readonly Func<bool> _exists;
 
+        public bool UnauthorizedAccess => true;
+
         public MockNuGetCacheSentinel(Func<bool> exists = null)
         {
             _exists = exists ?? (() => true);
         }
+
         public void Dispose()
         {
         }

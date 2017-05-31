@@ -12,5 +12,7 @@ namespace Microsoft.DotNet.Configurer
         bool Exists();
 
         void CreateIfNotExists();
+
+        bool UnauthorizedAccess { get; }
     }
 }

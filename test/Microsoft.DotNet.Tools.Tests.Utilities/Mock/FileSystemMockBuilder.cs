@@ -138,6 +138,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 return _files.Keys.Any(k => k.StartsWith(path));
             }
+
+            public void CreateDirectory(string path)
+            {
+                _files.Add(path, path);
+            }
         }
 
         private class TemporaryDirectoryMock : ITemporaryDirectoryMock

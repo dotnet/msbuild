@@ -188,7 +188,8 @@ namespace Microsoft.DotNet.Cli
                     nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     environmentProvider,
-                    Reporter.Output);
+                    Reporter.Output
+                    cliFallbackFolderPathCalculator.CliFallbackFolderPath);
 
                 dotnetConfigurer.Configure();
             }

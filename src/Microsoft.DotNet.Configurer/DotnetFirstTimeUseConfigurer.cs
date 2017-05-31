@@ -14,19 +14,22 @@ namespace Microsoft.DotNet.Configurer
         private INuGetCachePrimer _nugetCachePrimer;
         private INuGetCacheSentinel _nugetCacheSentinel;
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+        private string _cliFallbackFolderPath;
 
         public DotnetFirstTimeUseConfigurer(
             INuGetCachePrimer nugetCachePrimer,
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IEnvironmentProvider environmentProvider,
-            IReporter reporter)
+            IReporter reporter,
+            string cliFallbackFolderPath)
         {
             _nugetCachePrimer = nugetCachePrimer;
             _nugetCacheSentinel = nugetCacheSentinel;
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
             _environmentProvider = environmentProvider;
             _reporter = reporter;
+            _cliFallbackFolderPath = cliFallbackFolderPath;
         }
 
         public void Configure()
@@ -40,6 +43,10 @@ namespace Microsoft.DotNet.Configurer
             {
                 PrintNugetCachePrimeMessage();
                 _nugetCachePrimer.PrimeCache();
+            }
+            else if (_nugetCacheSentinel.UnauthorizedAccess)
+            {
+                PrintUnauthorizedAccessMessage();
             }
         }
 
@@ -55,12 +62,18 @@ namespace Microsoft.DotNet.Configurer
 
         private void PrintFirstTimeUseNotice()
         {
-            string firstTimeUseWelcomeMessage = LocalizableStrings.FirstTimeWelcomeMessage;
-
             _reporter.WriteLine();
-            _reporter.WriteLine(firstTimeUseWelcomeMessage);
+            _reporter.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
 
             _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        }
+
+        private void PrintUnauthorizedAccessMessage()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(string.Format(
+                LocalizableStrings.UnauthorizedAccessMessage,
+                _cliFallbackFolderPath));
         }
 
         private bool ShouldPrimeNugetCache()

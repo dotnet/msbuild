@@ -12,16 +12,9 @@ namespace Microsoft.DotNet.Configurer
 {
     public class CliFallbackFolderPathCalculator
     {
-        public string CliFallbackFolderPath
-        {
-            get
-            {
-                string profileDir = Environment.GetEnvironmentVariable(
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME");
-
-                return Path.Combine(profileDir, ".dotnet", "NuGetFallbackFolder");
-            }
-        }
+        public string CliFallbackFolderPath =>
+            Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
+            Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
 
         public string NuGetUserSettingsDirectory =>
             NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);

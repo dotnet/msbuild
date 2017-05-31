@@ -61,9 +61,9 @@ namespace Microsoft.DotNet.Configurer
 
             var nuGetFallbackFolder = _cliFallbackFolderPathCalculator.CliFallbackFolderPath;
 
-            _nuGetConfig.AddCliFallbackFolder(nuGetFallbackFolder);
-
             _nugetPackagesArchiver.ExtractArchive(nuGetFallbackFolder);
+
+            _nuGetConfig.AddCliFallbackFolder(nuGetFallbackFolder);
 
             _nuGetCacheSentinel.CreateIfNotExists();
         }
