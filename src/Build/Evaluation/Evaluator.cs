@@ -34,6 +34,7 @@ using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -734,7 +735,7 @@ namespace Microsoft.Build.Evaluation
             _data.EvaluationID = NextEvaluationID();
             _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationID);
 
-            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !String.Equals("1", Environment.GetEnvironmentVariable("MSBUILDDONOTLOGIMPORTS"));
+            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !Traits.Instance.EscapeHatches.DoNotLogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
