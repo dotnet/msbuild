@@ -1003,17 +1003,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// An arbitrary number that changes when this project reevaluates.
-        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
-        /// their previously stored value to find out, and if so perhaps decide to update their own state.
-        /// Note that the number may not increase monotonically.
-        /// Unloading a project does not reset the number, so it does not break the guarantee.
-        /// 
-        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
-        /// evaluation logging events back to the Project instance.
-        /// 
+        /// Obsolete. Use <see cref="LastEvaluationId"/> instead.
         /// </summary>
-        [Obsolete("Use Project.LastEvaluationID instead")] // deprecated added in 15.3
+        // marked as obsolete in 15.3
         public int EvaluationCounter => LastEvaluationId;
 
         /// <summary>
