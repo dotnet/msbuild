@@ -409,7 +409,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItSkipsLaunchProfilesWhenThereIsNoUsableDefault()
         {
-            var testAppName = "AppWithLaunchSettingsWithoutDefault";
+            var testAppName = "AppWithLaunchSettingsNoDefault";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
