@@ -134,7 +134,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework=&apos;{0}&apos;. They must be specified explicitly..
+        ///   Looks up a localized string similar to The TargetFramework value &apos;{0}&apos; was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly..
         /// </summary>
         internal static string CannotInferTargetFrameworkIdentiferAndVersion {
             get {
@@ -557,7 +557,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid value for the &apos;TargetFramework&apos; property. To multi-target, use the &apos;TargetFrameworks&apos; property instead..
+        ///   Looks up a localized string similar to The TargetFramework value &apos;{0}&apos; is not valid. To multi-target, use the &apos;TargetFrameworks&apos; property instead..
         /// </summary>
         internal static string TargetFrameworkWithSemicolon {
             get {
