@@ -245,13 +245,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="_SetupStageForCrossgen"
-          DependsOnTargets="_GetCrossgenProps;_FilterOutFXFromResolvedCandidates;_PopulateUnFilteredResolvedCandidates">
+          DependsOnTargets="_GetCrossgenProps;">
     <PropertyGroup>
       <_RuntimeRefDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimeref"))</_RuntimeRefDir>  <!-- flat app managed assemblies -->
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
       <_RuntimeSymbolsDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimesymbols"))</_RuntimeSymbolsDir>
     </PropertyGroup>
-
+    
+    <ItemGroup>
+      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
+    </ItemGroup>
+    
     <MakeDir Directories="$(_RuntimeOptimizedDir)"/>
     <MakeDir Directories="$(_RuntimeSymbolsDir)"
              Condition="'$(CreateProfilingSymbols)' == 'true'" />
@@ -268,33 +272,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
 
-  </Target>
-
-  <!--
-    ============================================================
-                                        _FilterOutFXFromResolvedCandidates
-    ============================================================
-    -->
-  
-  <Target Name="_FilterOutFXFromResolvedCandidates"
-          Condition="$(SkipRemovingSystemFiles) != 'true' ">
-
-    <ItemGroup>
-      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" Condition="!Exists('$(_NetCoreRefDir)$(DirectorySeparatorChar)%(FileName)%(Extension)')"/>
-    </ItemGroup>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _PopulateUnFilteredResolvedCandidates
-    ============================================================
-    -->
-  <Target Name="_PopulateUnFilteredResolvedCandidates"
-          Condition="$(SkipRemovingSystemFiles) == 'true' ">
-
-   <ItemGroup>
-      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
-    </ItemGroup>
   </Target>
 
   <!--

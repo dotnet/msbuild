@@ -76,7 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <PackageReferencesToStore Include="$(RestoreProj)">
-        <Properties>
+        <AdditionalProperties>
           StorePackageName=%(PackageReference.Identity);
           StorePackageVersion=%(PackageReference.Version);
           ComposeWorkingDir=$(ComposeWorkingDir);
@@ -89,28 +89,40 @@ Copyright (c) .NET Foundation. All rights reserved.
           SkipUnchangedFiles=$(SkipUnchangedFiles);
           PreserveStoreLayout=$(PreserveStoreLayout);
           CreateProfilingSymbols=$(CreateProfilingSymbols);
-          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)
-        </Properties>
+          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir);
+          DisableImplicitFrameworkReferences=false;
+        </AdditionalProperties>
       </PackageReferencesToStore>
     </ItemGroup>
 
+<!-- Restore phase -->
     <MSBuild Projects="@(PackageReferencesToStore)"
-                 Targets="StoreWorker"
+                 Targets="RestoreForComposeStore"
+                 Properties="EvaluationIteration=1;"
+                 BuildInParallel="$(BuildInParallel)"
+                 ContinueOnError="WarnAndContinue">
+    </MSBuild>
+    
+    
+<!-- Resolve phase-->
+    <MSBuild Projects="@(PackageReferencesToStore)"
+                 Targets="StoreResolver"
+                 Properties="EvaluationIteration=2;
+                             MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReference.Identity)_$([System.String]::Copy('%(PackageReference.Version)').Replace('*','-'))\;"
                  BuildInParallel="$(BuildInParallel)"
                  ContinueOnError="WarnAndContinue">
       <Output ItemName="ResolvedPackagesFromMapper" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
 
-  <Target Name="StoreWorker"
+  <Target Name="StoreResolver"
           Returns="@(ResolvedPackagesPublished)"
           DependsOnTargets="PrepforRestoreForComposeStore;
                             StoreWorkerPerformWork"/>
   
   <Target Name="StoreWorkerPerformWork"
-          DependsOnTargets="RestoreForComposeStore;
-                            ComputeAndCopyFilesToStoreDirectory;"
-          Condition="!Exists($(StoreWorkerWorkingDir))" />
+          DependsOnTargets="ComputeAndCopyFilesToStoreDirectory;"
+          Condition="Exists($(StoreWorkerWorkingDir))" />
 
 <!--
     ============================================================
@@ -275,13 +287,15 @@ Copyright (c) .NET Foundation. All rights reserved.
         Overwrite="true" />
   </Target>
 
-  <Target Name="PrepforRestoreForComposeStore">
+  <Target Name="PrepforRestoreForComposeStore"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary">
 
     <PropertyGroup>
       <StorePackageVersionForFolderName>$(StorePackageVersion.Replace('*','-'))</StorePackageVersionForFolderName>
       <StoreWorkerWorkingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"$(StorePackageName)_$(StorePackageVersionForFolderName)"))</StoreWorkerWorkingDir>
-      <_PackageProjFile>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "Package.csproj"))</_PackageProjFile>
-      <ProjectAssetsFile>$(StoreWorkerWorkingDir)\project.assets.json</ProjectAssetsFile>
+      <_PackageProjFile>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "Restore.csproj"))</_PackageProjFile>
+      <BaseIntermediateOutputPath>$(StoreWorkerWorkingDir)\obj</BaseIntermediateOutputPath>
+      <ProjectAssetsFile>$(BaseIntermediateOutputPath)\project.assets.json</ProjectAssetsFile>
       <_PackageProjContent>
         <![CDATA[
 <Project Sdk="Microsoft.NET.Sdk">
@@ -293,6 +307,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       </_PackageProjContent>
     </PropertyGroup>
     
+    <PropertyGroup>
+      <PackagesToPrune>$(MicrosoftNETPlatformLibrary)</PackagesToPrune>
+      <SelfContained Condition="'$(SelfContained)' == ''">true</SelfContained>
+    </PropertyGroup>
   </Target>
   
   <!--
@@ -304,7 +322,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="RestoreForComposeStore"
-          DependsOnTargets="PrepforRestoreForComposeStore;">
+          DependsOnTargets="PrepforRestoreForComposeStore;"
+          Condition="!Exists($(StoreWorkerWorkingDir))">
     
     <MakeDir Directories="$(StoreWorkerWorkingDir)" />
     
@@ -317,8 +336,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuild Projects="$(_PackageProjFile)"
                  Targets="Restore"
                  Properties="RestoreGraphProjectInput=$(_PackageProjFile);
-                             DisableImplicitFrameworkReferences=true;
-                             RestoreOutputPath=$(StoreWorkerWorkingDir);
+                             RestoreOutputPath=$(BaseIntermediateOutputPath);
                              RuntimeIdentifier=$(RuntimeIdentifier);
                              TargetFramework=$(TargetFramework);"/>
   </Target>
@@ -424,7 +442,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Gathers all the files that need to be copied to the publish directory.
     ============================================================
     -->
-  
+  <UsingTask TaskName="FilterResolvedFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeFilesToStore"
           DependsOnTargets="_ComputeNetPublishAssets;
                             _ComputeCopyToPublishDirectoryItems">
@@ -434,12 +452,21 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
     </PropertyGroup>
 
-    <ItemGroup>
+    <FilterResolvedFiles  AssetsFilePath="$(ProjectAssetsFile)"
+                           ResolvedFiles ="@(ResolvedAssembliesToPublish)"
+                           PackagesToPrune="$(PackagesToPrune)"
+                           TargetFramework="$(TargetFrameworkMoniker)"
+                           RuntimeIdentifier="$(RuntimeIdentifier)"
+                           IsSelfContained="$(SelfContained)" >
+      <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
+      <Output TaskParameter="PublishedPackges" ItemName="PackagesThatWereResolved" />
+    </FilterResolvedFiles>
 
-      <!-- Copy all the assemblies -->
-      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
-      </ResolvedFileToPublish>
+    <ItemGroup>
+      <ResolvedPackagesPublished Include="@(PackagesThatWereResolved)"
+                                    Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
     </ItemGroup>
+    
   </Target>
 
 </Project>

@@ -16,7 +16,6 @@ namespace Microsoft.NET.Build.Tasks
     public class ResolvePublishAssemblies : TaskBase
     {
         private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
-        private readonly List<ITaskItem> _packagesResolved = new List<ITaskItem>();
 
         [Required]
         public string ProjectPath { get; set; }
@@ -46,12 +45,6 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] AssembliesToPublish
         {
             get { return _assembliesToPublish.ToArray(); }
-        }
-
-        [Output]
-        public ITaskItem[] PackagesResolved
-        {
-            get { return _packagesResolved.ToArray(); }
         }
 
         protected override void ExecuteCore()
@@ -90,15 +83,11 @@ namespace Microsoft.NET.Build.Tasks
                 TaskItem item = new TaskItem(resolvedAssembly.SourcePath);
                 item.SetMetadata("DestinationSubPath", resolvedAssembly.DestinationSubPath);
                 item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
+                item.SetMetadata(MetadataKeys.PackageName, resolvedAssembly.Package.Id.ToString().ToLower());
+                item.SetMetadata(MetadataKeys.PackageVersion, resolvedAssembly.Package.Version.ToString().ToLower());
                 _assembliesToPublish.Add(item);
             }
 
-            foreach (var resolvedPkg in assemblyResolver.GetResolvedPackages())
-            {
-                TaskItem item = new TaskItem(resolvedPkg.Id);
-                item.SetMetadata("Version", resolvedPkg.Version.ToString());
-                _packagesResolved.Add(item);
-            }
         }
     }
 }
