@@ -461,7 +461,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _ParseTargetManifestFiles;
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
-                            _HandlePublishFileConflicts"
+                            _HandlePublishFileConflicts;
+                            _ComputeReferenceAssemblies"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>
@@ -478,6 +479,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       ReferencePaths="@(ReferencePath)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
+                      ReferenceAssemblies="@(_ReferenceAssemblies)"
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
