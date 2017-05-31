@@ -1013,31 +1013,28 @@ namespace Microsoft.Build.Tasks
 
             reference.FrameworkNameAttribute = frameworkName;
 
-            List<AssemblyNameExtension> dependencies = new List<AssemblyNameExtension>();
+            List<AssemblyNameExtension> dependencies = new List<AssemblyNameExtension>(dependentAssemblies?.Length ?? 0);
 
             if (dependentAssemblies != null && dependentAssemblies.Length > 0)
             {
                 // Re-map immediately so that to the sytem we actually got the remapped version when reading the manifest.
                 for (int i = 0; i < dependentAssemblies.Length; i++)
                 {
-                    if (_installedAssemblies != null)
+                    // This will return a clone of the remapped assemblyNameExtension so its ok to party on it.
+                    AssemblyNameExtension remappedExtension = _installedAssemblies?.RemapAssemblyExtension(dependentAssemblies[i]);
+                    if (remappedExtension != null)
                     {
-                        // This will return a clone of the remapped assemblyNameExtension so its ok to party on it.
-                        AssemblyNameExtension remappedExtension = _installedAssemblies.RemapAssemblyExtension(dependentAssemblies[i]);
-                        if (remappedExtension != null)
+                        AssemblyNameExtension originalExtension = dependentAssemblies[i];
+                        AssemblyNameExtension existingExtension = dependencies.Find(x => x.Equals(remappedExtension));
+                        if (existingExtension != null)
                         {
-                            AssemblyNameExtension originalExtension = dependentAssemblies[i];
-                            AssemblyNameExtension existingExtension = dependencies.Find(x => x.Equals(remappedExtension));
-                            if (existingExtension != null)
-                            {
-                                existingExtension.AddRemappedAssemblyName(originalExtension.CloneImmutable());
-                                continue;
-                            }
-                            else
-                            {
-                                dependentAssemblies[i] = remappedExtension;
-                                dependentAssemblies[i].AddRemappedAssemblyName(originalExtension.CloneImmutable());
-                            }
+                            existingExtension.AddRemappedAssemblyName(originalExtension.CloneImmutable());
+                            continue;
+                        }
+                        else
+                        {
+                            dependentAssemblies[i] = remappedExtension;
+                            dependentAssemblies[i].AddRemappedAssemblyName(originalExtension.CloneImmutable());
                         }
                     }
 
@@ -1045,7 +1042,7 @@ namespace Microsoft.Build.Tasks
                     // We will remove the dependency to mscorlib from the list of dependencies so it is not used for resolution or unification.
                     bool isMscorlib = IsPseudoAssembly(dependentAssemblies[i].Name);
 
-                    if (!isMscorlib || (isMscorlib && dependentAssemblies[i].Version.Major != 255))
+                    if (!isMscorlib || dependentAssemblies[i].Version.Major != 255)
                     {
                         dependencies.Add(dependentAssemblies[i]);
                     }
