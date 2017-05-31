@@ -32,6 +32,6 @@
   <!-- infrastructure and test only dependencies -->
   <PropertyGroup>
     <VersionToolsVersion>1.0.27-prerelease-01611-04</VersionToolsVersion>
-    <DotnetDebToolVersion>2.0.0-preview1-001877</DotnetDebToolVersion>
+    <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
   </PropertyGroup>
 </Project>
