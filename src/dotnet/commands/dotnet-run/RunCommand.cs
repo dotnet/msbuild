@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public string LaunchProfile { get; private set; }
         public bool NoLaunchProfile { get; private set; }
-
+        private bool UseLaunchProfile => !NoLaunchProfile;
 
         public int Start()
         {
@@ -37,39 +37,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             ICommand runCommand = GetRunCommand();
-
-            if (!NoLaunchProfile)
-            {
-                var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
-                var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
-                if (File.Exists(launchSettingsPath))
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
-                    string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
-
-                    try
-                    {
-                        var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
-                        var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, LaunchProfile);
-                        if (!applyResult.Success)
-                        {                            
-                            //Error that the launch profile couldn't be applied
-                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
-                        }
-                    }
-                    catch (IOException ex)
-                    {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName).Bold().Red());
-                        Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                        return -1;
-                    }
-                }
-                else if (!string.IsNullOrEmpty(LaunchProfile))
-                {
-                    //Error that the launch profile couldn't be found
-                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
-                }
-            }
+            ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
 
             return runCommand
                 .Execute()
@@ -110,6 +78,42 @@ namespace Microsoft.DotNet.Tools.Run
                 noLaunchProfile ?? this.NoLaunchProfile,
                 args ?? this.Args
             );
+        }
+
+        private void ApplyLaunchProfileSettingsIfNeeded(ref ICommand runCommand)
+        {
+            if (UseLaunchProfile)
+            {
+                var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
+                var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
+                if (File.Exists(launchSettingsPath))
+                {
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
+                    string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
+
+                    try
+                    {
+                        var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
+                        var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, LaunchProfile);
+                        if (!applyResult.Success)
+                        {                            
+                            //Error that the launch profile couldn't be applied
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName).Bold().Red());
+                        Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                        return -1;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(LaunchProfile))
+                {
+                    //Error that the launch profile couldn't be found
+                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
+                }
+            }
         }
 
         private void EnsureProjectIsBuilt()
