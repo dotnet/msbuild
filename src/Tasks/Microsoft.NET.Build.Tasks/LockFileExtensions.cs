@@ -12,6 +12,33 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime)
+        {
+            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
+
+            if (lockFileTarget == null)
+            {
+                string frameworkString = framework.DotNetFrameworkName;
+                string targetMoniker = string.IsNullOrEmpty(runtime) ?
+                    frameworkString :
+                    $"{frameworkString}/{runtime}";
+
+                string message;
+                if (string.IsNullOrEmpty(runtime))
+                {
+                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                }
+                else
+                {
+                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                }
+
+                throw new BuildErrorException(message);
+            }
+
+            return lockFileTarget;
+        }
+
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile,
             NuGetFramework framework,
@@ -28,17 +55,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new ArgumentNullException(nameof(framework));
             }
 
-            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
-
-            if (lockFileTarget == null)
-            {
-                string frameworkString = framework.DotNetFrameworkName;
-                string targetMoniker = string.IsNullOrEmpty(runtime) ?
-                    frameworkString :
-                    $"{frameworkString}/{runtime}";
-
-                throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
-            }
+            var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
             bool isFrameworkDependent = platformLibrary != null && (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
