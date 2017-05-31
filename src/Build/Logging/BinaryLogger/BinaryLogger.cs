@@ -17,7 +17,7 @@ namespace Microsoft.Build.Logging
     public sealed class BinaryLogger : ILogger
     {
         // version 2: 
-        //   - new BuildEventContext.EvaluationID
+        //   - new BuildEventContext.EvaluationId
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         internal const int FileFormatVersion = 2;
 

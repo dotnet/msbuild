@@ -99,7 +99,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Each evaluation has a unique ID.
         /// </summary>
-        private static int s_evaluationID = BuildEventContext.InvalidEvaluationID;
+        private static int s_evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
         /// Expander for evaluating conditions
@@ -727,10 +727,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private IDictionary<string, object> Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrow(_data.EvaluationID == BuildEventContext.InvalidEvaluationID, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+            ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
-            _data.EvaluationID = NextEvaluationID();
-            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationID);
+            _data.EvaluationId = NextEvaluationId();
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
@@ -2841,7 +2841,7 @@ namespace Microsoft.Build.Evaluation
             return sb.ToString();
         }
 
-        private static int NextEvaluationID() => Interlocked.Increment(ref s_evaluationID);
+        private static int NextEvaluationId() => Interlocked.Increment(ref s_evaluationId);
     }
 
     /// <summary>

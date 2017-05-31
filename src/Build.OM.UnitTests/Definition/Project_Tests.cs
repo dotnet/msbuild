@@ -1357,25 +1357,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reevaluation should update the evaluation counter.
         /// </summary>
         [Fact]
-        public void LastEvaluationID()
+        public void LastEvaluationId()
         {
             Project project = new Project();
-            int last = project.LastEvaluationID;
+            int last = project.LastEvaluationId;
 
             project.ReevaluateIfNecessary();
-            Assert.Equal(project.LastEvaluationID, last);
-            last = project.LastEvaluationID;
+            Assert.Equal(project.LastEvaluationId, last);
+            last = project.LastEvaluationId;
 
             project.SetProperty("p", "v");
             project.ReevaluateIfNecessary();
-            Assert.NotEqual(project.LastEvaluationID, last);
+            Assert.NotEqual(project.LastEvaluationId, last);
         }
 
         /// <summary>
         /// Unload should not reset the evaluation counter.
         /// </summary>
         [Fact]
-        public void LastEvaluationIDAndUnload()
+        public void LastEvaluationIdAndUnload()
         {
             string path = null;
 
@@ -1385,12 +1385,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement.Create().Save(path);
 
                 Project project = new Project(path);
-                int last = project.LastEvaluationID;
+                int last = project.LastEvaluationId;
 
                 project.ProjectCollection.UnloadAllProjects();
 
                 project = new Project(path);
-                Assert.NotEqual(project.LastEvaluationID, last);
+                Assert.NotEqual(project.LastEvaluationId, last);
             }
             finally
             {
@@ -1414,25 +1414,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 import.Save();
 
                 Project project = new Project();
-                int last = project.LastEvaluationID;
+                int last = project.LastEvaluationId;
 
                 project.Xml.AddImport(path);
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.LastEvaluationID, last);
-                last = project.LastEvaluationID;
+                Assert.NotEqual(project.LastEvaluationId, last);
+                last = project.LastEvaluationId;
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.LastEvaluationID, last);
+                Assert.Equal(project.LastEvaluationId, last);
 
                 import.AddProperty("p", "v");
                 Assert.Equal(true, project.IsDirty);
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.LastEvaluationID, last);
-                last = project.LastEvaluationID;
+                Assert.NotEqual(project.LastEvaluationId, last);
+                last = project.LastEvaluationId;
                 Assert.Equal("v", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.LastEvaluationID, last);
+                Assert.Equal(project.LastEvaluationId, last);
             }
             finally
             {
@@ -3809,29 +3809,29 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void ProjectInstanceShouldInitiallyHaveSameEvaluationIDAsTheProjectItCameFrom()
+        public void ProjectInstanceShouldInitiallyHaveSameEvaluationIdAsTheProjectItCameFrom()
         {
             using (var env = TestEnvironment.Create())
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
                 var project = new Project(null, null, projectCollection);
-                var initialEvaluationID = project.LastEvaluationID;
+                var initialEvaluationId = project.LastEvaluationId;
 
                 var projectInstance = project.CreateProjectInstance();
 
-                Assert.NotEqual(BuildEventContext.InvalidEvaluationID, initialEvaluationID);
-                Assert.Equal(initialEvaluationID, projectInstance.EvaluationID);
+                Assert.NotEqual(BuildEventContext.InvalidEvaluationId, initialEvaluationId);
+                Assert.Equal(initialEvaluationId, projectInstance.EvaluationId);
 
                 // trigger a new evaluation which increments the evaluation ID in the Project
                 project.AddItem("foo", "bar");
                 project.ReevaluateIfNecessary();
 
-                Assert.NotEqual(initialEvaluationID, project.LastEvaluationID);
-                Assert.Equal(initialEvaluationID, projectInstance.EvaluationID);
+                Assert.NotEqual(initialEvaluationId, project.LastEvaluationId);
+                Assert.Equal(initialEvaluationId, projectInstance.EvaluationId);
 
                 var newProjectInstance = project.CreateProjectInstance();
-                Assert.Equal(project.LastEvaluationID, newProjectInstance.EvaluationID);
+                Assert.Equal(project.LastEvaluationId, newProjectInstance.EvaluationId);
             }
         }
 
