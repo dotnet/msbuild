@@ -13,12 +13,12 @@ namespace Microsoft.Build.BackEnd.Components.Logging
     /// </summary>
     internal class EvaluationLoggingContext : LoggingContext
     {
-        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, int evaluationID) : base(
+        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext eventContext, int evaluationId) : base(
             loggingService,
             new BuildEventContext(
                 eventContext.SubmissionId,
                 eventContext.NodeId,
-                evaluationID,
+                evaluationId,
                 eventContext.ProjectInstanceId,
                 eventContext.ProjectContextId,
                 eventContext.TargetId,

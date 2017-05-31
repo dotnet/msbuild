@@ -92,18 +92,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void AllEvaluationEventsShouldHaveAnEvaluationID()
+        public void AllEvaluationEventsShouldHaveAnEvaluationId()
         {
             AssertLoggingEvents(
                 (project, mockLogger) =>
                 {
-                    var evaluationID = project.LastEvaluationID;
+                    var evaluationId = project.LastEvaluationId;
 
-                    Assert.NotEqual(BuildEventContext.InvalidEvaluationID, evaluationID);
+                    Assert.NotEqual(BuildEventContext.InvalidEvaluationId, evaluationId);
 
                     foreach (var buildEvent in mockLogger.AllBuildEvents)
                     {
-                        Assert.Equal(evaluationID, buildEvent.BuildEventContext.EvaluationID);
+                        Assert.Equal(evaluationId, buildEvent.BuildEventContext.EvaluationId);
                     }
                 });
         }
