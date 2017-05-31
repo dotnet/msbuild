@@ -56,6 +56,7 @@ ${buildCommand}""")
 
         def archiveSettings = new ArchivalSettings()
         archiveSettings.addFiles("bin/**/*")
+        archiveSettings.addFiles("bin/log/**/*")
         archiveSettings.excludeFiles("bin/obj/*")
         archiveSettings.setFailIfNothingArchived()
         archiveSettings.setArchiveOnFailure()

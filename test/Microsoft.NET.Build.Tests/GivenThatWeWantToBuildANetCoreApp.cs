@@ -38,34 +38,75 @@ namespace Microsoft.NET.Build.Tests
         public void It_targets_the_right_shared_framework(string targetFramework, string runtimeFrameworkVersion,
             string expectedPackageVersion, string expectedRuntimeVersion)
         {
+            string testIdentifier = "SharedFrameworkTargeting_" + string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null");
+
+            It_targets_the_right_framework(testIdentifier, targetFramework, runtimeFrameworkVersion,
+                selfContained: false, isExe: true,
+                expectedPackageVersion: expectedPackageVersion, expectedRuntimeVersion: expectedRuntimeVersion);
+        }
+
+        //  Test behavior when implicit version differs for framework-dependent and self-contained apps
+        [Theory]
+        [InlineData(false, true, "1.1.1")]
+        [InlineData(true, true, "1.1.2")]
+        [InlineData(false, false, "1.1.1")]
+        public void It_targets_the_right_framework_depending_on_output_type(bool selfContained, bool isExe, string expectedFrameworkVersion)
+        {
+            string testIdentifier = "Framework_targeting_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
+
+            It_targets_the_right_framework(testIdentifier, "netcoreapp1.1", null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion,
+                "/p:ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1=1.1.1");
+        }
+
+        private void It_targets_the_right_framework(
+            string testIdentifier,
+            string targetFramework,
+            string runtimeFrameworkVersion,
+            bool selfContained,
+            bool isExe,
+            string expectedPackageVersion,
+            string expectedRuntimeVersion,
+            string extraMSBuildArguments = null)
+        {
+            string runtimeIdentifier = null;
+            if (selfContained)
+            {
+                runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            }
+
             var testProject = new TestProject()
             {
-                Name = "SharedFrameworkTest",
+                Name = "FrameworkTargetTest",
                 TargetFrameworks = targetFramework,
                 RuntimeFrameworkVersion = runtimeFrameworkVersion,
                 IsSdkProject = true,
-                IsExe = true
-            };
+                IsExe = isExe,
+                RuntimeIdentifier = runtimeIdentifier
+            };            
 
-            string testIdentifier = string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null");
+            var extraArgs = extraMSBuildArguments?.Split(' ') ?? Array.Empty<string>();
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, nameof(It_targets_the_right_shared_framework), testIdentifier)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testIdentifier)
+                .Restore(Log, testProject.Name, extraArgs);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute()
+                .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
-            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
-            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
-            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            //  Self-contained apps don't write a framework version to the runtimeconfig, so only check this for framework-dependent apps
+            if (isExe && !selfContained)
+            {
+                string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+                string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+                JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
 
-            string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
-            actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+                string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
+                actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+            }
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
 

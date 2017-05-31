@@ -7,12 +7,11 @@ using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -65,7 +64,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
 
-        public string[] TargetManifestFileList { get; set; }
+        public ITaskItem[] RuntimeStorePackages { get; set; }
 
         public bool IsSelfContained { get; set; }
 
@@ -80,35 +79,21 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, HashSet<string>> compileFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         private Dictionary<string, HashSet<string>> runtimeFilesToSkip = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<PackageIdentity, StringBuilder> GetFilteredPackages()
+        private Dictionary<PackageIdentity, string> GetFilteredPackages()
         {
-            Dictionary<PackageIdentity, StringBuilder> filteredPackages = null;
+            Dictionary<PackageIdentity, string> filteredPackages = null;
 
-            if (TargetManifestFileList != null && TargetManifestFileList.Length > 0)
+            if (RuntimeStorePackages != null && RuntimeStorePackages.Length > 0)
             {
-                filteredPackages = new Dictionary<PackageIdentity, StringBuilder>();
-
-                foreach (var targetManifestFile in TargetManifestFileList)
+                filteredPackages = new Dictionary<PackageIdentity, string>();
+                foreach (var package in RuntimeStorePackages)
                 {
-                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, targetManifestFile));
-                    var packagesSpecified = StoreArtifactParser.Parse(targetManifestFile);
-                    var targetManifestFileName = Path.GetFileName(targetManifestFile);
-
-                    foreach (var pkg in packagesSpecified)
-                    {
-                        Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.PackageInfoLog, pkg.Id, pkg.Version));
-                        StringBuilder fileList;
-                        if (filteredPackages.TryGetValue(pkg, out fileList))
-                        {
-                            fileList.Append($";{targetManifestFileName}");
-                        }
-                        else
-                        {
-                            filteredPackages.Add(pkg, new StringBuilder(targetManifestFileName));
-                        }
-                    }
+                    filteredPackages.Add(
+                        ItemUtilities.GetPackageIdentity(package),
+                        package.GetMetadata(MetadataKeys.RuntimeStoreManifestNames));
                 }
             }
+
             return filteredPackages;
         }
 

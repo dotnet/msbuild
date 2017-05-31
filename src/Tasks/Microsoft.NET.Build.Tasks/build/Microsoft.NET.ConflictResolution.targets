@@ -22,9 +22,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ItemGroup>
       <!-- We need to find all the files that will be loaded from deps for conflict resolution.
-          To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true
+          To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true.
+          However, if CopyLocalLockFileAssemblies is true, then we don't add these items, as they
+          will always be included in ReferenceCopyLocalPaths.
           -->
-      <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))" />
+      <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))"
+                           Condition="'$(CopyLocalLockFileAssemblies)' != 'true'"
+                           />
 
       
       <!-- Also include RuntimeTarget items, which aren't included in AllCopyLocalItems, but need to be considered

@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IncludeWithGlob)' == 'true' And '$(UseLinkBase)' == 'true'">
+    <Compile Include="..\Linked\**\*.cs" LinkBase="Linked\Files" />
+    <AdditionalFiles Include="..\Linked\**\*.Additional.txt" LinkBase="Linked\Files" />
+    <None Include="..\Linked\**\*.None.txt" LinkBase="Linked\Files" />
+    <Content Include="..\Linked\**\*.Content.txt" LinkBase="Linked\Files" />
+    <EmbeddedResource Include="..\Linked\**\*.Embedded.txt" LinkBase="Linked\Files" />
+    <CustomItem Include="..\Linked\**\*.Custom.txt" LinkBase="Linked\Files" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeWithGlob)' == 'true' And '$(UseLinkBase)' != 'true'">
+    <Compile Include="..\Linked\**\*.cs" />
+    <AdditionalFiles Include="..\Linked\**\*.Additional.txt" />
+    <None Include="..\Linked\**\*.None.txt" />
+    <Content Include="..\Linked\**\*.Content.txt" />
+    <EmbeddedResource Include="..\Linked\**\*.Embedded.txt" />
+    <CustomItem Include="..\Linked\**\*.Custom.txt" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeWithGlob)' != 'true' And '$(UseLinkBase)' == 'true'">
+    <Compile Include="..\Linked\Linked.Class.cs" LinkBase="Linked\Files"/>
+    <AdditionalFiles Include="..\Linked\Linked.Additional.txt" LinkBase="Linked\Files"/>
+    <None Include="..\Linked\Linked.None.txt" LinkBase="Linked\Files"/>
+    <Content Include="..\Linked\Linked.Content.txt" LinkBase="Linked\Files"/>
+    <EmbeddedResource Include="..\Linked\Linked.Embedded.txt" LinkBase="Linked\Files"/>
+    <CustomItem Include="..\Linked\*Linked.Custom.txt" LinkBase="Linked\Files"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeWithGlob)' != 'true' And '$(UseLinkBase)' != 'true'">
+    <Compile Include="..\Linked\Linked.Class.cs"/>
+    <AdditionalFiles Include="..\Linked\Linked.Additional.txt" />
+    <None Include="..\Linked\Linked.None.txt" />
+    <Content Include="..\Linked\Linked.Content.txt" />
+    <EmbeddedResource Include="..\Linked\Linked.Embedded.txt" />
+    <CustomItem Include="..\Linked\*Linked.Custom.txt" />
+  </ItemGroup>
+
+
+  <Target Name="WriteItems" DependsOnTargets="Compile">
+    <ItemGroup>
+      <LinesToWrite Include="Compile%09%(Compile.FullPath)%09%(Compile.Link)" />
+      <LinesToWrite Include="AdditionalFiles%09%(AdditionalFiles.FullPath)%09%(AdditionalFiles.Link)" />
+      <LinesToWrite Include="None%09%(None.FullPath)%09%(None.Link)" />
+      <LinesToWrite Include="Content%09%(Content.FullPath)%09%(Content.Link)" />
+      <LinesToWrite Include="EmbeddedResource%09%(EmbeddedResource.FullPath)%09%(EmbeddedResource.Link)" />
+      <LinesToWrite Include="CustomItem%09%(CustomItem.FullPath)%09%(CustomItem.Link)" />
+    </ItemGroup>
+
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)\Items.txt"
+      Lines="@(LinesToWrite)"
+      Overwrite="true"
+      Encoding="Unicode"
+      />
+  </Target>
+  
+
+</Project>

@@ -96,6 +96,36 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkVersion)' == ''">
     <TargetFrameworkVersion >v0.0</TargetFrameworkVersion>
   </PropertyGroup>
+  
+  <!--
+    Trigger an error if targeting a higher version of .NET Core or .NET Standard than is supported by the current SDK.
+  -->
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' == ''">
+    <NETCoreAppMaximumVersion>$(BundledNETCoreAppTargetFrameworkVersion)</NETCoreAppMaximumVersion>
+  </PropertyGroup>
+    
+  <Target Name="_CheckForUnsupportedNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+
+    <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)'"
+                 ResourceName="UnsupportedTargetFrameworkVersion"
+                 FormatArguments=".NET Core;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
+      />
+  </Target>
+
+  <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
+    <NETStandardMaximumVersion>$(BundledNETStandardTargetFrameworkVersion)</NETStandardMaximumVersion>
+  </PropertyGroup>
+
+  <Target Name="_CheckForUnsupportedNETStandardVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+
+    <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETStandardMaximumVersion)'"
+                 ResourceName="UnsupportedTargetFrameworkVersion"
+                 FormatArguments=".NET Standard;$(_TargetFrameworkVersionWithoutV);$(NETStandardMaximumVersion)"
+      />    
+  </Target>
 
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
