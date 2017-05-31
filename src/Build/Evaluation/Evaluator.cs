@@ -2385,16 +2385,16 @@ namespace Microsoft.Build.Evaluation
                     // Expand the expression for the Log.
                     string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties, importElement.ConditionLocation);
 
-                    string message = ResourceUtilities.FormatResourceString(
-                        "ProjectImportSkippedFalseCondition",
+                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                        importElement.Location.Line,
+                        importElement.Location.Column,
+                        ResourceUtilities.GetResourceString("ProjectImportSkippedFalseCondition"),
                         importElement.Project,
                         importElement.ContainingProject.FullPath,
                         importElement.Location.Line,
                         importElement.Location.Column,
                         importElement.Condition,
-                        expanded);
-
-                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(importElement.Location.Line, importElement.Location.Column, message)
+                        expanded)
                     {
                         BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                         UnexpandedProject = importElement.Project,
@@ -2484,17 +2484,14 @@ namespace Microsoft.Build.Evaluation
 
                     if (_logProjectImportedEvents)
                     {
-                        string message = ResourceUtilities.FormatResourceString(
-                            "ProjectImportSkippedNoMatches",
-                            importExpressionEscapedItem,
-                            importElement.ContainingProject.FullPath,
-                            importElement.Location.Line,
-                            importElement.Location.Column);
-
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,
                             importElement.Location.Column,
-                            message)
+                            ResourceUtilities.GetResourceString("ProjectImportSkippedNoMatches"),
+                            importExpressionEscapedItem,
+                            importElement.ContainingProject.FullPath,
+                            importElement.Location.Line,
+                            importElement.Location.Column)
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
@@ -2621,17 +2618,14 @@ namespace Microsoft.Build.Evaluation
 
                             if (_logProjectImportedEvents)
                             {
-                                string message = ResourceUtilities.FormatResourceString(
-                                    "ProjectImported",
-                                    importedProjectElement.FullPath,
-                                    importElement.ContainingProject.FullPath,
-                                    importElement.Location.Line,
-                                    importElement.Location.Column);
-
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                                     importElement.Location.Line,
                                     importElement.Location.Column,
-                                    message)
+                                    ResourceUtilities.GetResourceString("ProjectImported"),
+                                    importedProjectElement.FullPath,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
                                 {
                                     BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                                     ImportedProjectFile = importedProjectElement.FullPath,
