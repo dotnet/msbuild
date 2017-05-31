@@ -37,7 +37,12 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             ICommand runCommand = GetRunCommand();
-            ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
+            int launchSettingsApplicationResult = ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
+
+            if (launchSettingsApplicationResult != 0)
+            {
+                return launchSettingsApplicationResult;
+            }
 
             return runCommand
                 .Execute()
@@ -80,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Run
             );
         }
 
-        private void ApplyLaunchProfileSettingsIfNeeded(ref ICommand runCommand)
+        private int ApplyLaunchProfileSettingsIfNeeded(ref ICommand runCommand)
         {
             if (UseLaunchProfile)
             {
@@ -114,6 +119,8 @@ namespace Microsoft.DotNet.Tools.Run
                     Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
                 }
             }
+
+            return 0;
         }
 
         private void EnsureProjectIsBuilt()
