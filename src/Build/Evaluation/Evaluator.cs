@@ -197,6 +197,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private EvaluationLoggingContext _evaluationLoggingContext;
 
+        private bool _logProjectImportedEvents = true;
+
 #if FEATURE_MSBUILD_DEBUGGER
         /// <summary>
         /// Types of locals pulled in at the start - environment, global, toolset, and built-in properties
@@ -731,6 +733,8 @@ namespace Microsoft.Build.Evaluation
 
             _data.EvaluationID = NextEvaluationID();
             _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationID);
+
+            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !String.Equals("1", Environment.GetEnvironmentVariable("MSBUILDDONOTLOGIMPORTS"));
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
@@ -2375,7 +2379,7 @@ namespace Microsoft.Build.Evaluation
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
                 ParserOptions.AllowProperties, _projectRootElementCache))
             {
-                if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                if (_logProjectImportedEvents)
                 {
                     // Expand the expression for the Log.
                     string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties, importElement.ConditionLocation);
@@ -2477,7 +2481,7 @@ namespace Microsoft.Build.Evaluation
                     // Keep track of any imports that evaluated to empty
                     atleastOneImportEmpty = true;
 
-                    if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                    if (_logProjectImportedEvents)
                     {
                         string message = ResourceUtilities.FormatResourceString(
                             "ProjectImportSkippedNoMatches",
@@ -2614,7 +2618,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             imports.Add(importedProjectElement);
 
-                            if (!_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                            if (_logProjectImportedEvents)
                             {
                                 string message = ResourceUtilities.FormatResourceString(
                                     "ProjectImported",
