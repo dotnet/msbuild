@@ -1604,11 +1604,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
 
-  <data name="UnsupportedOSPlatformString">
-    <value>MSB4239: The provided argument {0} for [MSBuild]::IsOsPlatform is not supported. Supported values are: {1}</value>
-    <comment>{StrBegin="MSB4231: "} {0} is the name of an OS platform, like Windows, Linux, OSX; {1} is a comma separated enumeration of OS platforms</comment>
-  </data>
-
   <data name="ProjectImportSkippedFalseCondition">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
   </data>
@@ -1627,7 +1622,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4240.
+        Next message code should be MSB4239.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
