@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItUsesLaunchProfileOfTheSpecifiedName()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettings";
+            var testAppName = "AppWithLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -263,7 +263,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItDefaultsToTheFirstUsableLaunchProfile()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettings";
+            var testAppName = "AppWithLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -293,7 +293,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItGivesAnErrorWhenTheLaunchProfileNotFound()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettings";
+            var testAppName = "AppWithLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -321,7 +321,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItGivesAnErrorWhenTheLaunchProfileCanNotBeHandled()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettings";
+            var testAppName = "AppWithLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItSkipsLaunchProfilesWhenTheSwitchIsSupplied()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettings";
+            var testAppName = "AppWithLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -409,7 +409,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItSkipsLaunchProfilesWhenThereIsNoUsableDefault()
         {
-            var testAppName = "MSBuildTestAppWithLaunchSettingsWithoutDefault";
+            var testAppName = "AppWithLaunchSettingsWithoutDefault";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
@@ -438,7 +438,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItPrintsAnErrorWhenLaunchSettingsAreCorrupted()
         {
-            var testAppName = "MSBuildTestAppWithCorruptedLaunchSettings";
+            var testAppName = "AppWithCorruptedLaunchSettings";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
                             .WithSourceFiles();
