@@ -9,13 +9,13 @@
     <CLI_NETSDK_Version>2.0.0-preview2-20170531-2</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-preview1-2500</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>2.0.0-rel-20170518-512</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.3.0-preview-20170502-03</CLI_TestPlatform_Version>
+    <CLI_TestPlatform_Version>15.3.0-preview-20170601-03</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170523-241</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170526-244</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170526-244</TemplateEngineTemplate2_0Version>
+    <TemplateEngineVersion>1.0.0-beta2-20170531-247</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170531-247</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170531-247</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview2-25331-01</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview2-25331-01</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
@@ -24,8 +24,8 @@
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>dev-128</AspNetCoreRuntimeVersion>
-    <AspNetCoreCoherenceTimestamp>preview2-25179</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreRuntimeVersion>dev-134</AspNetCoreRuntimeVersion>
+    <AspNetCoreCoherenceTimestamp>preview2-25332</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
