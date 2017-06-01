@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
@@ -82,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                 return provider.TryApplySettings(model, profileObject, ref command);
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
                 return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.UnexpectedExceptionProcessingLaunchSettings, ex.Message));
             }
