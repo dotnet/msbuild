@@ -564,7 +564,6 @@ namespace Microsoft.Build.Evaluation
         public System.Collections.Generic.IDictionary<string, System.Collections.Generic.List<string>> ConditionedProperties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public string DirectoryPath { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public bool DisableMarkDirty { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        [System.ObsoleteAttribute("Use Project.LastEvaluationID instead")]
         public int EvaluationCounter { get { throw null; } }
         public string FullPath { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
