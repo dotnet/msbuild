@@ -86,47 +86,47 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
 [version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
-[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x64.latest.exe
-[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x64.latest.exe.sha
-[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x64.latest.zip
-[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x64.latest.zip.sha
+[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.exe
+[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.exe.sha
+[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.zip
+[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.zip.sha
 
-[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x86.latest.exe
-[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x86.latest.exe.sha
-[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x86.latest.zip
-[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-win-x86.latest.zip.sha
+[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.exe
+[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.exe.sha
+[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.zip
+[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.zip.sha
 
-[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu-x64.latest.deb
-[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu-x64.latest.deb.sha
-[ubuntu-14.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz
-[ubuntu-14.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz.sha
+[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb
+[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb.sha
+[ubuntu-14.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[ubuntu-14.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu.16.04-x64.latest.deb
-[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu.16.04-x64.latest.deb.sha
-[ubuntu-16.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz
-[ubuntu-16.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz.sha
+[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb
+[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
+[ubuntu-16.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[ubuntu-16.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu.16.10-x64.latest.deb
-[ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-ubuntu.16.10-x64.latest.deb.sha
-[ubuntu-16.10-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu.16.10-x64.latest.tar.gz
-[ubuntu-16.10-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-ubuntu.16.10-x64.latest.tar.gz.sha
+[ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb
+[ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
+[ubuntu-16.10-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[ubuntu-16.10-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[debian-8-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-debian-x64.latest.tar.gz
-[debian-8-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-debian-x64.latest.tar.gz.sha
+[debian-8-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[debian-8-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-osx-x64.latest.pkg
-[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-osx-x64.latest.pkg.sha
-[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-osx-x64.latest.tar.gz
-[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-osx-x64.latest.tar.gz.sha
+[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.pkg
+[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.pkg.sha
+[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.tar.gz
+[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.tar.gz.sha
 
-[centos-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-centos-x64.latest.tar.gz
-[centos-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-centos-x64.latest.tar.gz.sha
+[centos-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[centos-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[rhel-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-rhel-x64.latest.tar.gz
-[rhel-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-rhel-x64.latest.tar.gz.sha
+[rhel-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[rhel-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
-[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-linux-x64.latest.tar.gz
-[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-linux-x64.latest.tar.gz.sha
+[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
+[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
 
 # Debian daily feed
 
