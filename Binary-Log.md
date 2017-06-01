@@ -25,6 +25,17 @@ You can use the binary logger simultaneously with other loggers, such as text fi
 
 When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch. Builds will usually be much faster if you don't pass the console and file loggers.
 
+# Collecting projects and imports source files
+
+By default the binary logger will collect the source code of all project files and all imported project/targets files used during the build. You can control this behavior:
+ * /bl:ProjectImports=None (do not collect project and imports files)
+ * /bl:ProjectImports=Embed (default - embed in the .binlog file)
+ * /bl:ProjectImports=ZipFile (produce a separate .ProjectImports.zip file next to the log file that contains the files)
+
+Note that only *.csproj, *.targets and other MSBuild project formats are collected. No other source files (*.cs, *.cpp etc) are collected.
+
+If the binary log contains the projects/imports files the MSBuild Structured Log Viewer will display all the files contained in the log, let you search through them and even display preprocessed view for any project where all imported projects are inlined (similar to msbuild /pp switch).
+
 # Replaying a binary log
 
 Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a `.binlog` file to the diagnostic verbosity text log:
