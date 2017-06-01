@@ -70,7 +70,7 @@
       </LayoutFile>
       <NetStandardNetFxFile Include="$(_netstandardLibraryNetFrameworkPath)\**\*" Exclude="$(_netstandardLibraryNetFrameworkPath)\**\*.props;$(_netstandardLibraryNetFrameworkPath)\**\*.targets" />
       <LayoutFile Include="@(NetStandardNetFxFile)">
-        <TargetPath>msbuildExtensions\NETStandard.Library.NETFramework\%(NetStandardNetFxFile.RecursiveDir)%(NetStandardNetFxFile.FileName)%(NetStandardNetFxFile.Extension)</TargetPath>
+        <TargetPath>msbuildExtensions\Microsoft.NET.Build.Extensions\%(NetStandardNetFxFile.RecursiveDir)%(NetStandardNetFxFile.FileName)%(NetStandardNetFxFile.Extension)</TargetPath>
       </LayoutFile>
     </ItemGroup>
   </Target>

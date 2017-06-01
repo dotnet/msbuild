@@ -1,13 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside
+       of SDK projects -->
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net46</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <OutputPath>$(OutputPath)Sdks\Microsoft.NET.Sdk\msbuildExtensions\NETStandard.Library.NETFramework\tools</OutputPath>
+    <OutputPath>$(OutputPath)Sdks\Microsoft.NET.Sdk\msbuildExtensions\Microsoft.NET.Build.Extensions\tools</OutputPath>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -69,6 +71,15 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
+  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
+  <Target Name="FilterCopyLocal" DependsOnTargets="RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
+    <ItemGroup>
+      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
+      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
+    </ItemGroup>
+  </Target>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
 
 </Project>

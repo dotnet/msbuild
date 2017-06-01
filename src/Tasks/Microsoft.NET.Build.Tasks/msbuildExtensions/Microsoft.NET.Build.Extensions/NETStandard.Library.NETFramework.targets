@@ -7,8 +7,8 @@
     <!-- Add NETStandard references if targetframeworkversion supports netstandard2.0 (net461 or later) -->
     <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND '$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'">true</ImplicitlyExpandNETStandardFacades>
 
-    <!-- if this is not an SDK project use our own task assembly -->
-    <MicrosoftNETBuildTasksAssembly Condition="'$(MicrosoftNETBuildTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\Microsoft.NET.Build.Tasks.NETFramework.dll</MicrosoftNETBuildTasksAssembly>
+    <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == '' AND '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\tools\netcoreapp1.0\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
+    <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\net46\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
   </PropertyGroup>
 
   <Choose>
@@ -41,7 +41,7 @@
     <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
   </PropertyGroup>
 
-  <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <Target Name="ImplicitlyExpandNETStandardFacades"
           AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
 
