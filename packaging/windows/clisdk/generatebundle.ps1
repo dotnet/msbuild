@@ -25,7 +25,7 @@ function RunCandleForBundle
     $result = $true
     pushd "$WixRoot"
 
-    Write-Host Running candle for bundle..
+    Write-Output Running candle for bundle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\candle.exe -nologo `
@@ -52,7 +52,7 @@ function RunCandleForBundle
     if($LastExitCode -ne 0)
     {
         $result = $false
-        Write-Host "Candle failed with exit code $LastExitCode."
+        Write-Output "Candle failed with exit code $LastExitCode."
     }
 
     popd
@@ -64,7 +64,7 @@ function RunLightForBundle
     $result = $true
     pushd "$WixRoot"
 
-    Write-Host Running light for bundle..
+    Write-Output Running light for bundle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\light.exe -nologo `
@@ -80,7 +80,7 @@ function RunLightForBundle
     if($LastExitCode -ne 0)
     {
         $result = $false
-        Write-Host "Light failed with exit code $LastExitCode."
+        Write-Output "Light failed with exit code $LastExitCode."
     }
 
     popd
@@ -98,7 +98,7 @@ if(!(Test-Path $ASPNETRuntimeWixLibFile))
     throw "$ASPNETRuntimeWixLibFile not found"
 }
 
-Write-Host "Creating dotnet Bundle at $DotnetBundleOutput"
+Write-Output "Creating dotnet Bundle at $DotnetBundleOutput"
 
 if([string]::IsNullOrEmpty($WixRoot))
 {
@@ -121,6 +121,6 @@ if(!(Test-Path $DotnetBundleOutput))
     Exit -1
 }
 
-Write-Host -ForegroundColor Green "Successfully created dotnet bundle - $DotnetBundleOutput"
+Write-Output -ForegroundColor Green "Successfully created dotnet bundle - $DotnetBundleOutput"
 
 exit $LastExitCode

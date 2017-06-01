@@ -25,7 +25,7 @@ function DownloadNugetExe
     }
 
     if (-not (Test-Path $NuGetExe)) {
-        Write-Host 'Downloading nuget.exe to ' + $NuGetExe
+        Write-Output 'Downloading nuget.exe to ' + $NuGetExe
         wget https://dist.nuget.org/win-x86-commandline/v3.5.0-rc1/NuGet.exe -OutFile $NuGetExe
     }
 }
@@ -34,7 +34,7 @@ function GenerateNupkg
 {
     if (-not (Test-Path $NuspecFile))
     {
-        Write-Host 'Error nuspec not found - $NuspecFile'
+        Write-Output 'Error nuspec not found - $NuspecFile'
     }
 
     $SdkBundlePath = [System.IO.Path]::GetFullPath($SdkBundlePath)
@@ -50,7 +50,7 @@ if(!(Test-Path $SdkBundlePath))
     throw "$SdkBundlePath not found"
 }
 
-Write-Host "Creating nupkg for Sdk installer"
+Write-Output "Creating nupkg for Sdk installer"
 
 DownloadNugetExe
 
@@ -69,6 +69,6 @@ if(!(Test-Path $NupkgFile))
     throw "$NupkgFile not generated"
 }
 
-Write-Host -ForegroundColor Green "Successfully created installer nupkg - $NupkgFile"
+Write-Output -ForegroundColor Green "Successfully created installer nupkg - $NupkgFile"
 
 exit $LastExitCode

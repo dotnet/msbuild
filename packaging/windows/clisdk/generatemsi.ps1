@@ -24,14 +24,14 @@ function RunHeat
     $result = $true
     pushd "$WixRoot"
 
-    Write-Host Running heat..
+    Write-Output Running heat..
 
     .\heat.exe dir `"$inputDir`" -template fragment -sreg -gg -var var.DotnetSrc -cg InstallFiles -srd -dr DOTNETHOME -out $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
     {
         $result = $false
-        Write-Host "Heat failed with exit code $LastExitCode."
+        Write-Output "Heat failed with exit code $LastExitCode."
     }
 
     popd
@@ -43,7 +43,7 @@ function RunCandle
     $result = $true
     pushd "$WixRoot"
 
-    Write-Host Running candle..
+    Write-Output Running candle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
     .\candle.exe -nologo `
@@ -64,7 +64,7 @@ function RunCandle
     if($LastExitCode -ne 0)
     {
         $result = $false
-        Write-Host "Candle failed with exit code $LastExitCode."
+        Write-Output "Candle failed with exit code $LastExitCode."
     }
 
     popd
@@ -76,7 +76,7 @@ function RunLight
     $result = $true
     pushd "$WixRoot"
 
-    Write-Host Running light..
+    Write-Output Running light..
     $CabCache = Join-Path $WixRoot "cabcache"
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\clisdk"
 
@@ -95,7 +95,7 @@ function RunLight
     if($LastExitCode -ne 0)
     {
         $result = $false
-        Write-Host "Light failed with exit code $LastExitCode."
+        Write-Output "Light failed with exit code $LastExitCode."
     }
 
     popd
@@ -107,7 +107,7 @@ if(!(Test-Path $inputDir))
     throw "$inputDir not found"
 }
 
-Write-Host "Creating dotnet MSI at $DotnetMSIOutput"
+Write-Output "Creating dotnet MSI at $DotnetMSIOutput"
 
 if([string]::IsNullOrEmpty($WixRoot))
 {
@@ -135,6 +135,6 @@ if(!(Test-Path $DotnetMSIOutput))
     Exit -1
 }
 
-Write-Host -ForegroundColor Green "Successfully created dotnet MSI - $DotnetMSIOutput"
+Write-Output -ForegroundColor Green "Successfully created dotnet MSI - $DotnetMSIOutput"
 
 exit $LastExitCode

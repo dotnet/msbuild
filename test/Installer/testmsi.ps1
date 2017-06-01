@@ -28,7 +28,7 @@ function CopyTestXUnitRunner([string]$destination)
     Copy-Item $XUnitRunnerDir\xunit.runner.utility.desktop.dll -Destination:$destination
 }
 
-Write-Host "Running tests for MSI installer at $inputMsi."
+Write-Output "Running tests for MSI installer at $inputMsi."
 
 if(!(Test-Path $inputMsi))
 {
@@ -65,7 +65,7 @@ try {
         CopyInstaller $testBin
         CopyTestXUnitRunner $testBin
 
-        Write-Host "Running installer tests in Windows Container"
+        Write-Output "Running installer tests in Windows Container"
 
         # --net="none" works around a networking issue on the containers on the CI machines.
         # Since our installer tests don't require the network, it is fine to shut it off.

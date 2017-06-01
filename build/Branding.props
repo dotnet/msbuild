@@ -1,10 +1,10 @@
 <Project ToolsVersion="14.0">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core 2.1.0 - Preview 1 SDK</SdkBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core 2.0.0 - Runtime</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core 2.0.0 - Host</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core 2.0.0 - Host FX Resolver</HostFxrBrandName>
-    
+    <SdkBrandName>Microsoft .NET Core SDK 2.1.0 - Preview 1</SdkBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.0.0</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core Host 2.0.0</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.0.0</HostFxrBrandName>
+
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
 
@@ -13,16 +13,16 @@
                                    '$(Rid)' == 'fedora.24-x64' OR
                                    '$(Rid)' == 'opensuse.42.1-x64' ">$(Rid)</ProductMonikerRid>
     <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
-    
+
     <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
     <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-dev</ArtifactNameCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameCombinedFrameworkSdk>dotnet-sharedframework-sdk</ArtifactNameCombinedFrameworkSdk>
+    <ArtifactNameCombinedFrameworkSdk>dotnet-runtime-sdk</ArtifactNameCombinedFrameworkSdk>
 
-    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdk>
-    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
-    <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
+    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
+    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkDebug>
+    <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
   </PropertyGroup>
 </Project>

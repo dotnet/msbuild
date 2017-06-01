@@ -1,4 +1,5 @@
-﻿using Microsoft.DotNet.Tools.Help;
+﻿using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Help;
 
 internal static class HelpUsageText
 {
@@ -31,7 +32,7 @@ path-to-application:
   -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 {LocalizableStrings.CommonOptions}:
-  -v|--verbose          {LocalizableStrings.VerboseDefinition}
+  -v|--verbosity        {CommonLocalizableStrings.VerbosityOptionDescription}
   -h|--help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.RunDotnetCommandHelpForMore}

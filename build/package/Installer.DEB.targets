@@ -10,7 +10,7 @@
     <PropertyGroup>
       <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer.csproj</DotnetDebToolConsumerProjectName>
       <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
-      <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp1.0/tool/package_tool</PackageTool>
+      <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp2.0/tool/package_tool</PackageTool>
     </PropertyGroup>
 
     <!-- constants -->
@@ -29,10 +29,10 @@
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
-      <SharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
+      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)-$(CoreSetupRid)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
       <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
-      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)-$(CoreSetupRid)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
     </PropertyGroup>

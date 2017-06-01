@@ -73,9 +73,36 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Path.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
-            result.Errors.Should().Contain("Version 99.99.99 of the SDK is smaller than the minimum version 999.99.99"
+            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK is smaller than the minimum version 999.99.99"
                 + " requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version"
                 + " specified in the project, or increase the version specified in global.json.");
+        }
+
+        [Fact]
+        public void ItReturnsNullWhenTheSDKRequiresAHigherVersionOfMSBuildThanTheOneAvailable()
+        {
+            var environment = new TestEnvironment();
+            var expected =
+                environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99", new Version(2, 0));
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "99.99.99"),
+                new MockContext
+                {
+                    MSBuildVersion = new Version(1, 0),
+                    ProjectFilePath = environment.TestDirectory.FullName
+                },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of MSBuild."
+                + " The current available version of MSBuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
+                + " version that requires the MSBuild version currently available.");
         }
 
         [Fact]
@@ -147,25 +174,64 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 => new DotNetMSBuildSdkResolver(GetEnvironmentVariable);
 
             public DirectoryInfo GetSdkDirectory(ProgramFiles programFiles, string sdkName, string sdkVersion)
-                => TestDirectory.GetDirectory(GetProgramFilesDirectory(programFiles).FullName, "dotnet", "sdk", sdkVersion, "Sdks", sdkName, "Sdk");
+                => TestDirectory.GetDirectory(
+                    GetProgramFilesDirectory(programFiles).FullName,
+                    "dotnet",
+                    "sdk",
+                    sdkVersion,
+                    "Sdks",
+                    sdkName,
+                    "Sdk");
 
             public DirectoryInfo GetProgramFilesDirectory(ProgramFiles programFiles)
                 => TestDirectory.GetDirectory($"ProgramFiles{programFiles}");
             
-            public DirectoryInfo CreateSdkDirectory(ProgramFiles programFiles, string sdkVersion, string sdkName)
+            public DirectoryInfo CreateSdkDirectory(
+                ProgramFiles programFiles,
+                string sdkName,
+                string sdkVersion,
+                Version minimumMSBuildVersion = null)
             {
-                var dir = GetSdkDirectory(programFiles, sdkVersion, sdkName);
+                var dir = GetSdkDirectory(programFiles, sdkName, sdkVersion);
                 dir.Create();
+
+                if (minimumMSBuildVersion != null)
+                {
+                    CreateMSBuildRequiredVersionFile(programFiles, sdkVersion, minimumMSBuildVersion);
+                }
+
                 return dir;
             }
 
             public void CreateMuxerAndAddToPath(ProgramFiles programFiles)
             {
-                var muxerDirectory = TestDirectory.GetDirectory(GetProgramFilesDirectory(programFiles).FullName, "dotnet");
+                var muxerDirectory =
+                    TestDirectory.GetDirectory(GetProgramFilesDirectory(programFiles).FullName, "dotnet");
 
                 new FileInfo(Path.Combine(muxerDirectory.FullName, Muxer)).Create();
 
                 PathEnvironmentVariable = $"{muxerDirectory}{Path.PathSeparator}{PathEnvironmentVariable}";
+            }
+
+            private void CreateMSBuildRequiredVersionFile(
+                ProgramFiles programFiles,
+                string sdkVersion,
+                Version minimumMSBuildVersion)
+            {
+                if (minimumMSBuildVersion == null)
+                {
+                    minimumMSBuildVersion = new Version(1, 0);
+                }
+
+                var cliDirectory = TestDirectory.GetDirectory(
+                    GetProgramFilesDirectory(programFiles).FullName,
+                    "dotnet",
+                    "sdk",
+                    sdkVersion);
+
+                File.WriteAllText(
+                    Path.Combine(cliDirectory.FullName, "minimumMSBuildVersion"),
+                    minimumMSBuildVersion.ToString());
             }
 
             public void CreateGlobalJson(DirectoryInfo directory, string version)
@@ -188,6 +254,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             public new string ProjectFilePath { get => base.ProjectFilePath; set => base.ProjectFilePath = value; }
             public new string SolutionFilePath { get => base.SolutionFilePath; set => base.SolutionFilePath = value; }
+            public new Version MSBuildVersion { get => base.MSBuildVersion; set => base.MSBuildVersion = value; }
+
+            public MockContext()
+            {
+                MSBuildVersion = new Version(15, 3, 0);
+            }
         }
 
         private sealed class MockFactory : SdkResultFactory
