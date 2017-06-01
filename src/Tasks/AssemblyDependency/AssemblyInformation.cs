@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -36,7 +37,11 @@ namespace Microsoft.Build.Tasks
 #endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
+
+#if !FEATURE_ASSEMBLY_LOADFROM
         private bool _metadataRead;
+#endif
+
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
@@ -188,24 +193,24 @@ namespace Microsoft.Build.Tasks
         /// assemblies and  the list of scatter files.
         /// </summary>
         /// <param name="path">Path to the assembly.</param>
+        /// <param name="cache">Cache of already-populated <see cref="AssemblyInformation"/>.</param>
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Gets the assembly name.</param>
         internal static void GetAssemblyMetadata
         (
             string path,
+            ConcurrentDictionary<string, AssemblyInformation> cache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
             out FrameworkName frameworkName
         )
         {
-            AssemblyInformation import = null;
-            using (import = new AssemblyInformation(path))
-            {
-                dependencies = import.Dependencies;
-                frameworkName = import.FrameworkNameAttribute;
-                scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
-            }
+            var import = cache?.GetOrAdd(path, s => new AssemblyInformation(s)) ?? new AssemblyInformation(path);
+
+            dependencies = import.Dependencies;
+            frameworkName = import.FrameworkNameAttribute;
+            scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
         }
 
         /// <summary>
@@ -264,10 +269,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
-// Disabling use of System.Reflection in case of MONO, because
-// Assembly.GetCustomAttributes* for an attribute which belongs
-// to an assembly that mono cannot find, causes a crash!
-// Instead, opt for using PEReader and friends to get that info
+            // Disabling use of System.Reflection in case of MONO, because
+            // Assembly.GetCustomAttributes* for an attribute which belongs
+            // to an assembly that mono cannot find, causes a crash!
+            // Instead, opt for using PEReader and friends to get that info
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
             if (!NativeMethodsShared.IsWindows)
             {
@@ -343,7 +348,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-
+#if !FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Read everything from the assembly in a single stream.
         /// </summary>
@@ -421,6 +426,7 @@ namespace Microsoft.Build.Tasks
                 _metadataRead = true;
             }
         }
+#endif
 
 // Enabling this for MONO, because it's required by GetFrameworkName.
 // More details are in the comment for that method

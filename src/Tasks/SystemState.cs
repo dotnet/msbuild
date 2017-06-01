@@ -469,6 +469,7 @@ namespace Microsoft.Build.Tasks
         private void GetAssemblyMetadata
         (
             string path,
+            ConcurrentDictionary<string, AssemblyInformation> cache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
             out FrameworkName frameworkName
@@ -480,6 +481,7 @@ namespace Microsoft.Build.Tasks
                 getAssemblyMetadata
                 (
                     path,
+                    cache,
                     out fileState.dependencies,
                     out fileState.scatterFiles,
                     out fileState.frameworkName
