@@ -94,6 +94,13 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        public void WriteBlob(BinaryLogRecordKind kind, byte[] bytes)
+        {
+            Write(kind);
+            Write(bytes.Length);
+            Write(bytes);
+        }
+
         private void Write(BuildStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.BuildStarted);
@@ -576,6 +583,11 @@ namespace Microsoft.Build.Logging
                 v >>= 7;
             }
             writer.Write((byte)v);
+        }
+
+        private void Write(byte[] bytes)
+        {
+            binaryWriter.Write(bytes);
         }
 
         private void Write(bool boolean)
