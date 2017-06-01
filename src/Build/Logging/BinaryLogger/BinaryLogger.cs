@@ -152,11 +152,14 @@ namespace Microsoft.Build.Logging
                     eventArgsWriter.Write(e);
                 }
 
-                IncludeSourceFilesFrom(e);
+                if (projectImportsCollector != null)
+                {
+                    CollectImports(e);
+                }
             }
         }
 
-        private void IncludeSourceFilesFrom(BuildEventArgs e)
+        private void CollectImports(BuildEventArgs e)
         {
             ProjectImportedEventArgs importArgs = e as ProjectImportedEventArgs;
             if (importArgs != null && importArgs.ImportedProjectFile != null)
