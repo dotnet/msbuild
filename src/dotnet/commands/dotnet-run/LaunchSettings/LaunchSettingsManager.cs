@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             }
             catch (JsonException ex)
             {
-                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.UnexpectedExceptionProcessingLaunchSettings, ex.Message));
+                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.DeserializationExceptionMessage, ex.Message));
             }
         }
 

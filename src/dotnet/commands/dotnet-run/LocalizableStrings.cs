@@ -50,5 +50,7 @@ namespace Microsoft.DotNet.Tools.Run
         public const string UnexpectedExceptionProcessingLaunchSettings = "An unexpected exception occurred while processing launch settings:\n{0}";
 
         public const string LaunchProfilesCollectionIsNotAJsonObject = "The 'profiles' property of the launch settings document is not a JSON object.";
+
+        public const string DeserializationExceptionMessage = "An error was encountered when reading launchSettings.json.\n{0}";
     }
 }

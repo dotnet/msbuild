@@ -13,30 +13,23 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command)
         {
-            try
+            var config = model.ToObject<ProjectLaunchSettingsModel>();
+
+            //For now, ignore everything but the environment variables section
+
+            foreach (var entry in config.EnvironmentVariables)
             {
-                var config = model.ToObject<ProjectLaunchSettingsModel>();
-
-                //For now, ignore everything but the environment variables section
-
-                foreach (var entry in config.EnvironmentVariables)
-                {
-                    string value = Environment.ExpandEnvironmentVariables(entry.Value);
-                    //NOTE: MSBuild variables are not expanded like they are in VS
-                    command.EnvironmentVariable(entry.Key, value);
-                }
-
-                if (!string.IsNullOrEmpty(config.ApplicationUrl))
-                {
-                    command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
-                }
-
-                return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);
+                string value = Environment.ExpandEnvironmentVariables(entry.Value);
+                //NOTE: MSBuild variables are not expanded like they are in VS
+                command.EnvironmentVariable(entry.Key, value);
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(config.ApplicationUrl))
             {
-                return new LaunchSettingsApplyResult(false, ex.Message);
+                command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
             }
+
+            return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);
         }
 
         private class ProjectLaunchSettingsModel
