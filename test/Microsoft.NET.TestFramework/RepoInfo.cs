@@ -62,6 +62,14 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        public static string NuGetFallbackFolder
+        {
+            get
+            {
+                return Path.Combine(BinPath, "NuGetFallbackFolder");
+            }
+        }
+
         public static string PackagesPath
         {
             get { return Path.Combine(BinPath, Configuration, "Packages"); }
