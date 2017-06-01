@@ -13,7 +13,6 @@ namespace Microsoft.NET.Build.Tasks
     {
         internal static bool GetFileDependsOnNETStandard(string filePath)
         {
-            bool result = false;
             using (var assemblyStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read))
             using (PEReader peReader = new PEReader(assemblyStream, PEStreamOptions.LeaveOpen))
             {
@@ -27,16 +26,16 @@ namespace Microsoft.NET.Build.Tasks
                             AssemblyReference reference = reader.GetAssemblyReference(referenceHandle);
                             var referenceName = reader.GetString(reference.Name);
 
-                            if (result = referenceName.Equals(NetStandardAssemblyName, StringComparison.Ordinal))
+                            if (referenceName.Equals(NetStandardAssemblyName, StringComparison.Ordinal))
                             {
-                                break;
+                                return true;
                             }
                         }
                     }
                 }
             }
 
-            return result;
+            return false;
         }
     }
 }

@@ -13,6 +13,12 @@ namespace Microsoft.NET.Build.Tasks
     {
         private static Guid s_importerGuid = new Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44");
 
+        // This method cross-compiles for desktop to avoid using System.Reflection.Metadata (SRM).
+        // We do this because we don't want the following:
+        //  - additional size of SRM and its closure
+        //  - load / JIT cost of SRM and its closure
+        //  - deal with bindingRedirects/unification needed to load SRM's closure.
+
         internal static bool GetFileDependsOnNETStandard(string filePath)
         {
             // Ported from Microsoft.Build.Tasks.AssemblyInformation

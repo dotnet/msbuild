@@ -28,6 +28,13 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            DependsOnNETStandard = AnyReferenceDependsOnNETStandard();
+
+            return;
+        }
+
+        private bool AnyReferenceDependsOnNETStandard()
+        {
             foreach (var reference in References)
             {
                 var referenceSourcePath = ItemUtilities.GetSourcePath(reference);
@@ -36,18 +43,20 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     try
                     {
-                        if (DependsOnNETStandard = GetFileDependsOnNETStandard(referenceSourcePath))
+                        if (GetFileDependsOnNETStandard(referenceSourcePath))
                         {
-                            break;
+                            return true;
                         }
                     }
                     catch (Exception e) when (IsReferenceException(e))
                     {
-                        // ResolveAssemblyReference treats all of these exceptions as warnings
+                        // ResolveAssemblyReference treats all of these exceptions as warnings so we'll do the same
                         Log.LogWarning(Strings.GetDependsOnNETStandardFailedWithException, e.Message);
                     }
                 }
             }
+
+            return false;
         }
 
         // ported from MSBuild's ReferenceTable.SetPrimaryAssemblyReferenceItem
