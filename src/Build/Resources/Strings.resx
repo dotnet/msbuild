@@ -1123,6 +1123,9 @@
   <data name="TaskPerformanceSummary" UESanitized="false" Visibility="Public">
     <value>Task Performance Summary:</value>
   </data>
+  <data name="ProjectEvaluationPerformanceSummary" UESanitized="false" Visibility="Public">
+    <value>Project Evaluation Performance Summary:</value>
+  </data>
   <data name="TaskSkippedFalseCondition" UESanitized="false" Visibility="Public">
     <value>Task "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
   </data>

@@ -223,6 +223,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void ShowPerfSummary()
         {
+            if (projectEvaluationPerformanceCounters != null)
+            {
+                setColor(ConsoleColor.Green);
+                WriteNewLine();
+                WriteLinePrettyFromResource("ProjectEvaluationPerformanceSummary");
+
+                setColor(ConsoleColor.Gray);
+                DisplayCounters(projectEvaluationPerformanceCounters);
+            }
+
             // Show project performance summary.
             if (projectPerformanceCounters != null)
             {
@@ -938,6 +948,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 eventSource.WarningRaised += WarningHandler;
                 eventSource.MessageRaised += MessageHandler;
                 eventSource.CustomEventRaised += CustomEventHandler;
+                eventSource.StatusEventRaised += StatusEventHandler;
             }
         }
 
@@ -1066,6 +1077,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public abstract void CustomEventHandler(object sender, CustomBuildEventArgs e);
 
+        public abstract void StatusEventHandler(object sender, BuildStatusEventArgs e);
+
         #endregion
 
         #region Internal member data
@@ -1193,6 +1206,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Accumulated task performance information.
         /// </summary>
         internal Dictionary<string, PerformanceCounter> taskPerformanceCounters;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal Dictionary<string, PerformanceCounter> projectEvaluationPerformanceCounters;
 
         #endregion
 
