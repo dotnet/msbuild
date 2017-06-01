@@ -27,16 +27,6 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_successfully()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Fullframework NuGet versioning on Jenkins infrastructure issue
-                //        https://github.com/dotnet/sdk/issues/1041
-
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject testProject = new TestProject()
             {
                 Name = "ExcludeMainProjectFromDeps",

@@ -23,9 +23,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-        //  See https://github.com/dotnet/sdk/issues/1077
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]

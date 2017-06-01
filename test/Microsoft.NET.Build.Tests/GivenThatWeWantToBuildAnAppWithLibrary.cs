@@ -102,9 +102,7 @@ namespace Microsoft.NET.Build.Tests
             libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
         }
 
-        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-        //  See https://github.com/dotnet/sdk/issues/1077
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager

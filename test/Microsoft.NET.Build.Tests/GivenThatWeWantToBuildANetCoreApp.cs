@@ -118,14 +118,6 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_restores_only_ridless_tfm()
         {
-            //  Disable this test when using full Framework MSBuild, until MSBuild is updated 
-            //  to provide conditions in NuGet ImportBefore/ImportAfter props/targets
-            //  https://github.com/dotnet/sdk/issues/874
-            if (UsingFullFrameworkMSBuild)
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
@@ -172,13 +164,6 @@ namespace Microsoft.NET.Build.Tests
 
         private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var targetFramework = "netcoreapp2.0";
             var runtimeIdentifier = useRid ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
@@ -249,13 +234,6 @@ public static class Program
         [Fact]
         public void It_trims_conflicts_from_the_deps_file()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NetCore2App",
