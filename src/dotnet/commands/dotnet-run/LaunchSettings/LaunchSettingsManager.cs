@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                 return provider.TryApplySettings(model, profileObject, ref command);
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
                 return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.UnexpectedExceptionProcessingLaunchSettings, ex.Message));
             }
