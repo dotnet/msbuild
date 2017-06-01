@@ -6,8 +6,12 @@
 
     <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == '' AND '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\tools\netcoreapp1.0\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
     <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\net46\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
+
+    <!-- Include conflict resolution targets for NETFramework and allow other frameworks to opt-in -->
+    <ResolveAssemblyConflicts Condition="'$(ResolveAssemblyConflicts)' == '' AND '$(TargetFrameworkIdentifier)' == '.NETFramework' AND '$(UsingMicrosoftNETSdk)' != 'true'">true</ResolveAssemblyConflicts>
   </PropertyGroup>
 
   <Import Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Project="Microsoft.NET.Build.Extensions.NETFramework.targets"/>
 
+  <Import Condition="'$(ResolveAssemblyConflicts)' == 'true'" Project="Microsoft.NET.Build.Extensions.ConflictResolution.targets"/>
 </Project>

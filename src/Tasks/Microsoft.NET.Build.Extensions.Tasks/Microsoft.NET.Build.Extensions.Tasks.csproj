@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.0</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
