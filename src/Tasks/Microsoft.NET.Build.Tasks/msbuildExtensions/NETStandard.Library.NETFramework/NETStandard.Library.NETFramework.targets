@@ -1,0 +1,84 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND ('$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1')">true</ImplicitlyExpandNETStandardFacades>
+    <!-- if this is not an SDK project use our own task assembly -->
+    <MicrosoftNETBuildTasksAssembly Condition="'$(MicrosoftNETBuildTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\Microsoft.NET.Build.Tasks.NETFramework.dll</MicrosoftNETBuildTasksAssembly>
+  </PropertyGroup>
+
+  <Choose>
+    <!-- Allow completely disabling the conflict resolution targets-->
+    <When Condition="'$(ImplicitlyExpandNETStandardFacades)' != 'true'" />
+    <!-- Condition here is a hack until https://github.com/dotnet/sdk/issues/534 is fixed -->
+    <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+      <!-- .NET SDK: Run after references are resolved -->
+      <PropertyGroup>
+        <ImplicitlyExpandNETStandardFacadesAfter>ResolveLockFileReferences</ImplicitlyExpandNETStandardFacadesAfter>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
+      <!-- NuGet3 targets: run after nuget assets are resolved -->
+      <PropertyGroup>
+        <ImplicitlyExpandNETStandardFacadesAfter>ResolveNuGetPackageAssets</ImplicitlyExpandNETStandardFacadesAfter>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <!-- NuGet 2, run before targets that consume references -->
+      <PropertyGroup>
+        <ResolveAssemblyReferencesDependsOn>ImplicitlyExpandNETStandardFacades;$(ResolveAssemblyReferencesDependsOn)</ResolveAssemblyReferencesDependsOn>
+        <PrepareResourcesDependsOn>ImplicitlyExpandNETStandardFacades;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'">
+    <!-- Ensure this runs before conflict resolution since the added files may cause conflicts -->
+    <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
+  </PropertyGroup>
+
+  <!-- The following target is used by desktop to determine if the project requires a netstandard reference -->
+  <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="GetDependsOnNETStandard"
+          Condition="'$(DependsOnNETStandard)' == ''">
+    <GetDependsOnNETStandard References="@(Reference);@(_ResolvedProjectReferencePaths)">
+      <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
+    </GetDependsOnNETStandard>
+  </Target>
+
+  <Target Name="ImplicitlyExpandNETStandardFacades"
+          DependsOnTargets="GetDependsOnNETStandard"
+          AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
+    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true'">
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7'"
+                                                Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2'"
+                                                Include="$(MSBuildThisFileDirectory)\net462\ref\*.dll"
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll'" />
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1'"
+                                                Include="$(MSBuildThisFileDirectory)\net461\ref\*.dll"
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll'" />
+
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7'"
+                                          Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2'"
+                                          Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll'" />
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1'"
+                                          Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll'" />
+
+      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
+           consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
+           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
+           including all computed references. -->
+      <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
+
+      <Reference Include="@(_NETStandardLibraryNETFrameworkReference)">
+        <Private>false</Private>
+      </Reference>
+
+      <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)">
+        <Private>false</Private>
+      </ReferenceCopyLocalPaths>
+    </ItemGroup>
+  </Target>
+</Project>

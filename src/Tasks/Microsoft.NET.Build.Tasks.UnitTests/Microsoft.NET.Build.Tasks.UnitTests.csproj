@@ -27,6 +27,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GivenAGetDependsOnNETStandardTask.cs" />
     <Compile Include="GivenAConflictResolver.cs" />
     <Compile Include="GivenAProjectContext.cs" />
     <Compile Include="GivenACompilationOptionsConverter.cs" />
@@ -34,6 +35,7 @@
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
     <Compile Include="GivenUnresolvedSDKProjectItemsAndImplicitPackages.cs" />
     <Compile Include="LockFileSnippets.cs" />
+    <Compile Include="Mocks\MockBuildEngine.cs" />
     <Compile Include="Mocks\MockContentAssetPreprocessor.cs" />
     <Compile Include="Mocks\MockPackageResolver.cs" />
     <Compile Include="Mocks\MockTaskItem.cs" />

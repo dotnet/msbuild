@@ -300,4 +300,7 @@
   <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
     <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
   </data>
+  <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
+    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
+  </data>
 </root>
