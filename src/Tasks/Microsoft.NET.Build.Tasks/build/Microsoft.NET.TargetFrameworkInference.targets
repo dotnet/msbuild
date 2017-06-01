@@ -106,7 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
     
   <Target Name="_CheckForUnsupportedNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' != ''">
 
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
@@ -119,7 +119,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedNETStandardVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' != ''">
 
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETStandardMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
