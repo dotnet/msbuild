@@ -44,7 +44,7 @@ osList.each { os ->
             steps {
                 if (osBase == 'Windows_NT') {
                     // Batch
-                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\
+                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\Preview\\Enterprise\\Common7\\Tools\\
 ${buildCommand}""")
                 }
                 else {
