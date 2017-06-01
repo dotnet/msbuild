@@ -1,6 +1,12 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
-    <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND ('$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1')">true</ImplicitlyExpandNETStandardFacades>
+    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion)</_TargetFrameworkVersionWithoutV>
+    <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
+
+    <!-- Add NETStandard references if targetframeworkversion supports netstandard2.0 (net461 or later) -->
+    <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND '$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'">true</ImplicitlyExpandNETStandardFacades>
+
     <!-- if this is not an SDK project use our own task assembly -->
     <MicrosoftNETBuildTasksAssembly Condition="'$(MicrosoftNETBuildTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\Microsoft.NET.Build.Tasks.NETFramework.dll</MicrosoftNETBuildTasksAssembly>
   </PropertyGroup>
@@ -35,34 +41,42 @@
     <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
   </PropertyGroup>
 
-  <!-- The following target is used by desktop to determine if the project requires a netstandard reference -->
   <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="GetDependsOnNETStandard"
-          Condition="'$(DependsOnNETStandard)' == ''">
-    <GetDependsOnNETStandard References="@(Reference);@(_ResolvedProjectReferencePaths)">
+  <Target Name="ImplicitlyExpandNETStandardFacades"
+          AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
+
+    <ItemGroup>
+      <_candidateNETStandardReferences Include="@(Reference);@(_ResolvedProjectReferencePaths)" />
+      <_inboxNETStandardFolders Include="$(TargetFrameworkDirectory)" />
+    </ItemGroup>
+
+    <!-- determine if NETStandard.dll is supported inbox for this TargetFramework -->
+    <PropertyGroup Condition="'$(NETStandardInbox)' == ''">
+      <NETStandardInbox Condition="Exists('%(_inboxNETStandardFolders.Identity)\netstandard.dll')">true</NETStandardInbox>
+    </PropertyGroup>
+
+    <!-- determine if any references depend on NETStandard -->
+    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true'" 
+                             References="@(_candidateNETStandardReferences)">
       <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
     </GetDependsOnNETStandard>
-  </Target>
 
-  <Target Name="ImplicitlyExpandNETStandardFacades"
-          DependsOnTargets="GetDependsOnNETStandard"
-          AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
-    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true'">
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7'"
+    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                                 Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2'"
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
                                                 Include="$(MSBuildThisFileDirectory)\net462\ref\*.dll"
                                                 Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll'" />
-      <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1'"
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
                                                 Include="$(MSBuildThisFileDirectory)\net461\ref\*.dll"
                                                 Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll'" />
 
-      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7'"
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                           Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
-      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2'"
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
                                           Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
                                           Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll'" />
-      <_NETStandardLibraryNETFrameworkLib Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1'"
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
                                           Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
                                           Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll'" />
 
