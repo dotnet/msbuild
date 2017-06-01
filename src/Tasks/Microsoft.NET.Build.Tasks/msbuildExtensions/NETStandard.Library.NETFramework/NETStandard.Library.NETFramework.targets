@@ -1,6 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND ('$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2' OR '$(TargetFrameworkVersion)' == 'v4.6.1')">true</ImplicitlyExpandNETStandardFacades>
+    <!-- if this is not an SDK project use our own task assembly -->
+    <MicrosoftNETBuildTasksAssembly Condition="'$(MicrosoftNETBuildTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\Microsoft.NET.Build.Tasks.NETFramework.dll</MicrosoftNETBuildTasksAssembly>
   </PropertyGroup>
 
   <Choose>
@@ -33,9 +35,19 @@
     <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
   </PropertyGroup>
 
+  <!-- The following target is used by desktop to determine if the project requires a netstandard reference -->
+  <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="GetDependsOnNETStandard"
+          Condition="'$(DependsOnNETStandard)' == ''">
+    <GetDependsOnNETStandard References="@(Reference);@(_ResolvedProjectReferencePaths)">
+      <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
+    </GetDependsOnNETStandard>
+  </Target>
+
   <Target Name="ImplicitlyExpandNETStandardFacades"
+          DependsOnTargets="GetDependsOnNETStandard"
           AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
-    <ItemGroup>
+    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true'">
       <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7'"
                                                 Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
       <_NETStandardLibraryNETFrameworkReference Condition="'$(TargetFrameworkVersion)' == 'v4.7' OR '$(TargetFrameworkVersion)' == 'v4.6.2'"
