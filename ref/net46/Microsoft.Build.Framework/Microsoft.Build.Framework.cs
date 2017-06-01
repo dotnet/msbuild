@@ -338,13 +338,13 @@ namespace Microsoft.Build.Framework
     public sealed partial class ProjectEvaluationFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         public ProjectEvaluationFinishedEventArgs() { }
-        public ProjectEvaluationFinishedEventArgs(string message) { }
+        public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs) { }
         public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         public ProjectEvaluationStartedEventArgs() { }
-        public ProjectEvaluationStartedEventArgs(string message) { }
+        public ProjectEvaluationStartedEventArgs(string message, params object[] messageArgs) { }
         public string ProjectFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class ProjectFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
