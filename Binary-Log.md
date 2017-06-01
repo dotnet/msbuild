@@ -25,6 +25,14 @@ You can use the binary logger simultaneously with other loggers, such as text fi
 
 When using the binary logger all other log formats are technically redundant since you can later reconstruct all the other logs from the binary log. To turn off console logging, pass the `/noconlog` switch. Builds will usually be much faster if you don't pass the console and file loggers.
 
+# Replaying a binary log
+
+Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a `.binlog` file to the diagnostic verbosity text log:
+
+```
+> msbuild.exe msbuild.binlog /noconlog /flp:v=diag;logfile=diag.log
+```
+
 # Creating a binary log with older MSBuild versions
 
 It is also possible to use the BinaryLogger with older MSBuild versions, such as MSBuild 14.0. For this you'll need the StructuredLogger.dll available here:
@@ -36,14 +44,6 @@ Once you have the `StructuredLogger.dll` on disk you can pass it to MSBuild like
 
 ```
 > msbuild.exe /logger:BinaryLogger,"path\to\StructuredLogger.dll";msbuild.binlog
-```
-
-# Replaying a binary log
-
-Instead of passing the project/solution to MSBuild.exe you can now pass a binary log to "build". This will replay all events to all other loggers (just the console by default). Here's an example of replaying a `.binlog` file to the diagnostic verbosity text log:
-
-```
-> msbuild.exe msbuild.binlog /noconlog /flp:v=diag;logfile=diag.log
 ```
 
 # Using MSBuild Structured Log Viewer
