@@ -1,7 +1,0 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <NETStandardLibraryNETFrameworkTargets Condition="'$(NETStandardLibraryNETFrameworkTargets)' == ''">$(MSBuildExtensionsPath)\Microsoft.NET.Build.Extensions\NETStandard.Library.NETFramework.targets</NETStandardLibraryNETFrameworkTargets>
-  </PropertyGroup>
-
-  <Import Project="$(NETStandardLibraryNETFrameworkTargets)" />
-</Project>

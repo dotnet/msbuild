@@ -1,0 +1,13 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion)</_TargetFrameworkVersionWithoutV>
+    <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
+
+    <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == '' AND '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\tools\netcoreapp1.0\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
+    <MicrosoftNETBuildExtensionsTasksAssembly Condition="'$(MicrosoftNETBuildExtensionsTasksAssembly)' == ''">$(MSBuildThisFileDirectory)\tools\net46\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
+  </PropertyGroup>
+
+  <Import Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Project="Microsoft.NET.Build.Extensions.NETFramework.targets"/>
+
+</Project>
