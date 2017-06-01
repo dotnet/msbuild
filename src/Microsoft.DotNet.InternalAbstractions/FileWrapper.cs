@@ -40,5 +40,10 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             {
             }
         }
+
+        public void WriteAllText(string path, string content)
+        {
+            File.WriteAllText(path, content);
+        }
     }
 }

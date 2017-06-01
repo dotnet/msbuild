@@ -88,7 +88,6 @@ if ($LastExitCode -ne 0)
     exit $LastExitCode
 }
 
-
 Write-Output "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
 Invoke-Expression "$dotnetInstallPath -Channel ""master"" -InstallDir $env:DOTNET_INSTALL_DIR_PJ -Architecture ""$Architecture"" -Version 1.0.0-preview2-1-003177"
 if ($LastExitCode -ne 0)

@@ -60,6 +60,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         private class FileMock : IFile
         {
             private Dictionary<string, string> _files;
+            
             public FileMock(Dictionary<string, string> files)
             {
                 _files = files;
@@ -99,6 +100,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             public void CreateEmptyFile(string path)
             {
                 _files.Add(path, string.Empty);
+            }
+
+            public void WriteAllText(string path, string content)
+            {
+                _files[path] = content;
             }
         }
 
