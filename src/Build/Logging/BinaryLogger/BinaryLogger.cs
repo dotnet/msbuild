@@ -24,6 +24,34 @@ namespace Microsoft.Build.Logging
         private Stream stream;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
+        private ProjectImportsCollector projectImportsCollector;
+
+        /// <summary>
+        /// Describes whether to collect the project files (including imported project files) used during the build.
+        /// If the project files are collected they can be embedded in the log file or as a separate zip archive.
+        /// </summary>
+        public enum ProjectImportsCollectionMode
+        {
+            /// <summary>
+            /// Don't collect any files during the build.
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// Embed all project files directly in the log file.
+            /// </summary>
+            Embed,
+
+            /// <summary>
+            /// Create an external .ProjectImports.zip archive for the project files.
+            /// </summary>
+            ZipFile
+        }
+
+        /// <summary>
+        /// Gets or sets whether to capture and embed project and target source files used during the build.
+        /// </summary>
+        public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
         private string FilePath { get; set; }
 
@@ -50,6 +78,11 @@ namespace Microsoft.Build.Logging
             try
             {
                 stream = new FileStream(FilePath, FileMode.Create);
+
+                if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                {
+                    projectImportsCollector = new ProjectImportsCollector(FilePath);
+                }
             }
             catch (Exception e)
             {
@@ -73,6 +106,26 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Shutdown()
         {
+            if (projectImportsCollector != null)
+            {
+                projectImportsCollector.Close();
+
+                if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
+                {
+                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
+
+                    // It is possible that the archive couldn't be created for some reason.
+                    // Only embed it if it actually exists.
+                    if (File.Exists(archiveFilePath))
+                    {
+                        eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, File.ReadAllBytes(archiveFilePath));
+                        File.Delete(archiveFilePath);
+                    }
+                }
+
+                projectImportsCollector = null;
+            }
+
             if (stream != null)
             {
                 // It's hard to determine whether we're at the end of decoding GZipStream
@@ -98,6 +151,27 @@ namespace Microsoft.Build.Logging
                 {
                     eventArgsWriter.Write(e);
                 }
+
+                if (projectImportsCollector != null)
+                {
+                    CollectImports(e);
+                }
+            }
+        }
+
+        private void CollectImports(BuildEventArgs e)
+        {
+            ProjectImportedEventArgs importArgs = e as ProjectImportedEventArgs;
+            if (importArgs != null && importArgs.ImportedProjectFile != null)
+            {
+                projectImportsCollector.AddFile(importArgs.ImportedProjectFile);
+                return;
+            }
+
+            ProjectStartedEventArgs projectArgs = e as ProjectStartedEventArgs;
+            if (projectArgs != null)
+            {
+                projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
         }
 
@@ -110,17 +184,44 @@ namespace Microsoft.Build.Logging
         {
             if (Parameters == null)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", 0, Parameters));
+                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", ""));
             }
 
-            string[] parameters = Parameters.Split(';');
-
-            if (parameters.Length != 1)
+            var parameters = Parameters.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var parameter in parameters)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameters.Length, Parameters));
+                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+                {
+                    CollectProjectImports = ProjectImportsCollectionMode.None;
+                }
+                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
+                {
+                    CollectProjectImports = ProjectImportsCollectionMode.Embed;
+                }
+                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
+                {
+                    CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
+                }
+                else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
+                {
+                    FilePath = parameter;
+                    if (FilePath.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        FilePath = FilePath.Substring("LogFile=".Length);
+                    }
+
+                    FilePath = parameter.TrimStart('"').TrimEnd('"');
+                }
+                else
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameter));
+                }
             }
 
-            FilePath = parameters[0].TrimStart('"').TrimEnd('"');
+            if (FilePath == null)
+            {
+                FilePath = "msbuild.binlog";
+            }
 
             try
             {

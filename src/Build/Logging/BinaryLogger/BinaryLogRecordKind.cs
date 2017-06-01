@@ -18,6 +18,7 @@
         CriticalBuildMessage,
         ProjectEvaluationStarted,
         ProjectEvaluationFinished,
-        ProjectImported
+        ProjectImported,
+        ProjectImportArchive
     }
 }
