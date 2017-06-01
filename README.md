@@ -73,7 +73,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
 | **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
-| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - **See Linux x64** |
+| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Debian 8**  | tar.gz - See **Linux x64** |
