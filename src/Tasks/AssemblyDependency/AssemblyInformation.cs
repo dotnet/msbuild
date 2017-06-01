@@ -337,6 +337,12 @@ namespace Microsoft.Build.Tasks
 
             return frameworkAttribute;
 #else
+            return CoreGetFrameworkName();
+#endif
+        }
+
+        private FrameworkName CoreGetFrameworkName()
+        {
             using (var stream = File.OpenRead(_sourceFile))
             using (var peFile = new PEReader(stream))
             {
@@ -353,8 +359,8 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    var container = metadataReader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
-                    var name = metadataReader.GetTypeReference((TypeReferenceHandle)container).Name;
+                    var container = metadataReader.GetMemberReference((MemberReferenceHandle) ctorHandle).Parent;
+                    var name = metadataReader.GetTypeReference((TypeReferenceHandle) container).Name;
                     if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
                     {
                         continue;
@@ -365,11 +371,9 @@ namespace Microsoft.Build.Tasks
                     {
                         return new FrameworkName(arguments[0]);
                     }
-
                 }
             }
             return null;
-#endif
         }
 
 // Enabling this for MONO, because it's required by GetFrameworkName.
@@ -588,6 +592,12 @@ namespace Microsoft.Build.Tasks
             return (AssemblyNameExtension[])asmRefs.ToArray(typeof(AssemblyNameExtension));
 #else
 
+            return CoreImportAssemblyDependencies();
+#endif
+        }
+
+        private AssemblyNameExtension[] CoreImportAssemblyDependencies()
+        {
             List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
 
             using (var stream = File.OpenRead(_sourceFile))
@@ -615,14 +625,13 @@ namespace Microsoft.Build.Tasks
                             assemblyName.SetPublicKey(publicKeyOrToken);
                         }
                     }
-                    assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+                    assemblyName.Flags = (AssemblyNameFlags) (int) entry.Flags;
 
                     ret.Add(new AssemblyNameExtension(assemblyName));
                 }
             }
 
             return ret.ToArray();
-#endif
         }
 
         /// <summary>
