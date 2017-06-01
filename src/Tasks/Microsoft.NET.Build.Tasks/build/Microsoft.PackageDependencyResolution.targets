@@ -145,6 +145,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.ResolvePackageDependencies"
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.CheckForTargetInAssetsFile"
+           AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- The condition on this target causes it to be skipped during design-time builds if
         the restore operation hasn't run yet.  This is to avoid displaying an error in
@@ -152,6 +154,15 @@ Copyright (c) .NET Foundation. All rights reserved.
         run and created the assets file. -->
   <Target Name="RunResolvePackageDependencies"
           Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+    
+    <!-- Verify that the assets file has a target for the right framework.  Otherwise, if we restored for the
+         wrong framework, we'd end up finding no references to pass to the compiler, and we'd get a ton of
+         compile errors. -->
+    <CheckForTargetInAssetsFile
+      AssetsFilePath="$(ProjectAssetsFile)"
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      RuntimeIdentifier="$(RuntimeIdentifier)" />
+    
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"

@@ -17,6 +17,9 @@ using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using NuGet.ProjectModel;
+using NuGet.Common;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -665,19 +668,46 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_passes_ridless_target_to_compiler()
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "RidlessLib")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var fullPathProjectFile = new BuildCommand(Log, libraryProjectDirectory).FullPathProjectFile;
+            var testProject = new TestProject()
+            {
+                Name = "CompileDoesntUseRid",
+                TargetFrameworks = "netcoreapp2.0",
+                RuntimeIdentifier = runtimeIdentifier,
+                IsSdkProject = true
+            };
 
-            // compile should still pass with unknown RID because references are always pulled 
-            // from RIDLess target
-            var buildCommand = new MSBuildCommand(Log, "Compile", fullPathProjectFile);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    //  Set property to disable logic in Microsoft.NETCore.App package that will otherwise cause a failure
+                    //  when we remove everything under the rid-specific targets in the assets file
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Element(ns + "PropertyGroup")
+                        .Add(new XElement(ns + "EnsureNETCoreAppRuntime", false));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            //  Test that compilation doesn't depend on any rid-specific assets by removing them from the assets file after it's been restored
+            var assetsFilePath = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "project.assets.json");
+
+            JObject assetsContents = JObject.Parse(File.ReadAllText(assetsFilePath));
+            foreach (JProperty target in assetsContents["targets"])
+            {
+                if (target.Name.Contains("/"))
+                {
+                    //  This is a target element with a RID specified, so remove all its contents
+                    target.Value = new JObject();
+                }
+            }
+            string newContents = assetsContents.ToString();
+            File.WriteAllText(assetsFilePath, newContents);
+
             buildCommand
-                .Execute("/p:RuntimeIdentifier=unkownrid")
+                .Execute()
                 .Should()
                 .Pass();
         }

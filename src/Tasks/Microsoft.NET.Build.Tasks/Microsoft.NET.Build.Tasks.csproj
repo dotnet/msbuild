@@ -47,8 +47,8 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
     <Compile Update="Resources\Strings.Designer.cs">
-      <DesignTime>true</DesignTime>
-      <AutoGen>true</AutoGen>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
