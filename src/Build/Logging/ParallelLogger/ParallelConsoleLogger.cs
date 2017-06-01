@@ -1071,6 +1071,30 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
+        public override void StatusEventHandler(object sender, BuildStatusEventArgs e)
+        {
+            if (showPerfSummary)
+            {
+                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
+
+                if (projectEvaluationStarted != null)
+                {
+                    MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
+                    counter.AddEventStarted(null, e.BuildEventContext, e.Timestamp, s_compareContextNodeId);
+
+                    return;
+                }
+
+                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
+
+                if (projectEvaluationFinished != null)
+                {
+                    MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
+                    counter.AddEventFinished(null, e.BuildEventContext, e.Timestamp);
+                }
+            }
+        }
+
         private void DisplayDeferredStartedEvents(BuildEventContext e)
         {
             if (showOnlyErrors || showOnlyWarnings) return;
