@@ -27,9 +27,10 @@ namespace Microsoft.Build.Framework
         (
             int lineNumber,
             int columnNumber,
-            string message
+            string message,
+            params object[] messageArgs
         )
-            : base(null, null, null, lineNumber, columnNumber, 0, 0, message, null, null, MessageImportance.Low)
+            : base(null, null, null, lineNumber, columnNumber, 0, 0, message, null, null, MessageImportance.Low, DateTime.UtcNow, messageArgs)
         {
         }
 
