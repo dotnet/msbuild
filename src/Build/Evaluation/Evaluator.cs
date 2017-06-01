@@ -791,7 +791,7 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.FormatResourceString("EvaluationStarted", projectFile))
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile)
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile
@@ -949,7 +949,7 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.FormatResourceString("EvaluationFinished", projectFile))
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile
