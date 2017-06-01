@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
@@ -50,20 +51,32 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 }
 
                 msbuildSdksDir = Path.Combine(netcoreSdkDir, "Sdks");
-                netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;;
-            }
+                netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;
 
-            if (!IsNetCoreSDKOveridden(netcoreSdkVersion) && 
-                IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
-            {
-                return factory.IndicateFailure(
-                    new[]
-                    {
-                        $"Version {netcoreSdkVersion} of the SDK is smaller than the minimum version"
-                        + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
-                        + " installed, increase the minimum version specified in the project, or increase"
-                        + " the version specified in global.json."
-                    });
+                if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
+                {
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK is smaller than the minimum version"
+                            + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
+                            + " installed, increase the minimum version specified in the project, or increase"
+                            + " the version specified in global.json."
+                        });
+                }
+                string minimumMSBuildVersionString = GetMinimumMSBuildVersion(netcoreSdkDir);
+                var minimumMSBuildVersion = Version.Parse(minimumMSBuildVersionString);
+                if (context.MSBuildVersion < minimumMSBuildVersion)
+                {
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK requires at least version {minimumMSBuildVersionString}"
+                            + $" of MSBuild. The current available version of MSBuild is {context.MSBuildVersion.ToString()}."
+                            + " Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild"
+                            + " version currently available."
+                        });
+                }
             }
 
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
@@ -80,9 +93,18 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion);
         }
 
-        private bool IsNetCoreSDKOveridden(string netcoreSdkVersion)
+        private static string GetMinimumMSBuildVersion(string netcoreSdkDir)
         {
-            return netcoreSdkVersion == null;
+            string minimumVersionFilePath = Path.Combine(netcoreSdkDir, "minimumMSBuildVersion");
+            if (!File.Exists(minimumVersionFilePath))
+            {
+                // smallest version that had resolver support and also
+                // greater than or equal to the version required by any 
+                // .NET Core SDK that did not have this file.
+                return "15.3.0";  
+            }
+
+            return File.ReadLines(minimumVersionFilePath).First().Trim();
         }
 
         private bool IsNetCoreSDKSmallerThanTheMinimumVersion(string netcoreSdkVersion, string minimumVersion)
@@ -101,7 +123,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return true;
             }
 
-            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) == -1;
+            return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) < 0;
         }
 
         private string ResolveNetcoreSdkDirectory(SdkResolverContext context)

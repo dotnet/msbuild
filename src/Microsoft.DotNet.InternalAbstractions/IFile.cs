@@ -22,5 +22,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             FileOptions fileOptions);
 
         void CreateEmptyFile(string path);
+
+        void WriteAllText(string path, string content);
     }
 }

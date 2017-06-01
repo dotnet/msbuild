@@ -175,6 +175,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 throw new NotImplementedException();
             }
+
+            public void WriteAllText(string path, string content)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class MockStream : MemoryStream

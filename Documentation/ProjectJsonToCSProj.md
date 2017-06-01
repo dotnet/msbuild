@@ -1,4 +1,4 @@
-.NET CLI preview 3 is coming, and with it comes the .csproj project file format and msbuild engine. The team has put a lot of focus on making the transition as seamless as possible, but as with any change of this magnitude there are some gotcha's to keep in mind. This issue explains how to use the .NET CLI during this transitional period.
+.NET CLI preview 3 is here, and with it comes the .csproj project file format and msbuild engine. The team has put a lot of focus on making the transition as seamless as possible, but as with any change of this magnitude there are some gotcha's to keep in mind. This issue explains how to use the .NET CLI during this transitional period.
 
 # Overview
 Starting with @coolcsh's great post [Changes to Project.json](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/) the team has been hard at work moving the .NET command line story from project.json to msbuild. Our plan was fairly straightforward:
@@ -60,3 +60,4 @@ When `preview2` shipped the Visual Studio new project templates included both a 
 We included this file by default as a future-proofing tactic. When the CLI launches it looks for this file in the current directory, or the nearest parent directory, and tries to find a matching version of itself. If an exact match is found then it is used. Otherwise, `dotnet.exe` picks the latest installed CLI. When there is no exact match AND preview3 is installed then we get into trouble because preview3 cannot reason about project.json files.
 
 When working with `preview2` and `preview3` on the same machine we need to be sure that `preview2` projects have a global.json present and that the `version` property is set to an installed preview2 version. This will typically be `1.0.0-preview2-003121` or `1.0.0-preview2-003131`. You can check what is installed by looking in `%PROGRAM FILES%\dotnet\sdk` and checking the folder names. 
+

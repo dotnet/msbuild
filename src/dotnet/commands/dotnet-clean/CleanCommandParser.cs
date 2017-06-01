@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(),
+                CommonOptions.RuntimeOption(),
                 CommonOptions.ConfigurationOption(),
                 CommonOptions.VerbosityOption());
     }

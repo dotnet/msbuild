@@ -5,17 +5,17 @@
 
 function header([string]$message)
 {
-    Write-Host -ForegroundColor Green "*** $message ***"
+    Write-Output -ForegroundColor Green "*** $message ***"
 }
 
 function info([string]$message)
 {
-    Write-Host -ForegroundColor Yellow "*** $message ***"
+    Write-Output -ForegroundColor Yellow "*** $message ***"
 }
 
 function error([string]$message)
 {
-    Write-Host -ForegroundColor Red "$message"
+    Write-Output -ForegroundColor Red "$message"
 }
 
 function setEnvIfDefault([string]$envVarName, [string]$value)

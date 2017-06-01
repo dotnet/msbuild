@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.0-preview2-25319-02</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.0.0-preview2-25331-01</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.3.0-preview-000246-05</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta2-61716-09</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
     <CLI_FSharp_Version>1.0.0-rc-170511-0</CLI_FSharp_Version>
-    <CLI_NETSDK_Version>2.0.0-preview2-20170506-1</CLI_NETSDK_Version>
-    <CLI_NuGet_Version>4.3.0-preview1-2500</CLI_NuGet_Version>
+    <CLI_NETSDK_Version>2.0.0-preview2-20170531-2</CLI_NETSDK_Version>
+    <CLI_NuGet_Version>4.3.0-preview2-4082</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>2.0.0-rel-20170518-512</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.3.0-preview-20170502-03</CLI_TestPlatform_Version>
+    <CLI_TestPlatform_Version>15.3.0-preview-20170601-03</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170523-241</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170523-241</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170523-241</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.0.0-preview2-25319-02</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0-preview2-25319-02</DependencyModelVersion>
+    <TemplateEngineVersion>1.0.0-beta2-20170531-247</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170531-247</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170531-247</TemplateEngineTemplate2_0Version>
+    <PlatformAbstractionsVersion>2.0.0-preview2-25331-01</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.0.0-preview2-25331-01</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>dev-125</AspNetCoreRuntimeVersion>
-    <AspNetCoreCoherenceTimestamp>preview2-25159</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreRuntimeVersion>dev-134</AspNetCoreRuntimeVersion>
+    <AspNetCoreCoherenceTimestamp>preview2-25332</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
   <PropertyGroup>
     <VersionToolsVersion>1.0.27-prerelease-01611-04</VersionToolsVersion>
-    <DotnetDebToolVersion>2.0.0-preview1-001877</DotnetDebToolVersion>
+    <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
   </PropertyGroup>
 </Project>
