@@ -258,14 +258,10 @@
     <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
   </data>
-  <data name="Shared.InvalidEscapeHatchValue">
-    <value>MSB5025: Invalid escape hatch value: {0}</value>
-    <comment>{StrBegin="MSB5021: "}</comment>
-  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5026
+        Next message code should be MSB5025
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
