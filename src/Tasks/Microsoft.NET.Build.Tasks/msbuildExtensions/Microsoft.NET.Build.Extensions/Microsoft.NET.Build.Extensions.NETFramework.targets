@@ -8,7 +8,6 @@
   <Choose>
     <!-- Allow completely disabling the conflict resolution targets-->
     <When Condition="'$(ImplicitlyExpandNETStandardFacades)' != 'true'" />
-    <!-- Condition here is a hack until https://github.com/dotnet/sdk/issues/534 is fixed -->
     <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
       <!-- .NET SDK: Run after references are resolved -->
       <PropertyGroup>
@@ -16,13 +15,13 @@
       </PropertyGroup>
     </When>
     <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
-      <!-- NuGet3 targets: run after nuget assets are resolved -->
+      <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
       <PropertyGroup>
         <ImplicitlyExpandNETStandardFacadesAfter>ResolveNuGetPackageAssets</ImplicitlyExpandNETStandardFacadesAfter>
       </PropertyGroup>
     </When>
     <Otherwise>
-      <!-- NuGet 2, run before targets that consume references -->
+      <!-- No specific NuGet targets to sequence after, run before targets that consume references -->
       <PropertyGroup>
         <ResolveAssemblyReferencesDependsOn>ImplicitlyExpandNETStandardFacades;$(ResolveAssemblyReferencesDependsOn)</ResolveAssemblyReferencesDependsOn>
         <PrepareResourcesDependsOn>ImplicitlyExpandNETStandardFacades;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
@@ -50,11 +49,12 @@
     </PropertyGroup>
 
     <!-- determine if any references depend on NETStandard -->
-    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true'" 
+    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true' AND '@(_candidateNETStandardReferences)' != ''" 
                              References="@(_candidateNETStandardReferences)">
       <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
     </GetDependsOnNETStandard>
 
+    <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
     <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
       <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                                 Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
@@ -75,9 +75,11 @@
                                           Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll'" />
 
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
-           consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
+           consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in 
+           _NETStandardLibraryNETFrameworkReference.
            Simple references can also come from NuGet framework assemblies, hence this statement should occur after
-           including all computed references. -->
+           including all computed references, thus this target is scheduled after references have been raised by NuGet
+           targets. -->
       <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
 
       <Reference Include="@(_NETStandardLibraryNETFrameworkReference)">

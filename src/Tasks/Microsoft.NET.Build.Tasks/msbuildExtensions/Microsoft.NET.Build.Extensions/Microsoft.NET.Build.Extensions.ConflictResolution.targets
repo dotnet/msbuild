@@ -5,12 +5,6 @@
     <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
     <!-- SDK projects have built in conflict resolution that understands assets/deps file -->
     <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
-    <When Condition="'$(TargetFramework)' != '' or '$(TargetFrameworks)' != ''">
-      <!-- SDK project missing inbox conflict resolution.  Emit an error -->
-      <PropertyGroup>
-        <PackagingToolsInsufficientSDKVersionAfter>ResolvePackageDependenciesForBuild</PackagingToolsInsufficientSDKVersionAfter>
-      </PropertyGroup>
-    </When>
     <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
       <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
       <PropertyGroup>
@@ -25,10 +19,6 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
-
-  <Target Name="PackagingToolsInsufficientSDKVersion" Condition="'$(PackagingToolsInsufficientSDKVersion)' != 'false'" AfterTargets="$(PackagingToolsInsufficientSDKVersionAfter)">
-    <Error Text="The version of Microsoft.NET.Sdk used by this project is insufficient to support this package.  Please ensure you are using the .NET Core SDK 2.0 or higher, which is included in Visual Studio 2017 Update 15.3.  This error may be suppressed by setting PackagingToolsInsufficientSDKVersion=false." />
-  </Target>
   
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <Target Name="HandlePackageFileConflicts" AfterTargets="$(HandlePackageFileConflictsAfter)" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">

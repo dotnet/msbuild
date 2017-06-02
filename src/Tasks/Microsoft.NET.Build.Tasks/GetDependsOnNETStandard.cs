@@ -29,8 +29,6 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             DependsOnNETStandard = AnyReferenceDependsOnNETStandard();
-
-            return;
         }
 
         private bool AnyReferenceDependsOnNETStandard()
