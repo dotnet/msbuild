@@ -55,8 +55,9 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_usedLibraryNames == null)
                 {
-                    _usedLibraryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    _usedLibraryNames.AddRange(_projectContext.LockFile.Libraries.Select(l => l.Name));
+                    _usedLibraryNames = new HashSet<string>(
+                        _projectContext.LockFile.Libraries.Select(l => l.Name),
+                        StringComparer.OrdinalIgnoreCase);
                 }
 
                 return _usedLibraryNames;
