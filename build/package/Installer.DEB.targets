@@ -52,8 +52,7 @@
     <!-- Output Directories -->
     <PropertyGroup>
       <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-      <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
-
+      <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
       <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
       <DotNetDebToolOutputDirectory>$(SdkDebianIntermediateDirectory)/deb-tool-output</DotNetDebToolOutputDirectory>
       <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>

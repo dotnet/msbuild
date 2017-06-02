@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <CoreSetupRid>$(Rid)</CoreSetupRid>
-    <CoreSetupRid Condition=" '$(OSName)' == 'win' or '$(OSName)' == 'osx' ">$(ProductMonikerRid)</CoreSetupRid>
+    <CoreSetupRid>$(HostRid)</CoreSetupRid>
+    <CoreSetupRid Condition=" '$(HostOSName)' == 'win' or '$(HostOSName)' == 'osx' ">$(HostMonikerRid)</CoreSetupRid>
 
     <!-- only the runtime OSX .pkgs have a `-internal` suffix -->
     <InstallerStartSuffix Condition="'$(OSName)' == 'osx'">-internal</InstallerStartSuffix>
