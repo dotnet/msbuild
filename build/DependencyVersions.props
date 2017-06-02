@@ -26,7 +26,7 @@
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
     <AspNetCoreRuntimeVersion>2.0.0-preview2-142</AspNetCoreRuntimeVersion>
     <AspNetCoherenceLabel>preview2</AspNetCoherenceLabel>
-    <AspNetCoreCoherenceTimestamp>25345</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreCoherenceTimestamp>25368</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
