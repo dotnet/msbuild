@@ -12,10 +12,6 @@
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
-    },
-    "UseBrowserLink": {
-      "longName": "use-browser-link",
-      "shortName": ""
     }
   },
   "usageExamples": [

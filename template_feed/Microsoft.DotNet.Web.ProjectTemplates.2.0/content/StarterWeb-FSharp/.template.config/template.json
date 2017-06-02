@@ -45,12 +45,6 @@
         "format": "yyyy"
       }
     },
-    "UseBrowserLink": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "description": "Whether or not to include BrowserLink in the project"
-    },
     "skipRestore": {
       "type": "parameter",
       "datatype": "bool",
