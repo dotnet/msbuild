@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:BuildProjectReferences=false")),
+                CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
 }

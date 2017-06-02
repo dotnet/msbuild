@@ -39,6 +39,7 @@ namespace Microsoft.DotNet.Cli
                     "-s|--serviceable",
                     LocalizableStrings.CmdServiceableDescription,
                     Accept.NoArguments().ForwardAs("/p:Serviceable=true")),
+                CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
 }

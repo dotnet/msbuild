@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.Cli
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
                             return $"/p:SelfContained={value}";
                         })),
+                CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
 }

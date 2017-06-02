@@ -65,5 +65,11 @@ namespace Microsoft.DotNet.Cli
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
             rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+
+        public static Option NoRestoreOption() =>
+            Create.Option(
+                "--no-restore",
+                CommonLocalizableStrings.NoRestoreDescription,
+                Accept.NoArguments());
     }
 }

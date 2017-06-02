@@ -81,6 +81,7 @@ namespace Microsoft.DotNet.Cli
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.cmdCollectFriendlyName)
                               .ForwardAsSingle(o => $"/p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
+                  CommonOptions.NoRestoreOption(),
                   CommonOptions.VerbosityOption());
 
         private static string GetSemiColonEsacpedstring(string arg)

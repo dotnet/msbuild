@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli
                         project: o.SingleArgumentOrDefault("--project"),
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
+                        noRestore: o.HasOption("--no-restore"),
                         args: o.Arguments
                     )),
                 options: new[]
@@ -45,7 +46,8 @@ namespace Microsoft.DotNet.Cli
                     Create.Option(
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
-                        Accept.NoArguments())
+                        Accept.NoArguments()),
+                    CommonOptions.NoRestoreOption(),
                 });
     }
 }
