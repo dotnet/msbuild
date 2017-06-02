@@ -36,9 +36,9 @@ namespace Company.WebApplication1
 #if (IndividualLocalAuth)
             services.AddIdentityServiceAuthentication();
 #elseif (IndividualB2CAuth)
-            services.AddAzureAdB2CWebApiAuthentication();
+            services.AddAzureAdB2CBearerAuthentication();
 #elseif (OrganizationalAuth)
-            services.AddAzureAdWebApiAuthentication();
+            services.AddAzureAdBearerAuthentication();
 #endif
 #if (OrganizationalAuth || IndividualAuth)
 

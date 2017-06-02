@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #if (IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.Extensions;
 #endif
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 #if (IndividualB2CAuth)
 using Microsoft.Extensions.Options;
@@ -45,18 +45,13 @@ namespace Company.WebApplication1.Controllers
         [HttpGet]
         public IActionResult ResetPassword()
         {
-            var properties = new AuthenticationProperties() { RedirectUri = "/" };
-            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.ResetPasswordPolicyId;
-            return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
+            return Challenge(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme);
         }
 
         [HttpGet]
-        public async Task EditProfile()
+        public IActionResult EditProfile()
         {
-            var properties = new AuthenticationProperties() { RedirectUri = "/" };
-            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.EditProfilePolicyId;
-            await HttpContext.ChallengeAsync(
-                OpenIdConnectDefaults.AuthenticationScheme, properties, ChallengeBehavior.Unauthorized);
+            return Challenge(AzureAdB2CDefaults.EditProfileAuthenticationScheme);
         }
         
 #endif

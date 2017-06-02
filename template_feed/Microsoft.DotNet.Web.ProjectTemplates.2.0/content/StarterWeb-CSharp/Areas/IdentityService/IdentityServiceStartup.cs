@@ -29,9 +29,9 @@ namespace Company.WebApplication1.Identity
                 // Add framework services.
                 services.AddDbContext<IdentityServiceDbContext>(options =>
 #if (UseLocalDB)
-                    options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlServer("name=DefaultConnection"));
 #else
-                    options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlite("name=DefaultConnection"));
 #endif
 
                 services.AddIdentity<ApplicationUser, IdentityRole>()
