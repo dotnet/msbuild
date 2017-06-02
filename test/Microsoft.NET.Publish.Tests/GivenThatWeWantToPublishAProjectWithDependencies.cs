@@ -200,9 +200,7 @@ namespace Microsoft.NET.Publish.Tests
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
 
-        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-        //  See https://github.com/dotnet/sdk/issues/1077
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("GenerateDocumentationFile=true", true, true)]
         [InlineData("GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true)]
         [InlineData("GenerateDocumentationFile=true;PublishReferencesDocumentationFiles=false", true, false)]
@@ -245,13 +243,6 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("PublishReferencesDocumentationFiles=true", true)]
         public void It_publishes_referenced_assembly_documentation(string property, bool expectAssemblyDocumentationFilePublished)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var identifier = property.Replace("=", "");
 
             var libProject = new TestProject

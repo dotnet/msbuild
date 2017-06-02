@@ -27,11 +27,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net46", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 net45 net451 net46", true, true)]
         [InlineData("net461", "PartialM3", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 net45 net451 net46 net461", true, true)]
         [InlineData("net462", "PartialM2", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 net45 net451 net46 net461", true, true)]
-        //  Fullframework NuGet versioning on Jenkins infrastructure issue
-        //        https://github.com/dotnet/sdk/issues/1041
-        //[InlineData("net461", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
-        //[InlineData("net462", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
-
+        [InlineData("net461", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
+        [InlineData("net462", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
         [InlineData("netstandard1.0", "FullMatrix", "netstandard1.0", true, true)]
         [InlineData("netstandard1.1", "FullMatrix", "netstandard1.0 netstandard1.1", true, true)]
         [InlineData("netstandard1.2", "FullMatrix", "netstandard1.0 netstandard1.1 netstandard1.2", true, true)]
@@ -48,16 +45,6 @@ namespace Microsoft.NET.Build.Tests
         public void Project_reference_compat(string referencerTarget, string testIDPostFix, string rawDependencyTargets, 
                 bool restoreSucceeds, bool buildSucceeds)
         {
-            if (UsingFullFrameworkMSBuild && referencerTarget == "netcoreapp2.0")
-            {
-                //  Fullframework NuGet versioning on Jenkins infrastructure issue
-                //        https://github.com/dotnet/sdk/issues/1041
-
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             string identifier = "_TestID_" + referencerTarget + "_" + testIDPostFix;
 
             TestProject referencerProject = GetTestProject("Referencer", referencerTarget, true);
