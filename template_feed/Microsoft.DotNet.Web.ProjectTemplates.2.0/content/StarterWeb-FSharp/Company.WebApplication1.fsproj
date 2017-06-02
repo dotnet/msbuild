@@ -14,12 +14,12 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25345" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25368" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25345" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25345" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25345" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25368" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25368" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25368" />
   </ItemGroup>
 
 </Project>
