@@ -63,7 +63,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void compose_dependencies()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -121,7 +121,7 @@ namespace Microsoft.NET.Publish.Tests
             }
 
         }
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void compose_with_fxfiles()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -155,7 +155,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void compose_dependencies_noopt()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -191,7 +191,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void store_nativeonlyassets()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -218,7 +218,7 @@ namespace Microsoft.NET.Publish.Tests
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void compose_multifile()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -264,7 +264,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void It_uses_star_versions_correctly()
         {
             TestAsset targetManifestsAsset = _testAssetsManager
@@ -305,7 +305,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void It_creates_profiling_symbols()
         {
             TestAsset targetManifestsAsset = _testAssetsManager
