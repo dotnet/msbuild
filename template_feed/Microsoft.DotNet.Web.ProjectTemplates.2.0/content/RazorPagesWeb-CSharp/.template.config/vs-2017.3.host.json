@@ -15,6 +15,7 @@
   "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784881",
   "uiFilters": [ "oneaspnet" ],
   "supportsDocker": true,
+  "useBrowserLink": true,
   "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.RazorPages",
   "minFullFrameworkVersion": "4.6.1"
 }
