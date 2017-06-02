@@ -117,6 +117,7 @@ namespace Microsoft.NET.TestFramework
             command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.NuGetCachePath);
 
             command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
+            command = command.EnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR", RepoInfo.SdksPath);
 
             command = command.EnvironmentVariable("NETCoreSdkBundledVersionsProps", Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props"));
 
