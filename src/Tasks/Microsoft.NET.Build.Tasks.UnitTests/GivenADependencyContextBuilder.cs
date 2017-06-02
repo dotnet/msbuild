@@ -1,8 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.IO;
 using FluentAssertions;
 using FluentAssertions.Json;
 using Microsoft.Build.Framework;
@@ -11,6 +9,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -43,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             IEnumerable<ReferenceInfo> directReferences =
                 ReferenceInfo.CreateDirectReferenceInfos(
-                    referencePaths ?? new ITaskItem[] { }, 
+                    referencePaths ?? new ITaskItem[] { },
                     referenceSatellitePaths ?? new ITaskItem[] { });
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
@@ -85,19 +86,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             get
             {
-                CompilationOptions compilationOptions = new CompilationOptions(
-                    defines: new[] { "DEBUG", "TRACE" },
-                    languageVersion: "6",
-                    platform: "x64",
-                    allowUnsafe: true,
-                    warningsAsErrors: false,
-                    optimize: null,
-                    keyFile: "../keyfile.snk",
-                    delaySign: null,
-                    publicSign: null,
-                    debugType: "portable",
-                    emitEntryPoint: true,
-                    generateXmlDocumentation: true);
+                CompilationOptions compilationOptions = CreateCompilationOptions();
 
                 ITaskItem[] dotnetNewSatelliteAssemblies = new ITaskItem[]
                 {
@@ -182,6 +171,121 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     }
                 }
             }
+        }
+
+        [Fact]
+        public void ItDoesntCreateReferenceAssembliesWhenNoCompilationOptions()
+        {
+            DependencyContext dependencyContext = BuildDependencyContextWithReferenceAssemblies(useCompilationOptions: false);
+
+            dependencyContext.CompileLibraries.Should().BeEmpty();
+            dependencyContext
+                .RuntimeLibraries
+                .Should()
+                .NotContain(l => l.Type == "referenceassembly");
+            dependencyContext
+                .RuntimeLibraries
+                .SelectMany(l => l.Dependencies)
+                .Should()
+                .NotBeEmpty()
+                .And
+                .NotContain(d => d.Name == "System.NotConflicting")
+                .And
+                .NotContain(d => d.Name == "System.Collections.NonGeneric.Reference");
+        }
+
+        [Fact]
+        public void ItHandlesReferenceAndPackageReferenceNameCollisions()
+        {
+            DependencyContext dependencyContext = BuildDependencyContextWithReferenceAssemblies(useCompilationOptions: true);
+
+            dependencyContext.CompileLibraries.Should()
+                .Contain(c => c.Name == "System.NotConflicting" && c.Type == "referenceassembly");
+
+            // Note: System.Collections.NonGeneric is referenced in the lockfile, so DependencyContextBuilder
+            // appends ".Reference" to make it unique
+            dependencyContext.CompileLibraries.Should()
+                .Contain(c => c.Name == "System.Collections.NonGeneric.Reference" && c.Type == "referenceassembly");
+            dependencyContext.CompileLibraries.Should()
+                .Contain(c => c.Name == "System.Collections.NonGeneric.Reference.Reference" && c.Type == "referenceassembly");
+        }
+
+        private DependencyContext BuildDependencyContextWithReferenceAssemblies(bool useCompilationOptions)
+        {
+            string mainProjectName = "simple.dependencies";
+            LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
+
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                "/usr/Path",
+                mainProjectName,
+                ".dll",
+                "1.0.0",
+                new ITaskItem[] { });
+
+            ITaskItem[] referencePaths = new ITaskItem[]
+            {
+                new MockTaskItem(
+                    "/usr/Path/System.NotConflicting.dll",
+                    new Dictionary<string, string>
+                    {
+                        { "CopyLocal", "false" },
+                        { "FusionName", "System.NotConflicting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null" },
+                        { "Version", "" },
+                    }),
+                new MockTaskItem(
+                    "/usr/Path/System.Collections.NonGeneric.dll",
+                    new Dictionary<string, string>
+                    {
+                        { "CopyLocal", "false" },
+                        { "FusionName", "System.Collections.NonGeneric, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null" },
+                        { "Version", "" },
+                    }),
+                new MockTaskItem(
+                    "/usr/Path/System.Collections.NonGeneric.Reference.dll",
+                    new Dictionary<string, string>
+                    {
+                        { "CopyLocal", "false" },
+                        { "FusionName", "System.Collections.NonGeneric.Reference, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null" },
+                        { "Version", "" },
+                    }),
+            };
+
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                runtime: null,
+                platformLibraryName: Constants.DefaultPlatformLibrary,
+                isSelfContained: false);
+
+            CompilationOptions compilationOptions = 
+                useCompilationOptions ? CreateCompilationOptions() :
+                null;
+
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithReferenceAssemblies(ReferenceInfo.CreateReferenceInfos(referencePaths))
+                .WithCompilationOptions(compilationOptions)
+                .Build();
+
+            // ensure the DependencyContext can be written out successfully - it has no duplicate dependency names
+            Save(dependencyContext);
+
+            return dependencyContext;
+        }
+
+        private static CompilationOptions CreateCompilationOptions()
+        {
+            return new CompilationOptions(
+                    defines: new[] { "DEBUG", "TRACE" },
+                    languageVersion: "6",
+                    platform: "x64",
+                    allowUnsafe: true,
+                    warningsAsErrors: false,
+                    optimize: null,
+                    keyFile: "../keyfile.snk",
+                    delaySign: null,
+                    publicSign: null,
+                    debugType: "portable",
+                    emitEntryPoint: true,
+                    generateXmlDocumentation: true);
         }
     }
 }
