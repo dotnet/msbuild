@@ -29,10 +29,10 @@
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
-      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)-$(CoreSetupRid)</SharedFxDebianPackageName>
+      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
       <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
-      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)-$(CoreSetupRid)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
     </PropertyGroup>
