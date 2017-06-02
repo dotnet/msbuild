@@ -28,45 +28,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\BuildErrorException.cs">
-      <Link>BuildErrorException.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\ConflictResolution\*.cs">
-      <Link>ConflictResolution\%(FileName)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticsHelper.cs">
-      <Link>DiagnosticsHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticMessageSeverity.cs">
-      <Link>DiagnosticMessageSeverity.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\ItemUtilities.cs">
-      <Link>ItemUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\GetDependsOnNETStandard*.cs">
-      <Link>%(FileName)%(Exetnsion)</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\MetadataKeys.cs">
-      <Link>MetadataKeys.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\NuGetUtils.cs">
-      <Link>NuGetUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\TaskBase.cs">
-      <Link>TaskBase.cs</Link>
-    </Compile>
+    <Compile Include="..\Microsoft.NET.Build.Tasks\BuildErrorException.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\ConflictResolution\*.cs" LinkBase="ConflictResolution" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticsHelper.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\DiagnosticMessageSeverity.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\ItemUtilities.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\GetDependsOnNETStandard*.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\MetadataKeys.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\NuGetUtils.cs" />
+    <Compile Include="..\Microsoft.NET.Build.Tasks\TaskBase.cs" />
     <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+      <LinkBase>Resources</LinkBase>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
     <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.*.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+      <LinkBase>Resources</LinkBase>
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
     <Compile Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.Designer.cs">
-      <Link>Resources\%(FileName)%(Extension)</Link>
+      <LinkBase>Resources</LinkBase>
       <DesignTime>true</DesignTime>
       <AutoGen>true</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
