@@ -105,11 +105,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             result.Should().Fail();
 
-            result.StdOut.Should()
-                         .ContainVisuallySameFragment(
-@"Feeds used:
-      /usr/local/bin
-      https://api.nuget.org/v3/index.json");
+            result.StdOut.Should().ContainVisuallySameFragment(@"source(s): /usr/local/bin, nuget.org");
         }
 
         [Fact]
