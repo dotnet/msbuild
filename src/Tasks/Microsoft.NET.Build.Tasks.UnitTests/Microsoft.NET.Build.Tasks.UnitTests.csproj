@@ -27,7 +27,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GivenAGetDependsOnNETStandardTask.cs" />
     <Compile Include="GivenAConflictResolver.cs" />
     <Compile Include="GivenAProjectContext.cs" />
     <Compile Include="GivenACompilationOptionsConverter.cs" />
