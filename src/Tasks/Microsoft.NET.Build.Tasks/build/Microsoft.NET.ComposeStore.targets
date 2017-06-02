@@ -53,7 +53,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                              TargetFramework=$(_TFM);
                              JitPath=$(JitPath);
                              Crossgen=$(Crossgen);
-                             RestoreProj=$(RestoreProj);
                              DisableImplicitFrameworkReferences=true;
                              SkipUnchangedFiles=$(SkipUnchangedFiles);
                              PreserveStoreLayout=$(PreserveStoreLayout);
@@ -75,7 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns ="@(ResolvedPackagesFromMapper)">
 
     <ItemGroup>
-      <PackageReferencesToStore Include="$(RestoreProj)">
+      <PackageReferencesToStore Include="$(MSBuildProjectFullPath)">
         <AdditionalProperties>
           StorePackageName=%(PackageReference.Identity);
           StorePackageVersion=%(PackageReference.Version);
@@ -98,7 +97,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- Restore phase -->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="RestoreForComposeStore"
-                 Properties="EvaluationIteration=1;"
                  BuildInParallel="$(BuildInParallel)"
                  ContinueOnError="WarnAndContinue">
     </MSBuild>
@@ -107,8 +105,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- Resolve phase-->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="StoreResolver"
-                 Properties="EvaluationIteration=2;
-                             MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReference.Identity)_$([System.String]::Copy('%(PackageReference.Version)').Replace('*','-'))\;"
+                 Properties="MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReference.Identity)_$([System.String]::Copy('%(PackageReference.Version)').Replace('*','-'))\;"
                  BuildInParallel="$(BuildInParallel)"
                  ContinueOnError="WarnAndContinue">
       <Output ItemName="ResolvedPackagesFromMapper" TaskParameter="TargetOutputs" />
@@ -253,7 +250,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ComposeWorkingDir>$([System.IO.Path]::GetFullPath($(ComposeWorkingDir)))</ComposeWorkingDir>
       <StoreStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"StagingDir"))</StoreStagingDir>      <!-- Will contain optimized managed assemblies in nuget cache layout -->
       <StoreSymbolsStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"SymbolsStagingDir"))</StoreSymbolsStagingDir>
-      <RestoreProj>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Restore.csproj"))</RestoreProj>          <!-- To minimize parsing huge input files during restore stage for packages -->
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     </PropertyGroup>
@@ -271,20 +267,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(PublishDir)" />
     <MakeDir  Directories="$(StoreStagingDir)"/>
 
-    <!-- Create a Project to be used for restores-->
-    <PropertyGroup>
-      <RestoreProjContent>
-        <![CDATA[
-<Project Sdk="Microsoft.NET.Sdk">
-</Project>
-]]>
-      </RestoreProjContent>
-    </PropertyGroup>
-
-    <WriteLinesToFile
-        File="$(RestoreProj)"
-        Lines="$(RestoreProjContent)"
-        Overwrite="true" />
   </Target>
 
   <Target Name="PrepforRestoreForComposeStore"
@@ -294,17 +276,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <StorePackageVersionForFolderName>$(StorePackageVersion.Replace('*','-'))</StorePackageVersionForFolderName>
       <StoreWorkerWorkingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"$(StorePackageName)_$(StorePackageVersionForFolderName)"))</StoreWorkerWorkingDir>
       <_PackageProjFile>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "Restore.csproj"))</_PackageProjFile>
-      <BaseIntermediateOutputPath>$(StoreWorkerWorkingDir)\obj</BaseIntermediateOutputPath>
+      <BaseIntermediateOutputPath>$(StoreWorkerWorkingDir)\</BaseIntermediateOutputPath>
       <ProjectAssetsFile>$(BaseIntermediateOutputPath)\project.assets.json</ProjectAssetsFile>
-      <_PackageProjContent>
-        <![CDATA[
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="$(StorePackageName)" Version="$(StorePackageVersion)"/>
-  </ItemGroup>
-</Project>    
-]]>
-      </_PackageProjContent>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -327,16 +300,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <MakeDir Directories="$(StoreWorkerWorkingDir)" />
     
-    <!-- Create a Project to Restore Package -->
-    <WriteLinesToFile
-            File="$(_PackageProjFile)"
-            Lines="$(_PackageProjContent)"
-            Overwrite="true" />
-    
-    <MSBuild Projects="$(_PackageProjFile)"
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
-                 Properties="RestoreGraphProjectInput=$(_PackageProjFile);
+                 Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
                              RestoreOutputPath=$(BaseIntermediateOutputPath);
+                             StorePackageName=$(StorePackageName);
+                             StorePackageVersion=$(StorePackageVersion);
                              RuntimeIdentifier=$(RuntimeIdentifier);
                              TargetFramework=$(TargetFramework);"/>
   </Target>
@@ -469,4 +438,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
+  <!--
+    ============================================================
+                                       PrepRestoreForStoreProjects 
+
+    Removes specified PackageReference for store and inserts the specified StorePackageName
+    ============================================================
+    -->
+  <Target Name="PrepRestoreForStoreProjects"
+          BeforeTargets="_GenerateProjectRestoreGraphPerFramework;"
+          Condition="'$(StorePackageName)' != ''" >
+    
+    <ItemGroup>
+      <PackageReference Remove="@(PackageReference)" Condition="'%(PackageReference.IsImplicitlyDefined)' != 'true'"/>
+      <PackageReference Include="$(StorePackageName)" Version="$(StorePackageVersion)"/>
+    </ItemGroup>
+  </Target>
 </Project>
