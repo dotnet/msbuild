@@ -611,6 +611,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The version of Microsoft.NET.Sdk used by this project is insufficient to support .NETStandard2.0 which is required by this project&apos;s references..
+        /// </summary>
+        internal static string UnsupportedSDKVersionForNetStandard20 {
+            get {
+                return ResourceManager.GetString("UnsupportedSDKVersionForNetStandard20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}..
         /// </summary>
         internal static string UnsupportedTargetFrameworkVersion {

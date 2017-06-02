@@ -8,7 +8,7 @@
   <Choose>
     <!-- Allow completely disabling the conflict resolution targets-->
     <When Condition="'$(ImplicitlyExpandNETStandardFacades)' != 'true'" />
-    <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+    <When Condition="'$(UsingMicrosoftNETSdk)' == 'true' OR '$(TargetFramework)' != '' OR '$(TargetFrameworks)' != ''">
       <!-- .NET SDK: Run after references are resolved -->
       <PropertyGroup>
         <ImplicitlyExpandNETStandardFacadesAfter>ResolveLockFileReferences</ImplicitlyExpandNETStandardFacadesAfter>
@@ -35,6 +35,7 @@
   </PropertyGroup>
 
   <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <UsingTask TaskName="NETBuildExtensionsError" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
   <Target Name="ImplicitlyExpandNETStandardFacades"
           AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
 
@@ -54,6 +55,13 @@
       <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
     </GetDependsOnNETStandard>
 
+    <!-- prevent using an older SDK version with NETStandard2.0 references -->
+    <PropertyGroup>
+      <_usingOldSDK Condition="'$(UsingMicrosoftNETSdk)' != 'true' AND ('$(TargetFramework)' != '' OR '$(TargetFrameworks)' != '')">true</_usingOldSDK>
+    </PropertyGroup>
+    <NETBuildExtensionsError Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_usingOldSDK)' == 'true'"
+                             ResourceName="UnsupportedSDKVersionForNetStandard20"/>
+    
     <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
     <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
       <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"

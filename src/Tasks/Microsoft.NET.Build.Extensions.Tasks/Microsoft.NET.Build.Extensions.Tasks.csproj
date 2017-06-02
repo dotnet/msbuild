@@ -11,6 +11,7 @@
     <OutputPath>$(OutputPath)Sdks\Microsoft.NET.Sdk\msbuildExtensions\Microsoft.NET.Build.Extensions\tools</OutputPath>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -34,6 +35,7 @@
     <SharedCompile Include="DiagnosticMessageSeverity.cs" />
     <SharedCompile Include="ItemUtilities.cs" />
     <SharedCompile Include="MetadataKeys.cs" />
+    <SharedCompile Include="NETSdkError.cs" />
     <SharedCompile Include="NuGetUtils.cs" />
     <SharedCompile Include="TaskBase.cs" />
     <Compile Include="@(SharedCompile->'..\Microsoft.NET.Build.Tasks\%(Identity)')">

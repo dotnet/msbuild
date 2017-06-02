@@ -303,4 +303,7 @@
   <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
     <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
   </data>
+  <data name="UnsupportedSDKVersionForNetStandard20" xml:space="preserve">
+    <value>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NETStandard2.0 which is required by this project's references.</value>
+  </data>
 </root>
