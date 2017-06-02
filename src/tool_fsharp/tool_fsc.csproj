@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Content Include="RunFsc.sh;RunFsc.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
