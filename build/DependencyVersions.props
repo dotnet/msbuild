@@ -14,8 +14,8 @@
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
     <TemplateEngineVersion>1.0.0-beta2-20170531-247</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170531-247</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170531-247</TemplateEngineTemplate2_0Version>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170602-250</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170602-250</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview2-25402-02</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview2-25402-02</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
@@ -24,8 +24,9 @@
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>dev-134</AspNetCoreRuntimeVersion>
-    <AspNetCoreCoherenceTimestamp>preview2-25332</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreRuntimeVersion>2.0.0-preview2-139</AspNetCoreRuntimeVersion>
+    <AspNetCoherenceLabel>preview2</AspNetCoherenceLabel>
+    <AspNetCoreCoherenceTimestamp>25345</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 

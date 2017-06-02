@@ -38,11 +38,12 @@
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'osx' ">$(OSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
 
-    <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeInstallerArchiveSuffix>
+    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeStoreSuffix>
+    <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimeStoreSuffix)' != ''">-$(AspNetCoherenceLabel)$(AspNetCoreRuntimeStoreSuffix)</AspNetCoreRuntimeInstallerArchiveSuffix>
     <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(AspNetCoreRuntimeInstallerArchiveSuffix)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
 
-    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
+    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture)$(AspNetCoreRuntimeStoreSuffix).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
     <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
   </PropertyGroup>
 
