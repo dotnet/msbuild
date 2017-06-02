@@ -2859,7 +2859,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ResGenDependsOn>ResolveAssemblyReferences;SplitResourcesByCulture;BeforeResGen;CoreResGen;AfterResGen</ResGenDependsOn>
-    <CoreResGenDependsOn></CoreResGenDependsOn>
+    <CoreResGenDependsOn>FindReferenceAssembliesForReferences</CoreResGenDependsOn>
     <UseSourcePath Condition="'$(UseSourcePath)'==''">true</UseSourcePath>
     <ResGenExecuteAsTool Condition="'$(ResGenExecuteAsTool)'==''">false</ResGenExecuteAsTool>
   </PropertyGroup>
@@ -2928,7 +2928,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <GenerateResource
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
-        References="@(ReferencePath)"
+        References="@(ReferencePathWithRefAssemblies)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.Cache"
