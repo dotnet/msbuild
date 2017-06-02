@@ -24,12 +24,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
         internal static Microsoft.Build.Tasks.GetAssemblyName getAssemblyName = new Microsoft.Build.Tasks.GetAssemblyName(GetAssemblyName);
         internal static Microsoft.Build.Tasks.GetAssemblyMetadata getAssemblyMetadata = new Microsoft.Build.Tasks.GetAssemblyMetadata(GetAssemblyMetadata);
+#if FEATURE_WIN32_REGISTRY
         internal static Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
         internal static Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
+#endif
         internal static Microsoft.Build.Tasks.GetLastWriteTime getLastWriteTime = new Microsoft.Build.Tasks.GetLastWriteTime(GetLastWriteTime);
         internal static Microsoft.Build.Tasks.GetAssemblyRuntimeVersion getRuntimeVersion = new Microsoft.Build.Tasks.GetAssemblyRuntimeVersion(GetRuntimeVersion);
         internal static Microsoft.Build.Tasks.GetAssemblyPathInGac checkIfAssemblyIsInGac = new Microsoft.Build.Tasks.GetAssemblyPathInGac(GetPathForAssemblyInGac);
+#if FEATURE_WIN32_REGISTRY
         internal static Microsoft.Build.Shared.OpenBaseKey openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
+#endif
         internal Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
         internal static Microsoft.Build.Tasks.IsWinMDFile isWinMDFile = new Microsoft.Build.Tasks.IsWinMDFile(IsWinMDFile);
         internal static Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
@@ -2945,7 +2949,26 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.FindSerializationAssemblies = false;
                 t.FindRelatedFiles = false;
                 t.StateFile = null;
-                t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader);
+                t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                    getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                    getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                    openBaseKey,
+#endif
+                    checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                );
 
                 // A few checks. These should always be true or it may be a perf issue for project load.
                 ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
@@ -2972,7 +2995,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string cache = rarCacheFile;
                 t.StateFile = cache;
                 File.Delete(t.StateFile);
-                succeeded = t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader);
+                succeeded =
+                    t.Execute
+                    (
+                        fileExists,
+                        directoryExists,
+                        getDirectories,
+                        getAssemblyName,
+                        getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                        getRegistrySubKeyNames,
+                        getRegistrySubKeyDefaultValue,
+#endif
+                        getLastWriteTime,
+                        getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                        openBaseKey,
+#endif
+                        checkIfAssemblyIsInGac,
+                        isWinMDFile,
+                        readMachineTypeFromPEHeader
+                    );
                 if (FileUtilities.FileExistsNoThrow(t.StateFile))
                 {
                     Assert.Equal(1, t.FilesWritten.Length);
