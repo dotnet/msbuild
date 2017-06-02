@@ -13,6 +13,7 @@
     <NuGetVersion>4.3.0-preview1-2500</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
+    <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
   </PropertyGroup>
 
   <!-- Dependencies from test projects -->
