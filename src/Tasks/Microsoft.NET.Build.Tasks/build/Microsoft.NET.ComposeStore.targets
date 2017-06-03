@@ -220,6 +220,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <SkipUnchangedFiles Condition="'$(SkipUnchangedFiles)' == ''">true</SkipUnchangedFiles>
     </PropertyGroup>
 
+   <NETSdkError Condition="'2.0' > '$(_TargetFrameworkVersionWithoutV)'"
+                 ResourceName="NU1008"
+                 FormatArguments="$(TargetFrameworkMoniker)"/>
+
     <NETSdkError Condition="'$(RuntimeIdentifier)' =='' and '$(_PureManagedAssets)' == ''"
                  ResourceName="RuntimeIdentifierWasNotSpecified"/>
 
