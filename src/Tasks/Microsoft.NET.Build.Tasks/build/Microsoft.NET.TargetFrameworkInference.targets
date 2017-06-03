@@ -80,9 +80,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == ''">
     <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
-  <Target Name="_CheckForUnsupportedTargetFramework" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
-    <NETSdkError Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'" 
+  <Target Name="_CheckForUnsupportedTargetFramework"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_GenerateRestoreProjectSpec;CollectPackageReferences"
+          Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
+          >
+    <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
                  ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
+                 FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
+    
+    <NETSdkError Condition="$(TargetFramework.Contains(';'))"
+                 ResourceName="TargetFrameworkWithSemicolon"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
