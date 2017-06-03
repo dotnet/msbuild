@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="es" original="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx">
+  <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
-      <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
         <target state="translated">Debe especificarse al menos una plataforma de destino posible.</target>
@@ -24,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="translated">El archivo de recursos '{0}' no tiene un destino para '{1}'. Asegúrese de que ha restaurado el proyecto para TargetFramework='{2}' y RuntimeIdentifier='{3}'.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="needs-review-translation">El archivo de recursos '{0}' no tiene un destino para '{1}'. Asegúrese de que ha restaurado el proyecto para TargetFramework='{2}' y RuntimeIdentifier='{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
-        <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="translated">No se puede inferir TargetFrameworkIdentifier y/o TargetFrameworkVersion de TargetFramework='{0}'. Deben especificarse de forma explícita.</target>
+        <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
+        <target state="needs-review-translation">No se puede inferir TargetFrameworkIdentifier y/o TargetFrameworkVersion de TargetFramework='{0}'. Deben especificarse de forma explícita.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -302,6 +301,16 @@
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
         <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFileMissingRuntimeIdentifier">
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetFrameworkWithSemicolon">
+        <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
+        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
