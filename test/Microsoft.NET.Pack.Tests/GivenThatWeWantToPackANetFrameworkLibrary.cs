@@ -24,7 +24,7 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ImplicitReferencesAreNotIncludedAsFrameworkReferences()
         {
             TestProject testProject = new TestProject()
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Pack.Tests
             frameworkAssemblies.Should().BeNull();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ExplicitReferencesAreIncludedAsFrameworkReferences()
         {
             TestProject testProject = new TestProject()
