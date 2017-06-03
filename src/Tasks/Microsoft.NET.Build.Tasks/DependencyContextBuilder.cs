@@ -28,6 +28,8 @@ namespace Microsoft.NET.Build.Tasks
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, string> _filteredPackages;
         private bool _includeMainProjectInDepsFile = true;
+        private HashSet<string> _usedLibraryNames;
+        private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
         {
@@ -36,6 +38,43 @@ namespace Microsoft.NET.Build.Tasks
 
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+        }
+
+        /// <summary>
+        /// Keeps track of the Library names being used in the DependencyContext.
+        /// </summary>
+        /// <remarks>
+        /// Since `Reference` and `PackageReference` names can conflict, we need to ensure
+        /// each separate Library has a unique name. Since PackageReference names are guaranteed
+        /// to be unique amongst other PackageReferences, start with that set, and ensure
+        /// Reference names are unique amongst all.
+        /// </remarks>
+        private HashSet<string> UsedLibraryNames
+        {
+            get
+            {
+                if (_usedLibraryNames == null)
+                {
+                    _usedLibraryNames = new HashSet<string>(
+                        _projectContext.LockFile.Libraries.Select(l => l.Name),
+                        StringComparer.OrdinalIgnoreCase);
+                }
+
+                return _usedLibraryNames;
+            }
+        }
+
+        private Dictionary<ReferenceInfo, string> ReferenceLibraryNames
+        {
+            get
+            {
+                if (_referenceLibraryNames == null)
+                {
+                    _referenceLibraryNames = new Dictionary<ReferenceInfo, string>();
+                }
+
+                return _referenceLibraryNames;
+            }
         }
 
         public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
@@ -116,7 +155,8 @@ namespace Microsoft.NET.Build.Tasks
                     GetProjectRuntimeLibrary(
                         _mainProjectInfo,
                         _projectContext,
-                        dependencyLookup)
+                        dependencyLookup,
+                        includeCompilationLibraries)
                 });
             }
             runtimeLibraries = runtimeLibraries
@@ -133,7 +173,8 @@ namespace Microsoft.NET.Build.Tasks
                         GetProjectCompilationLibrary(
                             _mainProjectInfo,
                             _projectContext,
-                            dependencyLookup)
+                            dependencyLookup,
+                            includeCompilationLibraries)
                     });
                 }
 
@@ -183,7 +224,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private List<Dependency> GetProjectDependencies(
             ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup)
+            Dictionary<string, Dependency> dependencyLookup,
+            bool includeCompilationLibraries)
         {
             List<Dependency> dependencies = new List<Dependency>();
 
@@ -197,12 +239,17 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var referenceInfos = Enumerable.Concat(
-                _referenceAssemblies ?? Enumerable.Empty<ReferenceInfo>(),
+                includeCompilationLibraries && _referenceAssemblies != null ? 
+                    _referenceAssemblies : 
+                    Enumerable.Empty<ReferenceInfo>(),
                 _directReferences ?? Enumerable.Empty<ReferenceInfo>());
 
             foreach (ReferenceInfo referenceInfo in referenceInfos)
             {
-                dependencies.Add(new Dependency(referenceInfo.Name, referenceInfo.Version));
+                dependencies.Add(
+                    new Dependency(
+                        GetReferenceLibraryName(referenceInfo), 
+                        referenceInfo.Version));
             }
 
             return dependencies;
@@ -239,14 +286,16 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeStoreManifestName: runtimeStoreManifestName,
                 serviceable: serviceable);
         }
+
         private RuntimeLibrary GetProjectRuntimeLibrary(
             SingleProjectInfo projectInfo,
             ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup)
+            Dictionary<string, Dependency> dependencyLookup,
+            bool includeCompilationLibraries)
         {
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
 
-            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
+            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
 
             return CreateRuntimeLibrary(
                 type: "project",
@@ -263,9 +312,10 @@ namespace Microsoft.NET.Build.Tasks
         private CompilationLibrary GetProjectCompilationLibrary(
             SingleProjectInfo projectInfo,
             ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup)
+            Dictionary<string, Dependency> dependencyLookup,
+            bool includeCompilationLibraries)
         {
-            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
+            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
 
             return new CompilationLibrary(
                 type: "project",
@@ -457,7 +507,7 @@ namespace Microsoft.NET.Build.Tasks
             return _referenceAssemblies
                 ?.Select(r => new CompilationLibrary(
                     type: "referenceassembly",
-                    name: r.Name,
+                    name: GetReferenceLibraryName(r),
                     version: r.Version,
                     hash: string.Empty,
                     assemblies: new[] { ResolveFrameworkReferencePath(r.FullPath) },
@@ -485,7 +535,7 @@ namespace Microsoft.NET.Build.Tasks
             return _directReferences
                 ?.Select(r => CreateRuntimeLibrary(
                     type: "reference",
-                    name: r.Name,
+                    name: GetReferenceLibraryName(r),
                     version: r.Version,
                     hash: string.Empty,
                     runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, r.FileName) },
@@ -502,7 +552,7 @@ namespace Microsoft.NET.Build.Tasks
             return _directReferences
                 ?.Select(r => new CompilationLibrary(
                     type: "reference",
-                    name: r.Name,
+                    name: GetReferenceLibraryName(r),
                     version: r.Version,
                     hash: string.Empty,
                     assemblies: new[] { r.FileName },
@@ -510,6 +560,38 @@ namespace Microsoft.NET.Build.Tasks
                     serviceable: false))
                 ??
                 Enumerable.Empty<CompilationLibrary>();
+        }
+
+        private string GetReferenceLibraryName(ReferenceInfo reference)
+        {
+            if (!ReferenceLibraryNames.TryGetValue(reference, out string name))
+            {
+                // Reference names can conflict with PackageReference names, so
+                // ensure that the Reference names are unique when creating libraries
+                name = GetUniqueReferenceName(reference.Name);
+
+                ReferenceLibraryNames.Add(reference, name);
+                UsedLibraryNames.Add(name);
+            }
+
+            return name;
+        }
+
+        private string GetUniqueReferenceName(string name)
+        {
+            if (UsedLibraryNames.Contains(name))
+            {
+                string startingName = $"{name}.Reference";
+                name = startingName;
+
+                int suffix = 1;
+                while (UsedLibraryNames.Contains(name))
+                {
+                    name = $"{startingName}{suffix++}";
+                }
+            }
+
+            return name;
         }
 
         private static IEnumerable<ResourceAssembly> CreateResourceAssemblies(IEnumerable<ResourceAssemblyInfo> resourceAssemblyInfos)
