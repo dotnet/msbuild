@@ -32,6 +32,43 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
+        public void ItImplicitlyRestoresAProjectWhenTesting()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+
+            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            result.ExitCode.Should().Be(1);
+        }
+
+        [Fact]
+        public void ItDoesNotImplicitlyRestoreAProjectWhenTestingWithTheNoRestoreOption()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .Should().Fail()
+                .And.HaveStdOutContaining("project.assets.json' not found.");;
+        }
+
+        [Fact]
         public void XunitSingleTFM()
         {
             // Copy XunitCore project in output directory of project dotnet-vstest.Tests
@@ -161,14 +198,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--no-restore")
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(rootPath)
-                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                                        .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore");
 
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
             result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
@@ -209,6 +246,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should()
                 .Pass();
+
             return testProjectDirectory;
         }
     }

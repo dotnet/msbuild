@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Tools.Run
         public string Project { get; private set; }
         public IReadOnlyCollection<string> Args { get; private set; }
         public bool NoRestore { get; private set; }
+        public IEnumerable<string> RestoreArgs { get; private set; }
 
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
@@ -58,6 +59,7 @@ namespace Microsoft.DotNet.Tools.Run
             string launchProfile,
             bool noLaunchProfile,
             bool noRestore,
+            IEnumerable<string> restoreArgs,
             IReadOnlyCollection<string> args)
         {
             Configuration = configuration;
@@ -67,6 +69,7 @@ namespace Microsoft.DotNet.Tools.Run
             LaunchProfile = launchProfile;
             NoLaunchProfile = noLaunchProfile;
             Args = args;
+            RestoreArgs = restoreArgs;
             NoRestore = noRestore;
         }
 
@@ -77,6 +80,7 @@ namespace Microsoft.DotNet.Tools.Run
             string launchProfile = null,
             bool? noLaunchProfile = null,
             bool? noRestore = null,
+            IEnumerable<string> restoreArgs = null,
             IReadOnlyCollection<string> args = null)
         {
             return new RunCommand(
@@ -87,6 +91,7 @@ namespace Microsoft.DotNet.Tools.Run
                 launchProfile ?? this.LaunchProfile,
                 noLaunchProfile ?? this.NoLaunchProfile,
                 noRestore ?? this.NoRestore,
+                restoreArgs ?? this.RestoreArgs,
                 args ?? this.Args
             );
         }
@@ -138,15 +143,7 @@ namespace Microsoft.DotNet.Tools.Run
             buildArgs.Add("/nologo");
             buildArgs.Add("/verbosity:quiet");
 
-            if (!string.IsNullOrWhiteSpace(Configuration))
-            {
-                buildArgs.Add($"/p:Configuration={Configuration}");
-            }
-
-            if (!string.IsNullOrWhiteSpace(Framework))
-            {
-                buildArgs.Add($"/p:TargetFramework={Framework}");
-            }
+            buildArgs.AddRange(RestoreArgs);
 
             var buildResult = new RestoringCommand(buildArgs, NoRestore).Execute();
             if (buildResult != 0)

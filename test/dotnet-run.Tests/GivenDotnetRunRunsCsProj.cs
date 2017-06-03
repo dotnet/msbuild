@@ -38,6 +38,40 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItImplicitlyRestoresAProjectWhenRunning()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
+        }
+
+        [Fact]
+        public void ItDoesNotImplicitlyRestoreAProjectWhenRunningWithTheNoRestoreOption()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("--no-restore")
+                .Should().Fail()
+                .And.HaveStdOutContaining("project.assets.json' not found.");;
+        }
+
+        [Fact]
         public void ItBuildsTheProjectBeforeRunning()
         {
             var testAppName = "MSBuildTestApp";
@@ -160,7 +194,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--no-restore")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }

@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
@@ -24,9 +26,16 @@ namespace Microsoft.DotNet.Cli
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
                         noRestore: o.HasOption("--no-restore"),
+                        restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
-                options: new[]
+                options: FullRunOptions);
+
+        private static Option[] FullRunOptions
+        {
+            get
+            {
+                var fullRunOptions = new List<Option>
                 {
                     CommonOptions.HelpOption(),
                     CommonOptions.ConfigurationOption(),
@@ -47,7 +56,13 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
-                    CommonOptions.NoRestoreOption(),
-                });
+                    CommonOptions.NoRestoreOption()
+                };
+
+                RestoreCommandParser.AddImplicitRestoreOptions(fullRunOptions);
+
+                return fullRunOptions.ToArray();
+            }
+        }
     }
 }

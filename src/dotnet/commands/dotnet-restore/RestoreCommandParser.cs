@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
@@ -14,15 +15,42 @@ namespace Microsoft.DotNet.Cli
                 "restore",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments(),
-                CommonOptions.HelpOption(),
+                FullRestoreOptions);
+
+        private static Option[] FullRestoreOptions
+        {
+            get
+            {
+                var fullRestoreOptions = new List<Option>();
+
+                fullRestoreOptions.Add(CommonOptions.HelpOption());
+                AddImplicitRestoreOptions(fullRestoreOptions, true, true);
+                fullRestoreOptions.Add(CommonOptions.VerbosityOption());
+
+                return fullRestoreOptions.ToArray();
+            }
+        }
+
+        public static void AddImplicitRestoreOptions(
+            List<Option> commandOptions,
+            bool showHelp = false,
+            bool useShortOptions = false)
+        {
+            commandOptions.AddRange(ImplicitRestoreOptions(showHelp, useShortOptions)
+                .Where(o => !commandOptions.Any(c => c.Name == o.Name)));
+        }
+
+        private static Option[] ImplicitRestoreOptions(bool showHelp = false, bool useShortOptions = false)
+        {
+            return new Option[] {
                 Create.Option(
-                    "-s|--source",
-                    LocalizableStrings.CmdSourceOptionDescription,
+                    useShortOptions ? "-s|--source" : "--source",
+                    showHelp ? LocalizableStrings.CmdSourceOptionDescription : string.Empty,
                     Accept.OneOrMoreArguments()
                           .With(name: LocalizableStrings.CmdSourceOption)
                           .ForwardAsSingle(o => $"/p:RestoreSources={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
-                    "-r|--runtime",
+                    useShortOptions ? "-r|--runtime" : "--runtime" ,
                     LocalizableStrings.CmdRuntimeOptionDescription,
                     Accept.OneOrMoreArguments()
                           .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
@@ -30,29 +58,29 @@ namespace Microsoft.DotNet.Cli
                           .ForwardAsSingle(o => $"/p:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--packages",
-                    LocalizableStrings.CmdPackagesOptionDescription,
+                    showHelp ? LocalizableStrings.CmdPackagesOptionDescription : string.Empty,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdPackagesOption)
                           .ForwardAsSingle(o => $"/p:RestorePackagesPath={o.Arguments.Single()}")),
                 Create.Option(
                     "--disable-parallel",
-                    LocalizableStrings.CmdDisableParallelOptionDescription,
+                    showHelp ? LocalizableStrings.CmdDisableParallelOptionDescription : string.Empty,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreDisableParallel=true")),
                 Create.Option(
                     "--configfile",
-                    LocalizableStrings.CmdConfigFileOptionDescription,
+                    showHelp ? LocalizableStrings.CmdConfigFileOptionDescription : string.Empty,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdConfigFileOption)
                           .ForwardAsSingle(o => $"/p:RestoreConfigFile={o.Arguments.Single()}")),
                 Create.Option(
                     "--no-cache",
-                    LocalizableStrings.CmdNoCacheOptionDescription,
+                    showHelp ? LocalizableStrings.CmdNoCacheOptionDescription : string.Empty,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreNoCache=true")),
                 Create.Option(
                     "--ignore-failed-sources",
-                    LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
+                    showHelp ? LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription : string.Empty,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreIgnoreFailedSources=true")),
                 Create.Option(
@@ -65,6 +93,8 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdForceRestoreOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreForce=true")),
-                CommonOptions.VerbosityOption());
+                CommonOptions.VerbosityOption()
+            };
+        }
     }
 }
