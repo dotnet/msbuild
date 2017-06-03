@@ -32,6 +32,9 @@ namespace Company.WebApplication1
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+#if (UseBrowserLink)
+                app.UseBrowserLink();
+#endif
             }
             else
             {

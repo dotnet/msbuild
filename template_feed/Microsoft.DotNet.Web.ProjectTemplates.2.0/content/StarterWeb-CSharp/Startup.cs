@@ -65,6 +65,9 @@ namespace Company.WebApplication1
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+#if (UseBrowserLink)
+                app.UseBrowserLink();
+#endif
 #if (IndividualLocalAuth)
                 app.UseDatabaseErrorPage();
                 app.UseDevelopmentCertificateErrorPage(Configuration);
