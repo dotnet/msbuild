@@ -60,9 +60,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Pack.Tests", "test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj", "{588516D7-96AD-4447-A1EB-244D737A3C87}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Extensions.Tasks", "src\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj", "{88723307-6BFA-4CB5-A518-2FFD5F91B891}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DF7D2697-B3B4-45C2-8297-27245F528A99} = {DF7D2697-B3B4-45C2-8297-27245F528A99}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Extensions.Tasks.UnitTests", "src\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj", "{0E11CA1E-D64F-48E9-BE86-B040D9E8EBF8}"
 EndProject
