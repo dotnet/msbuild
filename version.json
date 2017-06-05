@@ -8,7 +8,10 @@
   ],
   "cloudBuild": {
     "buildNumber": {
-      "enabled": true
+      "enabled": true,
+      "includeCommitId": {
+        "where": "fourthVersionComponent"
+      }
     }
   }
 }
