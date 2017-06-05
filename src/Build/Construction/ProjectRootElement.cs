@@ -1959,7 +1959,7 @@ namespace Microsoft.Build.Construction
             //
             // And this should also be treated as if the file is empty.
             //
-            const int maxCharsToRead = 100;
+            const int maxSizeToConsiderEmpty = 100;
 
             if (!File.Exists(path))
             {
@@ -1979,32 +1979,14 @@ namespace Microsoft.Build.Construction
                     return true;
                 }
 
-                if (fileInfo.Length > maxCharsToRead)
+                if (fileInfo.Length > maxSizeToConsiderEmpty)
                 {
                     // Files greater than the minimum to bytes to check are not empty
                     //
                     return false;
                 }
 
-                // Create a buffer that is as big as the file
-                //
-                char[] chars = new char[fileInfo.Length];
-
-                using (StreamReader streamReader = new StreamReader(new FileStream(path, FileMode.Open), Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: chars.Length, leaveOpen: false))
-                {
-                    // If the file only contains a preamble byte order mark (BOM) then the stream is already at the end and the file is empty
-                    //
-                    if (streamReader.EndOfStream)
-                    {
-                        return true;
-                    }
-
-                    streamReader.Read(chars, 0, chars.Length);
-                }
-
-                // Copy the char[] to a string and trim and trailing \0 because the BOM adds some bytes so we read past the file end
-                //
-                string contents = new String(chars).Trim('\0');
+                string contents = File.ReadAllText(path);
 
                 // If the file is only whitespace or the XML declaration then it empty
                 //
