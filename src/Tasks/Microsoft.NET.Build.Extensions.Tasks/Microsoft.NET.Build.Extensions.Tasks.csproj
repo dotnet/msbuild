@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocal="UpdateXlfOnBuild">
   <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside
        of SDK projects -->
 
@@ -12,6 +12,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
+    <UpdateXlfOnBuild>false</UpdateXlfOnBuild>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -46,9 +47,6 @@
     </Compile>
     <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.resx">
       <Link>Resources\%(FileName)%(Extension)</Link>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
     <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.*.resx">
       <Link>Resources\%(FileName)%(Extension)</Link>

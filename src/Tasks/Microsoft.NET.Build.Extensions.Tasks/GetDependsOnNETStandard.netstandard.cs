@@ -24,9 +24,8 @@ namespace Microsoft.NET.Build.Tasks
                         foreach (var referenceHandle in reader.AssemblyReferences)
                         {
                             AssemblyReference reference = reader.GetAssemblyReference(referenceHandle);
-                            var referenceName = reader.GetString(reference.Name);
 
-                            if (referenceName.Equals(NetStandardAssemblyName, StringComparison.Ordinal))
+                            if (reader.StringComparer.Equals(reference.Name, NetStandardAssemblyName))
                             {
                                 return true;
                             }

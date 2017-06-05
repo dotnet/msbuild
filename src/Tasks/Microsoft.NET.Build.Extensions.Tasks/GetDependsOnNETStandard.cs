@@ -9,7 +9,7 @@ using System.Security;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Determines the assembly version to use for a given semantic version.
+    /// Determines if any Reference depends on netstandard.dll.
     /// </summary>
     public partial class GetDependsOnNETStandard : TaskBase
     {

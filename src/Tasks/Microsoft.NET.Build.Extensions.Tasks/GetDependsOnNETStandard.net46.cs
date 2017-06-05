@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks
 {
     public partial class GetDependsOnNETStandard
     {
-        private static Guid s_importerGuid = new Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44");
+        private static readonly Guid s_importerGuid = new Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44");
 
         // This method cross-compiles for desktop to avoid using System.Reflection.Metadata (SRM).
         // We do this because we don't want the following:
@@ -42,11 +42,11 @@ namespace Microsoft.NET.Build.Tasks
             {
                 // on Windows use CLR's unmanaged metadata API.
                 // Create the metadata dispenser and open scope on the source file.
-                IMetaDataDispenser metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-                IMetaDataAssemblyImport assemblyImport = (IMetaDataAssemblyImport)metadataDispenser.OpenScope(filePath, 0, ref s_importerGuid);
+                var metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
+                var assemblyImport = (IMetaDataAssemblyImport)metadataDispenser.OpenScope(filePath, 0, s_importerGuid);
 
-                IntPtr asmRefEnum = IntPtr.Zero;
-                UInt32[] asmRefTokens = new UInt32[16];
+                var asmRefEnum = IntPtr.Zero;
+                var asmRefTokens = new UInt32[16];
                 UInt32 fetched;
                 // Ensure the enum handle is closed.
                 try

@@ -40,26 +40,26 @@
           AfterTargets="$(ImplicitlyExpandNETStandardFacadesAfter)">
 
     <ItemGroup>
-      <_candidateNETStandardReferences Include="@(Reference);@(_ResolvedProjectReferencePaths)" />
-      <_inboxNETStandardFolders Include="$(TargetFrameworkDirectory)" />
+      <_CandidateNETStandardReferences Include="@(Reference);@(_ResolvedProjectReferencePaths)" />
+      <_InboxNETStandardFolders Include="$(TargetFrameworkDirectory)" />
     </ItemGroup>
 
     <!-- determine if NETStandard.dll is supported inbox for this TargetFramework -->
     <PropertyGroup Condition="'$(NETStandardInbox)' == ''">
-      <NETStandardInbox Condition="Exists('%(_inboxNETStandardFolders.Identity)\netstandard.dll')">true</NETStandardInbox>
+      <NETStandardInbox Condition="Exists('%(_InboxNETStandardFolders.Identity)\netstandard.dll')">true</NETStandardInbox>
     </PropertyGroup>
 
     <!-- determine if any references depend on NETStandard -->
-    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true' AND '@(_candidateNETStandardReferences)' != ''" 
-                             References="@(_candidateNETStandardReferences)">
+    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true' AND '@(_CandidateNETStandardReferences)' != ''" 
+                             References="@(_CandidateNETStandardReferences)">
       <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
     </GetDependsOnNETStandard>
 
     <!-- prevent using an older SDK version with NETStandard2.0 references -->
     <PropertyGroup>
-      <_usingOldSDK Condition="'$(UsingMicrosoftNETSdk)' != 'true' AND ('$(TargetFramework)' != '' OR '$(TargetFrameworks)' != '')">true</_usingOldSDK>
+      <_UsingOldSDK Condition="'$(UsingMicrosoftNETSdk)' != 'true' AND ('$(TargetFramework)' != '' OR '$(TargetFrameworks)' != '')">true</_UsingOldSDK>
     </PropertyGroup>
-    <NETBuildExtensionsError Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_usingOldSDK)' == 'true'"
+    <NETBuildExtensionsError Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_UsingOldSDK)' == 'true'"
                              ResourceName="UnsupportedSDKVersionForNetStandard20"/>
     
     <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
