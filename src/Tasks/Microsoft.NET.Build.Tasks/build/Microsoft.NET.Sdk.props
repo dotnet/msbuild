@@ -114,7 +114,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- List of supported .NET Core and .NET Standard TFMs -->
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-  
+
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
@@ -124,11 +124,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
   </PropertyGroup>
 
-  <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
-  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'"> 
-    <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
-    <GenerateResourceMSBuildRuntime Condition=" '$(GenerateResourceMSBuildRuntime)' == '' ">CurrentRuntime</GenerateResourceMSBuildRuntime>
-  </PropertyGroup>
+  <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
 
   <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>

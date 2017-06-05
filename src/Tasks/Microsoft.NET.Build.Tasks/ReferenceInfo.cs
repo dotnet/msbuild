@@ -31,19 +31,15 @@ namespace Microsoft.NET.Build.Tasks
             _resourceAssemblies = new List<ResourceAssemblyInfo>();
         }
 
-        public static IEnumerable<ReferenceInfo> CreateFrameworkReferenceInfos(IEnumerable<ITaskItem> referencePaths)
+        public static IEnumerable<ReferenceInfo> CreateReferenceInfos(IEnumerable<ITaskItem> referencePaths)
         {
-            IEnumerable<ITaskItem> frameworkReferencePaths = referencePaths
-                .Where(r => r.GetBooleanMetadata("FrameworkFile") == true ||
-                            r.GetMetadata("ResolvedFrom") == "ImplicitlyExpandDesignTimeFacades");
-
-            List<ReferenceInfo> frameworkReferences = new List<ReferenceInfo>();
-            foreach (ITaskItem frameworkReferencePath in frameworkReferencePaths)
+            List<ReferenceInfo> referenceInfos = new List<ReferenceInfo>();
+            foreach (ITaskItem referencePath in referencePaths)
             {
-                frameworkReferences.Add(CreateReferenceInfo(frameworkReferencePath));
+                referenceInfos.Add(CreateReferenceInfo(referencePath));
             }
 
-            return frameworkReferences;
+            return referenceInfos;
         }
 
         public static IEnumerable<ReferenceInfo> CreateDirectReferenceInfos(

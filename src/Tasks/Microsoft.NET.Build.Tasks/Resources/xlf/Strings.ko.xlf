@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="ko" original="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
-      <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
         <target state="translated">가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
@@ -24,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="translated">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. TargetFramework='{2}' 및 RuntimeIdentifier='{3}'에 대해 이 프로젝트를 복원했는지 확인하세요.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="needs-review-translation">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. TargetFramework='{2}' 및 RuntimeIdentifier='{3}'에 대해 이 프로젝트를 복원했는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
-        <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="translated">TargetFramework='{0}'에서 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion을 유추할 수 없습니다. 명시적으로 지정해야 합니다.</target>
+        <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
+        <target state="needs-review-translation">TargetFramework='{0}'에서 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion을 유추할 수 없습니다. 명시적으로 지정해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -296,6 +295,21 @@
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
         <target state="translated">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. {2} '{3}'이(가) 잘못되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetFrameworkVersion">
+        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
+        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFileMissingRuntimeIdentifier">
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetFrameworkWithSemicolon">
+        <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
+        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
         <note />
       </trans-unit>
     </body>

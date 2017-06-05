@@ -13,14 +13,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    
+
     <RefAssembliesFolderName Condition="'$(RefAssembliesFolderName)' == ''">refs</RefAssembliesFolderName>
   </PropertyGroup>
 
   <Target Name="ComputeDependencyFileCompilerOptions"
-        Condition="'$(PreserveCompilationContext)' == 'true'"
-        BeforeTargets="GenerateBuildDependencyFile;
-                       GeneratePublishDependencyFile">
+          Condition="'$(PreserveCompilationContext)' == 'true'"
+          BeforeTargets="GenerateBuildDependencyFile;
+                         GeneratePublishDependencyFile">
 
     <ItemGroup>
       <DependencyFileCompilerOptions Include="CompilerOptions">
@@ -53,7 +53,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                            Packages="@(RuntimeStorePackages)">
       <Output TaskParameter="ItemsFromPackages" ItemName="_RuntimeItemsInRuntimeStore"/>
     </FindItemsFromPackages>
-    
+
     <ItemGroup>
       <!--
       Don't copy a compilation assembly if it's also a runtime assembly. There is no need to copy the same
@@ -70,6 +70,34 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RelativePath>$(RefAssembliesFolderName)\%(Filename)%(Extension)</RelativePath>
       </ResolvedFileToPublish>
     </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CopyReferenceOnlyAssembliesForBuild
+
+    Copies reference assemblies that normally can't be resolved at runtime to the 'refs' folder in the build output.
+    This is necessary in order for the running app to resolve these reference assemblies.
+    ============================================================
+    -->
+  <Target Name="_CopyReferenceOnlyAssembliesForBuild"
+          Condition="'$(PreserveCompilationContext)' == 'true'"
+          DependsOnTargets="_ComputeReferenceAssemblies"
+          AfterTargets="CopyFilesToOutputDirectory">
+
+    <Copy SourceFiles="@(_ReferenceOnlyAssemblies)"
+          DestinationFolder="$(OutDir)$(RefAssembliesFolderName)"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
 
   </Target>
 

@@ -14,6 +14,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
+
+  <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core' Or '$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+    <GenerateResourceMSBuildRuntime Condition=" '$(GenerateResourceMSBuildRuntime)' == '' ">CurrentRuntime</GenerateResourceMSBuildRuntime>
+  </PropertyGroup>
   
   <Import Project="Microsoft.NET.Sdk.Common.targets" />
 
@@ -81,7 +87,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildDependencyFile"
-          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;_HandlePackageFileConflicts"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
+                            _HandlePackageFileConflicts;
+                            _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
@@ -101,6 +109,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       ReferencePaths="@(ReferencePath)"
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
+                      ReferenceAssemblies="@(_ReferenceAssemblies)"
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
@@ -272,6 +281,40 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+                                        _ComputeReferenceAssemblies
+
+    Computes references that are only used at compile-time.
+    ============================================================
+    -->
+  <Target Name="_ComputeReferenceAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences">
+
+    <ItemGroup>
+      <_FrameworkReferenceAssemblies Include="@(ReferencePath)"
+                                     Condition="%(ReferencePath.FrameworkFile) == 'true' or
+                                                %(ReferencePath.ResolvedFrom) == 'ImplicitlyExpandDesignTimeFacades'" />
+      
+      <!--
+      "ReferenceOnly" assemblies are assemblies that are only used at compile-time, and they can't be resolved
+      by the normal compile-assembly resolvers at runtime:
+      1. App local
+      2. NuGet/Package layout
+      3. ProgramFiles\Reference Assemblies
+      These assemblies need to be copied to the 'refs' folder for both build and publish.
+      -->
+      <_ReferenceOnlyAssemblies Include="@(ReferencePath)"
+                                Exclude="@(_FrameworkReferenceAssemblies)"
+                                Condition="%(ReferencePath.CopyLocal) != 'true' and 
+                                           %(ReferencePath.NuGetSourceType) == ''" />
+
+      <_ReferenceAssemblies Include="@(_FrameworkReferenceAssemblies)" />
+      <_ReferenceAssemblies Include="@(_ReferenceOnlyAssemblies)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
                                         Run Information
 
     The ProcessStart information that can be used to run this project.
@@ -427,5 +470,4 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ConflictResolution.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
-
 </Project>

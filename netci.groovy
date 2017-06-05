@@ -29,11 +29,11 @@ osList.each { os ->
         // Calculate the build command
         if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
-            machineAffinity = 'latest-or-auto-dev15-rc'
+            machineAffinity = 'latest-dev15-3-preview1'
         } else if (os == 'Windows_NT_FullFramework') {
             buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
             osBase = 'Windows_NT'
-            machineAffinity = 'latest-or-auto-dev15-rc'
+            machineAffinity = 'latest-dev15-3-preview1'
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
             buildCommand = "./build.sh --configuration $config"
@@ -44,7 +44,7 @@ osList.each { os ->
             steps {
                 if (osBase == 'Windows_NT') {
                     // Batch
-                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\
+                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\Preview\\Enterprise\\Common7\\Tools\\
 ${buildCommand}""")
                 }
                 else {

@@ -14,9 +14,9 @@ namespace Microsoft.NET.Build.Tasks
     internal sealed class DiagnosticsHelper
     {
         private readonly List<ITaskItem> _diagnosticMessages = new List<ITaskItem>();
-        private readonly TaskLoggingHelper _log;
+        private readonly ILog _log;
 
-        public DiagnosticsHelper(TaskLoggingHelper log)
+        public DiagnosticsHelper(ILog log)
         {
             _log = log;
         }

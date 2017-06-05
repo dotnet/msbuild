@@ -80,7 +80,16 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assets file &apos;{0}&apos; doesn&apos;t have a target for &apos;{1}&apos;. Ensure you have restored this project for TargetFramework=&apos;{2}&apos; and RuntimeIdentifier=&apos;{3}&apos;..
+        ///   Looks up a localized string similar to Assets file &apos;{0}&apos; doesn&apos;t have a target for &apos;{1}&apos;. Ensure you have included &apos;{2}&apos; in the TargetFrameworks for your project. You may also need to include &apos;{3}&apos; in your project&apos;s RuntimeIdentifiers..
+        /// </summary>
+        internal static string AssetsFileMissingRuntimeIdentifier {
+            get {
+                return ResourceManager.GetString("AssetsFileMissingRuntimeIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assets file &apos;{0}&apos; doesn&apos;t have a target for &apos;{1}&apos;. Ensure you have included &apos;{2}&apos; in the TargetFrameworks for your project..
         /// </summary>
         internal static string AssetsFileMissingTarget {
             get {
@@ -134,7 +143,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework=&apos;{0}&apos;. They must be specified explicitly..
+        ///   Looks up a localized string similar to The TargetFramework value &apos;{0}&apos; was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly..
         /// </summary>
         internal static string CannotInferTargetFrameworkIdentiferAndVersion {
             get {
@@ -553,6 +562,15 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string RuntimeIdentifierWasNotSpecified {
             get {
                 return ResourceManager.GetString("RuntimeIdentifierWasNotSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The TargetFramework value &apos;{0}&apos; is not valid. To multi-target, use the &apos;TargetFrameworks&apos; property instead..
+        /// </summary>
+        internal static string TargetFrameworkWithSemicolon {
+            get {
+                return ResourceManager.GetString("TargetFrameworkWithSemicolon", resourceCulture);
             }
         }
         

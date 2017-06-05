@@ -10,6 +10,10 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
+    <!-- When building in visual studio, automatically sync .xlf files to .resx files on build.
+         Otherwise, let the build fail so that official/CI builds catch .xlf files that are not up-to-date. -->
+    <UpdateXlfOnBuild Condition="'$(BuildingInsideVisualStudio)' == 'true'">true</UpdateXlfOnBuild>
+
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

@@ -130,7 +130,7 @@
     <value>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
   </data>
   <data name="AssetsFileMissingTarget" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</value>
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</value>
   </data>
   <data name="AssetsFilePathNotRooted" xml:space="preserve">
     <value>Assets file path '{0}' is not rooted. Only full paths are supported.</value>
@@ -157,7 +157,7 @@
     <value>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</value>
   </data>
   <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
-    <value>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</value>
+    <value>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</value>
   </data>
   <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
     <value>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</value>
@@ -296,5 +296,11 @@
   </data>
   <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
     <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+  </data>
+  <data name="TargetFrameworkWithSemicolon" xml:space="preserve">
+    <value>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
+  </data>  
+  <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
   </data>
 </root>
