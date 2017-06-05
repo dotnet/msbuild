@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
@@ -63,6 +64,11 @@ namespace Microsoft.Build.Construction
         private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderDelegate = OpenLoader;
 
         private static readonly ProjectRootElementCache.OpenProjectRootElement s_openLoaderPreserveFormattingDelegate = OpenLoaderPreserveFormatting;
+
+        /// <summary>
+        /// Used to determine if a file is an empty XML file if it ONLY contains an XML declaration like &lt;?xml version="1.0" encoding="utf-8"?&gt;.
+        /// </summary>
+        private static readonly Lazy<Regex> XmlDeclarationRegEx = new Lazy<Regex>(() => new Regex(@"\A\s*\<\?\s*xml.*\?\>\s*\Z"), isThreadSafe: true);
 
         /// <summary>
         /// The default encoding to use / assume for a new project.
@@ -1936,6 +1942,80 @@ namespace Microsoft.Build.Construction
 
                 yield return sdkReference;
             }
+        }
+
+        /// <summary>
+        /// Determines if the specified file is an empty XML file meaning it has no contents, contains only whitespace, or
+        /// only an XML declaration.  If the file does not exist, it is not considered empty.
+        /// </summary>
+        /// <param name="path">The full path to a file to check.</param>
+        /// <returns><code>true</code> if the file is an empty XML file, otherwise <code>false</code>.</returns>
+        internal static bool IsEmptyXmlFile(string path)
+        {
+            // The maximum number of characters of the file to read to check if its empty or not.  Ideally we
+            // would only look at zero-length files but empty XML files can contain just an xml declaration:
+            //
+            //   <? xml version="1.0" encoding="utf-8" standalone="yes" ?>
+            //
+            // And this should also be treated as if the file is empty.
+            //
+            const int maxCharsToRead = 100;
+
+            if (!File.Exists(path))
+            {
+                // Non-existent files are not treated as empty
+                //
+                return false;
+            }
+
+            try
+            {
+                FileInfo fileInfo = new FileInfo(path);
+
+                if (fileInfo.Length == 0)
+                {
+                    // Zero length files are empty
+                    //
+                    return true;
+                }
+
+                if (fileInfo.Length > maxCharsToRead)
+                {
+                    // Files greater than the minimum to bytes to check are not empty
+                    //
+                    return false;
+                }
+
+                // Create a buffer that is as big as the file
+                //
+                char[] chars = new char[fileInfo.Length];
+
+                using (StreamReader streamReader = new StreamReader(new FileStream(path, FileMode.Open), Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: chars.Length, leaveOpen: false))
+                {
+                    // If the file only contains a preamble byte order mark (BOM) then the stream is already at the end and the file is empty
+                    //
+                    if (streamReader.EndOfStream)
+                    {
+                        return true;
+                    }
+
+                    streamReader.Read(chars, 0, chars.Length);
+                }
+
+                // Copy the char[] to a string and trim and trailing \0 because the BOM adds some bytes so we read past the file end
+                //
+                string contents = new String(chars).Trim('\0');
+
+                // If the file is only whitespace or the XML declaration then it empty
+                //
+                return String.IsNullOrEmpty(contents) || XmlDeclarationRegEx.Value.IsMatch(contents);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return false;
         }
 
         /// <summary>

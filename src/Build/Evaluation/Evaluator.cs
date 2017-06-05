@@ -77,6 +77,11 @@ namespace Microsoft.Build.Evaluation
         private static readonly bool s_ignoreTreatAsLocalProperty = (Environment.GetEnvironmentVariable("MSBUILDIGNORETREATASLOCALPROPERTY") != null);
 
         /// <summary>
+        /// Whether or not to ignore imports of empty files.
+        /// </summary>
+        private static readonly bool s_ignoreEmptyImports = (Environment.GetEnvironmentVariable("MSBUILDIGNOREEMPTYIMPORTS") != null);
+
+        /// <summary>
         /// Locals types names. We only have these because 'Built In' has a space,
         /// else we would use LocalsTypes enum names.
         /// Note: This should match LocalsTypes enum.
@@ -2637,7 +2642,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    catch (InvalidProjectFileException ex) when (ExceptionHandling.IsIoRelatedException(ex.InnerException))
+                    catch (InvalidProjectFileException ex)
                     {
                         // The import couldn't be read from disk, or something similar. In that case,
                         // the error message would be more useful if it pointed to the location in the importing project file instead.
@@ -2657,6 +2662,31 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            // If IgnoreEmptyImports is enabled, check if the file is considered empty
+                            //
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreEmptyImports) != 0 || s_ignoreEmptyImports) && ProjectRootElement.IsEmptyXmlFile(importFileUnescaped))
+                            {
+                                atleastOneImportIgnored = true;
+
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedEmptyFile"),
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                continue;
+                            }
+
                             // Otherwise a more generic message, still pointing to the location of the import tag
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
                                 importFileUnescaped, ex.InnerException.Message);

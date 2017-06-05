@@ -1613,6 +1613,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectImportSkippedNoMatches">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to no matching files.</value>
   </data>
+
+  <data name="ProjectImportSkippedEmptyFile">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being empty.</value>
+  </data>
   
   <data name="ProjectImported">
     <value>Importing project &quot;{0}&quot; into project &quot;{1}&quot; at ({2},{3}).</value>
