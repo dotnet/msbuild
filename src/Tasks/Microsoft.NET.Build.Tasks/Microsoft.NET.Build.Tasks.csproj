@@ -38,8 +38,6 @@
     <Compile Include="**\*.cs" />
     <None Include="build\**\*" PackagePath="build\" />
     <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
-    <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
-    <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
