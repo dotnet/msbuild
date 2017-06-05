@@ -3,7 +3,7 @@
   <Target Name="SetupDebProps"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
+      <SdkDebianPackageName>dotnet-sdk-$(SdkVersion)</SdkDebianPackageName>
     </PropertyGroup>
 
     <!-- dotnet deb-tool -->
@@ -27,7 +27,7 @@
     <!-- Package Identities -->
     <PropertyGroup>
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
-      <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
+      <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
       <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>

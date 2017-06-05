@@ -2,7 +2,7 @@
     "maintainer_name":"Microsoft",
     "maintainer_email": "dotnetcore@microsoft.com",        
 
-    "package_name": "dotnet-dev-%SDK_NUGET_VERSION%",
+    "package_name": "dotnet-sdk-%SDK_NUGET_VERSION%",
     "install_root": "/usr/share/dotnet",
 
     "short_description": "%CLI_SDK_BRAND_NAME%",
