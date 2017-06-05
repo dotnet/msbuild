@@ -99,6 +99,16 @@ namespace Microsoft.NET.Build.Tasks
             return runtimeLibraries.Filter(allExclusionList).ToArray();
         }
 
+        internal IEnumerable<PackageIdentity> GetTransitiveList(string package)
+        {
+            LockFileTargetLibrary platformLibrary = _lockFileTarget.GetLibrary(package);
+            IEnumerable<LockFileTargetLibrary> runtimeLibraries = _lockFileTarget.Libraries;
+            Dictionary<string, LockFileTargetLibrary> libraryLookup =
+                runtimeLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
+
+            return  _lockFileTarget.GetTransitivePackagesList(platformLibrary, libraryLookup);
+        }
+
         public IEnumerable<LockFileTargetLibrary> GetCompileLibraries(IEnumerable<string> compileExcludeFromPublishPackageIds)
         {
             IEnumerable<LockFileTargetLibrary> compileLibraries = _lockFileTarget.Libraries;

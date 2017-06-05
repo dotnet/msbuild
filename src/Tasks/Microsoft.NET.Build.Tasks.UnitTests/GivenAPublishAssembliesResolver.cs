@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
 using NuGet.Frameworks;
+using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
@@ -190,6 +191,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             return new ResolvedFile(
                 sourcepath,
                 destinationSubDirPath,
+                new PackageIdentity(packageId, NuGetVersion.Parse(version)),
                 assetType);
         }
     }

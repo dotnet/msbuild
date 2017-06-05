@@ -53,7 +53,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                              TargetFramework=$(_TFM);
                              JitPath=$(JitPath);
                              Crossgen=$(Crossgen);
-                             RestoreProj=$(RestoreProj);
                              DisableImplicitFrameworkReferences=true;
                              SkipUnchangedFiles=$(SkipUnchangedFiles);
                              PreserveStoreLayout=$(PreserveStoreLayout);
@@ -75,8 +74,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns ="@(ResolvedPackagesFromMapper)">
 
     <ItemGroup>
-      <PackageReferencesToStore Include="$(RestoreProj)">
-        <Properties>
+      <PackageReferencesToStore Include="$(MSBuildProjectFullPath)">
+        <AdditionalProperties>
           StorePackageName=%(PackageReference.Identity);
           StorePackageVersion=%(PackageReference.Version);
           ComposeWorkingDir=$(ComposeWorkingDir);
@@ -89,28 +88,38 @@ Copyright (c) .NET Foundation. All rights reserved.
           SkipUnchangedFiles=$(SkipUnchangedFiles);
           PreserveStoreLayout=$(PreserveStoreLayout);
           CreateProfilingSymbols=$(CreateProfilingSymbols);
-          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir)
-        </Properties>
+          StoreSymbolsStagingDir=$(StoreSymbolsStagingDir);
+          DisableImplicitFrameworkReferences=false;
+        </AdditionalProperties>
       </PackageReferencesToStore>
     </ItemGroup>
 
+<!-- Restore phase -->
     <MSBuild Projects="@(PackageReferencesToStore)"
-                 Targets="StoreWorker"
+                 Targets="RestoreForComposeStore"
+                 BuildInParallel="$(BuildInParallel)"
+                 ContinueOnError="WarnAndContinue">
+    </MSBuild>
+    
+    
+<!-- Resolve phase-->
+    <MSBuild Projects="@(PackageReferencesToStore)"
+                 Targets="StoreResolver"
+                 Properties="MSBuildProjectExtensionsPath=$(ComposeWorkingDir)\%(PackageReference.Identity)_$([System.String]::Copy('%(PackageReference.Version)').Replace('*','-'))\;"
                  BuildInParallel="$(BuildInParallel)"
                  ContinueOnError="WarnAndContinue">
       <Output ItemName="ResolvedPackagesFromMapper" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
 
-  <Target Name="StoreWorker"
+  <Target Name="StoreResolver"
           Returns="@(ResolvedPackagesPublished)"
           DependsOnTargets="PrepforRestoreForComposeStore;
                             StoreWorkerPerformWork"/>
   
   <Target Name="StoreWorkerPerformWork"
-          DependsOnTargets="RestoreForComposeStore;
-                            ComputeAndCopyFilesToStoreDirectory;"
-          Condition="!Exists($(StoreWorkerWorkingDir))" />
+          DependsOnTargets="ComputeAndCopyFilesToStoreDirectory;"
+          Condition="Exists($(StoreWorkerWorkingDir))" />
 
 <!--
     ============================================================
@@ -211,6 +220,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <SkipUnchangedFiles Condition="'$(SkipUnchangedFiles)' == ''">true</SkipUnchangedFiles>
     </PropertyGroup>
 
+   <NETSdkError Condition="'2.0' > '$(_TargetFrameworkVersionWithoutV)'"
+                 ResourceName="NU1008"
+                 FormatArguments="$(TargetFrameworkMoniker)"/>
+
     <NETSdkError Condition="'$(RuntimeIdentifier)' =='' and '$(_PureManagedAssets)' == ''"
                  ResourceName="RuntimeIdentifierWasNotSpecified"/>
 
@@ -241,7 +254,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ComposeWorkingDir>$([System.IO.Path]::GetFullPath($(ComposeWorkingDir)))</ComposeWorkingDir>
       <StoreStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"StagingDir"))</StoreStagingDir>      <!-- Will contain optimized managed assemblies in nuget cache layout -->
       <StoreSymbolsStagingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"SymbolsStagingDir"))</StoreSymbolsStagingDir>
-      <RestoreProj>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Restore.csproj"))</RestoreProj>          <!-- To minimize parsing huge input files during restore stage for packages -->
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     </PropertyGroup>
@@ -259,40 +271,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(PublishDir)" />
     <MakeDir  Directories="$(StoreStagingDir)"/>
 
-    <!-- Create a Project to be used for restores-->
-    <PropertyGroup>
-      <RestoreProjContent>
-        <![CDATA[
-<Project Sdk="Microsoft.NET.Sdk">
-</Project>
-]]>
-      </RestoreProjContent>
-    </PropertyGroup>
-
-    <WriteLinesToFile
-        File="$(RestoreProj)"
-        Lines="$(RestoreProjContent)"
-        Overwrite="true" />
   </Target>
 
-  <Target Name="PrepforRestoreForComposeStore">
+  <Target Name="PrepforRestoreForComposeStore"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary">
 
     <PropertyGroup>
       <StorePackageVersionForFolderName>$(StorePackageVersion.Replace('*','-'))</StorePackageVersionForFolderName>
       <StoreWorkerWorkingDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"$(StorePackageName)_$(StorePackageVersionForFolderName)"))</StoreWorkerWorkingDir>
-      <_PackageProjFile>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "Package.csproj"))</_PackageProjFile>
-      <ProjectAssetsFile>$(StoreWorkerWorkingDir)\project.assets.json</ProjectAssetsFile>
-      <_PackageProjContent>
-        <![CDATA[
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="$(StorePackageName)" Version="$(StorePackageVersion)"/>
-  </ItemGroup>
-</Project>    
-]]>
-      </_PackageProjContent>
+      <_PackageProjFile>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "Restore.csproj"))</_PackageProjFile>
+      <BaseIntermediateOutputPath>$(StoreWorkerWorkingDir)\</BaseIntermediateOutputPath>
+      <ProjectAssetsFile>$(BaseIntermediateOutputPath)\project.assets.json</ProjectAssetsFile>
     </PropertyGroup>
     
+    <PropertyGroup>
+      <PackagesToPrune>$(MicrosoftNETPlatformLibrary)</PackagesToPrune>
+      <SelfContained Condition="'$(SelfContained)' == ''">true</SelfContained>
+    </PropertyGroup>
   </Target>
   
   <!--
@@ -304,21 +299,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="RestoreForComposeStore"
-          DependsOnTargets="PrepforRestoreForComposeStore;">
+          DependsOnTargets="PrepforRestoreForComposeStore;"
+          Condition="!Exists($(StoreWorkerWorkingDir))">
     
     <MakeDir Directories="$(StoreWorkerWorkingDir)" />
     
-    <!-- Create a Project to Restore Package -->
-    <WriteLinesToFile
-            File="$(_PackageProjFile)"
-            Lines="$(_PackageProjContent)"
-            Overwrite="true" />
-    
-    <MSBuild Projects="$(_PackageProjFile)"
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
-                 Properties="RestoreGraphProjectInput=$(_PackageProjFile);
-                             DisableImplicitFrameworkReferences=true;
-                             RestoreOutputPath=$(StoreWorkerWorkingDir);
+                 Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
+                             RestoreOutputPath=$(BaseIntermediateOutputPath);
+                             StorePackageName=$(StorePackageName);
+                             StorePackageVersion=$(StorePackageVersion);
                              RuntimeIdentifier=$(RuntimeIdentifier);
                              TargetFramework=$(TargetFramework);"/>
   </Target>
@@ -424,7 +415,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Gathers all the files that need to be copied to the publish directory.
     ============================================================
     -->
-  
+  <UsingTask TaskName="FilterResolvedFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeFilesToStore"
           DependsOnTargets="_ComputeNetPublishAssets;
                             _ComputeCopyToPublishDirectoryItems">
@@ -434,12 +425,37 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
     </PropertyGroup>
 
-    <ItemGroup>
+    <FilterResolvedFiles  AssetsFilePath="$(ProjectAssetsFile)"
+                           ResolvedFiles ="@(ResolvedAssembliesToPublish)"
+                           PackagesToPrune="$(PackagesToPrune)"
+                           TargetFramework="$(TargetFrameworkMoniker)"
+                           RuntimeIdentifier="$(RuntimeIdentifier)"
+                           IsSelfContained="$(SelfContained)" >
+      <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
+      <Output TaskParameter="PublishedPackges" ItemName="PackagesThatWereResolved" />
+    </FilterResolvedFiles>
 
-      <!-- Copy all the assemblies -->
-      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
-      </ResolvedFileToPublish>
+    <ItemGroup>
+      <ResolvedPackagesPublished Include="@(PackagesThatWereResolved)"
+                                    Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
     </ItemGroup>
+    
   </Target>
 
+  <!--
+    ============================================================
+                                       PrepRestoreForStoreProjects 
+
+    Removes specified PackageReference for store and inserts the specified StorePackageName
+    ============================================================
+    -->
+  <Target Name="PrepRestoreForStoreProjects"
+          BeforeTargets="_GenerateProjectRestoreGraphPerFramework;"
+          Condition="'$(StorePackageName)' != ''" >
+    
+    <ItemGroup>
+      <PackageReference Remove="@(PackageReference)" Condition="'%(PackageReference.IsImplicitlyDefined)' != 'true'"/>
+      <PackageReference Include="$(StorePackageName)" Version="$(StorePackageVersion)"/>
+    </ItemGroup>
+  </Target>
 </Project>
