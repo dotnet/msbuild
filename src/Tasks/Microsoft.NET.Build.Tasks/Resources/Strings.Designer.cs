@@ -611,7 +611,7 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The version of Microsoft.NET.Sdk used by this project is insufficient to support .NETStandard2.0 which is required by this project&apos;s references..
+        ///   Looks up a localized string similar to The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project&apos;s references.  Please install version 2.0 or higher of the .NET Core SDK..
         /// </summary>
         internal static string UnsupportedSDKVersionForNetStandard20 {
             get {

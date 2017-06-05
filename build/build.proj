@@ -17,8 +17,9 @@
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
 
-    <!-- Explicitly specify task unit test project -->
+    <!-- Explicitly specify task unit test projects -->
     <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
+    <TestProject Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj" />
     <!-- Discover test projects under the test folder by convention -->
     <TestProject Include="$(RepositoryRootDirectory)test\**\*.Tests.csproj" />
   </ItemGroup>
