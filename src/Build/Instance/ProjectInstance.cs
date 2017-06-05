@@ -2438,7 +2438,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            if (Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.DebugEvaluation)
+            if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
                 Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Creating a ProjectInstance from an unevaluated state [{0}]", FullPath));
             }
