@@ -43,6 +43,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
 
+        public string DeveloperStoreLocation { get; set; }
+
         public bool IsSelfContained { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
@@ -181,13 +183,17 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
+            if (runtimeOptions.AdditionalProbingPaths == null)
+            {
+                runtimeOptions.AdditionalProbingPaths = new List<string>();
+            }
+
+            //Add developer profile store location as the first path to probe
+            var developerProfileStore = DeveloperStoreLocation +  "/.dotnet/store/|arch|/|tfm|";
+            runtimeOptions.AdditionalProbingPaths.Add(developerProfileStore);
+
             foreach (var packageFolder in projectContext.LockFile.PackageFolders)
             {
-                if (runtimeOptions.AdditionalProbingPaths == null)
-                {
-                    runtimeOptions.AdditionalProbingPaths = new List<string>();
-                }
-
                 // DotNetHost doesn't handle additional probing paths with a trailing slash
                 runtimeOptions.AdditionalProbingPaths.Add(EnsureNoTrailingDirectorySeparator(packageFolder.Path));
             }

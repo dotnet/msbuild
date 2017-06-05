@@ -12,6 +12,7 @@ using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -106,6 +107,16 @@ namespace Microsoft.NET.Build.Tests
 
                 string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
                 actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+            }
+
+            string devruntimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.dev.json");
+            if (File.Exists(devruntimeConfigFile))
+            {
+                string devruntimeConfigContents = File.ReadAllText(devruntimeConfigFile);
+                JObject devruntimeConfig = JObject.Parse(devruntimeConfigContents);
+
+                var additionalProbingPaths = ((JArray)devruntimeConfig["runtimeOptions"]["additionalProbingPaths"]).Values<string>();
+                additionalProbingPaths.Should().Contain(GetUserProfile() + "/.dotnet/store/|arch|/|tfm|");
             }
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
@@ -332,6 +343,21 @@ public static class Program
                 .Select(Path.GetFileName)
                 .Should()
                 .BeEquivalentTo("netcoreapp1.1");
+        }
+
+        private static string GetUserProfile()
+        {
+            string userDir;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                userDir = "USERPROFILE";
+            }
+            else
+            {
+                userDir = "HOME";
+            }
+
+            return Environment.GetEnvironmentVariable(userDir);
         }
     }
 }
