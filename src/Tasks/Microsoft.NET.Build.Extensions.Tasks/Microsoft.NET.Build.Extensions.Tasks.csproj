@@ -43,6 +43,8 @@
     <SharedCompile Include="DiagnosticsHelper.cs" />
     <SharedCompile Include="DiagnosticMessageSeverity.cs" />
     <SharedCompile Include="ItemUtilities.cs" />
+    <SharedCompile Include="ILog.cs" />
+    <SharedCompile Include="MSBuildLog.cs" />
     <SharedCompile Include="MetadataKeys.cs" />
     <SharedCompile Include="NETSdkError.cs" />
     <SharedCompile Include="NuGetUtils.cs" />
