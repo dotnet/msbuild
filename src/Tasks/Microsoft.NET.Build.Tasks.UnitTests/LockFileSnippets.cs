@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using NuGet.Common;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
@@ -14,16 +15,21 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         public static string CreateLockFileSnippet(
             string[] targets,
             string[] libraries,
-            string[] projectFileDependencyGroups)
+            string[] projectFileDependencyGroups,
+            string[] logs = null)
         {
             return $@"{{
-              ""locked"": false,
-              ""version"": 2,
+              ""version"": 3,
               ""targets"": {{{string.Join(",", targets)}}},
               ""libraries"": {{{string.Join(",", libraries)}}},
+              {GetLogsPart(logs)}
               ""projectFileDependencyGroups"": {{{string.Join(",", projectFileDependencyGroups)}}}
+
             }}";
         }
+
+        private static string GetLogsPart(string[] logs)
+            => logs == null ? string.Empty : $@" ""logs"": [{string.Join(",", logs)}], ";
 
         public static string CreateLibrary(string nameVer, string type = "package", params string[] members)
         {
@@ -101,6 +107,28 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             return $"\"{tfm}\": [{ToStringList(dependencies)}]";
         }
 
+        public static string CreateLog(NuGetLogCode code, LogLevel level, string message,
+            string filePath = null,
+            string libraryId = null,
+            string warningLevel = "0",
+            string[] targetGraphs = null)
+        {
+            List<string> parts = new List<string>();
+
+            parts.Add($"\"code\": \"{code}\"");
+            parts.Add($"\"level\": \"{level}\"");
+            parts.Add($"\"message\": \"{message}\"");
+            parts.Add($"\"warningLevel\": \"{warningLevel}\"");
+
+            if (filePath != null) parts.Add($"\"filePath\": \"{filePath}\"");
+            if (libraryId != null) parts.Add($"\"libraryId\": \"{libraryId}\"");
+            if (targetGraphs != null) parts.Add($"\"targetGraphs\": [{ToStringList(targetGraphs)}]");
+
+            return $@"{{
+                {string.Join(",", parts)}
+            }}";
+        }
+
         private static string ToStringList(params string[] members)
         {
             return members == null ? string.Empty : string.Join(",", members.Select(m => $"\"{m}\""));
@@ -118,6 +146,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         public static readonly string NETCoreOsxGroup =
             CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0/osx.10.11-x64");
+
+        public static readonly string NET461Group =
+            CreateProjectFileDependencyGroup(".NETFramework,Version=v4.6.1");
 
         public static readonly string LibADefn =
             CreateLibrary("LibA/1.2.3", "package", "lib/file/A.dll", "lib/file/B.dll", "lib/file/C.dll");

@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.NET.Build.Tasks.ConflictResolution
+namespace Microsoft.NET.Build.Tasks
 {
     public enum LogImportance
     {
@@ -81,5 +81,52 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         //   T:System.ArgumentNullException:
         //     message is null.
         void LogWarning(string message, params object[] messageArgs);
+
+        /// <summary>
+        /// Logs an error using the specified string and other error details.
+        /// </summary>
+        void LogError(
+            string subcategory,
+            string errorCode,
+            string helpKeyword,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            params object[] messageArgs);
+
+        /// <summary>
+        /// Logs a warning using the specified string and other warning details.
+        /// </summary>
+        void LogWarning(
+            string subcategory,
+            string warningCode,
+            string helpKeyword,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            params object[] messageArgs);
+
+        /// <summary>
+        /// Logs a message using the specified string and other message details.
+        /// </summary>
+        void LogMessage(
+            string subcategory,
+            string code,
+            string helpKeyword,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            MessageImportance importance,
+            string message,
+            params object[] messageArgs);
+
     }
 }
