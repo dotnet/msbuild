@@ -119,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
 
                         var systemCollectionsLibrary = dependencyContext
                             .CompileLibraries
-                            .FirstOrDefault(l => string.Equals(l.Name, "system.collections", StringComparison.OrdinalIgnoreCase));
+                            .FirstOrDefault(l => string.Equals(l.Name, "system.collections.reference", StringComparison.OrdinalIgnoreCase));
                         systemCollectionsLibrary.Assemblies.Count.Should().Be(1);
                         systemCollectionsLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/Facades/System.Collections.dll");
                     }

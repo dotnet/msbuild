@@ -236,7 +236,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 var currentPackageUniqueId = $"{parentTargetId}/{currentItemId}";
                 // add current package to dependencies world
-                var currentItem = items[currentItemId];
+                var currentItem = GetItem(items, currentItemId);
                 DependenciesWorld[currentPackageUniqueId] = currentItem;
 
                 // update parent
@@ -255,11 +255,11 @@ namespace Microsoft.NET.Build.Tasks
                     // Update parent's Dependencies count and make sure parent is in the dependencies world
                     if (!string.IsNullOrEmpty(parentPackageId))
                     {
-                        parentDependency = Packages[parentPackageId];
+                        parentDependency = GetItem(Packages, parentPackageId);
                     }
                     else
                     {
-                        parentDependency = Targets[parentTargetId];
+                        parentDependency = GetItem(Targets, parentTargetId);
                         currentItem.IsTopLevelDependency = true;
                     }
 
@@ -269,12 +269,18 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
+        {
+            return Targets.Count > 1 ? items[id].Clone() : items[id];
+        }
+
         private abstract class ItemMetadata
         {
-            public ItemMetadata(DependencyType type)
+            public ItemMetadata(DependencyType type, IList<string> dependencies = null, bool isTopLevelDependency = false)
             {
                 Type = type;
-                Dependencies = new List<string>();
+                Dependencies = dependencies == null ? new List<string>() : new List<string>(dependencies);
+                IsTopLevelDependency = isTopLevelDependency;
             }
 
             public DependencyType Type { get; protected set; }
@@ -291,6 +297,11 @@ namespace Microsoft.NET.Build.Tasks
             /// </summary>
             /// <returns></returns>
             public abstract IDictionary<string, string> ToDictionary();
+
+            /// <summary>
+            /// Creates a copy of the item
+            /// </summary>
+            public abstract ItemMetadata Clone();
         }
 
         private class TargetMetadata : ItemMetadata
@@ -302,6 +313,22 @@ namespace Microsoft.NET.Build.Tasks
                 TargetFrameworkMoniker = item.GetMetadata(MetadataKeys.TargetFrameworkMoniker) ?? string.Empty;
                 FrameworkName = item.GetMetadata(MetadataKeys.FrameworkName) ?? string.Empty;
                 FrameworkVersion = item.GetMetadata(MetadataKeys.FrameworkVersion) ?? string.Empty;
+            }
+
+            private TargetMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string runtimeIdentifier,
+                string targetFrameworkMoniker,
+                string frameworkName,
+                string frameworkVersion)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                RuntimeIdentifier = runtimeIdentifier;
+                TargetFrameworkMoniker = targetFrameworkMoniker;
+                FrameworkName = frameworkName;
+                FrameworkVersion = frameworkVersion;
             }
 
             public string RuntimeIdentifier { get; }
@@ -321,6 +348,18 @@ namespace Microsoft.NET.Build.Tasks
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
             }
+
+            public override ItemMetadata Clone()
+            {
+                return new TargetMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    RuntimeIdentifier,
+                    TargetFrameworkMoniker,
+                    FrameworkName,
+                    FrameworkVersion);
+            }
         }
 
         private class PackageMetadata : ItemMetadata
@@ -334,6 +373,24 @@ namespace Microsoft.NET.Build.Tasks
                 Path = (Resolved
                         ? item.GetMetadata(MetadataKeys.ResolvedPath)
                         : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
+            }
+
+            private PackageMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string name,
+                string version,
+                string path,
+                bool resolved,
+                bool isImplicitlyDefined)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                Name = name;
+                Version = version;
+                Path = path;
+                Resolved = resolved;
+                IsImplicitlyDefined = isImplicitlyDefined;
             }
 
             public string Name { get; protected set; }
@@ -355,6 +412,19 @@ namespace Microsoft.NET.Build.Tasks
                     { ResolvedMetadata, Resolved.ToString() },
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new PackageMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    Name,
+                    Version,
+                    Path,
+                    Resolved,
+                    IsImplicitlyDefined);
             }
         }
 
@@ -385,6 +455,30 @@ namespace Microsoft.NET.Build.Tasks
                 EndColumn = item.GetMetadata(MetadataKeys.EndColumn) ?? string.Empty;
             }
 
+            private DiagnosticMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string diagnosticCode,
+                string message,
+                string filePath,
+                string severity,
+                string startLine,
+                string startColumn,
+                string endLine,
+                string endColumn)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                DiagnosticCode = diagnosticCode;
+                Message = message;
+                FilePath = filePath;
+                Severity = severity;
+                StartLine = startLine;
+                StartColumn = startColumn;
+                EndLine = endLine;
+                EndColumn = endColumn;
+            }
+
             public string DiagnosticCode { get; }
             public string Message { get; }
             public string FilePath { get; }
@@ -410,6 +504,22 @@ namespace Microsoft.NET.Build.Tasks
                     { MetadataKeys.Type, Type.ToString() },
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new DiagnosticMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    DiagnosticCode,
+                    Message,
+                    FilePath,
+                    Severity,
+                    StartLine,
+                    StartColumn,
+                    EndLine,
+                    EndColumn);
             }
         }
 
