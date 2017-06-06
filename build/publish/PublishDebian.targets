@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkDebianUploadUrl>
+    <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkDebianUploadUrl>
     <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
     <DebianRevisionNumber>1</DebianRevisionNumber>
 
