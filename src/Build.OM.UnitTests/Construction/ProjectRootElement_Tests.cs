@@ -1776,6 +1776,14 @@ true, true, true)]
 
                 var project = new Project(rootElement, null, null, projectCollection);
 
+                var msbuildToolsPath = project.GetPropertyValue("MSBuildToolsPath");
+                System.Console.WriteLine($"MSBuildToolsPath: {msbuildToolsPath}");
+
+                foreach (var file in Directory.EnumerateFiles(msbuildToolsPath))
+                {
+                    System.Console.WriteLine($"\t{file}");
+                }
+
                 string reloadLocation = null;
 
                 if (reloadProjectFromMemory)
