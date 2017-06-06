@@ -1981,7 +1981,7 @@ namespace Microsoft.Build.Construction
 
                 if (fileInfo.Length > maxSizeToConsiderEmpty)
                 {
-                    // Files greater than the minimum to bytes to check are not empty
+                    // Files greater than the maximum bytes to check are not empty
                     //
                     return false;
                 }
