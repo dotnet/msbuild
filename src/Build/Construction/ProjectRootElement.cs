@@ -1703,6 +1703,8 @@ namespace Microsoft.Build.Construction
         /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
         /// When this happens, the state of this object does not change.
         /// 
+        /// Reloading from an XMLReader will retain the previous root element location (<see cref="FullPath"/>, <see cref="DirectoryPath"/>, <see cref="ProjectFileLocation"/>).
+        /// 
         /// </summary>
         /// <param name="reader">Reader to read from</param>
         /// <param name="throwIfUnsavedChanges">
@@ -1714,7 +1716,15 @@ namespace Microsoft.Build.Construction
         /// </param>
         public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
-            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(reader, shouldPreserveFormatting);
+            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting =>
+            {
+                var document =  LoadDocument(reader, shouldPreserveFormatting);
+
+                document.FullPath = this.FullPath;
+
+                return document;
+            };
+
             ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
