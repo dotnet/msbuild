@@ -13,6 +13,7 @@
     <NuGetVersion>4.3.0-preview2-4095</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
+    <NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25331-02</NETStandardLibraryNETFrameworkVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
   </PropertyGroup>
 

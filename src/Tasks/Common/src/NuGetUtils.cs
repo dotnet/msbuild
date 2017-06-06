@@ -5,39 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NuGet.Frameworks;
-using NuGet.Packaging.Core;
-using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    internal static class NuGetUtils
+    internal static partial class NuGetUtils
     {
-        public static bool IsPlaceholderFile(string path)
-        {
-            return string.Equals(Path.GetFileName(path), PackagingCoreConstants.EmptyFolder, StringComparison.Ordinal);
-        }
-
-        public static IEnumerable<LockFileItem> FilterPlaceHolderFiles(this IEnumerable<LockFileItem> files)
-        {
-            return files.Where(f => !IsPlaceholderFile(f.Path));
-        }
-
-        public static string GetLockFileLanguageName(string projectLanguage)
-        {
-            switch (projectLanguage)
-            {
-                case "C#": return "cs";
-                case "F#": return "fs";
-                default: return projectLanguage?.ToLowerInvariant();
-            }
-        }
-
-        public static NuGetFramework ParseFrameworkName(string frameworkName)
-        {
-            return frameworkName == null ? null : NuGetFramework.Parse(frameworkName);
-        }
-
         /// <summary>
         /// Gets PackageId from sourcePath.
         /// </summary>

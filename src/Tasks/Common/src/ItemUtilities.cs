@@ -3,14 +3,12 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
-using NuGet.Packaging.Core;
-using NuGet.Versioning;
 using System;
 using System.IO;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    internal static class ItemUtilities
+    internal static partial class ItemUtilities
     {
         public static bool? GetBooleanMetadata(this ITaskItem item, string metadataName)
         {
@@ -133,21 +131,6 @@ namespace Microsoft.NET.Build.Tasks
             var sourcePath = GetSourcePath(item);
 
             return Path.GetFileName(sourcePath);
-        }
-
-        public static PackageIdentity GetPackageIdentity(ITaskItem item)
-        {
-            string packageName = item.GetMetadata(MetadataKeys.PackageName);
-            string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
-
-            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
-            {
-                return null;
-            }
-
-            return new PackageIdentity(
-                packageName,
-                NuGetVersion.Parse(packageVersion));
         }
     }
 }

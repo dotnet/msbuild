@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MicrosoftNETBuildExtensionsTargets Condition="'$(MicrosoftNETBuildExtensionsTargets)' == ''">$(MSBuildExtensionsPath)\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets</MicrosoftNETBuildExtensionsTargets>
+  </PropertyGroup>
+
+  <Import Condition="Exists('$(MicrosoftNETBuildExtensionsTargets)')" Project="$(MicrosoftNETBuildExtensionsTargets)" />
+</Project>
