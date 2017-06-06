@@ -37,16 +37,21 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
+    <Compile Include="..\Common\src\**\*.cs">
+      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+    </Compile>
     <None Include="build\**\*" PackagePath="build\" />
     <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <None Include="Resources\xlf\**\*" />
-    <EmbeddedResource Include="Resources\Strings.resx">
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
+      <Link>Resources\%(FileName)%(Extension)</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
-    <Compile Update="Resources\Strings.Designer.cs">
+    <Compile Include="..\Common\Resources\Strings.Designer.cs">
+      <Link>Resources\%(FileName)%(Extension)</Link>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>

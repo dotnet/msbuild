@@ -43,30 +43,13 @@
     <None Include="msbuildExtensions\**\*" PackagePath="msbuildExtensions\" />
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <Compile Include="**\*.cs" />
-    <SharedCompile Include="BuildErrorException.cs" />
-    <SharedCompile Include="DiagnosticsHelper.cs" />
-    <SharedCompile Include="DiagnosticMessageSeverity.cs" />
-    <SharedCompile Include="ItemUtilities.cs" />
-    <SharedCompile Include="ILog.cs" />
-    <SharedCompile Include="MSBuildLog.cs" />
-    <SharedCompile Include="MetadataKeys.cs" />
-    <SharedCompile Include="NETSdkError.cs" />
-    <SharedCompile Include="NuGetUtils.cs" />
-    <SharedCompile Include="TaskBase.cs" />
-    <Compile Include="@(SharedCompile->'..\Microsoft.NET.Build.Tasks\%(Identity)')">
-      <Link>%(FileName)%(Extension)</Link>
+    <Compile Include="..\Common\src\**\*.cs">
+      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
     </Compile>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\ConflictResolution\*.cs">
-      <Link>ConflictResolution\%(FileName)%(Extension)</Link>
-    </Compile>
-    <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.resx">
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
       <Link>Resources\%(FileName)%(Extension)</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.*.resx">
-      <Link>Resources\%(FileName)%(Extension)</Link>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </EmbeddedResource>
-    <Compile Include="..\Microsoft.NET.Build.Tasks\Resources\Strings.Designer.cs">
+    <Compile Include="..\Common\Resources\Strings.Designer.cs">
       <Link>Resources\%(FileName)%(Extension)</Link>
       <DesignTime>true</DesignTime>
       <AutoGen>true</AutoGen>
