@@ -147,11 +147,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
-    <PropertyGroup>
-      <DeveloperStoreLocation>$(HOME)</DeveloperStoreLocation>
-      <DeveloperStoreLocation Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</DeveloperStoreLocation>
-    </PropertyGroup>
-
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
                                        TargetFramework="$(TargetFramework)"
