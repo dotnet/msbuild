@@ -62,7 +62,6 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-
         [Theory]
 
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.
