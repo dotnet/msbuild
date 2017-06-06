@@ -106,8 +106,9 @@ namespace Microsoft.DotNet.Tests
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
-            var emptyHomeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
-            emptyHomeFolder.Should().NotExist();
+            var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
+            string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
+            fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
         }
 
         [Fact]

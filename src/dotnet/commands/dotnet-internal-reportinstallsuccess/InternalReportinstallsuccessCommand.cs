@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Cli.Telemetry;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -37,13 +38,13 @@ namespace Microsoft.DotNet.Cli
 
         internal class ThreadBlockingTelemetry : ITelemetry
         {
-            private Telemetry telemetry;
+            private Telemetry.Telemetry telemetry;
 
             internal ThreadBlockingTelemetry()
             {
                 var sessionId =
                 Environment.GetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName);
-                telemetry = new Telemetry(new NoOpFirstTimeUseNoticeSentinel(), sessionId, blockThreadInitialization: true);
+                telemetry = new Telemetry.Telemetry(new NoOpFirstTimeUseNoticeSentinel(), sessionId, blockThreadInitialization: true);
             }
             public bool Enabled => telemetry.Enabled;
 
