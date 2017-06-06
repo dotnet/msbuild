@@ -152,6 +152,12 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.IO.StringWriter.#ctor(System.Text.StringBuilder)", Justification = "Reads fine to me")]
         private string GenerateCode(out string extension)
         {
+            if (Language.ToLowerInvariant() == "f#")
+            {
+                //no codedoom for F#, fallback to coreclr version
+                return GenerateCodeCoreClr(out extension);
+            }
+
             extension = null;
             bool haveGeneratedContent = false;
 
@@ -333,6 +339,32 @@ namespace Microsoft.Build.Tasks
                         code.AppendLine(string.Format($"<Assembly: {attributeItem.ItemSpec}({args})>"));
                         haveGeneratedContent = true;
                     }
+                    break;
+                case "f#":
+                    if (AssemblyAttributes == null) return string.Empty;
+
+                    extension = "fs";
+                    code.AppendLine("// " + ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment"));
+                    code.AppendLine();
+                    code.AppendLine("open System");
+                    code.AppendLine("open System.Reflection");
+                    code.AppendLine();
+
+                    foreach (ITaskItem attributeItem in AssemblyAttributes)
+                    {
+                        string args = GetAttributeArguments(attributeItem, "=", QuoteSnippetStringCSharp);
+                        if (args == null) return null;
+
+                        code.AppendLine(string.Format($"[<assembly: {attributeItem.ItemSpec}({args})>]"));
+                        haveGeneratedContent = true;
+                    }
+
+                    if (haveGeneratedContent)
+                    {
+                        code.AppendLine("()");
+                        code.AppendLine();
+                    }
+
                     break;
                 default:
                     Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, string.Empty);
