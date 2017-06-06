@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projColln.RegisterLogger(logger);
 
                 Assert.Throws<InvalidProjectFileException>(() => projColln.LoadProject(mainProjectPath));
-                logger.AssertLogContains("MSB4025");
+                logger.AssertLogContains("MSB4024");
             } finally {
                 if (mainProjectPath != null)
                 {
