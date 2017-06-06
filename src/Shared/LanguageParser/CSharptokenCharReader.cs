@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     /*
      * Class:   CSharpTokenCharReader
      *
-     * Reads over the contents of a C# source file (in the form of a string). 
+     * Reads over the contents okkkf a C# source file (in the form of a string). 
      * Provides utility functions for dealing with C#-specific tokens.
      *
      */
