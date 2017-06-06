@@ -1,300 +1,300 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <target state="translated">È necessario specificare almeno un framework di destinazione possibile.</target>
+        <target state="translated">Debe especificarse al menos una plataforma de destino posible.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="translated">Il progetto '{0}' è destinato a '{2}'. Non può essere usato come riferimento in un progetto destinato a '{1}'.</target>
+        <target state="translated">El proyecto "{0}" tiene como destino "{2}". No se puede hacer referencia a él mediante un proyecto que tenga como destino "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="translated">Nome di framework non valido: '{0}'.</target>
+        <target state="translated">Nombre de plataforma no válido: '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">Il file di risorse '{0}' non è stato trovato. Per generare questo file, eseguire un ripristino del pacchetto NuGet.</target>
+        <target state="translated">No se encuentra el archivo de recursos '{0}'. Ejecute una restauración de paquetes NuGet para generar el archivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">Il file di risorse '{0}' non contiene una destinazione per '{1}'. Assicurarsi di aver ripristinato questo progetto per TargetFramework='{2}' e RuntimeIdentifier='{3}'.</target>
+        <target state="needs-review-translation">El archivo de recursos '{0}' no tiene un destino para '{1}'. Asegúrese de que ha restaurado el proyecto para TargetFramework='{2}' y RuntimeIdentifier='{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">Il percorso dei file di risorse '{0}' non contiene una radice. Sono supportati solo percorsi completi.</target>
+        <target state="translated">La ruta de acceso del archivo de recursos '{0}' no tiene raíz. Solo se admiten rutas de acceso completas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">Le informazioni del progetto per '{0}' non sono state trovate. Questo errore può indicare la mancanza di un riferimento al progetto.</target>
+        <target state="translated">No se encuentra la información de proyecto de '{0}'. Esto puede indicar que falta una referencia de proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">Il file di contenuto '{0}' non contiene le informazioni previste sul pacchetto padre.</target>
+        <target state="translated">El archivo de contenido '{0}' no tiene la información de paquete primario que se esperaba.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="translated">Mancano i metadati di '{0}' sull'elemento '{2}' di '{1}'.</target>
+        <target state="translated">Faltan los metadatos de '{0}' en el elemento de '{1}' '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">Token di preprocessore '{0}' non riconosciuto in '{1}'.</target>
+        <target state="translated">Token de preprocesador no reconocido '{0}' en '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="translated">Per poter utilizzare il contenuto pre-elaborato, è necessario assegnare un valore per il parametro '{1}' nell'attività '{0}'.</target>
+        <target state="translated">Debe darse un valor al parámetro '{1}' de la tarea '{0}' para poder consumir contenido preprocesado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">Le risorse vengono utilizzate dal progetto '{0}', ma non è stato trovato alcun percorso di progetto MSBuild corrispondente in '{1}'.</target>
+        <target state="translated">Los recursos se consumen desde el proyecto '{0}', pero no se ha encontrado la ruta de acceso de proyecto de MSBuild correspondiente en '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">Tipo di file imprevisto per '{0}'. Il tipo è sia '{1}' che '{2}'.</target>
+        <target state="translated">Tipo de archivo no esperado para '{0}'. El tipo es tanto '{1}' como '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">Non è possibile dedurre TargetFrameworkIdentifier e/o TargetFrameworkVersion da TargetFramework='{0}'. Devono essere specificati in modo esplicito.</target>
+        <target state="needs-review-translation">No se puede inferir TargetFrameworkIdentifier y/o TargetFrameworkVersion de TargetFramework='{0}'. Deben especificarse de forma explícita.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">L'elemento di contenuto per '{0}' imposta '{1}', ma non fornisce '{2}' o '{3}'.</target>
+        <target state="translated">El elemento de contenido de '{0}' establece '{1}', pero no proporciona '{2}' ni '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">Al token di preprocessore '{0}' è stato assegnato più di un valore. Come valore verrà scelto '{1}'.</target>
+        <target state="translated">Se han dado varios valores para el token de preprocesador '{0}'. Se va a elegir '{1}' como valor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">Si sono verificati errori durante la creazione dell'assembly satellite '{0}'.</target>
+        <target state="translated">Se han producido errores al emitir el ensamblado satélite '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="translated">Il percorso risolto per '{0}' non è stato trovato.</target>
+        <target state="translated">No se encuentra la ruta de acceso resuelta para '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">La dipendenza '{0}' è imprevista e non ha numero di versione.</target>
+        <target state="translated">Dependencia '{0}' sin número de versión no esperada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="translated">Prima di elaborare le risorse, è necessario configurare il preprocessore di risorse.</target>
+        <target state="translated">Debe configurarse el preprocesador de recursos antes de que se procesen los recursos.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">La stringa di versione '{0}' di NuGet non è valida.</target>
+        <target state="translated">Cadena de versión de NuGet no válida: '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">Framework non installato: {0} in {1}</target>
+        <target state="translated">Plataforma no instalada: {0} en {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">La directory degli assembly di riferimento non è stata specificata. È possibile impostare il percorso con la variabile di ambiente DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
+        <target state="translated">No se especificó el directorio de ensamblados de referencia. Puede establecer la ubicación mediante la variable de entorno DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">Le dipendenze seguenti sono contrassegnate dal tipo 'platform', tuttavia questo tipo può essere assegnato a una sola dipendenza: {0}</target>
+        <target state="translated">Las dependencias siguientes están marcadas con el tipo "plataforma"; sin embargo, solo una dependencia puede tener este tipo: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="translated">Non è stato possibile leggere il file di blocco</target>
+        <target state="translated">No se pudo leer el archivo de bloqueo</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <target state="translated">Il file di progetto '{0}' non esiste.</target>
+        <target state="translated">El archivo de proyecto no existe "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <target state="translated">Non è stato possibile risolvere la dipendenza '{0}'.</target>
+        <target state="translated">No se pudo resolver la dependencia "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="translated">La dipendenza '{0}' nel progetto '{1}' non supporta il framework '{2}'.</target>
+        <target state="translated">La dependencia "{0}" del proyecto "{1}" no es compatible con la plataforma "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Per generare un nuovo file di risorse, eseguire 'dotnet restore'.</target>
+        <target state="translated">{0}. Ejecute "dotnet restore" para generar un nuevo archivo de recurso.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">La dipendenza specificata era '{0}' ma è risultata essere '{1}'.</target>
+        <target state="translated">La dependencia especificada era "{0}", pero finalizaba con "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <target state="translated">{0} è un framework non supportato.</target>
+        <target state="translated">{0} es una plataforma no compatible.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">Il file di risorse previsto non esiste. Per generare un nuovo file di risorse, eseguire 'dotnet restore'.</target>
+        <target state="translated">El archivo de recurso esperado no existe. Ejecute "dotnet restore" para generar un nuevo archivo de recurso.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <target state="translated">Il tipo di dipendenza è cambiato</target>
+        <target state="translated">El tipo de dependencia cambió</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <target state="translated">La destinazione '{0}' della dipendenza non è supportata.</target>
+        <target state="translated">El destino de dependencia"{0}" no es compatible.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">Conflitto di dipendenze. In '{0}' è previsto '{1}', ma è stato ricevuto '{2}'</target>
+        <target state="translated">Conflicto de dependencia. "{0}" esperaba "{1}", pero recibió "{2}"</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">Sono stati inclusi '{0}' elementi duplicati. Per impostazione predefinita, .NET SDK include '{0}' elementi della directory del progetto. È possibile rimuovere tali elementi dal file di progetto oppure impostare la proprietà '{1}' su '{2}' se si vuole includerli implicitamente nel file di progetto. Per altre informazioni, vedere {4}. Gli elementi duplicati sono: {3}</target>
+        <target state="translated">Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Para más información, consulte {4}. Los elementos duplicados eran: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">Nel progetto è stato incluso un riferimento al pacchetto per '{0}'. Questo pacchetto viene usato come riferimento implicito da .NET SDK e non è in genere necessario farvi riferimento dal progetto. Per altre informazioni, vedere {1}</target>
+        <target state="translated">Se incluyó un elemento PackageReference para "{0}" en su proyecto. El SDK de .NET hace referencia implícita a este paquete y normalmente no tiene que hacer referencia a él desde su proyecto. Para obtener más información, consulte {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="translated">La radice {0} del pacchetto specificata per la libreria risolta {1} non è corretta</target>
+        <target state="translated">Se proporcionó incorrectamente la raíz del paquete {0} para la biblioteca resuelta {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>More than one file found for {0}</source>
-        <target state="translated">È stato trovato più di un file per {0}</target>
+        <target state="translated">Se encontró más de un archivo para {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="translated">La cartella '{0}' esiste già. Eliminarla o specificare un elemento ComposeWorkingDir diverso</target>
+        <target state="translated">La carpeta "{0}" ya existe; elimínela o proporcione otro valor para ComposeWorkingDir</target>
         <note />
       </trans-unit>
       <trans-unit id="ParsingFiles">
         <source>Parsing the Files : '{0}'</source>
-        <target state="translated">Analisi dei file: '{0}'</target>
+        <target state="translated">Analizando los archivos: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageInfoLog">
         <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="translated">È stato analizzato il pacchetto con nome '{0}' e versione '{1}'</target>
+        <target state="translated">Nombre del paquete="{0}", versión analizada="{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>Specify a RuntimeIdentifier</source>
-        <target state="translated">Specificare un elemento RuntimeIdentifier</target>
+        <target state="translated">Especificar un valor para RuntimeIdentifier</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="translated">Il formato del manifesto di destinazione specificato {0} non è corretto</target>
+        <target state="translated">El manifiesto de destino {0} proporcionado no tiene el formato correcto</target>
         <note />
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">Non è possibile usare '{0}' come eseguibile host dell'applicazione perché non contiene la sequenza di byte segnaposto prevista '{1}' che indica dove verrà scritto il nome dell'applicazione.</target>
+        <target state="translated">No se puede usar "{0}" como ejecutable del host de aplicación ya que no contiene la secuencia de bytes esperada del marcador de posición "{1}" que marcaría dónde escribir el nombre de la aplicación.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">Il nome file specificato '{0}' supera 1024 byte</target>
+        <target state="translated">El nombre de archivo especificado "{0}" tiene más de 1024 bytes</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">Non è possibile compilare o pubblicare un'applicazione indipendente senza specificare un elemento RuntimeIdentifier. Specificare un elemento RuntimeIdentifier o impostare SelfContained su false.</target>
+        <target state="translated">No se admite compilar o publicar una aplicación autocontenida sin especificar un valor para RuntimeIdentifier. Especifique un valor para RuntimeIdentifier o establezca SelfContained en false.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">Verrà scelto '{0}' perché il valore di AssemblyVersion '{1}' è maggiore di '{2}'.</target>
+        <target state="translated">Se elegirá "{0}" porque AssemblyVersion "{1}" es mayor que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">Verrà scelto '{0}' perché la versione del file '{1}' è maggiore di '{2}'.</target>
+        <target state="translated">Se elegirá "{0}" porque la versión del archivo "{1}" es mayor que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="translated">Verrà scelto '{0}' perché è un elemento della piattaforma.</target>
+        <target state="translated">Se elegirá "{0}" porque es un elemento de la plataforma.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">Verrà scelto '{0}' perché proviene da un pacchetto preferito.</target>
+        <target state="translated">Se elegirá "{0}" porque viene de un paquete que es preferido.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="translated">Non è stato possibile determinare la versione da usare perché le versioni dell'assembly e del file sono uguali.</target>
+        <target state="translated">No se pudo determinar el ganador porque las versiones de archivo y ensamblado son iguales.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">Non è stato possibile determinare la versione da usare perché '{0}' non esiste.</target>
+        <target state="translated">No se pudo determinar el ganador porque "{0}" no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="translated">Non è stato possibile determinare la versione da usare perché non esiste alcuna versione file per '{0}'.</target>
+        <target state="translated">No se pudo determinar un ganador porque "{0}" no tiene una versión de archivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="translated">Non è stato possibile determinare la versione da usare perché '{0}' non è un assembly.</target>
+        <target state="translated">No se pudo determinar un ganador porque "{0}" no es un ensamblado.</target>
         <note />
       </trans-unit>
       <trans-unit id="EncounteredConflict">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">È stato rilevato un conflitto tra '{0}' e '{1}'.</target>
+        <target state="translated">Se encontró un conflicto entre "{0}" y "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="translated">Non è stato possibile caricare PlatformManifest da '{0}' perché non esiste.</target>
+        <target state="translated">No se pudo cargar PlatformManifest desde "{0}" porque no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="translated">Si è verificato un errore durante l'analisi di PlatformManifest da '{0}' a riga {1}. Il formato delle righe deve essere {2}.</target>
+        <target state="translated">Error al analizar PlatformManifest desde la línea "{0}" {1}. Las líneas deben tener el formato {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="translated">Si è verificato un errore durante l'analisi di PlatformManifest da '{0}' a riga {1}. Il valore {2} '{3}' non è valido.</target>
+        <target state="translated">Error al analizar PlatformManifest desde la línea "{0}" {1}. {2} "{3}" no era válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
@@ -315,6 +315,16 @@
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetDependsOnNETStandardFailedWithException">
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
+        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedSDKVersionForNetStandard20">
+        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
         <note />
       </trans-unit>
     </body>

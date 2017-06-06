@@ -89,30 +89,45 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
 
-    <Reference Include="System"/>
-    <Reference Include="System.Data"/>
-    <Reference Include="System.Drawing"/>
-    <Reference Include="System.Xml"/>
+    <_SDKImplicitReference Include="System"/>
+    <_SDKImplicitReference Include="System.Data"/>
+    <_SDKImplicitReference Include="System.Drawing"/>
+    <_SDKImplicitReference Include="System.Xml"/>
 
     <!-- When doing greater than/less than comparisons between strings, MSBuild will try to parse the strings as Version objects and compare them as
          such if the parse succeeds. -->
     
     <!-- Framework assemblies introduced in .NET 3.5 -->
-    <Reference Include="System.Core" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
-    <Reference Include="System.Runtime.Serialization" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
-    <Reference Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Core" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Runtime.Serialization" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
 
     <!-- Framework assemblies introduced in .NET 4.0 -->
-    <Reference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
+    <_SDKImplicitReference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
 
     <!-- Framework assemblies introduced in .NET 4.5 -->
-    <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <_SDKImplicitReference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     
     <!-- Don't automatically reference System.IO.Compression or System.Net.Http to help avoid hitting https://github.com/Microsoft/msbuild/issues/1329. -->
     <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
+    <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
+    <!-- Set Pack=false on implicit references so they don't get added to NuGet packages as framework assemblies -->
+    <_SDKImplicitReference Update="@(_SDKImplicitReference)"
+                           Pack="false" />
+
+    <!-- Don't duplicate any references that are explicit in the project file.  This means that if you do want to include a framework assembly in your
+         NuGet package, you can just add the Reference to your project file. -->
+    <_SDKImplicitReference Remove="@(Reference)" />
+
+    <!-- Add the implicit references to @(Reference) -->
+    <Reference Include="@(_SDKImplicitReference)" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Prevent System.Core reference from being added separately (see Microsoft.NETFramework.CurrentVersion.props) -->
+    <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(DisableImplicitPackageTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
     <PackageTargetFallback>$(PackageTargetFallback);net461</PackageTargetFallback>    

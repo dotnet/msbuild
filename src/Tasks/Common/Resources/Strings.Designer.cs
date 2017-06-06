@@ -377,6 +377,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}.
+        /// </summary>
+        internal static string GetDependsOnNETStandardFailedWithException {
+            get {
+                return ResourceManager.GetString("GetDependsOnNETStandardFailedWithException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
         internal static string IncorrectPackageRoot {
@@ -616,6 +625,15 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string UnrecognizedPreprocessorToken {
             get {
                 return ResourceManager.GetString("UnrecognizedPreprocessorToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project&apos;s references.  Please install version 2.0 or higher of the .NET Core SDK..
+        /// </summary>
+        internal static string UnsupportedSDKVersionForNetStandard20 {
+            get {
+                return ResourceManager.GetString("UnsupportedSDKVersionForNetStandard20", resourceCulture);
             }
         }
         

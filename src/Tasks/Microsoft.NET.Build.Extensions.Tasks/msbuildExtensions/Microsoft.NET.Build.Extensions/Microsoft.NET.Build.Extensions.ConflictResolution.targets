@@ -1,0 +1,45 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Choose>
+    <!-- Allow completely disabling the conflict resolution targets -->
+    <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
+    <!-- SDK projects have built in conflict resolution that understands assets/deps file -->
+    <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
+    <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
+      <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
+      <PropertyGroup>
+        <HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</HandlePackageFileConflictsAfter>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <!-- No specific NuGet targets to sequence after, run before targets that consume references -->
+      <PropertyGroup>
+        <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);HandlePackageFileConflicts</ResolveAssemblyReferencesDependsOn>
+        <PrepareResourcesDependsOn>HandlePackageFileConflicts;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  
+  <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <Target Name="HandlePackageFileConflicts" AfterTargets="$(HandlePackageFileConflictsAfter)" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">
+    <ResolvePackageFileConflicts References="@(Reference)"
+                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                PlatformManifests="@(PackageConflictPlatformManifests)"
+                                PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
+      <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
+    </ResolvePackageFileConflicts>
+
+    <!-- Replace Reference / ReferenceCopyLocalPaths with the filtered lists.
+         We must remove all and include rather than just remove since removal is based
+         only on ItemSpec and duplicate ItemSpecs may exist with different metadata 
+         (eg: HintPath) -->
+    <ItemGroup>
+      <Reference Remove="@(Reference)" />
+      <Reference Include="@(_ReferencesWithoutConflicts)" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
+    </ItemGroup>
+  </Target>
+</Project>

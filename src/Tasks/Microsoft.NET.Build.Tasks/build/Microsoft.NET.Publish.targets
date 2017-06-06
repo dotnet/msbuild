@@ -257,14 +257,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               IsSelfContained="$(SelfContained)" >
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
-      <Output TaskParameter="PackagesResolved" ItemName="PackagesThatWereResolved" />
     </ResolvePublishAssemblies>
-    
-    <ItemGroup>
-      <ResolvedPackagesPublished Include="@(PackagesThatWereResolved)"
-                                    Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
-    </ItemGroup>
-    
   </Target>
   
   <!--

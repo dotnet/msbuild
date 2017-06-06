@@ -27,8 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="PrepOptimizer"
-          DependsOnTargets="_GenerateCrossgenProj;
-                            _RestoreCrossgen;"
+          DependsOnTargets="_RestoreCrossgen;"
           Condition="$(SkipOptimization) != 'true' ">
     <!-- Get the coreclr path -->
     <ItemGroup>
@@ -198,44 +197,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_CrossProjFileDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Optimize"))</_CrossProjFileDir>
       <_NetCoreRefDir>$([System.IO.Path]::Combine($(_CrossProjFileDir), "netcoreapp"))</_NetCoreRefDir>              <!-- flat netcore app assemblies-->
     </PropertyGroup>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _GenerateCrossgenProj
-    Generates the project used to restore netcoreapp corresponding to RuntimeFrameworkVersion
-    ============================================================
-    -->
-  <Target Name="_GenerateCrossgenProj"
-          DependsOnTargets="_GetCrossgenProps;"
-         Condition="$(SkipOptimization) != 'true' ">
-    <!-- Create a Project to Restore Crossgen -->
+     <MakeDir  Directories="$(_CrossProjFileDir)"/>
     <PropertyGroup>
-      <CrossgenProjContent>
-        <![CDATA[
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-      <TargetFramework>$(_TFM)</TargetFramework>
-      <RuntimeIdentifier>$(RuntimeIdentifier)</RuntimeIdentifier>
-      <RuntimeFrameworkVersion>$(RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
-  </PropertyGroup>
-</Project>        
-
-]]>
-      </CrossgenProjContent>
+      <_CrossProjAssetsFile>$([System.IO.Path]::Combine($(_CrossProjFileDir),  project.assets.json))</_CrossProjAssetsFile>
     </PropertyGroup>
 
-    <PropertyGroup>
-      <_CrossProjFile>$([System.IO.Path]::Combine($(_CrossProjFileDir), "OptimizeCrossgen_$(RuntimeIdentifier)_$(_TFM).csproj"))</_CrossProjFile>
-      <_CrossProjAssetsFile>$([System.IO.Path]::Combine($(_CrossProjFileDir), "obj", project.assets.json))</_CrossProjAssetsFile>
-    </PropertyGroup>
-
-    <MakeDir  Directories="$(_CrossProjFileDir)"/>
     
-    <WriteLinesToFile
-        File="$(_CrossProjFile)"
-        Lines="$(CrossgenProjContent)"
-        Overwrite="true" />
   </Target>
 
   <!--
@@ -245,13 +212,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="_SetupStageForCrossgen"
-          DependsOnTargets="_GetCrossgenProps;_FilterOutFXFromResolvedCandidates;_PopulateUnFilteredResolvedCandidates">
+          DependsOnTargets="_GetCrossgenProps;">
     <PropertyGroup>
       <_RuntimeRefDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimeref"))</_RuntimeRefDir>  <!-- flat app managed assemblies -->
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
       <_RuntimeSymbolsDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimesymbols"))</_RuntimeSymbolsDir>
     </PropertyGroup>
-
+    
+    <ItemGroup>
+      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
+    </ItemGroup>
+    
     <MakeDir Directories="$(_RuntimeOptimizedDir)"/>
     <MakeDir Directories="$(_RuntimeSymbolsDir)"
              Condition="'$(CreateProfilingSymbols)' == 'true'" />
@@ -272,50 +243,30 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                                        _FilterOutFXFromResolvedCandidates
-    ============================================================
-    -->
-  
-  <Target Name="_FilterOutFXFromResolvedCandidates"
-          Condition="$(SkipRemovingSystemFiles) != 'true' ">
-
-    <ItemGroup>
-      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" Condition="!Exists('$(_NetCoreRefDir)$(DirectorySeparatorChar)%(FileName)%(Extension)')"/>
-    </ItemGroup>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _PopulateUnFilteredResolvedCandidates
-    ============================================================
-    -->
-  <Target Name="_PopulateUnFilteredResolvedCandidates"
-          Condition="$(SkipRemovingSystemFiles) == 'true' ">
-
-   <ItemGroup>
-      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
-    </ItemGroup>
-  </Target>
-
-  <!--
-    ============================================================
                                         _RestoreCrossgen
 Restores netcoreapp and publishes it to a temp directory
     ============================================================
     -->
   
   <Target Name="_RestoreCrossgen"
-           Condition="$(SkipOptimization) != 'true' ">
-    <MSBuild Projects="$(_CrossProjFile)"
+          DependsOnTargets="PrepforRestoreForComposeStore;
+                           _SetupStageForCrossgen;"
+          Condition="$(SkipOptimization) != 'true' ">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
-                 Properties="RestoreGraphProjectInput=$(_CrossProjFile);"/>
+                 Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
+                             DisableImplicitFrameworkReferences=true;
+                             RestoreOutputPath=$(_CrossProjFileDir);
+                             StorePackageName=$(MicrosoftNETPlatformLibrary);
+                             StorePackageVersion=$(RuntimeFrameworkVersion);"/>
 
-    <ResolvePublishAssemblies ProjectPath="$(_CrossProjFile)"
+    <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(_CrossProjAssetsFile)"
                               TargetFramework="$(_TFM)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
+                              IsSelfContained="$(SelfContained)"
                               PreserveStoreLayout="false">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="CrossgenResolvedAssembliesToPublish" />

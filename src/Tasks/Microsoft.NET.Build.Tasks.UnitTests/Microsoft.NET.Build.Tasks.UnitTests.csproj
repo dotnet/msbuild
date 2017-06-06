@@ -35,6 +35,7 @@
     <Compile Include="GivenThatWeReportAssetsLogMessages.cs" />
     <Compile Include="GivenUnresolvedSDKProjectItemsAndImplicitPackages.cs" />
     <Compile Include="LockFileSnippets.cs" />
+    <Compile Include="Mocks\MockBuildEngine.cs" />
     <Compile Include="Mocks\MockLog.cs" />
     <Compile Include="Mocks\MockContentAssetPreprocessor.cs" />
     <Compile Include="Mocks\MockPackageResolver.cs" />

@@ -67,9 +67,7 @@ namespace Microsoft.NET.Build.Tests
 
             VerifyBuild(testAsset, "EntityFrameworkApp", "net451", "win7-x86", buildArgs,
                 "EntityFrameworkApp.exe",
-                "EntityFrameworkApp.pdb",
-                "EntityFrameworkApp.runtimeconfig.dev.json",
-                "EntityFrameworkApp.runtimeconfig.json");
+                "EntityFrameworkApp.pdb");
 
             // Try running EntityFrameworkApp.exe
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "EntityFrameworkApp");
@@ -123,9 +121,7 @@ namespace Microsoft.NET.Build.Tests
 
             VerifyClean(testAsset, "EntityFrameworkApp", "net451", "win7-x86",
                 "EntityFrameworkApp.exe",
-                "EntityFrameworkApp.pdb",
-                "EntityFrameworkApp.runtimeconfig.dev.json",
-                "EntityFrameworkApp.runtimeconfig.json");
+                "EntityFrameworkApp.pdb");
         }
 
         private void VerifyClean(TestAsset testAsset, string project, string targetFramework, string runtimeIdentifier,
