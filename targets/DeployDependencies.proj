@@ -149,6 +149,7 @@
 
   <!-- The VSIX installer manifest references
         System.Collections.Immutable,
+        System.IO.Compression,
         System.Threading.Tasks.Dataflow,
         System.Runtime.InteropServices.RuntimeInformation
         from the Output folder, but they won't be placed there
@@ -167,6 +168,7 @@
           SkipUnchangedFiles="true"
           Condition=
           "'%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Collections.Immutable' or
+          '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.IO.Compression' or
           '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Threading.Tasks.Dataflow' or
           '%(ResolvedRuntimeFiles.NuGetPackageId)' == 'System.Runtime.InteropServices.RuntimeInformation'"
           />
