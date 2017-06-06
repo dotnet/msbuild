@@ -299,8 +299,11 @@
   </data>
   <data name="TargetFrameworkWithSemicolon" xml:space="preserve">
     <value>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
-  </data>  
+  </data>
   <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
     <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
+  </data>
+  <data name="SkippingAdditionalProbingPaths" xml:space="preserve">
+    <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
   </data>
 </root>

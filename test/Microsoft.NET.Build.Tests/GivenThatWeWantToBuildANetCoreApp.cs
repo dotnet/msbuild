@@ -83,7 +83,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = isExe,
                 RuntimeIdentifier = runtimeIdentifier
-            };            
+            };
 
             var extraArgs = extraMSBuildArguments?.Split(' ') ?? Array.Empty<string>();
 
@@ -98,25 +98,30 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
-            //  Self-contained apps don't write a framework version to the runtimeconfig, so only check this for framework-dependent apps
-            if (isExe && !selfContained)
+            if (isExe)
             {
-                string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
-                string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
-                JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+                //  Self-contained apps don't write a framework version to the runtimeconfig, so only check this for framework-dependent apps
+                if (!selfContained)
+                {
+                    string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+                    string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+                    JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
 
-                string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
-                actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
-            }
+                    string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
+                    actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+                }
 
-            string devruntimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.dev.json");
-            if (File.Exists(devruntimeConfigFile))
-            {
-                string devruntimeConfigContents = File.ReadAllText(devruntimeConfigFile);
+                var runtimeconfigDevFileName = testProject.Name + ".runtimeconfig.dev.json";
+                outputDirectory.Should()
+                        .HaveFile(runtimeconfigDevFileName);
+
+                string devruntimeConfigContents = File.ReadAllText(Path.Combine(outputDirectory.FullName, runtimeconfigDevFileName));
                 JObject devruntimeConfig = JObject.Parse(devruntimeConfigContents);
 
                 var additionalProbingPaths = ((JArray)devruntimeConfig["runtimeOptions"]["additionalProbingPaths"]).Values<string>();
-                additionalProbingPaths.Should().Contain(GetUserProfile() + "/.dotnet/store/|arch|/|tfm|");
+                // can't use Path.Combine on segments with an illegal `|` character
+                var expectedPath = $"{Path.Combine(GetUserProfile(), ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
+                additionalProbingPaths.Should().Contain(expectedPath);
             }
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);

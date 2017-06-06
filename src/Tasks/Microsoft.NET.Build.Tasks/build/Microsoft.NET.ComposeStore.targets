@@ -218,9 +218,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="AtLeastOneTargetFrameworkMustBeSpecified"/>
       
     <PropertyGroup>
-      <DefaultComposeDir>$(HOME)</DefaultComposeDir>
-      <DefaultComposeDir Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</DefaultComposeDir>
-      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', 'store'))</DefaultComposeDir>
+      <DefaultComposeDir>$(UserProfileRuntimeStorePath)</DefaultComposeDir>
 
       <_ProfilingSymbolsDirectoryName>symbols</_ProfilingSymbolsDirectoryName>
       <DefaultProfilingSymbolsDir>$([System.IO.Path]::Combine($(DefaultComposeDir), $(_ProfilingSymbolsDirectoryName)))</DefaultProfilingSymbolsDir>

@@ -43,7 +43,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
 
-        public string DeveloperStoreLocation { get; set; }
+        public ITaskItem[] AdditionalProbingPaths { get; set; }
 
         public bool IsSelfContained { get; set; }
 
@@ -57,6 +57,13 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
+
+            if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+            {
+                Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+            }
+
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
@@ -66,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks
 
             WriteRuntimeConfig(projectContext);
 
-            if (!string.IsNullOrEmpty(RuntimeConfigDevPath))
+            if (writeDevRuntimeConfig)
             {
                 WriteDevRuntimeConfig(projectContext);
             }
@@ -188,9 +195,14 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeOptions.AdditionalProbingPaths = new List<string>();
             }
 
-            //Add developer profile store location as the first path to probe
-            var developerProfileStore = DeveloperStoreLocation +  "/.dotnet/store/|arch|/|tfm|";
-            runtimeOptions.AdditionalProbingPaths.Add(developerProfileStore);
+            // Add the specified probing paths first so they are probed first
+            if (AdditionalProbingPaths?.Any() == true)
+            {
+                foreach (var additionalProbingPath in AdditionalProbingPaths)
+                {
+                    runtimeOptions.AdditionalProbingPaths.Add(additionalProbingPath.ItemSpec);
+                }
+            }
 
             foreach (var packageFolder in projectContext.LockFile.PackageFolders)
             {
