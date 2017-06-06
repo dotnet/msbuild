@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Choose>
         </Otherwise>
     </Choose>
-    <Import Project='$(MSBuildToolsPath)\microsoft.csharp.Targets'/>
+    <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
 </Project>";
 
         /// <summary>
