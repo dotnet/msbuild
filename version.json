@@ -1,9 +1,8 @@
 {
-  "version": "15.3-preview",
-  "buildNumberOffset": "300",
+  "version": "15.6-preview",
   "assemblyVersion": "15.1",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
-    "^refs/heads/xplat$"
+    "^refs/heads/vs.*$"
   ]
 }
