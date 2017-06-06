@@ -32,6 +32,7 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,13 +47,19 @@
     <Compile Include="..\Common\src\**\*.cs">
       <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
     </Compile>
+    <None Include="..\Common\Resources\xlf\**\*">
+      <Link>Resources\xlf\%(FileName)%(Extension)</Link>
+    </None>
     <EmbeddedResource Include="..\Common\Resources\Strings.resx">
       <Link>Resources\%(FileName)%(Extension)</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
     <Compile Include="..\Common\Resources\Strings.Designer.cs">
       <Link>Resources\%(FileName)%(Extension)</Link>
-      <DesignTime>true</DesignTime>
-      <AutoGen>true</AutoGen>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -62,7 +69,7 @@
       <_netstandardLibraryNetFrameworkPath>$(NUGET_PACKAGES)\NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_netstandardLibraryNetFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
-      <LayoutFile Include="@(None)">
+      <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
       <NetStandardNetFxFile Include="$(_netstandardLibraryNetFrameworkPath)\**\*" Exclude="$(_netstandardLibraryNetFrameworkPath)\**\*.props;$(_netstandardLibraryNetFrameworkPath)\**\*.targets" />
