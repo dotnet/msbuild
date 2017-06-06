@@ -17,31 +17,31 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25468" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25468" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25468" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25487" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25487" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25487" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25468" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.0-preview2-25468" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.0.0-preview2-25468" Condition="'$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.0-preview2-25468" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0-preview2-25468" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25468" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25468" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0-preview2-25468" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0-preview2-25468" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25487" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.0-preview2-25487" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.0.0-preview2-25487" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.0-preview2-25487" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0-preview2-25487" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25487" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25487" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0-preview2-25487" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0-preview2-25487" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="2.0.0-preview2-25368" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0-preview2-25468" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0-preview2-25487" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="2.0.0-preview2-25368" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25468" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25468" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-25487" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-25487" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NoTools)' != 'True'">
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0-preview2-25468" Condition="'$(IndividualLocalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25468" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25468" />
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0-preview2-25487" Condition="'$(IndividualLocalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25487" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25487" />
   </ItemGroup>
 
 </Project>
