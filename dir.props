@@ -38,7 +38,7 @@
 
     <!-- Package version / directories -->
     <BuildToolsVersion>1.0.27-prerelease-00927-05</BuildToolsVersion>
-    <CompilerToolsVersion>2.0.0-rc3-61110-06</CompilerToolsVersion>
+    <CompilerToolsVersion>2.2.0</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.5.46</GitVersioningVersion>
@@ -413,7 +413,7 @@
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
   </PropertyGroup>
