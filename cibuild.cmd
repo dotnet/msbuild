@@ -82,7 +82,7 @@ if /i "%HOST%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
     :: The LKG MSBuild on Core is too old to support
     :: SourceLink targets, so disable them.
-    set SOURCE_LINK_ARGUMENT=/p:SourceLinkCreate=false
+    set SOURCE_LINK_ARGUMENT=/p:SourceLinkCreate=false /p:DebugType=full
 ) else if /i "%HOST%"=="Full" (
     set RUNTIME_HOST=
 ) else (
