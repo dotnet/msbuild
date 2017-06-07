@@ -1010,16 +1010,15 @@ namespace Microsoft.Build.Evaluation
                         {
                             propertyValue = String.Empty;
                         }
-#if FEATURE_WIN32_REGISTRY
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
+                            // if FEATURE_WIN32_REGISTRY is off, treat the property value as if there's no Registry value at that location, rather than fail
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // If the property body starts with any of our special objects, then deal with them
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
-                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation);
+                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not FEATURE_WIN32_REGISTRY
                         }
-#endif
 
                         // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return String.Empty
                         // In this case, tryExtractRegistryFunction will be false. Note that very few properties are exactly 77 chars, so this check should be fast.
@@ -1491,6 +1490,14 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return result;
+            }
+#else
+            /// <summary>
+            /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", returns String.Empty, as FEATURE_WIN32_REGISTRY is off.
+            /// </summary>
+            private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
+            {
+                return String.Empty;
             }
 #endif
         }
