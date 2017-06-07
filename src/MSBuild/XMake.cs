@@ -2738,11 +2738,6 @@ namespace Microsoft.Build.CommandLine
             BinaryLogger logger = new BinaryLogger();
             logger.Parameters = arguments;
 
-            // If we have a binary logger, force verbosity to diagnostic.
-            // The only place where verbosity is used downstream is to determine whether to log task inputs.
-            // Since we always want task inputs for a binary logger, set it to diagnostic.
-            verbosity = LoggerVerbosity.Diagnostic;
-
             loggers.Add(logger);
         }
 
