@@ -15,28 +15,27 @@ namespace Microsoft.DotNet.Cli
                 "restore",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments(),
-                FullRestoreOptions);
+                FullRestoreOptions());
 
-        private static Option[] FullRestoreOptions
+        private static Option[] FullRestoreOptions()
         {
-            get
-            {
-                var fullRestoreOptions = new List<Option>();
+            var fullRestoreOptions = AddImplicitRestoreOptions(new Option[] { CommonOptions.HelpOption() }, true, true);
 
-                fullRestoreOptions.Add(CommonOptions.HelpOption());
-                AddImplicitRestoreOptions(fullRestoreOptions, true, true);
-                fullRestoreOptions.Add(CommonOptions.VerbosityOption());
-
-                return fullRestoreOptions.ToArray();
-            }
+            return fullRestoreOptions.Concat(new Option[] { CommonOptions.VerbosityOption() }).ToArray();
         }
 
-        public static void AddImplicitRestoreOptions(
-            List<Option> commandOptions,
-            bool showHelp = false,
-            bool useShortOptions = false)
+        public static Option[] AddImplicitRestoreOptions(
+            IEnumerable<Option> commandOptions)
         {
-            commandOptions.AddRange(ImplicitRestoreOptions(showHelp, useShortOptions)
+            return AddImplicitRestoreOptions(commandOptions, false, false).ToArray();
+        }
+
+        private static IEnumerable<Option> AddImplicitRestoreOptions(
+            IEnumerable<Option> commandOptions,
+            bool showHelp,
+            bool useShortOptions)
+        {
+            return commandOptions.Concat(ImplicitRestoreOptions(showHelp, useShortOptions)
                 .Where(o => !commandOptions.Any(c => c.Name == o.Name)));
         }
 
@@ -89,11 +88,10 @@ namespace Microsoft.DotNet.Cli
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreRecursive=false")),
                 Create.Option(
-                    "-f|--force",
+                    useShortOptions ? "-f|--force" : "--force",
                     LocalizableStrings.CmdForceRestoreOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("/p:RestoreForce=true")),
-                CommonOptions.VerbosityOption()
+                          .ForwardAs("/p:RestoreForce=true"))
             };
         }
     }

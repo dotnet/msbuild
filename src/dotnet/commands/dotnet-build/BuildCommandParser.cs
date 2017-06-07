@@ -12,49 +12,33 @@ namespace Microsoft.DotNet.Cli
     internal static class BuildCommandParser
     {
         public static Command Build() =>
-            Create.Command(
+            CreateWithRestoreOptions.Command(
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
                       .With(name: CommonLocalizableStrings.CmdProjectFile,
                             description:
                             "The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file."),
-                FullBuildOptions
-                );
-
-        private static Option[] FullBuildOptions
-        {
-            get
-            {
-                var fullBuildOptions = new List<Option>
-                {
-                    CommonOptions.HelpOption(),
-                    Create.Option(
-                        "-o|--output",
-                        LocalizableStrings.OutputOptionDescription,
-                        Accept.ExactlyOneArgument()
-                              .With(name: LocalizableStrings.OutputOptionName)
-                              .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
-                    CommonOptions.FrameworkOption(),
-                    CommonOptions.RuntimeOption(),
-                    CommonOptions.ConfigurationOption(),
-                    CommonOptions.VersionSuffixOption(),
-                    Create.Option(
-                        "--no-incremental",
-                        LocalizableStrings.NoIncrementialOptionDescription),
-                    Create.Option(
-                        "--no-dependencies",
-                        LocalizableStrings.NoDependenciesOptionDescription,
-                        Accept.NoArguments()
-                              .ForwardAs("/p:BuildProjectReferences=false")),
-                    CommonOptions.NoRestoreOption(),
-                    CommonOptions.VerbosityOption()
-                };
-
-                RestoreCommandParser.AddImplicitRestoreOptions(fullBuildOptions);
-
-                return fullBuildOptions.ToArray();
-            }
-        }
+                CommonOptions.HelpOption(),
+                Create.Option(
+                    "-o|--output",
+                    LocalizableStrings.OutputOptionDescription,
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.OutputOptionName)
+                          .ForwardAsSingle(o => $"/p:OutputPath={o.Arguments.Single()}")),
+                CommonOptions.FrameworkOption(),
+                CommonOptions.RuntimeOption(),
+                CommonOptions.ConfigurationOption(),
+                CommonOptions.VersionSuffixOption(),
+                Create.Option(
+                    "--no-incremental",
+                    LocalizableStrings.NoIncrementialOptionDescription),
+                Create.Option(
+                    "--no-dependencies",
+                    LocalizableStrings.NoDependenciesOptionDescription,
+                    Accept.NoArguments()
+                          .ForwardAs("/p:BuildProjectReferences=false")),
+                CommonOptions.NoRestoreOption(),
+                CommonOptions.VerbosityOption());
     }
 }

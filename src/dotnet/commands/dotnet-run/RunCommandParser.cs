@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
@@ -12,7 +13,7 @@ namespace Microsoft.DotNet.Cli
     internal static class RunCommandParser
     {
         public static Command Run() =>
-            Create.Command(
+            CreateWithRestoreOptions.Command(
                 "run",
                 LocalizableStrings.AppFullName,
                 treatUnmatchedTokensAsErrors: false,
@@ -29,13 +30,7 @@ namespace Microsoft.DotNet.Cli
                         restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
-                options: FullRunOptions);
-
-        private static Option[] FullRunOptions
-        {
-            get
-            {
-                var fullRunOptions = new List<Option>
+                options: new[]
                 {
                     CommonOptions.HelpOption(),
                     CommonOptions.ConfigurationOption(),
@@ -57,12 +52,6 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
                     CommonOptions.NoRestoreOption()
-                };
-
-                RestoreCommandParser.AddImplicitRestoreOptions(fullRunOptions);
-
-                return fullRunOptions.ToArray();
-            }
-        }
+                });
     }
 }

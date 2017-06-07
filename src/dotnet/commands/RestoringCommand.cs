@@ -14,23 +14,20 @@ namespace Microsoft.DotNet.Tools
 
         private IEnumerable<string> ArgsToForward { get; }
 
-        private IEnumerable<string> ArgsToForwardToRestore
+        private IEnumerable<string> ArgsToForwardToRestore()
         {
-            get
+            var restoreArguments = ArgsToForward.Where(a =>
+                !a.StartsWith("/t:") &&
+                !a.StartsWith("/target:") &&
+                !a.StartsWith("/ConsoleLoggerParameters:") &&
+                !a.StartsWith("/clp:"));
+
+            if (!restoreArguments.Any(a => a.StartsWith("/v:") || a.StartsWith("/verbosity:")))
             {
-                var restoreArguments = ArgsToForward.Where(a =>
-                    !a.StartsWith("/t:") &&
-                    !a.StartsWith("/target:") &&
-                    !a.StartsWith("/ConsoleLoggerParameters:") &&
-                    !a.StartsWith("/clp:"));
-
-                if (!restoreArguments.Any(a => a.StartsWith("/v:") || a.StartsWith("/verbosity:")))
-                {
-                    restoreArguments = restoreArguments.Concat(new string[] { "/v:q" });
-                }
-
-                return restoreArguments;
+                restoreArguments = restoreArguments.Concat(new string[] { "/v:q" });
             }
+
+            return restoreArguments;
         }
 
         private bool ShouldRunImplicitRestore => !NoRestore;
@@ -46,7 +43,7 @@ namespace Microsoft.DotNet.Tools
         {
             if (ShouldRunImplicitRestore)
             {
-                int exitCode = RestoreCommand.Run(ArgsToForwardToRestore.ToArray());
+                int exitCode = RestoreCommand.Run(ArgsToForwardToRestore().ToArray());
                 if (exitCode != 0)
                 {
                     return exitCode;
