@@ -74,6 +74,14 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
+        public virtual DirectoryInfo GetNonSDKOutputDirectory(string configuration = "Debug")
+        {
+            configuration = configuration ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration);
+            return new DirectoryInfo(output);
+        }
+
         public DirectoryInfo GetBaseIntermediateDirectory()
         {
             string output = Path.Combine(ProjectRootPath, "obj");

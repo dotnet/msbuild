@@ -78,6 +78,16 @@ namespace Microsoft.NET.TestFramework
             get { return Path.Combine(BinPath, Configuration, "Sdks"); }
         }
 
+        public static string BuildExtensionsSdkPath
+        {
+            get { return Path.Combine(SdksPath, "Microsoft.NET.Build.Extensions"); }
+        }
+
+        public static string BuildExtensionsMSBuildPath
+        {
+            get { return Path.Combine(BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft.NET.Build.Extensions"); }
+        }
+
         public static string CliSdkPath
         {
             get { return Path.Combine(RepoRoot, ".dotnet_cli", "sdk", CliVersion); }
@@ -120,6 +130,11 @@ namespace Microsoft.NET.TestFramework
             command = command.EnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR", RepoInfo.SdksPath);
 
             command = command.EnvironmentVariable("NETCoreSdkBundledVersionsProps", Path.Combine(RepoInfo.CliSdkPath, "Microsoft.NETCoreSdk.BundledVersions.props"));
+
+            // The following line can be removed once this file is integrated into MSBuild
+            command = command.EnvironmentVariable("CustomAfterMicrosoftCommonTargets", Path.Combine(RepoInfo.BuildExtensionsSdkPath, 
+                "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets"));
+            command = command.EnvironmentVariable("MicrosoftNETBuildExtensionsTargets", Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets"));
 
             return command;
         }
