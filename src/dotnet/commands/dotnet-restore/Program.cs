@@ -69,6 +69,11 @@ namespace Microsoft.DotNet.Tools.Restore
                 "--no-dependencies",
                 LocalizableStrings.CmdNoDependenciesOptionDescription,
                 CommandOptionType.NoValue);
+            
+            var forceOption = cmd.Option(
+                    $"-f|--force",
+                    LocalizableStrings.CmdForceRestoreOptionDescription,
+                    CommandOptionType.NoValue);
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
@@ -119,6 +124,11 @@ namespace Microsoft.DotNet.Tools.Restore
                 if (noDependenciesOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:RestoreRecursive=false");
+                }
+                
+                if(forceOption.HasValue())
+                {
+                     msbuildArgs.Add($"/p:RestoreForce=true");                   
                 }
 
                 if (verbosityOption.HasValue())
