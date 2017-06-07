@@ -139,7 +139,15 @@ namespace Microsoft.Build.Logging
 
         private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
         {
-            Write(e);
+            try
+            {
+                Write(e);
+            }
+            catch
+            {
+                // Exceptions here are unlikely but it'd be bad for a logger to crash the build.
+                // We can't log either because the logger is likely broken. Best just do nothing.
+            }
         }
 
         private void Write(BuildEventArgs e)
