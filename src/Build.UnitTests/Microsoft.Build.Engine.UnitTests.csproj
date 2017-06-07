@@ -129,6 +129,7 @@
     <Compile Include="BackEnd\TaskHostTaskCancelled_Tests.cs" />
     <Compile Include="BackEnd\TaskHostTaskComplete_Tests.cs" />
     <Compile Include="BackEnd\TaskHost_Tests.cs" />
+    <Compile Include="Construction\ProjectRootElement_Tests.cs" />
     <Compile Include="Evaluation\EvaluationLogging_Tests.cs" />
     <Compile Include="MockLoggingContext.cs" />
     <Compile Include="TestComparers\TaskRegistryComparers.cs" />
