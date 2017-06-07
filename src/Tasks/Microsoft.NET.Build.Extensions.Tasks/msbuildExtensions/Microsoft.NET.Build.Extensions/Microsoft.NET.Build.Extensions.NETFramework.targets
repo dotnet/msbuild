@@ -40,19 +40,19 @@
                                                 Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
       <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
                                                 Include="$(MSBuildThisFileDirectory)\net462\ref\*.dll"
-                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll'" />
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll')" />
       <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
                                                 Include="$(MSBuildThisFileDirectory)\net461\ref\*.dll"
-                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll'" />
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll')" />
 
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
                                           Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
                                           Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll'" />
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll')" />
       <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
                                           Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
-                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll'" />
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll')" />
 
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
            consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in 
