@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -94,6 +94,17 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _errorDataReceived = ForwardStreamStdErr;
             return this;
+        }
+
+        public Dotnet ForwardStdOut()
+        {
+            _outputDataReceived = ForwardStreamStdOut;
+            return this;
+        }
+
+        private void ForwardStreamStdOut(object sender, DataReceivedEventArgs e)
+        {
+            Console.Out.WriteLine(e.Data);
         }
 
         private void ForwardStreamStdErr(object sender, DataReceivedEventArgs e)

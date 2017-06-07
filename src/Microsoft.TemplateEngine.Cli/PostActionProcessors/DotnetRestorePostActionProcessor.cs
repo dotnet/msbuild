@@ -33,18 +33,13 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     continue;
                 }
 
-                Dotnet restoreCommand = Dotnet.Restore(pathToRestore);
-                restoreCommand.CaptureStdOut();
-                restoreCommand.CaptureStdErr();
-
                 environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
+                Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
                 Dotnet.Result commandResult = restoreCommand.Execute();
 
                 if (commandResult.ExitCode != 0)
                 {
                     environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
-                    environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
-                    environment.Host.LogMessage(string.Empty);
                     allSucceeded = false;
                 }
                 else
