@@ -575,6 +575,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;AdditionalProbingPaths&apos; were specified for GenerateRuntimeConfigurationFiles, but are being skipped because &apos;RuntimeConfigDevPath&apos; is empty..
+        /// </summary>
+        internal static string SkippingAdditionalProbingPaths {
+            get {
+                return ResourceManager.GetString("SkippingAdditionalProbingPaths", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The TargetFramework value &apos;{0}&apos; is not valid. To multi-target, use the &apos;TargetFrameworks&apos; property instead..
         /// </summary>
         internal static string TargetFrameworkWithSemicolon {

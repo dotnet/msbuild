@@ -43,6 +43,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] HostConfigurationOptions { get; set; }
 
+        public ITaskItem[] AdditionalProbingPaths { get; set; }
+
         public bool IsSelfContained { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
@@ -55,6 +57,13 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
+            bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
+
+            if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+            {
+                Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
+            }
+
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
@@ -64,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks
 
             WriteRuntimeConfig(projectContext);
 
-            if (!string.IsNullOrEmpty(RuntimeConfigDevPath))
+            if (writeDevRuntimeConfig)
             {
                 WriteDevRuntimeConfig(projectContext);
             }
@@ -181,13 +190,22 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
+            if (runtimeOptions.AdditionalProbingPaths == null)
+            {
+                runtimeOptions.AdditionalProbingPaths = new List<string>();
+            }
+
+            // Add the specified probing paths first so they are probed first
+            if (AdditionalProbingPaths?.Any() == true)
+            {
+                foreach (var additionalProbingPath in AdditionalProbingPaths)
+                {
+                    runtimeOptions.AdditionalProbingPaths.Add(additionalProbingPath.ItemSpec);
+                }
+            }
+
             foreach (var packageFolder in projectContext.LockFile.PackageFolders)
             {
-                if (runtimeOptions.AdditionalProbingPaths == null)
-                {
-                    runtimeOptions.AdditionalProbingPaths = new List<string>();
-                }
-
                 // DotNetHost doesn't handle additional probing paths with a trailing slash
                 runtimeOptions.AdditionalProbingPaths.Add(EnsureNoTrailingDirectorySeparator(packageFolder.Path));
             }
