@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25402-02" Condition="'$(TargetFrameworkOverride)' != ''" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.17" />
     <PackageReference Include="MSTest.TestFramework" Version="1.1.17" />
