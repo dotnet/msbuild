@@ -69,13 +69,13 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "Extensions/AzureAd/**"
+            "AzureAd/**"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "Extensions/AzureAdB2C/**"
+            "AzureAdB2C/**"
           ]
         }
       ]

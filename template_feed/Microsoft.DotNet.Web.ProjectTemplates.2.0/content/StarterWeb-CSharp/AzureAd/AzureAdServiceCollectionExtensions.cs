@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 #if (MultiOrgAuth)
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 #endif
 
@@ -25,7 +26,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             });
 
             services.AddSingleton<IConfigureOptions<AzureAdOptions>, BindAzureAdOptions>();
-            services.AddSingleton<IInitializeOptions<OpenIdConnectOptions>, InitializeFromAzureOptions>();
+            services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
             services.AddOpenIdConnectAuthentication();
             services.AddCookieAuthentication();
             return services;
@@ -38,16 +39,16 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             { }
         }
 
-        private class InitializeFromAzureOptions: IInitializeOptions<OpenIdConnectOptions>
+        private class PostConfigureAzureOptions: IPostConfigureOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdOptions _azureOptions;
 
-            public InitializeFromAzureOptions(IOptions<AzureAdOptions> azureOptions)
+            public PostConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
             {
                 _azureOptions = azureOptions.Value;
             }
 
-            public void Initialize(string name, OpenIdConnectOptions options)
+            public void PostConfigure(string name, OpenIdConnectOptions options)
             {
                 options.ClientId = _azureOptions.ClientId;
                 options.Authority = $"{_azureOptions.Instance}{_azureOptions.TenantId}";

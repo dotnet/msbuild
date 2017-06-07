@@ -22,10 +22,8 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             });
 
             services.AddSingleton<IConfigureOptions<AzureAdB2COptions>, BindAzureAdB2COptions>();
-            services.AddSingleton<IInitializeOptions<OpenIdConnectOptions>, InitializeFromAzureOptions>();
-            services.AddOpenIdConnectAuthentication(AzureAdB2CDefaults.SignUpSignInAuthenticationScheme, _ => { });
-            services.AddOpenIdConnectAuthentication(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme, _ => { });
-            services.AddOpenIdConnectAuthentication(AzureAdB2CDefaults.EditProfileAuthenticationScheme, _ => { });
+            services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
+            services.AddOpenIdConnectAuthentication();
             services.AddCookieAuthentication();
             return services;
         }
@@ -37,35 +35,19 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             { }
         }
 
-        private class InitializeFromAzureOptions: IInitializeOptions<OpenIdConnectOptions>
+        private class PostConfigureAzureOptions: IPostConfigureOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdB2COptions _azureOptions;
 
-            public InitializeFromAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
+            public PostConfigureAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
             {
                 _azureOptions = azureOptions.Value;
             }
 
-            public void Initialize(string name, OpenIdConnectOptions options)
-            {
-                if (name == AzureAdB2CDefaults.SignUpSignInAuthenticationScheme) 
-                {
-                    Setup(_azureOptions.SignUpSignInPolicyId, options);
-                }
-                else if (name == AzureAdB2CDefaults.ResetPasswordAuthenticationScheme) 
-                {
-                    Setup(_azureOptions.ResetPasswordPolicyId, options);
-                }
-                else if (name == AzureAdB2CDefaults.EditProfileAuthenticationScheme) 
-                {
-                    Setup(_azureOptions.EditProfilePolicyId, options);
-                }
-            }
- 
-            private void Setup(string policyId, OpenIdConnectOptions options)
+            public void PostConfigure(string name, OpenIdConnectOptions options)
             {
                 options.ClientId = _azureOptions.ClientId;
-                options.Authority = $"{_azureOptions.Instance}/{_azureOptions.Domain}/{policyId}/v2.0";
+                options.Authority = $"{_azureOptions.Instance}/{_azureOptions.Domain}/{_azureOptions.SignUpSignInPolicyId}/v2.0";
                 options.UseTokenLifetime = true;
                 options.CallbackPath = _azureOptions.CallbackPath;
 
@@ -73,10 +55,25 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
                 options.Events = new OpenIdConnectEvents()
                 {
+                    OnRedirectToIdentityProvider = OnRedirectToIdentityProvider,
                     OnRemoteFailure = OnRemoteFailure
                 };
             }
 
+            public Task OnRedirectToIdentityProvider(RedirectContext context)
+            {
+                var defaultPolicy = _azureOptions.DefaultPolicy;
+                if (context.Properties.Items.TryGetValue(AzureAdB2COptions.PolicyAuthenticationProperty, out var policy) && 
+                    !policy.Equals(defaultPolicy))
+                {
+                    context.ProtocolMessage.Scope = OpenIdConnectScope.OpenIdProfile;
+                    context.ProtocolMessage.ResponseType = OpenIdConnectResponseType.IdToken;
+                    context.ProtocolMessage.IssuerAddress = context.ProtocolMessage.IssuerAddress.ToLower().Replace(defaultPolicy.ToLower(), policy.ToLower());
+                    context.Properties.Items.Remove(AzureAdB2COptions.PolicyAuthenticationProperty);
+                }
+                return Task.FromResult(0);
+            }
+ 
             public Task OnRemoteFailure(FailureContext context)
             {
                 context.HandleResponse();

@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             });
 
             services.AddSingleton<IConfigureOptions<AzureAdB2COptions>, BindAzureAdB2COptions>();
-            services.AddSingleton<IInitializeOptions<JwtBearerOptions>, InitializeFromAzureOptions>();
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, PostConfigureAzureOptions>();
             services.AddJwtBearerAuthentication();
             return services;
         }
@@ -29,16 +29,16 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             { }
         }
 
-        private class InitializeFromAzureOptions: IInitializeOptions<JwtBearerOptions>
+        private class PostConfigureAzureOptions: IPostConfigureOptions<JwtBearerOptions>
         {
             private readonly AzureAdB2COptions _azureOptions;
 
-            public InitializeFromAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
+            public PostConfigureAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
             {
                 _azureOptions = azureOptions.Value;
             }
 
-            public void Initialize(string name, JwtBearerOptions options)
+            public void PostConfigure(string name, JwtBearerOptions options)
             {
                 options.Audience = _azureOptions.ClientId;
                 options.Authority = $"{_azureOptions.Instance}/{_azureOptions.Domain}/{_azureOptions.SignUpSignInPolicyId}/v2.0";

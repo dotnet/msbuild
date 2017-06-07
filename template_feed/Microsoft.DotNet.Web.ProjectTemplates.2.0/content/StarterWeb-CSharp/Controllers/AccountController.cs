@@ -515,13 +515,17 @@ namespace Company.WebApplication1.Controllers
         [HttpGet]
         public IActionResult ResetPassword()
         {
-            return Challenge(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme);
+            var properties = new AuthenticationProperties() { RedirectUri = "/" };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.ResetPasswordPolicyId;
+            return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
 
         [HttpGet]
         public IActionResult EditProfile()
         {
-            return Challenge(AzureAdB2CDefaults.EditProfileAuthenticationScheme);
+            var properties = new AuthenticationProperties() { RedirectUri = "/" };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.EditProfilePolicyId;
+            return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
         
         //
