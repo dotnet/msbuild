@@ -12,7 +12,7 @@
 
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
       <bal:WixStandardBootstrapperApplication
-        LicenseFile="..\..\osx\clisdk\resources\en.lproj\eula.rtf"
+        LicenseFile="..\eula.rtf"
         ShowFilesInUse="yes"
         ShowVersion="yes"
         />
