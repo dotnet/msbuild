@@ -3,29 +3,27 @@
   <Choose>
     <!-- Allow completely disabling the conflict resolution targets -->
     <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
-    <!-- SDK projects have built in conflict resolution that understands assets/deps file -->
-    <When Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
     <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
       <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
       <PropertyGroup>
-        <HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</HandlePackageFileConflictsAfter>
+        <_HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</_HandlePackageFileConflictsAfter>
       </PropertyGroup>
     </When>
     <Otherwise>
       <!-- No specific NuGet targets to sequence after, run before targets that consume references -->
       <PropertyGroup>
-        <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);HandlePackageFileConflicts</ResolveAssemblyReferencesDependsOn>
-        <PrepareResourcesDependsOn>HandlePackageFileConflicts;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
+        <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);_HandlePackageFileConflicts</ResolveAssemblyReferencesDependsOn>
+        <PrepareResourcesDependsOn>_HandlePackageFileConflicts;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
       </PropertyGroup>
     </Otherwise>
   </Choose>
   
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
-  <Target Name="HandlePackageFileConflicts" AfterTargets="$(HandlePackageFileConflictsAfter)" DependsOnTargets="$(HandlePackageFileConflictsDependsOn)">
+  <Target Name="_HandlePackageFileConflicts" AfterTargets="$(_HandlePackageFileConflictsAfter)">
     <ResolvePackageFileConflicts References="@(Reference)"
-                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
-                                PlatformManifests="@(PackageConflictPlatformManifests)"
-                                PreferredPackages="$(PackageConflictPreferredPackages)">
+                                 ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
