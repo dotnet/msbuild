@@ -45,6 +45,8 @@
 *.fsx text=auto
 *.hs text=auto
 
+*.props text=auto
+*.targets text=auto
 *.csproj text=auto
 *.vbproj text=auto
 *.fsproj text=auto
