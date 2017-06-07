@@ -5,5 +5,13 @@
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
     "^refs/heads/xplat$"
-  ]
+  ],
+  "cloudBuild": {
+    "buildNumber": {
+      "enabled": true,
+      "includeCommitId": {
+        "where": "fourthVersionComponent"
+      }
+    }
+  }
 }
