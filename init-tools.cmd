@@ -72,4 +72,11 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
 :: Create sempahore file
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
+
+:: Preserve original build number so the version-disambiguating logic in CreateNuGetPackages.proj
+:: can access the revision (unique build number today).
+if defined BUILD_BUILDNUMBER (
+  echo ##vso[task.setvariable variable=MSBUILD_VSTS_ORIGINALBUILDNUMBER;]%BUILD_BUILDNUMBER%
+)
+
 exit /b 0

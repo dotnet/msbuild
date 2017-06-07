@@ -40,6 +40,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     <P>property value</P>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ProjectFile>$(MSBuildProjectFullPath)</ProjectFile>
+    <ThisFile>$(MSBuildThisFileFullPath)</ThisFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <i Include=`a`>
       <m>metadata value</m>
@@ -58,6 +63,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     <PropertyGroup/>
     <PropertyGroup>
         <r>r1</r>
+    </PropertyGroup>
+    <PropertyGroup>
+      <ProjectFile>$(MSBuildProjectFullPath)</ProjectFile>
+      <ThisFile>$(MSBuildThisFileFullPath)</ThisFile>
     </PropertyGroup>
     <Choose>
         <When Condition=""true"">
@@ -85,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Choose>
         </Otherwise>
     </Choose>
-    <Import Project='$(MSBuildToolsPath)\microsoft.csharp.targets'/>
+    <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
 </Project>";
 
         /// <summary>
@@ -1608,9 +1617,10 @@ true, true, true)]
 </Project>");
 
             using (var env = TestEnvironment.Create())
-            using (var projectCollection1 = new ProjectCollection())
-            using (var projectCollection2 = new ProjectCollection())
             {
+                var projectCollection1 = env.CreateProjectCollection().Collection;
+                var projectCollection2 = env.CreateProjectCollection().Collection;
+
                 var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectPath = testFiles.CreatedFiles.First();
 
@@ -1703,6 +1713,102 @@ true, true, true)]
             // reload does not mutate the project element
             AssertReload(SimpleProject, ComplexProject, false, false, false, act);
         }
+
+        [Fact]
+        public void ReloadFromMemoryWhenProjectIsInMemoryKeepsProjectFileEmpty()
+        {
+            AssertProjectFileAfterReload(
+                true,
+                true,
+                (initial, reload, actualFile) => { Assert.Equal(String.Empty, actualFile); });
+        }
+
+        [Fact]
+        public void ReloadFromMemoryWhenProjectIsInFileKeepsProjectFile()
+        {
+            AssertProjectFileAfterReload(
+                false,
+                true,
+                (initial, reload, actualFile) => { Assert.Equal(initial, actualFile); });
+        }
+
+        [Fact]
+        public void ReloadFromFileWhenProjectIsInMemorySetsProjectFile()
+        {
+            AssertProjectFileAfterReload(
+                true,
+                false,
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
+        }
+
+        [Fact]
+        public void ReloadFromFileWhenProjectIsInFileUpdatesProjectFile()
+        {
+            AssertProjectFileAfterReload(
+                false,
+                false,
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
+        }
+
+        private void AssertProjectFileAfterReload(
+            bool initialProjectFromMemory,
+            bool reloadProjectFromMemory,
+            Action<string, string, string> projectFileAssert)
+        {
+
+            using (var env = TestEnvironment.Create())
+            {
+                var projectCollection = env.CreateProjectCollection().Collection;
+
+                string initialLocation = null;
+                ProjectRootElement rootElement = null;
+
+                if (initialProjectFromMemory)
+                {
+                    rootElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject, projectCollection);
+                }
+                else
+                {
+                    initialLocation = env.CreateFile().Path;
+                    File.WriteAllText(initialLocation, ObjectModelHelpers.CleanupFileContents(SimpleProject));
+                    rootElement = ProjectRootElement.Open(initialLocation, projectCollection);
+                }
+
+                var project = new Project(rootElement, null, null, projectCollection);
+
+                string reloadLocation = null;
+
+                if (reloadProjectFromMemory)
+                {
+                    rootElement.ReloadFrom(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(ComplexProject))), false);
+                }
+                else
+                {
+                    reloadLocation = env.CreateFile().Path;
+                    File.WriteAllText(reloadLocation, ObjectModelHelpers.CleanupFileContents(ComplexProject));
+                    rootElement.ReloadFrom(reloadLocation, false);
+                }
+
+                project.ReevaluateIfNecessary();
+
+                projectFileAssert.Invoke(initialLocation, reloadLocation, EmptyIfNull(rootElement.FullPath));
+                projectFileAssert.Invoke(initialLocation, reloadLocation, rootElement.ProjectFileLocation.File);
+                projectFileAssert.Invoke(initialLocation, reloadLocation, rootElement.AllChildren.Last().Location.File);
+                projectFileAssert.Invoke(initialLocation, reloadLocation, project.GetPropertyValue("ProjectFile"));
+                projectFileAssert.Invoke(initialLocation, reloadLocation, project.GetPropertyValue("ThisFile"));
+
+                if (initialProjectFromMemory && reloadProjectFromMemory)
+                {
+                    Assert.Equal(NativeMethodsShared.GetCurrentDirectory(), rootElement.DirectoryPath);
+                }
+                else
+                {
+                    projectFileAssert.Invoke(Path.GetDirectoryName(initialLocation), Path.GetDirectoryName(reloadLocation), rootElement.DirectoryPath);
+                }
+            }
+        }
+
+        private static string EmptyIfNull(string aString) => aString ?? string.Empty;
 
         [Fact]
         public void ReloadThrowsOnInvalidMsBuildSyntax()
