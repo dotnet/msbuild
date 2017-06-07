@@ -88,23 +88,23 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
 [version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
-[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.exe
-[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.exe.sha
-[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.zip
-[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x64.zip.sha
+[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe
+[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe.sha
+[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip
+[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip.sha
 
-[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.exe
-[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.exe.sha
-[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.zip
-[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-win-x86.zip.sha
+[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe
+[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe.sha
+[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip
+[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip.sha
 
-[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.pkg
-[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.pkg.sha
-[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.tar.gz
-[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-osx-x64.tar.gz.sha
+[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg
+[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg.sha
+[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz
+[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz.sha
 
-[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz
-[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-dev-latest-linux-x64.tar.gz.sha
+[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz
+[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz.sha
 
 [ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb
 [ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb.sha

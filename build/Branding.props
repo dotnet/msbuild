@@ -14,15 +14,13 @@
                                    '$(Rid)' == 'opensuse.42.1-x64' ">$(Rid)</ProductMonikerRid>
     <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
 
-    <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
+    <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
     <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
-    <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-dev</ArtifactNameCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameCombinedFrameworkSdk>dotnet-runtime-sdk</ArtifactNameCombinedFrameworkSdk>
+    <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
     <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkDebug>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
   </PropertyGroup>
 </Project>
