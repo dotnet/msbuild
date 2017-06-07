@@ -3923,6 +3923,51 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void ProjectImportedEventEmptyFile()
+        {
+            const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+";
+            string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
+
+            try
+            {
+                pre.AddPropertyGroup().AddProperty("NotUsed", "");
+                var import = pre.AddImport(importPath);
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreEmptyImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Null(eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(6, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
+                }
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        [Fact]
         public void ProjectImportEvent()
         {
             ProjectRootElement pre1 = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());

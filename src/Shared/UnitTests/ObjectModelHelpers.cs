@@ -792,9 +792,7 @@ namespace Microsoft.Build.UnitTests
         /// up the file contents (replacing single-back-quote with double-quote, etc.).
         /// Silently OVERWRITES existing file.
         /// </summary>
-        /// <param name="fileRelativePath"></param>
-        /// <param name="fileContents"></param>
-        internal static string CreateFileInTempProjectDirectory(string fileRelativePath, string fileContents)
+        internal static string CreateFileInTempProjectDirectory(string fileRelativePath, string fileContents, Encoding encoding = null)
         {
             Assert.False(String.IsNullOrEmpty(fileRelativePath));
             string fullFilePath = Path.Combine(TempProjectDir, fileRelativePath);
@@ -805,7 +803,18 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    File.WriteAllText(fullFilePath, CleanupFileContents(fileContents));
+                    if (encoding == null)
+                    {
+                        // This method uses UTF-8 encoding without a Byte-Order Mark (BOM)
+                        // https://msdn.microsoft.com/en-us/library/ms143375(v=vs.110).aspx#Remarks
+                        File.WriteAllText(fullFilePath, CleanupFileContents(fileContents));
+                    }
+                    else
+                    {
+                        // If it is necessary to include a UTF-8 identifier, such as a byte order mark, at the beginning of a file,
+                        // use the WriteAllText(String,?String,?Encoding) method overload with UTF8 encoding.
+                        File.WriteAllText(fullFilePath, CleanupFileContents(fileContents), encoding);
+                    }
                     break;
                 }
                 catch (Exception ex)

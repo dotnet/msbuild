@@ -4,5 +4,13 @@
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
     "^refs/heads/vs.*$"
-  ]
+  ],
+  "cloudBuild": {
+    "buildNumber": {
+      "enabled": true,
+      "includeCommitId": {
+        "where": "fourthVersionComponent"
+      }
+    }
+  }
 }
