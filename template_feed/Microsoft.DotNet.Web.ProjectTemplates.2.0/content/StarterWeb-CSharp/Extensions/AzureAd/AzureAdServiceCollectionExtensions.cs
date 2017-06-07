@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿#if (MultiOrgAuth)
+using System.Threading.Tasks;
+#endif
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+#if (MultiOrgAuth)
+using Microsoft.IdentityModel.Tokens;
+#endif
 
 namespace Microsoft.AspNetCore.Authentication.Extensions
 {
