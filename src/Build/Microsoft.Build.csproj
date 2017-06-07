@@ -774,7 +774,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Threading.Tasks">
       <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
     </Reference>
