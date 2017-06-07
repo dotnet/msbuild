@@ -276,7 +276,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     // Ignore clean shutdown trace logs.
                     if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
-                        Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
+                        Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete(Reuse)* and exception:\s*"))
                     {
                         newFilesCount--;
                         continue;

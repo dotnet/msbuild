@@ -549,6 +549,8 @@ namespace Microsoft.Build.BackEnd
             Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
 
+            INodePacket currentLocalPacket = null;
+
             bool exitLoop = false;
             do
             {
@@ -638,22 +640,21 @@ namespace Microsoft.Build.BackEnd
                             // Write out all the queued packets.
                             while (packetCount > 0)
                             {
-                                INodePacket packet;
                                 lock (_packetQueue)
                                 {
-                                    packet = localPacketQueue.Dequeue();
+                                    currentLocalPacket = localPacketQueue.Dequeue();
                                 }
 
                                 MemoryStream packetStream = new MemoryStream();
                                 INodePacketTranslator writeTranslator = NodePacketTranslator.GetWriteTranslator(packetStream);
 
-                                packetStream.WriteByte((byte)packet.Type);
+                                packetStream.WriteByte((byte)currentLocalPacket.Type);
 
                                 // Pad for packet length
                                 packetStream.Write(BitConverter.GetBytes((int)0), 0, 4);
 
                                 // Reset the position in the write buffer.
-                                packet.Translate(writeTranslator);
+                                currentLocalPacket.Translate(writeTranslator);
 
                                 // Now write in the actual packet length
                                 packetStream.Position = 1;
@@ -680,8 +681,22 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Error while deserializing or handling packet.  Abort.
                             CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
-                            ExceptionHandling.DumpExceptionToFile(e);
-                            ChangeLinkStatus(LinkStatus.Failed);
+
+                            if (currentLocalPacket is NodeShutdown)
+                            {
+                                // Failing to send the "I'm shutting down right now" packet
+                                // might fail if the remote node just sent a "shut down right now"
+                                // packet followed by closing the pipe. Log, but don't treat
+                                // this as fatal
+                                CommunicationsUtilities.Trace("Ignoring exception when sending NodeShutdown acknowledgement packet");
+                            }
+                            else
+                            {
+                                // An error in any other situation is unexpected.
+                                ExceptionHandling.DumpExceptionToFile(e);
+                                ChangeLinkStatus(LinkStatus.Failed);
+                            }
+
                             exitLoop = true;
                             break;
                         }
