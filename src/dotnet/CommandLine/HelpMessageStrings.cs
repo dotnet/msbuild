@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.Cli.CommandLine
 {
     internal class HelpMessageStrings
     {
-        internal const string MSBuildAdditionalArgsHelpText = LocalizableStrings.MSBuildAdditionalArgsHelpText;
+        internal static string MSBuildAdditionalArgsHelpText => LocalizableStrings.MSBuildAdditionalArgsHelpText;
     }
 }
