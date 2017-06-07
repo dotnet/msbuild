@@ -22,6 +22,7 @@
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <SpaTemplateVersion>1.0.0-preview-000249</SpaTemplateVersion>
+    <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
