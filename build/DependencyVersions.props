@@ -19,7 +19,7 @@
     <PlatformAbstractionsVersion>2.0.0-preview2-25407-01</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview2-25407-01</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
-    <CliMigrateVersion>1.2.1-alpha-002130</CliMigrateVersion>
+    <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <SpaTemplateVersion>1.0.0-preview-000249</SpaTemplateVersion>
 
