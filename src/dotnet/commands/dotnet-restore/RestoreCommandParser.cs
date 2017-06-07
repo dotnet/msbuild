@@ -60,6 +60,11 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdNoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:RestoreRecursive=false")),
+                Create.Option(
+                    "-f|--force",
+                    LocalizableStrings.CmdForceRestoreOptionDescription,
+                    Accept.NoArguments()
+                          .ForwardAs("/p:RestoreForce=true")),
                 CommonOptions.VerbosityOption());
     }
 }
