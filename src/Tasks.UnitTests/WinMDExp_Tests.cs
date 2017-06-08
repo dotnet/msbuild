@@ -33,11 +33,11 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(
                 t,
                 "/reference:mscorlib.dll",
-                false);
+                useResponseFile: true);
             CommandLine.ValidateHasParameter(
                 t,
                 "/reference:Windows.Foundation.winmd",
-                false);
+                useResponseFile: true);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             WinMDExp t = new WinMDExp();
             t.WinMDModule = "Foo.dll";
             t.DisabledWarnings = "41999,42016";
-            CommandLine.ValidateHasParameter(t, "/nowarn:41999,42016", false);
+            CommandLine.ValidateHasParameter(t, "/nowarn:41999,42016", useResponseFile: true);
         }
 
 
@@ -61,8 +61,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputDocumentationFile = "output.xml";
             t.InputDocumentationFile = "input.xml";
 
-            CommandLine.ValidateHasParameter(t, "/d:output.xml", false);
-            CommandLine.ValidateHasParameter(t, "/md:input.xml", false);
+            CommandLine.ValidateHasParameter(t, "/d:output.xml", useResponseFile: true);
+            CommandLine.ValidateHasParameter(t, "/md:input.xml", useResponseFile: true);
         }
 
         [Fact]
@@ -74,8 +74,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputPDBFile = "output.pdb";
             t.InputPDBFile = "input.pdb";
 
-            CommandLine.ValidateHasParameter(t, "/pdb:output.pdb", false);
-            CommandLine.ValidateHasParameter(t, "/mp:input.pdb", false);
+            CommandLine.ValidateHasParameter(t, "/pdb:output.pdb", useResponseFile: true);
+            CommandLine.ValidateHasParameter(t, "/mp:input.pdb", useResponseFile: true);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
             WinMDExp t = new WinMDExp();
 
             t.WinMDModule = "Foo.dll";
-            CommandLine.ValidateContains(t, "Foo.dll", false);
+            CommandLine.ValidateContains(t, "Foo.dll", useResponseFile: true);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
             WinMDExp t = new WinMDExp();
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Bob.winmd";
-            CommandLine.ValidateHasParameter(t, "/out:Bob.winmd", false);
+            CommandLine.ValidateHasParameter(t, "/out:Bob.winmd", useResponseFile: true);
         }
 
         [Fact]
@@ -103,12 +103,7 @@ namespace Microsoft.Build.UnitTests
 
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Foo.winmd";
-            CommandLine.ValidateHasParameter(t, "/out:Foo.winmd", false);
+            CommandLine.ValidateHasParameter(t, "/out:Foo.winmd", useResponseFile: true);
         }
     }
 }
-
-
-
-
-
