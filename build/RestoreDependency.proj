@@ -9,37 +9,38 @@
   <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDllPath)" />
 
   <Target Name="CopySdkToOutput"
-          DependsOnTargets="PrepareBundledSdksProps;
-                            EnsureSdkRestored;
+          DependsOnTargets="PrepareBundledDependencyProps;
+                            EnsureDependencyRestored;
                             GetSdkItemsToCopy"
+          Condition="'$(SdkLayoutDirectory)' != ''"
           Inputs="@(SdkContent)"
           Outputs="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')">
     <Copy SourceFiles="@(SdkContent)"
           DestinationFiles="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
     
-    <Message Text="Copied Sdk $(SdkPackageName) from $(SdkNuPkgPath) to $(SdkLayoutDirectory)."
+    <Message Text="Copied Sdk $(DependencyPackageName) from $(DependencyNuPkgPath) to $(SdkLayoutDirectory)."
              Importance="High" />
   </Target>
 
   <Target Name="GetSdkItemsToCopy">
     <ItemGroup>
-      <SdkContent Include="$(SdkNuPkgPath)/**/*" 
-                  Exclude="$(SdkNuPkgPath)/$(SdkPackageName).nuspec;
-                           $(SdkNuPkgPath)/$(SdkPackageName).$(SdkPackageVersion).nupkg;
-                           $(SdkNuPkgPath)/$(SdkPackageName).$(SdkPackageVersion).nupkg.sha512" />
+      <SdkContent Include="$(DependencyNuPkgPath)/**/*" 
+                  Exclude="$(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512" />
     </ItemGroup>
   </Target>
 
-  <Target Name="EnsureSdkRestored"
-          Condition="!Exists('$(SdkNuPkgPath)/$(SdkPackageName.ToLower()).nuspec')">
+  <Target Name="EnsureDependencyRestored"
+          Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
     <DotNetRestore ToolPath="$(Stage0Directory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
-                   AdditionalParameters="/p:SdkPackageName=$(SdkPackageName) /p:SdkPackageVersion=$(SdkPackageVersion)" />
+                   AdditionalParameters="/p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
   </Target>
 
-  <Target Name="PrepareBundledSdksProps">
+  <Target Name="PrepareBundledDependencyProps">
     <PropertyGroup>
-      <SdkNuPkgPath>$(NuGetPackagesDir)/$(SdkPackageName.ToLower())/$(SdkPackageVersion.ToLower())</SdkNuPkgPath>
+      <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion.ToLower())</DependencyNuPkgPath>
     </PropertyGroup>
   </Target>
 </Project>

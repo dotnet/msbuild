@@ -1,10 +1,52 @@
 <Project>
   <Target Name="GenerateMSBuildExtensions"
-          DependsOnTargets="GenerateBundledVersionsProps">
+          DependsOnTargets="GenerateBundledVersionsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
       <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
+
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
+                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft.NET.Build.Extensions\net*\**" />
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
+                                DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
+      <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
+                                Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
+                                DeploymentSubpath="Microsoft.NET.Build.Extensions/" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="PrepareMSBuildExtensionsProps">
+    <PropertyGroup>
+      <MSBuildExtensionsPackageName>Microsoft.NET.Build.Extensions</MSBuildExtensionsPackageName>
+      <MSBuildExtensionsVersionSubfolder>15.0</MSBuildExtensionsVersionSubfolder>
+      <MSBuildExtensionsNuPkgPath>$(NuGetPackagesDir)/$(MSBuildExtensionsPackageName.ToLower())/$(CLI_MSBuildExtensions_Version.ToLower())</MSBuildExtensionsNuPkgPath>
+
+      <NETStandardLibraryNETFrameworkPackageName>NETStandard.Library.NETFramework</NETStandardLibraryNETFrameworkPackageName>
+      <NETStandardLibraryNETFrameworkNuPkgPath>$(NuGetPackagesDir)/$(NETStandardLibraryNETFrameworkPackageName.ToLower())/$(CLI_NETStandardLibraryNETFrameworkVersion.ToLower())</NETStandardLibraryNETFrameworkNuPkgPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="RestoreMSBuildExtensionsPackages"
+          DependsOnTargets="PrepareMSBuildExtensionsProps">
+    <ItemGroup>
+      <ExtensionPackageToRestore Include="$(MSBuildExtensionsPackageName)" Version="$(CLI_MSBuildExtensions_Version)"/>
+      <ExtensionPackageToRestore Include="$(NETStandardLibraryNETFrameworkPackageName)" Version="$(CLI_NETStandardLibraryNETFrameworkVersion)"/>
+      
+      <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
+        <Properties>
+          CLIBuildDll=$(CLIBuildDll);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          DependencyPackageName=%(ExtensionPackageToRestore.Identity);
+          DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
+          Stage0Directory=$(Stage0Directory)
+        </Properties>
+      </ExtensionRestore>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(ExtensionRestore)">
+    </MSBuild>
   </Target>
 
   <Target Name="GenerateBundledVersionsProps">

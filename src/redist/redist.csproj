@@ -112,9 +112,14 @@
           DependsOnTargets="GenerateMSBuildExtensions"
           AfterTargets="Publish"
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
+    <ItemGroup>
+      <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
+        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+      </MSBuildExtensionsContent>
+    </ItemGroup>
     
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
-            DestinationFolder="$(PublishDir)/%(RecursiveDir)" />
+            DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
 
       <PropertyGroup>
         <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
@@ -140,13 +145,13 @@
   <Target Name="PublishSdks"
           AfterTargets="Publish">
     <ItemGroup>
-      <SdksToBundle Include="$(RepoRoot)/build/BundledSdks.proj">
+      <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
-          SdkPackageName=%(BundledSdk.Identity);
-          SdkPackageVersion=%(BundledSdk.Version);
+          DependencyPackageName=%(BundledSdk.Identity);
+          DependencyPackageVersion=%(BundledSdk.Version);
           Stage0Directory=$(Stage0Directory)
         </Properties>
       </SdksToBundle>
