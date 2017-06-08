@@ -3,7 +3,6 @@
     public class AzureAdB2COptions
     {
         public const string PolicyAuthenticationProperty = "Policy";
-
         public string ClientId { get; set; }
         public string Instance { get; set; }
         public string Domain { get; set; }
