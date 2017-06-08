@@ -22,18 +22,22 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
-        [InlineData("netstandard1.3", true)]
-        [InlineData("netcoreapp1.0", true)]
-        [InlineData("netcoreapp1.1", true)]
-        [InlineData("netstandard2.0", false)]
-        [InlineData("netcoreapp2.0", false)]
-        public void I_can_restore_a_project_with_implicit_msbuild_nuget_config(string framework, bool fileExists)
+        // https://github.com/dotnet/sdk/issues/1327
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netstandard1.3", "1.3", true)]
+        [InlineData("netcoreapp1.0", "1.0", true)]
+        [InlineData("netcoreapp1.1", "1.1", true)]
+        [InlineData("netstandard2.0", "2.0", false)]
+        [InlineData("netcoreapp2.0", "2.0app", false)]
+        public void I_can_restore_a_project_with_implicit_msbuild_nuget_config(
+            string framework,
+            string projectPrefix,
+            bool fileExists)
         {
-            string testProjectName = framework.Replace(".", "") + "ProjectWithFallbackFolderReference";   
+            string testProjectName = $"{projectPrefix}Fallback";
             TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, framework);
 
-            var packagesFolder = Path.Combine(testProjectTestAsset.Path, "packages");
+            var packagesFolder = Path.Combine(RepoInfo.TestsFolder, "packages", testProjectName);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.Execute($"/p:RestorePackagesPath={packagesFolder}").Should().Pass();
@@ -45,15 +49,16 @@ namespace Microsoft.NET.Build.Tests
                 "projectinfallbackfolder.1.0.0.nupkg")).Should().Be(fileExists);
         }
 
-        [Theory]
-        [InlineData("netstandard1.3")]
-        [InlineData("netcoreapp1.0")]
-        [InlineData("netcoreapp1.1")]
-        [InlineData("netstandard2.0")]
-        [InlineData("netcoreapp2.0")]
-        public void I_can_disable_implicit_msbuild_nuget_config(string framework)
+        // https://github.com/dotnet/sdk/issues/1327
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netstandard1.3", "1.3")]
+        [InlineData("netcoreapp1.0", "1.0")]
+        [InlineData("netcoreapp1.1", "1.1")]
+        [InlineData("netstandard2.0", "2.0")]
+        [InlineData("netcoreapp2.0", "2.0app")]
+        public void I_can_disable_implicit_msbuild_nuget_config(string framework, string projectPrefix)
         {
-            string testProjectName = framework.Replace(".", "") + "ProjectWithDisabledFallbackFolder";   
+            string testProjectName = $"{projectPrefix}DisabledFallback";
             TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, framework);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);

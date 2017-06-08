@@ -70,6 +70,14 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        public static string TestsFolder
+        {
+            get
+            {
+                return Path.Combine(BinPath, Configuration, "Tests");
+            }
+        }
+
         public static string PackagesPath
         {
             get { return Path.Combine(BinPath, Configuration, "Packages"); }
