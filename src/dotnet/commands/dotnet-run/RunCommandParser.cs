@@ -1,7 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
@@ -10,7 +13,7 @@ namespace Microsoft.DotNet.Cli
     internal static class RunCommandParser
     {
         public static Command Run() =>
-            Create.Command(
+            CreateWithRestoreOptions.Command(
                 "run",
                 LocalizableStrings.AppFullName,
                 treatUnmatchedTokensAsErrors: false,
@@ -23,6 +26,8 @@ namespace Microsoft.DotNet.Cli
                         project: o.SingleArgumentOrDefault("--project"),
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
+                        noRestore: o.HasOption("--no-restore"),
+                        restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
                 options: new[]
@@ -45,7 +50,8 @@ namespace Microsoft.DotNet.Cli
                     Create.Option(
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
-                        Accept.NoArguments())
+                        Accept.NoArguments()),
+                    CommonOptions.NoRestoreOption()
                 });
     }
 }

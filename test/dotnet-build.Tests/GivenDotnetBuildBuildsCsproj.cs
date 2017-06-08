@@ -39,6 +39,35 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         }
 
         [Fact]
+        public void ItImplicitlyRestoresAProjectWhenBuilding()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance(testAppName)
+                .WithSourceFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+        }
+
+        [Fact]
+        public void ItDoesNotImplicitlyRestoreAProjectWhenBuildingWithTheNoRestoreOption()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance(testAppName)
+                .WithSourceFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--no-restore")
+                .Should().Fail()
+                .And.HaveStdOutContaining("project.assets.json' not found.");;
+        }
+
+        [Fact]
         public void ItRunsWhenRestoringToSpecificPackageDir()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
@@ -62,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute()
+                .Execute("--no-restore")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
