@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
         private class BindAzureAdB2COptions : ConfigureOptions<AzureAdB2COptions>
         {
             public BindAzureAdB2COptions(IConfiguration config) : 
-                base(options => config.GetSection("Authentication:AzureAdB2C").Bind(options))
+                base(options => config.GetSection("AzureAdB2C").Bind(options))
             { }
         }
 

@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
         private class BindAzureAdOptions : ConfigureOptions<AzureAdOptions>
         {
             public BindAzureAdOptions(IConfiguration config) :
-                base(options => config.GetSection("Authentication:AzureAd").Bind(options))
+                base(options => config.GetSection("AzureAd").Bind(options))
             { }
         }
 
