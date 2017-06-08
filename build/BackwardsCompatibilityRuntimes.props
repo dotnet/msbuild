@@ -5,13 +5,13 @@
     <BackwardsCompatibility110SharedHostVersion>1.1.0</BackwardsCompatibility110SharedHostVersion>
     <BackwardsCompatibility110HostFxrVersion>1.1.0</BackwardsCompatibility110HostFxrVersion>
 
-    <BackwardsCompatibility110DownloadedSharedHostInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-host-$(HostMonikerRid).$(BackwardsCompatibility110SharedHostVersion)$(OSName)</BackwardsCompatibility110DownloadedSharedHostInstallerFileName>
+    <BackwardsCompatibility110DownloadedSharedHostInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-host-$(HostMonikerRid).$(BackwardsCompatibility110SharedHostVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedSharedHostInstallerFileName>
     <BackwardsCompatibility110DownloadedSharedHostInstallerFile Condition=" '$(OSName)' != 'linux' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedSharedHostInstallerFileName)</BackwardsCompatibility110DownloadedSharedHostInstallerFile>
 
-    <BackwardsCompatibility110DownloadedHostFxrInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-hostfxr-$(HostMonikerRid).$(BackwardsCompatibility110HostFxrVersion)$(OSName)</BackwardsCompatibility110DownloadedHostFxrInstallerFileName>
+    <BackwardsCompatibility110DownloadedHostFxrInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-hostfxr-$(HostMonikerRid).$(BackwardsCompatibility110HostFxrVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedHostFxrInstallerFileName>
     <BackwardsCompatibility110DownloadedHostFxrInstallerFile Condition=" '$(OSName)' != 'linux' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedHostFxrInstallerFileName)</BackwardsCompatibility110DownloadedHostFxrInstallerFile>
 
-    <BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-sharedframework-$(HostMonikerRid).$(BackwardsCompatibility110SharedFrameworkVersion)$(OSName)</BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName>
+    <BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName Condition=" '$(OSName)' != 'linux' ">dotnet-sharedframework-$(HostMonikerRid).$(BackwardsCompatibility110SharedFrameworkVersion)$(InstallerExtension)</BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName>
     <BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile Condition=" '$(OSName)' != 'linux' ">$(PackagesDirectory)/$(BackwardsCompatibility110DownloadedSharedFrameworkInstallerFileName)</BackwardsCompatibility110DownloadedSharedFrameworkInstallerFile>
 
     <BackwardsCompatibility110CombinedFrameworkHostCompressedFileName>dotnet-$(HostMonikerRid).$(BackwardsCompatibility110SharedFrameworkVersion)$(ArchiveExtension)</BackwardsCompatibility110CombinedFrameworkHostCompressedFileName>
