@@ -21,7 +21,7 @@
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <SpaTemplateVersion>1.0.0-preview-000249</SpaTemplateVersion>
+    <SpaTemplateVersion>1.0.0-preview-000286</SpaTemplateVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
