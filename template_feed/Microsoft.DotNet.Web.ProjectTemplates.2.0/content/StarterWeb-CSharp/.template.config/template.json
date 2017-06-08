@@ -28,7 +28,8 @@
           "exclude": [
             "Controllers/AccountController.cs",
             "Views/Account/**",
-            "Views/Shared/_LoginPartial.cshtml"
+            "Views/Shared/_LoginPartial.cshtml",
+            "Extensions/**"
           ]
         },
         {
@@ -73,13 +74,13 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "AzureAd/**"
+            "Extensions/AzureAd/**"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "AzureAdB2C/**"
+            "Extensions/AzureAdB2C/**"
           ]
         }
       ]
