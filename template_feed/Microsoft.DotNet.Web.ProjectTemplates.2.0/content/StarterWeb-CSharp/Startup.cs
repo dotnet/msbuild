@@ -72,10 +72,6 @@ namespace Company.WebApplication1
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
-#elseif (OrganizationalAuth)
-
-            services.AddAuthentication(
-                SharedOptions => SharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 #endif
 
             services.AddMvc();

@@ -20,7 +20,7 @@ namespace Company.WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
 #if (IndividualB2CAuth)
-            services.AddAzureAdB2CWebApiAuthentication();
+            services.AddAzureAdB2CBearerAuthentication();
 #elseif (OrganizationalAuth)
             services.AddAzureAdBearerAuthentication();
 #endif
