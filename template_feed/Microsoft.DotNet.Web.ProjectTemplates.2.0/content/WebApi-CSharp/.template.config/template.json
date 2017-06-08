@@ -30,12 +30,6 @@
           ]
         },
         {
-          "condition": "(!IndividualAuth && !OrganizationalAuth)",
-          "exclude": [
-            "Extensions/**"
-          ]
-        },
-        {
           "condition": "(!IncludeLaunchSettings)",
           "exclude": [
             "Properties/launchSettings.json"
@@ -44,13 +38,13 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "Extensions/AzureAd/**"
+            "AzureAd/**"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "Extensions/AzureAdB2C/**"
+            "AzureAdB2C/**"
           ]
         }
       ]
