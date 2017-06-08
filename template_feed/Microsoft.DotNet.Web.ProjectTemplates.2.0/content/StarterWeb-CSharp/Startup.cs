@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if (IndividualLocalAuth)
-using Company.WebApplication1.Data;
-using Company.WebApplication1.Models;
-using Company.WebApplication1.Services;
-#endif
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
@@ -35,6 +30,11 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 #endif
 #if (MultiOrgAuth)
 using Microsoft.IdentityModel.Tokens;
+#endif
+#if (IndividualLocalAuth)
+using Company.WebApplication1.Data;
+using Company.WebApplication1.Models;
+using Company.WebApplication1.Services;
 #endif
 
 namespace Company.WebApplication1

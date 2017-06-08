@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
         private class BindAzureAdOptions : ConfigureOptions<AzureAdOptions>
         {
             public BindAzureAdOptions(IConfiguration config) :
-                base(options => config.GetSection("Microsoft:AspNetCore:Authentication:AzureAd").Bind(options))
+                base(options => config.GetSection("Authentication:AzureAd").Bind(options))
             { }
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
             public void PostConfigure(string name, JwtBearerOptions options)
             {
-                options.Audience = _azureOptions.ClientId;
+                options.Audience = _azureOptions.Audience;
                 options.Authority = $"{_azureOptions.Instance}{_azureOptions.TenantId}";
             }
         }
