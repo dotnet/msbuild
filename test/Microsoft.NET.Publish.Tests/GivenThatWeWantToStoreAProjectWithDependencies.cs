@@ -235,7 +235,16 @@ namespace Microsoft.NET.Publish.Tests
             var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
             var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
 
-            new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml")
+            var composeStore = new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "NewtonsoftFilterProfile.xml");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // clear the PATH on windows to ensure creating .ni.pdbs works without 
+                // being in a VS developer command prompt
+                composeStore.WithEnvironmentVariable("PATH", string.Empty);
+            }
+            
+            composeStore
                 .Execute(
                     $"/p:RuntimeIdentifier={_runtimeRid}",
                     "/p:TargetFramework=netcoreapp2.0",

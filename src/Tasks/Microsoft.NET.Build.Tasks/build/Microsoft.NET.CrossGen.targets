@@ -73,8 +73,19 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="UnableToFindResolvedPath"
                  FormatArguments="$(Crossgen)" />
 
+    <!-- Copy crossgen into the netcoreapp folder to ensure it can load Microsoft.DiaSymReader.Native when creating PDBs -->
+    <Copy SourceFiles="$(Crossgen)"
+          DestinationFolder="$(_NetCoreRefDir)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+    
     <PropertyGroup>
-      <Crossgen> $([System.IO.Path]::GetFullPath($(Crossgen)))</Crossgen>
+      <Crossgen>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine($(_NetCoreRefDir), $([System.IO.Path]::GetFileName($(Crossgen)))))))</Crossgen>
     </PropertyGroup>
   </Target>
   
