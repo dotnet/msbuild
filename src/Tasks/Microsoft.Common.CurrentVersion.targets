@@ -1793,8 +1793,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         GetTargetPath
 
-    This stand-alone target returns the name of the build product (i.e. EXE, DLL)
-    that would be produced if we built this project.
+    This target returns an item containing the build product (i.e. EXE, DLL)
+    that would be produced if we built this project, with some relevant
+    metadata.
     ============================================================
     -->
   <PropertyGroup>
@@ -1804,6 +1805,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
+
+  <!--
+    ============================================================
+                                        GetTargetPathWithTargetPlatformMoniker
+
+    This stand-alone target returns the name and version of the target platform for this project.
+
+    NOTE: The ProjectReference protocol uses only GetTargetPath. Computing the item
+    in this target allows projects to override GetTargetPath without having to reimplement
+    the details of the metadata computation.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn)</GetTargetPathWithTargetPlatformMonikerDependsOn>
+  </PropertyGroup>
+
+  <!--NOTE: since an overridden GetTargetPath might not include a DependsOn
+      for this target, it's safer to establish the dependency here with a
+      BeforeTargets. -->
+  <Target
+      Name="GetTargetPathWithTargetPlatformMoniker"
+      BeforeTargets="GetTargetPath"
+      DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
       Returns="@(TargetPathWithTargetPlatformMoniker)">
     <ItemGroup>
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
@@ -1814,25 +1839,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
-
-  <!--
-    ============================================================
-                                        GetTargetPathWithTargetPlatformMoniker
-
-    This stand-alone target returns the name and version of the target platform for this project.
-
-    NOTE: The functionality of this target has been subsumed by GetTargetPath.  This target is
-    provided purely for compat reasons.
-    ============================================================
-    -->
-  <PropertyGroup>
-    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn); GetTargetPath</GetTargetPathWithTargetPlatformMonikerDependsOn>
-  </PropertyGroup>
-
-  <Target
-      Name="GetTargetPathWithTargetPlatformMoniker"
-      DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)" />
 
   <!--
     ============================================================
