@@ -32,14 +32,10 @@ namespace Microsoft.Build.Utilities
 
         public readonly bool DoNotLogProjectImports = Environment.GetEnvironmentVariable("MSBUILDDONOTLOGIMPORTS") == "1";
 
-        public readonly bool CacheAssemblyInformation =
-#if FEATURE_ASSEMBLY_LOADFROM
-            // On full framework, default to old/well-tested/known-good behavior, but allow an opt in.
-            Environment.GetEnvironmentVariable("MSBUILDCACHERARASSEMBLYINFORMATION") == "1";
-#else
-            // On .NET Core, go for speed, but allow an opt out.
-            Environment.GetEnvironmentVariable("MSBUILDDONOTCACHERARASSEMBLYINFORMATION") != "1";
-#endif
+        /// <summary>
+        /// Read information only once per file per ResolveAssemblyReference invocation.
+        /// </summary>
+        public readonly bool CacheAssemblyInformation = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHERARASSEMBLYINFORMATION") != "1";
 
         public readonly ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
 
