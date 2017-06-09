@@ -1,8 +1,10 @@
-﻿@using Company.WebApplication1
+﻿@*#if (IndividualAuth)
+@using Microsoft.AspNetCore.Identity
+#endif*@
+@using Company.WebApplication1
 @using Company.WebApplication1.Models
 @*#if (IndividualAuth)
 @using Company.WebApplication1.Models.AccountViewModels
 @using Company.WebApplication1.Models.ManageViewModels
-@using Microsoft.AspNetCore.Identity
 #endif*@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
