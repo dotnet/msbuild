@@ -348,7 +348,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
-    <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
+    <CopyUpToDateMarker>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
@@ -1835,7 +1835,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
-        <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$(CopyUpToDateMarker)</CopyUpToDateMarker>
+        <CopyUpToDateMarker>$(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
@@ -4239,7 +4239,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="$(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'$(ProduceReferenceAssembly)' == 'true' and '@(ReferencesCopiedInThisBuild)' != ''" />
+           Condition="'@(ReferencesCopiedInThisBuild)' != ''" />
 
   </Target>
 
