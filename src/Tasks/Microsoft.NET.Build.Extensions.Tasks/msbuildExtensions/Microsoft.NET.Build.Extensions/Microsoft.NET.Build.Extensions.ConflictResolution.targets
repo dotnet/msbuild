@@ -1,25 +1,32 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Build.Extensions.ConflictResolution.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Choose>
-    <!-- Allow completely disabling the conflict resolution targets -->
-    <When Condition="'$(DisableHandlePackageFileConflicts)' == 'true'" />
-    <When Condition="'$(ResolveNuGetPackages)' == 'true' and Exists('$(ProjectLockFile)')">
-      <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
-      <PropertyGroup>
-        <_HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</_HandlePackageFileConflictsAfter>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <!-- No specific NuGet targets to sequence after, run before targets that consume references -->
-      <PropertyGroup>
-        <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);_HandlePackageFileConflicts</ResolveAssemblyReferencesDependsOn>
-        <PrepareResourcesDependsOn>_HandlePackageFileConflicts;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
-  
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DisableHandlePackageFileConflicts)' != 'true'">
+    <!-- Non-SDK using project.json or PackageReference, run after references are read from the lock/assets file -->
+    <_HandlePackageFileConflictsAfter>ResolveNuGetPackageAssets</_HandlePackageFileConflictsAfter>
+    
+    <!-- In case ResolveNuGetPackageAssets is not run (eg: packages.config), ensure we run before targets that consume references -->
+    <_HandlePackageFileConflictsBefore>ResolveAssemblyReferences</_HandlePackageFileConflictsBefore>
+  </PropertyGroup>
+
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
-  <Target Name="_HandlePackageFileConflicts" AfterTargets="$(_HandlePackageFileConflictsAfter)">
+  <Target Name="_HandlePackageFileConflicts" 
+          BeforeTargets="$(_HandlePackageFileConflictsBefore)"
+          AfterTargets="$(_HandlePackageFileConflictsAfter)">
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
