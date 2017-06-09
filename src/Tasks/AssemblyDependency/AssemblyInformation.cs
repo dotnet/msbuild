@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -36,6 +37,11 @@ namespace Microsoft.Build.Tasks
 #endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
+
+#if !FEATURE_ASSEMBLY_LOADFROM
+        private bool _metadataRead;
+#endif
+
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
@@ -187,24 +193,24 @@ namespace Microsoft.Build.Tasks
         /// assemblies and  the list of scatter files.
         /// </summary>
         /// <param name="path">Path to the assembly.</param>
+        /// <param name="cache">Cache of already-populated <see cref="AssemblyInformation"/>.</param>
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Gets the assembly name.</param>
         internal static void GetAssemblyMetadata
         (
             string path,
+            ConcurrentDictionary<string, AssemblyInformation> cache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
             out FrameworkName frameworkName
         )
         {
-            AssemblyInformation import = null;
-            using (import = new AssemblyInformation(path))
-            {
-                dependencies = import.Dependencies;
-                frameworkName = import.FrameworkNameAttribute;
-                scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
-            }
+            var import = cache?.GetOrAdd(path, s => new AssemblyInformation(s)) ?? new AssemblyInformation(path);
+
+            dependencies = import.Dependencies;
+            frameworkName = import.FrameworkNameAttribute;
+            scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
         }
 
         /// <summary>
@@ -263,10 +269,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
-// Disabling use of System.Reflection in case of MONO, because
-// Assembly.GetCustomAttributes* for an attribute which belongs
-// to an assembly that mono cannot find, causes a crash!
-// Instead, opt for using PEReader and friends to get that info
+            // Disabling use of System.Reflection in case of MONO, because
+            // Assembly.GetCustomAttributes* for an attribute which belongs
+            // to an assembly that mono cannot find, causes a crash!
+            // Instead, opt for using PEReader and friends to get that info
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
             if (!NativeMethodsShared.IsWindows)
             {
@@ -337,40 +343,90 @@ namespace Microsoft.Build.Tasks
 
             return frameworkAttribute;
 #else
-            using (var stream = File.OpenRead(_sourceFile))
-            using (var peFile = new PEReader(stream))
-            {
-                var metadataReader = peFile.GetMetadataReader();
-
-                var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
-                    .Select(ah => metadataReader.GetCustomAttribute(ah));
-
-                foreach (var attr in attrs)
-                {
-                    var ctorHandle = attr.Constructor;
-                    if (ctorHandle.Kind != HandleKind.MemberReference)
-                    {
-                        continue;
-                    }
-
-                    var container = metadataReader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
-                    var name = metadataReader.GetTypeReference((TypeReferenceHandle)container).Name;
-                    if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
-                    {
-                        continue;
-                    }
-
-                    var arguments = GetFixedStringArguments(metadataReader, attr);
-                    if (arguments.Count == 1)
-                    {
-                        return new FrameworkName(arguments[0]);
-                    }
-
-                }
-            }
-            return null;
+            CorePopulateMetadata();
+            return _frameworkName;
 #endif
         }
+
+#if !FEATURE_ASSEMBLY_LOADFROM
+        /// <summary>
+        /// Read everything from the assembly in a single stream.
+        /// </summary>
+        /// <returns></returns>
+        private void CorePopulateMetadata()
+        {
+            if (_metadataRead) return;
+
+            lock (this)
+            {
+                if (_metadataRead) return;
+
+                using (var stream = File.OpenRead(_sourceFile))
+                using (var peFile = new PEReader(stream))
+                {
+                    var metadataReader = peFile.GetMetadataReader();
+
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+
+                    foreach (var handle in metadataReader.AssemblyReferences)
+                    {
+                        var entry = metadataReader.GetAssemblyReference(handle);
+
+                        var assemblyName = new AssemblyName
+                        {
+                            Name = metadataReader.GetString(entry.Name),
+                            Version = entry.Version,
+                            CultureName = metadataReader.GetString(entry.Culture)
+                        };
+                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+                        if (publicKeyOrToken != null)
+                        {
+                            if (publicKeyOrToken.Length <= 8)
+                            {
+                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                            }
+                            else
+                            {
+                                assemblyName.SetPublicKey(publicKeyOrToken);
+                            }
+                        }
+                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+
+                        ret.Add(new AssemblyNameExtension(assemblyName));
+                    }
+
+                    _assemblyDependencies = ret.ToArray();
+
+                    var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
+                        .Select(ah => metadataReader.GetCustomAttribute(ah));
+
+                    foreach (var attr in attrs)
+                    {
+                        var ctorHandle = attr.Constructor;
+                        if (ctorHandle.Kind != HandleKind.MemberReference)
+                        {
+                            continue;
+                        }
+
+                        var container = metadataReader.GetMemberReference((MemberReferenceHandle) ctorHandle).Parent;
+                        var name = metadataReader.GetTypeReference((TypeReferenceHandle) container).Name;
+                        if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
+                        {
+                            continue;
+                        }
+
+                        var arguments = GetFixedStringArguments(metadataReader, attr);
+                        if (arguments.Count == 1)
+                        {
+                            _frameworkName = new FrameworkName(arguments[0]);
+                        }
+                    }
+                }
+
+                _metadataRead = true;
+            }
+        }
+#endif
 
 // Enabling this for MONO, because it's required by GetFrameworkName.
 // More details are in the comment for that method
@@ -587,43 +643,11 @@ namespace Microsoft.Build.Tasks
 
             return (AssemblyNameExtension[])asmRefs.ToArray(typeof(AssemblyNameExtension));
 #else
-
-            List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
-
-            using (var stream = File.OpenRead(_sourceFile))
-            using (var peFile = new PEReader(stream))
-            {
-                var metadataReader = peFile.GetMetadataReader();
-
-                foreach (var handle in metadataReader.AssemblyReferences)
-                {
-                    var entry = metadataReader.GetAssemblyReference(handle);
-
-                    var assemblyName = new AssemblyName();
-                    assemblyName.Name = metadataReader.GetString(entry.Name);
-                    assemblyName.Version = entry.Version;
-                    assemblyName.CultureName = metadataReader.GetString(entry.Culture);
-                    var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                    if (publicKeyOrToken != null)
-                    {
-                        if (publicKeyOrToken.Length <= 8)
-                        {
-                            assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                        }
-                        else
-                        {
-                            assemblyName.SetPublicKey(publicKeyOrToken);
-                        }
-                    }
-                    assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
-                    ret.Add(new AssemblyNameExtension(assemblyName));
-                }
-            }
-
-            return ret.ToArray();
+            CorePopulateMetadata();
+            return _assemblyDependencies;
 #endif
         }
+
 
         /// <summary>
         /// Import extra files. These are usually consituent members of a scatter assembly.

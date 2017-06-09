@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -1718,6 +1719,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static void GetAssemblyMetadata
         (
             string path,
+            ConcurrentDictionary<string, AssemblyInformation> cache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
             out FrameworkNameVersioning frameworkName

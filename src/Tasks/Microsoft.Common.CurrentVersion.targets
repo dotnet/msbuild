@@ -348,7 +348,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
-    <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
+    <CopyUpToDateMarker>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
@@ -1793,8 +1793,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         GetTargetPath
 
-    This stand-alone target returns the name of the build product (i.e. EXE, DLL)
-    that would be produced if we built this project.
+    This target returns an item containing the build product (i.e. EXE, DLL)
+    that would be produced if we built this project, with some relevant
+    metadata.
     ============================================================
     -->
   <PropertyGroup>
@@ -1804,16 +1805,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)">
-    <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
-        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
-        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
-        <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
-        <CopyUpToDateMarker Condition="'$(ProduceReferenceAssembly)' == 'true'">$(CopyUpToDateMarker)</CopyUpToDateMarker>
-      </TargetPathWithTargetPlatformMoniker>
-    </ItemGroup>
-  </Target>
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
 
   <!--
     ============================================================
@@ -1821,18 +1813,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     This stand-alone target returns the name and version of the target platform for this project.
 
-    NOTE: The functionality of this target has been subsumed by GetTargetPath.  This target is
-    provided purely for compat reasons.
+    NOTE: The ProjectReference protocol uses only GetTargetPath. Computing the item
+    in this target allows projects to override GetTargetPath without having to reimplement
+    the details of the metadata computation.
     ============================================================
     -->
   <PropertyGroup>
-    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn); GetTargetPath</GetTargetPathWithTargetPlatformMonikerDependsOn>
+    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn)</GetTargetPathWithTargetPlatformMonikerDependsOn>
   </PropertyGroup>
 
+  <!--NOTE: since an overridden GetTargetPath might not include a DependsOn
+      for this target, it's safer to establish the dependency here with a
+      BeforeTargets. -->
   <Target
       Name="GetTargetPathWithTargetPlatformMoniker"
+      BeforeTargets="GetTargetPath"
       DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)" />
+      Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
+        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+        <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
+        <CopyUpToDateMarker>$(CopyUpToDateMarker)</CopyUpToDateMarker>
+      </TargetPathWithTargetPlatformMoniker>
+    </ItemGroup>
+  </Target>
 
   <!--
     ============================================================
@@ -4233,7 +4239,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="$(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'$(ProduceReferenceAssembly)' == 'true' and '@(ReferencesCopiedInThisBuild)' != ''" />
+           Condition="'@(ReferencesCopiedInThisBuild)' != ''" />
 
   </Target>
 
