@@ -194,6 +194,12 @@
     <ItemGroup>
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
+
+      <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
+      <SdkFiles Remove="$(PublishDir)/Microsoft.NET.Build.Extensions\net*\**\*" />
+
+      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
+      <SdkFiles Remove="$(PublishDir)/Microsoft.NET.Build.Extensions\tools\net*\**\*" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(SdkFiles)">
