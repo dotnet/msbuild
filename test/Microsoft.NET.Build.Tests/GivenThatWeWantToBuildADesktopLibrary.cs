@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -142,6 +143,11 @@ public class NETFramework
         [WindowsOnlyFact]
         public void It_can_use_ValueTuple_and_exchange_the_type_with_a_NETStandard_library()
         {
+            var referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version47);
+            if (!Directory.Exists(referenceAssemblies))
+            {
+                return;
+            }
 
             var netStandardLibrary = new TestProject()
             {
