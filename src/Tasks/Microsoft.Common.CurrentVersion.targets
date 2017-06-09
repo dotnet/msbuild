@@ -1793,8 +1793,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         GetTargetPath
 
-    This stand-alone target returns the name of the build product (i.e. EXE, DLL)
-    that would be produced if we built this project.
+    This target returns an item containing the build product (i.e. EXE, DLL)
+    that would be produced if we built this project, with some relevant
+    metadata.
     ============================================================
     -->
   <PropertyGroup>
@@ -1804,6 +1805,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
+
+  <!--
+    ============================================================
+                                        GetTargetPathWithTargetPlatformMoniker
+
+    This stand-alone target returns the name and version of the target platform for this project.
+
+    NOTE: The ProjectReference protocol uses only GetTargetPath. Computing the item
+    in this target allows projects to override GetTargetPath without having to reimplement
+    the details of the metadata computation.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn)</GetTargetPathWithTargetPlatformMonikerDependsOn>
+  </PropertyGroup>
+
+  <!--NOTE: since an overridden GetTargetPath might not include a DependsOn
+      for this target, it's safer to establish the dependency here with a
+      BeforeTargets. -->
+  <Target
+      Name="GetTargetPathWithTargetPlatformMoniker"
+      BeforeTargets="GetTargetPath"
+      DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
       Returns="@(TargetPathWithTargetPlatformMoniker)">
     <ItemGroup>
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
@@ -1814,25 +1839,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
-
-  <!--
-    ============================================================
-                                        GetTargetPathWithTargetPlatformMoniker
-
-    This stand-alone target returns the name and version of the target platform for this project.
-
-    NOTE: The functionality of this target has been subsumed by GetTargetPath.  This target is
-    provided purely for compat reasons.
-    ============================================================
-    -->
-  <PropertyGroup>
-    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn); GetTargetPath</GetTargetPathWithTargetPlatformMonikerDependsOn>
-  </PropertyGroup>
-
-  <Target
-      Name="GetTargetPathWithTargetPlatformMoniker"
-      DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)" />
 
   <!--
     ============================================================
@@ -2025,9 +2031,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="SerializationAssemblyFiles" ItemName="_ReferenceSerializationAssemblyPaths"/>
       <Output TaskParameter="ScatterFiles" ItemName="_ReferenceScatterPaths"/>
       <Output TaskParameter="CopyLocalFiles" ItemName="ReferenceCopyLocalPaths"/>
-      <!-- Indicate to the IDE that updated (possibly transitive) references should trigger
-           an (incremental) build. -->
-      <Output TaskParameter="CopyLocalFiles" ItemName="UpToDateCheckInput"/>
       <Output TaskParameter="SuggestedRedirects" ItemName="SuggestedBindingRedirects"/>
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
@@ -2052,31 +2055,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="FindReferenceAssembliesForReferences"
           DependsOnTargets="ResolveReferences">
     <ItemGroup>
+      <!-- Reference assemblies are not produced in all cases, but it's easier to consume them
+           if this metadatum is always populated. Ensure that it points to the implementation
+           assembly unless already specified. -->
+      <ReferencePath Condition="'%(ReferencePath.ReferenceAssembly)' == ''">
+        <ReferenceAssembly>%(FullPath)</ReferenceAssembly>
+      </ReferencePath>
+
       <ReferencePathWithRefAssemblies Include="@(ReferencePath->'%(ReferenceAssembly)')"
                                       Condition="'$(CompileUsingReferenceAssemblies)' != 'false'">
         <OriginalPath Condition="'%(ReferencePath.Identity)' != '@(ReferencePath->'%(ReferenceAssembly)')'">%(ReferencePath.Identity)</OriginalPath>
       </ReferencePathWithRefAssemblies>
       <ReferencePathWithRefAssemblies Include="@(ReferencePath)"
                                       Condition="'$(CompileUsingReferenceAssemblies)' == 'false'" />
-
-      <!-- The project system normally looks only at the inputs to the compiler in its
-           fast up-to-date check, but if the implementation assembly of a ref is stale
-           we still want to rerun to ensure copies, etc. happen. -->
-      <!-- The remote project might not have done anything to _its own_ assemblies, but
-           still need to invalidate the fast up-to-date check in projects that depend on
-           it because it has brought along a new implementation of one of its references. -->
-      <UpToDateCheckInput Include="@(ReferencePathWithRefAssemblies->'%(CopyUpToDateMarker)')" />
     </ItemGroup>
   </Target>
-
-  <ItemDefinitionGroup>
-    <!-- Reference assemblies are not produced in all cases, but it's easier to consume them
-         if this metadatum is always populated. This item definition ensures that it points
-         to the implementation assembly unless specified. -->
-    <ReferencePath>
-      <ReferenceAssembly>%(FullPath)</ReferenceAssembly>
-    </ReferencePath>
-  </ItemDefinitionGroup>
 
   <!--
     ====================================================================================================
@@ -2859,7 +2852,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ResGenDependsOn>ResolveAssemblyReferences;SplitResourcesByCulture;BeforeResGen;CoreResGen;AfterResGen</ResGenDependsOn>
-    <CoreResGenDependsOn></CoreResGenDependsOn>
+    <CoreResGenDependsOn>FindReferenceAssembliesForReferences</CoreResGenDependsOn>
     <UseSourcePath Condition="'$(UseSourcePath)'==''">true</UseSourcePath>
     <ResGenExecuteAsTool Condition="'$(ResGenExecuteAsTool)'==''">false</ResGenExecuteAsTool>
   </PropertyGroup>
@@ -2928,7 +2921,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <GenerateResource
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
-        References="@(ReferencePath)"
+        References="@(ReferencePathWithRefAssemblies)"
         AdditionalInputs="$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.Cache"

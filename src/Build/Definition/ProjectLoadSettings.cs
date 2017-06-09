@@ -37,6 +37,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Record the item elements that got evaluated
         /// </summary>
-        RecordEvaluatedItemElements = 8
+        RecordEvaluatedItemElements = 8,
+
+        /// <summary>
+        /// Ignore empty targets files when evaluating the project
+        /// </summary>
+        IgnoreEmptyImports = 16,
     }
 }

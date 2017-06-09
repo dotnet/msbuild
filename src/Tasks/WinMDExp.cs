@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks
         /// executing this tool
         /// </summary>
         /// <param name="commandLine">Gets filled with command line commands</param>
-        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendSwitchIfNotNull("/d:", OutputDocumentationFile);
             commandLine.AppendSwitchIfNotNull("/md:", InputDocumentationFile);

@@ -759,6 +759,7 @@ namespace Microsoft.Build.Evaluation
     public enum ProjectLoadSettings
     {
         Default = 0,
+        IgnoreEmptyImports = 16,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
         RecordEvaluatedItemElements = 8,

@@ -67,16 +67,6 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_splitter = new char[] { ';' };
 
         /// <summary>
-        /// Whether to write information about why we evaluate to debug output.
-        /// </summary>
-        private static readonly bool s_debugEvaluation = (Environment.GetEnvironmentVariable("MSBUILDDEBUGEVALUATION") != null);
-
-        /// <summary>
-        /// Whether to to respect the TreatAsLocalProperty parameter on the Project tag. 
-        /// </summary>
-        private static readonly bool s_ignoreTreatAsLocalProperty = (Environment.GetEnvironmentVariable("MSBUILDIGNORETREATASLOCALPROPERTY") != null);
-
-        /// <summary>
         /// Locals types names. We only have these because 'Built In' has a space,
         /// else we would use LocalsTypes enum names.
         /// Note: This should match LocalsTypes enum.
@@ -266,7 +256,7 @@ namespace Microsoft.Build.Evaluation
             _expander = new Expander<P, I>(data, data);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
-            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY"));
+            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
@@ -362,14 +352,6 @@ namespace Microsoft.Build.Evaluation
             /// Items
             /// </summary>
             Items
-        }
-
-        /// <summary>
-        /// Whether to write information about why we evaluate to debug output.
-        /// </summary>
-        internal static bool DebugEvaluation
-        {
-            get { return s_debugEvaluation; }
         }
 
         /// <summary>
@@ -921,7 +903,7 @@ namespace Microsoft.Build.Evaluation
             _data.BeforeTargets = targetsWhichRunBeforeByTarget;
             _data.AfterTargets = targetsWhichRunAfterByTarget;
 
-            if (s_debugEvaluation)
+            if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
                 // This is so important for VS performance it's worth always tracing; accidentally having 
                 // inconsistent sets of global properties will cause reevaluations, which are wasteful and incorrect
@@ -973,7 +955,7 @@ namespace Microsoft.Build.Evaluation
             IList<string> initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
             _initialTargetsList.AddRange(initialTargets);
 
-            if (!s_ignoreTreatAsLocalProperty)
+            if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
                 IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
 
@@ -2637,7 +2619,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    catch (InvalidProjectFileException ex) when (ExceptionHandling.IsIoRelatedException(ex.InnerException))
+                    catch (InvalidProjectFileException ex)
                     {
                         // The import couldn't be read from disk, or something similar. In that case,
                         // the error message would be more useful if it pointed to the location in the importing project file instead.
@@ -2657,6 +2639,31 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            // If IgnoreEmptyImports is enabled, check if the file is considered empty
+                            //
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreEmptyImports) != 0 || Traits.Instance.EscapeHatches.IgnoreEmptyImports) && ProjectRootElement.IsEmptyXmlFile(importFileUnescaped))
+                            {
+                                atleastOneImportIgnored = true;
+
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedEmptyFile"),
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                continue;
+                            }
+
                             // Otherwise a more generic message, still pointing to the location of the import tag
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
                                 importFileUnescaped, ex.InnerException.Message);
