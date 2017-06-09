@@ -10,11 +10,11 @@
                             TestDebuild;
                             BuildSdkDeb;
                             TestSdkDeb;"
-          Condition=" '$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian' "
+          Condition=" '$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian' "
           Outputs="@(GeneratedInstallers)"/>
 
   <Target Name="BuildSdkDeb"
-      Condition=" ('$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian') AND '$(DebuildPresent)'  == 'true' "
+      Condition=" ('$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian') AND '$(DebuildPresent)'  == 'true' "
       DependsOnTargets="PrepareDotnetDebDirectories;
                         PrepareDotnetDebTool;"
       Inputs="@(CLISdkFiles)"
@@ -98,7 +98,7 @@
   </Target>
 
   <Target Name="TestSdkDeb"
-      Condition=" ('$(OSName)' == 'ubuntu' OR '$(OSName)' == 'debian') and '$(DebuildPresent)'  == 'true' "
+      Condition=" ('$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian') and '$(DebuildPresent)'  == 'true' "
       Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);

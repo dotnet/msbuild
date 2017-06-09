@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(SdkPackageName)" Version="$(SdkPackageVersion)" />
+    <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

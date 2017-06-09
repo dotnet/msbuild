@@ -1,6 +1,10 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Test.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -44,10 +48,10 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdLoggerDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdLoggerOption)
-                              .ForwardAsSingle(o => 
+                              .ForwardAsSingle(o =>
                                     {
-                                          var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments)); 
-                                          
+                                          var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments));
+
                                           return $"/p:VSTestLogger={loggersString}";
                                     })),
                   CommonOptions.ConfigurationOption(),
@@ -81,6 +85,7 @@ namespace Microsoft.DotNet.Cli
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.cmdCollectFriendlyName)
                               .ForwardAsSingle(o => $"/p:VSTestCollect=\"{string.Join(";", o.Arguments)}\"")),
+                  CommonOptions.NoRestoreOption(),
                   CommonOptions.VerbosityOption());
 
         private static string GetSemiColonEsacpedstring(string arg)

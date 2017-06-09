@@ -20,7 +20,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp2.0 /p:GeneratePropsFile=$(GeneratePropsFile)" 
+    <Exec Command="$(DotnetStage0) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp2.0 /p:GeneratePropsFile=$(GeneratePropsFile)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
