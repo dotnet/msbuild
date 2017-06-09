@@ -165,4 +165,7 @@
   <data name="CmdNoDependenciesOptionDescription" xml:space="preserve">
     <value>Set this flag to ignore project to project references and only restore the root project.</value>
   </data>
+  <data name="CmdForceRestoreOptionDescription" xml:space="preserve">
+    <value>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</value>
+  </data>
 </root>

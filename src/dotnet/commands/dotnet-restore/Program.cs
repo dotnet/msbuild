@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 "/t:Restore"
             };
 
-            if (!parsedRestore.HasOption("verbosity"))
+            if (!HasVerbosityOption(parsedRestore))
             {
                 msbuildArgs.Add("/ConsoleLoggerParameters:Verbosity=Minimal");
             }
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Restore
             msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(parsedRestore.Arguments);
-            
+
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }
 
@@ -64,6 +64,13 @@ namespace Microsoft.DotNet.Tools.Restore
             }
             
             return cmd.Execute();
+        }
+
+        private static bool HasVerbosityOption(AppliedOption parsedRestore)
+        {
+            return parsedRestore.HasOption("verbosity") ||
+                   parsedRestore.Arguments.Any(a => a.Contains("/v:")) ||
+                   parsedRestore.Arguments.Any(a => a.Contains("/verbosity:"));
         }
     }
 }

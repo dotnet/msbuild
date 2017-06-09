@@ -520,4 +520,7 @@
   <data name="ShowHelpDescription" xml:space="preserve">
     <value>Show help information.</value>
   </data>
+  <data name="NoRestoreDescription" xml:space="preserve">
+    <value>Does not do an implicit restore when executing the command.</value>
+  </data>
 </root>

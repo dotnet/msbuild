@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return ret;
         }
 
-        public int Execute()
+        public virtual int Execute()
         {
             return GetProcessStartInfo().Execute();
         }

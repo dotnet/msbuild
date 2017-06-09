@@ -45,6 +45,39 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Fact]
+        public void ItImplicitlyRestoresAProjectWhenPublishing()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new PublishCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--framework netcoreapp2.0")
+                .Should().Pass();
+        }
+
+        [Fact]
+        public void ItDoesNotImplicitlyRestoreAProjectWhenPublishingWithTheNoRestoreOption()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new PublishCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.0 --no-restore")
+                .Should().Fail()
+                .And.HaveStdOutContaining("project.assets.json' not found.");;
+        }
+
+        [Fact]
         public void ItPublishesARunnableSelfContainedApp()
         {
             var testAppName = "MSBuildTestApp";
@@ -170,7 +203,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--no-restore")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";

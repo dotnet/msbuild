@@ -5,16 +5,17 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Cli;
 using System.Diagnostics;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
-    public class PackCommand : MSBuildForwardingApp
+    public class PackCommand : RestoringCommand
     {
-        public PackCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
-            : base(msbuildArgs, msbuildPath)
+        public PackCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -30,14 +31,16 @@ namespace Microsoft.DotNet.Tools.Pack
           
             var msbuildArgs = new List<string>()
             {
-                    "/t:pack"
+                "/t:pack"
             };
 
             msbuildArgs.AddRange(parsedPack.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(parsedPack.Arguments);
 
-            return new PackCommand(msbuildArgs, msbuildPath);
+            bool noRestore = parsedPack.HasOption("--no-restore");
+
+            return new PackCommand(msbuildArgs, noRestore, msbuildPath);
         }
 
         public static int Run(string[] args)

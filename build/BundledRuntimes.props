@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <CoreSetupRid>$(Rid)</CoreSetupRid>
-    <CoreSetupRid Condition=" '$(OSName)' == 'win' or '$(OSName)' == 'osx' ">$(ProductMonikerRid)</CoreSetupRid>
+    <CoreSetupRid>$(HostRid)</CoreSetupRid>
+    <CoreSetupRid Condition=" '$(HostOSName)' == 'win' or '$(HostOSName)' == 'osx' ">$(HostMonikerRid)</CoreSetupRid>
 
     <!-- only the runtime OSX .pkgs have a `-internal` suffix -->
-    <InstallerStartSuffix Condition="'$(OSName)' == 'osx'">-internal</InstallerStartSuffix>
+    <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
     
     <!-- Downloaded Installers + Archives -->
     <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
@@ -34,8 +34,8 @@
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeVersion)</AspNetCoreRuntimeInstallerBlobRootUrl>
 
     <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'win' ">$(OSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(OSName)' == 'osx' ">$(OSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">$(HostOSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
 
     <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeStoreSuffix>
@@ -43,7 +43,7 @@
     <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(AspNetCoreRuntimeInstallerArchiveSuffix)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
 
-    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(OSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture)$(AspNetCoreRuntimeStoreSuffix).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
+    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(HostOSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture)$(AspNetCoreRuntimeStoreSuffix).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
     <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
   </PropertyGroup>
 

@@ -13,14 +13,21 @@
                                    '$(Rid)' == 'fedora.24-x64' OR
                                    '$(Rid)' == 'opensuse.42.1-x64' ">$(Rid)</ProductMonikerRid>
     <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
+    <HostMonikerRid Condition=" '$(HostRid)' == 'ubuntu.16.04-x64' OR
+        '$(HostRid)' == 'ubuntu.16.10-x64' OR
+        '$(HostRid)' == 'fedora.24-x64' OR
+        '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
+    <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
 
     <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
     <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
     <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
+
+
     <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkDebug>
     <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
-
+    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(HostMonikerRid)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
   </PropertyGroup>
 </Project>
