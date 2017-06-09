@@ -104,6 +104,14 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        public static string NuGetExePath
+        {
+            get
+            {
+                return Path.Combine(RepoRoot, ".nuget", $"nuget{Constants.ExeSuffix}");
+            }
+        }
+
         private static string FindConfigurationInBasePath()
         {
             // assumes tests are always executed from the "bin/$Configuration/Tests" directory

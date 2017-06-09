@@ -31,7 +31,7 @@ namespace Microsoft.NET.TestFramework.Commands
             ProjectFile = FindProjectFile(ref _projectRootPath, relativePathToProject);
         }
 
-        private static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
+        internal static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
         {
             if (File.Exists(projectRootPath) && string.IsNullOrEmpty(relativePathToProject))
             {

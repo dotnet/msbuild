@@ -72,6 +72,14 @@ if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.1.2"))
     if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 }
 
+# Download nuget.exe
+if (!(Test-Path "$RepoRoot\.nuget"))
+{
+    mkdir "$RepoRoot\.nuget" | Out-Null
+    $NUGET_EXE_URL="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+    Invoke-WebRequest $NUGET_EXE_URL -OutFile "$RepoRoot\.nuget\nuget.exe"
+}
+
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 

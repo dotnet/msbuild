@@ -143,8 +143,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, true)]
         public void It_resolves_conflicts(bool isSdk, bool usePackagesConfig)
         {
-            // TODO: need to restore packages.config based project correctly.
-
             var successMessage = "No conflicts found for support libs";
 
             var testAsset = _testAssetsManager
@@ -193,7 +191,15 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            testAsset.Restore(Log, relativePath: AppName);
+            if (usePackagesConfig)
+            {
+                testAsset.NuGetRestore(Log, relativePath: AppName);
+                testAsset.Restore(Log, relativePath: LibraryName);
+            }
+            else
+            {
+                testAsset.Restore(Log, relativePath: AppName);
+            }
 
             // build should succeed without duplicates
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
