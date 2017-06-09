@@ -89,9 +89,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(DisableImplicitNuGetFallbackFolder)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and Exists($(_NugetFallbackFolder)) ">
-    <RestoreAdditionalProjectSources Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0' ">$(RestoreSources);$(_NugetFallbackFolder)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0' ">$(RestoreAdditionalProjectSources);$(_NugetFallbackFolder)</RestoreAdditionalProjectSources>
 
-    <RestoreAdditionalProjectFallbackFolders Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '2.0' ">$(RestoreFallbackFolders);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFolders>
+    <RestoreAdditionalProjectFallbackFolders Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '2.0' ">$(RestoreAdditionalProjectFallbackFolders);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFolders>
   </PropertyGroup>
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
