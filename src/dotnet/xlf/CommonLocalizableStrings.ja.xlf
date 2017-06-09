@@ -674,6 +674,11 @@
         <target state="translated">ヘルプ情報を表示します。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoRestoreDescription">
+        <source>Does not do an implicit restore when executing the command.</source>
+        <target state="new">Does not do an implicit restore when executing the command.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
