@@ -171,7 +171,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectTestAsset = CreateTestAsset(
                 testProjectName,
                 "netstandard2.0",
-                new Dictionary<string, string> { {"DisableImplicitPackageTargetFallback", "true" } });
+                new Dictionary<string, string> { {"DisableImplicitAssetTargetFallback", "true" } });
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));
