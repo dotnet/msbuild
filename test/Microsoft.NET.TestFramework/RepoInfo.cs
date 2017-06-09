@@ -101,7 +101,7 @@ namespace Microsoft.NET.TestFramework
 
         public static string BuildExtensionsMSBuildPath
         {
-            get { return Path.Combine(BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft.NET.Build.Extensions"); }
+            get { return Path.Combine(BuildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions"); }
         }
 
         public static string CliSdkPath
