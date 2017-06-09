@@ -157,10 +157,12 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
                      .And.Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.pdb");
         }
 
-        [Fact]
-        public void PackWorksWithLocalProject()
+        [Theory]
+        [InlineData("C#", "TestAppSimple")]
+        [InlineData("F#", "FSharpTestAppSimple")]
+        public void PackWorksWithLocalProject(string language, string projectName)
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
+            var testInstance = TestAssets.Get(projectName)
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
