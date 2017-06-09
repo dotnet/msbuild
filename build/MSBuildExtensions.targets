@@ -3,6 +3,8 @@
           DependsOnTargets="GenerateBundledVersionsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
+      
+      <!-- The MSBuildExtensionsContent item is for the files that will be laid out in the CLI install -->
       <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
 
       <!-- We want to include the tasks and targets from the Microsoft.NET.Build.Extensions package, but we don't want to include the DLLs
@@ -22,7 +24,25 @@
       <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                 Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
                                 DeploymentSubpath="Microsoft.NET.Build.Extensions/" />
+
+
+      <!-- The VSMSBuildExtensionsContent item is for the files that will be included in the VS.Redist.Common.Net.Core.SDK.MSBuildExtensions
+           package and inserted into Visual Studio -->
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
+                                  Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft.NET.Build.Extensions\net*\**"
+                                  DeploymentSubpath="msbuildExtensions/"/>
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
+                                  DeploymentSubpath="msbuildExtensions-ver/"/>
+      <VSMSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
+                                  Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
+                                  DeploymentSubpath="msbuildExtensions/Microsoft.NET.Build.Extensions/" />
+
+      <VSMSBuildExtensionsContent Update="@(VSMSBuildExtensionsContent)">
+        <DestinationPath >$(MSBuildExtensionsLayoutDirectory)/%(VSMSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+      </VSMSBuildExtensionsContent>
     </ItemGroup>
+
+    <Copy SourceFiles="@(VSMSBuildExtensionsContent)" DestinationFiles="%(VSMSBuildExtensionsContent.DestinationPath)" />
   </Target>
 
   <Target Name="PrepareMSBuildExtensionsProps">

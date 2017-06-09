@@ -17,6 +17,7 @@
       <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
       <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
-      <SdkResolverOutputDirectory>$(IntermediateDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
+      <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
+      <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
   </PropertyGroup>
 </Project>
