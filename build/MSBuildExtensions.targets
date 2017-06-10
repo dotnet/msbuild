@@ -17,6 +17,9 @@
            -->
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
                                 Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
+      
+      <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
+      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
 
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                 DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
@@ -31,6 +34,10 @@
       <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
                                   Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**"
                                   DeploymentSubpath="msbuildExtensions/"/>
+
+      <!-- Don't include .NET Core MS.NET.Build.Extensions tasks in Full Framework MSBuild layout -->
+      <VSMSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\netcoreapp*\**" />
+
       <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                   DeploymentSubpath="msbuildExtensions-ver/"/>
       <VSMSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
