@@ -16,26 +16,26 @@
            we generate it.
            -->
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
-                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft.NET.Build.Extensions\net*\**" />
+                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
 
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                 DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
       
       <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                 Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
-                                DeploymentSubpath="Microsoft.NET.Build.Extensions/" />
+                                DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
 
 
       <!-- The VSMSBuildExtensionsContent item is for the files that will be included in the VS.Redist.Common.Net.Core.SDK.MSBuildExtensions
            package and inserted into Visual Studio -->
       <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
-                                  Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft.NET.Build.Extensions\net*\**"
+                                  Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**"
                                   DeploymentSubpath="msbuildExtensions/"/>
       <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                   DeploymentSubpath="msbuildExtensions-ver/"/>
       <VSMSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                   Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
-                                  DeploymentSubpath="msbuildExtensions/Microsoft.NET.Build.Extensions/" />
+                                  DeploymentSubpath="msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/" />
 
       <VSMSBuildExtensionsContent Update="@(VSMSBuildExtensionsContent)">
         <DestinationPath >$(MSBuildExtensionsLayoutDirectory)/%(VSMSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
