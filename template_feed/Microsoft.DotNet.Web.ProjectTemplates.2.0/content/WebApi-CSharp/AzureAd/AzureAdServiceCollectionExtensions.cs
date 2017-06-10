@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
             public void PostConfigure(string name, JwtBearerOptions options)
             {
-                options.Audience = _azureOptions.Audience;
+                options.Audience = _azureOptions.ClientId;
                 options.Authority = $"{_azureOptions.Instance}{_azureOptions.TenantId}";
             }
         }
