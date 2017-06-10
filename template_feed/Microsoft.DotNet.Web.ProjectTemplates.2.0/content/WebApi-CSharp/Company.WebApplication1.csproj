@@ -13,18 +13,18 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25609" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-25615" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
     <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25405-01" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25609" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.0-preview2-25609" Condition="'$(OrganizationalAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25609" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25615" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.0-preview2-25615" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25615" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NoTools)' != 'True'">
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25609" Condition="'$(OrganizationalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25609" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview2-25615" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview2-25615" />
   </ItemGroup>
 
 </Project>
