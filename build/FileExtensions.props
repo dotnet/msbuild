@@ -1,16 +1,20 @@
 <Project>
     <PropertyGroup>
 
+      <IsRPMBasedDistro Condition=" $(HostRid.StartsWith('rhel')) ">True</IsRPMBasedDistro>
+
       <ArchiveExtension Condition=" '$(HostOSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(HostOSName)' != 'win' ">.tar.gz</ArchiveExtension>
 
       <InstallerExtension Condition=" '$(HostOSName)' == 'win' ">.msi</InstallerExtension>
       <InstallerExtension Condition=" '$(HostOSName)' == 'osx' ">.pkg</InstallerExtension>
       <InstallerExtension Condition=" '$(HostOSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">.deb</InstallerExtension>
+      <InstallerExtension Condition=" '$(IsRPMBasedDistro)' == True ">.rpm</InstallerExtension>
 
       <BundleExtension Condition=" '$(HostOSName)' == 'win' ">.exe</BundleExtension>
       <BundleExtension Condition=" '$(HostOSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
       <BundleExtension Condition=" '$(HostOSName)' == 'ubuntu' OR '$(OSName)' == 'debian' ">$(InstallerExtension)</BundleExtension>
+      <BundleExtension Condition=" '$(IsRPMBasedDistro)' == True ">.rpm</BundleExtension>
 
       <DynamicLibPrefix>lib</DynamicLibPrefix>
       <DynamicLibPrefix Condition=" '$(HostOSName)' == 'win' "></DynamicLibPrefix>
