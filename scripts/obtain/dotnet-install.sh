@@ -645,7 +645,7 @@ install_dotnet() {
     download "$download_link" $zip_path || download_failed=true
 
     #  if the download fails, download the legacy_download_link
-    if [ "$download_failed" = true && "$valid_legacy_download_link" = true ]; then
+    if [ "$download_failed" = true ] && [ "$valid_legacy_download_link" = true ]; then
         say "Cannot download: $download_link"
         zip_path=$(mktemp $temporary_file_template)
         say_verbose "Legacy zip path: $zip_path"
