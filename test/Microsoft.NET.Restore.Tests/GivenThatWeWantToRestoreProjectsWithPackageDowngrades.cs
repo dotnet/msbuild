@@ -45,7 +45,7 @@ namespace Microsoft.NET.Restore.Tests
             restoreCommand
                 .Execute($"/p:RestorePackagesPath={packagesFolder}")
                 .Should().Fail()
-                .And.HaveStdOutContaining("MSBUILD : error NU1605: Detected package downgrade");
+                .And.HaveStdOutContaining("NU1605");
         }
 
         [CoreMSBuildOnlyFact]
