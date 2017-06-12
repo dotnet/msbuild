@@ -93,7 +93,7 @@ namespace Microsoft.Build.Utilities
         public void AppendFileNamesIfNotNull(string[] fileNames, string delimiter) { }
         protected void AppendFileNameWithQuoting(string fileName) { }
         protected void AppendQuotedTextToBuffer(System.Text.StringBuilder buffer, string unquotedTextToAppend) { }
-        protected void AppendSpaceIfNotEmpty() { }
+        protected virtual void AppendSpaceIfNotEmpty() { }
         public void AppendSwitch(string switchName) { }
         public void AppendSwitchIfNotNull(string switchName, Microsoft.Build.Framework.ITaskItem parameter) { }
         public void AppendSwitchIfNotNull(string switchName, Microsoft.Build.Framework.ITaskItem[] parameters, string delimiter) { }

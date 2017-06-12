@@ -247,7 +247,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>
         /// This is a pretty obscure method and so it's only available to inherited classes.
         /// </remarks>
-        protected void AppendSpaceIfNotEmpty()
+        protected virtual void AppendSpaceIfNotEmpty()
         {
             if (CommandLine.Length != 0 && CommandLine[CommandLine.Length - 1] != ' ')
             {

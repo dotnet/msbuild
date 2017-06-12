@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks
         /// executing this tool
         /// </summary>
         /// <param name="commandLine">Gets filled with command line commands</param>
-        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendSwitchIfNotNull("/d:", OutputDocumentationFile);
             commandLine.AppendSwitchIfNotNull("/md:", InputDocumentationFile);
@@ -277,6 +277,24 @@ namespace Microsoft.Build.Tasks
             commandLine.AppendFileNameIfNotNull(WinMDModule);
 
             base.AddCommandLineCommands(commandLine);
+        }
+
+        private class NewlineCommandLineBuilder : CommandLineBuilderExtension
+        {
+            override protected void AppendSpaceIfNotEmpty()
+            {
+                if (CommandLine.Length != 0)
+                {
+                    CommandLine.Append(Environment.NewLine);
+                }
+            }
+        }
+
+        override protected string GenerateResponseFileCommands()
+        {
+            CommandLineBuilderExtension commandLineBuilder = new NewlineCommandLineBuilder();
+            AddResponseFileCommands(commandLineBuilder);
+            return commandLineBuilder.ToString();
         }
 
         /// <summary>

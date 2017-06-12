@@ -1166,8 +1166,9 @@ namespace Microsoft.Build.Tasks
         public bool UTF8Output { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public string WinMDModule { get { throw null; } set { } }
-        protected internal override void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
+        protected internal override void AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected override string GenerateFullPathToTool() { throw null; }
+        protected override string GenerateResponseFileCommands() { throw null; }
         protected override bool SkipTaskExecution() { throw null; }
         protected override bool ValidateParameters() { throw null; }
     }
