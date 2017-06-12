@@ -1,0 +1,332 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Merq</name>
+    </assembly>
+    <members>
+        <member name="T:Merq.IAsyncCommand">
+            <summary>
+            Marker interface for asynchronous commands.
+            </summary>
+        </member>
+        <member name="T:Merq.IAsyncCommand`1">
+            <summary>
+            Marker interface for asynchronous commands whose execution results in a value
+            being returned by its command handler.
+            </summary>
+        </member>
+        <member name="T:Merq.IAsyncCommandHandler">
+            <summary>
+            Marker interface for asynchronous command handlers.
+            </summary>
+        </member>
+        <member name="T:Merq.IAsyncCommandHandler`1">
+            <summary>
+            Interface implemented by command handlers that 
+            handle commands asynchronously and don't return 
+            a result.
+            </summary>
+            <typeparam name="TCommand">Type of command supported by the handler.</typeparam>
+        </member>
+        <member name="M:Merq.IAsyncCommandHandler`1.ExecuteAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Executes the command asynchronously.
+            </summary>
+            <param name="command">The command parameters for the execution.</param>
+            <param name="cancellation">Cancellation token to cancel command execution.</param>
+        </member>
+        <member name="T:Merq.IAsyncCommandHandler`2">
+            <summary>
+            Interface implemented by command handlers that 
+            handle commands asynchronously and return a result.
+            </summary>
+            <typeparam name="TCommand">Type of command supported by the handler.</typeparam>
+            <typeparam name="TResult">The type of the returned value from the execution.</typeparam>
+            <devdoc>
+            NOTE: we can't make TResult covariant since the result is Task{T} which is a class and 
+            isn't covariant on the {T} either.
+            </devdoc>
+        </member>
+        <member name="M:Merq.IAsyncCommandHandler`2.ExecuteAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Executes the command asynchronously.
+            </summary>
+            <param name="command">The command parameters for the execution.</param>
+            <param name="cancellation">Cancellation token to cancel command execution.</param>
+            <returns>The result of the execution.</returns>
+        </member>
+        <member name="T:Merq.ICanExecute`1">
+            <summary>
+            Interface implemented by all generic command handlers 
+            to determine if they can execute a given command.
+            </summary>
+        </member>
+        <member name="M:Merq.ICanExecute`1.CanExecute(`0)">
+            <summary>
+            Determines whether the given command can be executed given the 
+            current state of the environment or the command itself.
+            </summary>
+            <param name="command">The command being queried for execution.</param>		
+        </member>
+        <member name="T:Merq.ICommand">
+            <summary>
+            Marker interface for synchronous commands.
+            </summary>
+        </member>
+        <member name="T:Merq.ICommand`1">
+            <summary>
+            Marker interface for synchronous commands whose execution results in a value
+            being returned by its command handler.
+            </summary>
+        </member>
+        <member name="T:Merq.ICommandBus">
+            <summary>
+            Provides a uniform way of executing commands (synchronous or 
+            asynchronous) regardless of their handler implementations.
+            </summary>
+        </member>
+        <member name="M:Merq.ICommandBus.CanHandle``1">
+            <summary>
+            Determines whether the given command type has a registered handler.
+            </summary>
+            <typeparam name="TCommand">The type of command to query.</typeparam>
+            <returns><see langword="true"/> if the command has a registered handler. <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Merq.ICommandBus.CanHandle(Merq.IExecutable)">
+            <summary>
+            Determines whether the given command has a registered handler.
+            </summary>
+            <param name="command">The command to query.</param>
+            <returns><see langword="true"/> if the command has a registered handler. <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Merq.ICommandBus.CanExecute``1(``0)">
+            <summary>
+            Determines whether the given command can be executed by a registered 
+            handler with the provided command instance values. If no registered 
+            handler exists, returns <see langword="false"/>.
+            </summary>
+            <param name="command">The command parameters for the query.</param>
+            <returns><see langword="true"/> if a command handler is registered and 
+            the command can be executed. <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Merq.ICommandBus.Execute(Merq.ICommand)">
+            <summary>
+            Executes the given synchronous command.
+            </summary>
+            <param name="command">The command parameters for the execution.</param>
+        </member>
+        <member name="M:Merq.ICommandBus.Execute``1(Merq.ICommand{``0})">
+            <summary>
+            Executes the given synchronous command and returns a result from it.
+            </summary>
+            <typeparam name="TResult">The return type of the command execution.</typeparam>
+            <param name="command">The command parameters for the execution.</param>
+            <returns>The result of executing the command.</returns>
+        </member>
+        <member name="M:Merq.ICommandBus.ExecuteAsync(Merq.IAsyncCommand,System.Threading.CancellationToken)">
+            <summary>
+            Executes the given asynchronous command.
+            </summary>
+            <param name="command">The command parameters for the execution.</param>
+            <param name="cancellation">Cancellation token to cancel command execution.</param>
+        </member>
+        <member name="M:Merq.ICommandBus.ExecuteAsync``1(Merq.IAsyncCommand{``0},System.Threading.CancellationToken)">
+            <summary>
+            Executes the given asynchronous command and returns a result from it.
+            </summary>
+            <typeparam name="TResult">The return type of the command execution.</typeparam>
+            <param name="command">The command parameters for the execution.</param>
+            <param name="cancellation">Cancellation token to cancel command execution.</param>
+            <returns>The result of executing the command.</returns>
+        </member>
+        <member name="T:Merq.ICommandHandler">
+            <summary>
+            Marker interface for all command handlers, whether synchronous or asynchronous, 
+            allowing the <see cref="T:Merq.ICommandBus"/> to receive both.
+            </summary>
+        </member>
+        <member name="T:Merq.ICommandHandler`1">
+            <summary>
+            Interface implemented by synchronous void commands.
+            </summary>
+            <typeparam name="TCommand">Type of command supported by the handler.</typeparam>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Merq.ICommandHandler`1.Execute(`0)" -->
+        <member name="T:Merq.ICommandHandler`2">
+            <summary>
+            Interface implemented by synchronous command handlers that return a result.
+            </summary>
+            <typeparam name="TCommand">Type of command supported by the handler.</typeparam>
+            <typeparam name="TResult">The type of the returned value from the execution.</typeparam>
+        </member>
+        <member name="M:Merq.ICommandHandler`2.Execute(`0)">
+            <summary>
+            Executes the command synchronously.
+            </summary>
+            <param name="command">The command parameters for the execution.</param>
+            <returns>The result of the execution.</returns>
+        </member>
+        <member name="T:Merq.IExecuteResult">
+            <summary>
+            Marker interface for all command handlers that return a result. 
+            </summary>
+        </member>
+        <member name="T:Merq.IEventStream">
+            <summary>
+            Provides an observable stream of events that can be used for analysis 
+            or real-time handling.
+            </summary>
+            <remarks>
+            Leveraging the Reactive Extensions (Rx), it's possible to build fairly 
+            complicated event reaction chains by simply issuing Linq-style queries 
+            over the event stream. 
+            </remarks>
+        </member>
+        <member name="M:Merq.IEventStream.Push``1(``0)">
+            <summary>
+            Pushes an event to the stream, causing any subscriber to be invoked if
+            appropriate.
+            </summary>
+        </member>
+        <member name="M:Merq.IEventStream.Of``1">
+            <summary>
+            Observes the events of a given type <typeparamref name="TEvent"/>.
+            </summary>
+        </member>
+        <member name="T:Merq.IExecutable">
+            <summary>
+            Marker interface for both synchronous and asynchronous commands, which 
+            allows <see cref="T:Merq.ICanExecute`1"/> and <see cref="T:Merq.ICommand"/> 
+            to reference either.
+            </summary>
+        </member>
+        <member name="T:Merq.IExecutableCommandHandler`1">
+            <summary>
+            Marker interface for all generic command handlers, whether synchronous or asynchronous, 
+            allowing easy introspection of the generic <typeparam name="TCommand" /> if necessary.
+            </summary>
+        </member>
+        <member name="T:Merq.IFluentInterface">
+            <summary>
+            Interface that is used to build fluent interfaces by hiding methods declared by <see cref="T:System.Object"/> from IntelliSense.
+            </summary>
+            <remarks>
+            Code that consumes implementations of this interface should expect one of two things:
+            <list type = "number">
+              <item>When referencing the interface from within the same solution (project reference), you will still see the methods this interface is meant to hide.</item>
+              <item>When referencing the interface through the compiled output assembly (external reference), the standard Object methods will be hidden as intended.</item>
+              <item>When using Resharper, be sure to configure it to respect the attribute: Options, go to Environment | IntelliSense | Completion Appearance and check "Filter members by [EditorBrowsable] attribute".</item>
+            </list>
+            See https://kzu.github.io/IFluentInterface for more information.
+            </remarks>
+            <nuget id="IFluentInterface" />
+        </member>
+        <member name="M:Merq.IFluentInterface.GetType">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetType"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.GetHashCode">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetHashCode"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.ToString">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.ToString"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.Equals(System.Object)">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.Equals(System.Object)"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="T:ThisAssembly">
+            <summary>Provides access to the current assembly information.</summary>
+        </member>
+        <member name="T:ThisAssembly.Git">
+            <summary>Provides access to the git information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.IsDirty">
+            <summary>IsDirty: false</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Branch">
+            <summary>Branch: master</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commit">
+            <summary>Commit: d297683</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Sha">
+            <summary>Sha: d29768379c4325bafa678aaee15849aa9fa5a351</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commits">
+            <summary>Commits on top of base version: 0</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Tag">
+            <summary>Tag: v1.1.15-rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseTag">
+            <summary>Base tag: v1.1.15-rc</summary>
+        </member>
+        <member name="T:ThisAssembly.Git.BaseVersion">
+            <summary>Provides access to the base version information used to determine the <see cref="T:ThisAssembly.Git.SemVer" />.</summary>      
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Major">
+            <summary>Major: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Minor">
+            <summary>Minor: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Patch">
+            <summary>Patch: 15</summary>
+        </member>
+        <member name="T:ThisAssembly.Git.SemVer">
+            <summary>Provides access to SemVer information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Major">
+            <summary>Major: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Minor">
+            <summary>Minor: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Patch">
+            <summary>Patch: 15</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Label">
+            <summary>Label: rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.DashLabel">
+            <summary>Label with dash prefix: -rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Source">
+            <summary>Source: Tag</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.RootNamespace">
+            <summary>RootNamespace: Merq</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.AssemblyName">
+            <summary>AssemblyName: Merq</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.ProjectGuid">
+            <summary>ProjectGuid: {C6B16D17-4F6A-4457-8497-92068E53DE39}</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkVersion">
+            <summary>TargetFrameworkVersion: v5.0</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkIdentifier">
+            <summary>TargetFrameworkIdentifier: .NETPortable</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkMoniker">
+            <summary>TargetFrameworkMoniker: .NETPortable,Version=v5.0</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformVersion">
+            <summary>TargetPlatformVersion: 7.0</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformIdentifier">
+            <summary>TargetPlatformIdentifier: Portable</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformMoniker">
+            <summary>TargetPlatformMoniker: Portable,Version=7.0</summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,331 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Merq.Async</name>
+    </assembly>
+    <members>
+        <member name="T:AwaitExtensions">
+            <summary>
+            Allows awaiting a <see cref="T:System.Threading.Tasks.TaskScheduler"/> to schedule 
+            continuations on it.
+            </summary>
+        </member>
+        <member name="M:AwaitExtensions.GetAwaiter(System.Threading.Tasks.TaskScheduler)">
+            <summary>
+            Gets an awaiter that schedules continuations on the specified scheduler.
+            </summary>
+            <param name="scheduler">The task scheduler used to execute continuations.</param>
+        </member>
+        <member name="T:Merq.IAsyncManager">
+            <summary>
+            A unified way of starting and executing asynchronous tasks to avoid deadlocks.
+            </summary>
+            <remarks>
+            There are three rules that should be strictly followed when using or interacting
+            with tasks that have UI/Main thread interaction requirements:
+            1. If a method has certain thread apartment requirements (STA or MTA) it must either:
+            	a)	Have an asynchronous signature, and asynchronously marshal to the appropriate
+            		thread if it isn't originally invoked on a compatible thread.
+            		The recommended way to switch to the main thread is:
+            		<code>
+            		await asyncManager.SwitchToMainThread();
+            		</code>
+            	b)	Have a synchronous signature, and throw an exception when called on the wrong thread.
+            		In particular, no method is allowed to synchronously marshal work to another thread
+            		(blocking while that work is done). Synchronous blocks in general are to be avoided
+            		whenever possible.
+            
+            2. When an implementation of an already-shipped public API must call asynchronous code
+            and block for its completion, it must do so by following this simple pattern:
+            	<code>
+            	asyncManager.Run(async () => await SomeOperationAsync(...));
+            	</code>
+            
+            3. If ever awaiting work that was started earlier, that work must be Joined.
+            For example, one service kicks off some asynchronous work that may later become
+            synchronously blocking:
+            	<code>
+            	var longRunningAsyncWork = asyncManager.RunAsync(async () => await SomeOperationAsync(...));
+            	</code>
+            
+            Then later that async work becomes blocking:
+            <code>
+            await longRunningAsyncWork;
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Merq.IAsyncManager.Run(System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Runs the specified asynchronous method to completion while synchronously blocking the calling thread.
+            </summary>
+            <param name="asyncMethod">The asynchronous method to execute.</param>
+            <remarks>
+            <para>Any exception thrown by the delegate is rethrown in its original type to the caller of this method.</para>
+            <para>When the delegate resumes from a yielding await, the default behavior is to resume in its original context
+            as an ordinary async method execution would. For example, if the caller was on the main thread, execution
+            resumes after an await on the main thread; but if it started on a threadpool thread it resumes on a threadpool thread.</para>
+            <example>
+            <code>
+            // On threadpool or Main thread, this method will block
+            // the calling thread until all async operations in the
+            // delegate complete.
+            asyncManager.Run(async () => {
+            	// still on the threadpool or Main thread as before.
+            	await OperationAsync();
+            	// still on the threadpool or Main thread as before.
+            	await Task.Run(async () => {
+            		// Now we're on a threadpool thread.
+            		await Task.Yield();
+            		// still on a threadpool thread.
+            	});
+            });
+            // Now back on the Main thread (or threadpool thread if that's where we started).
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="M:Merq.IAsyncManager.Run``1(System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Runs the specified asynchronous method to completion while synchronously blocking the calling thread.
+            </summary>
+            <typeparam name="TResult">The type of value returned by the asynchronous operation.</typeparam>
+            <param name="asyncMethod">The asynchronous method to execute.</param>
+            <returns>The result of the Task returned by <paramref name="asyncMethod" />.</returns>
+            <remarks>
+            <para>Any exception thrown by the delegate is rethrown in its original type to the caller of this method.</para>
+            <para>When the delegate resumes from a yielding await, the default behavior is to resume in its original context
+            as an ordinary async method execution would. For example, if the caller was on the main thread, execution
+            resumes after an await on the main thread; but if it started on a threadpool thread it resumes on a threadpool thread.</para>
+            <para>See the <see cref="M:Merq.IAsyncManager.Run(System.Func{System.Threading.Tasks.Task})" /> overload documentation for an example.</para>
+            </remarks>
+        </member>
+        <member name="M:Merq.IAsyncManager.RunAsync(System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Invokes an async delegate on the caller's thread, and yields back to the caller when the async method yields.
+            The async delegate is invoked in such a way as to mitigate deadlocks in the event that the async method
+            requires the main thread while the main thread is blocked waiting for the async method's completion.
+            </summary>
+            <param name="asyncMethod">The method that, when executed, will begin the async operation.</param>
+            <returns>An object that tracks the completion of the async operation, and allows for later synchronous blocking of the main thread for completion if necessary.</returns>
+            <remarks>
+            <para>Exceptions thrown by the delegate are captured by the returned awaitable.</para>
+            <para>When the delegate resumes from a yielding await, the default behavior is to resume in its original context
+            as an ordinary async method execution would. For example, if the caller was on the main thread, execution
+            resumes after an await on the main thread; but if it started on a threadpool thread it resumes on a threadpool thread.</para>
+            </remarks>
+        </member>
+        <member name="M:Merq.IAsyncManager.RunAsync``1(System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Invokes an async delegate on the caller's thread, and yields back to the caller when the async method yields.
+            The async delegate is invoked in such a way as to mitigate deadlocks in the event that the async method
+            requires the main thread while the main thread is blocked waiting for the async method's completion.
+            </summary>
+            <typeparam name="TResult">The type of value returned by the asynchronous operation.</typeparam>
+            <param name="asyncMethod">The method that, when executed, will begin the async operation.</param>
+            <returns>
+            An object that tracks the completion of the async operation, and allows for later synchronous blocking of the main thread for completion if necessary.
+            </returns>
+            <remarks>
+            <para>Exceptions thrown by the delegate are captured by the returned awaitable.</para>
+            <para>When the delegate resumes from a yielding await, the default behavior is to resume in its original context
+            as an ordinary async method execution would. For example, if the caller was on the main thread, execution
+            resumes after an await on the main thread; but if it started on a threadpool thread it resumes on a threadpool thread.</para>
+            </remarks>
+        </member>
+        <member name="M:Merq.IAsyncManager.SwitchToBackground">
+            <summary>
+            Gets an awaitable that schedules continuations on the default background scheduler.
+            </summary>
+        </member>
+        <member name="M:Merq.IAsyncManager.SwitchToMainThread">
+            <summary>
+            Gets an awaitable whose continuations execute on the synchronization context that 
+            the manager was initialized with, in such a way as to mitigate both deadlocks and reentrancy.
+            </summary>
+            <remarks>
+            <example>
+            <code>
+            async Task SomeOperationAsync() {
+            	// on the caller's thread.
+            	await DoAsync();
+            	
+            	// Now switch to a threadpool thread explicitly.
+            	await asyncManager.SwitchToBackground();
+            	
+            	// Now switch to the Main thread to talk to some STA object.
+            	await asyncManager.SwitchToMainThread();
+            	STAService.DoSomething();
+            }
+            </code>
+            </example>
+            </remarks>
+        </member>
+        <member name="T:Merq.IAwaitable">
+            <summary>
+            An asynchronous job that can be awaited.
+            </summary>
+        </member>
+        <member name="M:Merq.IAwaitable.GetAwaiter">
+            <summary>
+            Method invoked when awaiting this instance.
+            </summary>
+        </member>
+        <member name="T:Merq.IAwaitable`1">
+            <summary>
+            An asynchronous job that can be awaited.
+            </summary>
+            <typeparam name="TResult">Type of result returned by the job.</typeparam>
+        </member>
+        <member name="M:Merq.IAwaitable`1.GetAwaiter">
+            <summary>
+            Method invoked when awaiting this instance.
+            </summary>
+        </member>
+        <member name="T:Merq.IAwaiter">
+            <summary>
+            An awaiter returned from <see cref="M:Merq.IAwaitable.GetAwaiter" />.
+            </summary>
+        </member>
+        <member name="M:Merq.IAwaiter.GetResult">
+            <summary>
+            Ends the wait for the completion of the asynchronous task.
+            </summary>
+        </member>
+        <member name="P:Merq.IAwaiter.IsCompleted">
+            <summary>Gets a value that indicates whether the asynchronous task has completed.</summary>
+        </member>
+        <member name="T:Merq.IAwaiter`1">
+            <summary>
+            An awaiter returned from <see cref="M:Merq.IAwaitable`1.GetAwaiter" />.
+            </summary>
+            <typeparam name="TResult">Type of result returned by the awaited job.</typeparam>
+        </member>
+        <member name="M:Merq.IAwaiter`1.GetResult">
+            <summary>
+            Ends the wait for the completion of the asynchronous task.
+            </summary>
+        </member>
+        <member name="P:Merq.IAwaiter`1.IsCompleted">
+            <summary>Gets a value that indicates whether the asynchronous task has completed.</summary>
+        </member>
+        <member name="T:Merq.IFluentInterface">
+            <summary>
+            Interface that is used to build fluent interfaces by hiding methods declared by <see cref="T:System.Object"/> from IntelliSense.
+            </summary>
+            <remarks>
+            Code that consumes implementations of this interface should expect one of two things:
+            <list type = "number">
+              <item>When referencing the interface from within the same solution (project reference), you will still see the methods this interface is meant to hide.</item>
+              <item>When referencing the interface through the compiled output assembly (external reference), the standard Object methods will be hidden as intended.</item>
+              <item>When using Resharper, be sure to configure it to respect the attribute: Options, go to Environment | IntelliSense | Completion Appearance and check "Filter members by [EditorBrowsable] attribute".</item>
+            </list>
+            See https://kzu.github.io/IFluentInterface for more information.
+            </remarks>
+            <nuget id="IFluentInterface" />
+        </member>
+        <member name="M:Merq.IFluentInterface.GetType">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetType"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.GetHashCode">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetHashCode"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.ToString">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.ToString"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:Merq.IFluentInterface.Equals(System.Object)">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.Equals(System.Object)"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="T:ThisAssembly">
+            <summary>Provides access to the current assembly information.</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.RootNamespace">
+            <summary>RootNamespace: Merq</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.AssemblyName">
+            <summary>AssemblyName: Merq.Async</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkVersion">
+            <summary>TargetFrameworkVersion: v4.5</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkIdentifier">
+            <summary>TargetFrameworkIdentifier: .NETPortable</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetFrameworkMoniker">
+            <summary>TargetFrameworkMoniker: .NETPortable,Version=v4.5,Profile=Profile111</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformVersion">
+            <summary>TargetPlatformVersion: 7.0</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformIdentifier">
+            <summary>TargetPlatformIdentifier: Portable</summary>
+        </member>
+        <member name="F:ThisAssembly.Project.TargetPlatformMoniker">
+            <summary>TargetPlatformMoniker: Portable,Version=7.0</summary>
+        </member>
+        <member name="T:ThisAssembly.Git">
+            <summary>Provides access to the git information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.IsDirty">
+            <summary>IsDirty: true</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Branch">
+            <summary>Branch: master</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commit">
+            <summary>Commit: cba4571</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Sha">
+            <summary>Sha: cba45713583789ad468a2e6840253a159bf61dd8</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commits">
+            <summary>Commits on top of base version: 0</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Tag">
+            <summary>Tag: v1.1.17-rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseTag">
+            <summary>Base tag: v1.1.17-rc</summary>
+        </member>
+        <member name="T:ThisAssembly.Git.BaseVersion">
+            <summary>Provides access to the base version information used to determine the <see cref="T:ThisAssembly.Git.SemVer" />.</summary>      
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Major">
+            <summary>Major: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Minor">
+            <summary>Minor: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Patch">
+            <summary>Patch: 17</summary>
+        </member>
+        <member name="T:ThisAssembly.Git.SemVer">
+            <summary>Provides access to SemVer information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Major">
+            <summary>Major: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Minor">
+            <summary>Minor: 1</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Patch">
+            <summary>Patch: 17</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Label">
+            <summary>Label: rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.DashLabel">
+            <summary>Label with dash prefix: -rc</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Source">
+            <summary>Source: Tag</summary>
+        </member>
+    </members>
+</doc>

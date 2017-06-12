@@ -1,0 +1,46 @@
+<!--
+***********************************************************************************************
+Xamarin.IoT.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+  created a backup copy.  Incorrect changes to this file will make it
+  impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corp. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Xamarin.VisualStudio.IoT.Tasks.CreateAppBundle" AssemblyFile="Xamarin.VisualStudio.IoT.Tasks.dll" />
+
+  <PropertyGroup>
+    <DefineConstants>__IOT__;$(DefineConstants)</DefineConstants>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MkBundleToolPath Condition="'$(MkBundleToolPath)' == ''" >$(MSBuildThisFileDirectory)..\tools\mkbundle.exe</MkBundleToolPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IoTFastDev)' == ''">
+    <IoTFastDev>True</IoTFastDev>
+    <IoTFastDev Condition="'$(Configuration)' == 'Release'">False</IoTFastDev>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'@(TargetAbis)'==''">
+    <TargetAbis Include="armel;armhf;raspbian;arm64;x86" />
+  </ItemGroup>
+
+  <Target Name="CreateAppBundle" Condition="'$(IoTFastDev)' == 'False'" AfterTargets="AfterBuild">
+    <CreateAppBundle
+				TargetAbis="@(TargetAbis)"
+				TargetDir="$(TargetDir)"
+        TargetFileName="$(TargetFileName)"
+        DiagnosticsPort="$(DiagnosticsPort)"
+        MkBundleToolPath="$(MkBundleToolPath)" />
+  </Target>
+
+  <ItemGroup>
+    <ProjectCapability Include="XamarinIoT" />
+    <ProjectCapability Remove="LaunchProfiles" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+<!--
+***********************************************************************************************
+Sdk.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corp. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.props" Condition="Exists('$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\build\Xamarin.IoT.props" Condition="Exists('$(MSBuildThisFileDirectory)..\build\Xamarin.IoT.props')" />
+</Project>

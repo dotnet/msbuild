@@ -1,0 +1,399 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>System.Diagnostics.Tracer</name>
+    </assembly>
+    <members>
+        <member name="T:System.Diagnostics.DiagnosticsTracer">
+            <summary>
+            Implements the <see cref="T:System.Diagnostics.ITracer"/> interface on top of
+            <see cref="T:System.Diagnostics.TraceSource"/>.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.StartActivityExtension">
+            <summary>
+            Extensions to <see cref="T:System.Diagnostics.ITracer"/> for activity tracing.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.StartActivityExtension.StartActivity(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Starts a new activity scope.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.StartActivityExtension.StartActivity(System.Diagnostics.ITracer,System.String)">
+            <summary>
+            Starts a new activity scope.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.StartActivityExtension.TraceActivity">
+            <devdoc>
+            In order for activity tracing to happen, the trace source needs to
+            have <see cref="F:System.Diagnostics.SourceLevels.ActivityTracing"/> enabled.
+            </devdoc>
+        </member>
+        <member name="T:System.Diagnostics.AggregateTracer">
+            <summary>
+            Logs to multiple tracers simulateously. Used for the
+            source "inheritance"
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.AggregateTracer.Trace(System.Diagnostics.TraceEventType,System.Object)">
+            <summary>
+            Traces the specified message with the given <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.AggregateTracer.Trace(System.Diagnostics.TraceEventType,System.String,System.Object[])">
+            <summary>
+            Traces the specified formatted message with the given <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.AggregateTracer.Trace(System.Diagnostics.TraceEventType,System.Exception,System.Object)">
+            <summary>
+            Traces an exception with the specified message and <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.AggregateTracer.Trace(System.Diagnostics.TraceEventType,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an exception with the specified formatted message and <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ITracer">
+            <summary>
+            Interface used by the application components to log messages.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracer.Trace(System.Diagnostics.TraceEventType,System.Object)">
+            <summary>
+            Traces the specified message with the given <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracer.Trace(System.Diagnostics.TraceEventType,System.String,System.Object[])">
+            <summary>
+            Traces the specified formatted message with the given <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracer.Trace(System.Diagnostics.TraceEventType,System.Exception,System.Object)">
+            <summary>
+            Traces an exception with the specified message and <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracer.Trace(System.Diagnostics.TraceEventType,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an exception with the specified formatted message and <see cref="T:System.Diagnostics.TraceEventType"/>.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ITracerConfiguration">
+            <summary>
+            Provides access for manipulating the configuration of the
+            underlying <see cref="T:System.Diagnostics.TraceSource"/>s.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.ITracerConfiguration.GlobalSourceName">
+            <summary>
+            Source name that can be used to setup global tracing and listeners,
+            since all source names inherit from it automatically.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerConfiguration.AddListener(System.String,System.Diagnostics.TraceListener)">
+            <summary>
+            Adds a listener to the source with the given <paramref name="sourceName"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerConfiguration.RemoveListener(System.String,System.Diagnostics.TraceListener)">
+            <summary>
+            Removes a listener from the source with the given <paramref name="sourceName"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerConfiguration.RemoveListener(System.String,System.String)">
+            <summary>
+            Removes a listener from the source with the given <paramref name="sourceName"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerConfiguration.SetTracingLevel(System.String,System.Diagnostics.SourceLevels)">
+            <summary>
+            Sets the tracing level for the source with the given <paramref name="sourceName"/>
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerConfiguration.GetSource(System.String)">
+            <summary>
+            Gets the underlying trace source of the given name for low level configuration.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ITracerExtensions">
+            <summary>
+            Provides usability overloads for tracing to a <see cref="T:System.Diagnostics.ITracer"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Critical(System.Diagnostics.ITracer,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Critical"/> with the given message;
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Critical(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Critical"/> with the given format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Critical(System.Diagnostics.ITracer,System.Exception,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Critical"/> with the given exception and message.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Critical(System.Diagnostics.ITracer,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Critical"/> with the given exception, format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Error(System.Diagnostics.ITracer,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Error"/> with the given message;
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Error(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Error"/> with the given format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Error(System.Diagnostics.ITracer,System.Exception,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Error"/> with the given exception and message.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Error(System.Diagnostics.ITracer,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Error"/> with the given exception, format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Warn(System.Diagnostics.ITracer,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Warning"/> with the given message;
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Warn(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Warning"/> with the given format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Warn(System.Diagnostics.ITracer,System.Exception,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Warning"/> with the given exception and message.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Warn(System.Diagnostics.ITracer,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Warning"/> with the given exception, format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Info(System.Diagnostics.ITracer,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Information"/> with the given message;
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Info(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Information"/> with the given format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Info(System.Diagnostics.ITracer,System.Exception,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Information"/> with the given exception and message.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Info(System.Diagnostics.ITracer,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Information"/> with the given exception, format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Verbose(System.Diagnostics.ITracer,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Verbose"/> with the given message;
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Verbose(System.Diagnostics.ITracer,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Verbose"/> with the given format string and arguments.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Verbose(System.Diagnostics.ITracer,System.Exception,System.Object)">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Verbose"/> with the given exception and message.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ITracerExtensions.Verbose(System.Diagnostics.ITracer,System.Exception,System.String,System.Object[])">
+            <summary>
+            Traces an event of type <see cref="F:System.Diagnostics.TraceEventType.Verbose"/> with the given exception, format string and arguments.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ITracerManager">
+            <summary>
+            Manages <see cref="T:System.Diagnostics.ITracer"/> instances. Provides the implementation
+            for the <see cref="T:System.Diagnostics.Tracer"/> static facade class.
+            </summary>
+            <nuget id="Tracer.Interfaces" />
+        </member>
+        <member name="M:System.Diagnostics.ITracerManager.Get(System.String)">
+            <summary>
+            Gets a tracer instance with the specified name.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.SourceNameReplacer">
+            <summary>
+            The TraceSource instance name matches the name of each of the "segments"
+            we built the aggregate source from. This means that when we trace, we issue
+            multiple trace statements, one for each. If a listener is added to (say) "*"
+            source name, all traces done through it will appear as coming from the source
+            "*", rather than (say) "Foo.Bar" which might be the actual source class.
+            This diminishes the usefulness of hierarchical loggers significantly, since
+            it now means that you need to add listeners too all trace sources you're
+            interested in receiving messages from, and all its "children" potentially,
+            some of them which might not have been created even yet. This is not feasible.
+            Instead, since we issue the trace call to each trace source (which is what
+            enables the configurability of all those sources in the app.config file),
+            we need to fix the source name right before tracing, so that a configured
+            listener at "*" still receives as the source name the original (aggregate) one,
+            and not "*". This requires some private reflection, and a lock to guarantee
+            proper logging, but this decreases its performance.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.Tracer">
+            <summary>
+            Provides access to tracer instances.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.Tracer.Configuration">
+            <summary>
+            Provides access to the tracer manager for manipulating the
+            underlying trace sources and their configuration.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.Get``1">
+            <summary>
+            Gets a tracer instance with the full type name of <typeparamref name="T"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.Get(System.Type)">
+            <summary>
+            Gets a tracer instance with the full type name of the <paramref name="type"/>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.Get(System.String)">
+            <summary>
+            Gets a tracer instance with the given name.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.NameFor``1">
+            <summary>
+            Gets the tracer name for the given type.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.NameFor(System.Type)">
+            <summary>
+            Gets the tracer name for the given type.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Tracer.ReplaceManager(System.Diagnostics.ITracerManager)">
+            <summary>
+            Replaces the existing trace manager with a new one, and returns
+            a disposable object that can be used to restore the previous manager. 
+            Useful when writing tests that leverage tracing for assertions.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.TracerManager.CompositeFor(System.String)">
+            <summary>
+            Gets the list of trace source names that are used to inherit trace source logging for the given <paramref name="name"/>.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.IFluentInterface">
+            <summary>
+            Interface that is used to build fluent interfaces by hiding methods declared by <see cref="T:System.Object"/> from IntelliSense.
+            </summary>
+            <remarks>
+            Code that consumes implementations of this interface should expect one of two things:
+            <list type = "number">
+              <item>When referencing the interface from within the same solution (project reference), you will still see the methods this interface is meant to hide.</item>
+              <item>When referencing the interface through the compiled output assembly (external reference), the standard Object methods will be hidden as intended.</item>
+              <item>When using Resharper, be sure to configure it to respect the attribute: Options, go to Environment | IntelliSense | Completion Appearance and check "Filter members by [EditorBrowsable] attribute".</item>
+            </list>
+            See https://kzu.github.io/IFluentInterface for more information.
+            </remarks>
+            <nuget id="IFluentInterface" />
+        </member>
+        <member name="M:System.Diagnostics.IFluentInterface.GetType">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetType"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.IFluentInterface.GetHashCode">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.GetHashCode"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.IFluentInterface.ToString">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.ToString"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.IFluentInterface.Equals(System.Object)">
+            <summary>
+            Redeclaration that hides the <see cref="M:System.Object.Equals(System.Object)"/> method from IntelliSense.
+            </summary>
+        </member>
+        <member name="T:ThisAssembly">
+            <summary>Provides access to the current assembly information.</summary>
+        </member>
+        <member name="T:ThisAssembly.Git">
+            <summary>Provides access to the git information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Branch">
+            <summary>Branch: master</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commit">
+            <summary>Commit: 41c7145</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Sha">
+            <summary>Sha: 41c7145aea1d629d47854e49e759c7cfa02f1c92</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Commits">
+            <summary>Commits on top of base version: 6</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.Tag">
+            <summary>Tag: </summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseTag">
+            <summary>Base tag: </summary>
+        </member>
+        <member name="T:ThisAssembly.Git.BaseVersion">
+            <summary>Provides access to the base version information used to determine the <see cref="T:ThisAssembly.Git.SemVer" />.</summary>      
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Major">
+            <summary>Major: 2</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Minor">
+            <summary>Minor: 0</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.BaseVersion.Patch">
+            <summary>Patch: 0</summary>
+        </member>
+        <member name="T:ThisAssembly.Git.SemVer">
+            <summary>Provides access to SemVer information for the current assembly.</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Major">
+            <summary>Major: 2</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Minor">
+            <summary>Minor: 0</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Patch">
+            <summary>Patch: 6</summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Label">
+            <summary>Label: </summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.DashLabel">
+            <summary>Label with dash prefix: </summary>
+        </member>
+        <member name="F:ThisAssembly.Git.SemVer.Source">
+            <summary>Source: File</summary>
+        </member>
+    </members>
+</doc>

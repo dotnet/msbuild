@@ -1,0 +1,505 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>System.Net.Mqtt.Server</name>
+    </assembly>
+    <members>
+        <member name="T:System.Net.Mqtt.ThisAssembly">
+            <summary>Provides access to the current assembly information.</summary>
+        </member>
+        <member name="T:System.Net.Mqtt.ThisAssembly.Git">
+            <summary>Provides access to the git information for the current assembly.</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.Branch">
+            <summary>Branch: netstandard</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.Commit">
+            <summary>Commit: a308d24</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.Sha">
+            <summary>Sha: a308d2434d8f05df35987f988807d0ea78243ecf</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.Commits">
+            <summary>Commits on top of base version: 200</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.Tag">
+            <summary>Tag: v0.2.63-200-ga308d24</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.BaseTag">
+            <summary>Base tag: v0.2.63</summary>
+        </member>
+        <member name="T:System.Net.Mqtt.ThisAssembly.Git.BaseVersion">
+            <summary>Provides access to the base version information used to determine the <see cref="T:System.Net.Mqtt.ThisAssembly.Git.SemVer" />.</summary>      
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.BaseVersion.Major">
+            <summary>Major: 0</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.BaseVersion.Minor">
+            <summary>Minor: 2</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.BaseVersion.Patch">
+            <summary>Patch: 63</summary>
+        </member>
+        <member name="T:System.Net.Mqtt.ThisAssembly.Git.SemVer">
+            <summary>Provides access to SemVer information for the current assembly.</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.Major">
+            <summary>Major: 0</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.Minor">
+            <summary>Minor: 2</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.Patch">
+            <summary>Patch: 263</summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.Label">
+            <summary>Label: </summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.DashLabel">
+            <summary>Label with dash prefix: </summary>
+        </member>
+        <member name="F:System.Net.Mqtt.ThisAssembly.Git.SemVer.Source">
+            <summary>Source: Tag</summary>
+        </member>
+        <member name="T:System.Net.Mqtt.MqttServer">
+            <summary>
+            Creates instances of <see cref="T:System.Net.Mqtt.IMqttServer"/> for accepting connections from 
+            MQTT clients.
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.MqttServer.Create(System.Net.Mqtt.MqttConfiguration,System.Net.Mqtt.IMqttAuthenticationProvider)">
+            <summary>
+            Creates an <see cref="T:System.Net.Mqtt.IMqttServer"/> over the TCP protocol, using the 
+            specified MQTT configuration to customize the protocol parameters.
+            </summary>
+            <param name="configuration">
+            The configuration used for creating the Server.
+            See <see cref="T:System.Net.Mqtt.MqttConfiguration" /> for more details about the supported values.
+            </param>
+            <param name="authenticationProvider">
+            Optional authentication provider to use, 
+            to enable authentication as part of the connection mechanism.
+            See <see cref="T:System.Net.Mqtt.IMqttAuthenticationProvider" /> for more details about how to implement
+            an authentication provider.
+            </param>
+            <returns>A new MQTT Server</returns>
+            <exception cref="T:System.Net.Mqtt.MqttServerException">MqttServerException</exception>
+        </member>
+        <member name="T:System.Net.Mqtt.Sdk.Bindings.IMqttServerBinding">
+            <summary>
+            Represents a server binding for a supported MQTT underlying transport protocol
+            </summary>
+            <remarks>
+            See <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html#_Toc442180911">Network Connections</a>
+            for more details about default and supported transport protocols for MQTT
+            </remarks>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.Bindings.IMqttServerBinding.GetChannelListener(System.Net.Mqtt.MqttConfiguration)">
+            <summary>
+            Provides a listener for incoming MQTT channels on top of an underlying transport protocol
+            See <see cref="T:System.Net.Mqtt.Sdk.IMqttChannelListener" /> for more details about the listener 
+            </summary>
+            <param name="configuration">
+            The configuration used for creating the listener
+            See <see cref="T:System.Net.Mqtt.MqttConfiguration" /> for more details about the supported values
+            </param>
+            <returns>A listener to accept and provide incoming MQTT channels on top of an underlying transport protocol</returns>
+        </member>
+        <member name="T:System.Net.Mqtt.Sdk.Bindings.ServerTcpBinding">
+            <summary>
+            Server binding to use TCP as the underlying MQTT transport protocol
+            This is the default transport protocol defined by MQTT specification
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.Bindings.ServerTcpBinding.GetChannelListener(System.Net.Mqtt.MqttConfiguration)">
+            <summary>
+            Provides a listener for incoming MQTT channels on top of TCP
+            </summary>
+            <param name="configuration">
+            The configuration used for creating the listener
+            See <see cref="T:System.Net.Mqtt.MqttConfiguration" /> for more details about the supported values
+            </param>
+            <returns>A listener to accept and provide incoming MQTT channels on top of TCP</returns>
+        </member>
+        <member name="T:System.Net.Mqtt.Sdk.IMqttChannelListener">
+            <summary>
+            Represents a listener for incoming channel connections on top of an underlying transport protocol
+            The connections are performed by MQTT Clients through <see cref="T:System.Net.Mqtt.Sdk.IMqttChannel`1" /> 
+            and the listener accepts and establishes the connection on the Server side
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.IMqttChannelListener.GetChannelStream">
+            <summary>
+            Provides the stream of incoming channels on top of an underlying transport protocol
+            </summary>
+            <returns>An observable sequence of <see cref="T:System.Net.Mqtt.Sdk.IMqttChannel`1"/> of byte[]</returns>
+        </member>
+        <member name="T:System.Net.Mqtt.Sdk.MqttServerFactory">
+            <summary>
+            Provides a factory for MQTT Servers
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.MqttServerFactory.#ctor(System.Net.Mqtt.IMqttAuthenticationProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Net.Mqtt.Sdk.MqttServerFactory" /> class,
+            with the option to define an authentication provider to enable authentication
+            as part of the connection mechanism.
+            It also uses TCP as the default transport protocol binding
+            </summary>
+            <param name="authenticationProvider">
+            Optional authentication provider to use, 
+            to enable authentication as part of the connection mechanism
+            See <see cref="T:System.Net.Mqtt.IMqttAuthenticationProvider" /> for more details about how to implement
+            an authentication provider
+            </param>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.MqttServerFactory.#ctor(System.Net.Mqtt.Sdk.Bindings.IMqttServerBinding,System.Net.Mqtt.IMqttAuthenticationProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Net.Mqtt.Sdk.MqttServerFactory" /> class,
+            spcifying the transport protocol binding to use and optionally the 
+            authentication provider to enable authentication as part of the connection mechanism.
+            </summary>
+            <param name="binding">
+            Transport protocol binding to use as the MQTT underlying protocol
+            See <see cref="T:System.Net.Mqtt.Sdk.Bindings.IMqttServerBinding" /> for more details about how to implement it 
+            </param>
+            <param name="authenticationProvider">
+            Optional authentication provider to use, 
+            to enable authentication as part of the connection mechanism
+            See <see cref="T:System.Net.Mqtt.IMqttAuthenticationProvider" /> for more details about how to implement
+            an authentication provider
+            </param>
+        </member>
+        <member name="M:System.Net.Mqtt.Sdk.MqttServerFactory.CreateServer(System.Net.Mqtt.MqttConfiguration)">
+            <summary>
+            Creates an MQTT Server
+            </summary>
+            <param name="configuration">
+            The configuration used for creating the Server
+            See <see cref="T:System.Net.Mqtt.MqttConfiguration" /> for more details about the supported values
+            </param>
+            <returns>A new MQTT Server</returns>
+            <exception cref="T:System.Net.Mqtt.MqttServerException">MqttServerException</exception>
+        </member>
+        <member name="T:System.Net.Mqtt.IMqttConnectedClient">
+            <summary>
+            Represents an <see cref="T:System.Net.Mqtt.IMqttClient"/> that has already
+            performed the protocol connection
+            This interface is only provided by the Server when creating in process clients
+            doing <see cref="M:System.Net.Mqtt.IMqttServer.CreateClientAsync" />, since invoking the 
+            <see cref="M:System.Net.Mqtt.IMqttClient.ConnectAsync(System.Net.Mqtt.MqttClientCredentials,System.Net.Mqtt.MqttLastWill,System.Boolean)"/> 
+            is not necessary.
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.IMqttConnectedClient.ConnectAsync(System.Net.Mqtt.MqttClientCredentials,System.Net.Mqtt.MqttLastWill,System.Boolean)">
+            <summary>
+            Hides the unnecessary <see cref="M:System.Net.Mqtt.IMqttClient.ConnectAsync(System.Net.Mqtt.MqttClientCredentials,System.Net.Mqtt.MqttLastWill,System.Boolean)"/> 
+            method from the interface.
+            </summary>
+        </member>
+        <member name="T:System.Net.Mqtt.IMqttServer">
+            <summary>
+            Represents an MQTT Server
+            </summary>
+        </member>
+        <member name="E:System.Net.Mqtt.IMqttServer.MessageUndelivered">
+            <summary>
+            Event raised when a message published by a Client 
+            has no subscribers for the published topic
+            See <see cref="T:System.Net.Mqtt.MqttUndeliveredMessage" /> for more details 
+            about the information exposed by this event 
+            </summary>
+        </member>
+        <member name="E:System.Net.Mqtt.IMqttServer.Stopped">
+            <summary>
+            Event fired when the Server gets stopped.
+            The Server disconnection could be caused by an intentional Stop or disposal, 
+            or an error during a Server operation
+            See <see cref="T:System.Net.Mqtt.MqttEndpointDisconnected"/> for more details on the disconnection information
+            </summary>
+        </member>
+        <member name="E:System.Net.Mqtt.IMqttServer.ClientConnected">
+            <summary>
+            Event raised when a client has successfully authenticated and connected to the server.
+            </summary>
+        </member>
+        <member name="E:System.Net.Mqtt.IMqttServer.ClientDisconnected">
+            <summary>
+            Event raised when a client has been disconnected from the server.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.IMqttServer.ActiveConnections">
+            <summary>
+            Gets the current number of active connections to the Server.
+            </summary>
+            <remarks>
+            <see cref="P:System.Net.Mqtt.IMqttServer.ActiveConnections"/> may temporarily differ with <see cref="P:System.Net.Mqtt.IMqttServer.ActiveClients"/> 
+            since the latter represents channels that have performed the MQTT Connect flow and 
+            have provided a valid Client ID and have been successfully authenticated (if authentication 
+            is supported by the server).
+            </remarks>
+        </member>
+        <member name="P:System.Net.Mqtt.IMqttServer.ActiveClients">
+            <summary>
+            Gets the list of Client Ids connected to the Server, once they have performed the 
+            Connect flow over their Channel and they have been authenticated.
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.IMqttServer.Start">
+            <summary>
+            Starts the Server and enables it to listen for incoming connections
+            </summary>
+            <exception cref="T:System.Net.Mqtt.MqttException">MqttException</exception>
+        </member>
+        <member name="M:System.Net.Mqtt.IMqttServer.CreateClientAsync">
+            <summary>
+            Creates an in process client and establishes the protocol 
+            connection before returning it to the caller
+            See <see cref="T:System.Net.Mqtt.IMqttConnectedClient" /> for more details about in process clients 
+            </summary>
+            <returns>Returns a connected client ready to use</returns>
+        </member>
+        <member name="M:System.Net.Mqtt.IMqttServer.Stop">
+            <summary>
+            Stops the server and disposes it.
+            </summary>
+        </member>
+        <member name="T:System.Net.Mqtt.MqttServerException">
+            <summary>
+            The exception that is thrown when a server operation fails
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.MqttServerException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Net.Mqtt.MqttServerException" /> class
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.MqttServerException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Net.Mqtt.MqttServerException" /> class,
+            using the specified error message
+            </summary>
+            <param name="message">The error message that explains the reason for the exception</param>
+        </member>
+        <member name="M:System.Net.Mqtt.MqttServerException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Net.Mqtt.MqttServerException" /> class,
+            with a specified error message and a reference to the inner exception that is the cause
+            of this exception
+            </summary>
+            <param name="message">The error message that explains the reason for the exception</param>
+            <param name="innerException">The exception that is the cause of the current exception</param>
+        </member>
+        <member name="T:System.Net.Mqtt.IMqttAuthenticationProvider">
+            <summary>
+            Provides an extensibility point to implement authentication on MQTT
+            Authentication mechanism is up to the consumer of the API as
+            this library doesn't provide any pre-defined authentication mechanism.
+            </summary>
+        </member>
+        <member name="M:System.Net.Mqtt.IMqttAuthenticationProvider.Authenticate(System.String,System.String,System.String)">
+            <summary>
+            Authenticates the user through the provided credentials
+            </summary>
+            <param name="clientId">Id of the client to authenticate</param>
+            <param name="username">Username to authenticate</param>
+            <param name="password">Password to authenticate</param>
+            <returns>A boolean value indicating if the user has been authenticated or not</returns>
+        </member>
+        <member name="T:System.Net.Mqtt.Server.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ConnectionProvider_ClientDisconnected">
+            <summary>
+              Looks up a localized string similar to Server - The connection for client {0} is not connected. Removing connection.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ConnectionProvider_ClientIdExists">
+            <summary>
+              Looks up a localized string similar to An active connection already exists for client {0}. Disposing current connection and adding the new one.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ConnectionProvider_PrivateClientAlreadyRegistered">
+            <summary>
+              Looks up a localized string similar to A private client with Id {0} is already registered.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ConnectionProvider_RemovingClient">
+            <summary>
+              Looks up a localized string similar to Server - Removing connection of client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.DisconnectFlow_Disconnecting">
+            <summary>
+              Looks up a localized string similar to Server - Disconnecting client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Mqtt_Disposing">
+            <summary>
+              Looks up a localized string similar to Disposing {0}....
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.PacketChannelCompleted">
+            <summary>
+              Looks up a localized string similar to Server - Packet Channel observable sequence has been completed for client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_CleanedOldSession">
+            <summary>
+              Looks up a localized string similar to Server - Cleaned old session for client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_CreatedSession">
+            <summary>
+              Looks up a localized string similar to Server - Created new session for client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_DeletedSessionOnDisconnect">
+            <summary>
+              Looks up a localized string similar to Server - Removed session for client {0} as part of Disconnect flow.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_InitializeError">
+            <summary>
+              Looks up a localized string similar to An error occurred while initializing the server.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_NewSocketAccepted">
+            <summary>
+              Looks up a localized string similar to Server - A new TCP channel has been accepted.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_NotStartedError">
+            <summary>
+              Looks up a localized string similar to The Server has to be started first, in order to execute any operation.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_PacketsObservableCompleted">
+            <summary>
+              Looks up a localized string similar to Server - Packet observable sequence has been completed, hence closing the channel.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.Server_PacketsObservableError">
+            <summary>
+              Looks up a localized string similar to Server - Packet observable sequence had an error, hence closing the channel.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_ConnectionError">
+            <summary>
+              Looks up a localized string similar to Server - An error occurred while executing the connect flow. Client: {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_ConnectPacketReceived">
+            <summary>
+              Looks up a localized string similar to Server - A connect packet has been received from client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_DispatchingMessage">
+            <summary>
+              Looks up a localized string similar to Server - Dispatching {0} message to flow {1} for client {2}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_DispatchingPublish">
+            <summary>
+              Looks up a localized string similar to Server - Dispatching Publish message to flow {0} for client {1} and topic {2}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_DispatchingSubscribe">
+            <summary>
+              Looks up a localized string similar to Server - Dispatching Subscribe message to flow {0} for client {1} and topics: {2}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_Error">
+            <summary>
+              Looks up a localized string similar to Server - An error occurred while listening and dispatching packets - Client: {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_FirstPacketMustBeConnect">
+            <summary>
+              Looks up a localized string similar to The first packet sent by a Client must be a Connect. The connection will be closed..
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_KeepAliveTimeExceeded">
+            <summary>
+              Looks up a localized string similar to The keep alive tolerance of {0} seconds has been exceeded and no packet has been received from client {1}. The connection will be closed..
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_NoConnectReceived">
+            <summary>
+              Looks up a localized string similar to No connect packet has been received since the network connection was established. The connection will be closed..
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPacketListener_SecondConnectNotAllowed">
+            <summary>
+              Looks up a localized string similar to Only one Connect packet is allowed. The connection will be closed..
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPublishReceiverFlow_SendingWill">
+            <summary>
+              Looks up a localized string similar to Server - Sending last will message of client {0} to topic {1}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPublishReceiverFlow_SystemMessageNotAllowedForClient">
+            <summary>
+              Looks up a localized string similar to Publish messages with a leading $ in the topic are considered  server specific messages, hence remote clients are not allowed to publish them.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerPublishReceiverFlow_TopicNotSubscribed">
+            <summary>
+              Looks up a localized string similar to The topic {0} has no subscribers, hence the message sent by {1} will not be forwarded.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerSubscribeFlow_ErrorOnSubscription">
+            <summary>
+              Looks up a localized string similar to Server - An error occurred when subscribing client {0} to topic {1}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.ServerSubscribeFlow_InvalidTopicSubscription">
+            <summary>
+              Looks up a localized string similar to Server - The topic {0}, sent by client {1} is invalid. Returning failure code.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.SessionRepository_ClientSessionNotFound">
+            <summary>
+              Looks up a localized string similar to No session has been found for client {0}.
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.Server.Properties.Resources.TcpChannelProvider_TcpListener_Failed">
+            <summary>
+              Looks up a localized string similar to An error occurred while starting to listen incoming TCP connections.
+            </summary>
+        </member>
+        <member name="T:System.Net.Mqtt.MqttUndeliveredMessage">
+            <summary>
+            Represents a published application message that had no subscribers
+            for the pusblished topic
+            This information is exposed by the <see cref="E:System.Net.Mqtt.IMqttServer.MessageUndelivered" /> event 
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.MqttUndeliveredMessage.SenderId">
+            <summary>
+            Client Id of the publisher of the message
+            </summary>
+        </member>
+        <member name="P:System.Net.Mqtt.MqttUndeliveredMessage.Message">
+            <summary>
+            Application message that was not delivered
+            See <see cref="T:System.Net.Mqtt.MqttApplicationMessage" /> for more details about the
+            format of the application message
+            </summary>
+        </member>
+    </members>
+</doc>
