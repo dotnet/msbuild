@@ -3,7 +3,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
-    <AssetTargetFallback>portable-net45+wp8+win8+wpa</AssetTargetFallback>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
@@ -64,6 +63,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.0" PrivateAssets="All" />
 
     <!-- Has satellite assembly -->
-    <PackageReference Include="System.Spatial" Version="5.7.0" />
+    <PackageReference Include="Humanizer" Version="2.2.0" />
   </ItemGroup>
 </Project>

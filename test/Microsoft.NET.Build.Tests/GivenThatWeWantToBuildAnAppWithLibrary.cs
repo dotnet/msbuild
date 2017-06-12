@@ -102,8 +102,7 @@ namespace Microsoft.NET.Build.Tests
             libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
         }
 
-        // https://github.com/dotnet/sdk/issues/1327
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager
