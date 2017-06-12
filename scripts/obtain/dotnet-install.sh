@@ -601,7 +601,7 @@ downloadwget() {
 
 calculate_vars() {
     eval $invocation
-    valid_legacy_download_link=false
+    valid_legacy_download_link=true
 
     normalized_architecture=$(get_normalized_architecture_from_architecture "$architecture")
     say_verbose "normalized_architecture=$normalized_architecture"
@@ -616,9 +616,10 @@ calculate_vars() {
     download_link=$(construct_download_link $azure_feed $channel $normalized_architecture $specific_version)
     say_verbose "download_link=$download_link"
 
-    if [ legacy_download_link=$(construct_legacy_download_link $azure_feed $channel $normalized_architecture $specific_version) ]; then
+    legacy_download_link=$(construct_legacy_download_link $azure_feed $channel $normalized_architecture $specific_version) || valid_legacy_download_link=false
+
+    if [ "$valid_legacy_download_link" = true ]; then
         say_verbose "legacy_download_link=$legacy_download_link"
-        valid_legacy_download_link=true
     else
         say_verbose "Cound not construct a legacy_download_link; omitting..."
     fi

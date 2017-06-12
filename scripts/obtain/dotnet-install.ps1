@@ -261,7 +261,7 @@ function Get-Download-Link([string]$AzureFeed, [string]$Channel, [string]$Specif
     return $PayloadURL
 }
 
-function Get-LegacytDownload-Link([string]$AzureFeed, [string]$Channel, [string]$SpecificVersion, [string]$CLIArchitecture) {
+function Get-LegacyDownload-Link([string]$AzureFeed, [string]$Channel, [string]$SpecificVersion, [string]$CLIArchitecture) {
     Say-Invocation $MyInvocation
     
     if ($SharedRuntime) {
