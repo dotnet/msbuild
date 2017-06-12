@@ -17,7 +17,7 @@
       <OutputDirectory Condition="'$(OutputDirectory)' == ''">$(BaseOutputDirectory)/stage2</OutputDirectory>
       <CompilationDirectory Condition="'$(CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
       <PackagesDirectory Condition="'$(PackagesDirectory)' == ''">$(BaseOutputDirectory)/packages</PackagesDirectory>
-      <SdkResolverOutputDirectory>$(BaseOutputDirectory)/intermediate/MSBuildSdkResolver</SdkResolverOutputDirectory>
+      <SdkResolverOutputDirectory>$(BaseOutputDirectory)/intermediate/MSBuildExtensionsLayout/MSBuildSdkResolver</SdkResolverOutputDirectory>
 
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
            signs files that are under these paths. -->

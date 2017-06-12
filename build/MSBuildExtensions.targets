@@ -3,6 +3,8 @@
           DependsOnTargets="GenerateBundledVersionsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
+      
+      <!-- The MSBuildExtensionsContent item is for the files that will be laid out in the CLI install -->
       <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
 
       <!-- We want to include the tasks and targets from the Microsoft.NET.Build.Extensions package, but we don't want to include the DLLs
@@ -14,15 +16,40 @@
            we generate it.
            -->
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
-                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft.NET.Build.Extensions\net*\**" />
+                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
+      
+      <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
+      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
 
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                 DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
       
       <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                 Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
-                                DeploymentSubpath="Microsoft.NET.Build.Extensions/" />
+                                DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
+
+
+      <!-- The VSMSBuildExtensionsContent item is for the files that will be included in the VS.Redist.Common.Net.Core.SDK.MSBuildExtensions
+           package and inserted into Visual Studio -->
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
+                                  Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**"
+                                  DeploymentSubpath="msbuildExtensions/"/>
+
+      <!-- Don't include .NET Core MS.NET.Build.Extensions tasks in Full Framework MSBuild layout -->
+      <VSMSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\netcoreapp*\**" />
+
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
+                                  DeploymentSubpath="msbuildExtensions-ver/"/>
+      <VSMSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
+                                  Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
+                                  DeploymentSubpath="msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/" />
+
+      <VSMSBuildExtensionsContent Update="@(VSMSBuildExtensionsContent)">
+        <DestinationPath >$(MSBuildExtensionsLayoutDirectory)/%(VSMSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+      </VSMSBuildExtensionsContent>
     </ItemGroup>
+
+    <Copy SourceFiles="@(VSMSBuildExtensionsContent)" DestinationFiles="%(VSMSBuildExtensionsContent.DestinationPath)" />
   </Target>
 
   <Target Name="PrepareMSBuildExtensionsProps">
