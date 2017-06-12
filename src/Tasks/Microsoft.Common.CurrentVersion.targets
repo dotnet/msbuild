@@ -348,11 +348,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(MSBuildProjectFile).$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
-    <CopyUpToDateMarker>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))</CopyUpToDateMarker>
   </PropertyGroup>
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
+    <CopyUpToDateMarker Include="$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
@@ -1835,7 +1835,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
-        <CopyUpToDateMarker>$(CopyUpToDateMarker)</CopyUpToDateMarker>
+        <CopyUpToDateMarker>@(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
     </ItemGroup>
   </Target>
@@ -4237,7 +4237,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          references on this build, subsequent builds of projects that depend on it must
          not be considered up to date, so touch this marker file that is considered an
          input to projects that reference this one. -->
-    <Touch Files="$(CopyUpToDateMarker)"
+    <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
            Condition="'@(ReferencesCopiedInThisBuild)' != ''" />
 
