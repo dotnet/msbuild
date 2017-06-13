@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 
@@ -84,7 +85,8 @@ namespace Microsoft.DotNet.Cli.Build
                 var replacementPattern = ReplacementPatterns[i].ItemSpec;
                 var replacementString = ReplacementStrings[i].ItemSpec;
 
-                outText = outText.Replace(replacementPattern, replacementString);
+                var regex = new Regex(replacementPattern);
+                outText = regex.Replace(outText, replacementString);
             }
 
             return outText;

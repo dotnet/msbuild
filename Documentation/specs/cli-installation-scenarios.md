@@ -126,8 +126,8 @@ Below table shows the mapping between the channels, branches and feeds for the D
 | Channel    	| Branch    	| Debian feed 	| Debian package name 	| NuGet version 	| NuGet feed                            	|
 |------------	|-----------	|-------------	|---------------------	|---------------	|---------------------------------------	|
 | Future    	| master    	| Development 	| dotnet-future      	| 1.0.0-dev-*   	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Preview    	| rel/<ver> 	| Development 	| dotnet-dev-<version>              	| 1.0.0-beta-*  	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Production 	| rel/<ver> 	| Production  	| dotnet-dev-<version>              	| 1.0.0         	| https://api.nuget.org/v3/index.json   	|
+| Preview    	| rel/<ver> 	| Development 	| dotnet-sdk-<version>              	| 1.0.0-beta-*  	| https://dotnet.myget.org/f/dotnet-cli 	|
+| Production 	| rel/<ver> 	| Production  	| dotnet-sdk-<version>              	| 1.0.0         	| https://api.nuget.org/v3/index.json   	|
 
 
 ## Funnels and discovery mechanisms for CLI bits

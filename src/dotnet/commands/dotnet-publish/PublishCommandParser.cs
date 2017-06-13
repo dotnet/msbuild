@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -10,7 +12,7 @@ namespace Microsoft.DotNet.Cli
     internal static class PublishCommandParser
     {
         public static Command Publish() =>
-            Create.Command(
+            CreateWithRestoreOptions.Command(
                 "publish",
                 LocalizableStrings.AppDescription,
                 Accept.ZeroOrMoreArguments(),
@@ -41,6 +43,7 @@ namespace Microsoft.DotNet.Cli
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
                             return $"/p:SelfContained={value}";
                         })),
+                CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
 }

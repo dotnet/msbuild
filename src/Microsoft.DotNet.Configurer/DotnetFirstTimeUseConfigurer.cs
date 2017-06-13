@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Configurer
 
         private void PrintFirstTimeUseNotice()
         {
-            const string firstTimeUseWelcomeMessage = LocalizableStrings.FirstTimeWelcomeMessage;
+            string firstTimeUseWelcomeMessage = LocalizableStrings.FirstTimeWelcomeMessage;
 
             Reporter.Output.WriteLine();
             Reporter.Output.WriteLine(firstTimeUseWelcomeMessage);

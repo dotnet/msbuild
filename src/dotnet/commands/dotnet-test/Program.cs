@@ -14,10 +14,10 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    public class TestCommand : MSBuildForwardingApp
+    public class TestCommand : RestoringCommand
     {
-        public TestCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
-            : base(msbuildArgs, msbuildPath)
+        public TestCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -65,7 +65,9 @@ namespace Microsoft.DotNet.Tools.Test
                 }
             }
 
-            return new TestCommand(msbuildArgs, msbuildPath);
+            bool noRestore = parsedTest.HasOption("--no-restore");
+
+            return new TestCommand(msbuildArgs, noRestore, msbuildPath);
         }
 
         public static int Run(string[] args)

@@ -112,9 +112,14 @@
           DependsOnTargets="GenerateMSBuildExtensions"
           AfterTargets="Publish"
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
+    <ItemGroup>
+      <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
+        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+      </MSBuildExtensionsContent>
+    </ItemGroup>
     
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
-            DestinationFolder="$(PublishDir)/%(RecursiveDir)" />
+            DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
 
       <PropertyGroup>
         <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
@@ -148,13 +153,13 @@
   <Target Name="PublishSdks"
           AfterTargets="Publish">
     <ItemGroup>
-      <SdksToBundle Include="$(RepoRoot)/build/BundledSdks.proj">
+      <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
-          SdkPackageName=%(BundledSdk.Identity);
-          SdkPackageVersion=%(BundledSdk.Version);
+          DependencyPackageName=%(BundledSdk.Identity);
+          DependencyPackageVersion=%(BundledSdk.Version);
           Stage0Directory=$(Stage0Directory)
         </Properties>
       </SdksToBundle>
@@ -197,6 +202,12 @@
     <ItemGroup>
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
       <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
+
+      <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
+      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
+
+      <!-- Don't try to CrossGen tasks and supporting DLLs compiled for .NET Framework -->
+      <SdkFiles Remove="$(PublishDir)/Microsoft\Microsoft.NET.Build.Extensions\tools\net*\**\*" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(SdkFiles)">
@@ -234,6 +245,7 @@
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
     <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunVbc.sh" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
   <Target Name="CreateSymbolsDirectory"
@@ -270,5 +282,19 @@
 
     <Copy SourceFiles="@(Stage2Cli)"
           DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="RetargetVSTestConsole"
+          AfterTargets="Publish">
+    <PropertyGroup>
+      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
+      <ReplacementPattern>"version": ".*"</ReplacementPattern>
+      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+    </PropertyGroup>
+    <ReplaceFileContents
+      InputFile="$(VSTestRuntimeConfigPath)"
+      DestinationFile="$(VSTestRuntimeConfigPath)"
+      ReplacementPatterns="$(ReplacementPattern)"
+      ReplacementStrings="$(ReplacementString)" />
   </Target>
 </Project>

@@ -5,15 +5,16 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
-    public class PublishCommand : MSBuildForwardingApp
+    public class PublishCommand : RestoringCommand
     {
-        private PublishCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
-            : base(msbuildArgs, msbuildPath)
+        private PublishCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -37,7 +38,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);
 
-            return new PublishCommand(msbuildArgs, msbuildPath);
+            bool noRestore = appliedPublishOption.HasOption("--no-restore");
+
+            return new PublishCommand(msbuildArgs, noRestore, msbuildPath);
         }
 
         public static int Run(string[] args)
