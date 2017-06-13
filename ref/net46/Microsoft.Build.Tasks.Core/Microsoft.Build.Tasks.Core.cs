@@ -1165,10 +1165,11 @@ namespace Microsoft.Build.Tasks
         protected override System.Text.Encoding StandardOutputEncoding { get { throw null; } }
         protected override string ToolName { get { throw null; } }
         public bool TreatWarningsAsErrors { get { throw null; } set { } }
+        protected override bool UseNewLineSeparatorInResponseFile { get { throw null; } }
         public bool UTF8Output { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public string WinMDModule { get { throw null; } set { } }
-        protected internal override void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
+        protected internal override void AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected override string GenerateFullPathToTool() { throw null; }
         protected override bool SkipTaskExecution() { throw null; }
         protected override bool ValidateParameters() { throw null; }
