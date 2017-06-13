@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
@@ -11,7 +12,7 @@ namespace Microsoft.DotNet.Cli
     internal static class BuildCommandParser
     {
         public static Command Build() =>
-            Create.Command(
+            CreateWithRestoreOptions.Command(
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
@@ -37,6 +38,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("/p:BuildProjectReferences=false")),
+                CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
 }

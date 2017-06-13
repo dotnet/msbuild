@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26419.0
+VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -30,7 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\BuildDefaults.props = build\BuildDefaults.props
 		build\BuildInfo.targets = build\BuildInfo.targets
 		build\BundledRuntimes.props = build\BundledRuntimes.props
-		build\BundledSdks.proj = build\BundledSdks.proj
 		build\BundledSdks.props = build\BundledSdks.props
 		build\BundledTemplates.proj = build\BundledTemplates.proj
 		build\BundledTemplates.props = build\BundledTemplates.props
@@ -48,10 +47,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\InstallerInfo.props = build\InstallerInfo.props
 		build\Microsoft.DotNet.Cli.tasks = build\Microsoft.DotNet.Cli.tasks
 		build\MSBuildExtensions.props = build\MSBuildExtensions.props
+		build\MSBuildExtensions.targets = build\MSBuildExtensions.targets
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
 		build\Prepare.targets = build\Prepare.targets
 		build\Publish.targets = build\Publish.targets
+		build\RestoreDependency.proj = build\RestoreDependency.proj
 		build\sdks\sdks.csproj = build\sdks\sdks.csproj
 		build\Signing.proj = build\Signing.proj
 		build\Stage0.props = build\Stage0.props

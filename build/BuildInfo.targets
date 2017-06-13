@@ -9,10 +9,16 @@
     </GetCurrentRuntimeInformation>
 
     <PropertyGroup>
-      <Rid Condition=" '$(Rid)' == '' ">$(HostRid)</Rid>
-      <Architecture Condition=" '$(Architecture)' == '' ">x64</Architecture>
-      <OSName Condition=" '$(OSName)' == '' ">$(HostOSName)</OSName>
-      <OSPlatform Condition=" '$(OSPlatform)' == '' ">$(HostOSPlatform)</OSPlatform>
+      <IsLinux Condition = " '$(HostOSName)' != 'win' AND '$(HostOSName)' != 'osx' ">True</IsLinux>
+      <Rid Condition=" '$(Rid)' == '' AND '$(IsLinux)' != 'True' ">$(HostRid)</Rid>
+      <Architecture Condition=" '$(Architecture)' == '' AND '$(IsLinux)' != 'True' ">x64</Architecture>
+      <OSName Condition=" '$(OSName)' == '' AND '$(IsLinux)' != 'True' ">$(HostOSName)</OSName>
+      <OSPlatform Condition=" '$(OSPlatform)' == '' AND '$(IsLinux)' != 'True' ">$(HostOSPlatform)</OSPlatform>
+
+      <Rid Condition=" '$(Rid)' == '' AND '$(IsLinux)' == 'True' ">linux-x64</Rid>
+      <Architecture Condition=" '$(Architecture)' == '' AND '$(IsLinux)' == 'True' ">x64</Architecture>
+      <OSName Condition=" '$(OSName)' == '' AND '$(IsLinux)' == 'True' ">linux</OSName>
+      <OSPlatform Condition=" '$(OSPlatform)' == '' AND '$(IsLinux)' == 'True' ">linux</OSPlatform>
 
       <BuildInfoPropsContent>
 &lt;Project ToolsVersion=&quot;14.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;

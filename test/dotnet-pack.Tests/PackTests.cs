@@ -157,10 +157,12 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
                      .And.Contain(e => e.FullName == "lib/netstandard1.5/MyLibrary.pdb");
         }
 
-        [Fact]
-        public void PackWorksWithLocalProjectJson()
+        [Theory]
+        [InlineData("C#", "TestAppSimple")]
+        [InlineData("F#", "FSharpTestAppSimple")]
+        public void PackWorksWithLocalProject(string language, string projectName)
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
+            var testInstance = TestAssets.Get(projectName)
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
@@ -169,6 +171,33 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute()
                 .Should().Pass();
+        }
+
+        [Fact]
+        public void ItImplicitlyRestoresAProjectWhenPackaging()
+        {
+            var testInstance = TestAssets.Get("TestAppSimple")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new PackCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+        }
+
+        [Fact]
+        public void ItDoesNotImplicitlyRestoreAProjectWhenPackagingWithTheNoRestoreOption()
+        {
+            var testInstance = TestAssets.Get("TestAppSimple")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new PackCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--no-restore")
+                .Should().Fail()
+                .And.HaveStdOutContaining("project.assets.json' not found.");;
         }
 
         [Fact]
@@ -231,7 +260,7 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
 
             new PackCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput()
+                .ExecuteWithCapturedOutput("--no-restore")
                 .Should()
                 .Pass();
 

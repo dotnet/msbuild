@@ -41,4 +41,5 @@
 
   <Import Project="build/AzureInfo.props" />
   <Import Project="build/InstallerInfo.props" />
+  <Import Project="build/GenerateResxSource.targets" />
 </Project>

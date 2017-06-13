@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
 
@@ -19,6 +20,8 @@ namespace Microsoft.DotNet.Tools.Run
         public bool NoBuild { get; private set; }
         public string Project { get; private set; }
         public IReadOnlyCollection<string> Args { get; private set; }
+        public bool NoRestore { get; private set; }
+        public IEnumerable<string> RestoreArgs { get; private set; }
 
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
@@ -55,6 +58,8 @@ namespace Microsoft.DotNet.Tools.Run
             string project,
             string launchProfile,
             bool noLaunchProfile,
+            bool noRestore,
+            IEnumerable<string> restoreArgs,
             IReadOnlyCollection<string> args)
         {
             Configuration = configuration;
@@ -64,6 +69,8 @@ namespace Microsoft.DotNet.Tools.Run
             LaunchProfile = launchProfile;
             NoLaunchProfile = noLaunchProfile;
             Args = args;
+            RestoreArgs = restoreArgs;
+            NoRestore = noRestore;
         }
 
         public RunCommand MakeNewWithReplaced(string configuration = null,
@@ -72,6 +79,8 @@ namespace Microsoft.DotNet.Tools.Run
             string project = null,
             string launchProfile = null,
             bool? noLaunchProfile = null,
+            bool? noRestore = null,
+            IEnumerable<string> restoreArgs = null,
             IReadOnlyCollection<string> args = null)
         {
             return new RunCommand(
@@ -81,6 +90,8 @@ namespace Microsoft.DotNet.Tools.Run
                 project ?? this.Project,
                 launchProfile ?? this.LaunchProfile,
                 noLaunchProfile ?? this.NoLaunchProfile,
+                noRestore ?? this.NoRestore,
+                restoreArgs ?? this.RestoreArgs,
                 args ?? this.Args
             );
         }
@@ -132,18 +143,9 @@ namespace Microsoft.DotNet.Tools.Run
             buildArgs.Add("/nologo");
             buildArgs.Add("/verbosity:quiet");
 
-            if (!string.IsNullOrWhiteSpace(Configuration))
-            {
-                buildArgs.Add($"/p:Configuration={Configuration}");
-            }
+            buildArgs.AddRange(RestoreArgs);
 
-            if (!string.IsNullOrWhiteSpace(Framework))
-            {
-                buildArgs.Add($"/p:TargetFramework={Framework}");
-            }
-
-            var buildResult = new MSBuildForwardingApp(buildArgs).Execute();
-
+            var buildResult = new RestoringCommand(buildArgs, NoRestore).Execute();
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();

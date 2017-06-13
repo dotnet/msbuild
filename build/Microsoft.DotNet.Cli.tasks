@@ -19,6 +19,7 @@
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateChecksums" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GenerateMSBuildExtensionsSWR" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateNuGetPackagesArchiveVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />

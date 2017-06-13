@@ -3,7 +3,7 @@
   <Target Name="SetupDebProps"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <SdkDebianPackageName>dotnet-dev-$(SdkVersion)</SdkDebianPackageName>
+      <SdkDebianPackageName>dotnet-sdk-$(SdkVersion)</SdkDebianPackageName>
     </PropertyGroup>
 
     <!-- dotnet deb-tool -->
@@ -27,12 +27,12 @@
     <!-- Package Identities -->
     <PropertyGroup>
       <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
-      <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
+      <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
-      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)-$(CoreSetupRid)</SharedFxDebianPackageName>
+      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
       <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
-      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)-$(CoreSetupRid)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
     </PropertyGroup>
@@ -52,8 +52,7 @@
     <!-- Output Directories -->
     <PropertyGroup>
       <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-      <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
-
+      <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
       <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
       <DotNetDebToolOutputDirectory>$(SdkDebianIntermediateDirectory)/deb-tool-output</DotNetDebToolOutputDirectory>
       <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
