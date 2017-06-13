@@ -88,6 +88,7 @@ namespace Microsoft.Build.Tasks
     public partial class CommandLineBuilderExtension : Microsoft.Build.Utilities.CommandLineBuilder
     {
         public CommandLineBuilderExtension() { }
+        public CommandLineBuilderExtension(bool quoteHyphensOnCommandLine, bool useNewLineSeparator) { }
         protected string GetQuotedText(string unquotedText) { throw null; }
     }
     public partial class ConvertToAbsolutePath : Microsoft.Build.Tasks.TaskExtension
@@ -600,6 +601,7 @@ namespace Microsoft.Build.Tasks
         protected internal System.Collections.Hashtable Bag { get { throw null; } }
         protected override bool HasLoggedErrors { get { throw null; } }
         public new Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
+        protected virtual bool UseNewLineSeparatorInResponseFile { get { throw null; } }
         protected internal virtual void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected internal virtual void AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected override string GenerateCommandLineCommands() { throw null; }

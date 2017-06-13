@@ -100,8 +100,36 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(5, t.GetIntParameterWithDefault("Key", 9));
         }
 
+        [Fact]
+        public void UseNewLineSeparatorseInResponseFile()
+        {
+            Action<CommandLineBuilderExtension> addResponseFileCommands = (commandLineBuilder) =>
+            {
+                commandLineBuilder.AppendSwitchIfNotNull("/A:", "D66B977148114482A88B0EFC1E531F02");
+                commandLineBuilder.AppendSwitchIfNotNull("/B:", "F9E03765A87543F4B385664B8DB7619D");
+            };
+
+            MyToolTaskExtension t = new MyToolTaskExtension(useNewLineSeparators: true, addResponseFileCommands: addResponseFileCommands);
+            
+            string[] actual = t.GetResponseFileCommands().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            string[] expected =
+            {
+                "/A:D66B977148114482A88B0EFC1E531F02",
+                "/B:F9E03765A87543F4B385664B8DB7619D"
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
         private class MyToolTaskExtension : ToolTaskExtension
         {
+            private readonly Action<CommandLineBuilderExtension> _addResponseFileCommands;
+
+            public MyToolTaskExtension(bool useNewLineSeparators = false, Action<CommandLineBuilderExtension> addResponseFileCommands = null)
+            {
+                _addResponseFileCommands = addResponseFileCommands;
+                UseNewLineSeparatorInResponseFile = useNewLineSeparators;
+            }
             protected override string ToolName
             {
                 get { return "toolname"; }
@@ -111,6 +139,21 @@ namespace Microsoft.Build.UnitTests
             {
                 return "fullpath";
             }
+
+            protected override bool UseNewLineSeparatorInResponseFile { get; }
+
+            public string GetResponseFileCommands()
+            {
+                return GenerateResponseFileCommands();
+            }
+
+            protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+            {
+                _addResponseFileCommands?.Invoke(commandLine);
+
+                base.AddResponseFileCommands(commandLine);
+            }
         }
+
     }
 }

@@ -78,6 +78,17 @@ namespace Microsoft.Build.Tasks
 
         private Hashtable _bag = new Hashtable();
 
+        /// <summary>
+        /// When set to true, the response file will use new lines instead of spaces to separate arguments.
+        /// </summary>
+        protected virtual bool UseNewLineSeparatorInResponseFile
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -119,7 +130,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         override protected string GenerateResponseFileCommands()
         {
-            CommandLineBuilderExtension commandLineBuilder = new CommandLineBuilderExtension();
+            CommandLineBuilderExtension commandLineBuilder = new CommandLineBuilderExtension(quoteHyphensOnCommandLine: false, useNewLineSeparator: UseNewLineSeparatorInResponseFile);
             AddResponseFileCommands(commandLineBuilder);
             return commandLineBuilder.ToString();
         }
