@@ -14,6 +14,7 @@
     <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25405-01" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-25661" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-25661" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview2-25661" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-25661" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview2-25661" />
   </ItemGroup>
