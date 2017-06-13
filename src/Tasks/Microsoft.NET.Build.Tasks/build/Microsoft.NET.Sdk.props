@@ -103,7 +103,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
 
-    <WarningsAsErrors Condition=" '$(WarningsAsErrors)' == '' ">NU1605</WarningsAsErrors>
+    <!-- Uncomment this once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
+    <!-- <WarningsAsErrors Condition=" '$(WarningsAsErrors)' == '' ">NU1605</WarningsAsErrors> -->
   </PropertyGroup>
 
   <PropertyGroup>
