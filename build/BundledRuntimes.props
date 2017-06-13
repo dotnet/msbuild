@@ -32,7 +32,9 @@
 
   <PropertyGroup>
     <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeVersion)</AspNetCoreRuntimeInstallerBlobRootUrl>
-
+    <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
+    <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
+    
     <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">$(HostOSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
@@ -89,6 +91,13 @@
       <DownloadFileName>$(AspNetCoreRuntimeInstallerArchiveFile)</DownloadFileName>
       <ExtractDestination>$(AspNetRuntimePackageStorePublishDirectory)</ExtractDestination>
   </_DownloadAndExtractItem>
+
+  <_DownloadAndExtractItem Include="AspNetCoreSharedRuntimeVersionFile"
+                           Condition="!Exists('$(AspNetCoreSharedRuntimeVersionFile)')">
+      <Url>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreSharedRuntimeVersionFileName)</Url>
+      <DownloadFileName>$(AspNetCoreSharedRuntimeVersionFile)</DownloadFileName>
+      <ExtractDestination></ExtractDestination>
+    </_DownloadAndExtractItem>
 
   </ItemGroup>
 </Project>
