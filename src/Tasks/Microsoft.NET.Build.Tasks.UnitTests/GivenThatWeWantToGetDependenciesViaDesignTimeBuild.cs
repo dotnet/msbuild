@@ -69,6 +69,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -145,6 +146,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepNoType, mockPackageDepUnknown };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -203,6 +205,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepUnresolved };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -415,6 +418,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockPackageReferenceDep
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -550,6 +554,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildPackageDep2
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -760,6 +765,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockWinmdDep,
                 mockReferenceDep
             };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -936,6 +942,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildAssemblyNoCompileMetadataDep,
                 mockChildAnalyzerAssemblyDep
             };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = "Package3;Package4";
 
             // Act
@@ -1064,6 +1071,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDep1, mockPackageDep2, mockChildPackageDep1 };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
 
             // Act
@@ -1092,6 +1100,75 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             resultPackage1.Length.Should().Be(1);
             resultPackage1[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
                              .Should().Be("");
+        }
+
+        [Fact]
+        public void ItShouldCreateDependenciesForNetStandardLibraryReferences()
+        {
+            // Arrange
+            // target definitions
+            var netStandard20Target = new MockTaskItem(
+                itemSpec: ".NETStandard,Version=v2.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.RuntimeIdentifier, "netstandard2.0" },
+                    { MetadataKeys.TargetFrameworkMoniker, ".NETStandard,Version=v2.0" },
+                    { MetadataKeys.FrameworkName, ".NETStandard" },
+                    { MetadataKeys.FrameworkVersion, "2.0" },
+                    { MetadataKeys.Type, "Target" }
+                });
+
+            // package definitions
+            var netStandardLibraryPackage = new MockTaskItem(
+                itemSpec: "NETStandard.Library/2.0.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, "NETStandard.Library" },
+                    { MetadataKeys.Version, "2.0.0" },
+                    { MetadataKeys.Path, "MyPackages\\NETStandard.Library\\2.0.0" },
+                    { MetadataKeys.ResolvedPath, "" },
+                    { MetadataKeys.Type, "Package" },
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                });
+
+            // package dependencies
+            var netStandardLibraryPackageDependency = new MockTaskItem(
+                itemSpec: "NETStandard.Library/2.0.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.ParentTarget, ".NETStandard,Version=v2.0" }
+                });
+
+            // references
+            var mockReference = new MockTaskItem(
+                itemSpec: "MyPackages\\NETStandard.Library\\2.0.0\\AnAssembly.dll",
+                metadata: new Dictionary<string, string>
+                {
+                    { "NuGetPackageId", "NETStandard.Library" },
+                    { "NuGetPackageVersion", "2.0.0" }
+                });
+
+            var task = new PreprocessPackageDependenciesDesignTime();
+            task.TargetDefinitions = new[] { netStandard20Target };
+            task.PackageDefinitions = new ITaskItem[] { netStandardLibraryPackage };
+            task.FileDefinitions = new ITaskItem[] {  };
+            task.PackageDependencies = new ITaskItem[] { netStandardLibraryPackageDependency };
+            task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { mockReference };
+            task.DefaultImplicitPackages = string.Empty;
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(3);
+
+            var resultPackage1 = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/NETStandard.Library/2.0.0")).ToArray();
+            resultPackage1.Length.Should().Be(1);
+            resultPackage1[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
+                             .Should().Be("NETStandard.Library/2.0.0/AnAssembly.dll");
         }
 
         private void VerifyTargetTaskItem(DependencyType type, ITaskItem input, ITaskItem output)
