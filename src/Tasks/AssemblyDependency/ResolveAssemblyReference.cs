@@ -8,7 +8,6 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
@@ -55,10 +54,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ResolveAssemblyReference()
         {
-            if (Traits.Instance.EscapeHatches.CacheAssemblyInformation)
-            {
-                _assemblyInformationCache = new ConcurrentDictionary<string, AssemblyInformation>();
-            }
         }
 
         #region Properties
@@ -864,8 +859,6 @@ namespace Microsoft.Build.Tasks
         /// Storage for names of all files writen to disk.
         /// </summary>
         private ArrayList _filesWritten = new ArrayList();
-
-        private readonly ConcurrentDictionary<string, AssemblyInformation> _assemblyInformationCache;
 
         /// <summary>
         /// The names of all files written to disk.
@@ -2130,8 +2123,8 @@ namespace Microsoft.Build.Tasks
                         readMachineTypeFromPEHeader,
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
-                        _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        _assemblyInformationCache);
+                        _unresolveFrameworkAssembliesFromHigherFrameworks
+                        );
 
                     // If AutoUnify, then compute the set of assembly remappings.
                     ArrayList generalResolutionExceptions = new ArrayList();
@@ -2386,7 +2379,7 @@ namespace Microsoft.Build.Tasks
                     // in case of P2P that have not build the reference can be resolved but file does not exist on disk. 
                     if (fileExists(resolvedReference.FullPath))
                     {
-                        getAssemblyMetadata(resolvedReference.FullPath, _assemblyInformationCache, out result, out scatterFiles, out frameworkName);
+                        getAssemblyMetadata(resolvedReference.FullPath, out result, out scatterFiles, out frameworkName);
                     }
                 }
                 catch (Exception e)
