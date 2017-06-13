@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DefaultImplicitPackages { get; set; }
 
+        [Required]
+        public ITaskItem[] References { get; set; }
+
         public ITaskItem[] InputDiagnosticMessages { get; set; }
 
         [Output]
@@ -63,6 +67,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private HashSet<string> ImplicitPackageReferences { get; set; }
 
+        private ITaskItem[] PreResolvedNetStandardAssemblyDependencies { get; set; }
+
         protected override void ExecuteCore()
         {
             ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
@@ -72,6 +78,7 @@ namespace Microsoft.NET.Build.Tasks
             PopulatePackages();
 
             PopulateAssemblies();
+            PopulatePreResolvedNetStandardAssemblies();
 
             InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
             PopulateDiagnosticsMap();
@@ -92,6 +99,8 @@ namespace Microsoft.NET.Build.Tasks
                 var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
+
+            AddDependenciesToTheWorld(Assemblies, PreResolvedNetStandardAssemblyDependencies);
 
             AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
@@ -180,6 +189,82 @@ namespace Microsoft.NET.Build.Tasks
                 var assembly = new AssemblyMetadata(dependencyType, fileDef, name);
                 Assemblies[fileDef.ItemSpec] = assembly;
             }
+        }
+
+        /// <summary>
+        /// Update FileDefinitions and FileDependencies to pretend that certain Reference items
+        /// explicitly added by a .targets file in the NETStandard.Library are actually normal
+        /// package items. This allows them to show up properly under the "SDK" node in Solution
+        /// Explorer, rather than just under the "Assemblies" node.
+        ///
+        /// This is not meant to be a general mechanism for injecting files that can't be handled
+        /// through the normal NuGet package mechanisms. For that, package authors should be
+        /// creating FileDefinition and FileDependency items instead of Reference items.
+        /// </summary>
+        private void PopulatePreResolvedNetStandardAssemblies()
+        {
+            var preResolvedAssemblyDependencies = new List<ITaskItem>();
+            foreach (var reference in References)
+            {
+                var packageName = reference.GetMetadata("NuGetPackageId");
+                var packageVersion = reference.GetMetadata("NuGetPackageVersion");
+
+                // This is not a "pre-resolved" assembly; skip it.
+                if (packageName == null || packageVersion == null)
+                {
+                    continue;
+                }
+
+                // This is meant only as a workaround for an issue in NETStandard.Library 2.0.*.
+                // Other packages should use the more general mechanism of creating
+                // FileDefinition and FileDependency items rather than Reference items.
+                if (packageName != "NETStandard.Library")
+                {
+                    continue;
+                }
+
+                var versionComponents = packageVersion.Split('.');
+                if (versionComponents[0] != "2" ||
+                    versionComponents[1] != "0")
+                {
+                    continue;
+                }
+
+                // If we don't know about the specified package, skip it.
+                var packageId = $"{packageName}/{packageVersion}";
+                if (!Packages.TryGetValue(packageId, out ItemMetadata packageItemMetadata))
+                {
+                    continue;
+                }
+
+                // If the file isn't actually a part of the package, skip it.
+                var packageMetadata = (PackageMetadata)packageItemMetadata;
+                if (!reference.ItemSpec.StartsWith(packageMetadata.Path, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var referenceRelativePath = reference.ItemSpec.Substring(packageMetadata.Path.Length).Trim('\\');
+                var referenceKey = $"{packageId}/{referenceRelativePath.Replace('\\', '/')}";
+
+                // If we already know about the assembly file, skip it.
+                if (Assemblies.TryGetValue(referenceKey, out ItemMetadata assemblyItemMetadata))
+                {
+                    continue;
+                }
+
+                // Create the appropriate metadata.
+                var name = Path.GetFileName(referenceKey);
+                var assembly = new PreResolvedNetStandardAssemblyMetadata(name, reference.ItemSpec);
+                Assemblies[referenceKey] = assembly;
+
+                // Create the file dependency.
+                preResolvedAssemblyDependencies.Add(new PreResolvedNetStandardAssemblyDependency(
+                    referenceKey,
+                    packageId));
+            }
+
+            PreResolvedNetStandardAssemblyDependencies = preResolvedAssemblyDependencies.ToArray();
         }
 
         private void PopulateDiagnosticsMap()
@@ -375,7 +460,7 @@ namespace Microsoft.NET.Build.Tasks
                         : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
             }
 
-            private PackageMetadata(
+            protected PackageMetadata(
                 DependencyType type,
                 IList<string> dependencies,
                 bool isTopLevelDependency,
@@ -437,6 +522,26 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Name = name ?? string.Empty;
                 Type = type;
+            }
+        }
+
+        /// <summary>
+        /// Represents metadata for a Reference item that we want to pretend was resolved as a
+        /// standard NuGet package assembly.
+        /// </summary>
+        private class PreResolvedNetStandardAssemblyMetadata : PackageMetadata
+        {
+            public PreResolvedNetStandardAssemblyMetadata(string name, string path)
+                : base(
+                      type: DependencyType.Assembly,
+                      dependencies: null,
+                      isTopLevelDependency: false,
+                      name: name,
+                      version: string.Empty,
+                      path: path,
+                      resolved: true,
+                      isImplicitlyDefined: false)
+            {
             }
         }
 
@@ -520,6 +625,62 @@ namespace Microsoft.NET.Build.Tasks
                     StartColumn,
                     EndLine,
                     EndColumn);
+            }
+        }
+
+        /// <summary>
+        /// Represents the FileDependency metadata for a Reference item that we want to pretend was
+        /// resolved as a standard NuGet package assembly.
+        /// </summary>
+        private sealed class PreResolvedNetStandardAssemblyDependency : ITaskItem
+        {
+            private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>(capacity: 3, comparer: StringComparer.OrdinalIgnoreCase);
+
+            public PreResolvedNetStandardAssemblyDependency(string itemSpec, string parentPackage)
+            {
+                ItemSpec = itemSpec;
+                _metadata[MetadataKeys.FileGroup] = "CompileTimeAssembly";
+                _metadata[MetadataKeys.ParentTarget] = ".NETStandard,Version=v2.0";
+                _metadata[MetadataKeys.ParentPackage] = parentPackage;
+            }
+
+            public string ItemSpec { get; set; }
+
+            public ICollection MetadataNames => _metadata.Keys;
+
+            public int MetadataCount => _metadata.Count;
+
+            public IDictionary CloneCustomMetadata()
+            {
+                return new Dictionary<string, string>(_metadata, _metadata.Comparer);
+            }
+
+            public void CopyMetadataTo(ITaskItem destinationItem)
+            {
+                foreach (var pair in _metadata)
+                {
+                    destinationItem.SetMetadata(pair.Key, pair.Value);
+                }
+            }
+
+            public string GetMetadata(string metadataName)
+            {
+                if (_metadata.TryGetValue(metadataName, out string metadataValue))
+                {
+                    return metadataValue;
+                }
+
+                return null;
+            }
+
+            public void RemoveMetadata(string metadataName)
+            {
+                _metadata.Remove(metadataName);
+            }
+
+            public void SetMetadata(string metadataName, string metadataValue)
+            {
+                _metadata[metadataName] = metadataValue;
             }
         }
 
