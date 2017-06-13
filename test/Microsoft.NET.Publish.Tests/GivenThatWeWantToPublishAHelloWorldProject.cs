@@ -160,7 +160,6 @@ public static class Program
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
@@ -364,8 +363,7 @@ public static class Program
                     .And
                     .OnlyHaveNativeAssembliesWhichAreInFolder(rid, publishDirectory.FullName, testProject.Name);
 
-                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { })
-                    .EnsureExecutable();
+                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { });
             }
             else
             {
