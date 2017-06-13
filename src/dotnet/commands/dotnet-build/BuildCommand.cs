@@ -15,8 +15,13 @@ namespace Microsoft.DotNet.Tools.Build
 {
     public class BuildCommand : RestoringCommand
     {
-        public BuildCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
-            : base(msbuildArgs, noRestore, msbuildPath)
+        public BuildCommand(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> userDefinedArguments,
+            IEnumerable<string> trailingArguments,
+            bool noRestore,
+            string msbuildPath = null)
+            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
         {
         }
 
@@ -49,7 +54,12 @@ namespace Microsoft.DotNet.Tools.Build
 
             bool noRestore = appliedBuildOptions.HasOption("--no-restore");
 
-            return new BuildCommand(msbuildArgs, noRestore, msbuildPath);
+            return new BuildCommand(
+                msbuildArgs,
+                appliedBuildOptions.OptionValuesToBeForwarded(),
+                appliedBuildOptions.Arguments,
+                noRestore,
+                msbuildPath);
         }
 
         public static int Run(string[] args)

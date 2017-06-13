@@ -3,6 +3,7 @@
 
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -52,6 +53,24 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput()
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!");
+        }
+
+        [Fact]
+        public void ItCanRunAMultiTFMProjectWithImplicitRestore()
+        {
+            var testInstance = TestAssets.Get(
+                    TestAssetKinds.DesktopTestProjects,
+                    "NETFrameworkReferenceNETStandard20")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            string projectDirectory = Path.Combine(testInstance.Root.FullName, "MultiTFMTestApp");
+
+            new RunCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.0")
+                .Should().Pass()
+                         .And.HaveStdOutContaining("This string came from the test library!");
         }
 
         [Fact]

@@ -12,31 +12,36 @@ namespace Microsoft.DotNet.Tools
     {
         private bool NoRestore { get; }
 
-        private IEnumerable<string> ArgsToForward { get; }
+        private IEnumerable<string> ParsedArguments { get; }
+
+        private IEnumerable<string> TrailingArguments { get; }
 
         private IEnumerable<string> ArgsToForwardToRestore()
         {
-            var restoreArguments = ArgsToForward.Where(a =>
-                !a.StartsWith("/t:") &&
-                !a.StartsWith("/target:") &&
-                !a.StartsWith("/ConsoleLoggerParameters:") &&
-                !a.StartsWith("/clp:"));
+            var restoreArguments = ParsedArguments.Where(a =>
+                !a.StartsWith("/p:TargetFramework"));
 
-            if (!restoreArguments.Any(a => a.StartsWith("/v:") || a.StartsWith("/verbosity:")))
+            if (!restoreArguments.Any(a => a.StartsWith("/verbosity:")))
             {
-                restoreArguments = restoreArguments.Concat(new string[] { "/v:q" });
+                restoreArguments = restoreArguments.Concat(new string[] { "/verbosity:q" });
             }
 
-            return restoreArguments;
+            return restoreArguments.Concat(TrailingArguments);
         }
 
         private bool ShouldRunImplicitRestore => !NoRestore;
 
-        public RestoringCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
+        public RestoringCommand(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> parsedArguments,
+            IEnumerable<string> trailingArguments,
+            bool noRestore,
+            string msbuildPath = null)
             : base(msbuildArgs, msbuildPath)
         {
             NoRestore = noRestore;
-            ArgsToForward = msbuildArgs;
+            ParsedArguments = parsedArguments;
+            TrailingArguments = trailingArguments;
         }
 
         public override int Execute()

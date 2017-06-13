@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System.Linq;
@@ -49,6 +50,23 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute()
+                .Should().Pass();
+        }
+
+        [Fact]
+        public void ItCanBuildAMultiTFMProjectWithImplicitRestore()
+        {
+            var testInstance = TestAssets.Get(
+                    TestAssetKinds.DesktopTestProjects,
+                    "NETFrameworkReferenceNETStandard20")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            string projectDirectory = Path.Combine(testInstance.Root.FullName, "MultiTFMTestApp");
+
+            new BuildCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("--framework netcoreapp2.0")
                 .Should().Pass();
         }
 

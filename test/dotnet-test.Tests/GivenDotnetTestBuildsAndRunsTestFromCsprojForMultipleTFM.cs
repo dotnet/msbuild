@@ -7,6 +7,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -74,6 +75,23 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
             result.ExitCode.Should().Be(1);
+        }
+
+        [Fact]
+        public void ItCanTestAMultiTFMProjectWithImplicitRestore()
+        {
+            var testInstance = TestAssets.Get(
+                    TestAssetKinds.DesktopTestProjects,
+                    "MultiTFMXunitProject")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            string projectDirectory = Path.Combine(testInstance.Root.FullName, "XUnitProject");
+
+            new DotnetTestCommand()
+               .WithWorkingDirectory(projectDirectory)
+               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp2.0")
+               .Should().Pass();
         }
     }
 }
