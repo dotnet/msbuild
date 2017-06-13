@@ -175,7 +175,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _paths.CreateDirectory(_paths.User.Packages);
             string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
-            Dotnet.Restore(proj, "--packages", restored).ForwardStdErr().Execute();
+            Dotnet.Restore(proj, "--packages", restored).ForwardStdOut().ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
