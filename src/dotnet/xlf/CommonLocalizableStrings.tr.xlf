@@ -367,11 +367,6 @@
         <target state="translated">Eklemek için en az bir başvuru belirtmeniz gerekir.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">{0} projesinde `{1}` başvurusu zaten var.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">`{0}` paket başvurusu yok.</target>

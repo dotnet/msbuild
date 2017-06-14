@@ -367,11 +367,6 @@
         <target state="translated">追加する参照を少なくとも 1 つ指定する必要があります。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">プロジェクト {0} には既に参照 `{1}` が指定されています。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">パッケージ参照 `{0}` は存在しません。</target>

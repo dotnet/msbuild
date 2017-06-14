@@ -367,11 +367,6 @@
         <target state="translated">您必須指定至少一個要新增的參考。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">專案 {0} 已經有參考 `{1}`。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">套件參考 `{0}` 不存在。</target>

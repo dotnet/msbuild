@@ -367,11 +367,6 @@
         <target state="translated">Необходимо указать по крайней мере одну добавляемую ссылку.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Проект "{0}" уже содержит ссылку "{1}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">Ссылка на пакет "{0}" не существует.</target>

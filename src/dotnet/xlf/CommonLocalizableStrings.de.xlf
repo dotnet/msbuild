@@ -367,11 +367,6 @@
         <target state="translated">Geben Sie mindestens einen hinzuzufügenden Verweis an.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis vom Typ "{1}" vorhanden.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">Der Paketverweis "{0}" ist nicht vorhanden.</target>

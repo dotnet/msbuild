@@ -367,11 +367,6 @@
         <target state="translated">추가할 참조를 하나 이상 지정해야 합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">{0} 프로젝트에 이미 `{1}` 참조가 있습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">패키지 참조 `{0}`이(가) 없습니다.</target>

@@ -367,11 +367,6 @@
         <target state="translated">Musíte zadat aspoň jeden odkaz, který chcete přidat.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Projekt {0} už obsahuje odkaz na {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">Odkaz na balíček {0} neexistuje.</target>

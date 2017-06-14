@@ -367,11 +367,6 @@
         <target state="translated">必须至少指定一个要添加的引用。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">项目 {0} 已经具有引用“{1}”。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">包引用“{0}”不存在。</target>

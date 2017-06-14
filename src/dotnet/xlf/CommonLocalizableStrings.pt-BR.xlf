@@ -367,11 +367,6 @@
         <target state="translated">É necessário especificar pelo menos uma referência a ser adicionada.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectAlreadyHasAReference">
-        <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">O projeto {0} já tem uma referência ‘{1}’.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
         <target state="translated">A referência do pacote ‘{0}’ não existe.</target>
