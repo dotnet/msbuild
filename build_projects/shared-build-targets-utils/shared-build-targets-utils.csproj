@@ -5,7 +5,7 @@
     <Description>Build scripts for dotnet-cli</Description>
     <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>shared-build-targets-utils</AssemblyName>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);dnxcore50;portable-net45+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
