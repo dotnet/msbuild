@@ -19,7 +19,7 @@
     </DebianUploadJsonContent>
   </PropertyGroup>
 
-  <Target Name="PublishDebFilesToDebianRepo" Condition=" ('$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian') AND '$(SkipPublishToDebianRepo)' != 'true' ">
+  <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(IsDebianBaseDistro)' == 'True' AND '$(SkipPublishToDebianRepo)' != 'true' ">
     <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />
     <Error Condition="'$(REPO_USER)' == ''" Text="REPO_USER must be set as an environment variable for debian publishing." />
     <Error Condition="'$(REPO_PASS)' == ''" Text="REPO_PASS must be set as an environment variable for debian publishing." />
