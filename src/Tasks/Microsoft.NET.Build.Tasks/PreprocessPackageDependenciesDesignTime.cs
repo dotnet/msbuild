@@ -198,8 +198,7 @@ namespace Microsoft.NET.Build.Tasks
         /// Explorer, rather than just under the "Assemblies" node.
         ///
         /// This is not meant to be a general mechanism for injecting files that can't be handled
-        /// through the normal NuGet package mechanisms. For that, package authors should be
-        /// creating FileDefinition and FileDependency items instead of Reference items.
+        /// through the normal NuGet package mechanisms.
         /// </summary>
         private void PopulatePreResolvedNetStandardAssemblies()
         {
