@@ -13,7 +13,7 @@
     <CLI_NETSDK_Version>2.0.0-preview2-20170614-1</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
     
-    <CLI_NuGet_Version>4.3.0-preview3-4154</CLI_NuGet_Version>
+    <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25331-02</CLI_NETStandardLibraryNETFrameworkVersion>
     <CLI_WEBSDK_Version>2.0.0-rel-20170518-512</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.3.0-preview-20170609-02</CLI_TestPlatform_Version>
