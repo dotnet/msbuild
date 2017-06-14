@@ -5,7 +5,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.2" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.3" PrivateAssets="All" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
