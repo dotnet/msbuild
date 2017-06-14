@@ -215,8 +215,6 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 // This is meant only as a workaround for an issue in NETStandard.Library 2.0.*.
-                // Other packages should use the more general mechanism of creating
-                // FileDefinition and FileDependency items rather than Reference items.
                 if (packageName != "NETStandard.Library")
                 {
                     continue;
