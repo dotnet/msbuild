@@ -14,7 +14,7 @@ using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.NET.Build.Tests
+namespace Microsoft.NET.Restore.Tests
 {
     public class GivenThatWeWantToRestoreProjectsUsingNuGetConfigProperties : SdkTest
     {
