@@ -215,7 +215,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 // This is meant only as a workaround for an issue in NETStandard.Library 2.0.*.
-                if (packageName != "NETStandard.Library")
+                if (!packageName.Equals("NETStandard.Library", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
