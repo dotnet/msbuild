@@ -16,8 +16,13 @@ namespace Microsoft.DotNet.Tools.Test
 {
     public class TestCommand : RestoringCommand
     {
-        public TestCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
-            : base(msbuildArgs, noRestore, msbuildPath)
+        public TestCommand(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> userDefinedArguments,
+            IEnumerable<string> trailingArguments,
+            bool noRestore,
+            string msbuildPath = null)
+            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
         {
         }
 
@@ -67,7 +72,12 @@ namespace Microsoft.DotNet.Tools.Test
 
             bool noRestore = parsedTest.HasOption("--no-restore");
 
-            return new TestCommand(msbuildArgs, noRestore, msbuildPath);
+            return new TestCommand(
+                msbuildArgs,
+                parsedTest.OptionValuesToBeForwarded(),
+                parsedTest.Arguments,
+                noRestore,
+                msbuildPath);
         }
 
         public static int Run(string[] args)
