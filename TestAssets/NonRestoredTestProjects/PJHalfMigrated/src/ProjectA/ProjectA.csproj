@@ -6,7 +6,7 @@
     <AssemblyName>ProjectA</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ProjectA</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);dnxcore50</AssetTargetFallback>
     <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>
   </PropertyGroup>
 

@@ -67,9 +67,10 @@ namespace Microsoft.DotNet.New.Tests
                 .Execute($"{projectType} --debug:ephemeral-hive --no-restore")
                 .Should().Pass();
 
+            // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
             new RestoreCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory}")
+                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory} /p:DisableImplicitAssetTargetFallback=true")
                 .Should().Pass();
         }
 

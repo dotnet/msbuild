@@ -5,6 +5,6 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <!-- Issue: https://github.com/dotnet/sdk/issues/1150 -->
-    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+    <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>
   </PropertyGroup>
 </Project>
