@@ -66,7 +66,7 @@ runtime-options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"{helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+            cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ runtime-options:
             var cmd = new HelpCommand()
                 .ExecuteWithCapturedOutput();
             cmd.Should().Pass();
-            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+            cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -85,8 +85,8 @@ runtime-options:
                 .ExecuteWithCapturedOutput("help invalid");
 
           cmd.Should().Fail();
-          cmd.StdErr.Should().ContainVisuallySameFragment($"Specified command 'invalid' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.");
-          cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+          cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, "invalid"));
+          cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
 
         [WindowsOnlyFact]
