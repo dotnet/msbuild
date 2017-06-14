@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Fact]
         public void WhenDotnetRunHelpIsInvokedAppArgumentsTextIsIncludedInOutput()
         {
-            const string AppArgumentsText = "Arguments passed to the application that is being run.";
+            string AppArgumentsText = Tools.Run.LocalizableStrings.RunCommandAdditionalArgsHelpText;
 
             var projectDirectory = TestAssets.CreateTestDirectory("RunContainsAppArgumentsText");
             var result = new TestCommand("dotnet")
