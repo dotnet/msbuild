@@ -30,8 +30,9 @@
                        Channel="$(Channel)"
                        CommitHash="$(CommitHash)" />
 
-    <UpdateVersionsRepo BranchName="$(BranchName)"
+    <!-- Uncomment the line below when https://github.com/dotnet/buildtools/issues/1547 gets fixed. -->
+    <!-- <UpdateVersionsRepo BranchName="$(BranchName)"
                         PackagesDirectory="$(PackagesDirectory)"
-                        GitHubPassword="$(GITHUB_PASSWORD)" />
+                        GitHubPassword="$(GITHUB_PASSWORD)" /> -->
   </Target>
 </Project>
