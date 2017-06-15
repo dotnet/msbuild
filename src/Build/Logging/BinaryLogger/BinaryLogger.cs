@@ -72,6 +72,7 @@ namespace Microsoft.Build.Logging
         public void Initialize(IEventSource eventSource)
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
+            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
 
             ProcessParameters();
 
