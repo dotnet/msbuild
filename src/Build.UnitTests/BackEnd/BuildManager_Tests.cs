@@ -204,9 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Theory]
-        [InlineData(2, false)]
         [InlineData(8, false)]
-        [InlineData(16, false)]
 #endif
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
         {

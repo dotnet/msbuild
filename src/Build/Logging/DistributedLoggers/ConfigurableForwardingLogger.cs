@@ -82,6 +82,8 @@ namespace Microsoft.Build.Logging
             _forwardingTable[BuildFinishedEventDescription] = 0;
             _forwardingTable[ProjectStartedEventDescription] = 0;
             _forwardingTable[ProjectFinishedEventDescription] = 0;
+            _forwardingTable[ProjectEvaluationStartedEventDescription] = 0;
+            _forwardingTable[ProjectEvaluationFinishedEventDescription] = 0;
             _forwardingTable[TargetStartedEventDescription] = 0;
             _forwardingTable[TargetFinishedEventDescription] = 0;
             _forwardingTable[TaskStartedEventDescription] = 0;
@@ -181,6 +183,7 @@ namespace Microsoft.Build.Logging
             eventSource.WarningRaised += new BuildWarningEventHandler(WarningHandler);
             eventSource.MessageRaised += new BuildMessageEventHandler(MessageHandler);
             eventSource.CustomEventRaised += new CustomBuildEventHandler(CustomEventHandler);
+            eventSource.StatusEventRaised += new BuildStatusEventHandler(BuildStatusHandler);
         }
 
         /// <summary>
@@ -229,6 +232,8 @@ namespace Microsoft.Build.Logging
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
                 _forwardingTable[CustomEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
             }
 
             if (_showSummary)
@@ -247,6 +252,8 @@ namespace Microsoft.Build.Logging
                 _forwardingTable[TargetFinishedEventDescription] = 1;
                 _forwardingTable[ProjectStartedEventDescription] = 1;
                 _forwardingTable[ProjectFinishedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
             }
 
             if (_showCommandLine)
@@ -443,6 +450,19 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        private void BuildStatusHandler(object sender, BuildStatusEventArgs e)
+        {
+            if (_forwardingTable[ProjectEvaluationStartedEventDescription] == 1 && e is ProjectEvaluationStartedEventArgs)
+            {
+                ForwardToCentralLogger(e);
+            }
+
+            if (_forwardingTable[ProjectEvaluationFinishedEventDescription] == 1 && e is ProjectEvaluationFinishedEventArgs)
+            {
+                ForwardToCentralLogger(e);
+            }
+        }
+
         /// <summary>
         /// Forwards the specified event.
         /// </summary>
@@ -487,6 +507,8 @@ namespace Microsoft.Build.Logging
         private const string BuildFinishedEventDescription = "BUILDFINISHEDEVENT";
         private const string ProjectStartedEventDescription = "PROJECTSTARTEDEVENT";
         private const string ProjectFinishedEventDescription = "PROJECTFINISHEDEVENT";
+        private const string ProjectEvaluationStartedEventDescription = "PROJECTEVALUATIONSTARTEDEVENT";
+        private const string ProjectEvaluationFinishedEventDescription = "PROJECTEVALUATIONFINISHEDEVENT";
         private const string TargetStartedEventDescription = "TARGETSTARTEDEVENT";
         private const string TargetFinishedEventDescription = "TARGETFINISHEDEVENT";
         private const string TaskStartedEventDescription = "TASKSTARTEDEVENT";

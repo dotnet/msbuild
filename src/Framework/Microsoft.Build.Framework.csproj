@@ -117,6 +117,7 @@
     </Compile>
     <Compile Include="ProjectEvaluationFinishedEventArgs.cs" />
     <Compile Include="ProjectEvaluationStartedEventArgs.cs" />
+    <Compile Include="ProjectImportedEventArgs.cs" />
     <Compile Include="ProjectFinishedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

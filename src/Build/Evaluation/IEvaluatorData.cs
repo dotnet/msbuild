@@ -33,7 +33,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The ID of this evaluation
         /// </summary>
-        int EvaluationID
+        int EvaluationId
         {
             get;
             set;

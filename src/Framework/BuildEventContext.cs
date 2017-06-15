@@ -52,7 +52,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The id of the evaluation
         /// </summary>
-        private readonly int _evaluationID;
+        private readonly int _evaluationId;
 
         #endregion
 
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Framework
             int projectContextId,
             int taskId
         )
-            : this(InvalidSubmissionId, nodeId, InvalidEvaluationID, InvalidProjectInstanceId, projectContextId, targetId, taskId)
+            : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId)
         {
             // UNDONE: This is obsolete.
         }
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            : this(InvalidSubmissionId, nodeId, InvalidEvaluationID, projectInstanceId, projectContextId, targetId, taskId)
+            : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            :this(submissionId, nodeId, InvalidEvaluationID, projectInstanceId, projectContextId, targetId, taskId)
+            :this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Framework
         (
             int submissionId,
             int nodeId,
-            int evaluationID,
+            int evaluationId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Framework
         {
             _submissionId = submissionId;
             _nodeId = nodeId;
-            _evaluationID = evaluationID;
+            _evaluationId = evaluationId;
             _targetId = targetId;
             _projectContextId = projectContextId;
             _taskId = taskId;
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Retrieves the Evaluation id.
         /// </summary>
-        public int EvaluationID => _evaluationID;
+        public int EvaluationId => _evaluationId;
 
         /// <summary>
         /// NodeId where event took place
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Indicates an invalid evaluation identifier.
         /// </summary>
-        public const int InvalidEvaluationID = -1;
+        public const int InvalidEvaluationId = -1;
 
         #endregion
 
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Framework
             // submission ID does not contribute to equality
             //hash = hash * 31 + _submissionId;
             hash = hash * 31 + _nodeId;
-            hash = hash * 31 + _evaluationID;
+            hash = hash * 31 + _evaluationId;
             hash = hash * 31 + _targetId;
             hash = hash * 31 + _projectContextId;
             hash = hash * 31 + _taskId;
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Framework
                    && _projectContextId == buildEventContext.ProjectContextId
                    && _targetId == buildEventContext.TargetId
                    && _taskId == buildEventContext.TaskId
-                   && _evaluationID == buildEventContext._evaluationID
+                   && _evaluationId == buildEventContext._evaluationId
                    && _projectInstanceId == buildEventContext._projectInstanceId;
         }
         #endregion

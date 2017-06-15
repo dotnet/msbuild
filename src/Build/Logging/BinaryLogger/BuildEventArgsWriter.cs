@@ -94,6 +94,13 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        public void WriteBlob(BinaryLogRecordKind kind, byte[] bytes)
+        {
+            Write(kind);
+            Write(bytes.Length);
+            Write(bytes);
+        }
+
         private void Write(BuildStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.BuildStarted);
@@ -231,14 +238,29 @@ namespace Microsoft.Build.Logging
                 Write((CriticalBuildMessageEventArgs)e);
                 return;
             }
-            else if (e is TaskCommandLineEventArgs)
+
+            if (e is TaskCommandLineEventArgs)
             {
                 Write((TaskCommandLineEventArgs)e);
                 return;
             }
 
+            if (e is ProjectImportedEventArgs)
+            {
+                Write((ProjectImportedEventArgs)e);
+                return;
+            }
+
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
+        }
+
+        private void Write(ProjectImportedEventArgs e)
+        {
+            Write(BinaryLogRecordKind.ProjectImported);
+            WriteMessageFields(e);
+            WriteOptionalString(e.ImportedProjectFile);
+            WriteOptionalString(e.UnexpandedProject);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
@@ -520,7 +542,7 @@ namespace Microsoft.Build.Logging
             Write(buildEventContext.TaskId);
             Write(buildEventContext.SubmissionId);
             Write(buildEventContext.ProjectInstanceId);
-            Write(buildEventContext.EvaluationID);
+            Write(buildEventContext.EvaluationId);
         }
 
         private void Write<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
@@ -561,6 +583,11 @@ namespace Microsoft.Build.Logging
                 v >>= 7;
             }
             writer.Write((byte)v);
+        }
+
+        private void Write(byte[] bytes)
+        {
+            binaryWriter.Write(bytes);
         }
 
         private void Write(bool boolean)

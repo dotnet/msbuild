@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.SubmissionId);
             Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.NodeId);
-            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.EvaluationID);
+            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.EvaluationId);
             Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.ProjectInstanceId);
             Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.ProjectContextId);
             Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.TargetId);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(0, startedEvent.BuildEventContext.SubmissionId);
             Assert.Equal(1, startedEvent.BuildEventContext.NodeId);
-            Assert.Equal(2, startedEvent.BuildEventContext.EvaluationID);
+            Assert.Equal(2, startedEvent.BuildEventContext.EvaluationId);
             Assert.Equal(3, startedEvent.BuildEventContext.ProjectInstanceId);
             Assert.Equal(4, startedEvent.BuildEventContext.ProjectContextId);
             Assert.Equal(5, startedEvent.BuildEventContext.TargetId);

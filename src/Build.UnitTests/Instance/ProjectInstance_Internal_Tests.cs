@@ -684,7 +684,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
         public delegate ProjectInstance ProjectInstanceFactory(string file, ProjectRootElement xml, ProjectCollection collection);
 
-        public static IEnumerable<object[]> ProjectInstanceHasEvaluationIDTestData()
+        public static IEnumerable<object[]> ProjectInstanceHasEvaluationIdTestData()
         {
             // from file
             yield return new ProjectInstanceFactory[]
@@ -728,8 +728,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         [Theory]
-        [MemberData(nameof(ProjectInstanceHasEvaluationIDTestData))]
-        public void ProjectInstanceHasEvaluationID(ProjectInstanceFactory projectInstanceFactory)
+        [MemberData(nameof(ProjectInstanceHasEvaluationIdTestData))]
+        public void ProjectInstanceHasEvaluationId(ProjectInstanceFactory projectInstanceFactory)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -740,7 +740,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 xml.Save(file);
 
                 var projectInstance = projectInstanceFactory.Invoke(file, xml, projectCollection);
-                Assert.NotEqual(BuildEventContext.InvalidEvaluationID, projectInstance.EvaluationID);
+                Assert.NotEqual(BuildEventContext.InvalidEvaluationId, projectInstance.EvaluationId);
             }
         }
 

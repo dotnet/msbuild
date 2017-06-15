@@ -451,8 +451,7 @@
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
   <data name="InvalidBinaryLoggerParameters" UESanitized="false" Visibility="Public">
-    <value>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</value>
-    <comment>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</comment>
+    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
   </data>
   <data name="InvalidContinueOnErrorAttribute" UESanitized="false" Visibility="Public">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>
@@ -1124,6 +1123,9 @@
   <data name="TaskPerformanceSummary" UESanitized="false" Visibility="Public">
     <value>Task Performance Summary:</value>
   </data>
+  <data name="ProjectEvaluationPerformanceSummary" UESanitized="false" Visibility="Public">
+    <value>Project Evaluation Performance Summary:</value>
+  </data>
   <data name="TaskSkippedFalseCondition" UESanitized="false" Visibility="Public">
     <value>Task "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
   </data>
@@ -1602,6 +1604,22 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NoReloadOnUnsavedChanges">
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
+  </data>
+
+  <data name="ProjectImportSkippedFalseCondition">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
+  </data>
+  
+  <data name="ProjectImportSkippedNoMatches">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to no matching files.</value>
+  </data>
+
+  <data name="ProjectImportSkippedEmptyFile">
+    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being empty.</value>
+  </data>
+  
+  <data name="ProjectImported">
+    <value>Importing project &quot;{0}&quot; into project &quot;{1}&quot; at ({2},{3}).</value>
   </data>
 
   <!--

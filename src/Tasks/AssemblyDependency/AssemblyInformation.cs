@@ -36,6 +36,11 @@ namespace Microsoft.Build.Tasks
 #endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
+
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+        private bool _metadataRead;
+#endif
+
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
@@ -337,40 +342,101 @@ namespace Microsoft.Build.Tasks
 
             return frameworkAttribute;
 #else
-            using (var stream = File.OpenRead(_sourceFile))
-            using (var peFile = new PEReader(stream))
-            {
-                var metadataReader = peFile.GetMetadataReader();
-
-                var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
-                    .Select(ah => metadataReader.GetCustomAttribute(ah));
-
-                foreach (var attr in attrs)
-                {
-                    var ctorHandle = attr.Constructor;
-                    if (ctorHandle.Kind != HandleKind.MemberReference)
-                    {
-                        continue;
-                    }
-
-                    var container = metadataReader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
-                    var name = metadataReader.GetTypeReference((TypeReferenceHandle)container).Name;
-                    if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
-                    {
-                        continue;
-                    }
-
-                    var arguments = GetFixedStringArguments(metadataReader, attr);
-                    if (arguments.Count == 1)
-                    {
-                        return new FrameworkName(arguments[0]);
-                    }
-
-                }
-            }
-            return null;
+            CorePopulateMetadata();
+            return _frameworkName;
 #endif
         }
+
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+        /// <summary>
+        /// Read everything from the assembly in a single stream.
+        /// </summary>
+        /// <returns></returns>
+        private void CorePopulateMetadata()
+        {
+            if (_metadataRead) return;
+
+            lock (this)
+            {
+                if (_metadataRead) return;
+
+                using (var stream = File.OpenRead(_sourceFile))
+                using (var peFile = new PEReader(stream))
+                {
+                    var metadataReader = peFile.GetMetadataReader();
+
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+
+                    foreach (var handle in metadataReader.AssemblyReferences)
+                    {
+                        var entry = metadataReader.GetAssemblyReference(handle);
+
+                        string cultureString = metadataReader.GetString(entry.Culture);
+                        var assemblyName = new AssemblyName
+                        {
+                            Name = metadataReader.GetString(entry.Name),
+                            Version = entry.Version
+                        };
+
+                        if (!NativeMethodsShared.IsMono)
+                        {
+                            // set_CultureName throws NotImplementedException on Mono
+                            assemblyName.CultureName = cultureString;
+                        }
+                        else if (cultureString != null)
+                        {
+                            assemblyName.CultureInfo = new CultureInfo(cultureString);
+                        }
+
+                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+                        if (publicKeyOrToken != null)
+                        {
+                            if (publicKeyOrToken.Length <= 8)
+                            {
+                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                            }
+                            else
+                            {
+                                assemblyName.SetPublicKey(publicKeyOrToken);
+                            }
+                        }
+                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+
+                        ret.Add(new AssemblyNameExtension(assemblyName));
+                    }
+
+                    _assemblyDependencies = ret.ToArray();
+
+                    var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
+                        .Select(ah => metadataReader.GetCustomAttribute(ah));
+
+                    foreach (var attr in attrs)
+                    {
+                        var ctorHandle = attr.Constructor;
+                        if (ctorHandle.Kind != HandleKind.MemberReference)
+                        {
+                            continue;
+                        }
+
+                        var container = metadataReader.GetMemberReference((MemberReferenceHandle) ctorHandle).Parent;
+                        var name = metadataReader.GetTypeReference((TypeReferenceHandle) container).Name;
+                        if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
+                        {
+                            continue;
+                        }
+
+                        var arguments = GetFixedStringArguments(metadataReader, attr);
+                        if (arguments.Count == 1)
+                        {
+                            _frameworkName = new FrameworkName(arguments[0]);
+                        }
+                    }
+                }
+
+                _metadataRead = true;
+            }
+        }
+#endif
 
 // Enabling this for MONO, because it's required by GetFrameworkName.
 // More details are in the comment for that method
@@ -587,52 +653,11 @@ namespace Microsoft.Build.Tasks
 
             return (AssemblyNameExtension[])asmRefs.ToArray(typeof(AssemblyNameExtension));
 #else
-
-            List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
-
-            using (var stream = File.OpenRead(_sourceFile))
-            using (var peFile = new PEReader(stream))
-            {
-                var metadataReader = peFile.GetMetadataReader();
-
-                foreach (var handle in metadataReader.AssemblyReferences)
-                {
-                    var entry = metadataReader.GetAssemblyReference(handle);
-
-                    var assemblyName = new AssemblyName();
-                    assemblyName.Name = metadataReader.GetString(entry.Name);
-                    assemblyName.Version = entry.Version;
-                    var cultureString = metadataReader.GetString(entry.Culture);
-                    if (!NativeMethodsShared.IsMono)
-                    {
-                        // set_CultureName throws NotImplementedException on Mono
-                        assemblyName.CultureName = cultureString;
-                    }
-                    else if (cultureString != null)
-                    {
-                        assemblyName.CultureInfo = new CultureInfo(cultureString);
-                    }
-                    var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                    if (publicKeyOrToken != null)
-                    {
-                        if (publicKeyOrToken.Length <= 8)
-                        {
-                            assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                        }
-                        else
-                        {
-                            assemblyName.SetPublicKey(publicKeyOrToken);
-                        }
-                    }
-                    assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
-                    ret.Add(new AssemblyNameExtension(assemblyName));
-                }
-            }
-
-            return ret.ToArray();
+            CorePopulateMetadata();
+            return _assemblyDependencies;
 #endif
         }
+
 
         /// <summary>
         /// Import extra files. These are usually consituent members of a scatter assembly.

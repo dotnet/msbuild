@@ -564,7 +564,6 @@ namespace Microsoft.Build.Evaluation
         public System.Collections.Generic.IDictionary<string, System.Collections.Generic.List<string>> ConditionedProperties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public string DirectoryPath { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public bool DisableMarkDirty { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        [System.ObsoleteAttribute("Use Project.LastEvaluationID instead")]
         public int EvaluationCounter { get { throw null; } }
         public string FullPath { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
@@ -576,7 +575,7 @@ namespace Microsoft.Build.Evaluation
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.ProjectItem> Items { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.ProjectItem> ItemsIgnoringCondition { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.ICollection<string> ItemTypes { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
-        public int LastEvaluationID { get { throw null; } }
+        public int LastEvaluationId { get { throw null; } }
         public Microsoft.Build.Evaluation.ProjectCollection ProjectCollection { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation ProjectFileLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.ProjectProperty> Properties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
@@ -760,6 +759,7 @@ namespace Microsoft.Build.Evaluation
     public enum ProjectLoadSettings
     {
         Default = 0,
+        IgnoreEmptyImports = 16,
         IgnoreMissingImports = 1,
         RecordDuplicateButNotCircularImports = 2,
         RecordEvaluatedItemElements = 8,
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.List<string> DefaultTargets { get { throw null; } }
         public string Directory { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.List<Microsoft.Build.Construction.ProjectItemElement> EvaluatedItemElements { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public int EvaluationID { get { throw null; } set { } }
+        public int EvaluationId { get { throw null; } set { } }
         public string FullPath { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.List<string> InitialTargets { get { throw null; } }
@@ -1419,10 +1419,17 @@ namespace Microsoft.Build.Logging
     public sealed partial class BinaryLogger : Microsoft.Build.Framework.ILogger
     {
         public BinaryLogger() { }
+        public Microsoft.Build.Logging.BinaryLogger.ProjectImportsCollectionMode CollectProjectImports { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Shutdown() { }
+        public enum ProjectImportsCollectionMode
+        {
+            Embed = 1,
+            None = 0,
+            ZipFile = 2,
+        }
     }
     public sealed partial class BinaryLogReplayEventSource : Microsoft.Build.Logging.EventArgsDispatcher
     {

@@ -187,7 +187,7 @@ namespace Microsoft.Build.Execution
         private string _subToolsetVersion;
         private TaskRegistry _taskRegistry;
         private bool _translateEntireState;
-        private int _evaluationID = BuildEventContext.InvalidEvaluationID;
+        private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace Microsoft.Build.Execution
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
 
-            EvaluationID = data.EvaluationID;
+            EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
             this.CreatePropertiesSnapshot(data, immutable);
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
             _projectFileLocation = that._projectFileLocation;
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
-            _evaluationID = that.EvaluationID;
+            _evaluationId = that.EvaluationId;
 
             TranslateEntireState = that.TranslateEntireState;
 
@@ -648,12 +648,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The ID of the evaluation that produced this ProjectInstance.
         /// 
-        /// See <see cref="Project.LastEvaluationID"/>.
+        /// See <see cref="Project.LastEvaluationId"/>.
         /// </summary>
-        public int EvaluationID
+        public int EvaluationId
         {
-            get { return _evaluationID; }
-            set { _evaluationID = value; }
+            get { return _evaluationId; }
+            set { _evaluationId = value; }
         }
 
         /// <summary>
@@ -1779,7 +1779,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _projectFileLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _taskRegistry, TaskRegistry.FactoryForDeserialization);
             translator.Translate(ref _isImmutable);
-            translator.Translate(ref _evaluationID);
+            translator.Translate(ref _evaluationId);
 
             translator.TranslateDictionary(
                 ref _itemDefinitions,
@@ -2438,16 +2438,16 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            if (Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.DebugEvaluation)
+            if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
                 Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Creating a ProjectInstance from an unevaluated state [{0}]", FullPath));
             }
 
-            ErrorUtilities.VerifyThrow(EvaluationID == BuildEventContext.InvalidEvaluationID, "Evaluation ID is invalid prior to evaluation");
+            ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
             _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(this, xml, ProjectLoadSettings.Default, buildParameters.MaxNodeCount, buildParameters.EnvironmentPropertiesInternal, loggingService, new ProjectItemInstanceFactory(this), buildParameters.ToolsetProvider, ProjectRootElementCache, buildEventContext, this /* for debugging only */, sdkResolution);
 
-            ErrorUtilities.VerifyThrow(EvaluationID != BuildEventContext.InvalidEvaluationID, "Evaluation should produce an evaluation ID");
+            ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }
 
         /// <summary>

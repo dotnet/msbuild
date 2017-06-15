@@ -34,6 +34,7 @@ using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -66,16 +67,6 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_splitter = new char[] { ';' };
 
         /// <summary>
-        /// Whether to write information about why we evaluate to debug output.
-        /// </summary>
-        private static readonly bool s_debugEvaluation = (Environment.GetEnvironmentVariable("MSBUILDDEBUGEVALUATION") != null);
-
-        /// <summary>
-        /// Whether to to respect the TreatAsLocalProperty parameter on the Project tag. 
-        /// </summary>
-        private static readonly bool s_ignoreTreatAsLocalProperty = (Environment.GetEnvironmentVariable("MSBUILDIGNORETREATASLOCALPROPERTY") != null);
-
-        /// <summary>
         /// Locals types names. We only have these because 'Built In' has a space,
         /// else we would use LocalsTypes enum names.
         /// Note: This should match LocalsTypes enum.
@@ -99,7 +90,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Each evaluation has a unique ID.
         /// </summary>
-        private static int s_evaluationID = BuildEventContext.InvalidEvaluationID;
+        private static int s_evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
         /// Expander for evaluating conditions
@@ -197,6 +188,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private EvaluationLoggingContext _evaluationLoggingContext;
 
+        private bool _logProjectImportedEvents = true;
+
 #if FEATURE_MSBUILD_DEBUGGER
         /// <summary>
         /// Types of locals pulled in at the start - environment, global, toolset, and built-in properties
@@ -263,7 +256,7 @@ namespace Microsoft.Build.Evaluation
             _expander = new Expander<P, I>(data, data);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
-            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY"));
+            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
@@ -359,14 +352,6 @@ namespace Microsoft.Build.Evaluation
             /// Items
             /// </summary>
             Items
-        }
-
-        /// <summary>
-        /// Whether to write information about why we evaluate to debug output.
-        /// </summary>
-        internal static bool DebugEvaluation
-        {
-            get { return s_debugEvaluation; }
         }
 
         /// <summary>
@@ -727,10 +712,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private IDictionary<string, object> Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrow(_data.EvaluationID == BuildEventContext.InvalidEvaluationID, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+            ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
 
-            _data.EvaluationID = NextEvaluationID();
-            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationID);
+            _data.EvaluationId = NextEvaluationId();
+            _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
+
+            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !Traits.Instance.EscapeHatches.DoNotLogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
@@ -786,7 +773,7 @@ namespace Microsoft.Build.Evaluation
 #endif
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.FormatResourceString("EvaluationStarted", projectFile))
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile)
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile
@@ -916,7 +903,7 @@ namespace Microsoft.Build.Evaluation
             _data.BeforeTargets = targetsWhichRunBeforeByTarget;
             _data.AfterTargets = targetsWhichRunAfterByTarget;
 
-            if (s_debugEvaluation)
+            if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
                 // This is so important for VS performance it's worth always tracing; accidentally having 
                 // inconsistent sets of global properties will cause reevaluations, which are wasteful and incorrect
@@ -944,7 +931,7 @@ namespace Microsoft.Build.Evaluation
 
             _data.FinishEvaluation();
 
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.FormatResourceString("EvaluationFinished", projectFile))
+            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
             {
                 BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                 ProjectFile = projectFile
@@ -968,7 +955,7 @@ namespace Microsoft.Build.Evaluation
             IList<string> initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
             _initialTargetsList.AddRange(initialTargets);
 
-            if (!s_ignoreTreatAsLocalProperty)
+            if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
                 IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
 
@@ -2375,6 +2362,29 @@ namespace Microsoft.Build.Evaluation
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
                 ParserOptions.AllowProperties, _projectRootElementCache))
             {
+                if (_logProjectImportedEvents)
+                {
+                    // Expand the expression for the Log.
+                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties, importElement.ConditionLocation);
+
+                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                        importElement.Location.Line,
+                        importElement.Location.Column,
+                        ResourceUtilities.GetResourceString("ProjectImportSkippedFalseCondition"),
+                        importElement.Project,
+                        importElement.ContainingProject.FullPath,
+                        importElement.Location.Line,
+                        importElement.Location.Column,
+                        importElement.Condition,
+                        expanded)
+                    {
+                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                        UnexpandedProject = importElement.Project,
+                        ProjectFile = importElement.ContainingProject.FullPath
+                    };
+
+                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                }
                 projects = new List<ProjectRootElement>();
                 return;
             }
@@ -2453,6 +2463,25 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Keep track of any imports that evaluated to empty
                     atleastOneImportEmpty = true;
+
+                    if (_logProjectImportedEvents)
+                    {
+                        ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                            importElement.Location.Line,
+                            importElement.Location.Column,
+                            ResourceUtilities.GetResourceString("ProjectImportSkippedNoMatches"),
+                            importExpressionEscapedItem,
+                            importElement.ContainingProject.FullPath,
+                            importElement.Location.Line,
+                            importElement.Location.Column)
+                        {
+                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                            UnexpandedProject = importElement.Project,
+                            ProjectFile = importElement.ContainingProject.FullPath
+                        };
+
+                        _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                    }
                 }
 
                 foreach (string importFileEscaped in importFilesEscaped)
@@ -2568,9 +2597,29 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            if (_logProjectImportedEvents)
+                            {
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImported"),
+                                    importedProjectElement.FullPath,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    ImportedProjectFile = importedProjectElement.FullPath,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                            }
                         }
                     }
-                    catch (InvalidProjectFileException ex) when (ExceptionHandling.IsIoRelatedException(ex.InnerException))
+                    catch (InvalidProjectFileException ex)
                     {
                         // The import couldn't be read from disk, or something similar. In that case,
                         // the error message would be more useful if it pointed to the location in the importing project file instead.
@@ -2590,6 +2639,31 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            // If IgnoreEmptyImports is enabled, check if the file is considered empty
+                            //
+                            if (((_loadSettings & ProjectLoadSettings.IgnoreEmptyImports) != 0 || Traits.Instance.EscapeHatches.IgnoreEmptyImports) && ProjectRootElement.IsEmptyXmlFile(importFileUnescaped))
+                            {
+                                atleastOneImportIgnored = true;
+
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ResourceUtilities.GetResourceString("ProjectImportSkippedEmptyFile"),
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
+                                {
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath
+                                };
+
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                                continue;
+                            }
+
                             // Otherwise a more generic message, still pointing to the location of the import tag
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
                                 importFileUnescaped, ex.InnerException.Message);
@@ -2841,7 +2915,7 @@ namespace Microsoft.Build.Evaluation
             return sb.ToString();
         }
 
-        private static int NextEvaluationID() => Interlocked.Increment(ref s_evaluationID);
+        private static int NextEvaluationId() => Interlocked.Increment(ref s_evaluationId);
     }
 
     /// <summary>

@@ -1003,18 +1003,10 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// An arbitrary number that changes when this project reevaluates.
-        /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
-        /// their previously stored value to find out, and if so perhaps decide to update their own state.
-        /// Note that the number may not increase monotonically.
-        /// Unloading a project does not reset the number, so it does not break the guarantee.
-        /// 
-        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationID"/> and can be used to connect
-        /// evaluation logging events back to the Project instance.
-        /// 
+        /// Obsolete. Use <see cref="LastEvaluationId"/> instead.
         /// </summary>
-        [Obsolete("Use Project.LastEvaluationID instead")] // deprecated added in 15.3
-        public int EvaluationCounter => LastEvaluationID;
+        // marked as obsolete in 15.3
+        public int EvaluationCounter => LastEvaluationId;
 
         /// <summary>
         /// The ID of the last evaluation for this Project.
@@ -1026,10 +1018,10 @@ namespace Microsoft.Build.Evaluation
         /// their previously stored value to find out, and if so perhaps decide to update their own state.
         /// Note that the number may not increase monotonically.
         /// 
-        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationID"/> and can be used to connect
+        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
         /// </summary>
-        public int LastEvaluationID => _data.EvaluationID;
+        public int LastEvaluationId => _data.EvaluationId;
 
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
@@ -2696,11 +2688,11 @@ namespace Microsoft.Build.Evaluation
 
             _loadSettings = loadSettings;
 
-            ErrorUtilities.VerifyThrow(LastEvaluationID == BuildEventContext.InvalidEvaluationID, "This is the first evaluation therefore the last evaluation id is invalid");
+            ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
             ReevaluateIfNecessary();
 
-            ErrorUtilities.VerifyThrow(LastEvaluationID != BuildEventContext.InvalidEvaluationID, "Last evaluation ID must be valid after the first evaluation");
+            ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
 
             // Cause the project to be actually loaded into the collection, and register for
             // rename notifications so we can subsequently update the collection.
@@ -3116,7 +3108,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <inheritdoc />
-            public int EvaluationID { get; set; } = BuildEventContext.InvalidEvaluationID;
+            public int EvaluationId { get; set; } = BuildEventContext.InvalidEvaluationId;
 
             /// <summary>
             /// The root directory for this project
@@ -3303,7 +3295,7 @@ namespace Microsoft.Build.Evaluation
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
                 this.EvaluatedItemElements = new List<ProjectItemElement>();
-                this.EvaluationID = BuildEventContext.InvalidEvaluationID;
+                this.EvaluationId = BuildEventContext.InvalidEvaluationId;
 
                 if (_globalPropertiesToTreatAsLocal != null)
                 {
