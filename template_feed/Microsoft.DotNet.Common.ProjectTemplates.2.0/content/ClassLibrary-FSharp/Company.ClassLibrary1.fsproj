@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="**/*.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
 
