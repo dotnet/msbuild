@@ -636,7 +636,7 @@ namespace Microsoft.NET.Build.Tasks
             public PreResolvedNetStandardAssemblyDependency(string itemSpec, string parentPackage)
             {
                 ItemSpec = itemSpec;
-                _metadata[MetadataKeys.FileGroup] = "CompileTimeAssembly";
+                _metadata[MetadataKeys.FileGroup] = CompileTimeAssemblyMetadata;
                 _metadata[MetadataKeys.ParentTarget] = ".NETStandard,Version=v2.0";
                 _metadata[MetadataKeys.ParentPackage] = parentPackage;
             }
