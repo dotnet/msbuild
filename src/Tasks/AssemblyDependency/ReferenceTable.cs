@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Runtime.Versioning;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -159,6 +161,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
 
+        private readonly ConcurrentDictionary<string, AssemblyMetadata> _assemblyMetadataCache;
+
         /// <summary>
         /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is. 
         /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message 
@@ -178,7 +182,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="findDependencies">If true, then search for dependencies.</param>
         /// <param name="findSatellites">If true, then search for satellite files.</param>
-        /// <param name="findSerializatoinAssemblies">If true, then search for serialization assembly files.</param>
+        /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
         /// <param name="findRelatedFiles">If true, then search for related files.</param>
         /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
@@ -193,6 +197,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
+        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         internal ReferenceTable
         (
             IBuildEngine buildEngine,
@@ -232,8 +237,8 @@ namespace Microsoft.Build.Tasks
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader,
             WarnOrErrorOnTargetArchitectureMismatchBehavior warnOrErrorOnTargetArchitectureMismatch,
             bool ignoreFrameworkAttributeVersionMismatch,
-            bool unresolveFrameworkAssembliesFromHigherFrameworks
-        )
+            bool unresolveFrameworkAssembliesFromHigherFrameworks,
+            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
         {
             _buildEngine = buildEngine;
             _log = log;
@@ -266,6 +271,7 @@ namespace Microsoft.Build.Tasks
             _readMachineTypeFromPEHeader = readMachineTypeFromPEHeader;
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
             _ignoreFrameworkAttributeVersionMismatch = ignoreFrameworkAttributeVersionMismatch;
+            _assemblyMetadataCache = assemblyMetadataCache;
 
             // Set condition for when to check assembly version against the target framework version 
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -1006,6 +1012,7 @@ namespace Microsoft.Build.Tasks
             _getAssemblyMetadata
             (
                 reference.FullPath,
+                _assemblyMetadataCache,
                 out dependentAssemblies,
                 out scatterFiles,
                 out frameworkName

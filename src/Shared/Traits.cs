@@ -32,6 +32,11 @@ namespace Microsoft.Build.Utilities
 
         public readonly bool LogProjectImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS") == "1";
 
+        /// <summary>
+        /// Read information only once per file per ResolveAssemblyReference invocation.
+        /// </summary>
+        public readonly bool CacheAssemblyInformation = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHERARASSEMBLYINFORMATION") != "1";
+
         public readonly ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
 
         /// <summary>

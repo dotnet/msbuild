@@ -8,6 +8,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
@@ -20,6 +21,7 @@ using Microsoft.Internal.Performance;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
+using Microsoft.Build.Tasks.AssemblyDependency;
 
 namespace Microsoft.Build.Tasks
 {
@@ -2083,6 +2085,11 @@ namespace Microsoft.Build.Tasks
 
                     SystemProcessorArchitecture processorArchitecture = TargetProcessorArchitectureToEnumeration(_targetProcessorArchitecture);
 
+                    ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache =
+                        Traits.Instance.EscapeHatches.CacheAssemblyInformation
+                            ? new ConcurrentDictionary<string, AssemblyMetadata>()
+                            : null;
+
                     // Start the table of dependencies with all of the primary references.
                     ReferenceTable dependencyTable = new ReferenceTable
                     (
@@ -2123,7 +2130,8 @@ namespace Microsoft.Build.Tasks
                         readMachineTypeFromPEHeader,
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
-                        _unresolveFrameworkAssembliesFromHigherFrameworks
+                        _unresolveFrameworkAssembliesFromHigherFrameworks,
+                        assemblyMetadataCache
                         );
 
                     // If AutoUnify, then compute the set of assembly remappings.
@@ -2248,7 +2256,7 @@ namespace Microsoft.Build.Tasks
                         // when we are not producing the dependency graph look for direct dependencies of primary references.
                         foreach (var resolvedReference in dependencyTable.References.Values)
                         {
-                            var rawDependencies = GetDependencies(resolvedReference, fileExists, getAssemblyMetadata);
+                            var rawDependencies = GetDependencies(resolvedReference, fileExists, getAssemblyMetadata, assemblyMetadataCache);
                             if (rawDependencies != null)
                             {
                                 foreach (var dependentReference in rawDependencies)
@@ -2363,11 +2371,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns the raw list of direct dependent assemblies from assembly's metadata.
         /// </summary>
-        /// <param name="fileExists">the delegate to check for the existence of a file.</param>
         /// <param name="resolvedReference">reference we are interested</param>
+        /// <param name="fileExists">the delegate to check for the existence of a file.</param>
         /// <param name="getAssemblyMetadata">the delegate to access assembly metadata</param>
+        /// <param name="assemblyMetadataCache">Cache of pre-extracted assembly metadata.</param>
         /// <returns>list of dependencies</returns>
-        private AssemblyNameExtension[] GetDependencies(Reference resolvedReference, FileExists fileExists, GetAssemblyMetadata getAssemblyMetadata)
+        private AssemblyNameExtension[] GetDependencies(Reference resolvedReference, FileExists fileExists, GetAssemblyMetadata getAssemblyMetadata, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
         {
             AssemblyNameExtension[] result = null;
             if (resolvedReference != null && resolvedReference.IsPrimary && !resolvedReference.IsBadImage)
@@ -2379,7 +2388,7 @@ namespace Microsoft.Build.Tasks
                     // in case of P2P that have not build the reference can be resolved but file does not exist on disk. 
                     if (fileExists(resolvedReference.FullPath))
                     {
-                        getAssemblyMetadata(resolvedReference.FullPath, out result, out scatterFiles, out frameworkName);
+                        getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }
                 catch (Exception e)

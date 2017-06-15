@@ -93,6 +93,7 @@
       <Link>Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -557,7 +558,7 @@
     <Compile Include="AxTlbBaseTask.cs" />
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>    
+    </Compile>
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
