@@ -164,7 +164,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          compile errors. -->
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
-      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)" />
 
     <ResolvePackageDependencies
