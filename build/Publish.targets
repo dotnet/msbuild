@@ -26,9 +26,12 @@
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
-      <ForPublishing Include="@(GeneratedInstallers)" />
-      <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
-      <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg" Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' " />
+      <ForPublishing Include="@(GeneratedInstallers)"
+                     Condition=" '$(IslinuxPortable)' != 'true' "/>
+      <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
+                     Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
+      <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(IsLinuxDistroSpecific)' != 'true'"/>
     </ItemGroup>
 
     <ItemGroup>
