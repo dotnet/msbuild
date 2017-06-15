@@ -56,14 +56,15 @@ namespace Microsoft.DotNet.New.Tests
                 Directory.CreateDirectory(Path.Combine(rootPath, "wwwroot", "dist"));
             }
 
+            // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
             new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
-                .Execute($"restore")
+                .Execute($"restore /p:DisableImplicitAssetTargetFallback=true")
                 .Should().Pass();
 
             var buildResult = new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("build")
+                .ExecuteWithCapturedOutput("build --no-restore")
                 .Should().Pass()
                 .And.NotHaveStdErr();
         }
