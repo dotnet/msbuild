@@ -5,7 +5,7 @@
     <CLI_MSBuild_Version>15.3.0-preview-000388-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc5-61427-04</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>1.1.0-alpha-20170607-4</CLI_NETSDK_Version>
-    <CLI_NuGet_Version>4.3.0-preview3-4154</CLI_NuGet_Version>
+    <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170516-2-509</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0</CLI_TestPlatform_Version>
     <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
