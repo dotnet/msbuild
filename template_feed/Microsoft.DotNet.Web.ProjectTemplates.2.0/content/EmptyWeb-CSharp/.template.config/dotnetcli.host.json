@@ -20,10 +20,11 @@
       "isHidden": true
     },
     "IncludeLaunchSettings": {
-      "isHidden": true
+      "longName": "use-launch-settings",
+      "shortName": ""
     }
   },
   "usageExamples": [
-    "--framework netcoreapp2.0"
+    ""
   ]
 }

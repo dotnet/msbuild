@@ -18,14 +18,7 @@
   "preferNameDirectory": true,
   "guids": [ 
     "09732173-2cef-46b7-83db-1334bcb079d3", // Tenant ID
-    "53bc9b9d-9d6a-45d4-8429-2a2761773502", // Client ID
-    "ab1d2251-be0b-4457-abfe-4686ff9286c0", // Client app ID
-    "d2e0a81e-e08e-42ea-bbae-bec4c4ac6aed", // Client OpenID scope ID
-    "c9c97e6d-e0fc-4f75-b7ca-d43515b68ee3", // Client logout redirect URI ID
-    "8f87a3e2-5ac9-4852-8cc9-35799e66f898", // Client redirect URI ID
-    "63F0DED9-6722-437C-B5EF-F0543F3CF7FE", // Web API client ID
-    "823806a0-9193-413b-af88-55d9df14c1af", // Web API app ID
-    "14399c3c-ec16-459f-a7a4-2a41d25c7d4b"  // Web API user impersonation scope ID
+    "53bc9b9d-9d6a-45d4-8429-2a2761773502" // Client ID
   ],
   "sources": [
     {
@@ -37,25 +30,6 @@
           ]
         },
         {
-          "condition": "(!IndividualAuth && !OrganizationalAuth)",
-          "exclude": [
-            "urlRewrite.config",
-            "Extensions/**"
-          ]
-        },
-        {
-          "condition": "(!IndividualLocalAuth)",
-          "exclude": [
-            "Areas/**",
-            "Extensions/IdentityService/**",
-            "wwwroot/**",
-            "Controllers/HomeController.cs",
-            ".bowercc",
-            "bower.json",
-            "bundleconfig.json"
-          ]
-        },
-        {
           "condition": "(!IncludeLaunchSettings)",
           "exclude": [
             "Properties/launchSettings.json"
@@ -64,13 +38,13 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "Extensions/AzureAd/**"
+            "AzureAd/**"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "Extensions/AzureAdB2C/**"
+            "AzureAdB2C/**"
           ]
         }
       ]
@@ -84,10 +58,6 @@
         {
           "choice": "None",
           "description": "No authentication"
-        },
-        {
-          "choice": "Individual",
-          "description": "Individual authentication"
         },
         {
           "choice": "IndividualB2C",
@@ -235,13 +205,9 @@
       "type": "computed",
       "value": "(auth == \"SingleOrg\")"
     },
-    "IndividualLocalAuth": {
-      "type": "computed",
-      "value": "(auth == \"Individual\")"
-    },
     "IndividualAuth": {
       "type": "computed",
-      "value": "(auth == \"Individual\" || auth == \"IndividualB2C\")"
+      "value": "(auth == \"IndividualB2C\")"
     },
     "IndividualB2CAuth": {
       "type": "computed",
@@ -260,12 +226,6 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to use LocalDB instead of SQLite"
-    },
-    "IncludeApplicationInsights": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "description": "Whether or not to include Application Insights in the project"
     },
     "TargetFrameworkOverride": {
       "type": "parameter",

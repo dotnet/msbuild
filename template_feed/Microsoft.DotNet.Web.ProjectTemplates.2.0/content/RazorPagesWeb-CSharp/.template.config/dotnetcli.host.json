@@ -12,9 +12,13 @@
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
+    },
+    "UseBrowserLink": {
+      "longName": "use-browserlink",
+      "shortName": ""
     }
   },
   "usageExamples": [
-    "--framework netcoreapp2.0"
+    ""
   ]
 }

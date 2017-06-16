@@ -70,10 +70,15 @@
       "isHidden": true
     },
     "IncludeLaunchSettings": {
-      "isHidden": true
+      "longName": "use-launch-settings",
+      "shortName": ""
     },
     "UserSecretsId": {
       "isHidden": true
+    },
+    "UseBrowserLink": {
+      "longName": "use-browserlink",
+      "shortName": ""
     }
   },
   "usageExamples": [

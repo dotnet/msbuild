@@ -1607,31 +1607,49 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, preferredTemplate.ThirdPartyNotices));
             }
 
-            HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>();
-            HashSet<string> groupParametersToExplicitlyHide = new HashSet<string>();
+            HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>(StringComparer.Ordinal);
             bool groupHasPostActionScriptRunner = false;
             List<IParameterSet> parameterSetsForAllTemplatesInGroup = new List<IParameterSet>();
-            IDictionary<string, InvalidParameterInfo> invalidParametersForGroup = new Dictionary<string, InvalidParameterInfo>();
+            IDictionary<string, InvalidParameterInfo> invalidParametersForGroup = new Dictionary<string, InvalidParameterInfo>(StringComparer.Ordinal);
             bool firstInList = true;
 
-            Dictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals = new Dictionary<string, IReadOnlyList<string>>();
-            HashSet<string> groupUserParamsWithDefaultValues = new HashSet<string>();
+            Dictionary<string, IReadOnlyList<string>> groupVariantsForCanonicals = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+            HashSet<string> groupUserParamsWithDefaultValues = new HashSet<string>(StringComparer.Ordinal);
+            Dictionary<string, bool> parameterHidingDisposition = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITemplateInfo templateInfo in templateGroup)
             {
                 IReadOnlyList<InvalidParameterInfo> invalidParamsForTemplate = GetTemplateUsageInformation(templateInfo, out IParameterSet allParamsForTemplate, out IReadOnlyList<string> userParamsWithInvalidValues, out IReadOnlyDictionary<string, IReadOnlyList<string>> variantsForCanonicals, out HashSet<string> userParamsWithDefaultValues, out bool hasPostActionScriptRunner);
-                HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
+                HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>(StringComparer.Ordinal);
+
+                foreach (ITemplateParameter parameter in allParamsForTemplate.ParameterDefinitions)
+                {
+                    //If the parameter has previously been encountered...
+                    if (parameterHidingDisposition.TryGetValue(parameter.Name, out bool isCurrentlyHidden))
+                    {
+                        //...and it was hidden, but it's not hidden in this template in the group,
+                        //  remove its hiding, otherwise leave it as is
+                        if (isCurrentlyHidden && !parametersToExplicitlyHide.Contains(parameter.Name))
+                        {
+                            parameterHidingDisposition[parameter.Name] = false;
+                        }
+                    }
+                    //...otherwise, since this is the first time the parameter has been seen,
+                    //  its hiding state should be used as the current disposition
+                    else
+                    {
+                        parameterHidingDisposition[parameter.Name] = parametersToExplicitlyHide.Contains(parameter.Name);
+                    }
+                }
 
                 if (firstInList)
                 {
                     invalidParametersForGroup = invalidParamsForTemplate.ToDictionary(x => x.Canonical, x => x);
-                    groupParametersToExplicitlyHide = new HashSet<string>(parametersToExplicitlyHide);
                     firstInList = false;
                 }
                 else
                 {
                     invalidParametersForGroup = InvalidParameterInfo.IntersectWithExisting(invalidParametersForGroup, invalidParamsForTemplate);
-                    groupParametersToExplicitlyHide.IntersectWith(parametersToExplicitlyHide);  // all the templates in a group must hide a param for it to be hidden in group help.
                 }
 
                 groupUserParamsWithInvalidValues.IntersectWith(userParamsWithInvalidValues);    // intersect because if the value is valid for any version, it's valid.
@@ -1653,7 +1671,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             IParameterSet allGroupParameters = new TemplateGroupParameterSet(parameterSetsForAllTemplatesInGroup);
             string parameterErrors = InvalidParameterInfo.InvalidParameterListToString(invalidParametersForGroup.Values.ToList());
-            ShowParameterHelp(_commandInput.AllTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), groupParametersToExplicitlyHide, groupVariantsForCanonicals, groupUserParamsWithDefaultValues, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
+            HashSet<string> parametersToHide = new HashSet<string>(parameterHidingDisposition.Where(x => x.Value).Select(x => x.Key), StringComparer.Ordinal);
+            ShowParameterHelp(_commandInput.AllTemplateParams, allGroupParameters, parameterErrors, groupUserParamsWithInvalidValues.ToList(), parametersToHide, groupVariantsForCanonicals, groupUserParamsWithDefaultValues, showImplicitlyHiddenParams, groupHasPostActionScriptRunner);
         }
 
         // Returns true if any partial matches were displayed, false otherwise

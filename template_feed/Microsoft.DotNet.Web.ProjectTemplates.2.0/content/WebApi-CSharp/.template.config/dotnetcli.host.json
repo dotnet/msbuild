@@ -62,13 +62,14 @@
       "isHidden": true
     },
     "IncludeLaunchSettings": {
-      "isHidden": true
+      "longName": "use-launch-settings",
+      "shortName": ""
     },
     "UserSecretsId": {
       "isHidden": true
     }
   },
   "usageExamples": [
-    "--framework netcoreapp2.0"
+    ""
   ]
 }
