@@ -717,7 +717,7 @@ namespace Microsoft.Build.Evaluation
             _data.EvaluationId = NextEvaluationId();
             _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
 
-            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !Traits.Instance.EscapeHatches.DoNotLogProjectImports;
+            _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();

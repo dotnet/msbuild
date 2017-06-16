@@ -9,6 +9,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -355,11 +356,13 @@ namespace Microsoft.Build.Engine.UnitTests
             _originalValue = Environment.GetEnvironmentVariable(environmentVariableName);
 
             Environment.SetEnvironmentVariable(environmentVariableName, newValue);
+            Traits.Instance = new Traits(); // Reset the traits to re-read environment changes
         }
 
         public override void Revert()
         {
             Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
+            Traits.Instance = new Traits(); // Reset the traits to re-read environment changes
         }
     }
 
