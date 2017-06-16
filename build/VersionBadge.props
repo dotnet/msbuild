@@ -1,10 +1,12 @@
 <Project>
   <PropertyGroup>
-    <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker> 
-    <VersionBadgeMoniker Condition=" '$(Rid)' == 'ubuntu.16.04-x64' ">ubuntu_16_04_x64</VersionBadgeMoniker>
-    <VersionBadgeMoniker Condition=" '$(Rid)' == 'ubuntu.16.10-x64' ">ubuntu_16_10_x64</VersionBadgeMoniker>
-    <VersionBadgeMoniker Condition=" '$(Rid)' == 'fedora.24-x64' ">fedora_24_x64</VersionBadgeMoniker>
-    <VersionBadgeMoniker Condition=" '$(Rid)' == 'opensuse.42.1-x64' ">opensuse_42_1_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(HostRid)' == 'debian.8-x64' ">debian_8_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(HostRid)' == 'rhel.7-x64' ">rhel_7_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(HostRid)' == 'ubuntu.14.04-x64' ">ubuntu_14_04_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(HostRid)' == 'ubuntu.16.04-x64' ">ubuntu_16_04_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(HostRid)' == 'ubuntu.16.10-x64' ">ubuntu_16_10_x64</VersionBadgeMoniker>
+    <VersionBadgeMoniker Condition=" '$(IslinuxPortable)' == 'true' ">linux_x64</VersionBadgeMoniker>
 
     <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge> 
   </PropertyGroup>
