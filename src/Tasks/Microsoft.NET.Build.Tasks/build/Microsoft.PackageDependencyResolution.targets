@@ -207,7 +207,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           FileDependencies="@(FileDependencies)"
           References="@(Reference)"
           DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          InputDiagnosticMessages="@(DiagnosticMessages)">
+          InputDiagnosticMessages="@(DiagnosticMessages)"
+          TargetFrameworkMoniker="$(TargetFrameworkMoniker)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
