@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+      <IsDebianBaseDistro Condition=" '$(HostOSName)' == 'ubuntu' OR '$(HostOSName)' == 'debian' ">true</IsDebianBaseDistro>
+      <IsRPMBasedDistro Condition=" $(HostRid.StartsWith('rhel')) ">true</IsRPMBasedDistro>
+      <IsLinuxDistroSpecific Condition=" ('$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true') AND '$(IslinuxPortable)' != 'true' ">true</IsLinuxDistroSpecific>
+    </PropertyGroup>
+</Project>
