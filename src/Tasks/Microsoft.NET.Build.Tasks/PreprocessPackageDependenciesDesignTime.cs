@@ -23,6 +23,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string DependenciesMetadata = "Dependencies";
         public const string CompileTimeAssemblyMetadata = "CompileTimeAssembly";
         public const string ResolvedMetadata = "Resolved";
+        public const string VisibleMetadata = "Visible";
 
         [Required]
         public ITaskItem[] TargetDefinitions { get; set; }
@@ -242,7 +243,9 @@ namespace Microsoft.NET.Build.Tasks
 
                 // Create the appropriate metadata.
                 var name = Path.GetFileName(referenceKey);
-                var assembly = new ExistingReferenceItemMetadata(name, reference.ItemSpec);
+                var facadeMetadata = reference.GetBooleanMetadata("Facade");
+                var visible = facadeMetadata.HasValue ? !facadeMetadata.Value : true;
+                var assembly = new ExistingReferenceItemMetadata(name, reference.ItemSpec, visible);
                 Assemblies[referenceKey] = assembly;
 
                 // Create the file dependency.
@@ -517,19 +520,44 @@ namespace Microsoft.NET.Build.Tasks
         /// Represents metadata for a Reference item that we want to pretend was resolved as a
         /// standard NuGet package assembly.
         /// </summary>
-        private class ExistingReferenceItemMetadata : PackageMetadata
+        private class ExistingReferenceItemMetadata : ItemMetadata
         {
-            public ExistingReferenceItemMetadata(string name, string path)
+            public ExistingReferenceItemMetadata(string name, string path, bool visible)
                 : base(
                       type: DependencyType.Assembly,
                       dependencies: null,
-                      isTopLevelDependency: false,
-                      name: name,
-                      version: string.Empty,
-                      path: path,
-                      resolved: true,
-                      isImplicitlyDefined: false)
+                      isTopLevelDependency: false)
             {
+                Name = name;
+                Path = path;
+                Visible = visible;
+            }
+
+            public string Name { get; }
+            public string Path { get; }
+            public bool Visible { get; }
+
+            public override IDictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, Name },
+                    { MetadataKeys.Path, Path },
+                    { MetadataKeys.Type, Type.ToString() },
+                    { MetadataKeys.IsImplicitlyDefined, "false" },
+                    { MetadataKeys.IsTopLevelDependency, "false" },
+                    { ResolvedMetadata, "true" },
+                    { VisibleMetadata, Visible.ToString() },
+                    { DependenciesMetadata, string.Empty }
+                };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new ExistingReferenceItemMetadata(
+                    Name,
+                    Path,
+                    Visible);
             }
         }
 
