@@ -8,7 +8,7 @@
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

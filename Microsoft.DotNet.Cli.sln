@@ -59,6 +59,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\Test.targets = build\Test.targets
 		build\Version.props = build\Version.props
 		build\VersionBadge.props = build\VersionBadge.props
+		build\DerivedHostMachineInfo.props = build\DerivedHostMachineInfo.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE}"
@@ -68,6 +69,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D
 		build\package\Installer.DEB.targets = build\package\Installer.DEB.targets
 		build\package\Installer.MSI.targets = build\package\Installer.MSI.targets
 		build\package\Installer.PKG.targets = build\package\Installer.PKG.targets
+		build\package\Installer.RPM.props = build\package\Installer.RPM.props
+		build\package\Installer.RPM.targets = build\package\Installer.RPM.targets
 		build\package\Layout.targets = build\package\Layout.targets
 		build\package\Nupkg.targets = build\package\Nupkg.targets
 	EndProjectSection

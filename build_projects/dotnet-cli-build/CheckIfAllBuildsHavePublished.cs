@@ -51,16 +51,8 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 { "win_x86", false },
                 { "win_x64", false },
-                { "ubuntu_x64", false },
-                { "ubuntu_16_04_x64", false },
-                { "ubuntu_16_10_x64", false },
-                { "rhel_x64", false },
                 { "osx_x64", false },
-                { "debian_x64", false },
-                { "centos_x64", false },
                 { "linux_x64", false },
-                { "fedora_24_x64", false },
-                { "opensuse_42_1_x64", false }
             };
 
             if (!badges.ContainsKey(VersionBadgeMoniker))

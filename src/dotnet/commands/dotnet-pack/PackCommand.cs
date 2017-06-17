@@ -14,8 +14,13 @@ namespace Microsoft.DotNet.Tools.Pack
 {
     public class PackCommand : RestoringCommand
     {
-        public PackCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
-            : base(msbuildArgs, noRestore, msbuildPath)
+        public PackCommand(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> userDefinedArguments,
+            IEnumerable<string> trailingArguments,
+            bool noRestore,
+            string msbuildPath = null)
+            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
         {
         }
 
@@ -40,7 +45,12 @@ namespace Microsoft.DotNet.Tools.Pack
 
             bool noRestore = parsedPack.HasOption("--no-restore");
 
-            return new PackCommand(msbuildArgs, noRestore, msbuildPath);
+            return new PackCommand(
+                msbuildArgs,
+                parsedPack.OptionValuesToBeForwarded(),
+                parsedPack.Arguments,
+                noRestore,
+                msbuildPath);
         }
 
         public static int Run(string[] args)

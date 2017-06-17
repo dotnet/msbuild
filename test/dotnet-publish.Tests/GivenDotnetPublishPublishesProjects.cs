@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -56,6 +57,23 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--framework netcoreapp2.0")
+                .Should().Pass();
+        }
+
+        [Fact]
+        public void ItCanPublishAMultiTFMProjectWithImplicitRestore()
+        {
+            var testInstance = TestAssets.Get(
+                    TestAssetKinds.DesktopTestProjects,
+                    "NETFrameworkReferenceNETStandard20")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            string projectDirectory = Path.Combine(testInstance.Root.FullName, "MultiTFMTestApp");
+
+            new PublishCommand()
+                .WithWorkingDirectory(projectDirectory)
                 .Execute("--framework netcoreapp2.0")
                 .Should().Pass();
         }

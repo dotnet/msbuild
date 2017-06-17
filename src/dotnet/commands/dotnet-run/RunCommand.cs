@@ -145,7 +145,8 @@ namespace Microsoft.DotNet.Tools.Run
 
             buildArgs.AddRange(RestoreArgs);
 
-            var buildResult = new RestoringCommand(buildArgs, NoRestore).Execute();
+            var buildResult =
+                new RestoringCommand(buildArgs, RestoreArgs, new [] { Project }, NoRestore).Execute();
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();

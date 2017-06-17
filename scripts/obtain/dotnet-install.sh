@@ -147,7 +147,7 @@ get_distro_specific_os_name() {
         fi
     fi
     
-    say_err "OS name could not be detected: $ID.$VERSION_ID"
+    say_verbose "Distribution specific OS name and version could not be detected: $ID.$VERSION_ID"
     return 1
 }
 
@@ -339,12 +339,17 @@ get_latest_version_info() {
     local azure_feed=$1
     local channel=$2
     local normalized_architecture=$3
+    local coherent=$4
 
     local version_file_url=null
     if [ "$shared_runtime" = true ]; then
         version_file_url="$uncached_feed/Runtime/$channel/latest.version"
     else
-        version_file_url="$uncached_feed/Sdk/$channel/latest.version"
+        if [ "$coherent" = true ]; then
+            version_file_url="$uncached_feed/Runtime/$channel/latest.coherent.version"
+        else
+            version_file_url="$uncached_feed/Sdk/$channel/latest.version"
+        fi
     fi
     say_verbose "get_latest_version_info: latest url: $version_file_url"
     
@@ -368,7 +373,14 @@ get_specific_version_from_version() {
     case $version in
         latest)
             local version_info
-            version_info="$(get_latest_version_info $azure_feed $channel $normalized_architecture)" || return 1
+            version_info="$(get_latest_version_info $azure_feed $channel $normalized_architecture false)" || return 1
+            say_verbose "get_specific_version_from_version: version_info=$version_info"
+            echo "$version_info" | get_version_from_version_info
+            return 0
+            ;;
+        coherent)
+            local version_info
+            version_info="$(get_latest_version_info $azure_feed $channel $normalized_architecture true)" || return 1
             say_verbose "get_specific_version_from_version: version_info=$version_info"
             echo "$version_info" | get_version_from_version_info
             return 0
@@ -412,7 +424,7 @@ construct_download_link() {
 # channel - $2
 # normalized_architecture - $3
 # specific_version - $4
-construct_alt_download_link() {
+construct_legacy_download_link() {
     eval $invocation
     
     local azure_feed=$1
@@ -423,14 +435,14 @@ construct_alt_download_link() {
     local distro_specific_osname
     distro_specific_osname=$(get_distro_specific_os_name) || return 1
 
-    local alt_download_link=null
+    local legacy_download_link=null
     if [ "$shared_runtime" = true ]; then
-        alt_download_link="$azure_feed/Runtime/$specific_version/dotnet-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
+        legacy_download_link="$azure_feed/Runtime/$specific_version/dotnet-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     else
-        alt_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
+        legacy_download_link="$azure_feed/Sdk/$specific_version/dotnet-dev-$distro_specific_osname-$normalized_architecture.$specific_version.tar.gz"
     fi
 
-    echo "$alt_download_link"
+    echo "$legacy_download_link"
     return 0
 }
 
@@ -601,7 +613,8 @@ downloadwget() {
 
 calculate_vars() {
     eval $invocation
-    
+    valid_legacy_download_link=true
+
     normalized_architecture=$(get_normalized_architecture_from_architecture "$architecture")
     say_verbose "normalized_architecture=$normalized_architecture"
     
@@ -615,8 +628,13 @@ calculate_vars() {
     download_link=$(construct_download_link $azure_feed $channel $normalized_architecture $specific_version)
     say_verbose "download_link=$download_link"
 
-    alt_download_link=$(construct_alt_download_link $azure_feed $channel $normalized_architecture $specific_version)
-    say_verbose "alt_download_link=$alt_download_link"
+    legacy_download_link=$(construct_legacy_download_link $azure_feed $channel $normalized_architecture $specific_version) || valid_legacy_download_link=false
+
+    if [ "$valid_legacy_download_link" = true ]; then
+        say_verbose "legacy_download_link=$legacy_download_link"
+    else
+        say_verbose "Cound not construct a legacy_download_link; omitting..."
+    fi
 
     install_root=$(resolve_installation_path $install_dir)
     say_verbose "install_root=$install_root"
@@ -638,16 +656,17 @@ install_dotnet() {
     say "Downloading link: $download_link"
     download "$download_link" $zip_path || download_failed=true
 
-    #  if the download fails, download the alt_download_link
-    if [ "$download_failed" = true ]; then
+    #  if the download fails, download the legacy_download_link
+    if [ "$download_failed" = true ] && [ "$valid_legacy_download_link" = true ]; then
         say "Cannot download: $download_link"
+        download_link=$legacy_download_link
         zip_path=$(mktemp $temporary_file_template)
-        say_verbose "Alternate zip path: $zip_path"
-        say "Downloading alternate link: $alt_download_link"
-        download "$alt_download_link" $zip_path
+        say_verbose "Legacy zip path: $zip_path"
+        say "Downloading legacy link: $download_link"
+        download "$download_link" $zip_path
     fi
     
-    say "Extracting zip"
+    say "Extracting zip from $download_link"
     extract_dotnet_package $zip_path $install_root
     
     return 0
@@ -657,11 +676,10 @@ local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
 temporary_file_template="${TMPDIR:-/tmp}/dotnet.XXXXXXXXX"
 
-channel="release/1.0.0"
+channel="LTS"
 version="Latest"
 install_dir="<auto>"
 architecture="<auto>"
-debug_symbols=false
 dry_run=false
 no_path=false
 azure_feed="https://dotnetcli.azureedge.net/dotnet"
@@ -693,9 +711,6 @@ do
         --shared-runtime|-[Ss]hared[Rr]untime)
             shared_runtime=true
             ;;
-        --debug-symbols|-[Dd]ebug[Ss]ymbols)
-            debug_symbols=true
-            ;;
         --dry-run|-[Dd]ry[Rr]un)
             dry_run=true
             ;;
@@ -726,17 +741,29 @@ do
             echo "$script_name is a simple command line interface for obtaining dotnet cli."
             echo ""
             echo "Options:"
-            echo "  -c,--channel <CHANNEL>         Download from the CHANNEL specified (default: $channel)."
+            echo "  -c,--channel <CHANNEL>         Download from the CHANNEL specified, Defaults to \`$channel\`."
             echo "      -Channel"
-            echo "  -v,--version <VERSION>         Use specific version, or \`latest\`. Defaults to \`latest\`."
+            echo "          Possible values:"
+            echo "          - Current - most current release"
+            echo "          - LTS - most current supported release"
+            echo "          - 2-part version in a format A.B - represents a specific release"
+            echo "              examples: 2.0; 1.0"
+            echo "          - Branch name"
+            echo "              examples: release/2.0.0; Master"
+            echo "  -v,--version <VERSION>         Use specific VERSION, Defaults to \`$version\`."
             echo "      -Version"
+            echo "          Possible values:"
+            echo "          - latest - most latest build on specific channel"
+            echo "          - coherent - most latest coherent build on specific channel"
+            echo "              coherent applies only to SDK downloads"
+            echo "          - 3-part version in a format A.B.C - represents specific version of build"
+            echo "              examples: 2.0.0-preview2-006120; 1.1.0"
             echo "  -i,--install-dir <DIR>         Install under specified location (see Install Location below)"
             echo "      -InstallDir"
             echo "  --architecture <ARCHITECTURE>  Architecture of .NET Tools. Currently only x64 is supported."
             echo "      --arch,-Architecture,-Arch"
             echo "  --shared-runtime               Installs just the shared runtime bits, not the entire SDK."
             echo "      -SharedRuntime"
-            echo "  --debug-symbols,-DebugSymbols  Specifies if symbols should be included in the installation."
             echo "  --dry-run,-DryRun              Do not perform installation. Display download link."
             echo "  --no-path, -NoPath             Do not set PATH for the current process."
             echo "  --verbose,-Verbose             Display diagnostics information."
@@ -764,9 +791,12 @@ done
 
 check_min_reqs
 calculate_vars
+
 if [ "$dry_run" = true ]; then
     say "Payload URL: $download_link"
-    say "Alternate payload URL: $alt_download_link"
+    if [ "$valid_legacy_download_link" = true ]; then
+        say "Legacy payload URL: $legacy_download_link"
+    fi
     say "Repeatable invocation: ./$(basename $0) --version $specific_version --channel $channel --install-dir $install_dir"
     exit 0
 fi

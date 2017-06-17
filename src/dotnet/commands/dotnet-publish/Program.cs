@@ -13,8 +13,13 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     public class PublishCommand : RestoringCommand
     {
-        private PublishCommand(IEnumerable<string> msbuildArgs, bool noRestore, string msbuildPath = null)
-            : base(msbuildArgs, noRestore, msbuildPath)
+        private PublishCommand(
+            IEnumerable<string> msbuildArgs,
+            IEnumerable<string> userDefinedArguments,
+            IEnumerable<string> trailingArguments,
+            bool noRestore,
+            string msbuildPath = null)
+            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
         {
         }
 
@@ -40,7 +45,12 @@ namespace Microsoft.DotNet.Tools.Publish
 
             bool noRestore = appliedPublishOption.HasOption("--no-restore");
 
-            return new PublishCommand(msbuildArgs, noRestore, msbuildPath);
+            return new PublishCommand(
+                msbuildArgs,
+                appliedPublishOption.OptionValuesToBeForwarded(),
+                appliedPublishOption.Arguments,
+                noRestore,
+                msbuildPath);
         }
 
         public static int Run(string[] args)
