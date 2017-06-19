@@ -31,7 +31,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview2-final" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview2-final" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview2-final" />
-    <PackageReference Include="Microsoft.Composition" Version="1.0.27" PrivateAssets="All" NoWarn="NU1701" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0-preview2-final" PrivateAssets="All" Condition="'$(IndividualLocalAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0-preview2-final" Condition=" '$(IndividualLocalAuth)' == 'True' AND '$(UseLocalDB)' != 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0-preview2-final" Condition=" '$(IndividualLocalAuth)' == 'True' AND '$(UseLocalDB)' == 'True'" />
