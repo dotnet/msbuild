@@ -2,6 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="FinishBuild"
           DependsOnTargets="CheckIfAllBuildsHavePublished;
+                            EvaluateRuntimeCoherence;
                             FinalizeBuild" />
 
   <Target Name="CheckIfAllBuildsHavePublished">
@@ -14,6 +15,27 @@
     </CheckIfAllBuildsHavePublished>
   </Target>
 
+  <Target Name="EvaluateRuntimeCoherence"
+        DependsOnTargets="ReadAspNetCoreSharedRuntimeVersionFile"
+        BeforeTargets="FinalizeBuild">
+    <PropertyGroup>
+      <Coherent>false</Coherent>
+      <Coherent Condition=" '$(CLI_SharedFrameworkVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ReadAspNetCoreSharedRuntimeVersionFile"
+          DependsOnTargets="DownloadHostAndSharedFxArtifacts">
+    <ItemGroup>
+      <File Include="$(AspNetCoreSharedRuntimeVersionFile)" />
+    </ItemGroup>
+    <ReadLinesFromFile File="@(File)">
+      <Output
+          TaskParameter="Lines"
+          ItemName="AspNetCoreSharedRuntimeVersion"/>
+    </ReadLinesFromFile>
+  </Target>
+  
   <Target Name="FinalizeBuild"
           Condition=" '$(HaveAllBuildsPublished)' == 'True' ">
     <CopyBlobsToLatest AccountName="$(ArtifactCloudDropAccountName)"
@@ -21,14 +43,16 @@
                        ContainerName="$(ArtifactContainerName)"
                        NugetVersion="$(FullNugetVersion)"
                        Channel="$(Channel)"
-                       CommitHash="$(CommitHash)" />
+                       CommitHash="$(CommitHash)"
+                       Coherent="$(Coherent)" />
 
     <CopyBlobsToLatest AccountName="$(ChecksumCloudDropAccountName)"
                        AccountKey="$(ChecksumCloudDropAccessToken)"
                        ContainerName="$(ChecksumContainerName)"
                        NugetVersion="$(FullNugetVersion)"
                        Channel="$(Channel)"
-                       CommitHash="$(CommitHash)" />
+                       CommitHash="$(CommitHash)"
+                       Coherent="$(Coherent)" />
 
     <!-- Uncomment the line below when https://github.com/dotnet/buildtools/issues/1547 gets fixed. -->
     <!-- <UpdateVersionsRepo BranchName="$(BranchName)"

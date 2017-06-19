@@ -8,11 +8,14 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class AnsiConsole
     {
+        private const int Light = 0x08;
+
         private AnsiConsole(TextWriter writer)
         {
             Writer = writer;
     
             OriginalForegroundColor = Console.ForegroundColor;
+            _boldRecursion = ((int)OriginalForegroundColor & Light) != 0 ? 1 : 0;
         }
     
         private int _boldRecursion;
@@ -33,7 +36,6 @@ namespace Microsoft.DotNet.Cli.Utils
     
         private void SetColor(ConsoleColor color)
         {
-            const int Light = 0x08;
             int c = (int)color;
 
             Console.ForegroundColor = 

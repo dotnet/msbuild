@@ -104,7 +104,7 @@ while [[ $# > 0 ]]; do
             ;;
         --linux-portable)
             LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
-            CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\""
+            CUSTOM_BUILD_ARGS="/p:Rid=\"linux-x64\" /p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
             args=( "${args[@]/$1}" )
             ;;
         --help)

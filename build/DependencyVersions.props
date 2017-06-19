@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.0-preview2-25407-01</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.0.0-preview3-25415-01</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.3.0-preview-000388-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta3-61814-09</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
@@ -10,7 +10,7 @@
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.0-preview2-20170614-1</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.0-preview2-20170615-7</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
     
     <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
@@ -23,8 +23,8 @@
     <TemplateEngineVersion>1.0.0-beta2-20170608-254</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta2-20170612-258</TemplateEngineTemplateVersion>
     <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170612-258</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.0.0-preview2-25407-01</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0-preview2-25407-01</DependencyModelVersion>
+    <PlatformAbstractionsVersion>2.0.0-preview3-25415-01</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.0.0-preview3-25415-01</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>

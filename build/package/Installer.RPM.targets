@@ -182,6 +182,7 @@
   </Target>
 
   <Target Name="TestSdkRpm"
+          DependsOnTargets="RestoreTests"
           Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
