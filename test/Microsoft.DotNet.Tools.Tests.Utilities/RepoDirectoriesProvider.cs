@@ -37,9 +37,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string directory = AppContext.BaseDirectory;
 #endif
 
-                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+                while (directory != null)
                 {
-                    directory = Directory.GetParent(directory).FullName;
+                    var gitDirOrFile = Path.Combine(directory, ".git");
+                    if (Directory.Exists(gitDirOrFile) || File.Exists(gitDirOrFile))
+                    {
+                        break;
+                    }
+                    directory = Directory.GetParent(directory)?.FullName;
                 }
 
                 if (directory == null)
