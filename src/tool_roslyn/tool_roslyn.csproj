@@ -37,9 +37,9 @@
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
     <ItemGroup>
-      <AssetsToRemoveFromDeps Include="runtimes/any/native/csc.exe" 
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/csc.dll" 
                               SectionName="runtimeTargets" />
-      <AssetsToRemoveFromDeps Include="runtimes/any/native/vbc.exe" 
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/vbc.dll" 
                               SectionName="runtimeTargets" />
       <AssetsToRemoveFromDeps Include="tool_roslyn.dll" 
                               SectionName="runtime"/>
@@ -49,7 +49,7 @@
                                  SectionName="%(AssetsToRemoveFromDeps.SectionName)"
                                  AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
    
-    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.exe;
+    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.dll;
                        $(PublishDir)/$(TargetName).runtimeconfig.json;
                        $(PublishDir)/$(TargetName).deps.json;"
           DestinationFiles="$(PublishDir)/csc.exe;
