@@ -5,7 +5,7 @@
     <CLI_MSBuild_Version>15.3.0-preview-000388-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta3-61814-09</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
-    <CLI_FSharp_Version>4.2.0-rc-170602-0</CLI_FSharp_Version>
+    <CLI_FSharp_Version>4.2.0-rc-170619-0</CLI_FSharp_Version>
     
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
