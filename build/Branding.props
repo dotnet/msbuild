@@ -1,6 +1,6 @@
 <Project ToolsVersion="14.0">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core SDK 2.0.0 Preview 2</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core SDK 2.1.0 - Preview 1</SdkBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.0.0</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core Host 2.0.0</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.0.0</HostFxrBrandName>

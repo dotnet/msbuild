@@ -80,8 +80,8 @@ $env:VSTEST_TRACE_BUILD=1
 # install a stage0
 $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
 
-Write-Output "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-Invoke-Expression "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Write-Output "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Version 2.0.0-preview2-006437" 
+Invoke-Expression "$dotnetInstallPath -Channel ""release/2.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"" -Version 2.0.0-preview2-006437"
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
