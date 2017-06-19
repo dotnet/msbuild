@@ -61,13 +61,10 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
-            string firstTimeUseWelcomeMessage = NormalizeLineEndings(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
-            // normalizing line endings as what is used in the resources may
-            // does not necessarily match how the command stdout capturing logic 
-            // handles newlines.
-            NormalizeLineEndings(_firstDotnetVerbUseCommandResult.StdOut)
-                .Should().Contain(firstTimeUseWelcomeMessage)
-                     .And.NotContain("Restore completed in");
+            _firstDotnetVerbUseCommandResult.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage)
+                .And.NotContain("Restore completed in");
         }
 
         [Fact]
@@ -111,11 +108,6 @@ namespace Microsoft.DotNet.Tests
         {
             return new DotnetCommand().ExecuteWithCapturedOutput("--version").StdOut
                 .TrimEnd(Environment.NewLine.ToCharArray());
-        }
-
-        private static string NormalizeLineEndings(string s)
-        {
-            return s.Replace("\r\n", "\n").Replace("\r", "\n");
         }
     }
 }
