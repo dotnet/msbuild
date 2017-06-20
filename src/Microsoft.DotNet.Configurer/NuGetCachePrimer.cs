@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Configurer
             _nuGetCacheSentinel.CreateIfNotExists();
         }
 
-        private bool SkipPrimingTheCache()
+        public bool SkipPrimingTheCache()
         {
             return !_file.Exists(_nugetPackagesArchiver.NuGetPackagesArchive);
         }
