@@ -1988,9 +1988,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</source>
-        <target state="translated">MSB4234: バイナリ ロガーには単一のパラメーター (出力ファイル名) が必要です。{0} 個のパラメーターが渡されました: "{1}"。</target>
-        <note>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</note>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="updated">MSB4234: バイナリ ロガーには単一のパラメーター (出力ファイル名) が必要です。{0} 個のパラメーターが渡されました: "{1}"。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
@@ -2021,6 +2021,31 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
         <target state="translated">MSB4235: ログ ファイル形式のバージョンは {0} ですが、このバージョンの MSBuild がサポートしているのは {1} のバージョンまでのみです。</target>
         <note>{StrBegin="MSB4235: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectEvaluationPerformanceSummary">
+        <source>Project Evaluation Performance Summary:</source>
+        <target state="new">Project Evaluation Performance Summary:</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedFalseCondition">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedNoMatches">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedEmptyFile">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
+        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectImported">
+        <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
+        <target state="new">Importing project "{0}" into project "{1}" at ({2},{3}).</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

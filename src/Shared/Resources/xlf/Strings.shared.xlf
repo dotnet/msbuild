@@ -228,11 +228,7 @@
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <note>{StrBegin="MSB5021: "}</note>
+        <note />
       </trans-unit>
     </body>
   </file>

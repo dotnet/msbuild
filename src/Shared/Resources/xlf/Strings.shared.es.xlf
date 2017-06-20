@@ -284,11 +284,6 @@
         <target state="translated">El parámetro "{0}" con el valor asignado "{1}" no puede tener una ruta de acceso no válida o caracteres de archivo no válidos.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: Valor de sombreado de escape no válido: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

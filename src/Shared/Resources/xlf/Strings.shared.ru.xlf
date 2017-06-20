@@ -284,11 +284,6 @@
         <target state="translated">Параметр "{0}" с назначенным значением "{1}" не может иметь недопустимый путь или недопустимые символы файлов.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: недопустимое значение escape-hatch: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>
