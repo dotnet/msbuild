@@ -354,9 +354,6 @@
   <data name="SpecifyAtLeastOneReferenceToAdd" xml:space="preserve">
     <value>You must specify at least one reference to add.</value>
   </data>
-  <data name="ProjectAlreadyHasAReference" xml:space="preserve">
-    <value>Project {0} already has a reference `{1}`.</value>
-  </data>
   <data name="PackageReferenceDoesNotExist" xml:space="preserve">
     <value>Package reference `{0}` does not exist.</value>
   </data>

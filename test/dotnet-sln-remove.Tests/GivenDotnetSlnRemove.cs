@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
@@ -182,7 +183,7 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln remove {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -191,7 +192,7 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln remove");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\nYou must specify at least one project to remove.");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($"Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\n{CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove}");
         }
 
         [Theory]
@@ -202,8 +203,8 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Required command was not provided.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(SlnCommandHelpText);
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
         }
 
         [Theory]
@@ -217,8 +218,8 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln {solutionName} remove p.csproj");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -236,8 +237,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln InvalidSolution.sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Expected file header not found.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -256,8 +257,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Expected file header not found.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -274,8 +275,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput(@"sln App.sln remove");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("You must specify at least one project to remove.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -293,8 +294,8 @@ EndGlobal
                 .WithWorkingDirectory(solutionPath)
                 .ExecuteWithCapturedOutput(@"sln remove App.csproj");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionPath + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -312,8 +313,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -332,7 +333,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln remove referenceDoesNotExistInSln.csproj");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Project reference `referenceDoesNotExistInSln.csproj` could not be found.");
+            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "referenceDoesNotExistInSln.csproj"));
             File.ReadAllText(solutionPath)
                 .Should().BeVisuallyEquivalentTo(contentBefore);
         }
@@ -356,7 +357,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{projectToRemove}` removed.");
+            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove));
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);
@@ -383,8 +384,8 @@ EndGlobal
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Pass();
 
-            string outputText = $@"Project reference `{projectToRemove}` removed.
-Project reference `{projectToRemove}` removed.";
+            string outputText = string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove);
+            outputText += Environment.NewLine + outputText;
             cmd.StdOut.Should().BeVisuallyEquivalentTo(outputText);
 
             slnFile = SlnFile.Read(solutionPath);
@@ -412,9 +413,10 @@ Project reference `{projectToRemove}` removed.";
                 .ExecuteWithCapturedOutput($"sln remove idontexist.csproj {projectToRemove} idontexisteither.csproj");
             cmd.Should().Pass();
 
-            string outputText = $@"Project reference `idontexist.csproj` could not be found.
-Project reference `{projectToRemove}` removed.
-Project reference `idontexisteither.csproj` could not be found.";
+            string outputText = $@"{string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "idontexist.csproj")}
+{string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove)}
+{string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "idontexisteither.csproj")}";
+
             cmd.StdOut.Should().BeVisuallyEquivalentTo(outputText);
 
             slnFile = SlnFile.Read(solutionPath);

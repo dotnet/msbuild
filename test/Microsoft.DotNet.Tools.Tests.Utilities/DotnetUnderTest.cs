@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Globalization;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
@@ -32,6 +33,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     new RepoDirectoriesProvider().Stage2WithBackwardsCompatibleRuntimesDirectory,
                     "dotnet");
             }
+        }
+
+        public static bool IsLocalized()
+        {
+            for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)
+            {
+                if (culture.Name == "en")
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

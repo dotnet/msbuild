@@ -31,7 +31,7 @@ Options:
             var cmd = new HelpCommand()
                 .ExecuteWithCapturedOutput($"{helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+            cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
     }
 }

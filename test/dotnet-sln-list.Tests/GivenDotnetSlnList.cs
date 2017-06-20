@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
@@ -48,7 +49,7 @@ Commands:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln list {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Theory]
@@ -59,8 +60,8 @@ Commands:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Required command was not provided.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(SlnCommandHelpText);
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
         }
 
         [Fact]
@@ -83,8 +84,8 @@ Commands:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"sln {solutionName} list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -101,8 +102,8 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln InvalidSolution.sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Expected file header not found.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -120,8 +121,8 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Expected file header not found.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionFullPath, LocalizableStrings.FileHeaderMissingError));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -139,8 +140,8 @@ Commands:
                 .WithWorkingDirectory(solutionDir)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Specified solution file {solutionDir + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionDir + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -157,8 +158,8 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -175,14 +176,15 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("No projects found in the solution.");
+            cmd.StdOut.Should().Be(CommonLocalizableStrings.NoProjectsFound);
         }
 
         [Fact]
         public void WhenProjectReferencesArePresentInTheSolutionItListsThem()
         {
-            string OutputText = $@"Project reference(s)
---------------------
+            string OutputText = CommonLocalizableStrings.ProjectReferenceOneOrMore;
+            OutputText += $@"
+{new string('-', OutputText.Length)}
 {Path.Combine("App", "App.csproj")}
 {Path.Combine("Lib", "Lib.csproj")}";
 
