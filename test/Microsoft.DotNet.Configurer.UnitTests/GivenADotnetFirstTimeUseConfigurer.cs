@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 {
     public class GivenADotnetFirstTimeUseConfigurer
     {
+        private const string CliFallbackFolderPath = "some path";
+
         private Mock<INuGetCachePrimer> _nugetCachePrimerMock;
         private Mock<INuGetCacheSentinel> _nugetCacheSentinelMock;
         private Mock<IFirstTimeUseNoticeSentinel> _firstTimeUseNoticeSentinelMock;
@@ -45,7 +47,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -66,7 +69,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -87,7 +91,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -105,7 +110,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -123,7 +129,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -140,7 +147,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -157,7 +165,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -177,7 +186,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -194,7 +204,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 
@@ -212,7 +223,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _nugetCacheSentinelMock.Object,
                 _firstTimeUseNoticeSentinelMock.Object,
                 _environmentProviderMock.Object,
-                _reporterMock.Object);
+                _reporterMock.Object,
+                CliFallbackFolderPath);
 
             dotnetFirstTimeUseConfigurer.Configure();
 

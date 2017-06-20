@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Cli
 
                 if (telemetryClient == null)
                 {
-                    telemetryClient = new Telemetry(nugetCacheSentinel);
+                    telemetryClient = new Telemetry(firstTimeUseNoticeSentinel);
                 }
             }
 
@@ -177,18 +177,17 @@ namespace Microsoft.DotNet.Cli
                 var nugetPackagesArchiver = new NuGetPackagesArchiver();
                 var environmentProvider = new EnvironmentProvider();
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                var nugetConfig = new NuGetConfig(cliFallbackFolderPathCalculator);
                 var nugetCachePrimer = new NuGetCachePrimer(
                     nugetPackagesArchiver,
                     nugetCacheSentinel,
-                    nugetConfig,
                     cliFallbackFolderPathCalculator);
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                     nugetCachePrimer,
                     nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     environmentProvider,
-                    Reporter.Output);
+                    Reporter.Output,
+                    cliFallbackFolderPathCalculator.CliFallbackFolderPath);
 
                 dotnetConfigurer.Configure();
             }

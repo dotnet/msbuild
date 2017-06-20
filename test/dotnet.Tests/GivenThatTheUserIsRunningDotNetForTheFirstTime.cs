@@ -25,19 +25,21 @@ namespace Microsoft.DotNet.Tests
         {
             var testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests");
             var testNuGetHome = Path.Combine(testDirectory.FullName, "nuget_home");
+            var cliTestFallbackFolder = Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(testDirectory);
             command.Environment["HOME"] = testNuGetHome;
             command.Environment["USERPROFILE"] = testNuGetHome;
             command.Environment["APPDATA"] = testNuGetHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = cliTestFallbackFolder;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
-            _nugetFallbackFolder = new DirectoryInfo(Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder"));
+            _nugetFallbackFolder = new DirectoryInfo(cliTestFallbackFolder);
         }
 
         [Fact]

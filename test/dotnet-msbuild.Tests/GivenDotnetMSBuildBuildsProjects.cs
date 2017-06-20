@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             result.Should().Fail();
 
-            result.StdOut.Should().ContainVisuallySameFragment(@"source(s): /usr/local/bin, nuget.org");
+            result.StdOut.Should().ContainVisuallySameFragment("NU1101");
         }
 
         [Fact]
@@ -186,14 +186,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
     }
 
-    public sealed class MockNuGetCacheSentinel : INuGetCacheSentinel
+    public sealed class MockNuGetCacheSentinel : IFirstTimeUseNoticeSentinel
     {
         private readonly Func<bool> _exists;
+
+        public bool UnauthorizedAccess => true;
 
         public MockNuGetCacheSentinel(Func<bool> exists = null)
         {
             _exists = exists ?? (() => true);
         }
+
         public void Dispose()
         {
         }

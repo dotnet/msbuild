@@ -6,13 +6,13 @@
     <CLI_Roslyn_Version>2.3.0-beta3-61816-04</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
     <CLI_FSharp_Version>4.2.0-rc-170602-0</CLI_FSharp_Version>
-    
+
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
     <CLI_NETSDK_Version>2.0.0-preview2-20170615-7</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
-    
+
     <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25331-02</CLI_NETStandardLibraryNETFrameworkVersion>
     <CLI_WEBSDK_Version>2.0.0-rel-20170518-512</CLI_WEBSDK_Version>

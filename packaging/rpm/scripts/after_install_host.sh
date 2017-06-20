@@ -19,4 +19,4 @@ The data collected is anonymous and will be published in an aggregated form for 
 
 The .NET Core Tools telemetry feature is enabled by default. You can opt-out of the telemetry feature by setting an environment variable DOTNET_CLI_TELEMETRY_OPTOUT (for example, 'export' on macOS/Linux, 'set' on Windows) to true (for example, 'true', 1). You can read more about .NET Core tools telemetry at https://aka.ms/dotnet-cli-telemetry."
 
-su - $SUDO_USER -c "dotnet new > /dev/null 2>&1 || true"
+dotnet new > /dev/null 2>&1 || true
