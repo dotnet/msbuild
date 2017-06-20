@@ -104,7 +104,9 @@ namespace Microsoft.Build.Shared
                 {
                     foreach (var extension in _extensions)
                     {
-                        var candidatePath = Path.Combine(dependencyPath, $"{assemblyName.Name}.{extension}");
+                        var candidatePath = Path.Combine(dependencyPath,
+                            assemblyName.CultureName ?? string.Empty,
+                            $"{assemblyName.Name}.{extension}");
                         if (IsAssemblyAlreadyLoaded(candidatePath) ||
                             !File.Exists(candidatePath))
                         {
