@@ -11,12 +11,8 @@ Telemetry
 --------------
 The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
 You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
-
-Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">歡迎使用 .NET Core!
+You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+        <target state="needs-review-translation">歡迎使用 .NET Core!
 ---------------------
 深入了解 .NET Core @ https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令，或前往 https://aka.ms/dotnet-cli-docs。
 
@@ -34,6 +30,15 @@ A command is running to initially populate your local package cache, to improve 
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
         <target state="translated">無法備妥 NuGet 快取。{0} 失敗，發生: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NugetCachePrimeMessage">
+        <source>Configuring...
+-------------------
+A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+        <target state="new">Configuring...
+-------------------
+A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
         <note />
       </trans-unit>
     </body>
