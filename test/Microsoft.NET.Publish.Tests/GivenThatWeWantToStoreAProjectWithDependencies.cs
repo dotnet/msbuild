@@ -84,7 +84,7 @@ namespace Microsoft.NET.Publish.Tests
                };
 
            
-            storeDirectory.Should().HaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [CoreMSBuildOnlyFact]
@@ -114,8 +114,7 @@ namespace Microsoft.NET.Publish.Tests
                };
 
            
-            storeDirectory.Should().HaveFiles(files_on_disk);
-
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [CoreMSBuildOnlyFact]
@@ -167,18 +166,21 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll",
                };
 
-            storeDirectory.Should().HaveFiles(files_on_disk);
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
-            var knownpackage = new HashSet<PackageIdentity>();
-
-            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")));
-            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")));
-            knownpackage.Add(new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0")));
+            var knownpackage = new HashSet<PackageIdentity>
+            {
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")),
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")),
+                new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0"))
+            };
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
             var packagescomposed = ParseStoreArtifacts(artifact);
