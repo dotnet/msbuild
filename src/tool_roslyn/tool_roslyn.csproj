@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.1" />
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.6.0-beta2-25304" />
   </ItemGroup>
 
   <ItemGroup>
