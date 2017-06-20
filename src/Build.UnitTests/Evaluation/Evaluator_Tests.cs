@@ -4348,7 +4348,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                               </Project>");
 
-            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyTreatAsLocalPropertyUnionBetweenImports");
+            string projectDirectory = Path.Combine(Path.GetTempPath(), "ThrownInvalidProjectExceptionProperlyHandled");
 
             try
             {
