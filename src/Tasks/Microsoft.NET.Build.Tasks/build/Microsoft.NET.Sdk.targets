@@ -428,6 +428,10 @@ Copyright (c) .NET Foundation. All rights reserved.
          PublicSign="$(PublicSign)"
          DelaySign="$(DelaySign)"
          Deterministic="$(Deterministic)"
+         DisabledWarnings="$(DisabledWarnings)"
+         WarningLevel="$(WarningLevel)"
+         WarningsAsErrors="$(WarningsAsErrors)"
+         WarningsNotAsErrors="$(WarningsNotAsErrors)"
          TargetType="Library"
          ToolExe="$(CscToolExe)"
          ToolPath="$(CscToolPath)">
