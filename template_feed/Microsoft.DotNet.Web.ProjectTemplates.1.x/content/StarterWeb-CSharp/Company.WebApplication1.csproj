@@ -25,7 +25,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.0.3" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.3" />
-    <PackageReference Include="Microsoft.Composition" Version="1.0.27" PrivateAssets="All" NoWarn="NU1701" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.0.4" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.0.4" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.0.4" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />

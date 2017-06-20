@@ -18,7 +18,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview2-final" />
-    <PackageReference Include="Microsoft.Composition" Version="1.0.27" PrivateAssets="All" NoWarn="NU1701" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0-preview2-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
