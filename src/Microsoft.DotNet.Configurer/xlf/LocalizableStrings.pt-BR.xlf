@@ -41,6 +41,25 @@ A command is running to initially populate your local package cache, to improve 
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnauthorizedAccessMessage">
+        <source>Permission denied to modify the '{0}' folder.
+
+Here are some options to fix this error:
+---------------------
+1. Re-run this command with elevated access.
+2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+3. Copy the .NET Core SDK to a non-protected location and use it from there.
+    </source>
+        <target state="new">Permission denied to modify the '{0}' folder.
+
+Here are some options to fix this error:
+---------------------
+1. Re-run this command with elevated access.
+2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+3. Copy the .NET Core SDK to a non-protected location and use it from there.
+    </target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
