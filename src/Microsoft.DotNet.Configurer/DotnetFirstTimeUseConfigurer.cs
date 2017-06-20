@@ -41,12 +41,14 @@ namespace Microsoft.DotNet.Configurer
 
             if (ShouldPrimeNugetCache())
             {
+                if (_nugetCacheSentinel.UnauthorizedAccess)
+                {
+                    PrintUnauthorizedAccessMessage();
+                }
+
                 PrintNugetCachePrimeMessage();
+
                 _nugetCachePrimer.PrimeCache();
-            }
-            else if (_nugetCacheSentinel.UnauthorizedAccess)
-            {
-                PrintUnauthorizedAccessMessage();
             }
         }
 

@@ -14,19 +14,19 @@ namespace Microsoft.DotNet.Configurer
 
         private readonly IFile _file;
 
-        private string _nugetCachePath;
+        private string _dotnetUserProfileFolderPath;
 
-        private string SentinelPath => Path.Combine(_nugetCachePath, SENTINEL);
+        private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
         public FirstTimeUseNoticeSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
-            this(cliFallbackFolderPathCalculator.CliFallbackFolderPath, FileSystemWrapper.Default.File)
+            this(cliFallbackFolderPathCalculator.DotnetUserProfileFolderPath, FileSystemWrapper.Default.File)
         {
         }
 
-        internal FirstTimeUseNoticeSentinel(string nugetCachePath, IFile file)
+        internal FirstTimeUseNoticeSentinel(string dotnetUserProfileFolderPath, IFile file)
         {
             _file = file;
-            _nugetCachePath = nugetCachePath;
+            _dotnetUserProfileFolderPath = dotnetUserProfileFolderPath;
         }
 
         public bool Exists()
