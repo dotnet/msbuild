@@ -23,6 +23,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string DependenciesMetadata = "Dependencies";
         public const string CompileTimeAssemblyMetadata = "CompileTimeAssembly";
         public const string ResolvedMetadata = "Resolved";
+        public const string VisibleMetadata = "Visible";
 
         [Required]
         public ITaskItem[] TargetDefinitions { get; set; }
@@ -44,6 +45,9 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public ITaskItem[] References { get; set; }
+
+        [Required]
+        public string TargetFrameworkMoniker { get; set; }
 
         public ITaskItem[] InputDiagnosticMessages { get; set; }
 
@@ -67,7 +71,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private HashSet<string> ImplicitPackageReferences { get; set; }
 
-        private ITaskItem[] PreResolvedNetStandardAssemblyDependencies { get; set; }
+        private ITaskItem[] ExistingReferenceItemDependencies { get; set; }
 
         protected override void ExecuteCore()
         {
@@ -78,7 +82,7 @@ namespace Microsoft.NET.Build.Tasks
             PopulatePackages();
 
             PopulateAssemblies();
-            PopulatePreResolvedNetStandardAssemblies();
+            PopulateExistingReferenceItems();
 
             InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
             PopulateDiagnosticsMap();
@@ -100,7 +104,7 @@ namespace Microsoft.NET.Build.Tasks
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
 
-            AddDependenciesToTheWorld(Assemblies, PreResolvedNetStandardAssemblyDependencies);
+            AddDependenciesToTheWorld(Assemblies, ExistingReferenceItemDependencies);
 
             AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
@@ -200,9 +204,9 @@ namespace Microsoft.NET.Build.Tasks
         /// This is not meant to be a general mechanism for injecting files that can't be handled
         /// through the normal NuGet package mechanisms.
         /// </summary>
-        private void PopulatePreResolvedNetStandardAssemblies()
+        private void PopulateExistingReferenceItems()
         {
-            var preResolvedAssemblyDependencies = new List<ITaskItem>();
+            var existingReferenceItemDependencies = new List<ITaskItem>();
             foreach (var reference in References)
             {
                 var packageName = reference.GetMetadata("NuGetPackageId");
@@ -210,19 +214,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 // This is not a "pre-resolved" assembly; skip it.
                 if (packageName == null || packageVersion == null)
-                {
-                    continue;
-                }
-
-                // This is meant only as a workaround for an issue in NETStandard.Library 2.0.*.
-                if (!packageName.Equals("NETStandard.Library", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var versionComponents = packageVersion.Split('.');
-                if (versionComponents[0] != "2" ||
-                    versionComponents[1] != "0")
                 {
                     continue;
                 }
@@ -252,16 +243,19 @@ namespace Microsoft.NET.Build.Tasks
 
                 // Create the appropriate metadata.
                 var name = Path.GetFileName(referenceKey);
-                var assembly = new PreResolvedNetStandardAssemblyMetadata(name, reference.ItemSpec);
+                var facadeMetadata = reference.GetBooleanMetadata("Facade");
+                var visible = facadeMetadata.HasValue ? !facadeMetadata.Value : true;
+                var assembly = new ExistingReferenceItemMetadata(name, reference.ItemSpec, visible);
                 Assemblies[referenceKey] = assembly;
 
                 // Create the file dependency.
-                preResolvedAssemblyDependencies.Add(new PreResolvedNetStandardAssemblyDependency(
+                existingReferenceItemDependencies.Add(new ExistingReferenceItemDependency(
                     referenceKey,
+                    TargetFrameworkMoniker,
                     packageId));
             }
 
-            PreResolvedNetStandardAssemblyDependencies = preResolvedAssemblyDependencies.ToArray();
+            ExistingReferenceItemDependencies = existingReferenceItemDependencies.ToArray();
         }
 
         private void PopulateDiagnosticsMap()
@@ -526,19 +520,44 @@ namespace Microsoft.NET.Build.Tasks
         /// Represents metadata for a Reference item that we want to pretend was resolved as a
         /// standard NuGet package assembly.
         /// </summary>
-        private class PreResolvedNetStandardAssemblyMetadata : PackageMetadata
+        private class ExistingReferenceItemMetadata : ItemMetadata
         {
-            public PreResolvedNetStandardAssemblyMetadata(string name, string path)
+            public ExistingReferenceItemMetadata(string name, string path, bool visible)
                 : base(
                       type: DependencyType.Assembly,
                       dependencies: null,
-                      isTopLevelDependency: false,
-                      name: name,
-                      version: string.Empty,
-                      path: path,
-                      resolved: true,
-                      isImplicitlyDefined: false)
+                      isTopLevelDependency: false)
             {
+                Name = name;
+                Path = path;
+                Visible = visible;
+            }
+
+            public string Name { get; }
+            public string Path { get; }
+            public bool Visible { get; }
+
+            public override IDictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, Name },
+                    { MetadataKeys.Path, Path },
+                    { MetadataKeys.Type, Type.ToString() },
+                    { MetadataKeys.IsImplicitlyDefined, "false" },
+                    { MetadataKeys.IsTopLevelDependency, "false" },
+                    { ResolvedMetadata, "true" },
+                    { VisibleMetadata, Visible.ToString() },
+                    { DependenciesMetadata, string.Empty }
+                };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new ExistingReferenceItemMetadata(
+                    Name,
+                    Path,
+                    Visible);
             }
         }
 
@@ -629,15 +648,15 @@ namespace Microsoft.NET.Build.Tasks
         /// Represents the FileDependency metadata for a Reference item that we want to pretend was
         /// resolved as a standard NuGet package assembly.
         /// </summary>
-        private sealed class PreResolvedNetStandardAssemblyDependency : ITaskItem
+        private sealed class ExistingReferenceItemDependency : ITaskItem
         {
             private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>(capacity: 3, comparer: StringComparer.OrdinalIgnoreCase);
 
-            public PreResolvedNetStandardAssemblyDependency(string itemSpec, string parentPackage)
+            public ExistingReferenceItemDependency(string itemSpec, string parentTarget, string parentPackage)
             {
                 ItemSpec = itemSpec;
-                _metadata[MetadataKeys.FileGroup] = "CompileTimeAssembly";
-                _metadata[MetadataKeys.ParentTarget] = ".NETStandard,Version=v2.0";
+                _metadata[MetadataKeys.FileGroup] = CompileTimeAssemblyMetadata;
+                _metadata[MetadataKeys.ParentTarget] = parentTarget;
                 _metadata[MetadataKeys.ParentPackage] = parentPackage;
             }
 
