@@ -284,11 +284,6 @@
         <target state="translated">Parametr {0} s přiřazenou hodnotou {1} nesmí obsahovat neplatnou cestu nebo neplatné znaky souboru.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: Neplatná hodnota pro nouzové ukončení: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -284,11 +284,6 @@
         <target state="translated">O parâmetro "{0}" com o valor "{1}" atribuído não pode ter um caminho inválido ou caracteres de arquivo inválidos.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: valor de hachura de escape inválido: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>
