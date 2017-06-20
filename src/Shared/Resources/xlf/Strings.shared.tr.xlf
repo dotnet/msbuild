@@ -284,11 +284,6 @@
         <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: Geçersiz kaçış taraması değeri: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

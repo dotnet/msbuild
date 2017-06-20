@@ -284,11 +284,6 @@
         <target state="translated">Parametr „{0}” z przypisaną wartością „{1}” nie może mieć nieprawidłowej ścieżki ani zawierać nieprawidłowych znaków w pliku.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: Nieprawidłowa wartość wyjścia bezpieczeństwa: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

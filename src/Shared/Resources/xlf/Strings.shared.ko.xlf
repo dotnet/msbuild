@@ -284,11 +284,6 @@
         <target state="translated">"{1}" 값이 할당된 "{0}" 매개 변수는 유효하지 않은 경로 또는 파일 문자를 포함할 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: 잘못된 이스케이프 해치 값: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

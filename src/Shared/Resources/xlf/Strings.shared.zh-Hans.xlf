@@ -284,11 +284,6 @@
         <target state="translated">分配有值“{1}”的参数“{0}”不可具有无效路径或无效的文件字符。</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: escape hatch 值无效: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>
