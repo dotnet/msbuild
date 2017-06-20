@@ -4371,7 +4371,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     })
                 ;
 
-                Assert.Equal($"The element <AnInvalidTopLevelElement> beneath element <Project> is unrecognized.  {import}", ex.Message);
+                Assert.Contains("<AnInvalidTopLevelElement>", ex.Message);
                 Assert.Equal("MSB4067", ex.ErrorCode);
                 Assert.Equal(4, ex.LineNumber);
                 Assert.Equal(33, ex.ColumnNumber);
