@@ -32,9 +32,9 @@
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>2.0.0-preview2-213</AspNetCoreRuntimeVersion>
+    <AspNetCoreRuntimeVersion>2.0.0-preview2-215</AspNetCoreRuntimeVersion>
     <AspNetCoherenceLabel>preview2</AspNetCoherenceLabel>
-    <AspNetCoreCoherenceTimestamp>25769</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreCoherenceTimestamp>25794</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
