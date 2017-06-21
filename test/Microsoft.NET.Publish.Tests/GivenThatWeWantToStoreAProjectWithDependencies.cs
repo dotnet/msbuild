@@ -77,14 +77,19 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
                };
 
-           
-            storeDirectory.Should().HaveFiles(files_on_disk);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
+
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [CoreMSBuildOnlyFact]
@@ -107,15 +112,19 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
                };
 
-           
-            storeDirectory.Should().HaveFiles(files_on_disk);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
 
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
         [CoreMSBuildOnlyFact]
@@ -167,18 +176,27 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll",
                };
 
-            storeDirectory.Should().HaveFiles(files_on_disk);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
 
-            var knownpackage = new HashSet<PackageIdentity>();
+            storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
-            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")));
-            knownpackage.Add(new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")));
-            knownpackage.Add(new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0")));
+            var knownpackage = new HashSet<PackageIdentity>
+            {
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")),
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")),
+                new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0"))
+            };
 
             var artifact = Path.Combine(OutputFolder, "artifact.xml");
             var packagescomposed = ParseStoreArtifacts(artifact);
