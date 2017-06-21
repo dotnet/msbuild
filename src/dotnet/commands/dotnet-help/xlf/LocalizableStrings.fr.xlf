@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="fr" original="src/dotnet/commands/dotnet-help/LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
-      <group id="src/dotnet/commands/dotnet-help/LocalizableStrings.resx" />
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Utilisation</target>
@@ -38,14 +37,9 @@
         <target state="translated">Options communes</target>
         <note />
       </trans-unit>
-      <trans-unit id="VerboseDefinition">
-        <source>Enable verbose output</source>
-        <target state="translated">Activer la sortie détaillée</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpDefinition">
-        <source>Show help</source>
-        <target state="translated">Afficher l'aide</target>
+        <source>Show help.</source>
+        <target state="needs-review-translation">Afficher l'aide</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">

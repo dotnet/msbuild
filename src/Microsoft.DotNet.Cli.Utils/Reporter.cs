@@ -4,7 +4,7 @@
 namespace Microsoft.DotNet.Cli.Utils
 {
     // Stupid-simple console manager
-    public class Reporter
+    public class Reporter : IReporter
     {
         private static readonly Reporter NullReporter = new Reporter(console: null);
         private static object _lock = new object();

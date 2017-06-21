@@ -26,7 +26,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
         private Mock<INuGetPackagesArchiver> _nugetPackagesArchiverMock;
         private Mock<INuGetCacheSentinel> _nugetCacheSentinel;
-        private Mock<INuGetConfig> _nugetConfigMock;
         private CliFallbackFolderPathCalculator _cliFallbackFolderPathCalculator;
 
         public GivenANuGetCachePrimer()
@@ -41,14 +40,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _nugetCacheSentinel = new Mock<INuGetCacheSentinel>();
 
-            _nugetConfigMock = new Mock<INuGetConfig>();
-
             _cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
 
             var nugetCachePrimer = new NuGetCachePrimer(
                 _nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _nugetConfigMock.Object,
                 _cliFallbackFolderPathCalculator,
                 _fileSystemMock.File);
 
@@ -67,21 +63,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var nugetCachePrimer = new NuGetCachePrimer(
                 nugetPackagesArchiverMock.Object,
                 _nugetCacheSentinel.Object,
-                _nugetConfigMock.Object,
                 _cliFallbackFolderPathCalculator,
                 fileSystemMock.File);
 
             nugetCachePrimer.PrimeCache();
 
             nugetPackagesArchiverMock.Verify(n => n.ExtractArchive(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public void It_adds_the_fallback_folder_to_NuGet_Config()
-        {
-            _nugetConfigMock.Verify(n =>
-                n.AddCliFallbackFolder(_cliFallbackFolderPathCalculator.CliFallbackFolderPath),
-                Times.Exactly(1));
         }
 
         [Fact]
@@ -108,7 +95,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var nugetCachePrimer = new NuGetCachePrimer(
                 nugetPackagesArchiveMock.Object,
                 nugetCacheSentinel.Object,
-                _nugetConfigMock.Object,
                 _cliFallbackFolderPathCalculator,
                 _fileSystemMock.File);
 

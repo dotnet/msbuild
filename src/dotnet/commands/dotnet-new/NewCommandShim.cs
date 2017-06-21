@@ -28,8 +28,10 @@ namespace Microsoft.DotNet.Tools.New
 
         public static int Run(string[] args)
         {
-            var sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
-            var telemetry = new Telemetry(new NuGetCacheSentinel(new CliFallbackFolderPathCalculator()), sessionId);
+            var sessionId =
+                Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
+            var telemetry =
+                new Telemetry(new FirstTimeUseNoticeSentinel(new CliFallbackFolderPathCalculator()), sessionId);
             var logger = new TelemetryLogger(null);
 
             if (telemetry.Enabled)

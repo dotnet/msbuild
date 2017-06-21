@@ -6,5 +6,6 @@ namespace Microsoft.DotNet.Configurer
     public interface INuGetCachePrimer
     {
         void PrimeCache();
+        bool SkipPrimingTheCache();
     }
 }

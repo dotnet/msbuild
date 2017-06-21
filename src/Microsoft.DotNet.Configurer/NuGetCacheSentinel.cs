@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -13,7 +14,11 @@ namespace Microsoft.DotNet.Configurer
         public static readonly string SENTINEL = $"{Product.Version}.dotnetSentinel";
         public static readonly string INPROGRESS_SENTINEL = $"{Product.Version}.inprogress.dotnetSentinel";
 
+        public bool UnauthorizedAccess { get; private set; }
+
         private readonly IFile _file;
+
+        private readonly IDirectory _directory;
 
         private string _nugetCachePath;
 
@@ -23,14 +28,17 @@ namespace Microsoft.DotNet.Configurer
         private Stream InProgressSentinel { get; set; }
 
         public NuGetCacheSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
-            this(cliFallbackFolderPathCalculator.CliFallbackFolderPath, FileSystemWrapper.Default.File)
+            this(cliFallbackFolderPathCalculator.CliFallbackFolderPath,
+                 FileSystemWrapper.Default.File,
+                 FileSystemWrapper.Default.Directory)
         {
         }
 
-        internal NuGetCacheSentinel(string nugetCachePath, IFile file)
+        internal NuGetCacheSentinel(string nugetCachePath, IFile file, IDirectory directory)
         {
-            _file = file;
             _nugetCachePath = nugetCachePath;
+            _file = file;
+            _directory = directory;
 
             SetInProgressSentinel();
         }
@@ -62,9 +70,9 @@ namespace Microsoft.DotNet.Configurer
         {
             try
             {
-                if (!Directory.Exists(_nugetCachePath))
+                if (!_directory.Exists(_nugetCachePath))
                 {
-                    Directory.CreateDirectory(_nugetCachePath);
+                    _directory.CreateDirectory(_nugetCachePath);
                 }
 
                 // open an exclusive handle to the in-progress sentinel and mark it for delete on close.
@@ -79,6 +87,10 @@ namespace Microsoft.DotNet.Configurer
                     FileShare.None,
                     1,
                     FileOptions.DeleteOnClose);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnauthorizedAccess = true;
             }
             catch { }
         }

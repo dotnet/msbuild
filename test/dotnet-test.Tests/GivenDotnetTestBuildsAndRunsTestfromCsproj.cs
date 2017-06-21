@@ -25,9 +25,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             // Verify
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
             result.ExitCode.Should().Be(1);
         }
 
@@ -45,9 +49,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .WithWorkingDirectory(testProjectDirectory)
                                         .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
             result.ExitCode.Should().Be(1);
         }
 
@@ -92,9 +100,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
 
             // Verify
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+            }
+
             result.ExitCode.Should().Be(1);
         }
 
@@ -114,7 +126,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--no-build");
 
             // Verify
-            result.StdErr.Should().Contain(expectedError);
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdErr.Should().Contain(expectedError);
+            }
+
+            result.ExitCode.Should().Be(1);
         }
 
         [Fact]
@@ -207,9 +224,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .WithWorkingDirectory(rootPath)
                                         .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore");
 
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
+            result.ExitCode.Should().Be(1);
         }
 
         [Fact]
@@ -224,9 +246,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .ExecuteWithCapturedOutput("-v q");
 
             // Verify
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().NotContain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-            result.StdOut.Should().NotContain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().NotContain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
+                result.StdOut.Should().NotContain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
             result.ExitCode.Should().Be(1);
         }
 

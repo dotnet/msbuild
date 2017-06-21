@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Tests
                 .WithWorkingDirectory(testInstance)
                 .ExecuteWithCapturedOutput("crash")
                 .Should().Fail()
-                     .And.HaveStdErrContaining("No executable found matching command \"dotnet-crash\"");
+                     .And.HaveStdErrContaining(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-crash"));
         }
     }
 }

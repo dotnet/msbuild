@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tests
                    .Which
                    .Message
                    .Should()
-                   .Be("Required value for option '-v' was not provided.");
+                   .Be(string.Format(LocalizableStrings.OptionRequiresSingleValueWhichIsMissing, "-v"));
         }
     }
 }

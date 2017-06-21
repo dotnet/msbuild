@@ -38,10 +38,14 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
 
             // Call vstest
             var result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);
-            result.StdOut
-                .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
-                .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
-                .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut
+                    .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
+                    .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
+                    .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
             result.ExitCode.Should().Be(1);
         }
     }

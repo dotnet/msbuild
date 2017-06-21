@@ -76,9 +76,9 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 | **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
-| **Debian 8**  | tar.gz - See **Linux x64** |
+| **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **CentOS 7.1 / Oracle Linux 7** | tar.gz - See **Linux x64** |
-| **RHEL 7.2** | tar.gz - See **Linux x64** |
+| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Fedora 24** | tar.gz - See **Linux x64** |
 | **OpenSUSE 42.1** | tar.gz - See **Linux x64** |
 
@@ -114,6 +114,12 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 
 [ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb
 [ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
+
+[debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb
+[debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb.sha
+
+[rhel-7-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm
+[rhel-7-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm.sha
 
 # Debian daily feed
 

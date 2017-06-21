@@ -413,7 +413,7 @@ namespace Microsoft.DotNet.Tests
             Action action = () => projectToolsCommandResolver.Resolve(commandResolverArguments);
 
             action.ShouldThrow<GracefulException>().WithMessage(
-                "The command executable for \"dotnet-fallbackfoldertool\" was not found. The project may not have been restored or restore failed - run `dotnet restore`");
+                string.Format(LocalizableStrings.CommandAssembliesNotFound, "dotnet-fallbackfoldertool"));
         }
 
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
