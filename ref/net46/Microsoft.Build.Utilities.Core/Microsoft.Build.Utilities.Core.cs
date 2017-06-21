@@ -85,6 +85,7 @@ namespace Microsoft.Build.Utilities
     {
         public CommandLineBuilder() { }
         public CommandLineBuilder(bool quoteHyphensOnCommandLine) { }
+        public CommandLineBuilder(bool quoteHyphensOnCommandLine, bool useNewLineSeparator) { }
         protected System.Text.StringBuilder CommandLine { get { throw null; } }
         public int Length { get { throw null; } }
         public void AppendFileNameIfNotNull(Microsoft.Build.Framework.ITaskItem fileItem) { }

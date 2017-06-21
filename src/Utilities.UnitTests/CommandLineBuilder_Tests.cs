@@ -442,6 +442,28 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"/D""A='\""'""", c.ToString()); //   /D"A='\"'"
         }
 
+        [Fact]
+        public void UseNewLineSeparators()
+        {
+            CommandLineBuilder c = new CommandLineBuilder(quoteHyphensOnCommandLine: false, useNewLineSeparator: true);
+
+            c.AppendSwitchIfNotNull("/foo:", "bar");
+            c.AppendFileNameIfNotNull("18056896847C4FFC9706F1D585C077B4");
+            c.AppendSwitch("/D:");
+            c.AppendTextUnquoted("C7E1720B16E5477D8D15733006E68278");
+
+
+            string[] actual = c.ToString().Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+            string[] expected = 
+            {
+                "/foo:bar",
+                "18056896847C4FFC9706F1D585C077B4",
+                "/D:C7E1720B16E5477D8D15733006E68278"
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
         internal class TestCommandLineBuilder : CommandLineBuilder
         {
             internal void TestVerifyThrow(string switchName, string parameter)
