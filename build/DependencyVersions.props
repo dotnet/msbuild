@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>2.0.0-preview3-25419-01</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.3.0-preview-000388-01</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.3.0-preview-000400-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta3-61816-04</CLI_Roslyn_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
     <CLI_FSharp_Version>4.2.0-rc-170602-0</CLI_FSharp_Version>
