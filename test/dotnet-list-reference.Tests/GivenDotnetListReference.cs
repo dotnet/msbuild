@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Msbuild.Tests.Utilities;
 using System;
@@ -50,7 +51,7 @@ Commands:
         {
             var cmd = new ListReferenceCommand().Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Theory]
@@ -61,8 +62,8 @@ Commands:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"list {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Required command was not provided.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(ListCommandHelpText);
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListCommandHelpText);
         }
 
         [Fact]
@@ -88,8 +89,8 @@ Commands:
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be($"Could not find project or directory `{projName}`.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -103,8 +104,8 @@ Commands:
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be("Project `Broken/Broken.csproj` is invalid.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -117,8 +118,8 @@ Commands:
                     .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be($"Found more than one project in `{workingDir + Path.DirectorySeparatorChar}`. Please specify which one to use.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -130,8 +131,8 @@ Commands:
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be($"Could not find any project in `{setup.TestRoot + Path.DirectorySeparatorChar}`.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -143,14 +144,15 @@ Commands:
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"There are no Project to Project references in project {lib.CsProjPath}. ;; Project to Project is the type of the item being requested (project, package, p2p) and {lib.CsProjPath} is the object operated on (a project file or a solution file). ");
+            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.NoReferencesFound, CommonLocalizableStrings.P2P, lib.CsProjPath));
         }
 
         [Fact]
         public void ItPrintsSingleReference()
         {
-            const string OutputText = @"Project reference(s)
---------------------
+            string OutputText = CommonLocalizableStrings.ProjectReferenceOneOrMore;
+            OutputText += $@"
+{new string('-', OutputText.Length)}
 ..\ref\ref.csproj";
 
             var lib = NewLib("lib");
@@ -167,8 +169,9 @@ Commands:
         [Fact]
         public void ItPrintsMultipleReferences()
         {
-            const string OutputText = @"Project reference(s)
---------------------
+            string OutputText = CommonLocalizableStrings.ProjectReferenceOneOrMore;
+            OutputText += $@"
+{new string('-', OutputText.Length)}
 ..\ref1\ref1.csproj
 ..\ref2\ref2.csproj
 ..\ref3\ref3.csproj";
