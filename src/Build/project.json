@@ -29,6 +29,7 @@
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
         "System.Runtime.Loader": "4.0.0",
         "System.Runtime.Serialization.Primitives": "4.1.1",
+        "System.Text.Encoding.CodePages" : "4.0.1",
         "System.Threading.Tasks.Dataflow": "4.6.0.0",
         "System.Threading.Thread": "4.0.0",
         "System.Threading.ThreadPool": "4.0.10",

@@ -43,6 +43,7 @@
         <dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" />
         <dependency id="System.Runtime.Serialization.Xml" version="4.1.1" />
         <dependency id="System.Text.Encoding" version="4.0.11" />
+        <dependency id="System.Text.Encoding.CodePages" version="4.0.1" />
         <dependency id="System.Text.RegularExpressions" version="4.1.0" />
         <dependency id="System.Threading" version="4.0.11" />
         <dependency id="System.Threading.Tasks" version="4.0.11" />
