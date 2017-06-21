@@ -100,24 +100,36 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-                foreach (var dependencyPath in _dependencyPaths)
+                foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
+                    // If no culture is specified, attempt to load directly from
+                    // the known dependency paths.
+                    ? new[] {string.Empty}
+                    // Search for satellite assemblies in culture subdirectories
+                    // of the assembly search directories, but fall back to the
+                    // bare search directory if that fails.
+                    : new[] {assemblyName.CultureName, string.Empty})
                 {
-                    foreach (var extension in _extensions)
+                    foreach (var dependencyPath in _dependencyPaths)
                     {
-                        var candidatePath = Path.Combine(dependencyPath, $"{assemblyName.Name}.{extension}");
-                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                            !File.Exists(candidatePath))
+                        foreach (var extension in _extensions)
                         {
-                            continue;
-                        }
+                            var candidatePath = Path.Combine(dependencyPath,
+                                cultureSubfolder,
+                                $"{assemblyName.Name}.{extension}");
+                            if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                                !File.Exists(candidatePath))
+                            {
+                                continue;
+                            }
 
-                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                        if (candidateAssemblyName.Version != assemblyName.Version)
-                        {
-                            continue;
-                        }
+                            AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                            if (candidateAssemblyName.Version != assemblyName.Version)
+                            {
+                                continue;
+                            }
 
-                        return LoadAndCache(candidatePath);
+                            return LoadAndCache(candidatePath);
+                        }
                     }
                 }
 
