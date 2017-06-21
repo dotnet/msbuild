@@ -14,19 +14,22 @@
 
     <PropertyGroup>
       <GenerateArchivesDestinationArchive>$(ArchiveOutputDirectory)/%(GenerateArchivesInputsOutputs.OutFileName)$(ArchiveExtension)</GenerateArchivesDestinationArchive>
+      <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
     </PropertyGroup>
 
     <ZipFileCreateFromDirectory
         Condition=" '$(OSName)' == 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="$(SatelliteAssemblies)" />
 
     <TarGzFileCreateFromDirectory
         Condition=" '$(OSName)' != 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="$(SatelliteAssemblies)" />
 
     <ItemGroup>
       <Archives Include="$(GenerateArchivesDestinationArchive)" />
