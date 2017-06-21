@@ -12,5 +12,5 @@ if (Test-Path $stage2) {
         $env:PATH="$stage2;$env:PATH"
     }
 } else {
-    Write-Output "You don't have a dev build in the 'artifacts\win10-x64\stage2' folder!"
+    Write-Host "You don't have a dev build in the 'artifacts\win10-x64\stage2' folder!"
 }

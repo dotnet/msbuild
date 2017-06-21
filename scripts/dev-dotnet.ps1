@@ -10,12 +10,12 @@ try {
         throw "You need to have a version of 'dotnet' on your path so we can determine the RID"
     }
 
-    $rid = dotnet --version | where { $_ -match "^ Runtime Id:\s*(.*)$" } | foreach { $matches[1] } 
+    $rid = dotnet --version | where { $_ -match "^ Runtime Id:\s*(.*)$" } | foreach { $matches[1] }
     $stage2 = "$PSScriptRoot\..\artifacts\$rid\stage2\bin"
     if (Test-Path $stage2) {
         $env:PATH="$stage2;$env:PATH"
     } else {
-        Write-Output "You don't have a dev build in the 'artifacts\$rid\stage2' folder!"
+        Write-Host "You don't have a dev build in the 'artifacts\$rid\stage2' folder!"
     }
 
     dotnet @args
