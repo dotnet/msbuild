@@ -238,29 +238,32 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        protected override bool UseNewLineSeparatorInResponseFile
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         #endregion
 
         #region Tool Members
 
-        /// <summary>
-        /// Fills the provided CommandLineBuilderExtension with all the command line options used when
-        /// executing this tool
-        /// </summary>
-        /// <param name="commandLine">Gets filled with command line commands</param>
-        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
-            commandLine.AppendSwitchIfNotNull("/d:", OutputDocumentationFile);
-            commandLine.AppendSwitchIfNotNull("/md:", InputDocumentationFile);
-            commandLine.AppendSwitchIfNotNull("/mp:", InputPDBFile);
-            commandLine.AppendSwitchIfNotNull("/pdb:", OutputPDBFile);
-            commandLine.AppendSwitchIfNotNull("/assemblyunificationpolicy:", AssemblyUnificationPolicy);
+            commandLine.AppendSwitchUnquotedIfNotNull("/d:", OutputDocumentationFile);
+            commandLine.AppendSwitchUnquotedIfNotNull("/md:", InputDocumentationFile);
+            commandLine.AppendSwitchUnquotedIfNotNull("/mp:", InputPDBFile);
+            commandLine.AppendSwitchUnquotedIfNotNull("/pdb:", OutputPDBFile);
+            commandLine.AppendSwitchUnquotedIfNotNull("/assemblyunificationpolicy:", AssemblyUnificationPolicy);
 
             if (String.IsNullOrEmpty(OutputWindowsMetadataFile))
             {
                 OutputWindowsMetadataFile = Path.ChangeExtension(WinMDModule, ".winmd");
             }
 
-            commandLine.AppendSwitchIfNotNull("/out:", OutputWindowsMetadataFile);
+            commandLine.AppendSwitchUnquotedIfNotNull("/out:", OutputWindowsMetadataFile);
             commandLine.AppendSwitchWithSplitting("/nowarn:", DisabledWarnings, ",", ';', ',');
             commandLine.AppendWhenTrue("/warnaserror+", this.Bag, "TreatWarningsAsErrors");
             commandLine.AppendWhenTrue("/utf8output", this.Bag, "UTF8Output");
@@ -270,13 +273,14 @@ namespace Microsoft.Build.Tasks
                 // Loop through all the references passed in.  We'll be adding separate
                 foreach (ITaskItem reference in this.References)
                 {
-                    commandLine.AppendSwitchIfNotNull("/reference:", reference.ItemSpec);
+                    commandLine.AppendSwitchUnquotedIfNotNull("/reference:", reference.ItemSpec);
                 }
             }
 
-            commandLine.AppendFileNameIfNotNull(WinMDModule);
-
-            base.AddCommandLineCommands(commandLine);
+            // There is no public method to add unquoted text that includes a separator.  Calling this method with String.Empty adds a separator
+            // and the unquoted text and no parameter.
+            commandLine.AppendSwitchUnquotedIfNotNull(WinMDModule, String.Empty);
+            base.AddResponseFileCommands(commandLine);
         }
 
         /// <summary>
