@@ -30,7 +30,7 @@ function RunCandleForBundle
 
     .\candle.exe -nologo `
         -dDotnetSrc="$inputDir" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\clisdk\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$RepoRoot\packaging\windows\clisdk\dummyeula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIDisplayVersion" `
