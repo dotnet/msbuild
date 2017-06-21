@@ -39,6 +39,7 @@ namespace Microsoft.Build.Shared
                 {
                     if (NativeMethodsShared.IsWindows)
                     {
+                        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                         // get the current OEM code page
                         s_currentOemEncoding = Encoding.GetEncoding(NativeMethodsShared.GetOEMCP());
                     }
