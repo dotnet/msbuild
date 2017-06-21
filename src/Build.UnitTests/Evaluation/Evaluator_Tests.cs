@@ -4328,6 +4328,63 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new BuildEventContext(1, 2, 3, 4)));
         }
 
+        /// <summary>
+        /// Test regression reported at https://github.com/Microsoft/msbuild/issues/2228
+        /// </summary>
+        [Fact]
+        public void ThrownInvalidProjectExceptionProperlyHandled()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                                
+                                <Import Project=""import.proj"" />
+
+                            </Project>");
+
+            string importContents = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+
+                                <AnInvalidTopLevelElement />
+
+                              </Project>");
+
+            string projectDirectory = Path.Combine(Path.GetTempPath(), "ThrownInvalidProjectExceptionProperlyHandled");
+
+            try
+            {
+                if (Directory.Exists(projectDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
+                }
+
+                Directory.CreateDirectory(projectDirectory);
+
+                string primaryProject = Path.Combine(projectDirectory, "project.proj");
+                string import = Path.Combine(projectDirectory, "import.proj");
+
+                File.WriteAllText(primaryProject, projectContents);
+                File.WriteAllText(import, importContents);
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>( () =>
+                    {
+                        Project unused = new Project(primaryProject, null, null);
+                    })
+                ;
+
+                Assert.Contains("<AnInvalidTopLevelElement>", ex.Message);
+                Assert.Equal("MSB4067", ex.ErrorCode);
+                Assert.Equal(4, ex.LineNumber);
+                Assert.Equal(33, ex.ColumnNumber);
+            }
+            finally
+            {
+                if (Directory.Exists(projectDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
+                }
+            }
+        }
+
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
