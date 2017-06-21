@@ -31,6 +31,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -47,11 +48,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </remarks>
         private readonly int RootPrefixLength = NativeMethodsShared.IsWindows ? 3 : 1;
 
+        private ITestOutputHelper _output;
+
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        public Project_Tests()
+        public Project_Tests(ITestOutputHelper output)
         {
+            _output = output;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
@@ -3836,13 +3840,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
-            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
-
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
-                
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
                 using (ProjectCollection collection = new ProjectCollection())
                 {
                     MockLogger logger = new MockLogger();
@@ -3874,19 +3880,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to false condition; ( \'$(Something)\' == \'nothing\' ) was evaluated as ( \'\' == \'nothing\' )."); 
                 }
             }
-            finally
-            {
-                File.Delete(pre.FullPath);
-            }
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
-            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
-
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
                 var import = pre.AddImport(@"Foo\*");
 
@@ -3916,22 +3921,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
                 }
             }
-            finally
-            {
-                File.Delete(pre.FullPath);
-            }
         }
 
         [Fact]
         public void ProjectImportedEventEmptyFile()
         {
-            const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
-";
-            string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
-            ProjectRootElement pre = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
-
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                const string contents = @"<?xml version=""1.0"" encoding=""utf-8""?>
+";
+                string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8);
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
                 pre.AddPropertyGroup().AddProperty("NotUsed", "");
                 var import = pre.AddImport(importPath);
 
@@ -3961,20 +3964,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
                 }
             }
-            finally
-            {
-                ObjectModelHelpers.DeleteTempProjectDirectory();
-            }
         }
 
         [Fact]
+        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportEvent()
         {
-            ProjectRootElement pre1 = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
-            ProjectRootElement pre2 = ProjectRootElement.Create(FileUtilities.GetTemporaryFile());
-
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre1 = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+                ProjectRootElement pre2 = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
                 using (ProjectCollection collection = new ProjectCollection())
                 {
                     MockLogger logger = new MockLogger();
@@ -4005,11 +4008,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     logger.AssertLogContains($"Importing project \"{pre1.FullPath}\" into project \"{pre2.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}).");
                 }
-            }
-            finally
-            {
-                File.Delete(pre1.FullPath);
-                File.Delete(pre2.FullPath);
             }
         }
 

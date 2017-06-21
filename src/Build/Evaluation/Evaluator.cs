@@ -717,7 +717,7 @@ namespace Microsoft.Build.Evaluation
             _data.EvaluationId = NextEvaluationId();
             _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, _data.EvaluationId);
 
-            _logProjectImportedEvents = !_evaluationLoggingContext.LoggingService.OnlyLogCriticalEvents && !Traits.Instance.EscapeHatches.DoNotLogProjectImports;
+            _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
@@ -2664,9 +2664,16 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-                            // Otherwise a more generic message, still pointing to the location of the import tag
-                            ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
-                                importFileUnescaped, ex.InnerException.Message);
+                            // If this exception is a wrapped exception (like IOException or XmlException) then wrap it as an invalid import instead
+                            if (ex.InnerException != null)
+                            {
+                                // Otherwise a more generic message, still pointing to the location of the import tag
+                                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
+                                    importFileUnescaped, ex.InnerException.Message);
+                            }
+
+                            // Throw the original InvalidProjectFileException because it has no InnerException and was not wrapping something else
+                            throw;
                         }
                     }
 

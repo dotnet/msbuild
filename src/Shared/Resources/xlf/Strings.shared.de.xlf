@@ -284,11 +284,6 @@
         <target state="translated">Der Parameter "{0}" mit dem zugewiesenen Wert "{1}" darf keinen ungültigen Pfad und keine ungültigen Dateizeichen haben.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidEscapeHatchValue">
-        <source>MSB5025: Invalid escape hatch value: {0}</source>
-        <target state="translated">MSB5025: Ungültiger Escape Hatch-Wert: {0}</target>
-        <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -17,6 +17,7 @@
         "System.Runtime.Serialization.Xml": "4.1.1",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
         "System.Security.Cryptography.X509Certificates": "4.1.0",
+        "System.Text.Encoding.CodePages" : "4.0.1",
         "System.Threading.Thread": "4.0.0",
         "System.Xml.XmlDocument": "4.0.1"
       }

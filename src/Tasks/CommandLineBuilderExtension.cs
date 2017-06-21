@@ -17,6 +17,23 @@ namespace Microsoft.Build.Tasks
     public class CommandLineBuilderExtension : CommandLineBuilder
     {
         /// <summary>
+        /// Initializes a new instance of the CommandLineBuilderExtension class.
+        /// </summary>
+        public CommandLineBuilderExtension()
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the CommandLineBuilderExtension class.
+        /// </summary>
+        public CommandLineBuilderExtension(bool quoteHyphensOnCommandLine, bool useNewLineSeparator)
+            : base(quoteHyphensOnCommandLine, useNewLineSeparator)
+        {
+            
+        }
+
+        /// <summary>
         /// Set a boolean switch iff its value exists and its value is 'true'.
         /// </summary>
         /// <param name="switchName"></param>

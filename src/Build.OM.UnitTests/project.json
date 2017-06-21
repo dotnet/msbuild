@@ -27,6 +27,7 @@
         "System.Diagnostics.Process": "4.1.0",
         "System.Diagnostics.TraceSource": "4.0.0",
         "System.Security.Cryptography.X509Certificates": "4.1.0",
+        "System.Text.Encoding.CodePages" : "4.0.1",
         "System.Threading.Thread": "4.0.0",
         "System.Threading.ThreadPool": "4.0.10",
         "System.Xml.XmlDocument": "4.0.1",
