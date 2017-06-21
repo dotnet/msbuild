@@ -77,13 +77,18 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
                };
 
-           
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
+
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
@@ -107,13 +112,18 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> files_on_disk = new List<string> {
                "artifact.xml",
-               @"newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
-               @"fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
-               @"fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
+               "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
+               "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
+               "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll"
                };
 
-           
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
+
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
         }
 
@@ -172,6 +182,12 @@ namespace Microsoft.NET.Publish.Tests
                "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
                "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll",
                };
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // https://github.com/dotnet/core-setup/issues/2716 - an unintended native shim is getting published to the runtime store
+                files_on_disk.Add($"runtime.{_runtimeRid}.runtime.native.system.security.cryptography/1.0.1/runtimes/{_runtimeRid}/native/System.Security.Cryptography.Native{FileConstants.DynamicLibSuffix}");
+            }
 
             storeDirectory.Should().OnlyHaveFiles(files_on_disk);
 
