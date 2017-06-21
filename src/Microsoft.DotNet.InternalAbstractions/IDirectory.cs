@@ -14,5 +14,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         IEnumerable<string> GetFiles(string path, string searchPattern);
 
         string GetDirectoryFullName(string path);
+
+        void CreateDirectory(string path);
     }
 }

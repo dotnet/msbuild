@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using FluentAssertions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -16,6 +17,9 @@ using Xunit.Abstractions;
 using MSBuildCommand = Microsoft.DotNet.Tools.Test.Utilities.MSBuildCommand;
 using System.Diagnostics;
 using System.Threading;
+
+// There are tests which modify static Telemetry.CurrentSessionId and they cannot run in parallel
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -105,13 +109,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             result.Should().Fail();
 
-            result.StdOut.Should().ContainVisuallySameFragment(@"source(s): /usr/local/bin, nuget.org");
+            result.StdOut.Should().ContainVisuallySameFragment("NU1101");
         }
 
         [Fact]
         public void WhenDotnetRunHelpIsInvokedAppArgumentsTextIsIncludedInOutput()
         {
-            const string AppArgumentsText = "Arguments passed to the application that is being run.";
+            string AppArgumentsText = Tools.Run.LocalizableStrings.RunCommandAdditionalArgsHelpText;
 
             var projectDirectory = TestAssets.CreateTestDirectory("RunContainsAppArgumentsText");
             var result = new TestCommand("dotnet")
@@ -127,7 +131,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             Telemetry telemetry;
             string[] allArgs = GetArgsForMSBuild(() => true, out telemetry);
-            // telemetry will still be disabled if environmental variable is set
+            // telemetry will still be disabled if environment variable is set
             if (telemetry.Enabled)
             {
                 allArgs.Should().NotBeNull();
@@ -158,6 +162,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists, out Telemetry telemetry)
         {
+            Telemetry.CurrentSessionId = null; // reset static session id modified by telemetry constructor
             telemetry = new Telemetry(new MockNuGetCacheSentinel(sentinelExists));
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
@@ -181,14 +186,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
     }
 
-    public sealed class MockNuGetCacheSentinel : INuGetCacheSentinel
+    public sealed class MockNuGetCacheSentinel : IFirstTimeUseNoticeSentinel
     {
         private readonly Func<bool> _exists;
+
+        public bool UnauthorizedAccess => true;
 
         public MockNuGetCacheSentinel(Func<bool> exists = null)
         {
             _exists = exists ?? (() => true);
         }
+
         public void Dispose()
         {
         }

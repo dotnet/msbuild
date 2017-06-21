@@ -39,13 +39,15 @@
       <FilesToSign Include="$(OutputDirectory)/sdk/**/csc.exe;
                             $(OutputDirectory)/sdk/**/csc.dll;
                             $(OutputDirectory)/sdk/**/dotnet.dll;
+                            $(OutputDirectory)/sdk/**/dotnet.resources.dll;
                             $(OutputDirectory)/sdk/**/System.*.dll;
                             $(OutputDirectory)/sdk/**/Microsoft.*.dll;
                             $(OutputDirectory)/sdk/**/NuGet*.dll;
                             $(OutputDirectory)/sdk/**/datacollector.dll;
                             $(OutputDirectory)/sdk/**/MSBuild.dll;
                             $(OutputDirectory)/sdk/**/testhost.dll;
-                            $(OutputDirectory)/sdk/**/vstest.console.dll">
+                            $(OutputDirectory)/sdk/**/vstest.console.dll;
+                            $(OutputDirectory)/sdk/**/vstest.console.resources.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
       <!-- Built files for the packages -->

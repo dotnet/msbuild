@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -45,7 +46,7 @@ Commands:
         {
             var cmd = new DotnetCommand().ExecuteWithCapturedOutput($"remove package {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Theory]
@@ -56,8 +57,8 @@ Commands:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"remove {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Required command was not provided.");
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(RemoveCommandHelpText);
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(RemoveCommandHelpText);
         }
 
         [Fact]

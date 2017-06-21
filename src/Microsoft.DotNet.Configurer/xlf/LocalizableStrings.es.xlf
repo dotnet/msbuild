@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="es" original="src/Microsoft.DotNet.Configurer/LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
-      <group id="src/Microsoft.DotNet.Configurer/LocalizableStrings.resx" />
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
@@ -12,12 +11,8 @@ Telemetry
 --------------
 The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
 You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
-
-Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">Bienvenido a .NET Core
+You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+        <target state="needs-review-translation">Bienvenido a .NET Core
 ---------------------
 Obtenga más información sobre .NET Core en https://aka.ms/dotnet-docs. Use dotnet --help para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
 
@@ -35,6 +30,34 @@ Un comando se ejecuta para rellenar inicialmente la caché de paquete local a fi
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
         <target state="translated">No se pudo desbloquear la caché de NuGet. Error de {0} con: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NugetCachePrimeMessage">
+        <source>Configuring...
+-------------------
+A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+        <target state="new">Configuring...
+-------------------
+A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnauthorizedAccessMessage">
+        <source>Permission denied to modify the '{0}' folder.
+
+Here are some options to fix this error:
+---------------------
+1. Re-run this command with elevated access.
+2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+3. Copy the .NET Core SDK to a non-protected location and use it from there.
+    </source>
+        <target state="new">Permission denied to modify the '{0}' folder.
+
+Here are some options to fix this error:
+---------------------
+1. Re-run this command with elevated access.
+2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+3. Copy the .NET Core SDK to a non-protected location and use it from there.
+    </target>
         <note />
       </trans-unit>
     </body>

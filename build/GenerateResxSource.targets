@@ -15,12 +15,16 @@
   </Target>
 
   <Target Name="CustomizeResourceNames"
-          BeforeTargets="PrepareResourceNames"
+          BeforeTargets="PrepareResourceNames;GatherXlf"
           >
     <ItemGroup>
-      <EmbeddedResource>
-        <ManifestResourceName Condition="'%(EmbeddedResource.Namespace)' != ''">%(EmbeddedResource.Namespace).%(EmbeddedResource.Filename)</ManifestResourceName>
+      <EmbeddedResource Condition="'%(EmbeddedResource.Namespace)' != ''">
+        <ManifestResourceName>%(EmbeddedResource.Namespace).%(EmbeddedResource.Filename)</ManifestResourceName>
       </EmbeddedResource>
+      <XlfSource Condition="'%(XlfSource.Namespace)' != ''">
+        <ManifestResourceName>%(XlfSource.Namespace).%(XlfSource.Filename)</ManifestResourceName>
+        <XlfTranslatedFileName>%(XlfSource.Namespace).%(XlfSource.Filename)</XlfTranslatedFileName>
+      </XlfSource>
     </ItemGroup>
   </Target>
 
@@ -35,7 +39,7 @@
 
   <Target Name="GetEmbeddedResourcesWithSourceGeneration">
     <ItemGroup>
-      <EmbeddedResourceSG Include="@(EmbeddedResource)" Condition="'%(EmbeddedResource.GenerateSource)' == 'true'" />
+      <EmbeddedResourceSG Include="@(EmbeddedResource)" Condition="'%(EmbeddedResource.GenerateSource)' == 'true' and '%(EmbeddedResource.XlfLanguage)' == ''" />
       <EmbeddedResourceSG>
         <SourceOutputPath>$(IntermediateOutputPath)%(EmbeddedResourceSG.ManifestResourceName).cs</SourceOutputPath>
       </EmbeddedResourceSG>

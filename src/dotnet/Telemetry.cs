@@ -35,9 +35,9 @@ namespace Microsoft.DotNet.Cli
 
         public Telemetry () : this(null) { }
 
-        public Telemetry(INuGetCacheSentinel sentinel) : this(sentinel, null) { }
+        public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(INuGetCacheSentinel sentinel, string sessionId)
+        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId)
         {
             Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli
             _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
         }
 
-        private bool PermissionExists(INuGetCacheSentinel sentinel)
+        private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)
         {
             if (sentinel == null)
             {

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
@@ -9,11 +11,11 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {
-    public class GivenDotnetPublishPublisheswithCacheProjects : TestBase
+    public class GivenDotnetStoresAndPublishesProjects : TestBase
     {
         private static string _tfm = "netcoreapp2.0";
-        private static string _frameworkVersion = Microsoft.DotNet.TestFramework.TestAssetInstance.CurrentRuntimeFrameworkVersion;
-        private static string _arch = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
+        private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
+        private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
         [Fact]
         public void ItPublishesARunnablePortableApp()
@@ -23,10 +25,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
-                .WithSourceFiles()
-                .UseCurrentRuntimeFrameworkVersion();
+                .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.Root.ToString();
+            var testProjectDirectory = testInstance.Root.FullName;
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "localAssemblyCache");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
@@ -76,10 +77,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
-                .WithSourceFiles()
-                .UseCurrentRuntimeFrameworkVersion();
+                .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.Root.ToString();
+            var testProjectDirectory = testInstance.Root.FullName;
             var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
             var profileFilter = Path.Combine(profileProjectPath, targetManifestFileName);
 
@@ -117,10 +117,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
-                .WithSourceFiles()
-                .UseCurrentRuntimeFrameworkVersion();
+                .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.Root.ToString();
+            var testProjectDirectory = testInstance.Root.FullName;
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "lAC");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");

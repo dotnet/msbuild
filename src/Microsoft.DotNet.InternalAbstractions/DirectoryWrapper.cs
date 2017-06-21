@@ -42,5 +42,10 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
             return directoryFullName;
         }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
     }
 }

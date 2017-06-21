@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var assetsFile = testInstance.Root.GetDirectory("obj").GetFile("project.assets.json").FullName;
             var expectedMessage = string.Join(
                 Environment.NewLine,
-                $"File not found `{assetsFile}`.",
-                "The project may not have been restored or restore failed - run `dotnet restore`");
+                string.Format(LocalizableStrings.FileNotFound, assetsFile),
+                LocalizableStrings.ProjectNotRestoredOrRestoreFailed);
 
             Action action = () =>
             {

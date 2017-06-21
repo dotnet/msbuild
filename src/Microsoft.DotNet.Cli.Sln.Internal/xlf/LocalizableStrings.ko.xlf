@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="ko" original="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
-      <group id="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx" />
       <trans-unit id="GlobalSectionMoreThanOnceError">
         <source>Global section specified more than once</source>
         <target state="translated">전역 섹션이 두 번 이상 지정됨</target>
