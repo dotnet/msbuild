@@ -1,0 +1,48 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Manage your account";
+}
+
+<h2>@ViewData["Title"].</h2>
+@if (Model.ShowStatusMessage)
+{
+    <div class="alert alert-@Model.StatusMessageClass alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        @Model.StatusMessage
+    </div>
+}
+<div>
+    <h4>Change your account settings</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>Password:</dt>
+        <dd>
+            @if (Model.HasPassword)
+            {
+                <a asp-page="./ChangePassword" class="btn-bracketed">Change</a>
+            }
+            else
+            {
+                <a asp-page="./SetPassword" class="btn-bracketed">Create</a>
+            }
+        </dd>
+        <dt>External Logins:</dt>
+        <dd>
+            @Model.Logins.Count <a asp-page="./ExternalLogins" class="btn-bracketed">Manage</a>
+        </dd>
+        <dt>Email:</dt>
+        <dd>
+            @if (Model.IsEmailConfirmed)
+            {
+                <span class="text-success">Confirmed</span>
+            }
+            else
+            {
+                <form asp-page-handler="ConfirmEmail" method="post">
+                    <button type="submit" class="btn-link btn-bracketed">Confirm</button>
+                </form>
+            }
+        </dd>
+    </dl>
+</div>

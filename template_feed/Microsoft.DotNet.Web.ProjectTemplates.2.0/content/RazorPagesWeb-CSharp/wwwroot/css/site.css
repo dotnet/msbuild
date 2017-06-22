@@ -1,4 +1,4 @@
-﻿body {
+body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
@@ -34,6 +34,11 @@ textarea {
     display: inline-block;
     content: "]";
     padding-left: 0.5em;
+}
+
+.btn-bracketed {
+    padding: 0;
+    border: 0;
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
