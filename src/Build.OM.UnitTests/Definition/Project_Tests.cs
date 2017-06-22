@@ -3843,6 +3843,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3886,6 +3888,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3970,6 +3974,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportEvent()
         {
             using (var env = TestEnvironment.Create(_output))
