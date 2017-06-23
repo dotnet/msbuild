@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Xml.XPath.XDocument</name>
+  </assembly>
+  <members>
+    <member name="T:System.Xml.XPath.Extensions">
+      <summary>此类包含 LINQ to XML 扩展方法，可以使用这些方法计算 XPath 表达式。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode)">
+      <summary>为 <see cref="T:System.Xml.Linq.XNode" /> 创建一个 <see cref="T:System.Xml.XPath.XPathNavigator" />。</summary>
+      <returns>一个可以处理 XPath 查询的 <see cref="T:System.Xml.XPath.XPathNavigator" />。</returns>
+      <param name="node">一个可以处理 XPath 查询的 <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode,System.Xml.XmlNameTable)">
+      <summary>为 <see cref="T:System.Xml.Linq.XNode" /> 创建一个 <see cref="T:System.Xml.XPath.XPathNavigator" />。<see cref="T:System.Xml.XmlNameTable" /> 可以使 XPath 表达式的处理变得更高效。</summary>
+      <returns>一个可以处理 XPath 查询的 <see cref="T:System.Xml.XPath.XPathNavigator" />。</returns>
+      <param name="node">一个可以处理 XPath 查询的 <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="nameTable">一个将由 <see cref="T:System.Xml.XPath.XPathNavigator" /> 使用的 <see cref="T:System.Xml.XmlNameTable" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String)">
+      <summary>计算 XPath 表达式。</summary>
+      <returns>一个可以包含 bool、double、string 或 <see cref="T:System.Collections.Generic.IEnumerable`1" /> 的对象。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>计算 XPath 表达式，使用指定的 <see cref="T:System.Xml.IXmlNamespaceResolver" /> 解析命名空间前缀。</summary>
+      <returns>一个包含表达式计算结果的对象。该对象可以为 bool、double、string 或 <see cref="T:System.Collections.Generic.IEnumerable`1" />。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <param name="resolver">一个用于解析 XPath 表达式中命名空间前缀的 <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String)">
+      <summary>使用 XPath 表达式选择 <see cref="T:System.Xml.Linq.XElement" />。</summary>
+      <returns>一个 <see cref="T:System.Xml.Linq.XElement" />，或者 null。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>使用 XPath 表达式选择 <see cref="T:System.Xml.Linq.XElement" />，并使用指定的 <see cref="T:System.Xml.IXmlNamespaceResolver" /> 解析命名空间前缀。</summary>
+      <returns>一个 <see cref="T:System.Xml.Linq.XElement" />，或者 null。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <param name="resolver">一个用于解析 XPath 表达式中命名空间前缀的 <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String)">
+      <summary>使用 XPath 表达式选择一个元素集合。</summary>
+      <returns>一个 <see cref="T:System.Xml.Linq.XElement" /> 的 <see cref="T:System.Collections.Generic.IEnumerable`1" />，它包含选定元素。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>使用 XPath 表达式选择一个元素集合，并使用指定的 <see cref="T:System.Xml.IXmlNamespaceResolver" /> 解析命名空间前缀。</summary>
+      <returns>一个 <see cref="T:System.Xml.Linq.XElement" /> 的 <see cref="T:System.Collections.Generic.IEnumerable`1" />，它包含选定元素。</returns>
+      <param name="node">一个 <see cref="T:System.Xml.Linq.XNode" />，XPath 表达式将在其上计算。</param>
+      <param name="expression">一个包含 XPath 表达式的 <see cref="T:System.String" />。</param>
+      <param name="resolver">一个用于解析 XPath 表达式中命名空间前缀的 <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XPath.XDocumentExtensions"></member>
+    <member name="M:System.Xml.XPath.XDocumentExtensions.ToXPathNavigable(System.Xml.Linq.XNode)"></member>
+  </members>
+</doc>

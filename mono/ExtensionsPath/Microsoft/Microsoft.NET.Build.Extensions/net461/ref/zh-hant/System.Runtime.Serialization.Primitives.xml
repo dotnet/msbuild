@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Primitives</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.CollectionDataContractAttribute">
+      <summary>當套用至集合型別時，就能夠自訂集合 Item 項目的規格。這個屬性只能套用至由 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 識別為有效、可序列化集合的型別。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.CollectionDataContractAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.CollectionDataContractAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsItemNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsKeyNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReference">
+      <summary>取得或設定值，這個值表示是否要保留物件參考資料。</summary>
+      <returns>true 表示保留物件參考資料，否則為 false。預設為 false。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsValueNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ItemName">
+      <summary>取得或設定集合項目的自訂名稱。</summary>
+      <returns>要套用至集合項目的名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.KeyName">
+      <summary>取得或設定字典索引鍵名稱的自訂名稱。</summary>
+      <returns>要用來代替預設字典索引鍵名稱的名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Name">
+      <summary>取得或設定集合型別的資料合約名稱。</summary>
+      <returns>集合型別的資料合約名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Namespace">
+      <summary>取得或設定資料合約的命名空間。</summary>
+      <returns>資料合約的命名空間。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ValueName">
+      <summary>取得或設定字典值名稱的自訂名稱。</summary>
+      <returns>要用來代替預設字典值名稱的名稱。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.ContractNamespaceAttribute">
+      <summary>指定資料合約的 CLR 命名空間和 XML 命名空間。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.ContractNamespaceAttribute.#ctor(System.String)">
+      <summary>使用提供的命名空間，初始化 <see cref="T:System.Runtime.Serialization.ContractNamespaceAttribute" /> 類別的新執行個體。</summary>
+      <param name="contractNamespace">合約的命名空間。</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ClrNamespace">
+      <summary>取得或設定資料合約型別的 CLR 命名空間。</summary>
+      <returns>型別的合法 CLR 命名空間。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ContractNamespace">
+      <summary>取得資料合約成員的命名空間。</summary>
+      <returns>資料合約成員的命名空間。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractAttribute">
+      <summary>指定定義或實作資料合約的型別，可由序列化程式 (例如 <see cref="T:System.Runtime.Serialization.DataContractSerializer" />) 加以序列化。型別作者一定要定義型別的資料合約，才能讓型別能夠進行序列化。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReference">
+      <summary>取得或設定值，這個值表示是否要保留物件參考資料。</summary>
+      <returns>true 表示使用標準的 XML 來保留物件參考資料，否則為 false。預設為 false。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Name">
+      <summary>取得或設定型別的資料合約名稱。</summary>
+      <returns>資料合約的本機名稱。預設為要套用屬性之類別的名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Namespace">
+      <summary>取得或設定型別之資料合約的命名空間。</summary>
+      <returns>合約的命名空間。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataMemberAttribute">
+      <summary>當套用至型別的成員時，便會指定該成員屬於資料合約的一部分，而且已由 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 完成序列化。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataMemberAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataMemberAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.EmitDefaultValue">
+      <summary>取得或設定值，這個值會指定即將序列化之欄位或屬性的預設值是否要加以序列化。</summary>
+      <returns>如果應該要在序列化資料流中產生成員的預設值，則為 true，否則為 false。預設為 true。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsRequired">
+      <summary>取得或設定值，這個值會指示序列化引擎在讀取或還原序列化時成員是否必須存在於其中。</summary>
+      <returns>如果需要成員，則為 true，否則為 false。</returns>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">成員不存在。</exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Name">
+      <summary>取得或設定資料成員名稱。</summary>
+      <returns>資料成員的名稱。預設為要套用屬性之目標的名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Order">
+      <summary>取得或設定成員之序列化和還原序列化的順序。</summary>
+      <returns>序列化或還原序列化的數字順序。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.EnumMemberAttribute">
+      <summary>指定欄位是列舉成員，並且應該加以序列化。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.EnumMemberAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.EnumMemberAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.IsValueSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.Value">
+      <summary>取得或設定與已套用屬性之列舉成員相關聯的值。</summary>
+      <returns>與列舉成員相關聯的值。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.IgnoreDataMemberAttribute">
+      <summary>當套用至型別的成員時，會指定該成員不屬於資料合約的一部分，而且未序列化。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.IgnoreDataMemberAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.IgnoreDataMemberAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.InvalidDataContractException">
+      <summary>當 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 或 <see cref="T:System.Runtime.Serialization.NetDataContractSerializer" /> 在序列化 (Serialization) 和還原序列化 (Deserialization) 期間遇到無效的資料合約時，所擲回的例外狀況。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String)">
+      <summary>使用指定的錯誤訊息，初始化 <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 類別的新執行個體。</summary>
+      <param name="message">錯誤的描述。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String,System.Exception)">
+      <summary>使用指定的錯誤訊息和內部例外狀況，來初始化 <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 類別的新執行個體。</summary>
+      <param name="message">錯誤的描述。</param>
+      <param name="innerException">原始的 <see cref="T:System.Exception" />。</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.KnownTypeAttribute">
+      <summary>指定在序列化或還原序列化指定型別時，應該要由 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 辨識的型別。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.String)">
+      <summary>使用負責傳回已知型別之 <see cref="T:System.Collections.IEnumerable" /> 的方法名稱，初始化 <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 類別的新執行個體。</summary>
+      <param name="methodName">方法名稱，這個方法會傳回在序列化或還原序列化資料時所使用型別的 <see cref="T:System.Collections.IEnumerable" />。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.Type)">
+      <summary>使用指定的型別來初始化 <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 類別的新執行個體。</summary>
+      <param name="type">當序列化或還原序列化資料時，將包含做為已知型別的 <see cref="T:System.Type" />。</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.MethodName">
+      <summary>取得方法名稱，這個方法將傳回應該要在序列化或還原序列化期間進行辨識之型別的清單。</summary>
+      <returns>
+        <see cref="T:System.String" />，其中包含由 <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 類別所定義型別上的方法名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.Type">
+      <summary>取得型別，這個型別在序列化或還原序列化期間應該要由 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 進行辨識。</summary>
+      <returns>在序列化或還原序列化期間所使用的 <see cref="T:System.Type" />。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializedAttribute">
+      <summary>套用至方法時，指定在還原序列化物件圖形中的物件後立即呼叫該方法。還原序列化相對於圖形中其他物件的順序不具決定性。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializedAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.OnDeserializedAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializingAttribute">
+      <summary>套用至方法時，指定在還原序列化物件圖形中的物件期間呼叫該方法。還原序列化相對於圖形中其他物件的順序不具決定性。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializingAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.OnDeserializingAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializedAttribute">
+      <summary>套用至方法時，指定在序列化物件圖形中的物件後呼叫該方法。序列化相對於圖形中其他物件的順序不具決定性。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializedAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.OnSerializedAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializingAttribute">
+      <summary>套用至方法時，指定在序列化物件圖形中的物件期間呼叫該方法。序列化相對於圖形中其他物件的順序不具決定性。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializingAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.OnSerializingAttribute" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.SerializationException">
+      <summary>當序列化 (Serialization) 或還原序列化 (Deserialization) 期間發生錯誤時，擲回的例外狀況。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor">
+      <summary>使用預設屬性來初始化 <see cref="T:System.Runtime.Serialization.SerializationException" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String)">
+      <summary>使用指定的訊息，初始化 <see cref="T:System.Runtime.Serialization.SerializationException" /> 類別的新執行個體。</summary>
+      <param name="message">指示發生例外狀況的原因。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String,System.Exception)">
+      <summary>使用指定的錯誤訊息和造成這個例外狀況原因的內部例外參考，初始化 <see cref="T:System.Runtime.Serialization.SerializationException" /> 類別的新執行個體。</summary>
+      <param name="message">解釋例外狀況原因的錯誤訊息。</param>
+      <param name="innerException">導致目前例外狀況的例外。如果 <paramref name="innerException" /> 參數不是 null，則目前的例外狀況會在處理內部例外的 catch 區塊中引發。</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.StreamingContext">
+      <summary>描述指定之序列化資料流的來源和目的端，並提供額外的呼叫端定義內容。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.Equals(System.Object)">
+      <summary>判斷兩個 <see cref="T:System.Runtime.Serialization.StreamingContext" /> 執行個體是否具有相同的值。</summary>
+      <returns>如果指定的物件是 <see cref="T:System.Runtime.Serialization.StreamingContext" /> 的執行個體，而且目前執行個體的值，則為 true，否則為 false。</returns>
+      <param name="obj">與目前執行個體相互比較的物件。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.GetHashCode">
+      <summary>傳回這個物件的雜湊程式碼。</summary>
+      <returns>
+        <see cref="T:System.Runtime.Serialization.StreamingContextStates" /> 值，包含這個 <see cref="T:System.Runtime.Serialization.StreamingContext" /> 之序列化的來源和目的端。</returns>
+    </member>
+  </members>
+</doc>

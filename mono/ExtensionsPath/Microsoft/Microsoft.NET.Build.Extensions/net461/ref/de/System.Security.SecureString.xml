@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Security.SecureString</name>
+  </assembly>
+  <members>
+    <member name="T:System.Security.SecureString">
+      <summary>Stellt Text dar, der vertraulich behandelt werden soll, etwa durch Löschen aus dem Arbeitsspeicher des Computers, wenn er nicht mehr benötigt wird.Diese Klasse kann nicht vererbt werden.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor">
+      <summary>Initialisiert eine neue Instanz der <see cref="T:System.Security.SecureString" />-Klasse.</summary>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this instance.</exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor(System.Char*,System.Int32)">
+      <summary>Initialisiert eine neue Instanz der <see cref="T:System.Security.SecureString" />-Klasse aus einem Unterarray von <see cref="T:System.Char" />-Objekten. </summary>
+      <param name="value">Ein Zeiger auf ein Array von <see cref="T:System.Char" />-Objekten.</param>
+      <param name="length">Die Anzahl der Elemente von <paramref name="value" />, die in die neue Instanz eingeschlossen werden sollen.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="length" /> is less than zero or greater than 65,536.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string. </exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.AppendChar(System.Char)">
+      <summary>Fügt am Ende der aktuellen sicheren Zeichenfolge ein Zeichen an.</summary>
+      <param name="c">Ein Zeichen, das an diese sichere Zeichenfolge angefügt werden soll.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Clear">
+      <summary>Löscht den Wert der aktuellen sicheren Zeichenfolge.</summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Copy">
+      <summary>Erstellt eine Kopie der aktuellen sicheren Zeichenfolge.</summary>
+      <returns>Ein Duplikat dieser sicheren Zeichenfolge.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Dispose">
+      <summary>Gibt alle vom aktuellen <see cref="T:System.Security.SecureString" />-Objekt verwendeten Ressourcen frei.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.InsertAt(System.Int32,System.Char)">
+      <summary>Fügt in dieser sicheren Zeichenfolge an der angegebenen Indexposition ein Zeichen ein. </summary>
+      <param name="index">Die Indexposition, an der der <paramref name="c" />-Parameter eingefügt wird.</param>
+      <param name="c">Das einzufügende Zeichen.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than the length of this secure string.-or-Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.IsReadOnly">
+      <summary>Gibt an, ob diese sichere Zeichenfolge als schreibgeschützt markiert ist.</summary>
+      <returns>true, wenn diese sichere Zeichenfolge schreibgeschützt ist, andernfalls false.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="P:System.Security.SecureString.Length">
+      <summary>Ruft die Anzahl der Zeichen in der aktuellen sicheren Zeichenfolge ab.</summary>
+      <returns>Die Anzahl von <see cref="T:System.Char" />-Objekten in dieser sicheren Zeichenfolge.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.MakeReadOnly">
+      <summary>Legt den Textwert dieser sicheren Zeichenfolge als schreibgeschützt fest.   </summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.RemoveAt(System.Int32)">
+      <summary>Entfernt das Zeichen an der angegebenen Indexposition aus dieser sicheren Zeichenfolge.</summary>
+      <param name="index">Die Indexposition eines Zeichens in dieser sicheren Zeichenfolge.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.SetAt(System.Int32,System.Char)">
+      <summary>Ersetzt das an der angegebenen Indexposition vorhandene Zeichen durch ein anderes Zeichen.</summary>
+      <param name="index">Die Indexposition eines vorhandenen Zeichens in dieser sicheren Zeichenfolge</param>
+      <param name="c">Ein Zeichen, das das vorhandene Zeichen ersetzt.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="T:System.Security.SecureStringMarshal"></member>
+    <member name="M:System.Security.SecureStringMarshal.SecureStringToCoTaskMemUnicode(System.Security.SecureString)"></member>
+    <member name="M:System.Security.SecureStringMarshal.ZeroFreeCoTaskMemUnicode(System.IntPtr)"></member>
+  </members>
+</doc>

@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Primitives</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.CollectionDataContractAttribute">
+      <summary>Cuando se aplica a un tipo de colección, habilita la especificación personalizada de los elementos de elemento de colección.Este atributo sólo se puede aplicar a los tipos que son reconocidos por <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> como colecciones válidas serializables.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.CollectionDataContractAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.CollectionDataContractAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsItemNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsKeyNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReference">
+      <summary>Obtiene o establece un valor que indica si conservar los datos de referencia al objeto.</summary>
+      <returns>true para mantener los datos de la referencia a objeto; de lo contrario, false.El valor predeterminado es false.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsValueNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ItemName">
+      <summary>Obtiene o establece un nombre personalizado para un elemento de la colección.</summary>
+      <returns>El nombre para aplicar a los elementos de la colección.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.KeyName">
+      <summary>Obtiene o establece el nombre personalizado para un nombre de clave del diccionario.</summary>
+      <returns>El nombre que se debe usar en lugar del nombre de clave del diccionario predeterminado.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Name">
+      <summary>Obtiene o establece el nombre del contrato de datos para el tipo de colección.</summary>
+      <returns>El nombre del contrato de datos para el tipo de colección.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Namespace">
+      <summary>Obtiene o establece el espacio de nombres para el contrato de datos.</summary>
+      <returns>El espacio de nombres del contrato de datos.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ValueName">
+      <summary>Obtiene o establece el nombre personalizado para un nombre de valor del diccionario.</summary>
+      <returns>El nombre que se debe usar en lugar del nombre de valor del diccionario predeterminado.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.ContractNamespaceAttribute">
+      <summary>Especifica el espacio de nombres CLR y el espacio de nombres XML del contrato de datos. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.ContractNamespaceAttribute.#ctor(System.String)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.ContractNamespaceAttribute" /> con el espacio de nombres proporcionado. </summary>
+      <param name="contractNamespace">Espacio de nombres del contrato.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ClrNamespace">
+      <summary>Obtiene o establece el espacio de nombres CLR del tipo de contrato de datos. </summary>
+      <returns>Espacio de nombres CLR-legal de un tipo.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ContractNamespace">
+      <summary>Obtiene el espacio de nombres de los miembros del contrato de datos.</summary>
+      <returns>El espacio de nombres de los miembros del contrato de datos.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractAttribute">
+      <summary>Especifica que el tipo define o implementa un contrato de datos y los puede serializar un serializador como, por ejemplo <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.Para que hacer su tipo sea serializable, los autores del tipo deben definir un contrato de datos para dicho tipo.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.DataContractAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReference">
+      <summary>Obtiene o establece un valor que indica si conservar los datos de referencia al objeto.</summary>
+      <returns>true mantiene los datos de referencia al objeto mediante XML estándar; de lo contrario, false.El valor predeterminado es false.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Name">
+      <summary>Obtiene o establece el nombre del contrato de datos para el tipo.</summary>
+      <returns>El nombre local del contrato de datos.El valor predeterminado es el nombre de la clase a la que se aplica el atributo.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Namespace">
+      <summary>Obtiene o establece el espacio de nombres del contrato de datos para el tipo.</summary>
+      <returns>Espacio de nombres del contrato. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataMemberAttribute">
+      <summary>Cuando se aplica al miembro de un tipo, especifica que el miembro forma parte de un contrato de datos y lo puede serializar <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataMemberAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.DataMemberAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.EmitDefaultValue">
+      <summary>Obtiene o establece un valor que especifica si se debe serializar el valor predeterminado para un campo o propiedad que se está serializando. </summary>
+      <returns>true si el valor predeterminado para un miembro se debe generar en la secuencia de la serialización; de lo contrario, false.El valor predeterminado es true.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsRequired">
+      <summary>Obtiene o establece un valor que indica al motor de serialización que el miembro debe estar presente durante la lectura o la deserialización.</summary>
+      <returns>true, si el miembro es necesario; en caso contrario, false.</returns>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">el miembro no está presente.</exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Name">
+      <summary>Obtiene o establece un nombre de miembro de datos. </summary>
+      <returns>El nombre del miembro de datos.El valor predeterminado es el nombre del destino al que se aplica el atributo.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Order">
+      <summary>Obtiene o establece el orden de serialización y deserialización de un miembro.</summary>
+      <returns>El orden numérico de serialización o deserialización.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.EnumMemberAttribute">
+      <summary>Especifica que el campo es un miembro de enumeración y se debe serializar.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.EnumMemberAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.EnumMemberAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.IsValueSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.Value">
+      <summary>Obtiene o establece el valor asociado al miembro de enumeración al que se aplica el atributo. </summary>
+      <returns>El valor asociado al miembro de la enumeración.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.IgnoreDataMemberAttribute">
+      <summary>Cuando se aplica al miembro de un tipo, especifica que el miembro no forma parte de un contrato de datos y no está serializado.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.IgnoreDataMemberAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.IgnoreDataMemberAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.InvalidDataContractException">
+      <summary>La excepción que se inicia cuando <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> o <see cref="T:System.Runtime.Serialization.NetDataContractSerializer" /> detecta un contrato de datos no válido durante la serialización y deserialización. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.InvalidDataContractException" />.  </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> con el mensaje de error especificado. </summary>
+      <param name="message">Descripción del error. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String,System.Exception)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> con el mensaje y la excepción interna especificadas. </summary>
+      <param name="message">Descripción del error. </param>
+      <param name="innerException">
+        <see cref="T:System.Exception" /> original. </param>
+    </member>
+    <member name="T:System.Runtime.Serialization.KnownTypeAttribute">
+      <summary>Especifica tipos que deberá reconocer <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> al serializar o deserializar un tipo determinado. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.String)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> con el nombre de un método que devuelve <see cref="T:System.Collections.IEnumerable" /> de tipos conocidos. </summary>
+      <param name="methodName">El nombre del método que devuelve una interfaz <see cref="T:System.Collections.IEnumerable" /> de tipos usados al serializar o deserializar datos.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.Type)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> con el tipo especificado. </summary>
+      <param name="type">
+        <see cref="T:System.Type" /> que está incluido como un tipo conocido al serializar o deserializar los datos.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.MethodName">
+      <summary>Obtiene el nombre de un método que devolverá una lista de tipos que se deberán reconocer durante la serialización o la deserialización. </summary>
+      <returns>
+        <see cref="T:System.String" /> que contiene el nombre del método en el tipo definido por la clase <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" />. </returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.Type">
+      <summary>Obtiene el tipo que <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> deberá reconocer durante la serialización o la deserialización. </summary>
+      <returns>
+        <see cref="T:System.Type" /> que se usa durante la serialización o la deserialización. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializedAttribute">
+      <summary>Cuando se aplica a un método, especifica que se produce una llamada al método inmediatamente después de la deserialización de un objeto en un gráfico de objetos.El orden de deserialización relativo a otros objetos del gráfico no es determinista.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializedAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.OnDeserializedAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializingAttribute">
+      <summary>Cuando se aplica a un método, especifica que la llamada al método se produce durante la deserialización de un objeto en un gráfico de objetos.El orden de deserialización relativo a otros objetos del gráfico no es determinista.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializingAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.OnDeserializingAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializedAttribute">
+      <summary>Cuando se aplica a un método, especifica que la llamada al método se produce después de la serialización de un objeto en un gráfico de objetos.El orden de serialización relativo a otros objetos del gráfico no es determinista.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializedAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.OnSerializedAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializingAttribute">
+      <summary>Cuando se aplica a un método, especifica que la llamada al método se produce durante la serialización de un objeto en un gráfico de objetos.El orden de serialización relativo a otros objetos del gráfico no es determinista.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializingAttribute.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.OnSerializingAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.SerializationException">
+      <summary>Excepción que se produce cuando se produce un error durante la serialización o deserialización.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.SerializationException" /> con propiedades predeterminadas.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.SerializationException" /> con el mensaje especificado.</summary>
+      <param name="message">Indica la razón por la cual se produjo la excepción. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String,System.Exception)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Runtime.Serialization.SerializationException" /> con el mensaje de error especificado y una referencia a la excepción interna que causó esta excepción.</summary>
+      <param name="message">Mensaje de error que explica la razón de la excepción. </param>
+      <param name="innerException">La excepción que es la causa de la excepción actual.Si el parámetro <paramref name="innerException" /> no es null, la excepción actual se produce en un bloque catch que controla la excepción interna.</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.StreamingContext">
+      <summary>Describe el origen y destino de una secuencia de serialización determinada y proporciona un contexto definido por el llamador adicional.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.Equals(System.Object)">
+      <summary>Determina si dos instancias de <see cref="T:System.Runtime.Serialization.StreamingContext" /> contienen los mismos valores.</summary>
+      <returns>Es true si el objeto especificado es una instancia de <see cref="T:System.Runtime.Serialization.StreamingContext" /> y es igual que el valor de la instancia actual; en caso contrario, es false.</returns>
+      <param name="obj">Objeto que se va a comparar con la instancia actual. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.GetHashCode">
+      <summary>Devuelve un código hash de este objeto.</summary>
+      <returns>Valor de <see cref="T:System.Runtime.Serialization.StreamingContextStates" /> que contiene el origen o el destino de la serialización correspondiente a este <see cref="T:System.Runtime.Serialization.StreamingContext" />.</returns>
+    </member>
+  </members>
+</doc>

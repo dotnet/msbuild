@@ -1,0 +1,460 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Net.Sockets</name>
+  </assembly>
+  <members>
+    <member name="T:System.Net.Sockets.ProtocolType">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> クラスがサポートするプロトコルを指定します。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Tcp">
+      <summary>伝送制御プロトコル。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Udp">
+      <summary>ユーザー データグラム プロトコル。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unknown">
+      <summary>未確認のプロトコル。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unspecified">
+      <summary>指定されていないプロトコル。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.Socket">
+      <summary>Berkeley ソケット インターフェイスを実装します。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.AddressFamily,System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>指定したアドレス ファミリ、ソケット タイプ、およびプロトコルを使用して、<see cref="T:System.Net.Sockets.Socket" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="addressFamily">
+        <see cref="T:System.Net.Sockets.AddressFamily" /> 値の 1 つ。</param>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 値の 1 つ。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 値の 1 つ。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="addressFamily" />、<paramref name="socketType" />、および <paramref name="protocolType" /> を組み合わせると、無効なソケットになります。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>指定したソケット タイプとプロトコルを使用して、<see cref="T:System.Net.Sockets.Socket" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 値の 1 つ。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 値の 1 つ。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="socketType" /> と <paramref name="protocolType" /> を組み合わせると、無効なソケットになります。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>受信接続の試行を受け入れる非同期操作を開始します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentException">引数が無効です。この例外は、提供されたバッファーのサイズが不足している場合に発生します。バッファーは、2 * (sizeof(SOCKADDR_STORAGE + 16) バイト以上であることが必要です。この例外は、複数のバッファーが指定されているときに、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティが null ではない場合にも発生します。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">引数が範囲外です。この例外は、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Count" /> が 0 未満の場合に発生します。</exception>
+      <exception cref="T:System.InvalidOperationException">無効な操作が要求されました。この例外は、受け入れ側の <see cref="T:System.Net.Sockets.Socket" /> が接続を待機していない場合、または受け入れられたソケットがバインドされている場合に発生します。<see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" /> メソッドを呼び出す前に、<see cref="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)" /> メソッドと <see cref="M:System.Net.Sockets.Socket.Listen(System.Int32)" /> メソッドを呼び出す必要があります。この例外は、ソケットが既に接続されている、またはソケット操作が指定された <paramref name="e" /> パラメーターを使用して既に進行中の場合にも発生します。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.AddressFamily">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> のアドレス ファミリを取得します。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.AddressFamily" /> 値の 1 つ。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> をローカル エンドポイントと関連付けます。</summary>
+      <param name="localEP">
+        <see cref="T:System.Net.Sockets.Socket" /> に関連付けるローカル <see cref="T:System.Net.EndPoint" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localEP" /> は null なので、</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Security.SecurityException">コール スタックの上位にある呼び出し元が、要求された操作のアクセス許可を保持していません。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Net.SocketPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.CancelConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>リモート ホスト接続への非同期要求を取り消します。</summary>
+      <param name="e">
+        <see cref="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)" /> メソッドの 1 つを呼び出してリモート ホストへの接続を要求するために使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> パラメーターおよび <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> を null にすることはできません。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Security.SecurityException">コール スタックの上位にある呼び出し元が、要求された操作のアクセス許可を保持していません。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>リモート ホストに接続する非同期要求を開始します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentException">引数が無効です。この例外は、複数のバッファーが指定されているときに、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティが null ではない場合に発生します。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> パラメーターおよび <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> を null にすることはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> が待機しているか、<paramref name="e" /> パラメーターで指定されている <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。この例外は、ローカル エンドポイントと <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> が同じアドレス ファミリではない場合にも発生します。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Security.SecurityException">コール スタックの上位にある呼び出し元が、要求された操作のアクセス許可を保持していません。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>リモート ホストに接続する非同期要求を開始します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 値の 1 つ。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 値の 1 つ。</param>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentException">引数が無効です。この例外は、複数のバッファーが指定されているときに、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティが null ではない場合に発生します。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> パラメーターおよび <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> を null にすることはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> が待機しているか、<paramref name="e" /> パラメーターで指定されている <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。この例外は、ローカル エンドポイントと <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> が同じアドレス ファミリではない場合にも発生します。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Security.SecurityException">コール スタックの上位にある呼び出し元が、要求された操作のアクセス許可を保持していません。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Connected">
+      <summary>最後に実行された <see cref="Overload:System.Net.Sockets.Socket.Send" /> 操作または <see cref="Overload:System.Net.Sockets.Socket.Receive" /> 操作の時点で、<see cref="T:System.Net.Sockets.Socket" /> がリモート ホストに接続されていたかどうかを示す値を取得します。</summary>
+      <returns>最後に実行された操作の時点で、<see cref="T:System.Net.Sockets.Socket" /> がリモート リソースに接続されていた場合は true。それ以外の場合は false。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> クラスの現在のインスタンスによって使用されているすべてのリソースを解放します。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> が使用しているアンマネージ リソースを解放します。オプションでマネージ リソースも破棄します。</summary>
+      <param name="disposing">マネージ リソースとアンマネージ リソースの両方を解放する場合は true。アンマネージ リソースだけを解放する場合は false。</param>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Finalize">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> クラスによって使用されていたリソースを解放します。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Listen(System.Int32)">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> を待機状態にします。</summary>
+      <param name="backlog">保留中の接続のキューの最大長。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.LocalEndPoint">
+      <summary>ローカル エンドポイントを取得します。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.Socket" /> が通信に使用している <see cref="T:System.Net.EndPoint" />。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.NoDelay">
+      <summary>ストリーム <see cref="T:System.Net.Sockets.Socket" /> が Nagle アルゴリズムを使用するかどうかを指定する <see cref="T:System.Boolean" /> 値を取得または設定します。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.Socket" /> が Nagle アルゴリズムを使用する場合は false。それ以外の場合は true。既定値は、false です。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <see cref="T:System.Net.Sockets.Socket" /> へのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv4">
+      <summary>基になるオペレーティング システムおよびネットワーク アダプターがインターネット プロトコル Version 4 (IPv4) をサポートしているかどうかを示します。</summary>
+      <returns>オペレーティング システムおよびネットワーク アダプターが IPv4 プロトコルをサポートしている場合は true。それ以外の場合は false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv6">
+      <summary>基になるオペレーティング システムおよびネットワーク アダプターで、インターネット プロトコル Version 6 (IPv6) をサポートしているかどうかを示します。</summary>
+      <returns>オペレーティング システムおよびネットワーク アダプターが IPv6 プロトコルをサポートしている場合は true。それ以外の場合は false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ProtocolType">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> のプロトコル型を取得します。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 値の 1 つ。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>接続されている <see cref="T:System.Net.Sockets.Socket" /> オブジェクトからデータを受信する非同期要求を開始します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentException">引数が無効です。<paramref name="e" /> パラメーターの <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティまたは <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティは、有効なバッファーを参照する必要があります。これらのプロパティは、どちらか 1 つを設定できます。一度に両方のプロパティを設定することはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <paramref name="e" /> パラメーターに指定された <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ReceiveBufferSize">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> の受信バッファーのサイズを指定する値を取得または設定します。</summary>
+      <returns>受信バッファーのサイズ (バイト単位) を格納している <see cref="T:System.Int32" />。既定値は 8192 です。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">設定操作として指定された値が 0 未満です。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveFromAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>指定したネットワーク デバイスから、データの非同期の受信を開始します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> に null を指定することはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <paramref name="e" /> パラメーターに指定された <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.RemoteEndPoint">
+      <summary>リモート エンドポイントを取得します。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.Socket" /> の通信先の <see cref="T:System.Net.EndPoint" />。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>接続されている <see cref="T:System.Net.Sockets.Socket" /> オブジェクトに、データを非同期に送信します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="e" /> パラメーターの <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティまたは <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティは、有効なバッファーを参照する必要があります。これらのプロパティは、どちらか 1 つを設定できます。一度に両方のプロパティを設定することはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <paramref name="e" /> パラメーターに指定された <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <see cref="T:System.Net.Sockets.Socket" /> がまだ接続されていないか、<see cref="M:System.Net.Sockets.Socket.Accept" />、<see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" />、または <see cref="Overload:System.Net.Sockets.Socket.BeginAccept" /> の各メソッドによって取得されませんでした。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.SendBufferSize">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> の送信バッファーのサイズを指定する値を取得または設定します。</summary>
+      <returns>送信バッファーのサイズ (バイト単位) を格納している <see cref="T:System.Int32" />。既定値は 8192 です。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">設定操作として指定された値が 0 未満です。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendToAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>特定のリモート ホストにデータを非同期的に送信します。</summary>
+      <returns>I/O 操作が保留中の場合は、true を返します。操作の完了時に、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントが発生します。I/O 操作が同期的に完了した場合は、false を返します。この場合、<paramref name="e" /> パラメーターの <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> イベントは発生しません。メソッド呼び出しから制御が戻った直後に、パラメーターとして渡された <paramref name="e" /> オブジェクトを調べて操作の結果を取得できます。</returns>
+      <param name="e">この非同期ソケット操作に使用する <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクト。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> に null を指定することはできません。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <paramref name="e" /> パラメーターに指定された <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> オブジェクトを使用してソケット操作が既に進行していました。</exception>
+      <exception cref="T:System.NotSupportedException">このメソッドには Windows XP 以降が必要です。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">指定されたプロトコルはコネクション指向ですが、<see cref="T:System.Net.Sockets.Socket" /> がまだ接続されていません。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> での送受信を無効にします。</summary>
+      <param name="how">許可されなくなる操作を指定する <see cref="T:System.Net.Sockets.SocketShutdown" /> 値の 1 つ。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。詳細については、次の「解説」を参照してください。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Ttl">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> によって送信されたインターネット プロトコル (IP) パケットの有効期間 (TTL) の値を指定する値を取得または設定します。</summary>
+      <returns>TTL の値。</returns>
+      <exception cref="T:System.ArgumentOutOfRangeException">TTL 値には、負の数を設定できません。</exception>
+      <exception cref="T:System.NotSupportedException">このプロパティは、<see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /> ファミリまたは <see cref="F:System.Net.Sockets.AddressFamily.InterNetworkV6" /> ファミリのソケットに対してだけ設定できます。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">ソケットへのアクセスを試みているときにエラーが発生しました。このエラーは、TTL に 255 より大きい値を設定しようとしたときにも返されます。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> は閉じられています。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncEventArgs">
+      <summary>非同期ソケット操作を表します。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.#ctor">
+      <summary>空の <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> インスタンスを作成します。</summary>
+      <exception cref="T:System.NotSupportedException">このプラットフォームはサポートされていません。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.AcceptSocket">
+      <summary>非同期ソケット メソッドとの接続を受け入れるために使用するソケットまたは作成されたソケットを取得または設定します。</summary>
+      <returns>非同期ソケット メソッドとの接続を受け入れるために使用する <see cref="T:System.Net.Sockets.Socket" /> または作成されたソケット。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer">
+      <summary>非同期ソケット メソッドで使用するデータ バッファーを取得します。</summary>
+      <returns>非同期ソケット メソッドで使用するデータ バッファーを表す <see cref="T:System.Byte" /> 配列。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList">
+      <summary>非同期ソケット メソッドで使用するデータ バッファーの配列を取得または設定します。</summary>
+      <returns>非同期ソケット メソッドで使用するデータ バッファーの配列を表す <see cref="T:System.Collections.IList" />。</returns>
+      <exception cref="T:System.ArgumentException">設定操作であいまいなバッファーが指定されています。この例外は、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> が null 以外の値に設定されている状態で、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティに null 以外の値を設定しようとした場合に発生します。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BytesTransferred">
+      <summary>ソケット操作で転送するバイト数を取得します。</summary>
+      <returns>ソケット操作で転送するバイト数を格納する <see cref="T:System.Int32" />。</returns>
+    </member>
+    <member name="E:System.Net.Sockets.SocketAsyncEventArgs.Completed">
+      <summary>非同期操作を完了させるために使用されるイベントです。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectByNameError">
+      <summary>
+        <see cref="T:System.Net.DnsEndPoint" /> が使用されているときに接続エラーが発生した場合、例外を取得します。</summary>
+      <returns>
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> プロパティに <see cref="T:System.Net.DnsEndPoint" /> を指定したときの接続エラーの原因を示す <see cref="T:System.Exception" />。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectSocket">
+      <summary>
+        <see cref="Overload:System.Net.Sockets.Socket.ConnectAsync" /> メソッドが正常に完了した後に作成され、接続された <see cref="T:System.Net.Sockets.Socket" /> オブジェクト。</summary>
+      <returns>接続された <see cref="T:System.Net.Sockets.Socket" /> オブジェクト。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Count">
+      <summary>非同期操作で送信または受信するデータの最大量 (バイト単位) を取得します。</summary>
+      <returns>送信または受信するデータの最大量 (バイト単位) を格納する <see cref="T:System.Int32" />。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Dispose">
+      <summary>
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> インスタンスが使用するアンマネージ リソースを解放し、必要に応じてマネージ リソースを破棄します。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Finalize">
+      <summary>
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> クラスによって使用されていたリソースを解放します。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.LastOperation">
+      <summary>このコンテキスト オブジェクトで最近実行されたソケット操作の種類を取得します。</summary>
+      <returns>このコンテキスト オブジェクトで最近実行されたソケット操作の種類を示す <see cref="T:System.Net.Sockets.SocketAsyncOperation" /> インスタンス。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Offset">
+      <summary>
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティによって参照されるデータ バッファーへのオフセット (バイト単位) を取得します。</summary>
+      <returns>
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティによって参照されるデータ バッファーへのオフセット (バイト単位) を格納する <see cref="T:System.Int32" />。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.OnCompleted(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>非同期操作の完了時に呼び出されるメソッドを表します。</summary>
+      <param name="e">シグナル状態のイベント。</param>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint">
+      <summary>非同期操作のリモート IP エンドポイントを取得または設定します。</summary>
+      <returns>非同期操作のリモート IP エンドポイントを表す <see cref="T:System.Net.EndPoint" />。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Byte[],System.Int32,System.Int32)">
+      <summary>非同期ソケット メソッドで使用するデータ バッファーを設定します。</summary>
+      <param name="buffer">非同期ソケット メソッドで使用するデータ バッファー。</param>
+      <param name="offset">操作を開始するデータ バッファーのオフセット (バイト単位)。</param>
+      <param name="count">バッファー内で送信または受信するデータの最大量 (バイト単位)。</param>
+      <exception cref="T:System.ArgumentException">あいまいなバッファーが指定されています。この例外は、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティが null ではなく、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> プロパティも null ではない場合に発生します。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">引数が範囲外です。この例外は、<paramref name="offset" /> パラメーターがゼロ未満であるか、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティの配列の長さよりも大きい場合に発生します。また、<paramref name="count" /> パラメーターがゼロ未満であるか、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティの配列の長さから <paramref name="offset" /> パラメーターを引いた長さよりも大きい場合にも、この例外が発生します。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Int32,System.Int32)">
+      <summary>非同期ソケット メソッドで使用するデータ バッファーを設定します。</summary>
+      <param name="offset">操作を開始するデータ バッファーのオフセット (バイト単位)。</param>
+      <param name="count">バッファー内で送信または受信するデータの最大量 (バイト単位)。</param>
+      <exception cref="T:System.ArgumentOutOfRangeException">引数が範囲外です。この例外は、<paramref name="offset" /> パラメーターがゼロ未満であるか、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティの配列の長さよりも大きい場合に発生します。また、<paramref name="count" /> パラメーターがゼロ未満であるか、<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> プロパティの配列の長さから <paramref name="offset" /> パラメーターを引いた長さよりも大きい場合にも、この例外が発生します。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.SocketError">
+      <summary>非同期ソケット操作の結果を取得または設定します。</summary>
+      <returns>非同期ソケット操作の結果を表す <see cref="T:System.Net.Sockets.SocketError" />。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.UserToken">
+      <summary>この非同期ソケット操作に関連付けられたユーザー オブジェクトまたはアプリケーション オブジェクトを取得または設定します。</summary>
+      <returns>この非同期ソケット操作に関連付けられたユーザー オブジェクトまたはアプリケーション オブジェクトを表すオブジェクト。</returns>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncOperation">
+      <summary>このコンテキスト オブジェクトで最近実行された非同期ソケット操作の型。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Accept">
+      <summary>ソケットの Accept 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Connect">
+      <summary>ソケットの Connect 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.None">
+      <summary>ソケット操作なし。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Receive">
+      <summary>ソケットの Receive 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.ReceiveFrom">
+      <summary>ソケットの ReceiveFrom 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Send">
+      <summary>ソケットの Send 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.SendTo">
+      <summary>ソケットの SendTo 操作。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketShutdown">
+      <summary>
+        <see cref="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)" /> メソッドが使用する定数を定義します。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Both">
+      <summary>送信と受信の両方の <see cref="T:System.Net.Sockets.Socket" /> を無効にします。このフィールドは定数です。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Receive">
+      <summary>受信の <see cref="T:System.Net.Sockets.Socket" /> を無効にします。このフィールドは定数です。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Send">
+      <summary>送信の <see cref="T:System.Net.Sockets.Socket" /> を無効にします。このフィールドは定数です。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketType">
+      <summary>
+        <see cref="T:System.Net.Sockets.Socket" /> クラスのインスタンスが表すソケットの種類を指定します。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Dgram">
+      <summary>データグラムをサポートしています。これはコネクションレスで、固定 (通常は短い) 最大長の、信頼性のないメッセージです。メッセージが喪失または複製されたり、正しい順序で受信されなかったりする可能性があります。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> 型の <see cref="T:System.Net.Sockets.Socket" /> はデータの送受信に先立って接続する必要がなく、複数のピアと通信できます。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> はデータグラム プロトコル (<see cref="F:System.Net.Sockets.ProtocolType.Udp" />) と <see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /><see cref="T:System.Net.Sockets.AddressFamily" /> を使用します。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Stream">
+      <summary>データの複製および境界の維持を行うことなく、信頼性が高く双方向の、接続ベースのバイト ストリームをサポートします。この種類の Socket は、単一のピアと通信し、通信を開始する前にリモート ホスト接続を確立しておく必要があります。<see cref="F:System.Net.Sockets.SocketType.Stream" /> は伝送制御プロトコル (<see cref="F:System.Net.Sockets.ProtocolType.Tcp" />) <see cref="T:System.Net.Sockets.ProtocolType" /> および InterNetwork<see cref="T:System.Net.Sockets.AddressFamily" /> を使用します。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Unknown">
+      <summary>不明な Socket 型を指定します。</summary>
+    </member>
+  </members>
+</doc>

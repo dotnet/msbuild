@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Security.SecureString</name>
+  </assembly>
+  <members>
+    <member name="T:System.Security.SecureString">
+      <summary>代表應該將文字保密，例如於不再使用時將它從電腦記憶體刪除。此類別無法被繼承。</summary>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor">
+      <summary>初始化 <see cref="T:System.Security.SecureString" /> 類別的新執行個體。</summary>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this instance.</exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor(System.Char*,System.Int32)">
+      <summary>從 <see cref="T:System.Char" /> 物件的子陣列，初始化 <see cref="T:System.Security.SecureString" /> 類別的新執行個體。</summary>
+      <param name="value">
+        <see cref="T:System.Char" /> 物件陣列的指標。</param>
+      <param name="length">要包含在新執行個體中之 <paramref name="value" /> 的項目數。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="length" /> is less than zero or greater than 65,536.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string. </exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.AppendChar(System.Char)">
+      <summary>將字元附加至目前安全字串的結尾。</summary>
+      <param name="c">附加至這個安全字串的字元。</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Clear">
+      <summary>刪除目前安全字串的值。</summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Copy">
+      <summary>建立目前安全字串的複本。</summary>
+      <returns>這個安全字串的複本。</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Dispose">
+      <summary>釋放由 <see cref="T:System.Security.SecureString" /> 物件使用的所有資源。</summary>
+    </member>
+    <member name="M:System.Security.SecureString.InsertAt(System.Int32,System.Char)">
+      <summary>將這個安全字串中的字元插入指定索引位置。</summary>
+      <param name="index"> 插入參數 <paramref name="c" /> 的索引位置。</param>
+      <param name="c">要插入的字元。</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than the length of this secure string.-or-Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.IsReadOnly">
+      <summary>指示這個安全字串是否標示為唯讀。</summary>
+      <returns>如果這個安全字串標示為唯讀則為 true；否則為 false。</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="P:System.Security.SecureString.Length">
+      <summary>取得目前安全字串中的字元數。</summary>
+      <returns>這個安全字串中 <see cref="T:System.Char" /> 物件的數目。</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.MakeReadOnly">
+      <summary>使這個安全字串的文字值成為唯讀。  </summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.RemoveAt(System.Int32)">
+      <summary>從這個安全字串移除位在指定索引位置的字元。</summary>
+      <param name="index">這個安全字串中字元的索引位置。</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.SetAt(System.Int32,System.Char)">
+      <summary>使用另一個字元，取代位在指定索引位置的現有字元。</summary>
+      <param name="index">這個安全字串中現有字元的索引位置。</param>
+      <param name="c">取代現有字元的字元。</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="T:System.Security.SecureStringMarshal"></member>
+    <member name="M:System.Security.SecureStringMarshal.SecureStringToCoTaskMemUnicode(System.Security.SecureString)"></member>
+    <member name="M:System.Security.SecureStringMarshal.ZeroFreeCoTaskMemUnicode(System.IntPtr)"></member>
+  </members>
+</doc>

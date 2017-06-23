@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Security.SecureString</name>
+  </assembly>
+  <members>
+    <member name="T:System.Security.SecureString">
+      <summary>Представляет текст, который должен оставаться конфиденциальным, например, путем его удаления из памяти компьютера, если он больше не нужен.Этот класс не наследуется.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Security.SecureString" />.</summary>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this instance.</exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor(System.Char*,System.Int32)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Security.SecureString" /> из подмассива объектов <see cref="T:System.Char" />. </summary>
+      <param name="value">Указатель на массив объектов <see cref="T:System.Char" />.</param>
+      <param name="length">Число элементов массива <paramref name="value" />, включаемых в новый экземпляр.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="length" /> is less than zero or greater than 65,536.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string. </exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.AppendChar(System.Char)">
+      <summary>Добавляет знак в конец текущей защищенной строки.</summary>
+      <param name="c">Знак, добавляемый к защищенной строке.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Clear">
+      <summary>Удаляет значение текущей защищенной строки.</summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Copy">
+      <summary>Создает копию текущей защищенной строки.</summary>
+      <returns>Копия этой защищенной строки.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Dispose">
+      <summary>Освобождает все ресурсы, используемые текущим объектом <see cref="T:System.Security.SecureString" />.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.InsertAt(System.Int32,System.Char)">
+      <summary>Вставляет знак в заданную индексом позицию защищенной строки. </summary>
+      <param name="index">Индекс позиции вставки параметра <paramref name="c" />.</param>
+      <param name="c">Вставляемый знак.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than the length of this secure string.-or-Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.IsReadOnly">
+      <summary>Указывает, что защищенная строка доступна только для чтения.</summary>
+      <returns>Значение true, если защищенная строка доступна только для чтения; в противном случае — false.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="P:System.Security.SecureString.Length">
+      <summary>Возвращает количество символов в текущей защищенной строке.</summary>
+      <returns>Количество объектов <see cref="T:System.Char" /> в этой защищенной строке.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.MakeReadOnly">
+      <summary>Делает текстовое значение этой защищенной строки доступным только для чтения.   </summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.RemoveAt(System.Int32)">
+      <summary>Удаляет из защищенной строки знак, расположенный по указанному индексу.</summary>
+      <param name="index">Индекс знака в защищенной строке.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.SetAt(System.Int32,System.Char)">
+      <summary>Заменяет расположенный по указанному индексу знак другим знаком.</summary>
+      <param name="index">Индекс имеющегося знака в защищенной строке.</param>
+      <param name="c">Знак, заменяющий имеющийся знак.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="T:System.Security.SecureStringMarshal"></member>
+    <member name="M:System.Security.SecureStringMarshal.SecureStringToCoTaskMemUnicode(System.Security.SecureString)"></member>
+    <member name="M:System.Security.SecureStringMarshal.ZeroFreeCoTaskMemUnicode(System.IntPtr)"></member>
+  </members>
+</doc>

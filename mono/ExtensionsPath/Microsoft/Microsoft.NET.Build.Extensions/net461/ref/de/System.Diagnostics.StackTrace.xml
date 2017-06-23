@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Diagnostics.StackTrace</name>
+  </assembly>
+  <members>
+    <member name="T:System.Diagnostics.StackFrame">
+      <summary>Stellt Informationen zu einem <see cref="T:System.Diagnostics.StackFrame" /> bereit, der einen Funktionsaufruf in der Aufrufliste für den aktuellen Thread darstellt.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileColumnNumber">
+      <summary>Ruft die Spaltennummer in der Datei mit dem ausgeführten Code ab.Diese Informationen werden i. d. R. aus den Debugsymbolen für das ausführbare Programm extrahiert.</summary>
+      <returns>Die Dateispaltennummer oder 0 (null), wenn die Dateispaltennummer nicht bestimmt werden kann.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileLineNumber">
+      <summary>Ruft die Zeilennummer in der Datei mit dem ausgeführten Code ab.Diese Informationen werden i. d. R. aus den Debugsymbolen für das ausführbare Programm extrahiert.</summary>
+      <returns>Die Dateizeilennummer oder 0 (null), wenn die Dateizeilennummer nicht bestimmt werden kann.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileName">
+      <summary>Ruft den Dateinamen mit dem ausgeführten Code ab.Diese Informationen werden i. d. R. aus den Debugsymbolen für das ausführbare Programm extrahiert.</summary>
+      <returns>Der Dateiname oder null, wenn der Dateiname nicht bestimmt werden kann.</returns>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetILOffset">
+      <summary>Ruft den Offset vom Beginn des MSIL-Codes (Microsoft Intermediate Language) für die ausgeführte Methode ab.Dabei kann es sich um einen Näherungswert handeln. Das hängt davon ab, ob der JIT-Compiler (Just-In-Time) den Debuggingcode erzeugt.Die Generierung dieser Debuginformation wird vom <see cref="T:System.Diagnostics.DebuggableAttribute" /> kontrolliert.</summary>
+      <returns>Der Offset vom Beginn des MSIL-Codes für die ausgeführte Methode.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetMethod">
+      <summary>Ruft die Methode ab, in der der Rahmen ausgeführt wird.</summary>
+      <returns>Die Methode, in der der Rahmen ausgeführt wird.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Diagnostics.StackFrame.OFFSET_UNKNOWN">
+      <summary>Definiert den Wert, der von der <see cref="M:System.Diagnostics.StackFrame.GetNativeOffset" />-Methode oder der <see cref="M:System.Diagnostics.StackFrame.GetILOffset" />-Methode zurückgegeben wird, wenn der Offset in MSIL (Microsoft Intermediate Language) oder der systemeigenen Sprache nicht bekannt ist.Dieses Feld ist konstant.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.ToString">
+      <summary>Erstellt eine lesbare Darstellung der Stapelüberwachung.</summary>
+      <returns>Eine lesbare Darstellung der Stapelüberwachung.</returns>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Diagnostics.StackFrameExtensions"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.GetNativeImageBase(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.GetNativeIP(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasILOffset(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasMethod(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasNativeImage(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasSource(System.Diagnostics.StackFrame)"></member>
+    <member name="T:System.Diagnostics.StackTrace">
+      <summary>Stellt eine Stapelüberwachung dar, d. h. eine geordnete Auflistung mindestens eines Stapelrahmens.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.#ctor(System.Exception,System.Boolean)">
+      <summary>Initialisiert eine neue Instanz der <see cref="T:System.Diagnostics.StackTrace" />-Klasse unter Verwendung des bereitgestellten Ausnahmeobjekts und zeichnet optional Quellinformationen auf.</summary>
+      <exception cref="T:System.ArgumentNullException">Der Parameter <paramref name="e" /> ist null. </exception>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.GetFrames">
+      <summary>Gibt eine Kopie aller Stapelrahmen in der aktuellen Stapelüberwachung zurück.</summary>
+      <returns>Ein Array vom Typ <see cref="T:System.Diagnostics.StackFrame" />, das die Funktionsaufrufe im Stapelrahmen darstellt.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.ToString">
+      <summary>Erstellt eine lesbare Darstellung der Stapelüberwachung.</summary>
+      <returns>Eine lesbare Darstellung der Stapelüberwachung.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+  </members>
+</doc>

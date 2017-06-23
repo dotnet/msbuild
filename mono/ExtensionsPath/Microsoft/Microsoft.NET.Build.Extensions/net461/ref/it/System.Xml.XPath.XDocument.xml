@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Xml.XPath.XDocument</name>
+  </assembly>
+  <members>
+    <member name="T:System.Xml.XPath.Extensions">
+      <summary>Questa classe contiene i metodi di estensione LINQ to XML che consentono di valutare le espressioni XPath.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode)">
+      <summary>Crea un oggetto <see cref="T:System.Xml.XPath.XPathNavigator" /> per <see cref="T:System.Xml.Linq.XNode" />.</summary>
+      <returns>Oggetto <see cref="T:System.Xml.XPath.XPathNavigator" /> in grado di elaborare query XPath.</returns>
+      <param name="node">Oggetto <see cref="T:System.Xml.Linq.XNode" /> in grado di elaborare query XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode,System.Xml.XmlNameTable)">
+      <summary>Crea un oggetto <see cref="T:System.Xml.XPath.XPathNavigator" /> per <see cref="T:System.Xml.Linq.XNode" />.<see cref="T:System.Xml.XmlNameTable" /> attiva un'elaborazione più efficiente delle espressioni XPath.</summary>
+      <returns>Oggetto <see cref="T:System.Xml.XPath.XPathNavigator" /> in grado di elaborare query XPath.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> in grado di elaborare una query XPath.</param>
+      <param name="nameTable">Oggetto <see cref="T:System.Xml.XmlNameTable" /> da utilizzare con <see cref="T:System.Xml.XPath.XPathNavigator" />.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String)">
+      <summary>Valuta un'espressione XPath.</summary>
+      <returns>Oggetto che può contenere bool, double, string o <see cref="T:System.Collections.Generic.IEnumerable`1" />. </returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>Valuta un'espressione XPath risolvendo i prefissi degli spazi dei nomi utilizzando l'oggetto <see cref="T:System.Xml.IXmlNamespaceResolver" /> specificato.</summary>
+      <returns>Oggetto contenente il risultato della valutazione dell'espressione.L'oggetto può essere bool, double, string o <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <param name="resolver">
+        <see cref="T:System.Xml.IXmlNamespaceResolver" /> per i prefissi degli spazi dei nomi nell'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String)">
+      <summary>Viene selezionato <see cref="T:System.Xml.Linq.XElement" /> utilizzando un'espressione XPath.</summary>
+      <returns>
+        <see cref="T:System.Xml.Linq.XElement" /> o Null.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>Viene selezionato <see cref="T:System.Xml.Linq.XElement" /> utilizzando un'espressione XPath e risolvendo i prefissi degli spazi dei nomi tramite l'oggetto <see cref="T:System.Xml.IXmlNamespaceResolver" /> specificato.</summary>
+      <returns>
+        <see cref="T:System.Xml.Linq.XElement" /> o Null.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <param name="resolver">
+        <see cref="T:System.Xml.IXmlNamespaceResolver" /> per i prefissi degli spazi dei nomi nell'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String)">
+      <summary>Seleziona una raccolta di elementi utilizzando un'espressione XPath.</summary>
+      <returns>
+        <see cref="T:System.Collections.Generic.IEnumerable`1" /> di <see cref="T:System.Xml.Linq.XElement" /> contenente gli elementi selezionati.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>Viene selezionata una raccolta di elementi utilizzando un'espressione XPath e risolvendo i prefissi degli spazi dei nomi tramite l'oggetto <see cref="T:System.Xml.IXmlNamespaceResolver" /> specificato.</summary>
+      <returns>
+        <see cref="T:System.Collections.Generic.IEnumerable`1" /> di <see cref="T:System.Xml.Linq.XElement" /> contenente gli elementi selezionati.</returns>
+      <param name="node">
+        <see cref="T:System.Xml.Linq.XNode" /> sul quale valutare l'espressione XPath.</param>
+      <param name="expression">
+        <see cref="T:System.String" /> contenente un'espressione XPath.</param>
+      <param name="resolver">
+        <see cref="T:System.Xml.IXmlNamespaceResolver" /> per i prefissi degli spazi dei nomi nell'espressione XPath.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XPath.XDocumentExtensions"></member>
+    <member name="M:System.Xml.XPath.XDocumentExtensions.ToXPathNavigable(System.Xml.Linq.XNode)"></member>
+  </members>
+</doc>

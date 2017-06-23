@@ -1,0 +1,1435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Data.Common</name>
+  </assembly>
+  <members>
+    <member name="T:System.DBNull">
+      <summary>존재하지 않는 값을 나타냅니다.이 클래스는 상속될 수 없습니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.DBNull.ToString">
+      <summary>빈 문자열(<see cref="F:System.String.Empty" />)을 반환합니다.</summary>
+      <returns>빈 문자열(<see cref="F:System.String.Empty" />)입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.DBNull.ToString(System.IFormatProvider)">
+      <summary>지정된 <see cref="T:System.IFormatProvider" />를 사용하는 빈 문자열을 반환합니다.</summary>
+      <returns>빈 문자열(<see cref="F:System.String.Empty" />)입니다.</returns>
+      <param name="provider">반환 값의 형식을 지정하는 데 사용되는 <see cref="T:System.IFormatProvider" />입니다.또는 운영 체제의 현재 로캘 설정에서 형식 정보를 가져오기 위한 null입니다. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.DBNull.Value">
+      <summary>
+        <see cref="T:System.DBNull" /> 클래스의 유일한 인스턴스를 나타냅니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.CommandBehavior">
+      <summary>쿼리의 결과와 데이터베이스에 미치는 영향을 설명합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.CommandBehavior.CloseConnection">
+      <summary>명령을 실행하면 관련 Connection 개체는 관련 DataReader 개체가 닫힐 때 함께 닫힙니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.Default">
+      <summary>쿼리는 여러 결과 집합을 반환할 수 있습니다.쿼리를 실행하면 데이터베이스 상태에 영향을 미칠 수 있습니다.Default는 <see cref="T:System.Data.CommandBehavior" /> 플래그를 설정하지 않으므로 ExecuteReader(CommandBehavior.Default) 호출과  ExecuteReader() 호출은 기능적으로 동일합니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.KeyInfo">
+      <summary>쿼리는 열과 기본 키 정보를 반환하며 </summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SchemaOnly">
+      <summary>쿼리에서 열 정보만 반환합니다.<see cref="F:System.Data.CommandBehavior.SchemaOnly" />를 사용할 때 .NET Framework Data Provider for SQL Server에서는 실행되는 문 앞에 SET FMTONLY ON을 배치합니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SequentialAccess">
+      <summary>DataReader에서 대형 이진 값을 갖는 열이 포함된 행을 처리하는 방법을 제공합니다.전체 행을 로드하지 않고 SequentialAccess를 사용하여 DataReader에서 데이터를 스트림으로 로드할 수 있습니다.그런 다음 GetBytes 또는 GetChars 메서드를 사용하여 읽기 작업을 시작할 바이트 위치와 반환될 데이터의 제한된 버퍼 크기를 지정할 수 있습니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SingleResult">
+      <summary>쿼리는 단일 결과 집합을 반환합니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SingleRow">
+      <summary>쿼리가 첫 번째 결과 집합의 단일 행을 반환해야 합니다.쿼리를 실행하면 데이터베이스 상태에 영향을 미칠 수 있습니다.일부 .NET Framework 데이터 공급자에서는 이 정보를 사용하여 명령의 성능을 최적화할 수도 있습니다.<see cref="T:System.Data.OleDb.OleDbCommand" /> 개체의 <see cref="M:System.Data.OleDb.OleDbCommand.ExecuteReader" /> 메서드를 사용하여 <see cref="F:System.Data.CommandBehavior.SingleRow" />를 지정할 때 .NET Framework Data Provider for OLE DB에서는 OLE DB IRow 인터페이스가 사용 가능하면 이 인터페이스를 사용하여 바인딩을 수행하고,그렇지 않으면 IRowset 인터페이스를 사용합니다.SQL 문이 단일 행만 반환해야 하는 경우 <see cref="F:System.Data.CommandBehavior.SingleRow" />를 지정하여 응용 프로그램의 성능을 향상시킬 수도 있습니다.여러 결과 집합을 반환해야 하는 쿼리를 실행할 경우 SingleRow를 지정할 수 있습니다.  이 경우 여러 결과 집합 SQL 쿼리와 단일 행이 둘 다 지정되어 있으면 반환된 결과에 첫 번째 결과 집합의 첫 번째 행만 포함됩니다.쿼리의 나머지 결과 집합은 반환되지 않습니다.</summary>
+    </member>
+    <member name="T:System.Data.CommandType">
+      <summary>명령 문자열을 해석하는 방법을 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.CommandType.StoredProcedure">
+      <summary>저장 프로시저의 이름입니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandType.TableDirect">
+      <summary>테이블의 이름입니다.</summary>
+    </member>
+    <member name="F:System.Data.CommandType.Text">
+      <summary>SQL 텍스트 명령입니다. 이 속성의 기본값입니다. </summary>
+    </member>
+    <member name="T:System.Data.ConnectionState">
+      <summary>데이터 소스에 대한 현재 연결 상태를 설명합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.ConnectionState.Broken">
+      <summary>데이터 소스 연결이 끊어집니다.이 상황은 연결이 열린 이후에만 발생할 수 있습니다.이 경우 연결이 닫힌 다음 다시 열릴 수 있습니다. 이 값은 이후에 릴리스되는 제품 버전에 사용하기 위해 예약되었습니다.</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Closed">
+      <summary>연결이 끊어졌습니다.</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Connecting">
+      <summary>연결 개체가 데이터 소스에 연결됩니다.</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Executing">
+      <summary>연결 개체가 명령을 실행하고 있습니다. 이 값은 이후에 릴리스되는 제품 버전에 사용하기 위해 예약되었습니다. </summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Fetching">
+      <summary>연결 개체가 데이터를 검색하고 있습니다. 이 값은 이후에 릴리스되는 제품 버전에 사용하기 위해 예약되었습니다. </summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Open">
+      <summary>연결이 열립니다.</summary>
+    </member>
+    <member name="T:System.Data.DbType">
+      <summary>.NET Framework 데이터 공급자의 필드, 속성 또는 Parameter 개체의 데이터 형식을 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.DbType.AnsiString">
+      <summary>범위가 1문자에서 8,000문자까지인 비유니코드 문자의 가변 길이 스트림입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.AnsiStringFixedLength">
+      <summary>유니코드 문자가 아닌 고정 길이 스트림입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Binary">
+      <summary>범위가 1바이트에서 8,000바이트까지인 이진 데이터의 가변 길이 스트림입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Boolean">
+      <summary>true 또는 false의 부울 값을 나타내는 단순 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Byte">
+      <summary>0에서 255 사이의 값을 갖는 8비트 부호 없는 정수입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Currency">
+      <summary>정확성이 통화 단위의 10000분의 1이고 범위가 -2 63(또는 -922,337,203,685,477.5808)에서 2 63 -1(또는 +922,337,203,685,477.5807)까지인 통화 값입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Date">
+      <summary>날짜 값을 나타내는 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTime">
+      <summary>날짜 및 시간 값을 나타내는 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTime2">
+      <summary>날짜 및 시간 데이터입니다.날짜 값 범위는 서기 1년 1월 1일에서 서기 9999년 12월 31일 사이입니다.Time 값 범위는 00:00:00부터 23:59:59.9999999까지이며 정확도는 100나노초입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTimeOffset">
+      <summary>표준 시간대를 고려한 날짜 및 시간 데이터입니다.날짜 값 범위는 서기 1년 1월 1일에서 서기 9999년 12월 31일 사이입니다.Time 값 범위는 00:00:00부터 23:59:59.9999999까지이며 정확도는 100나노초입니다.표준 시간대 값의 범위는 -14:00에서 +14:00 사이입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Decimal">
+      <summary>1.0 x 10-28부터 약 7.9 x 1028까지 28-29개의 유효 자릿수를 가진 값을 나타내는 단순 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Double">
+      <summary>약 5.0 x 10-324부터 1.7 x 10308까지 15-16자리의 정밀도를 가진 값을 나타내는 부동 소수점 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Guid">
+      <summary>GUID(Globally Unique IDentifier)입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int16">
+      <summary>-32768과 32767 사이의 값을 가진 부호 있는 16비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int32">
+      <summary>-2147483648과 2147483647 사이의 값을 가진 부호 있는 32비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int64">
+      <summary>-9223372036854775808과 9223372036854775807 사이의 값을 가진 부호 있는 64비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Object">
+      <summary>다른 DbType 값에 의해 명시적으로 나타나지 않은 참조 또는 값 형식을 나타내는 일반 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.SByte">
+      <summary>-128과 127 사이의 값을 가진 부호 있는 8비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Single">
+      <summary>약 1.5 x 10-45부터 3.4 x 1038까지 7자리의 정밀도를 가진 값을 나타내는 부동 소수점 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.String">
+      <summary>유니코드 문자열을 나타내는 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.StringFixedLength">
+      <summary>유니코드 문자의 고정 길이 문자열입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Time">
+      <summary>SQL Server DateTime 값을 나타내는 형식입니다.SQL Server time 값을 사용하려면 <see cref="F:System.Data.SqlDbType.Time" />을 사용합니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt16">
+      <summary>0과 65535 사이의 값을 가진 부호 없는 16비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt32">
+      <summary>0과 4294967295 사이의 값을 가진 부호 없는 32비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt64">
+      <summary>0과 18446744073709551615 사이의 값을 가진 부호 없는 64비트 정수를 나타내는 정수 계열 형식입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.VarNumeric">
+      <summary>가변 길이 숫자 값입니다.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Xml">
+      <summary>XML 문서나 단편의 구문 분석된 표현입니다.</summary>
+    </member>
+    <member name="T:System.Data.IsolationLevel">
+      <summary>연결에 대한 트랜잭션 잠금 동작을 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Chaos">
+      <summary>격리 수준이 높은 트랜잭션에서 보류 중인 변경은 덮어쓸 수 없습니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.ReadCommitted">
+      <summary>공유 잠금은 커밋되지 않은 읽기를 방지하기 위해 데이터를 읽는 동안 유지되지만 트랜잭션이 끝나기 전에 데이터가 변경되어 반복되지 않은 읽기나 팬텀 데이터가 생성될 수 있습니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.ReadUncommitted">
+      <summary>공유 잠금이 발행되지 않았고 단독 잠금이 부여되지 않았음을 의미하는 더티 읽기가 가능합니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.RepeatableRead">
+      <summary>잠금은 쿼리에서 사용되는 모든 데이터에 적용되어 데이터를 다른 사용자가 업데이트할 수 없게 합니다.반복되지 않은 읽기를 금지하지만 팬텀 행의 경우는 가능합니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Serializable">
+      <summary>범위 잠금을 <see cref="T:System.Data.DataSet" />에 적용하여 트랜잭션이 완료될 때까지 다른 사용자가 데이터 집합에 행을 삽입하거나 업데이트할 수 없게 합니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Snapshot">
+      <summary>동일한 데이터에 대해 한 응용 프로그램에서 데이터를 수정하고 있을 때 또 다른 응용 프로그램에서 읽을 수 있는 데이터 버전을 저장하여 차단을 줄입니다.다시 쿼리해도 한 트랜잭션에서 다른 트랜잭션의 변경 내용을 볼 수 없음을 나타냅니다.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Unspecified">
+      <summary>지정된 격리 수준과 다른 수준이 사용되지만 수준을 결정할 수는 없습니다.</summary>
+    </member>
+    <member name="T:System.Data.ParameterDirection">
+      <summary>
+        <see cref="T:System.Data.DataSet" />을 기준으로 하는 쿼리 내의 상대 매개 변수의 형식을 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.ParameterDirection.Input">
+      <summary>매개 변수는 입력 매개 변수입니다.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.InputOutput">
+      <summary>매개 변수는 입력과 출력 모두에 사용할 수 있습니다.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.Output">
+      <summary>매개 변수는 출력 매개 변수입니다.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.ReturnValue">
+      <summary>매개 변수는 저장 프로시저, 기본 제공 함수, 사용자 정의 함수 등과 같은 연산으로부터 반환 값을 나타냅니다.</summary>
+    </member>
+    <member name="T:System.Data.StateChangeEventArgs">
+      <summary>.NET Framework 데이터 공급자의 상태 변경 이벤트에 데이터를 제공합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.StateChangeEventArgs.#ctor(System.Data.ConnectionState,System.Data.ConnectionState)">
+      <summary>개체의 원래 상태와 현재 상태가 지정된 경우 <see cref="T:System.Data.StateChangeEventArgs" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <param name="originalState">
+        <see cref="T:System.Data.ConnectionState" /> 값 중 하나입니다. </param>
+      <param name="currentState">
+        <see cref="T:System.Data.ConnectionState" /> 값 중 하나입니다. </param>
+    </member>
+    <member name="P:System.Data.StateChangeEventArgs.CurrentState">
+      <summary>연결의 새 상태를 가져옵니다.연결 개체는 이벤트가 발생될 때 이미 새 상태에 있습니다.</summary>
+      <returns>
+        <see cref="T:System.Data.ConnectionState" /> 값 중 하나입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.StateChangeEventArgs.OriginalState">
+      <summary>연결의 원래 상태를 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.ConnectionState" /> 값 중 하나입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.StateChangeEventHandler">
+      <summary>
+        <see cref="E:System.Data.Common.DbConnection.StateChange" /> 이벤트를 처리할 메서드를 나타냅니다.</summary>
+      <param name="sender">이벤트 소스입니다. </param>
+      <param name="e">이벤트 데이터가 들어 있는 <see cref="T:System.Data.StateChangeEventArgs" />입니다. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Data.UpdateRowSource">
+      <summary>업데이트 중인 행에 쿼리 명령 결과를 적용하는 방법을 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.Both">
+      <summary>출력 매개 변수와 처음 반환된 행은 모두 <see cref="T:System.Data.DataSet" />의 변경된 행에 매핑됩니다.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.FirstReturnedRecord">
+      <summary>처음 반환된 행의 데이터는 <see cref="T:System.Data.DataSet" />의 변경된 행에 매핑됩니다.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.None">
+      <summary>반환된 매개 변수와 행이 무시됩니다.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.OutputParameters">
+      <summary>출력 매개 변수는 <see cref="T:System.Data.DataSet" />의 변경된 행에 매핑됩니다.</summary>
+    </member>
+    <member name="T:System.Data.Common.DbCommand">
+      <summary>SQL 문이나 데이터 소스에 대해 실행할 저장 프로시저를 나타냅니다.명령을 나타내는 데이터베이스 관련 클래스의 기본 클래스를 제공합니다.<see cref="Overload:System.Data.Common.DbCommand.ExecuteNonQueryAsync" /></summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbCommand" /> 개체의 인스턴스를 생성합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Cancel">
+      <summary>
+        <see cref="T:System.Data.Common.DbCommand" />의 실행을 취소하려고 시도합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandText">
+      <summary>데이터 소스에 대해 실행할 텍스트 명령을 가져오거나 설정합니다.</summary>
+      <returns>실행할 텍스트 명령입니다.기본값은 빈 문자열("")입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandTimeout">
+      <summary>명령 실행을 종료하고 오류를 생성하기 전 대기 시간을 가져오거나 설정합니다.</summary>
+      <returns>명령을 실행할 때까지 대기하는 시간(초)입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandType">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.CommandText" /> 속성이 해석되는 방법을 나타내거나 지정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.CommandType" /> 값 중 하나입니다.기본값은 Text입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Connection">
+      <summary>이 <see cref="T:System.Data.Common.DbCommand" />에서 사용하는 <see cref="T:System.Data.Common.DbConnection" />을 가져오거나 설정합니다.</summary>
+      <returns>데이터 소스에 대한 연결입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.CreateDbParameter">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체의 새 인스턴스를 만듭니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체</returns>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.CreateParameter">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체의 새 인스턴스를 만듭니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbConnection">
+      <summary>이 <see cref="T:System.Data.Common.DbCommand" />에서 사용하는 <see cref="T:System.Data.Common.DbConnection" />을 가져오거나 설정합니다.</summary>
+      <returns>데이터 소스에 대한 연결입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbParameterCollection">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체의 컬렉션을 가져옵니다.</summary>
+      <returns>SQL 문 또는 저장 프로시저의 매개 변수입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbTransaction">
+      <summary>이 <see cref="T:System.Data.Common.DbCommand" /> 개체가 실행되는 <see cref="P:System.Data.Common.DbCommand.DbTransaction" />을 가져오거나 설정합니다.</summary>
+      <returns>.NET Framework Data Provider의 명령 개체가 실행되는 트랜잭션입니다.기본값은 null 참조(Visual Basic에서는 Nothing)입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DesignTimeVisible">
+      <summary>명령 개체를 사용자 지정된 인터페이스 컨트롤에서 표시할지 여부를 나타내는 값을 가져오거나 설정합니다.</summary>
+      <returns>명령 개체를 컨트롤에 표시해야 하면 true이고, 그렇지 않으면 false입니다.기본값은 true입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Dispose"></member>
+    <member name="M:System.Data.Common.DbCommand.Dispose(System.Boolean)"></member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteDbDataReader(System.Data.CommandBehavior)">
+      <summary>연결에 대해 명령 텍스트를 실행합니다.</summary>
+      <returns>작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="behavior">
+        <see cref="T:System.Data.CommandBehavior" />의 인스턴스</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)">
+      <summary>공급자는 <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" /> 오버로드에 기본값이 아닌 구현을 제공하도록 이 메서드를 구현해야 합니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbCommand.ExecuteReader" /> 메서드를 호출하고, 호출 스레드를 차단하면서 완료된 작업을 반환합니다.기본 구현은 이미 취소된 취소 토큰을 전달하는 경우 취소된 작업을 반환합니다.ExecuteReader에서 throw되는 예외는 반환된 Task Exception 속성을 통해 전달됩니다.이 메서드는 조기에 취소할 작업을 요청하는 데 사용할 수 있는 취소 토큰을 허용합니다.구현은 이 요청을 무시할 수 있습니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="behavior">문 실행 및 데이터 검색을 위한 옵션입니다.</param>
+      <param name="cancellationToken">취소 요청을 모니터링할 토큰입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQuery">
+      <summary>연결 개체에 대해 SQL 문을 실행합니다.</summary>
+      <returns>영향 받는 행의 수입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync">
+      <summary>연결 개체에 대해 SQL 문을 실행하는 비동기 버전의 <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />입니다.CancellationToken.None을 사용하여 <see cref="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync(System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />의 비동기 버전입니다.공급자는 적절한 구현을 재정의해야 합니다.취소 토큰은 선택적으로 무시될 수 있습니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" /> 메서드를 호출하고, 호출 스레드를 차단하면서 완료된 작업을 반환합니다.기본 구현은 이미 취소된 취소 토큰을 전달하는 경우 취소된 작업을 반환합니다.  <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />에서 throw되는 예외는 반환된 Task Exception 속성을 통해 통신이 이루어집니다.반환된 작업이 완료될 때까지 DbCommand 개체의 다른 메서드 및 속성을 호출하지 마십시오.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 요청을 모니터링할 토큰입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReader">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.Connection" />에 대해 <see cref="P:System.Data.Common.DbCommand.CommandText" />를 실행하고 <see cref="T:System.Data.Common.DbDataReader" />를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" /> 개체</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReader(System.Data.CommandBehavior)">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.Connection" />에 대해 <see cref="P:System.Data.Common.DbCommand.CommandText" />를 실행하고 <see cref="T:System.Data.CommandBehavior" /> 값 중 하나를 사용하여 <see cref="T:System.Data.Common.DbDataReader" />를 반환합니다. </summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" /> 개체</returns>
+      <param name="behavior">
+        <see cref="T:System.Data.CommandBehavior" /> 값 중 하나입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.Connection" />에 대해 <see cref="P:System.Data.Common.DbCommand.CommandText" />를 실행하고 <see cref="T:System.Data.Common.DbDataReader" />를 반환하는 <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />의 비동기 버전입니다.CancellationToken.None을 사용하여 <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Data.CommandBehavior)">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.Connection" />에 대해 <see cref="P:System.Data.Common.DbCommand.CommandText" />를 실행하고 <see cref="T:System.Data.Common.DbDataReader" />를 반환하는 <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />의 비동기 버전입니다.<see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="behavior">
+        <see cref="T:System.Data.CommandBehavior" /> 값 중 하나입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="behavior">
+        <see cref="T:System.Data.CommandBehavior" /> 값 중 하나입니다.</param>
+      <param name="cancellationToken">취소 요청을 모니터링할 토큰입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="P:System.Data.Common.DbCommand.Connection" />에 대해 <see cref="P:System.Data.Common.DbCommand.CommandText" />를 실행하고 <see cref="T:System.Data.Common.DbDataReader" />를 반환하는 <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />의 비동기 버전입니다.이 메서드는 작업을 취소하지 않아야 한다는 알림을 전파합니다.<see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 요청을 모니터링할 토큰입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+      <exception cref="T:System.ArgumentException">
+        <see cref="T:System.Data.CommandBehavior" /> 값이 잘못된 경우</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalar">
+      <summary>쿼리를 실행하고 쿼리에서 반환된 결과 집합의 첫 번째 행의 첫 번째 열을 반환합니다.다른 모든 열과 행은 무시됩니다.</summary>
+      <returns>결과 집합의 첫 번째 행의 첫 번째 열을 반환합니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalarAsync">
+      <summary>쿼리를 실행하고 쿼리에서 반환된 결과 집합의 첫 번째 행의 첫 번째 열을 반환하는 <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" />의 비동기 버전입니다.다른 모든 열과 행은 무시됩니다.CancellationToken.None을 사용하여 <see cref="M:System.Data.Common.DbCommand.ExecuteScalarAsync(System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalarAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" />의 비동기 버전입니다.공급자는 적절한 구현을 재정의해야 합니다.취소 토큰은 선택적으로 무시될 수 있습니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" /> 메서드를 호출하고, 호출 스레드를 차단하면서 완료된 작업을 반환합니다.기본 구현은 이미 취소된 취소 토큰을 전달하는 경우 취소된 작업을 반환합니다.ExecuteScalar에서 throw되는 예외는 반환된 Task Exception 속성을 통해 전달됩니다.반환된 작업이 완료될 때까지 DbCommand 개체의 다른 메서드 및 속성을 호출하지 마십시오.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 요청을 모니터링할 토큰입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Parameters">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 개체의 컬렉션을 가져옵니다.매개 변수에 대한 자세한 내용은 매개 변수 및 매개 변수 데이터 형식 구성을 참조하십시오.</summary>
+      <returns>SQL 문 또는 저장 프로시저의 매개 변수입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Prepare">
+      <summary>데이터 소스에 명령의 준비 버전이나 컴파일 버전을 만듭니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Transaction">
+      <summary>이 <see cref="T:System.Data.Common.DbCommand" /> 개체가 실행되는 <see cref="T:System.Data.Common.DbTransaction" />을 가져오거나 설정합니다.</summary>
+      <returns>.NET Framework Data Provider의 Command 개체가 실행되는 트랜잭션입니다.기본값은 null 참조(Visual Basic에서는 Nothing)입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.UpdatedRowSource">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataAdapter" />의 Update 메서드에서 사용될 때 명령 결과가 <see cref="T:System.Data.DataRow" />에 적용되는 방법을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.UpdateRowSource" /> 값 중 하나입니다.명령이 자동으로 생성되지 않으면 기본값은 Both입니다.명령이 자동으로 생성되면 기본값은 None입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbConnection">
+      <summary>데이터베이스에 대한 연결을 나타냅니다. </summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnection" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginDbTransaction(System.Data.IsolationLevel)">
+      <summary>데이터베이스 트랜잭션을 시작합니다.</summary>
+      <returns>새 트랜잭션을 나타내는 개체입니다.</returns>
+      <param name="isolationLevel">트랜잭션의 격리 수준을 지정합니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginTransaction">
+      <summary>데이터베이스 트랜잭션을 시작합니다.</summary>
+      <returns>새 트랜잭션을 나타내는 개체입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginTransaction(System.Data.IsolationLevel)">
+      <summary>지정된 격리 수준으로 데이터베이스 트랜잭션을 시작합니다.</summary>
+      <returns>새 트랜잭션을 나타내는 개체입니다.</returns>
+      <param name="isolationLevel">트랜잭션의 격리 수준을 지정합니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.ChangeDatabase(System.String)">
+      <summary>열려 있는 연결의 현재 데이터베이스를 변경합니다.</summary>
+      <param name="databaseName">사용할 연결의 데이터베이스 이름을 지정합니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Close">
+      <summary>데이터베이스에 대한 연결을 닫습니다.열린 연결을 닫기 위해 기본적으로 이 메서드를 사용합니다.</summary>
+      <exception cref="T:System.Data.Common.DbException">연결을 여는 동안 연결 수준의 오류가 발생한 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ConnectionString">
+      <summary>연결을 여는 데 사용되는 문자열을 가져오거나 설정합니다.</summary>
+      <returns>초기 연결을 설정하는 데 사용되는 연결 문자열입니다.연결 문자열의 정확한 내용은 이 연결의 특정 데이터 소스에 따라 달라집니다.기본값은 빈 문자열입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ConnectionTimeout">
+      <summary>시도를 종료하고 오류를 생성하기 전까지 연결하기 위해 대기할 시간을 가져옵니다.</summary>
+      <returns>연결이 열릴 때까지 대기하는 시간(초)입니다.기본값은 사용하고 있는 특정 형식의 연결에 따라 결정됩니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.CreateCommand">
+      <summary>현재 연결과 관련된 <see cref="T:System.Data.Common.DbCommand" /> 개체를 만들고 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbCommand" /> 개체</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.CreateDbCommand">
+      <summary>현재 연결과 관련된 <see cref="T:System.Data.Common.DbCommand" /> 개체를 만들고 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbCommand" /> 개체</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.Database">
+      <summary>연결이 열린 후에 현재 데이터베이스의 이름을 가져오거나 연결이 열리기 전에 연결 문자열에 지정된 데이터베이스 이름을 가져옵니다.</summary>
+      <returns>현재 데이터베이스 이름이나 연결이 열린 후 사용할 데이터베이스의 이름입니다.기본값은 빈 문자열입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.DataSource">
+      <summary>연결할 데이터베이스 서버의 이름을 가져옵니다.</summary>
+      <returns>연결할 데이터베이스 서버의 이름입니다.기본값은 빈 문자열입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Dispose"></member>
+    <member name="M:System.Data.Common.DbConnection.Dispose(System.Boolean)"></member>
+    <member name="M:System.Data.Common.DbConnection.OnStateChange(System.Data.StateChangeEventArgs)">
+      <summary>
+        <see cref="E:System.Data.Common.DbConnection.StateChange" /> 이벤트를 발생시킵니다.</summary>
+      <param name="stateChange">이벤트 데이터가 들어 있는 <see cref="T:System.Data.StateChangeEventArgs" />입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Open">
+      <summary>
+        <see cref="P:System.Data.Common.DbConnection.ConnectionString" />에서 지정하는 설정을 사용하여 데이터베이스 연결을 엽니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.OpenAsync">
+      <summary>
+        <see cref="P:System.Data.Common.DbConnection.ConnectionString" />으로 지정된 설정을 사용하여 데이터베이스 연결을 여는 <see cref="M:System.Data.Common.DbConnection.Open" />의 비동기 버전입니다.이 메서드는 CancellationToken.None을 사용하여 가상 메서드 <see cref="M:System.Data.Common.DbConnection.OpenAsync(System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.OpenAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbConnection.Open" />의 비동기 버전입니다.공급자는 적절한 구현을 재정의해야 합니다.취소 토큰은 선택적으로 적용될 수 있습니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbConnection.Open" /> 호출을 호출하고 완료된 작업을 반환합니다.기본 구현은 이미 취소된 cancellationToken을 전달하는 경우 취소된 작업을 반환합니다.Open에서 throw되는 예외는 반환된 Task Exception 속성을 통해 전달됩니다.반환된 작업이 완료될 때까지 DbConnection 개체의 다른 메서드 및 속성을 호출하지 마십시오.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 명령입니다.</param>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ServerVersion">
+      <summary>개체가 연결되는 서버 버전을 나타내는 문자열을 가져옵니다.</summary>
+      <returns>데이터베이스의 버전입니다.반환되는 문자열 형식은 사용하고 있는 특정 형식의 연결에 따라 달라집니다.</returns>
+      <exception cref="T:System.InvalidOperationException">반환된 작업이 완료되지 않았으며 <see cref="Overload:System.Data.Common.DbConnection.OpenAsync" />에 대한 호출 이후 연결이 열리지 않은 상태에서 <see cref="P:System.Data.Common.DbConnection.ServerVersion" />이 호출되었습니다.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.State">
+      <summary>연결의 상태를 설명하는 문자열을 가져옵니다.</summary>
+      <returns>연결의 상태입니다.반환되는 문자열 형식은 사용하고 있는 특정 형식의 연결에 따라 달라집니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="E:System.Data.Common.DbConnection.StateChange">
+      <summary>이벤트 상태가 변경되면 발생합니다.</summary>
+    </member>
+    <member name="T:System.Data.Common.DbConnectionStringBuilder">
+      <summary>강력한 형식의 연결 문자열 작성기에 대한 기본 클래스를 제공합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Add(System.String,System.Object)">
+      <summary>지정한 키와 값을 가지는 엔트리를 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 추가합니다.</summary>
+      <param name="keyword">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 추가할 키입니다.</param>
+      <param name="value">지정된 키의 값입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" />가 null 참조(Visual Basic의 경우 Nothing)인 경우</exception>
+      <exception cref="T:System.NotSupportedException">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />가 읽기 전용인 경우 또는<see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 크기가 고정되어 있는 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.AppendKeyValuePair(System.Text.StringBuilder,System.String,System.String)">
+      <summary>기존의 <see cref="T:System.Text.StringBuilder" /> 개체에 효과적이고 안전하게 키와 값을 추가하는 방법을 제공합니다.</summary>
+      <param name="builder">키/값 쌍을 추가할 <see cref="T:System.Text.StringBuilder" />입니다.</param>
+      <param name="keyword">추가할 키입니다.</param>
+      <param name="value">제공된 키의 값입니다.</param>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Clear">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 인스턴스의 내용을 지웁니다.</summary>
+      <exception cref="T:System.NotSupportedException">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />가 읽기 전용인 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />와 관련된 연결 문자열을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 포함된 키/값 쌍으로부터 만들어진 현재의 연결 문자열입니다.기본값은 빈 문자열입니다.</returns>
+      <exception cref="T:System.ArgumentException">잘못된 연결 문자열 인수를 제공한 경우</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ContainsKey(System.String)">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 특정 키가 들어 있는지 여부를 확인합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 지정한 키를 가진 엔트리가 포함되어 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="keyword">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에서 찾을 수 있는 키입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" />가 null 참조(Visual Basic의 경우 Nothing)인 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Count">
+      <summary>
+        <see cref="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString" /> 속성에 포함된 현재 키 개수를 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 인스턴스가 유지하는 연결 문자열에 포함된 키의 개수입니다.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.EquivalentTo(System.Data.Common.DbConnectionStringBuilder)">
+      <summary>이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 개체에 있는 연결 정보를 제공된 개체에 있는 연결 정보와 비교합니다.</summary>
+      <returns>두 <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 개체의 연결 정보가 동일한 연결 문자열을 만들면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="connectionStringBuilder">이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 개체와 비교할 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />입니다.</param>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Item(System.String)">
+      <summary>지정한 키와 관련된 값을 가져오거나 설정합니다.</summary>
+      <returns>지정한 키와 관련된 값입니다.지정한 키가 없는 경우 해당 키를 가져오려고 시도하면 null 참조(Visual Basic에서는 Nothing)이 반환되고, 해당 키를 설정하려고 시도하면 지정한 키를 사용하여 새 요소가 만들어집니다.null(Visual Basic에서는 Nothing) 키를 전달하면 <see cref="T:System.ArgumentNullException" />이 throw됩니다.null 값을 할당하면 키/값 쌍이 제거됩니다.</returns>
+      <param name="keyword">가져오거나 설정할 항목의 키입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" />가 null 참조(Visual Basic의 경우 Nothing)인 경우</exception>
+      <exception cref="T:System.NotSupportedException">속성이 설정되어 있으며 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />가 읽기 전용인 경우 또는속성이 설정되어 있고 <paramref name="keyword" />가 컬렉션에 없으며 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 크기가 고정된 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Keys">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 키를 포함하는 <see cref="T:System.Collections.ICollection" />을 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 키를 포함하는 <see cref="T:System.Collections.ICollection" />입니다.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Remove(System.String)">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 인스턴스에서 지정한 키를 가지는 엔트리를 제거합니다.</summary>
+      <returns>연결 문자열에 있던 키가 제거되었으면 true이고, 키가 원래 없었으면 false입니다.</returns>
+      <param name="keyword">이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 연결 문자열에서 제거할 키/값 쌍의 키입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" />가 null(Visual Basic의 경우 Nothing)인 경우</exception>
+      <exception cref="T:System.NotSupportedException">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />가 읽기 전용이거나 <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 크기가 고정된 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ShouldSerialize(System.String)">
+      <summary>지정한 키가 이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 인스턴스에 있는지 여부를 나타냅니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에 지정한 키를 가진 엔트리가 포함되어 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="keyword">
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에서 찾을 수 있는 키입니다.</param>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#CopyTo(System.Array,System.Int32)">
+      <summary>특정 <see cref="T:System.Array" /> 인덱스에서 시작하여 <see cref="T:System.Collections.ICollection" />의 요소를 <see cref="T:System.Array" />에 복사합니다.</summary>
+      <param name="array">
+        <see cref="T:System.Collections.ICollection" />에서 복사한 요소의 대상인 일차원 <see cref="T:System.Array" />입니다.<see cref="T:System.Array" />에는 0부터 시작하는 인덱스가 있어야 합니다.</param>
+      <param name="index">
+        <paramref name="array" />에서 복사가 시작되는 인덱스(0부터 시작)입니다.</param>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#IsSynchronized">
+      <summary>
+        <see cref="T:System.Collections.ICollection" />에 대한 액세스가 동기화되어 스레드로부터 안전하게 보호되는지 여부를 나타내는 값을 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Collections.ICollection" />에 대한 액세스가 동기화되어 스레드로부터 안전하게 보호되면 true이고, 그렇지 않으면 false입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#SyncRoot">
+      <summary>
+        <see cref="T:System.Collections.ICollection" />에 대한 액세스를 동기화하는 데 사용할 수 있는 개체를 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Collections.ICollection" />에 대한 액세스를 동기화하는 데 사용할 수 있는 개체입니다.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Add(System.Object,System.Object)">
+      <summary>제공된 키와 값이 있는 요소를 <see cref="T:System.Collections.IDictionary" /> 개체에 추가합니다.</summary>
+      <param name="keyword">추가할 요소의 키로 사용하는 <see cref="T:System.Object" />입니다.</param>
+      <param name="value">추가할 요소의 값으로 사용하는 <see cref="T:System.Object" />입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Contains(System.Object)">
+      <summary>
+        <see cref="T:System.Collections.IDictionary" /> 개체에 지정된 키가 있는 요소가 포함되어 있는지 여부를 확인합니다.</summary>
+      <returns>
+        <see cref="T:System.Collections.IDictionary" />에 해당 키가 있는 요소가 포함되어 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="keyword">
+        <see cref="T:System.Collections.IDictionary" /> 개체에서 찾을 키입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#GetEnumerator">
+      <summary>
+        <see cref="T:System.Collections.IDictionary" /> 개체의 <see cref="T:System.Collections.IDictionaryEnumerator" /> 개체를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Collections.IDictionary" /> 개체의 <see cref="T:System.Collections.IDictionaryEnumerator" /> 개체입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#IsFixedSize"></member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#IsReadOnly"></member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Item(System.Object)">
+      <summary>지정된 키가 있는 요소를 가져오거나 설정합니다.</summary>
+      <returns>지정한 키가 있는 요소입니다.</returns>
+      <param name="keyword">가져오거나 설정할 요소의 키입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Remove(System.Object)">
+      <summary>
+        <see cref="T:System.Collections.IDictionary" /> 개체에서 지정된 키를 가진 요소를 제거합니다.</summary>
+      <param name="keyword">제거할 요소의 키입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IEnumerable#GetEnumerator">
+      <summary>컬렉션을 반복하는 열거자를 반환합니다.</summary>
+      <returns>컬렉션을 반복하는 데 사용할 수 있는 <see cref="T:System.Collections.IEnumerator" /> 개체입니다.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ToString">
+      <summary>이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />와 관련된 연결 문자열을 반환합니다.</summary>
+      <returns>현재 <see cref="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString" /> 속성입니다.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.TryGetValue(System.String,System.Object@)">
+      <summary>제공된 키에 해당하는 값을 이 <see cref="T:System.Data.Common.DbConnectionStringBuilder" />에서 검색합니다.</summary>
+      <returns>연결 문자열에 <paramref name="keyword" />가 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="keyword">검색할 항목의 키입니다.</param>
+      <param name="value">
+        <paramref name="key" />에 해당하는 값입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" />에 null 값(Visual Basic에서는 Nothing)이 있는 경우</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Values">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 값이 들어 있는 <see cref="T:System.Collections.ICollection" />을 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 값을 포함하는 <see cref="T:System.Collections.ICollection" />입니다.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Data.Common.DbDataReader">
+      <summary>데이터 소스에서 앞으로만 이동 가능한 행 스트림을 읽습니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataReader" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Depth">
+      <summary>현재 행의 중첩 수준을 나타내는 값을 가져옵니다.</summary>
+      <returns>현재 행의 중첩 수준입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Dispose">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataReader" /> 클래스의 현재 인스턴스에서 사용하는 모든 리소스를 해제합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataReader" />에서 사용하는 관리되는 리소스를 해제하고 관리되지 않는 리소스를 선택적으로 해제합니다.</summary>
+      <param name="disposing">관리되는 리소스와 관리되지 않는 리소스를 해제하려면 true이고, 관리되지 않는 리소스만 해제하려면 false입니다.</param>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.FieldCount">
+      <summary>현재 행의 열 수를 가져옵니다.</summary>
+      <returns>현재 행의 열 수입니다.</returns>
+      <exception cref="T:System.NotSupportedException">SQL Server의 인스턴스에 대한 현재 연결이 없는 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetBoolean(System.Int32)">
+      <summary>지정된 열의 값을 부울로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetByte(System.Int32)">
+      <summary>지정된 열의 값을 바이트로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetBytes(System.Int32,System.Int64,System.Byte[],System.Int32,System.Int32)">
+      <summary>
+        <paramref name="dataOffset" />이 나타내는 위치에서 시작하여 지정된 열의 바이트 스트림을 버퍼(<paramref name="bufferOffset" />이 나타내는 위치에서 시작)로 읽습니다.</summary>
+      <returns>실제로 읽은 바이트 수입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <param name="dataOffset">읽기 작업을 시작하는 행 내의 인덱스입니다.</param>
+      <param name="buffer">데이터를 복사해 넣을 버퍼입니다.</param>
+      <param name="bufferOffset">데이터가 복사될 버퍼의 인덱스입니다.</param>
+      <param name="length">읽을 최대 문자 수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetChar(System.Int32)">
+      <summary>단일 문자로 지정된 열의 값을 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetChars(System.Int32,System.Int64,System.Char[],System.Int32,System.Int32)">
+      <summary>
+        <paramref name="dataOffset" />가 나타내는 위치에서 시작하여 지정된 열의 문자 스트림을 버퍼(<paramref name="bufferOffset" />가 나타내는 위치에서 시작)로 읽습니다.</summary>
+      <returns>실제로 읽은 문자 수입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <param name="dataOffset">읽기 작업을 시작하는 행 내의 인덱스입니다.</param>
+      <param name="buffer">데이터를 복사해 넣을 버퍼입니다.</param>
+      <param name="bufferOffset">데이터가 복사될 버퍼의 인덱스입니다.</param>
+      <param name="length">읽을 최대 문자 수입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetData(System.Int32)">
+      <summary>요청된 열 서수에 대한 <see cref="T:System.Data.Common.DbDataReader" /> 개체를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" /> 개체</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDataTypeName(System.Int32)">
+      <summary>지정된 열의 데이터 형식 이름을 가져옵니다.</summary>
+      <returns>데이터 형식의 이름을 나타내는 문자열입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDateTime(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.DateTime" /> 개체로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDbDataReader(System.Int32)">
+      <summary>공급자별 구현으로 재정의될 수 있는 요청된 열 서수에 대한 <see cref="T:System.Data.Common.DbDataReader" /> 개체를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" /> 개체</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDecimal(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.Decimal" /> 개체로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDouble(System.Int32)">
+      <summary>지정된 열의 값을 배정밀도 부동 소수점 숫자로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetEnumerator">
+      <summary>데이터 판독기에서 행을 반복하는 데 사용할 수 있는 <see cref="T:System.Collections.IEnumerator" />를 반환합니다.</summary>
+      <returns>데이터 판독기에서 행을 반복하는 데 사용할 수 있는 <see cref="T:System.Collections.IEnumerator" />입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldType(System.Int32)">
+      <summary>지정된 열의 데이터 형식을 가져옵니다.</summary>
+      <returns>지정된 열의 데이터 형식입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValue``1(System.Int32)">
+      <summary>지정된 열의 값을 형식으로 동기적으로 가져옵니다.</summary>
+      <returns>검색할 열입니다.</returns>
+      <param name="ordinal">검색할 열입니다.</param>
+      <typeparam name="T">지정된 열의 값을 형식으로 동기적으로 가져옵니다.</typeparam>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.SqlClient.SqlDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.SqlClient.SqlDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" />는 SQL Server에서 반환되는 형식과 일치하지 않거나 캐스팅할 수 없습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32)">
+      <summary>지정된 열의 값을 형식으로 비동기적으로 가져옵니다.</summary>
+      <returns>반환될 값의 형식입니다.</returns>
+      <param name="ordinal">반환될 값의 형식입니다.</param>
+      <typeparam name="T">반환될 값의 형식입니다.자세한 내용은 설명 부분을 참조하십시오.</typeparam>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" />는 데이터 소스에서 반환되는 형식과 일치하지 않거나 캐스팅할 수 없습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32,System.Threading.CancellationToken)">
+      <summary>지정된 열의 값을 형식으로 비동기적으로 가져옵니다.</summary>
+      <returns>반환될 값의 형식입니다.</returns>
+      <param name="ordinal">반환될 값의 형식입니다.</param>
+      <param name="cancellationToken">작업을 취소해야 한다는 알림을 전파하는 취소 명령입니다.취소를 보장하지는 않습니다.CancellationToken.None을 설정하면 이 메서드가 <see cref="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32)" />와 동일해집니다.반환된 작업은 취소로 표시되어 있어야 합니다.</param>
+      <typeparam name="T">반환될 값의 형식입니다.자세한 내용은 설명 부분을 참조하십시오.</typeparam>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" />는 데이터 소스에서 반환되는 형식과 일치하지 않거나 캐스팅할 수 없습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFloat(System.Int32)">
+      <summary>지정된 열의 값을 단정밀도 부동 소수점 숫자로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetGuid(System.Int32)">
+      <summary>지정된 열의 값을 GUID(globally-unique identifier)로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt16(System.Int32)">
+      <summary>지정된 열의 값을 16비트 부호 있는 정수로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt32(System.Int32)">
+      <summary>지정된 열의 값을 32비트 부호 있는 정수로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt64(System.Int32)">
+      <summary>지정된 열의 값을 64비트 부호 있는 정수로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetName(System.Int32)">
+      <summary>0부터 시작하는 열 서수가 지정된 경우 열 이름을 가져옵니다.</summary>
+      <returns>지정된 열의 이름입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetOrdinal(System.String)">
+      <summary>열 이름이 지정된 경우 열 서수를 가져옵니다.</summary>
+      <returns>열 번호를 나타내는 0부터 시작하는 서수입니다.</returns>
+      <param name="name">열의 이름입니다.</param>
+      <exception cref="T:System.IndexOutOfRangeException">지정된 이름이 유효한 열 이름이 아닌 경우</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificFieldType(System.Int32)">
+      <summary>지정된 열의 공급자별 필드 형식을 반환합니다.</summary>
+      <returns>지정된 열의 데이터 형식을 설명하는 <see cref="T:System.Type" /> 개체입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificValue(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.Object" />의 인스턴스로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificValues(System.Object[])">
+      <summary>현재 행의 컬렉션에서 공급자별 특성 열을 모두 가져옵니다.</summary>
+      <returns>배열에 있는 <see cref="T:System.Object" />의 인스턴스 수를 반환합니다.</returns>
+      <param name="values">특성 열을 복사해 올 <see cref="T:System.Object" />의 배열입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetStream(System.Int32)">
+      <summary>데이터를 <see cref="T:System.IO.Stream" />으로 검색합니다.</summary>
+      <returns>반환된 개체입니다.</returns>
+      <param name="ordinal">데이터를 <see cref="T:System.IO.Stream" />으로 검색합니다.</param>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+      <exception cref="T:System.InvalidCastException">반환된 형식이 다음 형식 중 하나가 아닙니다.binaryimagevarbinaryudt</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetString(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.String" />의 인스턴스로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.InvalidCastException">지정된 캐스트가 잘못된 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetTextReader(System.Int32)">
+      <summary>데이터를 <see cref="T:System.IO.TextReader" />로 검색합니다.</summary>
+      <returns>반환된 개체입니다.</returns>
+      <param name="ordinal">데이터를 <see cref="T:System.IO.TextReader" />로 검색합니다.</param>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+      <exception cref="T:System.InvalidCastException">반환된 형식이 다음 형식 중 하나가 아닙니다.charncharntextnvarchar텍스트varchar</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetValue(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.Object" />의 인스턴스로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetValues(System.Object[])">
+      <summary>현재 행의 열 값으로 개체 배열을 채웁니다.</summary>
+      <returns>배열에 있는 <see cref="T:System.Object" />의 인스턴스 수를 반환합니다.</returns>
+      <param name="values">특성 열을 복사해 올 <see cref="T:System.Object" />의 배열입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.HasRows">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataReader" />에 행이 하나 이상 포함되어 있는지 여부를 나타내는 값을 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" />에 행이 하나 이상 포함되어 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.IsClosed">
+      <summary>
+        <see cref="T:System.Data.Common.DbDataReader" />가 닫혀 있는지 여부를 나타내는 값을 가져옵니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbDataReader" />가 닫혔으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Data.SqlClient.SqlDataReader" />가 닫힌 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)">
+      <summary>열이 존재하지 않거나 없는 값을 포함하는지 여부를 나타내는 값을 가져옵니다.</summary>
+      <returns>지정된 열이 <see cref="T:System.DBNull" />에 해당하면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32)">
+      <summary>존재하지 않거나 누락된 값이 열에 포함되었는지 여부를 나타내는 값을 가져오는 <see cref="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)" />의 비동기 버전입니다.</summary>
+      <returns>지정된 열 값이 DBNull과 같으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="ordinal">검색할 열입니다(0부터 시작).</param>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32,System.Threading.CancellationToken)">
+      <summary>존재하지 않거나 누락된 값이 열에 포함되었는지 여부를 나타내는 값을 가져오는 <see cref="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)" />의 비동기 버전입니다.필요에 따라 작업을 취소해야 하는 알림을 전송합니다.</summary>
+      <returns>지정된 열 값이 DBNull과 같으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="ordinal">검색할 열입니다(0부터 시작).</param>
+      <param name="cancellationToken">작업을 취소해야 한다는 알림을 전파하는 취소 명령입니다.취소를 보장하지는 않습니다.CancellationToken.None을 설정하면 이 메서드가 <see cref="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32)" />와 동일해집니다.반환된 작업은 취소로 표시되어 있어야 합니다.</param>
+      <exception cref="T:System.InvalidOperationException">데이터 검색 중 연결이 끊기거나 닫힌 경우데이터 검색 중 <see cref="T:System.Data.Common.DbDataReader" />가 닫힌 경우읽을 준비가 된 데이터가 없는 경우(예를 들어, 첫 번째 <see cref="M:System.Data.Common.DbDataReader.Read" />가 호출되지 않았거나 false를 반환한 경우)순차 모드에서 이전에 읽은 열을 읽으려고 했습니다.진행 중인 비동기 작업이 없습니다.이는 스트림을 읽는 동안 호출할 수 있기 때문에 순차 모드로 실행할 때 모든 Get* 메서드에 적용됩니다.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">존재하지 않는 열을 읽으려고 시도합니다.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Item(System.Int32)">
+      <summary>지정된 열의 값을 <see cref="T:System.Object" />의 인스턴스로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="ordinal">열 번호를 나타내는 0부터 시작하는 서수입니다.</param>
+      <exception cref="T:System.IndexOutOfRangeException">전달된 인덱스가 0에서 <see cref="P:System.Data.IDataRecord.FieldCount" /> 사이의 범위에 속하지 않는 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Item(System.String)">
+      <summary>지정된 열의 값을 <see cref="T:System.Object" />의 인스턴스로 가져옵니다.</summary>
+      <returns>지정된 열의 값입니다.</returns>
+      <param name="name">열의 이름입니다.</param>
+      <exception cref="T:System.IndexOutOfRangeException">지정된 이름의 열을 찾지 못한 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResult">
+      <summary>일괄 문의 결과를 읽을 때 판독기를 다음 결과로 이동합니다.</summary>
+      <returns>결과 집합이 더 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResultAsync">
+      <summary>일괄 문의 결과를 읽을 때 판독기를 다음 결과로 이동하는 <see cref="M:System.Data.Common.DbDataReader.NextResult" />의 비동기 버전입니다.CancellationToken.None을 사용하여 <see cref="M:System.Data.Common.DbDataReader.NextResultAsync(System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResultAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbDataReader.NextResult" />의 비동기 버전입니다.공급자는 적절한 구현을 재정의해야 합니다.<paramref name="cancellationToken" />은 선택적으로 무시될 수 있습니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbDataReader.NextResult" /> 메서드를 호출하고, 호출 스레드를 차단하면서 완료된 작업을 반환합니다.기본 구현은 이미 취소된 <paramref name="cancellationToken" />을 전달하는 경우 취소된 작업을 반환합니다.<see cref="M:System.Data.Common.DbDataReader.NextResult" />에서 throw되는 예외는 반환된 Task Exception 속성을 통해 전달됩니다.반환된 작업이 아직 완료되지 않은 상태에서는 DbDataReader 개체의 다른 메서드와 속성을 호출하면 안 됩니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 명령입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Read">
+      <summary>판독기를 결과 집합의 다음 레코드로 이동합니다.</summary>
+      <returns>행이 더 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.ReadAsync">
+      <summary>판독기를 결과 집합의 다음 레코드로 이동하는 비동기 버전의 <see cref="M:System.Data.Common.DbDataReader.Read" />입니다.이 메서드는 CancellationToken.None을 사용하여 <see cref="M:System.Data.Common.DbDataReader.ReadAsync(System.Threading.CancellationToken)" />를 호출합니다.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.ReadAsync(System.Threading.CancellationToken)">
+      <summary>
+        <see cref="M:System.Data.Common.DbDataReader.Read" />의 비동기 버전입니다.  공급자는 적절한 구현을 재정의해야 합니다.cancellationToken은 선택적으로 무시될 수 있습니다.기본 구현은 동기 <see cref="M:System.Data.Common.DbDataReader.Read" /> 메서드를 호출하고, 호출 스레드를 차단하면서 완료된 작업을 반환합니다.기본 구현은 이미 취소된 cancellationToken을 전달하는 경우 취소된 작업을 반환합니다.  Read에서 throw되는 예외는 반환된 Task Exception 속성을 통해 전달됩니다.반환된 작업이 완료될 때까지 DbDataReader 개체의 다른 메서드 및 속성을 호출하지 마십시오.</summary>
+      <returns>비동기 작업(operation)을 나타내는 작업(task)입니다.</returns>
+      <param name="cancellationToken">취소 명령입니다.</param>
+      <exception cref="T:System.Data.Common.DbException">명령 텍스트를 실행하는 동안 오류가 발생했습니다.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.RecordsAffected">
+      <summary>SQL 문으로 변경, 삽입 또는 삭제된 열의 수를 가져옵니다. </summary>
+      <returns>변경, 삽입 또는 삭제된 행의 수입니다. SELECT 문에 대해서는 -1을 반환하고, 영향을 받은 행이 없거나 문이 실패하면 0을 반환합니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.VisibleFieldCount">
+      <summary>표시되는 <see cref="T:System.Data.Common.DbDataReader" />의 필드 수를 가져옵니다.</summary>
+      <returns>표시되는 필드 수입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbException">
+      <summary>데이터 소스를 위해 throw되는 모든 예외에 대한 기본 클래스입니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor(System.String)">
+      <summary>지정된 오류 메시지를 사용하여 <see cref="T:System.Data.Common.DbException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <param name="message">이 예외에 표시할 메시지입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor(System.String,System.Exception)">
+      <summary>지정된 오류 메시지와 해당 예외의 근본 원인인 내부 예외에 대한 참조를 사용하여 <see cref="T:System.Data.Common.DbException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <param name="message">오류 메시지 문자열입니다.</param>
+      <param name="innerException">내부 예외 참조입니다.</param>
+    </member>
+    <member name="T:System.Data.Common.DbParameter">
+      <summary>
+        <see cref="T:System.Data.Common.DbCommand" />에 대한 매개 변수 및 <see cref="T:System.Data.DataSet" /> 열에 대한 해당 매핑(선택적)을 나타냅니다.매개 변수에 대한 자세한 내용은 매개 변수 및 매개 변수 데이터 형식 구성을 참조하십시오.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameter.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.DbType">
+      <summary>매개 변수의 <see cref="T:System.Data.DbType" />을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.DbType" /> 값 중 하나입니다.기본값은 <see cref="F:System.Data.DbType.String" />입니다.</returns>
+      <exception cref="T:System.ArgumentException">속성이 유효한 <see cref="T:System.Data.DbType" />으로 설정되지 않은 경우</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Direction">
+      <summary>매개 변수가 입력 전용, 출력 전용, 양방향 또는 저장 프로시저의 반환 값 매개 변수인지 여부를 나타내는 값을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.ParameterDirection" /> 값 중 하나입니다.기본값은 Input입니다.</returns>
+      <exception cref="T:System.ArgumentException">속성이 유효한 <see cref="T:System.Data.ParameterDirection" /> 값 중의 하나로 설정되지 않은 경우</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.IsNullable">
+      <summary>매개 변수가 null 값을 허용하는지 여부를 나타내는 값을 가져오거나 설정합니다.</summary>
+      <returns>null 값이 허용되면 true이고, 그렇지 않으면 false입니다.기본값은 false입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.ParameterName">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" />의 이름을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" />의 이름입니다.기본값은 빈 문자열("")입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Precision">
+      <summary>[.NET Framework 4.5.1 이상 버전에서 지원됨] <see cref="P:System.Data.Common.DbParameter.Value" /> 속성을 나타내는 데 사용된 숫자의 최대 자릿수를 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="P:System.Data.Common.DbParameter.Value" /> 속성을 나타내는 데 사용된 숫자의 최대 자릿수입니다.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbParameter.ResetDbType">
+      <summary>DbType 속성을 원래 설정으로 다시 설정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Scale">
+      <summary>[.NET Framework 4.5.1 이상 버전에서 지원됨] <see cref="P:System.Data.Common.DbParameter.Value" />를 확인하는 소수 자릿수의 수를 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="P:System.Data.Common.DbParameter.Value" />를 확인하는 소수 자릿수의 수입니다.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Size">
+      <summary>열 내부에 있는 데이터의 최대 크기를 바이트 단위로 가져오거나 설정합니다.</summary>
+      <returns>열 내부에 있는 데이터의 최대 크기(바이트)입니다.기본값은 매개 변수 값에서 유추됩니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.SourceColumn">
+      <summary>
+        <see cref="T:System.Data.DataSet" />에 매핑되어 <see cref="P:System.Data.Common.DbParameter.Value" />를 로드하거나 반환하기 위해 사용된 소스 열의 이름을 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.DataSet" />에 매핑된 소스 열의 이름입니다.기본값은 빈 문자열입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.SourceColumnNullMapping">
+      <summary>소스 열에서 null을 허용하는지 여부를 나타내는 값을 설정하거나 가져옵니다.그러면 <see cref="T:System.Data.Common.DbCommandBuilder" />가 null 허용 열에 대해 Update 문을 올바르게 생성할 수 있습니다.</summary>
+      <returns>소스 열에서 null을 허용하면 true이고, 그렇지 않으면 false입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Value">
+      <summary>매개 변수의 값을 가져오거나 설정합니다.</summary>
+      <returns>매개 변수의 값인 <see cref="T:System.Object" />입니다.기본값은 null입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbParameterCollection">
+      <summary>
+        <see cref="T:System.Data.Common.DbCommand" />와 관련된 매개 변수의 컬렉션에 대한 기본 클래스입니다. </summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameterCollection" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Add(System.Object)">
+      <summary>지정된 <see cref="T:System.Data.Common.DbParameter" /> 개체를 <see cref="T:System.Data.Common.DbParameterCollection" />에 추가합니다.</summary>
+      <returns>컬렉션에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체의 인덱스입니다.</returns>
+      <param name="value">컬렉션에 추가할 <see cref="T:System.Data.Common.DbParameter" />의 <see cref="P:System.Data.Common.DbParameter.Value" />입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.AddRange(System.Array)">
+      <summary>지정된 값을 가진 항목의 배열을 <see cref="T:System.Data.Common.DbParameterCollection" />에 추가합니다.</summary>
+      <param name="values">컬렉션에 추가할 <see cref="T:System.Data.Common.DbParameter" /> 형식의 값으로 구성된 배열입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Clear">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameterCollection" />에서 <see cref="T:System.Data.Common.DbParameter" /> 값을 모두 제거합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Contains(System.Object)">
+      <summary>지정된 <see cref="P:System.Data.Common.DbParameter.Value" />를 가진 <see cref="T:System.Data.Common.DbParameter" />가 컬렉션에 포함되는지 여부를 나타냅니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" />가 컬렉션에 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="value">컬렉션에서 찾을 <see cref="T:System.Data.Common.DbParameter" />의 <see cref="P:System.Data.Common.DbParameter.Value" />입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Contains(System.String)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" />가 컬렉션에 있는지 여부를 나타냅니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" />가 컬렉션에 있으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="value">컬렉션에서 찾을 <see cref="T:System.Data.Common.DbParameter" />의 이름입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.CopyTo(System.Array,System.Int32)">
+      <summary>지정된 인덱스에서 시작하여 항목의 배열을 컬렉션에 복사합니다.</summary>
+      <param name="array">컬렉션에 복사할 항목의 배열입니다.</param>
+      <param name="index">항목을 복사할 컬렉션의 인덱스입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Count">
+      <summary>컬렉션의 항목 수를 지정합니다.</summary>
+      <returns>컬렉션의 항목 수입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetEnumerator">
+      <summary>.NET Framework 데이터 공급자로 컬렉션에서 단순하게 반복할 수 있도록 지원하는 <see cref="M:System.Collections.IEnumerable.GetEnumerator" /> 메서드를 노출합니다.</summary>
+      <returns>컬렉션에서 반복하는 데 사용할 수 있는 <see cref="T:System.Collections.IEnumerator" />입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetParameter(System.Int32)">
+      <summary>컬렉션의 지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체를 반환합니다.</summary>
+      <returns>컬렉션의 지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체입니다.</returns>
+      <param name="index">컬렉션에 있는 <see cref="T:System.Data.Common.DbParameter" />의 인덱스입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetParameter(System.String)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체를 반환합니다.</summary>
+      <returns>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체입니다.</returns>
+      <param name="parameterName">컬렉션에 있는 <see cref="T:System.Data.Common.DbParameter" />의 이름입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.IndexOf(System.Object)">
+      <summary>지정된 <see cref="T:System.Data.Common.DbParameter" /> 개체의 인덱스를 반환합니다.</summary>
+      <returns>지정된 <see cref="T:System.Data.Common.DbParameter" /> 개체의 인덱스입니다.</returns>
+      <param name="value">컬렉션의 <see cref="T:System.Data.Common.DbParameter" /> 개체입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.IndexOf(System.String)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체에 대한 인덱스를 반환합니다.</summary>
+      <returns>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체에 대한 인덱스입니다.</returns>
+      <param name="parameterName">컬렉션에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체의 이름입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Insert(System.Int32,System.Object)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체에 대한 지정된 인덱스를 컬렉션의 지정된 인덱스에 삽입합니다.</summary>
+      <param name="index">
+        <see cref="T:System.Data.Common.DbParameter" /> 개체를 삽입할 인덱스입니다.</param>
+      <param name="value">컬렉션에 삽입할 <see cref="T:System.Data.Common.DbParameter" /> 개체입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Item(System.Int32)">
+      <summary>지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" />를 가져오고 설정합니다.</summary>
+      <returns>지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" />입니다.</returns>
+      <param name="index">매개 변수의 인덱스이며 0에서 시작합니다.</param>
+      <exception cref="T:System.IndexOutOfRangeException">지정된 인덱스가 없는 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Item(System.String)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" />를 가져오고 설정합니다.</summary>
+      <returns>지정된 이름을 가진 <see cref="T:System.Data.Common.DbParameter" />입니다.</returns>
+      <param name="parameterName">매개 변수의 이름입니다.</param>
+      <exception cref="T:System.IndexOutOfRangeException">지정된 인덱스가 없는 경우 </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Remove(System.Object)">
+      <summary>컬렉션에서 지정된 <see cref="T:System.Data.Common.DbParameter" /> 개체를 제거합니다.</summary>
+      <param name="value">제거할 <see cref="T:System.Data.Common.DbParameter" /> 개체입니다.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.RemoveAt(System.Int32)">
+      <summary>컬렉션에서 지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체를 제거합니다.</summary>
+      <param name="index">
+        <see cref="T:System.Data.Common.DbParameter" /> 개체가 있는 인덱스입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.RemoveAt(System.String)">
+      <summary>컬렉션에서 지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체를 제거합니다.</summary>
+      <param name="parameterName">제거할 <see cref="T:System.Data.Common.DbParameter" /> 개체의 이름입니다.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.SetParameter(System.Int32,System.Data.Common.DbParameter)">
+      <summary>지정된 인덱스에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체를 새 값으로 설정합니다. </summary>
+      <param name="index">
+        <see cref="T:System.Data.Common.DbParameter" /> 개체가 있는 인덱스입니다.</param>
+      <param name="value">새 <see cref="T:System.Data.Common.DbParameter" /> 값입니다.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.SetParameter(System.String,System.Data.Common.DbParameter)">
+      <summary>지정된 이름의 <see cref="T:System.Data.Common.DbParameter" /> 개체를 새 값으로 설정합니다.</summary>
+      <param name="parameterName">컬렉션에 있는 <see cref="T:System.Data.Common.DbParameter" /> 개체의 이름입니다.</param>
+      <param name="value">새 <see cref="T:System.Data.Common.DbParameter" /> 값입니다.</param>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.SyncRoot">
+      <summary>컬렉션에 대한 액세스를 동기화하는 데 사용되는 <see cref="T:System.Object" />를 지정합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameterCollection" />에 대한 액세스를 동기화하는 데 사용되는 <see cref="T:System.Object" />입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#ICollection#IsSynchronized"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#IsFixedSize"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#IsReadOnly"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#Item(System.Int32)">
+      <summary>지정된 인덱스에 있는 요소를 가져오거나 설정합니다.</summary>
+      <returns>지정된 인덱스의 요소입니다.</returns>
+      <param name="index">가져오거나 설정할 요소의 인덱스(0부터 시작)입니다.</param>
+    </member>
+    <member name="T:System.Data.Common.DbProviderFactory">
+      <summary>데이터 소스 클래스의 공급자 구현에 대한 인스턴스를 만드는 데 사용되는 메서드의 집합을 나타냅니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.#ctor">
+      <summary>
+        <see cref="T:System.Data.Common.DbProviderFactory" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateCommand">
+      <summary>
+        <see cref="T:System.Data.Common.DbCommand" /> 클래스를 구현하는 공급자 클래스의 새 인스턴스를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbCommand" />의 새 인스턴스입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateConnection">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnection" /> 클래스를 구현하는 공급자 클래스의 새 인스턴스를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnection" />의 새 인스턴스입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateConnectionStringBuilder">
+      <summary>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> 클래스를 구현하는 공급자 클래스의 새 인스턴스를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbConnectionStringBuilder" />의 새 인스턴스입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateParameter">
+      <summary>
+        <see cref="T:System.Data.Common.DbParameter" /> 클래스를 구현하는 공급자 클래스의 새 인스턴스를 반환합니다.</summary>
+      <returns>
+        <see cref="T:System.Data.Common.DbParameter" />의 새 인스턴스입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbTransaction">
+      <summary>트랜잭션의 기본 클래스입니다. </summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.#ctor">
+      <summary>새 <see cref="T:System.Data.Common.DbTransaction" /> 개체를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Commit">
+      <summary>데이터베이스 트랜잭션을 커밋합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.Connection">
+      <summary>트랜잭션과 관련된 <see cref="T:System.Data.Common.DbConnection" /> 개체를 지정합니다.</summary>
+      <returns>트랜잭션과 관련된 <see cref="T:System.Data.Common.DbConnection" /> 개체입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.DbConnection">
+      <summary>트랜잭션과 관련된 <see cref="T:System.Data.Common.DbConnection" /> 개체를 지정합니다.</summary>
+      <returns>트랜잭션과 관련된 <see cref="T:System.Data.Common.DbConnection" /> 개체입니다.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Dispose">
+      <summary>
+        <see cref="T:System.Data.Common.DbTransaction" />에서 사용하는 관리되지 않는 리소스를 해제합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.Data.Common.DbTransaction" />에서 사용하는 관리되지 않는 리소스를 해제하고, 관리되는 리소스를 선택적으로 해제할 수 있습니다.</summary>
+      <param name="disposing">true인 경우 이 메서드는 이 <see cref="T:System.Data.Common.DbTransaction" />에서 참조하는 관리되는 개체가 보유하고 있는 리소스를 모두 해제합니다.</param>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.IsolationLevel">
+      <summary>이 트랜잭션에 대한 <see cref="T:System.Data.IsolationLevel" />을 지정합니다.</summary>
+      <returns>이 트랜잭션에 대한 <see cref="T:System.Data.IsolationLevel" />입니다.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Rollback">
+      <summary>보류 중인 상태에서 트랜잭션을 롤백합니다.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+  </members>
+</doc>

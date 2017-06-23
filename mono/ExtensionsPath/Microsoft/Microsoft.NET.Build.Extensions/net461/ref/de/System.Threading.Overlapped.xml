@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Threading.Overlapped</name>
+  </assembly>
+  <members>
+    <member name="T:System.Threading.IOCompletionCallback">
+      <summary>Empfängt beim Abschluss einer E/A-Operation im Threadpool den Fehlercode, die Anzahl der Bytes sowie den überlappenden Werttyp.</summary>
+      <param name="errorCode">Der Fehlercode. </param>
+      <param name="numBytes">Die Anzahl der übertragenen Bytes. </param>
+      <param name="pOVERLAP">Ein <see cref="T:System.Threading.NativeOverlapped" />, das einen nicht verwalteten Zeiger auf den systemeigenen überlappenden Werttyp darstellt. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.NativeOverlapped">
+      <summary>Stellt ein explizites Layout bereit, das für nicht verwalteten Code sichtbar ist und dem Layout der OVERLAPPED-Win32-Struktur entspricht, jedoch zusätzliche reservierte Felder am Ende aufweist.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.EventHandle">
+      <summary>Gibt das Handle für ein Ereignis an, das beim Abschluss der Operation auf den signalisierten Zustand festgelegt wird.Der aufrufende Prozess muss diesen Member vor dem Aufruf überlappender Funktionen entweder auf 0 oder auf ein gültiges Ereignishandle festlegen.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalHigh">
+      <summary>Gibt die Länge der übertragenen Daten an.Reserviert für die Verwendung durch das Betriebssystem.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalLow">
+      <summary>Gibt einen systemabhängigen Status an.Reserviert für die Verwendung durch das Betriebssystem.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetHigh">
+      <summary>Gibt das höherwertige Word des Byteoffsets an, an dem die Übertragung begonnen werden soll.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetLow">
+      <summary>Gibt eine Dateiposition an, an der die Übertragung begonnen werden soll.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.Overlapped">
+      <summary>Liefert eine verwaltete Darstellung einer Win32-OVERLAPPED-Struktur mit Methoden zum Übertragen von Informationen von einer <see cref="T:System.Threading.Overlapped" />-Instanz zu einer <see cref="T:System.Threading.NativeOverlapped" />-Struktur.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.#ctor">
+      <summary>Initialisiert eine neue leere Instanz der <see cref="T:System.Threading.Overlapped" />-Klasse.</summary>
+    </member>
+    <member name="P:System.Threading.Overlapped.AsyncResult">
+      <summary>Ruft das Objekt ab, das Statusinformationen über den E/A-Vorgang bereitstellt, oder legt es fest.</summary>
+      <returns>Ein Objekt, das die <see cref="T:System.IAsyncResult" />-Schnittstelle implementiert.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Free(System.Threading.NativeOverlapped*)">
+      <summary>Gibt den nicht verwalteten Arbeitsspeicher frei, der einer systemeigenen überlappenden Struktur zugewiesen ist, die von der <see cref="Overload:System.Threading.Overlapped.Pack" />-Methode zugeordnet wird.</summary>
+      <param name="nativeOverlappedPtr">Ein Zeiger auf die freizugebende <see cref="T:System.Threading.NativeOverlapped" />-Struktur.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" /> ist null.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetHigh">
+      <summary>Ruft das hohe WORD der Dateiposition ab, an der die Übertragung gestartet werden soll, oder legt dieses fest.Die Dateiposition ist ein Byteoffset vom Anfang der Datei.</summary>
+      <returns>Ein <see cref="T:System.Int32" />-Wert, der das hohe WORD der Dateiposition darstellt.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetLow">
+      <summary>Ruft das niedrige WORD der Dateiposition ab, an der die Übertragung gestartet werden soll, oder legt dieses fest.Die Dateiposition ist ein Byteoffset vom Anfang der Datei.</summary>
+      <returns>Ein <see cref="T:System.Int32" />-Wert, der das niedrige WORD der Dateiposition darstellt.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Pack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>Packt die aktuelle Instanz in eine <see cref="T:System.Threading.NativeOverlapped" />-Struktur und gibt einen Delegaten, der aufgerufen wird, wenn der asynchrone E/A-Vorgang abgeschlossen ist, und ein verwaltetes Objekt an, das als Puffer dient.</summary>
+      <returns>Ein nicht verwalteter Zeiger auf eine <see cref="T:System.Threading.NativeOverlapped" />-Struktur. </returns>
+      <param name="iocb">Ein <see cref="T:System.Threading.IOCompletionCallback" />-Delegat, der die Rückrufmethode darstellt, die aufgerufen wird, wenn der asynchrone E/A-Vorgang abgeschlossen ist.</param>
+      <param name="userData">Ein Objekt oder ein Objektarray, das den Eingabe- oder den Ausgabepuffer für den Vorgang darstellt.Jedes Objekt stellt einen Puffer dar, z. B. ein Array von Bytes.</param>
+      <exception cref="T:System.InvalidOperationException">Die aktuelle <see cref="T:System.Threading.Overlapped" />-Klasse wurde bereits gepackt.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Unpack(System.Threading.NativeOverlapped*)">
+      <summary>Entpackt die angegebene, nicht verwaltete <see cref="T:System.Threading.NativeOverlapped" />-Struktur in ein verwaltetes <see cref="T:System.Threading.Overlapped" />-Objekt. </summary>
+      <returns>Ein <see cref="T:System.Threading.Overlapped" />-Objekt, das die Informationen enthält, die aus der systemeigenen Struktur entpackt wurden.</returns>
+      <param name="nativeOverlappedPtr">Ein nicht verwalteter Zeiger auf eine <see cref="T:System.Threading.NativeOverlapped" />-Struktur.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" /> ist null.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.UnsafePack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>Packt die aktuelle Instanz in eine <see cref="T:System.Threading.NativeOverlapped" />-Struktur, und gibt einen Delegaten, der aufgerufen werden soll, wenn der asynchrone E/A-Vorgang abgeschlossen ist, und ein verwaltetes Objekt an, das als Puffer dient.Gibt den aufrufenden Stapel nicht weiter.</summary>
+      <returns>Ein nicht verwalteter Zeiger auf eine <see cref="T:System.Threading.NativeOverlapped" />-Struktur. </returns>
+      <param name="iocb">Ein <see cref="T:System.Threading.IOCompletionCallback" />-Delegat, der die Rückrufmethode darstellt, die aufgerufen wird, wenn der asynchrone E/A-Vorgang abgeschlossen ist.</param>
+      <param name="userData">Ein Objekt oder ein Objektarray, das den Eingabe- oder den Ausgabepuffer für den Vorgang darstellt.Jedes Objekt stellt einen Puffer dar, z. B. ein Array von Bytes.</param>
+      <exception cref="T:System.Security.SecurityException">Der Aufrufer verfügt nicht über die erforderliche Berechtigung. </exception>
+      <exception cref="T:System.InvalidOperationException">Die aktuelle <see cref="T:System.Threading.Overlapped" />-Klasse ist bereits gepackt.</exception>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence, ControlPolicy" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Threading.PreAllocatedOverlapped"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.#ctor(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.Dispose"></member>
+    <member name="T:System.Threading.ThreadPoolBoundHandle"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.PreAllocatedOverlapped)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.BindHandle(System.Runtime.InteropServices.SafeHandle)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.Dispose"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.FreeNativeOverlapped(System.Threading.NativeOverlapped*)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.GetNativeOverlappedState(System.Threading.NativeOverlapped*)"></member>
+    <member name="P:System.Threading.ThreadPoolBoundHandle.Handle"></member>
+  </members>
+</doc>

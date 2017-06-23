@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Globalization.Extensions</name>
+  </assembly>
+  <members>
+    <member name="T:System.StringNormalizationExtensions"></member>
+    <member name="M:System.StringNormalizationExtensions.IsNormalized(System.String)"></member>
+    <member name="M:System.StringNormalizationExtensions.IsNormalized(System.String,System.Text.NormalizationForm)"></member>
+    <member name="M:System.StringNormalizationExtensions.Normalize(System.String)"></member>
+    <member name="M:System.StringNormalizationExtensions.Normalize(System.String,System.Text.NormalizationForm)"></member>
+    <member name="T:System.Globalization.GlobalizationExtensions"></member>
+    <member name="M:System.Globalization.GlobalizationExtensions.GetStringComparer(System.Globalization.CompareInfo,System.Globalization.CompareOptions)"></member>
+    <member name="T:System.Globalization.IdnMapping">
+      <summary>支持在 Internet 域名中使用非 ASCII 字符。此类不能被继承。</summary>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.#ctor">
+      <summary>初始化 <see cref="T:System.Globalization.IdnMapping" /> 类的新实例。</summary>
+    </member>
+    <member name="P:System.Globalization.IdnMapping.AllowUnassigned">
+      <summary>获取或设置一个值，该值指示当前 <see cref="T:System.Globalization.IdnMapping" /> 对象的成员所执行的操作中是否使用未分配的 Unicode 码位。</summary>
+      <returns>如果在操作中使用未分配的码位，则为 true；否则为 false。</returns>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.Equals(System.Object)">
+      <summary>指示当前 <see cref="T:System.Globalization.IdnMapping" /> 对象与指定对象是否相等。</summary>
+      <returns>如果 <paramref name="obj" /> 参数指定的对象从 <see cref="T:System.Globalization.IdnMapping" /> 派生且它的 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性相等，则为 true；否则为 false。</returns>
+      <param name="obj">要与当前对象进行比较的对象。</param>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String)">
+      <summary>将由 Unicode 字符组成的域名标签的字符串编码为 US-ASCII 字符范围内的可显示的 Unicode 字符的字符串。根据 IDNA 标准格式化的字符串。</summary>
+      <returns>由 <paramref name="unicode" /> 参数指定的字符串的等效项包括 US-ASCII 字符范围（U+0020 至 U+007E）内的可显示 Unicode 字符并根据 IDNA 标准格式化。</returns>
+      <param name="unicode">要转换的字符串，它包含一个或多个由标签分隔符分隔的域名标签。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="unicode" /> 是无效的。</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String,System.Int32)">
+      <summary>编码包含US-ASCII字符范围以外的 Unicode 字符的域名称标签子字符串。子串转换为在 US-ASCII 字符范围内可显示的“ Unicode ”字符串并根据 IDNA 标准格式化。</summary>
+      <returns>由 <paramref name="unicode" /> 和 <paramref name="index" /> 指定的子字符串的等效项包括 US-ASCII 字符范围（U+0020 至 U+007E）内的可显示 Unicode 字符并根据 IDNA 标准格式化。</returns>
+      <param name="unicode">要转换的字符串，它包含一个或多个由标签分隔符分隔的域名标签。</param>
+      <param name="index">
+        <paramref name="unicode" /> 的从零开始的偏移量，用于指定开始转换的子字符串的位置。转换运算将继续执行到 <paramref name="unicode" /> 字符串的末尾。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> 小于零。- 或 -<paramref name="index" /> 大于 <paramref name="unicode" /> 的长度。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="unicode" /> 是无效的。</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String,System.Int32,System.Int32)">
+      <summary>编码包含 US-ASCII 字符范围以外的 Unicode 字符的域名称标签子字符串的指定字符数。子串转换为在 US-ASCII 字符范围内可显示的“ Unicode ”字符串并根据 IDNA 标准格式化。</summary>
+      <returns>由 <paramref name="unicode" />、<paramref name="index" /> 和 <paramref name="count" /> 参数指定的子字符串的等效项，包括 US-ASCII 字符范围（U+0020 至 U+007E）内的可显示 Unicode 字符并根据 IDNA 标准格式化。</returns>
+      <param name="unicode">要转换的字符串，它包含一个或多个由标签分隔符分隔的域名标签。</param>
+      <param name="index">
+        <paramref name="unicode" /> 的从零开始的偏移量，用于指定子字符串的起始位置。</param>
+      <param name="count">要在 <paramref name="unicode" /> 字符串中的 <paramref name="index" /> 指定的位置开始的子字符串中转换的字符数。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> 或 <paramref name="count" /> 小于零。- 或 -<paramref name="index" /> 大于 <paramref name="unicode" /> 的长度。- 或 -<paramref name="index" /> 大于 <paramref name="unicode" /> 的长度减去 <paramref name="count" />。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="unicode" /> 是无效的。</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetHashCode">
+      <summary>返回此 <see cref="T:System.Globalization.IdnMapping" /> 对象的哈希代码。</summary>
+      <returns>从 <see cref="T:System.Globalization.IdnMapping" /> 对象的属性派生的四个 32 位常量中的一个。返回值没有特殊意义，不适合在哈希代码算法中使用。</returns>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String)">
+      <summary>对基于 IDNA 标准编码的一个或者多个域名标签的字符串进行解码，解码为一个 Unicode 字符串。</summary>
+      <returns>由 <paramref name="ascii" /> 参数指定的 IDNA 子字符串的 Unicode 等效项。</returns>
+      <param name="ascii">要解码的字符串，包含根据 IDNA 标准在 US-ASCII 字符范围 （U+0020 至 U+007E） 编码的一个或多个标签。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="ascii" /> 是无效的。</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String,System.Int32)">
+      <summary>对基于 IDNA 标准编码的一个或者多个域名标签的子字符串进行解码，解码为 Unicode 字符串。</summary>
+      <returns>由 <paramref name="ascii" /> 和 <paramref name="index" /> 参数指定的 IDNA 子字符串的 Unicode 等效项。</returns>
+      <param name="ascii">要解码的字符串，包含根据 IDNA 标准在 US-ASCII 字符范围 （U+0020 至 U+007E） 编码的一个或多个标签。</param>
+      <param name="index">
+        <paramref name="ascii" /> 的从零开始的偏移量，用于指定开始解码的子字符串的位置。解码运算将继续执行到 <paramref name="ascii" /> 字符串的末尾。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> 小于零。- 或 -<paramref name="index" /> 大于 <paramref name="ascii" /> 的长度。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="ascii" /> 是无效的。</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String,System.Int32,System.Int32)">
+      <summary>对基于 IDNA 标准编码、具有指定长度并包含一个或者多个域名标签的子字符串进行解码，解码为一个 Unicode 字符串。</summary>
+      <returns>由 <paramref name="ascii" />、<paramref name="index" /> 和 <paramref name="count" /> 参数指定的 IDNA 子字符串的 Unicode 等效项。</returns>
+      <param name="ascii">要解码的字符串，包含根据 IDNA 标准在 US-ASCII 字符范围 （U+0020 至 U+007E） 编码的一个或多个标签。</param>
+      <param name="index">
+        <paramref name="ascii" /> 的从零开始的偏移量，用于指定子字符串的起始位置。</param>
+      <param name="count">开始 <paramref name="ascii" /> 字符串中 <paramref name="index" /> 指定的位置的子字符串中要转换的字符数。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> 为 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> 或 <paramref name="count" /> 小于零。- 或 -<paramref name="index" /> 大于 <paramref name="ascii" /> 的长度。- 或 -<paramref name="index" /> 大于 <paramref name="ascii" /> 的长度减去 <paramref name="count" />。</exception>
+      <exception cref="T:System.ArgumentException">根据 <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> 和 <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> 属性以及 IDNA 标准，<paramref name="ascii" /> 是无效的。</exception>
+    </member>
+    <member name="P:System.Globalization.IdnMapping.UseStd3AsciiRules">
+      <summary>获取或设置一个值，该值指示在当前 <see cref="T:System.Globalization.IdnMapping" /> 对象的成员所执行的操作中是使用标准命名约定还是宽松命名约定。</summary>
+      <returns>如果在操作中使用标准命名转换，则为 true；否则为 false。</returns>
+    </member>
+    <member name="T:System.Text.NormalizationForm">
+      <summary>指定要执行的规范化的类型。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormC">
+      <summary>指示使用完全规范化分解对 Unicode 字符串进行规范化，然后将序列替换为其原复合字符（如果可能）。</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormD">
+      <summary>指示使用完全规范化分解对 Unicode 字符串进行规范化。</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormKC">
+      <summary>指示使用完全兼容性分解对 Unicode 字符串进行规范化，然后将序列替换为其原复合字符（如果可能）。</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormKD">
+      <summary>指示使用完全兼容性分解对 Unicode 字符串进行规范化。</summary>
+    </member>
+  </members>
+</doc>

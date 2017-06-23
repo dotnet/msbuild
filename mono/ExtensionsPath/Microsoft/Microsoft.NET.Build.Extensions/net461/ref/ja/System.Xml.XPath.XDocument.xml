@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Xml.XPath.XDocument</name>
+  </assembly>
+  <members>
+    <member name="T:System.Xml.XPath.Extensions">
+      <summary>このクラスには、XPath 式を評価できるようにする LINQ to XML 拡張メソッドが含まれています。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode)">
+      <summary>
+        <see cref="T:System.Xml.Linq.XNode" /> の <see cref="T:System.Xml.XPath.XPathNavigator" /> を作成します。</summary>
+      <returns>XPath クエリを処理できる <see cref="T:System.Xml.XPath.XPathNavigator" />。</returns>
+      <param name="node">XPath クエリを処理できる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.CreateNavigator(System.Xml.Linq.XNode,System.Xml.XmlNameTable)">
+      <summary>
+        <see cref="T:System.Xml.Linq.XNode" /> の <see cref="T:System.Xml.XPath.XPathNavigator" /> を作成します。<see cref="T:System.Xml.XmlNameTable" /> を使用すると、XPath 式をより効率的に処理できます。</summary>
+      <returns>XPath クエリを処理できる <see cref="T:System.Xml.XPath.XPathNavigator" />。</returns>
+      <param name="node">XPath クエリを処理できる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="nameTable">
+        <see cref="T:System.Xml.XPath.XPathNavigator" /> で使用する <see cref="T:System.Xml.XmlNameTable" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String)">
+      <summary>XPath 式を評価します。</summary>
+      <returns>bool、double、string、または <see cref="T:System.Collections.Generic.IEnumerable`1" /> を含むオブジェクト。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathEvaluate(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>XPath 式を評価します。このとき、指定された <see cref="T:System.Xml.IXmlNamespaceResolver" /> を使用して名前空間プレフィックスを解決します。</summary>
+      <returns>式の評価結果を含むオブジェクト。このオブジェクトは、bool、double、string、または <see cref="T:System.Collections.Generic.IEnumerable`1" /> です。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <param name="resolver">XPath 式の名前空間プレフィックスの解決に使用する <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String)">
+      <summary>XPath 式を使用して <see cref="T:System.Xml.Linq.XElement" /> を選択します。</summary>
+      <returns>
+        <see cref="T:System.Xml.Linq.XElement" />、または null。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElement(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>XPath 式を使用して <see cref="T:System.Xml.Linq.XElement" /> を選択します。このとき、指定された <see cref="T:System.Xml.IXmlNamespaceResolver" /> を使用して名前空間プレフィックスを解決します。</summary>
+      <returns>
+        <see cref="T:System.Xml.Linq.XElement" />、または null。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <param name="resolver">XPath 式の名前空間プレフィックスの解決に使用する <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String)">
+      <summary>XPath 式を使用して要素のコレクションを選択します。</summary>
+      <returns>選択対象の要素を格納する <see cref="T:System.Xml.Linq.XElement" /> の <see cref="T:System.Collections.Generic.IEnumerable`1" />。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XPath.Extensions.XPathSelectElements(System.Xml.Linq.XNode,System.String,System.Xml.IXmlNamespaceResolver)">
+      <summary>XPath 式を使用して要素のコレクションを選択します。このとき、指定された <see cref="T:System.Xml.IXmlNamespaceResolver" /> を使用して名前空間プレフィックスを解決します。</summary>
+      <returns>選択対象の要素を格納する <see cref="T:System.Xml.Linq.XElement" /> の <see cref="T:System.Collections.Generic.IEnumerable`1" />。</returns>
+      <param name="node">XPath 式の評価対象となる <see cref="T:System.Xml.Linq.XNode" />。</param>
+      <param name="expression">XPath 式を含む <see cref="T:System.String" />。</param>
+      <param name="resolver">XPath 式の名前空間プレフィックスの解決に使用する <see cref="T:System.Xml.IXmlNamespaceResolver" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XPath.XDocumentExtensions"></member>
+    <member name="M:System.Xml.XPath.XDocumentExtensions.ToXPathNavigable(System.Xml.Linq.XNode)"></member>
+  </members>
+</doc>

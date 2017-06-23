@@ -1,0 +1,1313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Data.Common</name>
+  </assembly>
+  <members>
+    <member name="T:System.DBNull">
+      <summary>Представляет несуществующее значение.Этот класс не наследуется.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.DBNull.ToString">
+      <summary>Возвращает пустую строку (<see cref="F:System.String.Empty" />).</summary>
+      <returns>Пустая строка (<see cref="F:System.String.Empty" />).</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.DBNull.ToString(System.IFormatProvider)">
+      <summary>Возвращает пустую строку, используя заданный объект <see cref="T:System.IFormatProvider" />.</summary>
+      <returns>Пустая строка (<see cref="F:System.String.Empty" />).</returns>
+      <param name="provider">Объект <see cref="T:System.IFormatProvider" />, используемый для форматирования возвращаемого значения.– или – Значение null, чтобы получить сведения о форматировании на основе текущего значения параметра языкового стандарта операционной системы. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.DBNull.Value">
+      <summary>Представляет единственный экземпляр класса <see cref="T:System.DBNull" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.CommandBehavior">
+      <summary>Содержит описание результатов запроса и его воздействия на базу данных.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.CommandBehavior.CloseConnection">
+      <summary>При выполнении этой команды связанный объект Connection закрывается, когда закрывается связанный объект DataReader.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.Default">
+      <summary>Запрос может вернуть несколько наборов результатов.Выполнение запроса может повлиять на состояние базы данных.Поле Default не задает флаги <see cref="T:System.Data.CommandBehavior" />, поэтому вызов метода ExecuteReader(CommandBehavior.Default) функционально эквивалентен вызову метода ExecuteReader().</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.KeyInfo">
+      <summary>Запрос возвращает информацию колонки и первичного ключа. </summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SchemaOnly">
+      <summary>Запрос возвращает только сведения о столбце.При использовании <see cref="F:System.Data.CommandBehavior.SchemaOnly" /> поставщик данных .NET Framework для SQL Server предваряет оператор, выполняемый с параметром SET FMTONLY ON.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SequentialAccess">
+      <summary>Содержит способ для DataReader для обработки строк, содержащих столбцы с большими двоичными значениями.Вместо загрузки всей строки, SequentialAccess позволяет DataReader загрузить данные как поток.Затем можно использовать метод GetBytes или метод GetChars, чтобы указать положение байта для начала операции чтения и ограниченный размер буфера для возврата данных.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SingleResult">
+      <summary>Запрос возвращает один набор результатов.</summary>
+    </member>
+    <member name="F:System.Data.CommandBehavior.SingleRow">
+      <summary>Ожидается, что запрос вернет одну строку из первого набора результатов.Выполнение запроса может повлиять на состояние базы данных.Некоторые поставщики данных .NET Framework могут, но не обязательно, использовать эту информацию для оптимизации производительности команды.При указании <see cref="F:System.Data.CommandBehavior.SingleRow" /> с методом <see cref="M:System.Data.OleDb.OleDbCommand.ExecuteReader" /> объекта <see cref="T:System.Data.OleDb.OleDbCommand" />, поставщик данных .NET Framework для OLE DB выполняет привязку с помощью интерфейса IRow OLE DB, если он доступен.В обратном случае, используется интерфейс IRowset.Если оператор SQL должен вернуть только одну строку, рекомендуется указать <see cref="F:System.Data.CommandBehavior.SingleRow" /> для повышения производительности приложения.Можно также указать SingleRow при выполнении запросов, которые должны возвращать несколько наборов результатов.  В этом случае, если заданы и SQL-запрос с несколькими наборами результатом, и одна строка, возвращаемый результат будет содержать только первую строку первого набора результатов.Другие наборы результатов запроса не возвращаются.</summary>
+    </member>
+    <member name="T:System.Data.CommandType">
+      <summary>Определяет, как интерпретируется командная строка.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.CommandType.StoredProcedure">
+      <summary>Имя хранимой процедуры.</summary>
+    </member>
+    <member name="F:System.Data.CommandType.TableDirect">
+      <summary>Имя таблицы.</summary>
+    </member>
+    <member name="F:System.Data.CommandType.Text">
+      <summary>Текстовая команда SQL. (По умолчанию). </summary>
+    </member>
+    <member name="T:System.Data.ConnectionState">
+      <summary>Описывает текущее состояние подключения к источнику данных.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.ConnectionState.Broken">
+      <summary>Подключение к источнику данных разорвано.Это может произойти только после открытия подключения.Подключение в этом режиме может быть закрыто, а затем повторно открыто. (Это значение зарезервировано для будущих версий продукта.)</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Closed">
+      <summary>Подключение закрыто.</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Connecting">
+      <summary>Объект подключения подключается к источнику данных.</summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Executing">
+      <summary>Объект подключения выполняет команду. (Это значение зарезервировано для будущих версий продукта.) </summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Fetching">
+      <summary>Объект подключения получает данные. (Это значение зарезервировано для будущих версий продукта.) </summary>
+    </member>
+    <member name="F:System.Data.ConnectionState.Open">
+      <summary>Подключение открыто.</summary>
+    </member>
+    <member name="T:System.Data.DbType">
+      <summary>Указывает тип данных поля, свойства или объекта Parameter поставщика данных .NET Framework.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.DbType.AnsiString">
+      <summary>Поток переменной длины из символов, не принадлежащих кодировке Юникод. В нем может быть от 1 до 8000 символов.</summary>
+    </member>
+    <member name="F:System.Data.DbType.AnsiStringFixedLength">
+      <summary>Поток фиксированной длины из символов, не принадлежащих кодировке Юникод.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Binary">
+      <summary>Поток переменной длины из двоичных данных, имеющий длину от 1 до 8000 байт.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Boolean">
+      <summary>Простой тип для представления логических значений true и false.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Byte">
+      <summary>8-битовое целое число без знака, которое может принимать значения от 0 до 255.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Currency">
+      <summary>Значение типа currency, лежащее в диапазоне от -2 63 (или -922,337,203,685,477.5808) до 2 63 -1 (или +922,337,203,685,477.5807) и имеющее точность до одной десятитысячной денежной единицы.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Date">
+      <summary>Тип для представления значений даты.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTime">
+      <summary>Тип для представления значений даты и времени.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTime2">
+      <summary>Данные даты и времени.Значение даты может находиться в диапазоне от 1 января 1 г. н. э. до 31 декабря 9999 года н. э.Значение времени может находиться в диапазоне от 00:00:00 до 23:59:59.9999999 с точностью до 100 наносекунд.</summary>
+    </member>
+    <member name="F:System.Data.DbType.DateTimeOffset">
+      <summary>Данные даты и времени, поддерживающие часовые пояса.Значение даты может находиться в диапазоне от 1 января 1 г. н. э. до 31 декабря 9999 года н. э.Значение времени может находиться в диапазоне от 00:00:00 до 23:59:59.9999999 с точностью до 100 наносекунд.Часовые пояса могут находиться в диапазоне от -14:00 до +14:00.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Decimal">
+      <summary>Простой тип для представления значений в диапазоне от 1,0 x 10 -28 до приблизительно 7,9 x 10 28 с 28-29 значимыми цифрами.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Double">
+      <summary>Простой тип для представления значений с плавающей запятой в диапазоне от 5,0 x 10 -324 до приблизительно 1,7 x 10 308 с точностью до 15-16 знаков.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Guid">
+      <summary>Глобальный уникальный идентификатор (GUID).</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int16">
+      <summary>Целочисленный тип для представления 16-битовых целых чисел со знаком в диапазоне от -32768 до 32767.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int32">
+      <summary>Целочисленный тип для представления 32-битовых целых чисел со знаком в диапазоне от -2147483648 до 2147483647.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Int64">
+      <summary>Целочисленный тип для представления 64-битовых целых чисел со знаком в диапазоне от -9223372036854775808 до 9223372036854775807.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Object">
+      <summary>Общий тип для представления всех значений и ссылок, которые не могут быть представлены ни одним другим значением DbType.</summary>
+    </member>
+    <member name="F:System.Data.DbType.SByte">
+      <summary>Целочисленный тип для представления 8-битовых целых чисел со знаком в диапазоне от -128 до 127.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Single">
+      <summary>Простой тип для представления значений с плавающей запятой в диапазоне от 1,5 x 10 -45 до 3,4 x 10 38 с точностью до 15-16 знаков.</summary>
+    </member>
+    <member name="F:System.Data.DbType.String">
+      <summary>Тип для представления символьных строк Юникода.</summary>
+    </member>
+    <member name="F:System.Data.DbType.StringFixedLength">
+      <summary>Строка фиксированной длины из символов Юникода.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Time">
+      <summary>Тип, представляющий значение DateTime SQL Server.Если нужно использовать значение time SQL Server, необходимо воспользоваться <see cref="F:System.Data.SqlDbType.Time" />.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt16">
+      <summary>Целочисленный тип, представляющий 16-битовые целые числа без знака со значениями от 0 до 65535.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt32">
+      <summary>Целочисленный тип для представления 32-битовых целых чисел без знака в диапазоне от 0 до 4294967295.</summary>
+    </member>
+    <member name="F:System.Data.DbType.UInt64">
+      <summary>Целочисленный тип для представления 64-битовых целых чисел без знака в диапазоне от 0 до 18446744073709551615.</summary>
+    </member>
+    <member name="F:System.Data.DbType.VarNumeric">
+      <summary>Числовое значение переменной длины.</summary>
+    </member>
+    <member name="F:System.Data.DbType.Xml">
+      <summary>Проанализированное представление фрагмента или документа XML.</summary>
+    </member>
+    <member name="T:System.Data.IsolationLevel">
+      <summary>Задает поведение при блокировке транзакции для подключения.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Chaos">
+      <summary>Ожидающие изменения более изолированных транзакций не могут быть перезаписаны.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.ReadCommitted">
+      <summary>В процессе чтения данных совмещаемые блокировки сохраняются, чтобы избежать чтения "грязных" данных, однако данные могут быть изменены до окончания транзакции, что может стать причиной неповторяемого чтения или появления фиктивных данных.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.ReadUncommitted">
+      <summary>Чтение "грязных" данных возможно, что означает отсутствие совмещаемых и монопольных блокировок.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.RepeatableRead">
+      <summary>Блокировки помещаются на все данные, используемые в запросе, что предотвращает обновление данных другими пользователями.Предотвращает неповторяемое чтение, однако появление фиктивных строк остается возможным.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Serializable">
+      <summary>Блокировка диапазона устанавливается для объекта <see cref="T:System.Data.DataSet" />, что предотвращает обновление или ставку строк другими пользователями в набор данных до завершения транзакции.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Snapshot">
+      <summary>Уменьшает блокировку, сохраняя версию данных, которую приложение может считывать в то время, когда другое приложение изменяет те же самые данные.Указывает, что из одной транзакции пользователь не может просматривать изменения, сделанные в других транзакциях, даже если он запросит их повторно.</summary>
+    </member>
+    <member name="F:System.Data.IsolationLevel.Unspecified">
+      <summary>Используется уровень изоляции, отличный от указанного, однако этот уровень не может быть определен.</summary>
+    </member>
+    <member name="T:System.Data.ParameterDirection">
+      <summary>Указывает тип параметра в запросе к объекту <see cref="T:System.Data.DataSet" />.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.ParameterDirection.Input">
+      <summary>Параметр является входным.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.InputOutput">
+      <summary>Параметр может быть как входным, так и выходным.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.Output">
+      <summary>Параметр является выходным.</summary>
+    </member>
+    <member name="F:System.Data.ParameterDirection.ReturnValue">
+      <summary>Параметр представляет значение, возвращаемое хранимой процедурой, встроенной или определенной пользователем функцией.</summary>
+    </member>
+    <member name="T:System.Data.StateChangeEventArgs">
+      <summary>Предоставляет данные для события изменения состояния поставщика данных .NET Framework.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.StateChangeEventArgs.#ctor(System.Data.ConnectionState,System.Data.ConnectionState)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.StateChangeEventArgs" /> при данном исходном и текущем состоянии объекта.</summary>
+      <param name="originalState">Одно из значений <see cref="T:System.Data.ConnectionState" />. </param>
+      <param name="currentState">Одно из значений <see cref="T:System.Data.ConnectionState" />. </param>
+    </member>
+    <member name="P:System.Data.StateChangeEventArgs.CurrentState">
+      <summary>Получает новое состояние подключения.Объект подключения будет уже в новом состоянии, когда событие запущено.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.ConnectionState" />.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.StateChangeEventArgs.OriginalState">
+      <summary>Получает текущее состояние подключения.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.ConnectionState" />.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.StateChangeEventHandler">
+      <summary>Представляет метод обработки события <see cref="E:System.Data.Common.DbConnection.StateChange" />.</summary>
+      <param name="sender">Источник события. </param>
+      <param name="e">Объект <see cref="T:System.Data.StateChangeEventArgs" /> содержит данные, относящиеся к событию. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Data.UpdateRowSource">
+      <summary>Задает способ применения к обновляемой строке результатов команды запроса.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.Both">
+      <summary>Выходные параметры и первая возвращаемая строка отображаются в измененной строке объекта <see cref="T:System.Data.DataSet" />.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.FirstReturnedRecord">
+      <summary>Данные первой возвращаемой строки отображаются в измененной строке объекта <see cref="T:System.Data.DataSet" />.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.None">
+      <summary>Все возвращаемые параметры или строки игнорируются.</summary>
+    </member>
+    <member name="F:System.Data.UpdateRowSource.OutputParameters">
+      <summary>Выходные параметры отображаются в измененной строке объекта <see cref="T:System.Data.DataSet" />.</summary>
+    </member>
+    <member name="T:System.Data.Common.DbCommand">
+      <summary>Представляет оператор SQL или хранимую процедуру, применяемую к источнику данных.Предоставляет базовый класс для классов, зависящих от базы данных, представляющих команды.<see cref="Overload:System.Data.Common.DbCommand.ExecuteNonQueryAsync" /></summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.#ctor">
+      <summary>Создает экземпляр объекта <see cref="T:System.Data.Common.DbCommand" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Cancel">
+      <summary>Пытается отменить выполнение объекта <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandText">
+      <summary>Возвращает или задает текстовую команду, выполняемую применительно к источнику данных.</summary>
+      <returns>Выполняемая текстовая команда.Значением по умолчанию является пустая строка ("").</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandTimeout">
+      <summary>Возвращает или задает время ожидания перед завершением попытки выполнить команду и созданием ошибки.</summary>
+      <returns>Время ожидания выполнения команды (в секундах).</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.CommandType">
+      <summary>Указывает или определяет способ интерпретации свойства <see cref="P:System.Data.Common.DbCommand.CommandText" />.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.CommandType" />.Значение по умолчанию: Text.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Connection">
+      <summary>Возвращает или задает объект <see cref="T:System.Data.Common.DbConnection" />, используемый этим объектом <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <returns>Подключение к источнику данных.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.CreateDbParameter">
+      <summary>Создает новый экземпляр объекта <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" />.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.CreateParameter">
+      <summary>Создает новый экземпляр объекта <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" />.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbConnection">
+      <summary>Возвращает или задает объект <see cref="T:System.Data.Common.DbConnection" />, используемый этим объектом <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <returns>Подключение к источнику данных.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbParameterCollection">
+      <summary>Получает коллекцию объектов <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Параметры оператора SQL или хранимой процедуры.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DbTransaction">
+      <summary>Возвращает или задает свойство <see cref="P:System.Data.Common.DbCommand.DbTransaction" /> внутри которого выполняется этот объект <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <returns>Транзакция, в которой выполняется объект Command поставщика данных .NET Framework.Значением по умолчанию является ссылка со значением NULL (Nothing в Visual Basic).</returns>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.DesignTimeVisible">
+      <summary>Возвращает или задает значение, определяющее, должен ли объект команды выводиться на экран в настраиваемом элементе управления интерфейса.</summary>
+      <returns>Значение true, если объект команды должен выводиться на экран в элементе управления; в противном случае — значение false.Значение по умолчанию — true.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Dispose"></member>
+    <member name="M:System.Data.Common.DbCommand.Dispose(System.Boolean)"></member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteDbDataReader(System.Data.CommandBehavior)">
+      <summary>Выполняет текст команды применительно к подключению.</summary>
+      <returns>Задача, представляющая операцию.</returns>
+      <param name="behavior">Экземпляр <see cref="T:System.Data.CommandBehavior" />.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)">
+      <summary>Поставщики должны реализовать этот метод, чтобы предоставить реализацию, отличную от реализации по умолчанию, для перегрузок <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbCommand.ExecuteReader" /> и возвращает завершенную задачу, блокируя вызывающий поток.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный токен отмены.Исключения, создаваемые ExecuteReader, будут связаны через возвращаемое свойство исключения задачи.Этот метод принимает токен отмены, который может использоваться для запроса ранней отмены операции.Реализации могут игнорировать данный запрос.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="behavior">Параметры для завершения инструкции и извлечения данных.</param>
+      <param name="cancellationToken">Токен для отслеживания запросов отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQuery">
+      <summary>Выполняет оператор SQL применительно к объекту подключения.</summary>
+      <returns>Число подвергшихся воздействию строк.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync">
+      <summary>Асинхронная версия <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />, которая выполняет инструкцию SQL относительно объекта соединения.Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync(System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteNonQueryAsync(System.Threading.CancellationToken)">
+      <summary>Это асинхронная версия метода <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />.Поставщики должны выполнить переопределение с помощью соответствующей реализации.При необходимости можно игнорировать токен отмены.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" /> и возвращает завершенную задачу, блокируя вызывающий поток.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный токен отмены.  Исключения, создаваемые <see cref="M:System.Data.Common.DbCommand.ExecuteNonQuery" />, будут связаны через возвращаемое свойство исключения задачи.Не вызывайте другие методы и свойства объекта DbCommand до тех пор, пока возвращаемая задача не будет завершена.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Токен для отслеживания запросов отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReader">
+      <summary>Выполняет свойство <see cref="P:System.Data.Common.DbCommand.CommandText" /> применительно к свойству <see cref="P:System.Data.Common.DbCommand.Connection" /> и возвращает объект <see cref="T:System.Data.Common.DbDataReader" />.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbDataReader" />.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReader(System.Data.CommandBehavior)">
+      <summary>Выполняет свойство <see cref="P:System.Data.Common.DbCommand.CommandText" /> применительно к свойству <see cref="P:System.Data.Common.DbCommand.Connection" /> и возвращает объект <see cref="T:System.Data.Common.DbDataReader" />, используя одно из значений типа <see cref="T:System.Data.CommandBehavior" />. </summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbDataReader" />.</returns>
+      <param name="behavior">Одно из значений <see cref="T:System.Data.CommandBehavior" />.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync">
+      <summary>Асинхронная версия <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />, которая выполняет <see cref="P:System.Data.Common.DbCommand.CommandText" /> относительно <see cref="P:System.Data.Common.DbCommand.Connection" /> и возвращает <see cref="T:System.Data.Common.DbDataReader" />.Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Data.CommandBehavior)">
+      <summary>Асинхронная версия <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />, которая выполняет <see cref="P:System.Data.Common.DbCommand.CommandText" /> относительно <see cref="P:System.Data.Common.DbCommand.Connection" /> и возвращает <see cref="T:System.Data.Common.DbDataReader" />.Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="behavior">Одно из значений <see cref="T:System.Data.CommandBehavior" />.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)">
+      <summary>Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="behavior">Одно из значений <see cref="T:System.Data.CommandBehavior" />.</param>
+      <param name="cancellationToken">Токен для отслеживания запросов отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteReaderAsync(System.Threading.CancellationToken)">
+      <summary>Асинхронная версия <see cref="Overload:System.Data.Common.DbCommand.ExecuteReader" />, которая выполняет <see cref="P:System.Data.Common.DbCommand.CommandText" /> относительно <see cref="P:System.Data.Common.DbCommand.Connection" /> и возвращает <see cref="T:System.Data.Common.DbDataReader" />.Этот метод распространяет уведомление о том, что операции следует отменить.Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteDbDataReaderAsync(System.Data.CommandBehavior,System.Threading.CancellationToken)" />.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Токен для отслеживания запросов отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+      <exception cref="T:System.ArgumentException">Недопустимое значение <see cref="T:System.Data.CommandBehavior" />.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalar">
+      <summary>Выполняет запрос и возвращает первый столбец первой строки результирующего набора, возвращаемого запросом.Все другие столбцы и строки игнорируются.</summary>
+      <returns>Первый столбец первой строки в результирующем наборе.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalarAsync">
+      <summary>Асинхронная версия метода <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" />, который выполняет запрос и возвращает первый столбец первой строки в наборе результатов, возвращаемых запросом.Все другие столбцы и строки игнорируются.Вызывает <see cref="M:System.Data.Common.DbCommand.ExecuteScalarAsync(System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.ExecuteScalarAsync(System.Threading.CancellationToken)">
+      <summary>Это асинхронная версия метода <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" />.Поставщики должны выполнить переопределение с помощью соответствующей реализации.При необходимости можно игнорировать токен отмены.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbCommand.ExecuteScalar" /> и возвращает завершенную задачу, блокируя вызывающий поток.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный токен отмены.Исключения, создаваемые ExecuteScalar, будут связаны через возвращаемое свойство исключения задачи.Не вызывайте другие методы и свойства объекта DbCommand до тех пор, пока возвращаемая задача не будет завершена.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Токен для отслеживания запросов отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Parameters">
+      <summary>Получает коллекцию объектов <see cref="T:System.Data.Common.DbParameter" />.Дополнительные сведения о параметрах см. в разделе Настройка параметров и типов данных параметров.</summary>
+      <returns>Параметры оператора SQL или хранимой процедуры.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbCommand.Prepare">
+      <summary>Создает подготовленную (или скомпилированную) версию команды для источника данных.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.Transaction">
+      <summary>Возвращает или задает свойство <see cref="T:System.Data.Common.DbTransaction" /> внутри которого выполняется этот объект <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <returns>Транзакция, в которой выполняется объект Command поставщика данных .NET Framework.Значением по умолчанию является ссылка со значением NULL (Nothing в Visual Basic).</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbCommand.UpdatedRowSource">
+      <summary>Возвращает или задает способ применения результатов команды к объекту <see cref="T:System.Data.DataRow" />, если он используется методом Update объекта <see cref="T:System.Data.Common.DbDataAdapter" />.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.UpdateRowSource" />.Значением по умолчанию является Both, если команда не создается автоматически.В противном случае по умолчанию используется значение None.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbConnection">
+      <summary>Представляет подключение к базе данных. </summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbConnection" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginDbTransaction(System.Data.IsolationLevel)">
+      <summary>Начинает транзакцию базы данных.</summary>
+      <returns>Объект, представляющий новую транзакцию.</returns>
+      <param name="isolationLevel">Указывает уровень изоляции транзакции.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginTransaction">
+      <summary>Начинает транзакцию базы данных.</summary>
+      <returns>Объект, представляющий новую транзакцию.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.BeginTransaction(System.Data.IsolationLevel)">
+      <summary>Начинает транзакцию базы данных с указанным уровнем изоляции.</summary>
+      <returns>Объект, представляющий новую транзакцию.</returns>
+      <param name="isolationLevel">Указывает уровень изоляции транзакции.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.ChangeDatabase(System.String)">
+      <summary>Изменяет текущую базу данных для открытого подключения.</summary>
+      <param name="databaseName">Указывает имя базы данных для используемого подключения.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Close">
+      <summary>Закрытие подключения к базе данных.Рекомендуется использовать этот метод для закрытия любого открытого подключения.</summary>
+      <exception cref="T:System.Data.Common.DbException">Ошибка уровня подключения, возникшая при открытии подключения. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ConnectionString">
+      <summary>Возвращает или задает строку, используемую для открытия подключения.</summary>
+      <returns>Строка подключения использована для установления первоначального подключения.Точное содержимое строки подключения зависит от конкретного источника данных для этого подключения.Значение по умолчанию — пустая строка.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ConnectionTimeout">
+      <summary>Получает время ожидания при установлении подключения, по истечении которого попытка подключения завершается и генерируется ошибка.</summary>
+      <returns>Время ожидания открытия подключения (в секундах).Значение по умолчанию определяется конкретным типом используемого подключения.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.CreateCommand">
+      <summary>Создает и возвращает объект <see cref="T:System.Data.Common.DbCommand" />, связанный с текущим подключением.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbCommand" />.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.CreateDbCommand">
+      <summary>Создает и возвращает объект <see cref="T:System.Data.Common.DbCommand" />, связанный с текущим подключением.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbCommand" />.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.Database">
+      <summary>Получает имя текущей базы данных после открытия подключения или имя базы данных, указанное в строке подключения, перед открытием подключения.</summary>
+      <returns>Имя текущей базы данных или базы данных, которая будет использоваться после открытия подключения.Значение по умолчанию — пустая строка.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.DataSource">
+      <summary>Получает имя сервера базы данных, к которому осуществляется подключение.</summary>
+      <returns>Имя сервера базы данных, к которому осуществляется подключение.Значение по умолчанию — пустая строка.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Dispose"></member>
+    <member name="M:System.Data.Common.DbConnection.Dispose(System.Boolean)"></member>
+    <member name="M:System.Data.Common.DbConnection.OnStateChange(System.Data.StateChangeEventArgs)">
+      <summary>Создает событие <see cref="E:System.Data.Common.DbConnection.StateChange" />.</summary>
+      <param name="stateChange">Объект <see cref="T:System.Data.StateChangeEventArgs" />, содержащий данные, которые относятся к событию.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.Open">
+      <summary>Открывает подключение к базе данных с параметрами, определяемыми свойством <see cref="P:System.Data.Common.DbConnection.ConnectionString" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.OpenAsync">
+      <summary>Асинхронная версия <see cref="M:System.Data.Common.DbConnection.Open" />, которая открывает соединение с базой данных с параметрами, указанными <see cref="P:System.Data.Common.DbConnection.ConnectionString" />.Этот метод вызывает виртуальный метод <see cref="M:System.Data.Common.DbConnection.OpenAsync(System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnection.OpenAsync(System.Threading.CancellationToken)">
+      <summary>Это асинхронная версия метода <see cref="M:System.Data.Common.DbConnection.Open" />.Поставщики должны выполнить переопределение с помощью соответствующей реализации.При необходимости можно учитывать токен отмены.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbConnection.Open" /> и возвращает выполненную задачу.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный cancellationToken.Исключения, создаваемые Open, будут связаны через возвращаемое свойство исключения задачи.Не вызывайте другие методы и свойства объекта DbConnection до тех пор, пока возвращаемая задача не будет завершена.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Инструкция отмены.</param>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.ServerVersion">
+      <summary>Получает строку, представляющую версию сервера, к которому подключен объект.</summary>
+      <returns>Версия базы данных.Формат возвращенной строки зависит от конкретного типа используемого подключения.</returns>
+      <exception cref="T:System.InvalidOperationException">Свойство <see cref="P:System.Data.Common.DbConnection.ServerVersion" /> было вызвано, когда возвращаемая задача не была завершена и соединение не было открыто после вызова метода <see cref="Overload:System.Data.Common.DbConnection.OpenAsync" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbConnection.State">
+      <summary>Получает строку, описывающую состояние подключения.</summary>
+      <returns>Состояние подключения.Формат возвращенной строки зависит от конкретного типа используемого подключения.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="E:System.Data.Common.DbConnection.StateChange">
+      <summary>Происходит при изменении состояния события.</summary>
+    </member>
+    <member name="T:System.Data.Common.DbConnectionStringBuilder">
+      <summary>Предоставляет базовый класс для строго типизированных построителей строк подключения.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Add(System.String,System.Object)">
+      <summary>Добавляет запись с указанным ключом и значением в объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <param name="keyword">Ключ, добавляемый в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</param>
+      <param name="value">Значение для заданного ключа.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" /> является пустой ссылкой (Nothing в Visual Basic).</exception>
+      <exception cref="T:System.NotSupportedException">Список <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> доступен только для чтения. -или-Коллекция <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> имеет фиксированный размер.</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.AppendKeyValuePair(System.Text.StringBuilder,System.String,System.String)">
+      <summary>Предоставляет эффективный и безопасный способ добавления ключа и значения к существующему объекту <see cref="T:System.Text.StringBuilder" />.</summary>
+      <param name="builder">Объект <see cref="T:System.Text.StringBuilder" />, к которому следует добавить пару ключ/значение.</param>
+      <param name="keyword">Добавляемый ключ.</param>
+      <param name="value">Значение для представленного ключа.</param>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Clear">
+      <summary>Удаляет содержимое экземпляра класса <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <exception cref="T:System.NotSupportedException">Список <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> доступен только для чтения.</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString">
+      <summary>Возвращает или задает строку подключения, связанную с <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Текущая строка подключения, созданная по парам ключ/значение, содержащимся в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.Значение по умолчанию — пустая строка.</returns>
+      <exception cref="T:System.ArgumentException">Представлен недопустимый аргумент строки подключения.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ContainsKey(System.String)">
+      <summary>Определяет, содержит ли объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> указанный ключ.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> содержит запись с указанным ключом; в противном случае — значение false.</returns>
+      <param name="keyword">Ключ, который требуется найти в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" /> является пустой ссылкой (Nothing в Visual Basic).</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Count">
+      <summary>Получает текущее количество ключей, содержащихся в свойстве <see cref="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString" />.</summary>
+      <returns>Количество ключей, содержащихся в строке подключения, поддерживается экземпляром <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.EquivalentTo(System.Data.Common.DbConnectionStringBuilder)">
+      <summary>Сравнивает сведения о подключении в этом объекте <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> со сведениями о подключении в предоставляемом объекте.</summary>
+      <returns>Значение true, если сведения о подключении в обоих объектах <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> соответствуют эквивалентной строке подключения; в противном случае — значение false.</returns>
+      <param name="connectionStringBuilder">Объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" />, сравниваемый с этим объектом <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</param>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Item(System.String)">
+      <summary>Получает или задает значение, связанное с заданным ключом.</summary>
+      <returns>Значение, связанное с указанным ключом.Если указанный ключ не найден, при попытке его получения возвращается ссылка со значением NULL (Nothing в Visual Basic), а при попытке задания ключа с его помощью создается новый элемент.При передаче ключа NULL (Nothing в Visual Basic) выдается исключение <see cref="T:System.ArgumentNullException" />.Назначение значения NULL приводит к удалению пары ключ/значение.</returns>
+      <param name="keyword">Ключ элемента, который требуется получить или задать.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" /> является пустой ссылкой (Nothing в Visual Basic).</exception>
+      <exception cref="T:System.NotSupportedException">Свойство задано и объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> доступен только для чтения. -или-Свойство задано, ключ <paramref name="keyword" /> не существует в коллекции, и коллекция <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> имеет фиксированный размер.</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Keys">
+      <summary>Получает <see cref="T:System.Collections.ICollection" />, который содержит ключи в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>
+        <see cref="T:System.Collections.ICollection" />, который содержит ключи в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.Remove(System.String)">
+      <summary>Удаляет запись с указанным ключом из экземпляра класса <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>true, если ключ существовал в строке подключения и был удален; false, если ключ не существовал.</returns>
+      <param name="keyword">Ключ пары ключ-значение, удаляемой из строки подключения в этом объекте <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" /> имеет значение null (Nothing в Visual Basic)</exception>
+      <exception cref="T:System.NotSupportedException">Объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> доступен только для чтения или объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> имеет фиксированный размер.</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ShouldSerialize(System.String)">
+      <summary>Указывает, существует ли указанный ключ в этом экземпляре <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbConnectionStringBuilder" /> содержит запись с указанным ключом; в противном случае — значение false.</returns>
+      <param name="keyword">Ключ, который требуется найти в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</param>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#CopyTo(System.Array,System.Int32)">
+      <summary>Копирует элементы коллекции <see cref="T:System.Collections.ICollection" /> в массив <see cref="T:System.Array" />, начиная с указанного индекса массива <see cref="T:System.Array" />.</summary>
+      <param name="array">Одномерный массив <see cref="T:System.Array" />, в который копируются элементы из интерфейса <see cref="T:System.Collections.ICollection" />.Индексация в массиве <see cref="T:System.Array" /> должна начинаться с нуля.</param>
+      <param name="index">Индекс (с нуля) в массиве <paramref name="array" />, с которого начинается копирование.</param>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#IsSynchronized">
+      <summary>Получает значение, позволяющее определить, является ли доступ к коллекции <see cref="T:System.Collections.ICollection" /> синхронизированным (потокобезопасным).</summary>
+      <returns>true, если доступ к классу <see cref="T:System.Collections.ICollection" /> является синхронизированным (потокобезопасным); в противном случае — false.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#ICollection#SyncRoot">
+      <summary>Получает объект, с помощью которого можно синхронизировать доступ к коллекции <see cref="T:System.Collections.ICollection" />.</summary>
+      <returns>Объект, который может использоваться для синхронизации доступа к <see cref="T:System.Collections.ICollection" />.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Add(System.Object,System.Object)">
+      <summary>Добавляет элемент с предоставленными ключом и значением в объект <see cref="T:System.Collections.IDictionary" />.</summary>
+      <param name="keyword">Объект <see cref="T:System.Object" /> используется в качестве ключа добавляемого элемента.</param>
+      <param name="value">Объект <see cref="T:System.Object" /> используется в качестве значения добавляемого элемента.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Contains(System.Object)">
+      <summary>Определяет, содержится ли элемент с указанным ключом в объекте <see cref="T:System.Collections.IDictionary" />.</summary>
+      <returns>Значение true, если в объекте <see cref="T:System.Collections.IDictionary" /> содержится элемент с данным ключом, в противном случае — false.</returns>
+      <param name="keyword">Ключ для размещения в объекте <see cref="T:System.Collections.IDictionary" />.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#GetEnumerator">
+      <summary>Возвращает объект <see cref="T:System.Collections.IDictionaryEnumerator" /> для объекта <see cref="T:System.Collections.IDictionary" />.</summary>
+      <returns>Объект <see cref="T:System.Collections.IDictionaryEnumerator" /> для объекта <see cref="T:System.Collections.IDictionary" />.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#IsFixedSize"></member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#IsReadOnly"></member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Item(System.Object)">
+      <summary>Возвращает или задает элемент с указанным ключом.</summary>
+      <returns>Элемент с указанным ключом.</returns>
+      <param name="keyword">Ключ элемента, который требуется получить или задать.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IDictionary#Remove(System.Object)">
+      <summary>Удаляет элемент с указанным ключом из объекта <see cref="T:System.Collections.IDictionary" />.</summary>
+      <param name="keyword">Ключ удаляемого элемента.</param>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.System#Collections#IEnumerable#GetEnumerator">
+      <summary>Возвращает перечислитель, осуществляющий перебор коллекции.</summary>
+      <returns>Объект <see cref="T:System.Collections.IEnumerator" />, который может использоваться для перебора коллекции.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.ToString">
+      <summary>Возвращает строку подключения, связанную с этим объектом <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Текущее свойство <see cref="P:System.Data.Common.DbConnectionStringBuilder.ConnectionString" />.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbConnectionStringBuilder.TryGetValue(System.String,System.Object@)">
+      <summary>Получает значение, соответствующее предоставляемому ключу из этого объекта <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Значение true, если <paramref name="keyword" /> находится в строке подключения, в противном случае — значение false.</returns>
+      <param name="keyword">Ключ извлекаемого элемента.</param>
+      <param name="value">Значение, соответствующее <paramref name="key" />.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="keyword" /> содержит значение null (Nothing в Visual Basic).</exception>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Data.Common.DbConnectionStringBuilder.Values">
+      <summary>Получает <see cref="T:System.Collections.ICollection" />, которая содержит значения в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Интерфейс <see cref="T:System.Collections.ICollection" />, содержащий значения в <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</returns>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Data.Common.DbDataReader">
+      <summary>Считывает поток строк последовательного доступа из источника данных.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbDataReader" />.</summary>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Depth">
+      <summary>Получает значение, указывающее глубину вложенности для текущей строки.</summary>
+      <returns>Глубина вложенности текущей строки.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Dispose">
+      <summary>Освобождает все ресурсы, используемые текущим экземпляром класса <see cref="T:System.Data.Common.DbDataReader" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Dispose(System.Boolean)">
+      <summary>Освобождает управляемые ресурсы, используемые объектом <see cref="T:System.Data.Common.DbDataReader" /> (при необходимости освобождает и неуправляемые ресурсы).</summary>
+      <param name="disposing">Значение true, чтобы разблокировать все ресурсы (управляемые и неуправляемые); значение false, чтобы разблокировать только неуправляемые ресурсы.</param>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.FieldCount">
+      <summary>Возвращает количество столбцов в текущей строке.</summary>
+      <returns>Количество столбцов в текущей строке.</returns>
+      <exception cref="T:System.NotSupportedException">Текущее подключение к экземпляру SQL Server отсутствует. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetBoolean(System.Int32)">
+      <summary>Получает значение указанного столбца в виде логического значения.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetByte(System.Int32)">
+      <summary>Получает значение заданного столбца в виде байта.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetBytes(System.Int32,System.Int64,System.Byte[],System.Int32,System.Int32)">
+      <summary>Считывает поток байтов из указанного столбца, начиная с местоположения, указанного параметром <paramref name="dataOffset" />, в буфер, начиная с местоположения, указанного параметром <paramref name="bufferOffset" />.</summary>
+      <returns>Фактическое количество считанных байтов.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <param name="dataOffset">Индекс в строке, с которого начинается операция считывания.</param>
+      <param name="buffer">Буфер, в который копируются данные.</param>
+      <param name="bufferOffset">Индекс для буфера, в который будут копироваться данные.</param>
+      <param name="length">Наибольшее число символов для чтения.</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetChar(System.Int32)">
+      <summary>Получает значение заданного столбца в виде одного символа.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetChars(System.Int32,System.Int64,System.Char[],System.Int32,System.Int32)">
+      <summary>Считывает поток символов из указанного столбца, начиная с местоположения, указанного параметром <paramref name="dataOffset" />, в буфер, начиная с местоположения, указанного параметром <paramref name="bufferOffset" />.</summary>
+      <returns>Фактическое количество считанных символов.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <param name="dataOffset">Индекс в строке, с которого начинается операция считывания.</param>
+      <param name="buffer">Буфер, в который копируются данные.</param>
+      <param name="bufferOffset">Индекс для буфера, в который будут копироваться данные.</param>
+      <param name="length">Наибольшее число символов для чтения.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetData(System.Int32)">
+      <summary>Возвращает объект <see cref="T:System.Data.Common.DbDataReader" /> для запрошенного порядкового номера столбца.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbDataReader" />.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>1</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDataTypeName(System.Int32)">
+      <summary>Получает имя типа данных указанного столбца.</summary>
+      <returns>Строка, представляющая имя типа данных.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDateTime(System.Int32)">
+      <summary>Получает значение заданного столбца в виде объекта <see cref="T:System.DateTime" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDbDataReader(System.Int32)">
+      <summary>Возвращает объект <see cref="T:System.Data.Common.DbDataReader" /> для запрошенного порядкового номера столбца, который может быть переопределен с помощью зависящей от поставщика реализации.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbDataReader" />.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDecimal(System.Int32)">
+      <summary>Получает значение заданного столбца в виде объекта <see cref="T:System.Decimal" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetDouble(System.Int32)">
+      <summary>Получает значение заданного столбца в виде числа двойной точности с плавающей запятой.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetEnumerator">
+      <summary>Возвращает объект <see cref="T:System.Collections.IEnumerator" />, который можно использовать для перебора строк в объекте для чтения данных.</summary>
+      <returns>Объект <see cref="T:System.Collections.IEnumerator" />, позволяющий выполнять перебор строк в объекте для чтения данных.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldType(System.Int32)">
+      <summary>Получает тип данных указанного столбца.</summary>
+      <returns>Тип данных указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValue``1(System.Int32)">
+      <summary>Синхронно получает значение заданного столбца в виде типа.</summary>
+      <returns>Получаемый столбец.</returns>
+      <param name="ordinal">Получаемый столбец.</param>
+      <typeparam name="T">Синхронно получает значение заданного столбца в виде типа.</typeparam>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.SqlClient.SqlDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.SqlClient.SqlDataReader.Read" /> не был вызван или вернул значение false).Сделана попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" /> не соответствует типу, возвращаемому SQL Server, или не может быть приведено.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32)">
+      <summary>Асинхронно получает значение заданного столбца в виде типа.</summary>
+      <returns>Тип возвращаемого значения.</returns>
+      <param name="ordinal">Тип возвращаемого значения.</param>
+      <typeparam name="T">Тип возвращаемого значения.Дополнительные сведения см. в разделе «Примечания».</typeparam>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Сделана попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" /> не соответствует типу, возвращаемому источником данных, или не может быть приведено.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32,System.Threading.CancellationToken)">
+      <summary>Асинхронно получает значение заданного столбца в виде типа.</summary>
+      <returns>Тип возвращаемого значения.</returns>
+      <param name="ordinal">Тип возвращаемого значения.</param>
+      <param name="cancellationToken">Инструкция отмены, распространяющая уведомление о том, что операции должны быть отменены.Не гарантирует отмену.Параметр CancellationToken.None делает этот метод равным методу <see cref="M:System.Data.Common.DbDataReader.GetFieldValueAsync``1(System.Int32)" />.Возвращаемая задача должна быть помечена как отмененная.</param>
+      <typeparam name="T">Тип возвращаемого значения.Дополнительные сведения см. в разделе «Примечания».</typeparam>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Сделана попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="T" /> не соответствует типу, возвращаемому источником данных, или не может быть приведено.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetFloat(System.Int32)">
+      <summary>Получает значение указанного столбца в виде числа одиночной точности с плавающей запятой.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetGuid(System.Int32)">
+      <summary>Возвращает значение заданного столбца в виде глобального уникального идентификатора (GUID).</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt16(System.Int32)">
+      <summary>Получает значение заданного столбца в виде 16-битового целого числа со знаком.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt32(System.Int32)">
+      <summary>Получает значение заданного столбца в виде 32-битового целого числа со знаком.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetInt64(System.Int32)">
+      <summary>Получает значение заданного столбца в виде 64-битового целого числа со знаком.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetName(System.Int32)">
+      <summary>Получает имя столбца при наличии заданного порядкового номера (с нуля) столбца.</summary>
+      <returns>Имя указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetOrdinal(System.String)">
+      <summary>Получает порядковый номер столбца при наличии заданного имени столбца.</summary>
+      <returns>Порядковый номер столбца (начиная с нуля).</returns>
+      <param name="name">Имя столбца.</param>
+      <exception cref="T:System.IndexOutOfRangeException">Указанное имя не является допустимым именем столбца.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificFieldType(System.Int32)">
+      <summary>Возвращает зависящий от поставщика тип поля заданного столбца.</summary>
+      <returns>Объект <see cref="T:System.Type" />, описывающий тип данных указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificValue(System.Int32)">
+      <summary>Получает значение указанного столбца в виде экземпляра <see cref="T:System.Object" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetProviderSpecificValues(System.Object[])">
+      <summary>Получает зависящие от поставщика столбцы атрибутов в коллекции для текущей строки.</summary>
+      <returns>Количество экземпляров объекта <see cref="T:System.Object" /> в массиве.</returns>
+      <param name="values">Массив объектов <see cref="T:System.Object" />, в который копируются столбцы атрибутов.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetStream(System.Int32)">
+      <summary>Извлекает данные в виде <see cref="T:System.IO.Stream" />.</summary>
+      <returns>Возвращаемый объект.</returns>
+      <param name="ordinal">Извлекает данные в виде <see cref="T:System.IO.Stream" />.</param>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Сделана попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+      <exception cref="T:System.InvalidCastException">Возвращаемый тип не был одним из указанных ниже типов:binaryimagevarbinaryUDT</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetString(System.Int32)">
+      <summary>Получает значение указанного столбца в виде экземпляра <see cref="T:System.String" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.InvalidCastException">Указанное приведение недопустимо. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetTextReader(System.Int32)">
+      <summary>Получает данные в виде <see cref="T:System.IO.TextReader" />.</summary>
+      <returns>Возвращаемый объект.</returns>
+      <param name="ordinal">Получает данные в виде <see cref="T:System.IO.TextReader" />.</param>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Сделана попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+      <exception cref="T:System.InvalidCastException">Возвращаемый тип не был одним из указанных ниже типов:charncharntextnvarchartextvarchar</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetValue(System.Int32)">
+      <summary>Получает значение указанного столбца в виде экземпляра <see cref="T:System.Object" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.GetValues(System.Object[])">
+      <summary>Заполняет массив объектов значениями столбцов текущей строки.</summary>
+      <returns>Количество экземпляров объекта <see cref="T:System.Object" /> в массиве.</returns>
+      <param name="values">Массив объектов <see cref="T:System.Object" />, в который копируются столбцы атрибутов.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.HasRows">
+      <summary>Получает значение, указывающее, содержит ли этот объект <see cref="T:System.Data.Common.DbDataReader" /> одну или несколько строк.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbDataReader" /> содержит одну или несколько строк; в противном случае — значение false.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.IsClosed">
+      <summary>Получает значение, указывается, является ли объект <see cref="T:System.Data.Common.DbDataReader" /> закрытым.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт; в противном случае — значение false.</returns>
+      <exception cref="T:System.InvalidOperationException">Объект <see cref="T:System.Data.SqlClient.SqlDataReader" /> закрыт. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)">
+      <summary>Получает значение, указывающее, содержит ли столбец несуществующие или пропущенные значения.</summary>
+      <returns>Значение true, если указанный столбец эквивалентен <see cref="T:System.DBNull" />; в противном случае — значение false.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32)">
+      <summary>Асинхронная версия метода <see cref="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)" />, который получает значение, указывающее, содержит ли столбец несуществующие или отсутствующие значения.</summary>
+      <returns>Значение true, если значение указанного столбца эквивалентно DBNull; в обратном случае — значение false.</returns>
+      <param name="ordinal">Извлекаемый столбец (отсчитываемый с нуля).</param>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32,System.Threading.CancellationToken)">
+      <summary>Асинхронная версия метода <see cref="M:System.Data.Common.DbDataReader.IsDBNull(System.Int32)" />, который получает значение, указывающее, содержит ли столбец несуществующие или отсутствующие значения.При необходимости отправляет уведомление о том, что операции следует отменить.</summary>
+      <returns>Значение true, если значение указанного столбца эквивалентно DBNull; в обратном случае — значение false.</returns>
+      <param name="ordinal">Извлекаемый столбец (отсчитываемый с нуля).</param>
+      <param name="cancellationToken">Инструкция отмены, распространяющая уведомление о том, что операции должны быть отменены.Не гарантирует отмену.Параметр CancellationToken.None делает этот метод равным методу <see cref="M:System.Data.Common.DbDataReader.IsDBNullAsync(System.Int32)" />.Возвращаемая задача должна быть помечена как отмененная.</param>
+      <exception cref="T:System.InvalidOperationException">Соединение разъединяется или закрывается во время извлечения данных.Объект <see cref="T:System.Data.Common.DbDataReader" /> закрыт во время извлечения данных.Не существует данных, готовых для чтения (например, первый объект <see cref="M:System.Data.Common.DbDataReader.Read" /> не был вызван или вернул значение false).Попытка чтения ранее считанного столбца в последовательном режиме.Выполнялась асинхронная операция.Относится ко всем методам Get* при работе в последовательном режиме, так как они могут вызываться при чтении потока.</exception>
+      <exception cref="T:System.IndexOutOfRangeException">Попытка чтения столбца, который не существует.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Item(System.Int32)">
+      <summary>Получает значение указанного столбца в виде экземпляра <see cref="T:System.Object" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="ordinal">Порядковый номер столбца (начиная с нуля).</param>
+      <exception cref="T:System.IndexOutOfRangeException">Переданный индекс находился вне диапазона от 0 до <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.Item(System.String)">
+      <summary>Получает значение указанного столбца в виде экземпляра <see cref="T:System.Object" />.</summary>
+      <returns>Значение указанного столбца.</returns>
+      <param name="name">Имя столбца.</param>
+      <exception cref="T:System.IndexOutOfRangeException">Столбцы с указанным именем не найдены. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResult">
+      <summary>Перемещает считыватель к следующему результату при считывании результатов выполнения пакетных операторов.</summary>
+      <returns>Значение true, если имеются и другие наборы результатов; в противном случае — значение false.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResultAsync">
+      <summary>Асинхронная версия метода <see cref="M:System.Data.Common.DbDataReader.NextResult" />, который перемещает средство чтения к следующему результату при чтении результатов из пакета инструкций.Вызывает <see cref="M:System.Data.Common.DbDataReader.NextResultAsync(System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.NextResultAsync(System.Threading.CancellationToken)">
+      <summary>Это асинхронная версия метода <see cref="M:System.Data.Common.DbDataReader.NextResult" />.Поставщики должны выполнить переопределение с помощью соответствующей реализации.При необходимости можно игнорировать <paramref name="cancellationToken" />.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbDataReader.NextResult" /> и возвращает завершенную задачу, блокируя вызывающий поток.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный <paramref name="cancellationToken" />.Исключения, создаваемые <see cref="M:System.Data.Common.DbDataReader.NextResult" />, будут связаны через возвращаемое свойство исключения задачи.Другие методы и свойства объекта DbDataReader не должны вызываться, когда возвращаемая задача еще не завершена.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Инструкция отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.Read">
+      <summary>Перемещает считыватель на следующую запись в наборе результатов.</summary>
+      <returns>Значение true, если имеются другие строки; в противном случае — значение false.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.ReadAsync">
+      <summary>Асинхронная версия <see cref="M:System.Data.Common.DbDataReader.Read" />, которая перемещает модуль чтения к следующей записи в наборе результатов.Этот метод вызывает метод <see cref="M:System.Data.Common.DbDataReader.ReadAsync(System.Threading.CancellationToken)" /> с CancellationToken.None.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="M:System.Data.Common.DbDataReader.ReadAsync(System.Threading.CancellationToken)">
+      <summary>Это асинхронная версия метода <see cref="M:System.Data.Common.DbDataReader.Read" />.  Поставщики должны выполнить переопределение с помощью соответствующей реализации.При необходимости можно игнорировать cancellationToken.Реализация по умолчанию вызывает синхронный метод <see cref="M:System.Data.Common.DbDataReader.Read" /> и возвращает завершенную задачу, блокируя вызывающий поток.Реализация по умолчанию возвращает отмененную задачу, если ей передается уже отмененный cancellationToken.  Исключения, создаваемые Read, будут связаны через возвращаемое свойство исключения задачи.Не вызывайте другие методы и свойства объекта DbDataReader до тех пор, пока возвращаемая задача не будет завершена.</summary>
+      <returns>Задача, представляющая асинхронную операцию.</returns>
+      <param name="cancellationToken">Инструкция отмены.</param>
+      <exception cref="T:System.Data.Common.DbException">Ошибка, произошедшая при попытке выполнения текста команды.</exception>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.RecordsAffected">
+      <summary>Получает количество строк, которые были изменены, вставлены или удалены при выполнении инструкции SQL. </summary>
+      <returns>Количество измененных, вставленных или удаленных строк. Значение -1 для операторов SELECT; значение 0, если строки не изменены или при сбое инструкции.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbDataReader.VisibleFieldCount">
+      <summary>Получает количество нескрытых полей в <see cref="T:System.Data.Common.DbDataReader" />.</summary>
+      <returns>Количество нескрытых полей.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbException">
+      <summary>Базовый класс для всех исключений, выданных от имени источника данных.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbException" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbException" /> с указанным сообщением об ошибке.</summary>
+      <param name="message">Сообщение, отображаемое для этого исключения.</param>
+    </member>
+    <member name="M:System.Data.Common.DbException.#ctor(System.String,System.Exception)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbException" /> с указанным сообщением об ошибке и ссылкой на внутреннее исключение, которое стало причиной данного исключения.</summary>
+      <param name="message">Строка сообщения об ошибке.</param>
+      <param name="innerException">Ссылка на внутреннее исключения.</param>
+    </member>
+    <member name="T:System.Data.Common.DbParameter">
+      <summary>Предоставляет параметр для <see cref="T:System.Data.Common.DbCommand" /> и дополнительно его отображение для столбца <see cref="T:System.Data.DataSet" />.Дополнительные сведения о параметрах см. в разделе Настройка параметров и типов данных параметров.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameter.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbParameter" />.</summary>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.DbType">
+      <summary>Возвращает или задает значение <see cref="T:System.Data.DbType" /> данного параметра.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.DbType" />.Значение по умолчанию — <see cref="F:System.Data.DbType.String" />.</returns>
+      <exception cref="T:System.ArgumentException">Для свойства не задано допустимое значение <see cref="T:System.Data.DbType" />.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Direction">
+      <summary>Возвращает или задает значение, определяющее, предназначен ли параметр только для ввода, только для вывода, является ли он двунаправленным или возвращается хранимой процедурой.</summary>
+      <returns>Одно из значений <see cref="T:System.Data.ParameterDirection" />.Значение по умолчанию — Input.</returns>
+      <exception cref="T:System.ArgumentException">Для свойства не задано допустимое значение <see cref="T:System.Data.ParameterDirection" />.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.IsNullable">
+      <summary>Возвращает или задает значение, показывающее, может ли параметр принимать значение NULL.</summary>
+      <returns>true, если значение NULL допустимо; в противном случае — false.Значение по умолчанию — false.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.ParameterName">
+      <summary>Возвращает или задает имя <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Имя объекта <see cref="T:System.Data.Common.DbParameter" />.Значение по умолчанию — пустая строка ("").</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Precision">
+      <summary>[Поддерживается в .NET Framework 4.5.1 и более поздних версиях] Возвращает или задает наибольшее количество знаков, которые можно использовать для представления свойства <see cref="P:System.Data.Common.DbParameter.Value" />.</summary>
+      <returns>Максимальное количество цифр, которые можно использовать для представления свойства <see cref="P:System.Data.Common.DbParameter.Value" />.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbParameter.ResetDbType">
+      <summary>Сбрасывает свойство DbType к его исходным параметрам.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Scale">
+      <summary>[Поддерживается в .NET Framework 4.5.1 и более поздних версиях] Возвращает или задает количество десятичных разрядов для <see cref="P:System.Data.Common.DbParameter.Value" />.</summary>
+      <returns>Количество десятичных разрядов для <see cref="P:System.Data.Common.DbParameter.Value" />.</returns>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Size">
+      <summary>Возвращает или задает наибольший размер данных в столбце (в байтах).</summary>
+      <returns>Наибольший размер данных в столбце (в байтах).Значение по умолчанию определяется по значению параметра.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.SourceColumn">
+      <summary>Возвращает или задает имя исходного столбца, который сопоставляется с объектом <see cref="T:System.Data.DataSet" /> и используется для загрузки и возврата свойства <see cref="P:System.Data.Common.DbParameter.Value" />.</summary>
+      <returns>Имя столбца источника, сопоставляемого с <see cref="T:System.Data.DataSet" />.Значение по умолчанию — пустая строка.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.SourceColumnNullMapping">
+      <summary>Получает или задает значение, показывающее, может ли столбец источника содержать значение NULL.Это позволяет объекту <see cref="T:System.Data.Common.DbCommandBuilder" /> правильно генерировать операторы Update для столбцов, которые могут содержать значения null.</summary>
+      <returns>true, если исходный столбец может содержать значение NULL; в противном случае — false.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameter.Value">
+      <summary>Возвращает или задает значение параметра.</summary>
+      <returns>
+        <see cref="T:System.Object" />, являющийся значением параметра.Значение по умолчанию — NULL.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbParameterCollection">
+      <summary>Базовый класс для коллекции параметров, подходящей для <see cref="T:System.Data.Common.DbCommand" />. </summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbParameterCollection" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Add(System.Object)">
+      <summary>Добавляет заданный объект <see cref="T:System.Data.Common.DbParameter" /> в коллекцию <see cref="T:System.Data.Common.DbParameterCollection" />.</summary>
+      <returns>Индекс объекта <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</returns>
+      <param name="value">Параметр <see cref="P:System.Data.Common.DbParameter.Value" /> объекта <see cref="T:System.Data.Common.DbParameter" />, добавляемого в коллекцию.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.AddRange(System.Array)">
+      <summary>Добавляет массив элементов с заданными значениями к <see cref="T:System.Data.Common.DbParameterCollection" />.</summary>
+      <param name="values">Массив значений типа <see cref="T:System.Data.Common.DbParameter" />, добавляемый в коллекцию.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Clear">
+      <summary>Удаляет все значения <see cref="T:System.Data.Common.DbParameter" /> из <see cref="T:System.Data.Common.DbParameterCollection" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Contains(System.Object)">
+      <summary>Указывает, содержится ли в коллекции объект <see cref="T:System.Data.Common.DbParameter" /> с заданным значением <see cref="P:System.Data.Common.DbParameter.Value" />.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbParameter" /> входит в коллекцию; в противном случае — значение false.</returns>
+      <param name="value">Параметр <see cref="P:System.Data.Common.DbParameter.Value" /> объекта <see cref="T:System.Data.Common.DbParameter" /> для поиска в коллекции.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Contains(System.String)">
+      <summary>Указывает, содержится ли в коллекции объект <see cref="T:System.Data.Common.DbParameter" /> с заданным именем.</summary>
+      <returns>Значение true, если объект <see cref="T:System.Data.Common.DbParameter" /> входит в коллекцию; в противном случае — значение false.</returns>
+      <param name="value">Имя объекта <see cref="T:System.Data.Common.DbParameter" /> для поиска в коллекции.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.CopyTo(System.Array,System.Int32)">
+      <summary>Копирует в коллекцию массив элементов, начиная с указанного индекса.</summary>
+      <param name="array">Массив элементов, добавляемый в коллекцию.</param>
+      <param name="index">Индекс в коллекции, используемый для копирования элементов.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Count">
+      <summary>Задает число элементов в коллекции.</summary>
+      <returns>Число элементов в коллекции.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetEnumerator">
+      <summary>Представляет метод <see cref="M:System.Collections.IEnumerable.GetEnumerator" />, поддерживающий простую итерацию элементов коллекции поставщиком данных .NET Framework.</summary>
+      <returns>Объект <see cref="T:System.Collections.IEnumerator" />, который может использоваться для итерации элементов коллекции.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetParameter(System.Int32)">
+      <summary>Получает объект <see cref="T:System.Data.Common.DbParameter" /> по указанному индексу в коллекции.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" />, содержащийся в коллекции по указанному индексу.</returns>
+      <param name="index">Индекс объекта <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.GetParameter(System.String)">
+      <summary>Получает объект <see cref="T:System.Data.Common.DbParameter" /> с указанным именем.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" /> с указанным именем.</returns>
+      <param name="parameterName">Имя объекта <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.IndexOf(System.Object)">
+      <summary>Возвращает индекс указанного объекта <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Индекс указанного объекта <see cref="T:System.Data.Common.DbParameter" />.</returns>
+      <param name="value">Объект <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.IndexOf(System.String)">
+      <summary>Получает индекс объекта <see cref="T:System.Data.Common.DbParameter" /> с указанным именем.</summary>
+      <returns>Индекс объекта <see cref="T:System.Data.Common.DbParameter" /> с указанным именем.</returns>
+      <param name="parameterName">Имя объекта <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Insert(System.Int32,System.Object)">
+      <summary>Вставляет указанный индекс объекта <see cref="T:System.Data.Common.DbParameter" /> с заданным именем в коллекцию по указанному индексу.</summary>
+      <param name="index">Индекс, по которому следует вставить объект <see cref="T:System.Data.Common.DbParameter" />.</param>
+      <param name="value">Объект <see cref="T:System.Data.Common.DbParameter" />, вставляемый в коллекцию.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Item(System.Int32)">
+      <summary>Возвращает и задает объект <see cref="T:System.Data.Common.DbParameter" /> с заданным индексом.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" /> с указанным индексом.</returns>
+      <param name="index">Индекс (с нуля) параметра.</param>
+      <exception cref="T:System.IndexOutOfRangeException">Указанный индекс не существует. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.Item(System.String)">
+      <summary>Возвращает и задает объект <see cref="T:System.Data.Common.DbParameter" /> с заданным именем.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbParameter" /> с заданным именем.</returns>
+      <param name="parameterName">Имя параметра.</param>
+      <exception cref="T:System.IndexOutOfRangeException">Указанный индекс не существует. </exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.Remove(System.Object)">
+      <summary>Удаляет указанный объект <see cref="T:System.Data.Common.DbParameter" /> из коллекции.</summary>
+      <param name="value">Объект <see cref="T:System.Data.Common.DbParameter" /> для удаления.</param>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.RemoveAt(System.Int32)">
+      <summary>Удаляет объект <see cref="T:System.Data.Common.DbParameter" /> на указанной позиции из коллекции.</summary>
+      <param name="index">Индекс, по которому располагается объект <see cref="T:System.Data.Common.DbParameter" />.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.RemoveAt(System.String)">
+      <summary>Удаляет из коллекции объект <see cref="T:System.Data.Common.DbParameter" /> с указанным именем.</summary>
+      <param name="parameterName">Имя удаляемого объекта <see cref="T:System.Data.Common.DbParameter" />.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.SetParameter(System.Int32,System.Data.Common.DbParameter)">
+      <summary>Присваивает объекту <see cref="T:System.Data.Common.DbParameter" /> по указанному индексу новое значение. </summary>
+      <param name="index">Индекс, по которому располагается объект <see cref="T:System.Data.Common.DbParameter" />.</param>
+      <param name="value">Новое значение <see cref="T:System.Data.Common.DbParameter" />.</param>
+    </member>
+    <member name="M:System.Data.Common.DbParameterCollection.SetParameter(System.String,System.Data.Common.DbParameter)">
+      <summary>Присваивает объекту <see cref="T:System.Data.Common.DbParameter" /> с указанным именем новое значение.</summary>
+      <param name="parameterName">Имя объекта <see cref="T:System.Data.Common.DbParameter" /> в коллекции.</param>
+      <param name="value">Новое значение <see cref="T:System.Data.Common.DbParameter" />.</param>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.SyncRoot">
+      <summary>Задает объект <see cref="T:System.Object" />, который может быть использован для синхронизации доступа к коллекции.</summary>
+      <returns>Объект <see cref="T:System.Object" />, который может быть использован для синхронизации доступа к <see cref="T:System.Data.Common.DbParameterCollection" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#ICollection#IsSynchronized"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#IsFixedSize"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#IsReadOnly"></member>
+    <member name="P:System.Data.Common.DbParameterCollection.System#Collections#IList#Item(System.Int32)">
+      <summary>Получает или задает элемент с указанным индексом.</summary>
+      <returns>Элемент с заданным индексом.</returns>
+      <param name="index">Отсчитываемый с нуля индекс получаемого или задаваемого элемента.</param>
+    </member>
+    <member name="T:System.Data.Common.DbProviderFactory">
+      <summary>Представляет набор методов для создания экземпляров классов поставщиков, реализующих источник данных.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Data.Common.DbProviderFactory" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateCommand">
+      <summary>Возвращает новый экземпляра класса поставщика, реализующий класс <see cref="T:System.Data.Common.DbCommand" />.</summary>
+      <returns>Новый экземпляр <see cref="T:System.Data.Common.DbCommand" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateConnection">
+      <summary>Возвращает новый экземпляра класса поставщика, реализующий класс <see cref="T:System.Data.Common.DbConnection" />.</summary>
+      <returns>Новый экземпляр <see cref="T:System.Data.Common.DbConnection" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateConnectionStringBuilder">
+      <summary>Возвращает новый экземпляра класса поставщика, реализующий класс <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</summary>
+      <returns>Новый экземпляр <see cref="T:System.Data.Common.DbConnectionStringBuilder" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbProviderFactory.CreateParameter">
+      <summary>Возвращает новый экземпляра класса поставщика, реализующий класс <see cref="T:System.Data.Common.DbParameter" />.</summary>
+      <returns>Новый экземпляр <see cref="T:System.Data.Common.DbParameter" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Data.Common.DbTransaction">
+      <summary>Базовый класс для транзакции. </summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.#ctor">
+      <summary>Инициализирует новый объект <see cref="T:System.Data.Common.DbTransaction" />.</summary>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Commit">
+      <summary>Фиксирует транзакцию базы данных.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.Connection">
+      <summary>Задает объект <see cref="T:System.Data.Common.DbConnection" />, связанный с транзакцией.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbConnection" />, связанный с транзакцией.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.DbConnection">
+      <summary>Задает объект <see cref="T:System.Data.Common.DbConnection" />, связанный с транзакцией.</summary>
+      <returns>Объект <see cref="T:System.Data.Common.DbConnection" />, связанный с транзакцией.</returns>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Dispose">
+      <summary>Освобождает неуправляемые ресурсы, используемые <see cref="T:System.Data.Common.DbTransaction" />.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Dispose(System.Boolean)">
+      <summary>Освобождает неуправляемые ресурсы, используемые объектом <see cref="T:System.Data.Common.DbTransaction" />, а при необходимости освобождает также управляемые ресурсы.</summary>
+      <param name="disposing">При значении true этот метод освобождает все ресурсы, используемые любыми управляемыми объектами, на которые ссылается этот объект <see cref="T:System.Data.Common.DbTransaction" />.</param>
+    </member>
+    <member name="P:System.Data.Common.DbTransaction.IsolationLevel">
+      <summary>Задает объект <see cref="T:System.Data.IsolationLevel" /> для этой транзакции.</summary>
+      <returns>Объект <see cref="T:System.Data.IsolationLevel" /> для этой транзакции.</returns>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Data.Common.DbTransaction.Rollback">
+      <summary>Откатывает транзакцию, которая находится в состоянии ожидания.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+  </members>
+</doc>

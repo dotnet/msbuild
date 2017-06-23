@@ -1,0 +1,1876 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Xml</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.DataContractResolver">
+      <summary>Предоставляет механизм динамического сопоставления типов с представлением xsi:type во время сериализации и десериализации.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractResolver" />. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.ResolveName(System.String,System.String,System.Type,System.Runtime.Serialization.DataContractResolver)">
+      <summary>Переопределение этого метода, чтобы во время десериализации сопоставить указанное имя xsi:type и пространство имен с типом контракта данных.</summary>
+      <returns>Тип, с которым сопоставляются имя и пространство имен xsi:type. </returns>
+      <param name="typeName">Имя xsi:type для сопоставления.</param>
+      <param name="typeNamespace">Пространство имен xsi:type для сопоставления.</param>
+      <param name="declaredType">Тип данных объявлен в контракте данных.</param>
+      <param name="knownTypeResolver">Известный арбитр типов.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.TryResolveType(System.Type,System.Type,System.Runtime.Serialization.DataContractResolver,System.Xml.XmlDictionaryString@,System.Xml.XmlDictionaryString@)">
+      <summary>Переопределение этого метода, чтобы во время сериализации сопоставить тип контракта данных с именем xsi:type и пространством имен.</summary>
+      <returns>Значение true, если сопоставление успешно; в противном случае — значение false.</returns>
+      <param name="type">Сопоставляемый тип.</param>
+      <param name="declaredType">Тип данных объявлен в контракте данных.</param>
+      <param name="knownTypeResolver">Известный арбитр типов.</param>
+      <param name="typeName">Имя xsi:type.</param>
+      <param name="typeNamespace">Пространство имен xsi:type.</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractSerializer">
+      <summary>Сериализует и десериализует экземпляр типа в XML-поток или документ с помощью предоставленного контракта данных.Этот класс не наследуется.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для сериализации или десериализации объекта указанного типа.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для выполнения сериализации или десериализации объекта указанного типа и инициализирует коллекцию известных типов, которые могут присутствовать в графе объекта.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+      <param name="knownTypes">Интерфейс <see cref="T:System.Collections.Generic.IEnumerable`1" />, принадлежащий к типу <see cref="T:System.Type" />, в котором содержатся типы, которые могут присутствовать в графе объекта.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Runtime.Serialization.DataContractSerializerSettings)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для сериализации или десериализации объекта указанного типа и параметров.</summary>
+      <param name="type">Тип сериализуемого или десериализуемого экземпляра.</param>
+      <param name="settings">Параметры сериализатора.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.String,System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для выполнения сериализации или десериализации объекта указанного типа с помощью предоставленных корневых элемента и пространства имен XML.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+      <param name="rootName">Имя XML-элемента, содержащего данные для сериализации или десериализации.</param>
+      <param name="rootNamespace">Пространство имен XML-элемента, содержащего данные для сериализации или десериализации.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.String,System.String,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для сериализации или десериализации объекта указанного типа.Этот метод также задает корневые XML-элемент и пространство имен в двух строковых параметрах, а также список известных типов, которые могут присутствовать в графе объектов.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+      <param name="rootName">Имя корневого элемента содержимого.</param>
+      <param name="rootNamespace">Пространство имен корневого элемента.</param>
+      <param name="knownTypes">Интерфейс <see cref="T:System.Collections.Generic.IEnumerable`1" />, принадлежащий к типу <see cref="T:System.Type" />, в котором содержатся типы, которые могут присутствовать в графе объекта.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для выполнения сериализации или десериализации объекта указанного типа с помощью предоставленных корневых элемента и пространства имен XML, заданных посредством параметров типа <see cref="T:System.Xml.XmlDictionaryString" />.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+      <param name="rootName">Объект <see cref="T:System.Xml.XmlDictionaryString" />, содержащий имя корневого элемента содержимого.</param>
+      <param name="rootNamespace">Объект <see cref="T:System.Xml.XmlDictionaryString" />, содержащий пространство имен корневого элемента.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> для сериализации или десериализации объекта указанного типа.Этот метод также задает корневые XML-элемент и пространство имен в двух параметрах <see cref="T:System.Xml.XmlDictionaryString" />, а также список известных типов, которые могут присутствовать в графе объекта.</summary>
+      <param name="type">Тип сериализуемых или десериализуемых экземпляров.</param>
+      <param name="rootName">Объект <see cref="T:System.Xml.XmlDictionaryString" />, содержащий имя корневого элемента содержимого.</param>
+      <param name="rootNamespace">Объект <see cref="T:System.Xml.XmlDictionaryString" />, содержащий пространство имен корневого элемента.</param>
+      <param name="knownTypes">Интерфейс <see cref="T:System.Collections.Generic.IEnumerable`1" />, принадлежащий к типу <see cref="T:System.Type" />, в котором содержатся известные типы, которые могут присутствовать в графе объекта.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.IgnoreExtensionDataObject">
+      <summary>Возвращает значение, указывающее, должны ли пропускаться данные, предоставляемые расширением класса, при сериализации или десериализации класса.</summary>
+      <returns>Значение true, если данные расширения опускаются; в противном случае — false.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.IsStartObject(System.Xml.XmlDictionaryReader)">
+      <summary>Определяет, расположен ли объект <see cref="T:System.Xml.XmlDictionaryReader" /> на объекте, который может быть десериализован.</summary>
+      <returns>Значение true, если модуль чтения установлен на начальном элементе считываемого потока; в противном случае — значение false.</returns>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlDictionaryReader" />, используемый для чтения XML-потока.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.IsStartObject(System.Xml.XmlReader)">
+      <summary>Определяет, расположен ли объект <see cref="T:System.Xml.XmlReader" /> на объекте, который может быть десериализован.</summary>
+      <returns>Значение true, если модуль чтения установлен на начальном элементе считываемого потока; в противном случае — значение false.</returns>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlReader" />, используемый для чтения XML-потока.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.KnownTypes">
+      <summary>Возвращает коллекцию типов, которые могут присутствовать в графе объекта, сериализованном с помощью этого экземпляра класса <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.</summary>
+      <returns>Коллекция <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1" />, содержащая ожидаемые типы, переданные в качестве известных типов в конструктор <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph">
+      <summary>Возвращает максимальное количество элементов в графе объекта для сериализации или десериализации.</summary>
+      <returns>Максимальное количество сериализуемых или десериализуемых элементов.Значение по умолчанию: <see cref="F:System.Int32.MaxValue" />.</returns>
+      <exception cref="T:System.ArgumentOutOfRangeException">Количество элементов превышает максимальное значение.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.PreserveObjectReferences">
+      <summary>Возвращает значение, указывающее, следует ли использовать нестандартные конструкции XML для сохранения данных ссылок на объект. </summary>
+      <returns>Значение true, если требуется сохранить ссылки; в противном случае — значение false.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>Считывает XML-поток с помощью модуля чтения <see cref="T:System.Xml.XmlDictionaryReader" /> и возвращает десериализованный объект. Также указывает, была ли выполнена проверка имени объекта перед считыванием его значения. </summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlDictionaryReader" />, используемый для чтения XML-потока.</param>
+      <param name="verifyObjectName">Значение true, если требуется проверить соответствие имени объекта предоставленному в конструкторе значению корневого имени; в противном случае — значение false. </param>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Параметру <paramref name="verifyObjectName" /> задано значение true и имя и пространство имен элемента не соответствуют значениям, заданным в конструкторе. </exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlReader)">
+      <summary>Считывает XML-поток с помощью средства чтения <see cref="T:System.Xml.XmlReader" /> и возвращает десериализованный объект.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlReader" />, используемый для чтения XML-потока.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlReader,System.Boolean)">
+      <summary>Считывает XML-поток с помощью модуля чтения <see cref="T:System.Xml.XmlReader" /> и возвращает десериализованный объект. Также указывает, была ли выполнена проверка имени объекта перед считыванием его значения.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlReader" />, используемый для чтения XML-потока.</param>
+      <param name="verifyObjectName">Значение true, если требуется проверить соответствие имени объекта предоставленному в конструкторе значению корневого имени; в противном случае — значение false.</param>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Параметру <paramref name="verifyObjectName" /> задано значение true и имя и пространство имен элемента не соответствуют значениям, заданным в конструкторе. </exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.SerializeReadOnlyTypes">
+      <summary>Получает значение, указывающее, сериализованы ли типы, доступные только для чтения.</summary>
+      <returns>Значение true, если сериализуются типы только для чтения; значение false, если сериализуются все типы.</returns>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteEndObject(System.Xml.XmlDictionaryWriter)">
+      <summary>Выполняет запись закрывающего XML-элемента с помощью средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlDictionaryWriter" />, используемый для записи потока.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не соответствует правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Возникла проблема с записываемым экземпляром.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteEndObject(System.Xml.XmlWriter)">
+      <summary>Выполняет запись закрывающего XML-элемента с помощью средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи потока.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не соответствует правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Возникла проблема с записываемым экземпляром.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObject(System.Xml.XmlWriter,System.Object)">
+      <summary>Записывает все данные объекта (начальный XML-элемент, содержимое и закрывающий элемент) в XML-документ или поток с помощью средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи XML-документа или потока.</param>
+      <param name="graph">Объект, содержащий данные для записи в поток.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не соответствует правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Возникла проблема с записываемым экземпляром.</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObjectContent(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>Выполняет запись содержимого XML с помощью средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlDictionaryWriter" />, используемый для записи потока.</param>
+      <param name="graph">Объект, записываемый в поток.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не соответствует правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Возникла проблема с записываемым экземпляром.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObjectContent(System.Xml.XmlWriter,System.Object)">
+      <summary>Выполняет запись содержимого XML с помощью средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи потока.</param>
+      <param name="graph">Объект, записываемый в поток.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не соответствует правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Возникла проблема с записываемым экземпляром.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteStartObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>Выполняет запись открывающего XML-элемента с помощью средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlDictionaryWriter" />, используемый для записи начального элемента XML.</param>
+      <param name="graph">Записываемый объект.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteStartObject(System.Xml.XmlWriter,System.Object)">
+      <summary>Выполняет запись открывающего XML-элемента с помощью модуля записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи начального элемента XML.</param>
+      <param name="graph">Записываемый объект.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractSerializerSettings">
+      <summary>Задает параметры сериализатора контракта данных.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializerSettings.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractSerializerSettings" />.</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.DataContractResolver">
+      <summary>Получает или задает компонент, используемый для динамического сопоставления объявлений xsi:type с типами известных контрактов.</summary>
+      <returns>Компонент, используемый для динамического сопоставления объявлений xsi:type с типами известных контрактов.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.KnownTypes">
+      <summary>Получает или задает коллекцию типов, которые могут присутствовать в графе объекта, сериализованном с помощью этого DataContractSerializerSettings.</summary>
+      <returns>Коллекция типов, которые могут присутствовать в графе объекта, сериализованном с помощью этого экземпляра класса DataContractSerializerSettings.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.MaxItemsInObjectGraph">
+      <summary>Получает или задает максимальное количество элементов в графе объекта для сериализации или десериализации.</summary>
+      <returns>Максимальное количество элементов в графе объекта для сериализации или десериализации.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.PreserveObjectReferences">
+      <summary>Получает или задает значение, указывающее, следует ли использовать нестандартные конструкции XML для сохранения данных ссылок на объект.</summary>
+      <returns>Значение True, если требуется использовать нестандартные конструкции XML для сохранения данных ссылок на объект; в противном случае — значение false.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.RootName">
+      <summary>Получает или задает корневое имя выбранного объекта.</summary>
+      <returns>Имя корневого объекта выбранного объекта.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.RootNamespace">
+      <summary>Получает или задает корневое пространство имен для указанного объекта.</summary>
+      <returns>Корневое пространство имен для указанного объекта.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.SerializeReadOnlyTypes">
+      <summary>Получает или задает значение, указывающее, следует ли сериализовать типы, доступные только для чтения.</summary>
+      <returns>Значение True для сериализации доступных только для чтения типов; в противном случае — значение false.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.XmlObjectSerializer">
+      <summary>Предоставляет базовый класс для сериализации объектов в XML-потоки или XML-документы.Это абстрактный класс.</summary>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром. </exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.XmlObjectSerializer" />.  </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.IsStartObject(System.Xml.XmlDictionaryReader)">
+      <summary>Возвращает значение, указывающее, расположено ли средство чтения <see cref="T:System.Xml.XmlDictionaryReader" /> на элементе XML, который можно считать.</summary>
+      <returns>Значение true, если средство чтения может считать данные; в противном случае — значение false.</returns>
+      <param name="reader">Средство чтения <see cref="T:System.Xml.XmlDictionaryReader" />, используемое для чтения XML-потока или XML-документа.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.IsStartObject(System.Xml.XmlReader)">
+      <summary>Возвращает значение, указывающее, расположено ли средство чтения <see cref="T:System.Xml.XmlReader" /> на элементе XML, который можно считать. </summary>
+      <returns>Значение true, если средство чтения расположено на начальном элементе; в противном случае — значение false.</returns>
+      <param name="reader">Средство чтения <see cref="T:System.Xml.XmlReader" />, используемое для чтения XML-потока или XML-документа.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.IO.Stream)">
+      <summary>Считывает XML-поток или XML-документ с помощью средства чтения <see cref="T:System.IO.Stream" /> и возвращает десериализованный объект.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="stream">Средство чтения <see cref="T:System.IO.Stream" />, используемое для чтения XML-потока или XML-документа.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlDictionaryReader)">
+      <summary>Считывает XML-документ или XML-поток с помощью средства чтения <see cref="T:System.Xml.XmlDictionaryReader" /> и возвращает десериализованный объект.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" /> используется для считывания документа XML.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>Считывает XML-поток или XML-документ с помощью средства чтения <see cref="T:System.Xml.XmlDictionaryReader" /> и возвращает десериализованный объект; также позволяет указать до попытки чтения, может ли сериализатор считать данные.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" /> используется для считывания документа XML.</param>
+      <param name="verifyObjectName">Значение true, если требуется проверить соответствие имени и пространства имен включающего XML-элемента ожидаемым корневым имени и пространству имен; в противном случае — значение false, если следует пропустить проверку.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlReader)">
+      <summary>Считывает XML-документ или XML-поток с помощью средства чтения <see cref="T:System.Xml.XmlReader" /> и возвращает десериализованный объект.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">Средство чтения <see cref="T:System.Xml.XmlReader" />, используемое для чтения XML-потока или XML-документа.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlReader,System.Boolean)">
+      <summary>Считывает XML-документ или XML-поток с помощью средства чтения <see cref="T:System.Xml.XmlReader" /> и возвращает десериализованный объект; также позволяет указать перед попыткой чтения, может ли сериализатор считать данные.</summary>
+      <returns>Десериализованный объект.</returns>
+      <param name="reader">Средство чтения <see cref="T:System.Xml.XmlReader" />, используемое для чтения XML-документа или XML-потока.</param>
+      <param name="verifyObjectName">Значение true, если требуется проверить соответствие имени и пространства имен включающего XML-элемента ожидаемым корневым имени и пространству имен; значение false, если следует пропустить проверку.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteEndObject(System.Xml.XmlDictionaryWriter)">
+      <summary>Записывает завершающий элемент данных объекта в качестве закрывающего XML-элемента в XML-документ или XML-поток с помощью средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlDictionaryWriter" />, используемый для записи XML-документа или потока.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteEndObject(System.Xml.XmlWriter)">
+      <summary>Записывает завершающий элемент данных объекта в качестве закрывающего XML-элемента в XML-документ или XML-поток с помощью средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи XML-документа или потока.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.IO.Stream,System.Object)">
+      <summary>Записывает полное содержимое объекта (начало записи, запись содержимого и завершение записи) в XML-документ или поток с помощью указанного средства записи <see cref="T:System.IO.Stream" />.</summary>
+      <param name="stream">Средство записи <see cref="T:System.IO.Stream" />, используемое для записи в XML-документ или XML-поток.</param>
+      <param name="graph">Объект, содержащий данные для записи в поток.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>Записывает полное содержимое объекта (начало записи, запись содержимого и завершение записи) в XML-документ или поток с помощью указанного средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Средство записи <see cref="T:System.Xml.XmlDictionaryWriter" />, используемое для записи содержимого в XML-документ или XML-поток.</param>
+      <param name="graph">Объект, в котором находится содержимое для записи.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.Xml.XmlWriter,System.Object)">
+      <summary>Записывает полное содержимое объекта (начало записи, запись содержимого и завершение записи) в XML-документ или поток с помощью указанного средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи XML-документа или потока.</param>
+      <param name="graph">Объект, в котором находится содержимое для записи.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObjectContent(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>Записывает только содержимое объекта в XML-документ или XML-поток с помощью указанного средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlDictionaryWriter" />, используемый для записи XML-документа или потока.</param>
+      <param name="graph">Объект, в котором находится содержимое для записи.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObjectContent(System.Xml.XmlWriter,System.Object)">
+      <summary>Записывает только содержимое объекта в XML-документ или XML-поток с помощью указанного средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Объект <see cref="T:System.Xml.XmlWriter" />, используемый для записи XML-документа или потока.</param>
+      <param name="graph">Объект, в котором находится содержимое для записи.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteStartObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>Записывает начальный элемент данных объекта в качестве открывающего XML-элемента с помощью указанного средства записи <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <param name="writer">Средство записи <see cref="T:System.Xml.XmlDictionaryWriter" />, используемое для записи документа XML.</param>
+      <param name="graph">Объект для сериализации.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteStartObject(System.Xml.XmlWriter,System.Object)">
+      <summary>Записывает начальный элемент данных объекта в качестве открывающего XML-элемента с помощью указанного средства записи <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <param name="writer">Средство записи <see cref="T:System.Xml.XmlWriter" />, используемое для записи документа XML.</param>
+      <param name="graph">Объект для сериализации.</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">Сериализуемый тип не удовлетворяет правилам контракта данных.Например, к этому типу не применен атрибут <see cref="T:System.Runtime.Serialization.DataContractAttribute" />.</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">возникла проблема с сериализуемым экземпляром.</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">было превышено максимально допустимое количество объектов для сериализации.Проверьте свойство <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" />.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.IXmlDictionary">
+      <summary>interface, определяющий контракт, который должен реализовать словарь XML, чтобы быть использованным реализациями <see cref="T:System.Xml.XmlDictionaryReader" /> и <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>Попытки найти запись в словаре.</summary>
+      <returns>true, если данный ключ присутствует в словаре; в противном случае — false.</returns>
+      <param name="key">Искомый ключ.</param>
+      <param name="result">Если параметр <paramref name="key" /> определен, <see cref="T:System.Xml.XmlDictionaryString" />, сопоставляется с ключом; в противном случае — null.</param>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>Выполняет поиск указанного значения в словаре.</summary>
+      <returns>Значение true, если значение присутствует в словаре; в противном случае — false.</returns>
+      <param name="value">Искомое строковое значение.</param>
+      <param name="result">Соответствующая строка <see cref="T:System.Xml.XmlDictionaryString" />, если обнаружена; в противном случае — null.</param>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>Проверяет наличие в словаре указанной строки <see cref="T:System.Xml.XmlDictionaryString" />.</summary>
+      <returns>Значение true, если <see cref="T:System.Xml.XmlDictionaryString" /> присутствует в словаре; в противном случае — false.</returns>
+      <param name="value">Строка <see cref="T:System.Xml.XmlDictionaryString" />, наличие которой проверяется.</param>
+      <param name="result">Соответствующая строка <see cref="T:System.Xml.XmlDictionaryString" />, если обнаружена; в противном случае — null.</param>
+    </member>
+    <member name="T:System.Xml.OnXmlDictionaryReaderClose">
+      <summary>delegate для метода обратного вызова при закрытии модуля чтения.</summary>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlDictionaryReader" />, который инициирует событие OnClose.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.UniqueId">
+      <summary>Уникальный идентификатор, оптимизированный для GUID.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor">
+      <summary>Создает новый экземпляр этого класса с новым GUID.</summary>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Byte[])">
+      <summary>Создает новый экземпляр этого класса, используя массив байтов, представляющий идентификатор <see cref="T:System.Guid" />.</summary>
+      <param name="guid">Массив байтов, представляющий идентификатор <see cref="T:System.Guid" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="guid" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentException">Параметр <paramref name="guid" /> предоставляет менее 16 допустимых байтов.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Byte[],System.Int32)">
+      <summary>Создает новый экземпляр данного класса, начиная со смещения в пределах массива byte, представляющего <see cref="T:System.Guid" />.</summary>
+      <param name="guid">Массив byte, представляющий <see cref="T:System.Guid" />.</param>
+      <param name="offset">Позиция смещения внутри массива  byte, представляющего <see cref="T:System.Guid" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="guid" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины массива.</exception>
+      <exception cref="T:System.ArgumentException">Параметры <paramref name="guid " />и<paramref name=" offset" /> содержат менее 16 допустимых байт.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Char[],System.Int32,System.Int32)">
+      <summary>Создает новый экземпляр данного класса, начиная со смещения в пределах массива char, используя заданное количество записей.</summary>
+      <param name="chars">Массив char, представляющий <see cref="T:System.Guid" />.</param>
+      <param name="offset">Позиция смещения внутри массива char, представляющего <see cref="T:System.Guid" />.</param>
+      <param name="count">Количество используемых записей массива, начиная со смещения <paramref name="offset" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="chars" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины массива.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="count" /> имеет значение меньше нуля или больше длины массива минус смещение <paramref name="offset" />.</exception>
+      <exception cref="T:System.FormatException">Параметр <paramref name="count" /> равен нулю.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Guid)">
+      <summary>Создает новый экземпляр данного класса, используя идентификатор <see cref="T:System.Guid" />.</summary>
+      <param name="guid">Объект <see cref="T:System.Guid" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="guid" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.String)">
+      <summary>Создает новый экземпляр данного класса, используя строку.</summary>
+      <param name="value">Строка, используемая для создания объекта <see cref="T:System.Xml.UniqueId" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <exception cref="T:System.FormatException">Длина параметра <paramref name=" value" /> равна нулю.</exception>
+    </member>
+    <member name="P:System.Xml.UniqueId.CharArrayLength">
+      <summary>Возвращает значение длины строкового представления <see cref="T:System.Xml.UniqueId" />.</summary>
+      <returns>Длина строкового представления <see cref="T:System.Xml.UniqueId" />.</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.Equals(System.Object)">
+      <summary>Проверяет, равен ли объект этому идентификатору <see cref="T:System.Xml.UniqueId" />.</summary>
+      <returns>Значение true, если объект равен этому <see cref="T:System.Xml.UniqueId" />; в противном случае — значение false.</returns>
+      <param name="obj">Сравниваемый объект.</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.GetHashCode">
+      <summary>Создает хэш-код, представляющий идентификатор <see cref="T:System.Xml.UniqueId" />.</summary>
+      <returns>Целочисленный хэш-код, представляющий <see cref="T:System.Xml.UniqueId" />.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Xml.UniqueId.IsGuid">
+      <summary>Указывает, является ли идентификатор <see cref="T:System.Xml.UniqueId" /> объектом <see cref="T:System.Guid" />.</summary>
+      <returns>Значение true, если параметр <see cref="T:System.Xml.UniqueId" /> имеет значение <see cref="T:System.Guid" />; в противном случае — значение false.</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.op_Equality(System.Xml.UniqueId,System.Xml.UniqueId)">
+      <summary>Переопределяет оператор равенства для проверки равенства двух объектов <see cref="T:System.Xml.UniqueId" />.</summary>
+      <returns>Значение true, если оба объекта <see cref="T:System.Xml.UniqueId" /> равны или оба имеют значение null; значение false, если объекты не равны или только один из них имеет значение null.</returns>
+      <param name="id1">Первая коллекция <see cref="T:System.Xml.UniqueId" />.</param>
+      <param name="id2">Вторая категория <see cref="T:System.Xml.UniqueId" />.</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.op_Inequality(System.Xml.UniqueId,System.Xml.UniqueId)">
+      <summary>Переопределяет оператор равенства для проверки неравенства двух объектов <see cref="T:System.Xml.UniqueId" />.</summary>
+      <returns>Значение true, если переопределенный оператор равенства возвращает значение false; в противном случае — значение false.</returns>
+      <param name="id1">Первая коллекция <see cref="T:System.Xml.UniqueId" />.</param>
+      <param name="id2">Вторая категория <see cref="T:System.Xml.UniqueId" />.</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.ToCharArray(System.Char[],System.Int32)">
+      <summary>Помещает значение <see cref="T:System.Xml.UniqueId" /> в массив char.</summary>
+      <returns>Количество записей в массиве char, заполненных значением <see cref="T:System.Xml.UniqueId" />.</returns>
+      <param name="chars">Массив char.</param>
+      <param name="offset">Позиция в массиве char для начала вставки значения <see cref="T:System.Xml.UniqueId" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="chars" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины массива.</exception>
+      <exception cref="T:System.ArgumentException">Параметры <paramref name="guid " />и<paramref name=" offset" /> содержат менее 16 допустимых байт.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.ToString">
+      <summary>Отображает значение <see cref="T:System.Xml.UniqueId" /> в строковом формате.</summary>
+      <returns>Строковое представление значения <see cref="T:System.Xml.UniqueId" />.</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.TryGetGuid(System.Byte[],System.Int32)">
+      <summary>Предпринимает попытку получения значения <see cref="T:System.Xml.UniqueId" /> в виде <see cref="T:System.Guid" /> и сохранения его в данном массиве байтов после заданного смещения.</summary>
+      <returns>Значение true, если значение, хранящееся в экземпляре <see cref="T:System.Xml.UniqueId" /> является <see cref="T:System.Guid" />; в противном случае — false.</returns>
+      <param name="buffer">Массив byte, который будет содержать объект <see cref="T:System.Guid" />.</param>
+      <param name="offset">Позиция в массиве byte для начала вставки значения <see cref="T:System.Guid" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины массива.</exception>
+      <exception cref="T:System.ArgumentException">Параметры <paramref name="buffer " />и<paramref name=" offset" /> содержат менее 16 допустимых байт.</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.TryGetGuid(System.Guid@)">
+      <summary>Предпринимает попытку получения значения <see cref="T:System.Xml.UniqueId" /> в виде <see cref="T:System.Guid" />.</summary>
+      <returns>true, если UniqueId представляет элемент <see cref="T:System.Guid" />, в противном случае — false.</returns>
+      <param name="guid">Имеет значение <see cref="T:System.Guid" /> в случае успешного выполнения; иначе — <see cref="F:System.Guid.Empty" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentException">Параметры <paramref name="buffer " />и<paramref name=" offset" /> содержат менее 16 допустимых байт.</exception>
+    </member>
+    <member name="T:System.Xml.XmlBinaryReaderSession">
+      <summary>Обеспечивает динамическое управление оптимизированными строками</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Xml.XmlBinaryReaderSession" />.</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.Add(System.Int32,System.String)">
+      <summary>Создает объект <see cref="T:System.Xml.XmlDictionaryString" /> из входного параметра и добавляет его во внутреннюю коллекцию.</summary>
+      <returns>Новый созданный объект <see cref="T:System.Xml.XmlDictionaryString" />, который добавляется во внутреннюю коллекцию.</returns>
+      <param name="id">Значение ключа.</param>
+      <param name="value">Значение.</param>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="id" /> меньше нуля.</exception>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <exception cref="T:System.InvalidOperationException">Запись с ключом <paramref name="id" /> уже существует.</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.Clear">
+      <summary>Очищает внутреннюю коллекцию от всего содержимого.</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>Проверяет, содержит ли внутренняя коллекция запись, соответствующую ключу.</summary>
+      <returns>Значение true, если запись, соответствующая <paramref name="key" />, найдена; в противном случае — false.</returns>
+      <param name="key">Искомый ключ.</param>
+      <param name="result">Когда выполнение этого метода завершается, содержит строку, если запись была найдена; в противном случае — значение null.Этот параметр передается без инициализации.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="key" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>Проверяет, содержит ли внутренняя коллекция запись, соответствующую значению.</summary>
+      <returns>Значение true, если запись, соответствующая <paramref name="value" />, найдена; в противном случае — false.</returns>
+      <param name="value">Значение, которое нужно найти.</param>
+      <param name="result">Когда выполнение этого метода завершается, содержит строку, если запись была найдена; в противном случае — значение null.Этот параметр передается без инициализации.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>Проверяет, содержит ли внутренняя коллекция запись, соответствующую значению.</summary>
+      <returns>Значение true, если запись, соответствующая <paramref name="value" />, найдена; в противном случае — false.</returns>
+      <param name="value">Значение, которое нужно найти.</param>
+      <param name="result">Когда выполнение этого метода завершается, содержит строку, если запись была найдена; в противном случае — значение null.Этот параметр передается без инициализации.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+    </member>
+    <member name="T:System.Xml.XmlBinaryWriterSession">
+      <summary>Позволяет использовать динамический словарь для сжатия общих строк, присутствующих в сообщении и сохраняющих состояние.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.#ctor">
+      <summary>Создает экземпляр этого класса. </summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.Reset">
+      <summary>Удаляет внутренние коллекции.</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.TryAdd(System.Xml.XmlDictionaryString,System.Int32@)">
+      <summary>Предпринимает попытку добавления строки <see cref="T:System.Xml.XmlDictionaryString" /> во внутреннюю коллекцию.</summary>
+      <returns>true если строка может быть добавлена; в противном случае false.</returns>
+      <param name="value">Добавляемый объект <see cref="T:System.Xml.XmlDictionaryString" />.</param>
+      <param name="key">Ключ <see cref="T:System.Xml.XmlDictionaryString" />, который был успешно добавлен.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <exception cref="T:System.InvalidOperationException">Запись с ключом <paramref name="key" /> уже существует.</exception>
+    </member>
+    <member name="T:System.Xml.XmlDictionary">
+      <summary>Реализует словарь, используемый для оптимизации реализаций модулей чтения/записи XML Windows Communication Foundation (WCF).</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.#ctor">
+      <summary>Создает пустую коллекцию <see cref="T:System.Xml.XmlDictionary" />.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.#ctor(System.Int32)">
+      <summary>Создает <see cref="T:System.Xml.XmlDictionary" /> с начальной емкостью.</summary>
+      <param name="capacity">Начальный размер словаря.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.Add(System.String)">
+      <summary>Добавляет строку в <see cref="T:System.Xml.XmlDictionary" />.</summary>
+      <returns>Добавленный объект <see cref="T:System.Xml.XmlDictionaryString" />.</returns>
+      <param name="value">Строка, добавляемая в словарь.</param>
+    </member>
+    <member name="P:System.Xml.XmlDictionary.Empty">
+      <summary>Возвращает static пустой словарь <see cref="T:System.Xml.IXmlDictionary" />.</summary>
+      <returns>static пустой словарь <see cref="T:System.Xml.IXmlDictionary" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>Попытки найти запись в словаре.</summary>
+      <returns>true, если данный ключ присутствует в словаре; в противном случае — false.</returns>
+      <param name="key">Искомый ключ.</param>
+      <param name="result">Если параметр <paramref name="key" /> определен, <see cref="T:System.Xml.XmlDictionaryString" />, сопоставляется с ключом; в противном случае — null.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>Выполняет поиск указанного значения в словаре.</summary>
+      <returns>Значение true, если значение присутствует в словаре; в противном случае — false.</returns>
+      <param name="value">Искомое строковое значение.</param>
+      <param name="result">Соответствующая строка <see cref="T:System.Xml.XmlDictionaryString" />, если обнаружена; в противном случае — null.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>Проверяет наличие в словаре указанной строки <see cref="T:System.Xml.XmlDictionaryString" />.</summary>
+      <returns>Значение true, если <see cref="T:System.Xml.XmlDictionaryString" /> присутствует в словаре; в противном случае — false.</returns>
+      <param name="value">Строка <see cref="T:System.Xml.XmlDictionaryString" />, наличие которой проверяется.</param>
+      <param name="result">Соответствующая строка <see cref="T:System.Xml.XmlDictionaryString" />, если обнаружена; в противном случае — null.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReader">
+      <summary>Класс abstract, который Windows Communication Foundation (WCF) наследует от <see cref="T:System.Xml.XmlReader" /> для выполнения сериализации и десериализации.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.#ctor">
+      <summary>Создает экземпляр этого класса.  Вызывается только производными классами.</summary>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReader.CanCanonicalize">
+      <summary>Данное свойство всегда возвращает значение false.Производные классы могут переопределять параметры для возврата значения true, если поддерживают канонизацию.</summary>
+      <returns>Возвращает false.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="offset">Начальное положение для чтения из параметра <paramref name="buffer" />.</param>
+      <param name="count">Число байтов, которое может быть считано из буфера, заданного параметром <paramref name="buffer" />.</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> редактора.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины буфера.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="count" /> имеет значение меньше нуля или больше длины буфера минус величина смещения.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas,System.Xml.XmlBinaryReaderSession)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="offset">Начальное положение для чтения из параметра <paramref name="buffer" />.</param>
+      <param name="count">Число байтов, которое может быть считано из буфера, заданного параметром <paramref name="buffer" />.</param>
+      <param name="dictionary">Используемое средство записи <see cref="T:System.Xml.XmlDictionary" />.</param>
+      <param name="quotas">Применяемое семейство <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />.</param>
+      <param name="session">Используемое средство записи <see cref="T:System.Xml.XmlBinaryReaderSession" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины буфера.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="count" /> имеет значение меньше нуля или больше длины буфера минус величина смещения.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="offset">Начальное положение для чтения из параметра <paramref name="buffer" />.</param>
+      <param name="count">Число байтов, которое может быть считано из буфера, заданного параметром <paramref name="buffer" />.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="offset" /> имеет значение меньше нуля или больше длины буфера.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="count" /> имеет значение меньше нуля или больше длины буфера минус величина смещения.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> редактора.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <exception cref="T:System.ArgumentNullException">Значение параметра <paramref name="stream" /> или <paramref name="quotas" /> — null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas,System.Xml.XmlBinaryReaderSession)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> редактора.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <param name="session">
+        <see cref="T:System.Xml.XmlBinaryReaderSession" /> редактора.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="stream" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryReader" />, который может читать формат двоичных XML-данных .NET.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="quotas">Квоты, применимые к этой операции.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="stream" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateDictionaryReader(System.Xml.XmlReader)">
+      <summary>Создает экземпляр <see cref="T:System.Xml.XmlDictionaryReader" /> из существующего объекта <see cref="T:System.Xml.XmlReader" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="reader">Экземпляр <see cref="T:System.Xml.XmlReader" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="reader" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.Byte[],System.Int32,System.Int32,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="offset">Начальное положение для чтения из параметра <paramref name="buffer" />.</param>
+      <param name="count">Число байтов, которое может быть считано из буфера, заданного параметром <paramref name="buffer" />.</param>
+      <param name="quotas">Квоты, применимые к этому модулю чтения.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.Byte[],System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="quotas">Квоты, применимые к этому модулю чтения.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="buffer" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.IO.Stream,System.Text.Encoding,System.Xml.XmlDictionaryReaderQuotas,System.Xml.OnXmlDictionaryReaderClose)">
+      <summary>Создает экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="encoding">Объект <see cref="T:System.Text.Encoding" />, указывающий свойства кодировки, которые нужно применить.</param>
+      <param name="quotas">Применяемое семейство <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />.</param>
+      <param name="onClose">Делегат, вызываемый при закрытии модуля чтения.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.IO.Stream,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Создает экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReader" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="quotas">Квоты, применимые к этому модулю чтения.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.EndCanonicalization">
+      <summary>Этот метод еще не реализован.</summary>
+      <exception cref="T:System.NotSupportedException">Всегда .</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.GetAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>При переопределении в производном классе получает значение атрибута.</summary>
+      <returns>Значение атрибута.</returns>
+      <param name="localName">Строка <see cref="T:System.Xml.XmlDictionaryString" />, представляющая локальное имя атрибута.</param>
+      <param name="namespaceUri">Строка <see cref="T:System.Xml.XmlDictionaryString" />, представляющая пространство имен атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IndexOfLocalName(System.String[],System.String)">
+      <summary>Возвращает индекс локального имени текущего узла в массиве имен.</summary>
+      <returns>Индекс локального имени текущего узла в массиве имен.</returns>
+      <param name="localNames">Массив строк локальных имен для поиска.</param>
+      <param name="namespaceUri">Пространство имен текущего узла.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localNames" /> или любое из имен в массиве имеет значение null.</exception>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IndexOfLocalName(System.Xml.XmlDictionaryString[],System.Xml.XmlDictionaryString)">
+      <summary>Возвращает индекс локального имени текущего узла в массиве имен.</summary>
+      <returns>Индекс локального имени текущего узла в массиве имен.</returns>
+      <param name="localNames">Массив <see cref="T:System.Xml.XmlDictionaryString" /> локальных имен для поиска.</param>
+      <param name="namespaceUri">Пространство имен текущего узла.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localNames" /> или любое из имен в массиве имеет значение null.</exception>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsLocalName(System.String)">
+      <summary>Проверяет, является ли параметр <paramref name="localName" /> локальным именем текущего узла.</summary>
+      <returns>Значение true, если <paramref name="localName" /> соответствует локальному имени текущего узла; в противном случае — false.</returns>
+      <param name="localName">Локальное имя текущего узла.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsLocalName(System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли параметр <paramref name="localName" /> локальным именем текущего узла.</summary>
+      <returns>Значение true, если <paramref name="localName" /> соответствует локальному имени текущего узла; в противном случае — false.</returns>
+      <param name="localName">Строка <see cref="T:System.Xml.XmlDictionaryString" />, представляющая локальное имя текущего узла.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="localName" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsNamespaceUri(System.String)">
+      <summary>Проверяет, является ли параметр <paramref name="namespaceUri" /> пространством имен текущего узла.</summary>
+      <returns>Значение true, если параметр <paramref name="namespaceUri" /> соответствует пространству имен текущего узла; в противном случае — false.</returns>
+      <param name="namespaceUri">Пространство имен текущего узла.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsNamespaceUri(System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли параметр <paramref name="namespaceUri" /> пространством имен текущего узла.</summary>
+      <returns>Значение true, если параметр <paramref name="namespaceUri" /> соответствует пространству имен текущего узла; в противном случае — false.</returns>
+      <param name="namespaceUri">Пространство имен текущего узла.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsStartArray(System.Type@)">
+      <summary>Проверяет, установлен ли модуль чтения в начале массива.Этот класс возвращает значение false, но производные классы, имеющие концепцию массивов, могут вернуть значение true.</summary>
+      <returns>Значение true, если модуль чтения размещен в начале узла массива; в противном случае — false.</returns>
+      <param name="type">Тип узла, если узел допустим; в противном случае — null.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли первый тег открывающим или пустым тегом элемента, а также соответствует ли локальное имя и URI пространства таким же значениям текущего узла.</summary>
+      <returns>Значение true, если первый тег в массиве является открывающим тегом или пустым тегом элемента и соответствует <paramref name="localName" /> и <paramref name="namespaceUri" />; в противном случае — false.</returns>
+      <param name="localName">Строка <see cref="T:System.Xml.XmlDictionaryString" />, представляющая локальное имя атрибута.</param>
+      <param name="namespaceUri">Строка <see cref="T:System.Xml.XmlDictionaryString" />, представляющая пространство имен атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsTextNode(System.Xml.XmlNodeType)">
+      <summary>Проверяет, является ли текущий узел текстовым узлом.</summary>
+      <returns>Значение true, если тип узла <see cref="F:System.Xml.XmlNodetype.Text" />, <see cref="F:System.Xml.XmlNodetype.Whitespace" />, <see cref="F:System.Xml.XmlNodetype.SignificantWhitespace" />, <see cref="F:System.Xml.XmlNodetype.CDATA" /> или <see cref="F:System.Xml.XmlNodetype.Attribute" />; в противном случае — false.</returns>
+      <param name="nodeType">Тип проверяемого узла.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement">
+      <summary>Проверяет, является ли текущий узел содержимого открывающим элементом или пустым элементом.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.String)">
+      <summary>Проверяет, является ли текущий узел содержимого открывающим элементом или пустым элементом и соответствует ли свойство <see cref="P:System.Xml.XmlReader.Name" /> элемента данному аргументу.</summary>
+      <param name="name">Свойство <see cref="P:System.Xml.XmlReader.Name" /> элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.String,System.String)">
+      <summary>Проверяет, является ли текущий узел содержимого открывающим элементом или пустым элементом и соответствуют ли свойства <see cref="P:System.Xml.XmlReader.LocalName" /> и <see cref="P:System.Xml.XmlReader.NamespaceURI" /> элемента данным аргументам.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли текущий узел содержимого открывающим элементом или пустым элементом и соответствуют ли свойства <see cref="P:System.Xml.XmlReader.LocalName" /> и <see cref="P:System.Xml.XmlReader.NamespaceURI" /> элемента данного аргумента.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReader.Quotas">
+      <summary>Получает значения квот, применимые к текущему экземпляру данного класса.</summary>
+      <returns>Выражение <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />, применяющееся к текущему экземпляру данного класса. </returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Boolean[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Boolean" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">Локальное имя элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.DateTime[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.DateTime" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Decimal[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Decimal" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Double[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Double" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Guid[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Guid" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int16[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений short в типизированном массиве.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int32[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений в типизированный массив.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int64[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений long в типизированном массиве.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Single[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения чисел с плавающей запятой float в типизированном массиве.</summary>
+      <returns>Количество чисел с плавающей запятой, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются числа с плавающей запятой.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество чисел с плавающей запятой, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.TimeSpan" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Boolean[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Boolean" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.DateTime[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.DateTime" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Decimal[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Decimal" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Double[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения типов узлов <see cref="T:System.Double" /> в типизированный массив.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Guid[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Guid" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int16[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений short в типизированном массиве.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int32[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений в типизированный массив.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int64[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения целочисленных значений long в типизированном массиве.</summary>
+      <returns>Количество целочисленных значений, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются целые значения.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество целочисленных значений, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Single[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения чисел с плавающей запятой float в типизированном массиве.</summary>
+      <returns>Количество чисел с плавающей запятой, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются числа с плавающей запятой.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество чисел с плавающей запятой, помещаемых в массив.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.TimeSpan" /> в типизированный массиве.</summary>
+      <returns>Количество узлов, помещаемых в массив.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, в который помещаются узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов для размещения в массиве.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadBooleanArray(System.String,System.String)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Boolean" /> в типизированный массиве.</summary>
+      <returns>Массив <see cref="T:System.Boolean" /> узлов <see cref="T:System.Boolean" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadBooleanArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает повторяющиеся вхождения узлов типа <see cref="T:System.Boolean" /> в типизированный массиве.</summary>
+      <returns>Массив <see cref="T:System.Boolean" /> узлов <see cref="T:System.Boolean" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAs(System.Type,System.Xml.IXmlNamespaceResolver)">
+      <summary>Преобразует содержимое узла в заданный тип.</summary>
+      <returns>Объединенное текстовое содержимое или значение атрибута, преобразованное в требуемый тип.</returns>
+      <param name="type">Тип <see cref="T:System.Type" /> возвращаемого значения.</param>
+      <param name="namespaceResolver">Объект <see cref="T:System.Xml.IXmlNamespaceResolver" />, используемый для разрешения любых префиксов пространств имен, имеющих отношение к преобразованию типов.Например, этот объект можно использовать при преобразовании объекта <see cref="T:System.Xml.XmlQualifiedName" /> в xs:string.Это значение может быть пустой ссылкой.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBase64">
+      <summary>Считывает содержимое и возвращает раскодированные двоичные байты Base64.</summary>
+      <returns>Байтовый массив, содержащий раскодированные двоичные байты Base64.</returns>
+      <exception cref="T:System.Xml.XmlException">Размер массива больше значения квоты MaxArrayLength для данного модуля чтения.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBinHex">
+      <summary>Считывает содержимое и возвращает раскодированные двоичные байты BinHex.</summary>
+      <returns>Байтовый массив, содержащий раскодированные двоичные байты BinHex.</returns>
+      <exception cref="T:System.Xml.XmlException">Размер массива больше <see cref="F:System.Int32.MaxValue" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBinHex(System.Int32)">
+      <summary>Считывает содержимое и возвращает раскодированные двоичные байты BinHex.</summary>
+      <returns>Байтовый массив, содержащий раскодированные двоичные байты BinHex.</returns>
+      <param name="maxByteArrayContentLength">Максимальная длина массива.</param>
+      <exception cref="T:System.Xml.XmlException">Размер массива больше <paramref name="maxByteArrayContentLength" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsChars(System.Char[],System.Int32,System.Int32)">
+      <summary>Выполняет чтение содержимого в массиве char.</summary>
+      <returns>Количество прочитанных символов.</returns>
+      <param name="chars">Массив, в который помещаются символы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество символов, помещаемых в массив.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsDecimal">
+      <summary>Преобразует содержимое узла в decimal.</summary>
+      <returns>Представление decimal содержимого узла.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsFloat">
+      <summary>Преобразует содержимое узла в float.</summary>
+      <returns>Представление float содержимого узла.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsGuid">
+      <summary>Преобразует содержимое узла в guid.</summary>
+      <returns>Представление guid содержимого узла.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsQualifiedName(System.String@,System.String@)">
+      <summary>Преобразует содержимое узла в представление полного имени.</summary>
+      <param name="localName">Часть <see cref="P:System.Xml.XmlReader.LocalName" /> полного имени (параметр out).</param>
+      <param name="namespaceUri">Часть <see cref="P:System.Xml.XmlReader.NamespaceURI" /> полного имени (параметр out).</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString">
+      <summary>Преобразует содержимое узла в строку.</summary>
+      <returns>Содержимое узла в строковом представлении.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.Int32)">
+      <summary>Преобразует содержимое узла в строку.</summary>
+      <returns>Содержимое узла в строковом представлении.</returns>
+      <param name="maxStringContentLength">Максимальная длина строки.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.String[],System.Int32@)">
+      <summary>Преобразует содержимое узла в строку.</summary>
+      <returns>Содержимое узла в строковом представлении.</returns>
+      <param name="strings">Массив строк, с которым сопоставляется содержимое.</param>
+      <param name="index">Индекс записи в <paramref name="strings" />, соответствующий содержимому.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="strings" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentNullException">Запись в <paramref name=" strings" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.Xml.XmlDictionaryString[],System.Int32@)">
+      <summary>Преобразует содержимое узла в строку.</summary>
+      <returns>Содержимое узла в строковом представлении.</returns>
+      <param name="strings">Массив объектов <see cref="T:System.Xml.XmlDictionaryString" />, с которым сопоставляется содержимое.</param>
+      <param name="index">Индекс записи в <paramref name="strings" />, соответствующий содержимому.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="strings" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentNullException">Запись в <paramref name=" strings" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsTimeSpan">
+      <summary>Преобразует содержимое узла в <see cref="T:System.TimeSpan" />.</summary>
+      <returns>Представление <see cref="T:System.TimeSpan" /> содержимого узла.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsUniqueId">
+      <summary>Преобразует содержимое узла в уникальный идентификатор.</summary>
+      <returns>Содержимое узла, представленное в виде уникального идентификатора.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDateTimeArray(System.String,System.String)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.DateTime" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.DateTime" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDateTimeArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.DateTime" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.DateTime" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDecimalArray(System.String,System.String)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.Decimal" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.Decimal" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDecimalArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.Decimal" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.Decimal" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDoubleArray(System.String,System.String)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.Double" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.Double" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDoubleArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Преобразует содержимое узла в массив <see cref="T:System.Double" />.</summary>
+      <returns>Содержимое узла, представленное в виде массива <see cref="T:System.Double" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBase64">
+      <summary>Преобразует содержимое узла в массив байтов Base64.</summary>
+      <returns>Содержимое узла, представленное в виде массива байтов Base64.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBinHex">
+      <summary>Преобразует содержимое узла в массив байтов BinHex.</summary>
+      <returns>Содержимое узла, представленное в виде массива байтов BinHex.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBoolean">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.Boolean" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.Boolean" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsDecimal">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.Decimal" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.Decimal" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsDouble">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.Double" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.Double" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsFloat">
+      <summary>Преобразует содержимое элемента в число с плавающей запятой (<see cref="T:System.Single" />).</summary>
+      <returns>Содержимое узла, представленное в виде числа с плавающей запятой (<see cref="T:System.Single" />).</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsGuid">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.Guid" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.Guid" />.</returns>
+      <exception cref="T:System.ArgumentException">Элемент имеет недопустимый формат.</exception>
+      <exception cref="T:System.FormatException">Элемент имеет недопустимый формат.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsInt">
+      <summary>Преобразует содержимое элемента в целое число (<see cref="T:System.Int32" />).</summary>
+      <returns>Содержимое узла, представленное в виде целого числа (<see cref="T:System.Int32" />).</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsLong">
+      <summary>Преобразует содержимое элемента в длинное целое число (<see cref="T:System.Int64" />).</summary>
+      <returns>Содержимое узла, представленное в виде длинного целого числа (<see cref="T:System.Int64" />).</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsString">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.String" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.String" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsTimeSpan">
+      <summary>Преобразует содержимое элемента в <see cref="T:System.TimeSpan" />.</summary>
+      <returns>Содержимое узла, представленное в виде <see cref="T:System.TimeSpan" />.</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsUniqueId">
+      <summary>Преобразует содержимое элемента в уникальный идентификатор.</summary>
+      <returns>Содержимое узла, представленное в виде уникального идентификатора.</returns>
+      <exception cref="T:System.ArgumentException">Элемент имеет недопустимый формат.</exception>
+      <exception cref="T:System.FormatException">Элемент имеет недопустимый формат.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement">
+      <summary>Проверяет, является ли текущий узел элементом, и перемещает модуль чтения на следующий узел.</summary>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> возвращает false.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.String)">
+      <summary>Проверяет, является ли текущий узел элементом <paramref name="name" /> и перемещает модуль чтения на следующий узел.</summary>
+      <param name="name">Проверенное имя элемента.</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> возвращает false.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.String,System.String)">
+      <summary>Проверяет, является ли текущий узел элементом сданным <paramref name="localName" /> и <paramref name="namespaceUri" />, и перемещает модуль чтения на следующий узел.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> возвращает false.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли текущий узел элементом сданным <paramref name="localName" /> и <paramref name="namespaceUri" />, и перемещает модуль чтения на следующий узел.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> возвращает false.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadGuidArray(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данным <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив <see cref="T:System.Guid" />.</summary>
+      <returns>Массив дескрипторов вывода <see cref="T:System.Guid" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadGuidArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данным <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив <see cref="T:System.Guid" />.</summary>
+      <returns>Массив дескрипторов вывода <see cref="T:System.Guid" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt16Array(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел short (<see cref="T:System.Int16" />).</summary>
+      <returns>Массив целых чисел short (<see cref="T:System.Int16" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt16Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел short (<see cref="T:System.Int16" />).</summary>
+      <returns>Массив целых чисел short (<see cref="T:System.Int16" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt32Array(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел (<see cref="T:System.Int32" />).</summary>
+      <returns>Массив целых чисел <see cref="T:System.Int32" /> ().</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt32Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел (<see cref="T:System.Int32" />).</summary>
+      <returns>Массив целых чисел <see cref="T:System.Int32" /> ().</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt64Array(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел long (<see cref="T:System.Int64" />).</summary>
+      <returns>Массив целых чисел long (<see cref="T:System.Int64" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt64Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив целых чисел long (<see cref="T:System.Int64" />).</summary>
+      <returns>Массив целых чисел long (<see cref="T:System.Int64" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadSingleArray(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив чисел float (<see cref="T:System.Single" />).</summary>
+      <returns>Массив чисел float (<see cref="T:System.Single" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadSingleArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данными <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив чисел float (<see cref="T:System.Single" />).</summary>
+      <returns>Массив чисел float (<see cref="T:System.Single" />).</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Проверяет, является ли текущий узел элементом сданным <paramref name="localName" /> и <paramref name="namespaceUri" />, и перемещает модуль чтения на следующий узел.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadTimeSpanArray(System.String,System.String)">
+      <summary>Считывает содержимое последовательности узлов с данным <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив <see cref="T:System.TimeSpan" />.</summary>
+      <returns>Массив <see cref="T:System.TimeSpan" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadTimeSpanArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает содержимое последовательности узлов с данным <paramref name="localName" /> и <paramref name="namespaceUri" /> в массив <see cref="T:System.TimeSpan" />.</summary>
+      <returns>Массив <see cref="T:System.TimeSpan" />.</returns>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadValueAsBase64(System.Byte[],System.Int32,System.Int32)">
+      <summary>Не реализован.</summary>
+      <returns>Не реализован.</returns>
+      <param name="buffer">Буфер, из которого выполняется чтение.</param>
+      <param name="offset">Начальное положение для чтения из параметра <paramref name="buffer" />.</param>
+      <param name="count">Число байтов, которое может быть считано из буфера, заданного параметром <paramref name="buffer" />.</param>
+      <exception cref="T:System.NotSupportedException">Всегда .</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])">
+      <summary>Этот метод еще не реализован.</summary>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="includeComments">Определяет, включаются ли комментарии.</param>
+      <param name="inclusivePrefixes">Префиксы, подлежащие включению.</param>
+      <exception cref="T:System.NotSupportedException">Всегда .</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetArrayLength(System.Int32@)">
+      <summary>Не реализовано в данном классе (всегда возвращается false).Может переопределяться в производных классах.</summary>
+      <returns>Значение false, если не переопределено в производном классе.</returns>
+      <param name="count">Возвращает 0, если не переопределено в производном классе.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetBase64ContentLength(System.Int32@)">
+      <summary>Не реализовано в данном классе (всегда возвращается false).Может переопределяться в производных классах.</summary>
+      <returns>Значение false, если не переопределено в производном классе.</returns>
+      <param name="length">Возвращает 0, если не переопределено в производном классе.</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetLocalNameAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>Не реализовано в данном классе (всегда возвращается false).Может переопределяться в производных классах.</summary>
+      <returns>Значение false, если не переопределено в производном классе.</returns>
+      <param name="localName">Возвращает null, если не переопределено в производном классе. .</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetNamespaceUriAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>Не реализовано в данном классе (всегда возвращается false).Может переопределяться в производных классах.</summary>
+      <returns>Значение false, если не переопределено в производном классе.</returns>
+      <param name="namespaceUri">Возвращает null, если не переопределено в производном классе.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetValueAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>Не реализовано в данном классе (всегда возвращается false).Может переопределяться в производных классах.</summary>
+      <returns>Значение false, если не переопределено в производном классе.</returns>
+      <param name="value">Возвращает null, если не переопределено в производном классе.</param>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReaderQuotas">
+      <summary>Содержит настраиваемые значения квоты для XmlDictionaryReaders.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReaderQuotas.#ctor">
+      <summary>Создает новый экземпляр данного класса. </summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReaderQuotas.CopyTo(System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>Задает свойства для переданного экземпляра квот, основываясь на значениях в данном экземпляре.</summary>
+      <param name="quotas">Экземпляр <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />, в который следует выполнить копирование значения.</param>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для переданного экземпляра.</exception>
+      <exception cref="T:System.ArgumentNullException">Переданные целевые <paramref name=" quotas" /> равны null.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.Max">
+      <summary>Возвращает экземпляр данного класса с максимальными значениями для всех свойств.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryReaderQuotas" /> со значениями свойств <see cref="F:System.Int32.MaxValue" />.</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxArrayLength">
+      <summary>Возвращает и задает максимально допустимую длину массива.</summary>
+      <returns>Максимально допустимая длина массива.Значение по умолчанию — 16384.</returns>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для данного экземпляра.</exception>
+      <exception cref="T:System.ArgumentException">Попытка set значение меньше нуля.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxBytesPerRead">
+      <summary>Возвращает и задает максимально допустимое число байтов, возвращаемых для каждой операции чтения.</summary>
+      <returns>Максимальное допустимое число байтов, возвращаемых для каждой операции чтения.Значение по умолчанию — 4096.</returns>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для данного экземпляра.</exception>
+      <exception cref="T:System.ArgumentException">Попытка set значение меньше нуля.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxDepth">
+      <summary>Получает и задает максимальную глубину вложенного узла.</summary>
+      <returns>Максимальная глубина вложенного узла.Значение по умолчанию — 32.</returns>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для данного экземпляра.</exception>
+      <exception cref="T:System.ArgumentException">Попытка set значение меньше нуля.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxNameTableCharCount">
+      <summary>Возвращает и задает максимальное количество символов в имени таблицы.</summary>
+      <returns>Максимально допустимое количество символов в имени таблицы.Значение по умолчанию — 16384.</returns>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для данного экземпляра.</exception>
+      <exception cref="T:System.ArgumentException">Попытка set значение меньше нуля.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxStringContentLength">
+      <summary>Получает и задает максимальную длину строки, возвращаемую модулем чтения.</summary>
+      <returns>Максимальная длина строки, возвращаемой модулем чтения.Значение по умолчанию — 8192.</returns>
+      <exception cref="T:System.InvalidOperationException">Попытка set значение при доступе только для чтения к значению квоты для данного экземпляра.</exception>
+      <exception cref="T:System.ArgumentException">Попытка set значение меньше нуля.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.ModifiedQuotas">
+      <summary>Получает измененные квоты для <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />.</summary>
+      <returns>Измененные квоты для <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />.</returns>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReaderQuotaTypes">
+      <summary>Перечисляет настраиваемые значения квоты для XmlDictionaryReaders.</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxArrayLength">
+      <summary>Указывает максимально допустимую длину массива.</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxBytesPerRead">
+      <summary>Указывает максимальное допустимое число байтов, возвращаемых для каждой операции чтения.</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxDepth">
+      <summary>Указывает максимальную глубину вложенного узла.</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxNameTableCharCount">
+      <summary>Указывает максимально допустимое количество символов в имени таблицы.</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxStringContentLength">
+      <summary>Указывает максимальную длину строки, возвращаемой средством чтения.</summary>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryString">
+      <summary>Представляет запись, которая хранится в <see cref="T:System.Xml.XmlDictionary" />.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryString.#ctor(System.Xml.IXmlDictionary,System.String,System.Int32)">
+      <summary>Создает экземпляр этого класса. </summary>
+      <param name="dictionary">Класс <see cref="T:System.Xml.IXmlDictionary" />, содержащий этот экземпляр.</param>
+      <param name="value">Строка, являющаяся значением записи словаря.</param>
+      <param name="key">Целое число, являющееся ключом записи словаря.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="dictionary" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Параметр <paramref name="key" /> имеет значение меньше 0 или больше <see cref="F:System.Int32.MaxValue" /> / 4.</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Dictionary">
+      <summary>Представляет <see cref="T:System.Xml.IXmlDictionary" />, передаваемый конструктору экземпляра <see cref="T:System.Xml.XmlDictionaryString" />.</summary>
+      <returns>
+        <see cref="T:System.Xml.IXmlDictionary" /> для этой записи словаря.</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Empty">
+      <summary>Возвращает объект <see cref="T:System.Xml.XmlDictionaryString" />, представляющий пустую строку.</summary>
+      <returns>Объект <see cref="T:System.Xml.XmlDictionaryString" />, представляющий пустую строку.</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Key">
+      <summary>Возвращает целочисленный ключ для экземпляра класса.  </summary>
+      <returns>Целочисленный ключ для этого экземпляра класса. </returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryString.ToString">
+      <summary>Отображает текстовое представление объекта.</summary>
+      <returns>Строковое значение для этого экземпляра класса. </returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Value">
+      <summary>Возвращает строковое значение для этого экземпляра класса.  </summary>
+      <returns>Строковое значение для этого экземпляра класса. </returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryWriter">
+      <summary>Представляет абстрактный класс, который Windows Communication Foundation (WCF) наследует от <see cref="T:System.Xml.XmlWriter" /> для выполнения сериализации и десериализации.</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Xml.XmlDictionaryWriter" />.</summary>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryWriter.CanCanonicalize">
+      <summary>Данное свойство всегда возвращает значение false.Производные классы могут переопределять параметры для возврата значения true, если поддерживают канонизацию.</summary>
+      <returns>Во всех случаях — значение false.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего XML в двоичном формате WCF.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего XML в двоичном формате WCF.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+      <param name="dictionary">Объект <see cref="T:System.Xml.XmlDictionary" />, который следует использовать в качестве общего словаря.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlBinaryWriterSession)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего XML в двоичном формате WCF.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+      <param name="dictionary">Объект <see cref="T:System.Xml.XmlDictionary" />, который следует использовать в качестве общего словаря.</param>
+      <param name="session">Используемое средство записи <see cref="T:System.Xml.XmlBinaryWriterSession" />.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlBinaryWriterSession,System.Boolean)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего XML в двоичном формате WCF.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, из которого требуется выполнить чтение.</param>
+      <param name="dictionary">Объект <see cref="T:System.Xml.XmlDictionary" />, который следует использовать в качестве общего словаря.</param>
+      <param name="session">Используемое средство записи <see cref="T:System.Xml.XmlBinaryWriterSession" />.</param>
+      <param name="ownsStream">Значение true для указания того, что поток закрывается средством записи после завершения; в противном случае — значение false.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateDictionaryWriter(System.Xml.XmlWriter)">
+      <summary>Создает экземпляр класса <see cref="T:System.Xml.XmlDictionaryWriter" /> из существующего объекта <see cref="T:System.Xml.XmlWriter" />.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="writer">Экземпляр <see cref="T:System.Xml.XmlWriter" />.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="writer" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего текстовый XML.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream,System.Text.Encoding)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего текстовый XML.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+      <param name="encoding">Кодировка в выходе.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream,System.Text.Encoding,System.Boolean)">
+      <summary>Создает экземпляр объекта <see cref="T:System.Xml.XmlDictionaryWriter" />, записывающего текстовый XML.</summary>
+      <returns>Экземпляр <see cref="T:System.Xml.XmlDictionaryWriter" />.</returns>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+      <param name="encoding">Кодировка в потоке.</param>
+      <param name="ownsStream">Значение true для указания того, что поток закрывается средством записи после завершения; в противном случае — значение false.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.EndCanonicalization">
+      <summary>При реализации производным классом прекращает канонизацию, начатую соответствующим вызовом <see cref="M:System.Xml.XmlDictionaryWriter.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])" />.</summary>
+      <exception cref="T:System.NotSupportedException">Этот метод еще не реализован.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])">
+      <summary>При реализации производным классом, запускает канонизацию.</summary>
+      <param name="stream">Поток, в который требуется выполнить запись.</param>
+      <param name="includeComments">Значение true, если комментарии необходимо включить; в противном случае — значение false.</param>
+      <param name="inclusivePrefixes">Префиксы, подлежащие включению.</param>
+      <exception cref="T:System.NotSupportedException">Этот метод еще не реализован.</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Boolean[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Boolean" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий данные.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество значений, записываемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.DateTime[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.DateTime" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Decimal[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Decimal" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Double[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Double" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Guid[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Guid" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int16[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int16" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int32[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int32" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int64[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int64" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Single[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Single" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.TimeSpan" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Boolean[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Boolean" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.DateTime[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.DateTime" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Decimal[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Decimal" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Double[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Double" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Guid[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Guid" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int16[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int16" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int32[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int32" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int64[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Int64" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Single[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.Single" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>Записывает узлы из массива <see cref="T:System.TimeSpan" />.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="array">Массив, содержащий узлы.</param>
+      <param name="offset">Начальный индекс в массиве.</param>
+      <param name="count">Количество узлов, возвращаемых из массива.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="array" /> имеет значение null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="offset" /> меньше нуля или больше длины массива <paramref name="array" />.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Значение параметра <paramref name="count" /> меньше нуля или больше длины массива <paramref name="array" /> минус <paramref name="offset" />.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteAttributeString(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>Записывает полное имя и значение атрибута.</summary>
+      <param name="prefix">Префикс атрибута.</param>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="namespaceUri">URI пространства имен атрибута.</param>
+      <param name="value">Атрибут.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteAttributeString(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>Записывает полное имя и значение атрибута.</summary>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="namespaceUri">URI пространства имен атрибута.</param>
+      <param name="value">Атрибут.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteElementString(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>Записывает элемент с текстовым содержимым.</summary>
+      <param name="prefix">Префикс элемента.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="value">Содержимое элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteElementString(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>Записывает элемент с текстовым содержимым.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <param name="value">Содержимое элемента.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteNode(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>Записывает текущий XML-узел из объекта <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />.</param>
+      <param name="defattr">Значение true, чтобы скопировать атрибуты по умолчанию из XmlReader; в противном случае — значение false.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="reader" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteNode(System.Xml.XmlReader,System.Boolean)">
+      <summary>Записывает текущий XML-узел из объекта <see cref="T:System.Xml.XmlReader" />.</summary>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" />.</param>
+      <param name="defattr">Значение true, чтобы скопировать атрибуты по умолчанию из <see cref="T:System.Xml.XmlReader" />; в противном случае — значение false.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="reader" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteQualifiedName(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Считывает проверенное имя пространства имен.Этот метод ищет префикс для пространства имен в его области.</summary>
+      <param name="localName">Локальное имя полного имени.</param>
+      <param name="namespaceUri">URI-код пространства имен полного имени.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="localName" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartAttribute(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Записывает начальное значение атрибута с заданным префиксом, локальным именем и URI пространства имен.</summary>
+      <param name="prefix">Префикс пространства имен.</param>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="namespaceUri">URI пространства имен атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Записывает начала атрибута с заданным локальным именем и URI пространства имен.</summary>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="namespaceUri">URI пространства имен атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartElement(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Записывает указанный открывающий тег и связывает его с заданным пространством имен и префиксом.</summary>
+      <param name="prefix">Префикс элемента.</param>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <exception cref="T:System.InvalidOperationException">Средство записи закрыто.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Записывает указанный открывающий тег и связывает его с заданным пространством имен.</summary>
+      <param name="localName">Локальное имя элемента.</param>
+      <param name="namespaceUri">URI пространства имен элемента.</param>
+      <exception cref="T:System.InvalidOperationException">Средство записи закрыто.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteString(System.Xml.XmlDictionaryString)">
+      <summary>Записывает заданное текстовое содержимое.</summary>
+      <param name="value">Текст для записи.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteTextNode(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>Записывает текстовый узел, на котором в данный момент расположен объект <see cref="T:System.Xml.XmlDictionaryReader" />.</summary>
+      <param name="reader">Объект <see cref="T:System.Xml.XmlDictionaryReader" />, из которого возвращается текстовое значение.</param>
+      <param name="isAttribute">Значение true для указания того, что средство чтения расположено в значении атрибута или содержимом элемента; в противном случае — значение false.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Guid)">
+      <summary>Записывает значение <see cref="T:System.Guid" />.</summary>
+      <param name="value">Значение типа <see cref="T:System.Guid" /> для записи.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.TimeSpan)">
+      <summary>Записывает значение <see cref="T:System.TimeSpan" />.</summary>
+      <param name="value">Значение типа <see cref="T:System.TimeSpan" /> для записи.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Xml.UniqueId)">
+      <summary>Записывает значение уникального идентификатора.</summary>
+      <param name="value">Значение уникального идентификатора для записи.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="value" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Xml.XmlDictionaryString)">
+      <summary>Записывает значение <see cref="T:System.Xml.XmlDictionaryString" />.</summary>
+      <param name="value">Значение типа <see cref="T:System.Xml.XmlDictionaryString" />.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlAttribute(System.String,System.String)">
+      <summary>Записывает стандартный атрибут XML в текущий узел.</summary>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="value">Значение атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>Записывает атрибут XML в текущий узел.</summary>
+      <param name="localName">Локальное имя атрибута.</param>
+      <param name="value">Значение атрибута.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlnsAttribute(System.String,System.String)">
+      <summary>Записывает атрибут объявления пространства имен.</summary>
+      <param name="prefix">Префикс, привязанный к данному пространству имен.</param>
+      <param name="namespaceUri">Пространство имен, к которому привязан префикс.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlnsAttribute(System.String,System.Xml.XmlDictionaryString)">
+      <summary>Записывает атрибут объявления пространства имен.</summary>
+      <param name="prefix">Префикс, привязанный к данному пространству имен.</param>
+      <param name="namespaceUri">Пространство имен, к которому привязан префикс.</param>
+      <exception cref="T:System.ArgumentNullException">Параметр <paramref name="namespaceUri" /> имеет значение null.</exception>
+    </member>
+  </members>
+</doc>

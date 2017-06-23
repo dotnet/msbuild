@@ -1,0 +1,806 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Diagnostics.Tracing</name>
+  </assembly>
+  <members>
+    <member name="T:System.Diagnostics.Tracing.EventActivityOptions">
+      <summary>指定跟踪活动的启动和停止事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Detachable">
+      <summary>允许重叠的活动。默认情况下，活动开始和停止必须是嵌套的属性。即，不允许使用开始 A、开始 B、停止 A、停止 B 序列，这会导致 B 与 A 同时停止。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Disable">
+      <summary>关闭开始和停止跟踪。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.None">
+      <summary>对开始和停止跟踪使用默认行为。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Recursive">
+      <summary>允许递归活动开始。默认情况下，活动不能是递归的。即，不允许使用开始 A、开始 A、停止 A、停止 A 序列。如果应用执行，并且在调用另一个开始之前未到达停止，则可能会出现无意的递归活动。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventAttribute">
+      <summary>指定事件的附加事件架构信息。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventAttribute.#ctor(System.Int32)">
+      <summary>使用指定的事件标识符初始化 <see cref="T:System.Diagnostics.Tracing.EventAttribute" /> 类的新实例。</summary>
+      <param name="eventId">该事件的事件标识符。</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.ActivityOptions">
+      <summary>指定活动开始和停止事件的行为。活动是应用中开始与停止之间的时间区域。</summary>
+      <returns>返回 <see cref="T:System.Diagnostics.Tracing.EventActivityOptions" />。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Channel">
+      <summary>获取或设置应在其中写入事件的附加事件日志。</summary>
+      <returns>应在其中写入事件的附加事件日志。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.EventId">
+      <summary>获取或设置事件的标识符。</summary>
+      <returns>事件标识符。该值应介于 0 到 65535 之间。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Keywords">
+      <summary>获取或设置事件的关键字。</summary>
+      <returns>枚举值的按位组合。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Level">
+      <summary>获取或设置事件的级别。</summary>
+      <returns>指定事件级别的枚举值之一。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Message">
+      <summary>获取或设置事件的消息。</summary>
+      <returns>事件的消息。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Opcode">
+      <summary>获取或设置事件的操作代码。</summary>
+      <returns>用于指定操作代码的枚举值之一。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Tags">
+      <summary>获取和设置<see cref="T:System.Diagnostics.Tracing.EventTags" />为此值<see cref="T:System.Diagnostics.Tracing.EventAttribute" />对象。事件标记是在记录事件时传递的用户定义值。</summary>
+      <returns>返回 <see cref="T:System.Diagnostics.Tracing.EventTags" /> 值。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Task">
+      <summary>获取或设置事件的任务。</summary>
+      <returns>事件的任务。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Version">
+      <summary>获取或设置事件的版本。</summary>
+      <returns>事件的版本。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventChannel">
+      <summary>指定事件的事件日志通道。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Admin">
+      <summary>管理员日志通道。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Analytic">
+      <summary>分析通道。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Debug">
+      <summary>调试通道。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.None">
+      <summary>未指定通道。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Operational">
+      <summary>操作通道。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventCommand">
+      <summary>描述传递给 <see cref="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)" /> 恢复命令 (<see cref="P:System.Diagnostics.Tracing.EventCommandEventArgs.Command" /> 属性。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Disable">
+      <summary>禁用该事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Enable">
+      <summary>启用该事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.SendManifest">
+      <summary>发送清单。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Update">
+      <summary>更新事件。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventCommandEventArgs">
+      <summary>提供 <see cref="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)" /> 回调的参数。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventCommandEventArgs.Arguments">
+      <summary>获取回调的参数数组。</summary>
+      <returns>回调参数数组。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventCommandEventArgs.Command">
+      <summary>获取回调的命令。</summary>
+      <returns>回调命令。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventCommandEventArgs.DisableEvent(System.Int32)">
+      <summary>禁用有指定标识符的事件。</summary>
+      <returns>如果 <paramref name="eventId" /> 在范围中，则为 true；否则为 false。</returns>
+      <param name="eventId">禁用事件的标识符。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventCommandEventArgs.EnableEvent(System.Int32)">
+      <summary>启用有指定标识符的事件。</summary>
+      <returns>如果 <paramref name="eventId" /> 在范围中，则为 true；否则为 false。</returns>
+      <param name="eventId">启用事件的标识符。</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventDataAttribute">
+      <summary>指定的类型传递给<see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)" />方法。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventDataAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" /> 类的新实例。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventDataAttribute.Name">
+      <summary>如果未显式命名事件类型或属性，则获取或设置要应用于事件的名称。</summary>
+      <returns>要应用于事件或属性的名称。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldAttribute">
+      <summary>
+        <see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" />放置在作为传递的用户定义类型的字段上<see cref="T:System.Diagnostics.Tracing.EventSource" />负载。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventFieldAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" /> 类的新实例。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventFieldAttribute.Format">
+      <summary>获取和设置指定如何设置用户定义类型的值的格式的值。</summary>
+      <returns>返回一个 <see cref="T:System.Diagnostics.Tracing.EventFieldFormat" /> 值。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventFieldAttribute.Tags">
+      <summary>获取和设置用户定义<see cref="T:System.Diagnostics.Tracing.EventFieldTags" />是所必需的字段包含不受支持的类型之一的数据的值。</summary>
+      <returns>返回 <see cref="T:System.Diagnostics.Tracing.EventFieldTags" />。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldFormat">
+      <summary>指定如何设置用户定义类型的值的格式，可以用于重写字段的默认格式设置。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Boolean">
+      <summary>Boolean</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Default">
+      <summary>默认。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Hexadecimal">
+      <summary>十六进制。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.HResult">
+      <summary>HResult。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Json">
+      <summary>JSON。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.String">
+      <summary>字符串。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Xml">
+      <summary>XML。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldTags">
+      <summary>指定放置在作为传递的用户定义类型的字段的用户定义的标记<see cref="T:System.Diagnostics.Tracing.EventSource" />负载通过<see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" />。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldTags.None">
+      <summary>不指定任何标记，等于零。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventIgnoreAttribute">
+      <summary>指定在编写具有的事件类型时，应忽略属性<see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,``0@)" />方法。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventIgnoreAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventIgnoreAttribute" /> 类的新实例。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventKeywords">
+      <summary>定义应用于事件的标准关键字。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.All">
+      <summary>所有位都设置为 1，表示每个可能的事件组。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.AuditFailure">
+      <summary>已附加到所有失败的安全审核事件。仅对安全日志中的事件使用此关键字。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.AuditSuccess">
+      <summary>已附加到所有成功的安全审核事件。仅对安全日志中的事件使用此关键字。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.CorrelationHint">
+      <summary>已附加到传输事件，其中相关的活动 ID（相关 ID）是一个计算值，不能保证其唯一性（即它不是真正的 GUID）。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.EventLogClassic">
+      <summary>附加到使用 RaiseEvent 函数引发的事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.None">
+      <summary>发布此事件时未对关键字执行任何筛选。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.Sqm">
+      <summary>已附加到所有服务质量机制 (SQM) 事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.WdiContext">
+      <summary>已附加到所有 Windows 诊断基础结构 (WDI) 上下文事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.WdiDiagnostic">
+      <summary>已附加到所有 Windows 诊断基础结构 (WDI) 诊断事件。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventLevel">
+      <summary>标识事件的级别。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Critical">
+      <summary>此级别与一个导致严重故障的错误相对应。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Error">
+      <summary>该级别增加表示某个问题的标准错误。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Informational">
+      <summary>此级别向不是错误的信息性事件或消息添加。这些事件可帮助跟踪应用程序的进度或状态。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.LogAlways">
+      <summary>此事件的级别筛选未完成。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Verbose">
+      <summary>此级别添加冗长事件或消息。他导致所有的事件被记录。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Warning">
+      <summary>此级别添加警告事件（例如，因磁盘容量快满而发布的事件）。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventListener">
+      <summary>提供用于启用和禁用事件源中事件的方法。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.#ctor">
+      <summary>创建 <see cref="T:System.Diagnostics.Tracing.EventListener" /> 类的新实例。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.DisableEvents(System.Diagnostics.Tracing.EventSource)">
+      <summary>禁用指定事件源的所有事件。</summary>
+      <param name="eventSource">要禁用其事件的事件源。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.Dispose">
+      <summary>释放由 <see cref="T:System.Diagnostics.Tracing.EventListener" /> 类的当前实例占用的资源。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel)">
+      <summary>启用具有指定详细级别或更低详细级别的指定事件源的事件。</summary>
+      <param name="eventSource">要启用其事件的事件源。</param>
+      <param name="level">要启用的事件级别。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords)">
+      <summary>启动具有指定详细级别或更低详细级别且与关键字标志匹配的指定事件源的事件。</summary>
+      <param name="eventSource">要启用其事件的事件源。</param>
+      <param name="level">要启用的事件级别。</param>
+      <param name="matchAnyKeyword">启用事件所需的关键字标志。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords,System.Collections.Generic.IDictionary{System.String,System.String})">
+      <summary>启动具有指定详细级别或更低详细级别且与关键字标志和参数匹配的指定事件源的事件。</summary>
+      <param name="eventSource">要启用其事件的事件源。</param>
+      <param name="level">要启用的事件级别。</param>
+      <param name="matchAnyKeyword">启用事件所需的关键字标志。</param>
+      <param name="arguments">需匹配以启用事件的参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EventSourceIndex(System.Diagnostics.Tracing.EventSource)">
+      <summary>获取表示指定事件源的较小非负数。</summary>
+      <returns>表示指定的事件源的较小非负数。</returns>
+      <param name="eventSource">要查找其索引的事件源。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.OnEventSourceCreated(System.Diagnostics.Tracing.EventSource)">
+      <summary>当创建该事件侦听器且将新事件源附加到侦听器时，对所有现有事件源执行了调用。</summary>
+      <param name="eventSource">事件源。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs)">
+      <summary>每次事件源写入事件时都执行调用，其中事件侦听器为事件源启用了事件。</summary>
+      <param name="eventData">描述该事件的事件参数。</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventManifestOptions">
+      <summary>指定如何生成事件源的 ETW 清单。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.AllCultures">
+      <summary>在提供的每个附属程序集的本地化文件夹下生成资源节点。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.AllowEventSourceOverride">
+      <summary>重写默认行为的当前<see cref="T:System.Diagnostics.Tracing.EventSource" />必须将用户定义类型的基类传递给 write 方法。这会启用对 .NET 事件源的验证。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.None">
+      <summary>未指定任何选项。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.OnlyIfNeededForRegistration">
+      <summary>只有必须在主机上注册事件源时才生成清单。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.Strict">
+      <summary>如果写入清单文件时出现任何不一致将导致引发异常。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventOpcode">
+      <summary>定义标准操作代码，事件源将其添加到事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.DataCollectionStart">
+      <summary>跟踪集合启动事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.DataCollectionStop">
+      <summary>跟踪集合停止事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Extension">
+      <summary>扩展事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Info">
+      <summary>信息性事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Receive">
+      <summary>在应用程序中的一个活动收到数据时发布的事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Reply">
+      <summary>在应用程序中的活动答复事件后发布的事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Resume">
+      <summary>在应用程序中的活动从挂起状态恢复后发布的事件。该事件应执行具有 <see cref="F:System.Diagnostics.Tracing.EventOpcode.Suspend" /> 操作代码的事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Send">
+      <summary>在应用程序中的一个活动将数据或系统资源传输到另一个活动时发布的事件。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Start">
+      <summary>在应用程序启动新事务或活动时发布的事件。当多个具有 <see cref="F:System.Diagnostics.Tracing.EventOpcode.Start" /> 码的事件相继发生而没有具有 <see cref="F:System.Diagnostics.Tracing.EventOpcode.Stop" /> 码的插入事件时，此操作代码可以嵌入到另一个事务或活动中。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Stop">
+      <summary>在应用程序中的活动或事务结束时发布的事件。此事件与具有 <see cref="F:System.Diagnostics.Tracing.EventOpcode.Start" /> 操作码的最后一个未成对的事件对应。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Suspend">
+      <summary>在应用程序中的活动挂起时发布的事件。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSource">
+      <summary>提供为 Windows 事件跟踪 (ETW) 创建事件的功能。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor">
+      <summary>创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Boolean)">
+      <summary>创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例，并指定在 Windows 基础代码发生错误时是否引发异常。</summary>
+      <param name="throwOnEventWriteErrors">若在 Windows 基础代码发生错误时要引发异常，则为 true；否则为 false。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Diagnostics.Tracing.EventSourceSettings)">
+      <summary>使用指定的配置设置创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例。</summary>
+      <param name="settings">一个枚举值的按位组合，这些枚举值指定要应用于事件源的配置设置。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Diagnostics.Tracing.EventSourceSettings,System.String[])">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 的新实例，以用于其中包含指定设置和特性的非约定事件。</summary>
+      <param name="settings">一个枚举值的按位组合，这些枚举值指定要应用于事件源的配置设置。</param>
+      <param name="traits">指定事件源特性的键值对。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="traits" /> is not specified in key-value pairs.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String)">
+      <summary>使用指定的名称创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例。</summary>
+      <param name="eventSourceName">要应用于事件源的名称。不得为 null。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String,System.Diagnostics.Tracing.EventSourceSettings)">
+      <summary>使用指定的名称和设置创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例。</summary>
+      <param name="eventSourceName">要应用于事件源的名称。不得为 null。</param>
+      <param name="config">一个枚举值的按位组合，这些枚举值指定要应用于事件源的配置设置。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String,System.Diagnostics.Tracing.EventSourceSettings,System.String[])">
+      <summary>使用指定的配置设置创建 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的新实例。</summary>
+      <param name="eventSourceName">要应用于事件源的名称。不得为 null。</param>
+      <param name="config">一个枚举值的按位组合，这些枚举值指定要应用于事件源的配置设置。</param>
+      <param name="traits">指定事件源特性的键值对。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="traits" /> is not specified in key-value pairs.</exception>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.ConstructionException">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 获取在事件源的构造过程中引发的任何异常。</summary>
+      <returns>在事件源的构造过程中引发的异常；如果没有引发异常，则为 null。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.CurrentThreadActivityId">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 获取当前线程的活动 ID。</summary>
+      <returns>当前线程的活动 ID。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Dispose">
+      <summary>释放由 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类的当前实例占用的所有资源。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Dispose(System.Boolean)">
+      <summary>释放 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 类使用的非托管资源，并可以选择释放托管资源。</summary>
+      <param name="disposing">若要释放托管资源和非托管资源，则为 true；若仅释放非托管资源，则为 false。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Finalize">
+      <summary>允许 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 对象在被垃圾回收之前尝试释放资源并执行其他清理操作。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GenerateManifest(System.Type,System.String)">
+      <summary>返回与当前事件源关联的 XML 清单的字符串。</summary>
+      <returns>XML 数据字符串。</returns>
+      <param name="eventSourceType">事件源的类型。</param>
+      <param name="assemblyPathToIncludeInManifest">要包含在清单的 provider 元素中的程序集文件 (.dll) 的路径。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GenerateManifest(System.Type,System.String,System.Diagnostics.Tracing.EventManifestOptions)">
+      <summary>返回与当前事件源关联的 XML 清单的字符串。</summary>
+      <returns>XML 数据字符串或 null（请参见“备注”）。</returns>
+      <param name="eventSourceType">事件源的类型。</param>
+      <param name="assemblyPathToIncludeInManifest">要包含在清单的 provider 元素中的程序集文件 (.dll) 的路径。</param>
+      <param name="flags">一个枚举值的按位组合，这些枚举值指定如何生成清单。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetGuid(System.Type)">
+      <summary>获取事件源的实现的唯一标识符。</summary>
+      <returns>此事件源类型的唯一标识符。</returns>
+      <param name="eventSourceType">事件源的类型。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetName(System.Type)">
+      <summary>获取事件源的好友名称。</summary>
+      <returns>事件源的友好名称。默认值为类的简单名称。</returns>
+      <param name="eventSourceType">事件源的类型。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetSources">
+      <summary>获取应用程序域的所有事件源的快照。</summary>
+      <returns>应用程序域中所有事件源的枚举。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetTrait(System.String)">
+      <summary>获取与指定键关联的特性值。</summary>
+      <returns>与指定的键相关联的特性值。如果未找到该键，则返回 null。</returns>
+      <param name="key">要获取的特性的键。</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Guid">
+      <summary>此事件源的唯一标识符。</summary>
+      <returns>此事件源的唯一标识符。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled">
+      <summary>确定是否已启用当前事件源。</summary>
+      <returns>如果启用了当前事件源，则为 true；否则为 false。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled(System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords)">
+      <summary>确定是否已启用具有指定级别和关键字的当前事件源。</summary>
+      <returns>如果启用了事件源，则为 true；否则为 false。</returns>
+      <param name="level">事件源级别。</param>
+      <param name="keywords">事件源的关键字。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled(System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords,System.Diagnostics.Tracing.EventChannel)">
+      <summary>确定是否对带有指定级别、关键字和通道的事件启用了当前事件源。</summary>
+      <returns>如果对指定的事件级别、关键字和通道启用了事件源，则为 true；否则为 false。通过此方法的结果仅可大概了解特定的事件是否处于活动状态。使用它可避免在禁用了记录的情况下因记录造成昂贵的计算费用。事件源可能具有确定其活动的其他筛选。</returns>
+      <param name="level">要检查的事件级别。当事件源的级别大于或等于 <paramref name="level" /> 时，将其视为已启用。</param>
+      <param name="keywords">要检查的事件关键字。</param>
+      <param name="channel">要检查的事件通道。</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Name">
+      <summary>从事件源中派生出来的类的友好名称。</summary>
+      <returns>派生类的友好名称。默认值为类的简单名称。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)">
+      <summary>当该控制器更新当前事件源时调用。</summary>
+      <param name="command">事件的参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SendCommand(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventCommand,System.Collections.Generic.IDictionary{System.String,System.String})">
+      <summary>发送命令到指定的事件源。</summary>
+      <param name="eventSource">对其发送命令的事件源。</param>
+      <param name="command">要发送的事件命令。</param>
+      <param name="commandArguments">事件命令的参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SetCurrentThreadActivityId(System.Guid)">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 在当前线程上设置活动 ID。</summary>
+      <param name="activityId">当前线程的新活动 ID；或者为 <see cref="F:System.Guid.Empty" /> 以指示当前线程上的工作与任何活动都不关联。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SetCurrentThreadActivityId(System.Guid,System.Guid@)">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 在当前线程上设置活动 ID 并返回以前的活动 ID。</summary>
+      <param name="activityId">当前线程的新活动 ID；或者为 <see cref="F:System.Guid.Empty" /> 以指示当前线程上的工作与任何活动都不关联。</param>
+      <param name="oldActivityThatWillContinue">当此方法返回时，将包含当前线程上以前的活动 ID。</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Settings">
+      <summary>获取应用于此事件源的设置。</summary>
+      <returns>应用于此事件源的设置。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.ToString">
+      <summary>获得当前事件源实例的字符串表示形式。</summary>
+      <returns>标识当前事件源的名称和唯一标识符。</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write(System.String)">
+      <summary>使用指定的名称和默认选项而非字段来写入事件。</summary>
+      <param name="eventName">要写入的事件的名称。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)">
+      <summary>使用指定的名称和选项而非字段来写入事件。</summary>
+      <param name="eventName">要写入的事件的名称。</param>
+      <param name="options">事件的级别、关键字和操作代码等选项。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)">
+      <summary>使用指定的名称、事件数据和选项写入事件。</summary>
+      <param name="eventName">事件的名称。</param>
+      <param name="options">事件选项。</param>
+      <param name="data">事件数据。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" /> 属性进行标记。</param>
+      <typeparam name="T">定义事件及其关联数据的类型。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" /> 属性进行标记。</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,System.Guid@,System.Guid@,``0@)">
+      <summary>使用指定的名称、选项、相关活动和事件数据写入事件。</summary>
+      <param name="eventName">事件的名称。</param>
+      <param name="options">事件选项。</param>
+      <param name="activityId">与事件关联的活动的 ID。</param>
+      <param name="relatedActivityId">关联活动的 ID；如果没有关联活动，则为 <see cref="F:System.Guid.Empty" />。</param>
+      <param name="data">事件数据。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" /> 属性进行标记。</param>
+      <typeparam name="T">定义事件及其关联数据的类型。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" /> 属性进行标记。</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,``0@)">
+      <summary>使用指定的名称、选项和事件数据写入事件。</summary>
+      <param name="eventName">事件的名称。</param>
+      <param name="options">事件选项。</param>
+      <param name="data">事件数据。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" /> 属性进行标记。</param>
+      <typeparam name="T">定义事件及其关联数据的类型。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" /> 属性进行标记。</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,``0)">
+      <summary>使用指定的名称和数据写入事件。</summary>
+      <param name="eventName">事件的名称。</param>
+      <param name="data">事件数据。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" /> 属性进行标记。</param>
+      <typeparam name="T">定义事件及其关联数据的类型。此类型必须为匿名类型或以 <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" /> 属性进行标记。</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32)">
+      <summary>通过使用提供的事件标识符写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Byte[])">
+      <summary>通过使用提供的事件标识符和字节数组参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">字节数组参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32)">
+      <summary>通过使用提供的事件标识符和 32 位整数参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.Int32)">
+      <summary>通过使用提供的事件标识符和 32 位整数参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个整数参数。</param>
+      <param name="arg2">一个整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.Int32,System.Int32)">
+      <summary>通过使用提供的事件标识符和 32 位整数参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个整数参数。</param>
+      <param name="arg2">一个整数参数。</param>
+      <param name="arg3">一个整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.String)">
+      <summary>使用提供的事件标识符、32 位整数和字符串参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">32 位整数参数。</param>
+      <param name="arg2">一个字符串参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64)">
+      <summary>通过使用提供的事件标识符和 64 位整数参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">64 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Byte[])">
+      <summary>使用指定的标识符、64 位整数和字节数组参数写入事件数据。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">64 位整数参数。</param>
+      <param name="arg2">字节数组参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Int64)">
+      <summary>通过使用提供的事件标识符和 64 位参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">64 位整数参数。</param>
+      <param name="arg2">64 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Int64,System.Int64)">
+      <summary>通过使用提供的事件标识符和 64 位参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">64 位整数参数。</param>
+      <param name="arg2">64 位整数参数。</param>
+      <param name="arg3">64 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.String)">
+      <summary>使用提供的事件标识符、64 位整数和字符串参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">64 位整数参数。</param>
+      <param name="arg2">一个字符串参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Object[])">
+      <summary>通过使用提供的事件标识符和参数数组写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="args">对象数组。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String)">
+      <summary>通过使用提供的事件标识符和字符串参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int32)">
+      <summary>通过使用提供的事件标识符和参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+      <param name="arg2">32 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int32,System.Int32)">
+      <summary>通过使用提供的事件标识符和参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+      <param name="arg2">32 位整数参数。</param>
+      <param name="arg3">32 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int64)">
+      <summary>通过使用提供的事件标识符和参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+      <param name="arg2">64 位整数参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.String)">
+      <summary>通过使用提供的事件标识符和字符串参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+      <param name="arg2">一个字符串参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.String,System.String)">
+      <summary>通过使用提供的事件标识符和字符串参数写入事件。</summary>
+      <param name="eventId">事件标识符。该值应介于 0 到 65535 之间。</param>
+      <param name="arg1">一个字符串参数。</param>
+      <param name="arg2">一个字符串参数。</param>
+      <param name="arg3">一个字符串参数。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventCore(System.Int32,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)">
+      <summary>通过使用提供的事件标识符和事件数据，创建新的 <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> 重载。</summary>
+      <param name="eventId">事件标识符。</param>
+      <param name="eventDataCount">事件数据项的数目。</param>
+      <param name="data">包含事件数据的结构。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventWithRelatedActivityId(System.Int32,System.Guid,System.Object[])">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 写入一个指示当前活动与其他活动相关的事件。</summary>
+      <param name="eventId">在 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 中唯一标识此事件的标识符。</param>
+      <param name="relatedActivityId">相关的活动标识符。</param>
+      <param name="args">包含与事件相关的数据的对象数组。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventWithRelatedActivityIdCore(System.Int32,System.Guid*,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 写入一个指示当前活动与其他活动相关的事件。</summary>
+      <param name="eventId">在 <see cref="T:System.Diagnostics.Tracing.EventSource" /> 中唯一标识此事件的标识符。</param>
+      <param name="relatedActivityId">指向相关活动 ID 的 GUID 的指针。</param>
+      <param name="eventDataCount">
+        <paramref name="data" /> 字段中的项数。</param>
+      <param name="data">指向事件数据字段中第一个项的指针。</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSource.EventData">
+      <summary>提供事件数据用于创建快速 <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> 过载，方法是使用 <see cref="M:System.Diagnostics.Tracing.EventSource.WriteEventCore(System.Int32,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)" /> 方法。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.EventData.DataPointer">
+      <summary>获取或设置新的 <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> 重载的数据的指针。</summary>
+      <returns>数据的指针。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.EventData.Size">
+      <summary>获取或设置新的 <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> 重载中的项目的负载数量。</summary>
+      <returns>在新的重载中的负载项的数目。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceAttribute">
+      <summary>允许 Windows (ETW) 名称事件追踪，要独立定义事件源类的名称。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceAttribute.#ctor">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" /> 类的新实例。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.Guid">
+      <summary>获取或设置事件源标识符。</summary>
+      <returns>事件源标识符。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.LocalizationResources">
+      <summary>获取或设置本地化资源文件的名称。</summary>
+      <returns>本地化资源文件的名称或如果本地化资源文件不存在，则为 null。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.Name">
+      <summary>获取或设置事件源的名称。</summary>
+      <returns>事件源的名称。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceException">
+      <summary>在 Windows （ETW） 中追踪事件时发生错误时引发的异常。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor">
+      <summary>初始化 <see cref="T:System.Diagnostics.Tracing.EventSourceException" /> 类的新实例。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor(System.String)">
+      <summary>使用指定的错误消息初始化 <see cref="T:System.Diagnostics.Tracing.EventSourceException" /> 类的新实例。</summary>
+      <param name="message">描述错误的消息。</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor(System.String,System.Exception)">
+      <summary>使用指定错误消息和对作为此异常原因的内部异常的引用来初始化 <see cref="T:System.Diagnostics.Tracing.EventSourceException" /> 类的新实例。</summary>
+      <param name="message">解释异常原因的错误信息。</param>
+      <param name="innerException">作为当前异常原因的异常，如果没有指定内部异常，则为 null。</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceOptions">
+      <summary>指定重写的默认事件设置，如日志级别，关键字和操作的代码时<see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)" />调用方法。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.ActivityOptions"></member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Keywords">
+      <summary>获取或设置应用于事件的关键字。如果未设置此属性，该事件的关键字将None。</summary>
+      <returns>应用于事件，这些关键字或None如果任何关键字都不设置。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Level">
+      <summary>获取或设置应用于事件的事件级别。</summary>
+      <returns>事件的事件级别。如果未设置，则默认为 Verbose (5)。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Opcode">
+      <summary>获取或设置用于为指定的事件的操作代码。</summary>
+      <returns>用于指定事件的操作代码。如果未设置，默认值是Info(0)。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Tags"></member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceSettings">
+      <summary>指定事件源的配置选项。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.Default">
+      <summary>未启用任何特殊配置选项。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.EtwManifestEventFormat">
+      <summary>引发事件时 ETW 侦听器应使用基于清单的格式。设置此选项即对 ETW 侦听器发出指令，指示在引发事件时该侦听器应使用基于清单的格式。这是默认选项时定义的类型派生自<see cref="T:System.Diagnostics.Tracing.EventSource" />使用一种受保护<see cref="T:System.Diagnostics.Tracing.EventSource" />构造函数。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.EtwSelfDescribingEventFormat">
+      <summary>ETW 侦听器应使用自描述事件格式。这是默认选项创建的新实例时<see cref="T:System.Diagnostics.Tracing.EventSource" />使用一个公共<see cref="T:System.Diagnostics.Tracing.EventSource" />构造函数。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.ThrowOnEventWriteErrors">
+      <summary>发生错误时该事件源将引发异常。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventTags">
+      <summary>指定活动开始和停止事件的跟踪。只应使用较低的 24 位。有关详细信息，请参阅 <see cref="T:System.Diagnostics.Tracing.EventSourceOptions" /> 和 <see cref="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)" />。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventTags.None">
+      <summary>指定没有标记，并且等于零。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventTask">
+      <summary>定义应用于事件中任务。</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventTask.None">
+      <summary>未定义任务。</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventWrittenEventArgs">
+      <summary>为 <see cref="M:System.Diagnostics.Tracing.EventListener.OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs)" /> 回调提供数据。</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.ActivityId">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 获取向其写入了事件的线程上的活动 ID。</summary>
+      <returns>向其写入了事件的线程上的活动 ID。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Channel">
+      <summary>获取事件的通道。</summary>
+      <returns>事件的通道。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventId">
+      <summary>获取事件标识符。</summary>
+      <returns>事件标识符。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventName">
+      <summary>获取事件的名称。</summary>
+      <returns>事件的名称。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventSource">
+      <summary>获取事件源对象。</summary>
+      <returns>事件源对象。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Keywords">
+      <summary>获取事件的关键字。</summary>
+      <returns>事件的关键字。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Level">
+      <summary>获取事件的级别。</summary>
+      <returns>事件级别。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Message">
+      <summary>获取事件的消息。</summary>
+      <returns>事件的消息。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Opcode">
+      <summary>获取事件的操作代码。</summary>
+      <returns>事件的操作代码。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Payload">
+      <summary>获取事件的负载。</summary>
+      <returns>事件的负载。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.PayloadNames">
+      <summary>返回表示事件的属性名称的字符串的列表。</summary>
+      <returns>返回 <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1" />。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.RelatedActivityId">
+      <summary>[在 .NET Framework 4.5.1 和更高版本中受支持] 获取与当前实例表示的活动相关的活动的标识符。</summary>
+      <returns>相关活动的标识符或 <see cref="F:System.Guid.Empty" />（如果没有相关活动）。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Tags">
+      <summary>返回在 <see cref="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)" /> 方法调用中指定的标记。</summary>
+      <returns>返回 <see cref="T:System.Diagnostics.Tracing.EventTags" />。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Task">
+      <summary>获取事件的任务。</summary>
+      <returns>事件的任务。</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Version">
+      <summary>获取事件的版本。</summary>
+      <returns>事件的版本。</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.NonEventAttribute">
+      <summary>是被不会形成事件的方法。</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.NonEventAttribute.#ctor">
+      <summary>创建 <see cref="T:System.Diagnostics.Tracing.NonEventAttribute" /> 类的新实例。</summary>
+    </member>
+  </members>
+</doc>

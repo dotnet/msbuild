@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Primitives</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.CollectionDataContractAttribute">
+      <summary>컬렉션 형식에 적용되는 경우 컬렉션 항목 요소를 사용자 지정할 수 있습니다.이 특성은 <see cref="T:System.Runtime.Serialization.DataContractSerializer" />에서 serialize할 수 있는 유효한 컬렉션으로 인식한 형식에만 적용할 수 있습니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.CollectionDataContractAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.CollectionDataContractAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsItemNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsKeyNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReference">
+      <summary>개체 참조 데이터를 유지할지 여부를 나타내는 값을 가져오거나 설정합니다.</summary>
+      <returns>개체 참조 데이터를 유지하려면 true이고, 그렇지 않으면 false입니다.기본값은 false입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsValueNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ItemName">
+      <summary>컬렉션 요소의 사용자 지정 이름을 가져오거나 설정합니다.</summary>
+      <returns>컬렉션 요소에 적용할 이름입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.KeyName">
+      <summary>사전 키 이름의 사용자 지정 이름을 가져오거나 설정합니다.</summary>
+      <returns>기본 사전 키 이름 대신에 사용할 이름입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Name">
+      <summary>컬렉션 형식의 데이터 계약 이름을 가져오거나 설정합니다.</summary>
+      <returns>컬렉션 형식의 데이터 계약 이름입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Namespace">
+      <summary>데이터 계약의 네임스페이스를 가져오거나 설정합니다.</summary>
+      <returns>데이터 계약의 네임스페이스입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ValueName">
+      <summary>사전 값 이름의 사용자 지정 이름을 가져오거나 설정합니다.</summary>
+      <returns>기본 사전 값 이름 대신 사용할 이름입니다.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.ContractNamespaceAttribute">
+      <summary>데이터 계약의 CLR 네임스페이스와 XML 네임스페이스를 지정합니다. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.ContractNamespaceAttribute.#ctor(System.String)">
+      <summary>지정한 네임스페이스를 사용하여 <see cref="T:System.Runtime.Serialization.ContractNamespaceAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="contractNamespace">계약의 네임스페이스입니다.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ClrNamespace">
+      <summary>데이터 계약 형식의 CLR 네임스페이스를 가져오거나 설정합니다. </summary>
+      <returns>형식의 CLR 규정 네임스페이스입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ContractNamespace">
+      <summary>데이터 계약 멤버의 네임스페이스를 가져옵니다.</summary>
+      <returns>데이터 계약 멤버의 네임스페이스입니다.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractAttribute">
+      <summary>형식이 데이터 계약을 정의하거나 구현하며, <see cref="T:System.Runtime.Serialization.DataContractSerializer" />와 같은 serializer를 통해 serialize할 수 있도록 지정합니다.형식을 serialize할 수 있게 만들려면 형식 작성자가 형식에 대해 데이터 계약을 정의해야 합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReference">
+      <summary>개체 참조 데이터를 유지할지 여부를 나타내는 값을 가져오거나 설정합니다.</summary>
+      <returns>표준 XML을 사용하여 개체 참조 데이터를 유지하려면 true이고, 그렇지 않으면 false입니다.기본값은 false입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Name">
+      <summary>형식의 데이터 계약 이름을 가져오거나 설정합니다.</summary>
+      <returns>데이터 계약의 로컬 이름입니다.기본값은 특성이 적용되는 클래스의 이름입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Namespace">
+      <summary>형식에 대한 데이터 계약의 네임스페이스를 가져오거나 설정합니다.</summary>
+      <returns>계약의 네임스페이스입니다. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataMemberAttribute">
+      <summary>형식의 멤버에 적용되는 경우 멤버가 데이터 계약의 일부이며 <see cref="T:System.Runtime.Serialization.DataContractSerializer" />를 통해 serialize될 수 있음을 지정합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataMemberAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.DataMemberAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.EmitDefaultValue">
+      <summary>serialize할 필드나 속성에 대한 기본값을 serialize하는지 여부를 지정하는 값을 가져오거나 설정합니다. </summary>
+      <returns>멤버의 기본값을 serialization 스트림에서 생성해야 하면 true이고, 그렇지 않으면 false입니다.기본값은 true입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsRequired">
+      <summary>읽거나 deserialize할 때 멤버가 있어야 함을 serialization 엔진에 알려 주는 값을 가져오거나 설정합니다.</summary>
+      <returns>필수 멤버이면 true이고, 그렇지 않으면 false입니다.</returns>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">멤버가 없는 경우</exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Name">
+      <summary>데이터 멤버 이름을 가져오거나 설정합니다. </summary>
+      <returns>데이터 멤버 이름입니다.기본값은 특성이 적용되는 대상의 이름입니다.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Order">
+      <summary>멤버의 serialization 및 deserialization 순서를 가져오거나 설정합니다.</summary>
+      <returns>serialization 또는 deserialization의 순서에 해당하는 정수입니다.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.EnumMemberAttribute">
+      <summary>필드가 열거형 멤버이며 serialize되어야 함을 지정합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.EnumMemberAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.EnumMemberAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.IsValueSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.Value">
+      <summary>특성이 적용된 열거형 멤버와 연결된 값을 가져오거나 설정합니다. </summary>
+      <returns>열거형 멤버와 연결된 값입니다.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.IgnoreDataMemberAttribute">
+      <summary>형식의 멤버에 적용되는 경우 멤버가 데이터 계약의 일부가 아니며 serialize되지 않음을 지정합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.IgnoreDataMemberAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.IgnoreDataMemberAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.InvalidDataContractException">
+      <summary>serialization 및 deserialization 중에 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 또는 <see cref="T:System.Runtime.Serialization.NetDataContractSerializer" />가 잘못된 데이터 계약을 발견한 경우 throw되는 예외입니다. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 클래스의 새 인스턴스를 초기화합니다.  </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String)">
+      <summary>지정된 오류 메시지를 사용하여 <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="message">오류에 대한 설명입니다. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String,System.Exception)">
+      <summary>지정된 오류 메시지와 내부 예외를 사용하여 <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="message">오류에 대한 설명입니다. </param>
+      <param name="innerException">원래 <see cref="T:System.Exception" />입니다. </param>
+    </member>
+    <member name="T:System.Runtime.Serialization.KnownTypeAttribute">
+      <summary>지정한 형식을 serialize 또는 deserialize할 때 <see cref="T:System.Runtime.Serialization.DataContractSerializer" />가 인식해야 할 형식을 지정합니다. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.String)">
+      <summary>알려진 형식의 <see cref="T:System.Collections.IEnumerable" />을 반환하는 메서드의 이름을 사용하여 <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="methodName">데이터를 serialize 또는 deserialize할 때 사용된 형식의 <see cref="T:System.Collections.IEnumerable" />을 반환하는 메서드의 이름입니다.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.Type)">
+      <summary>지정된 형식을 사용하여 <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="type">데이터를 serialize 또는 deserialize할 때 알려진 형식으로 포함되는 <see cref="T:System.Type" />입니다.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.MethodName">
+      <summary>serialization 또는 deserialization 중에 인식해야 할 형식 목록을 반환하는 메서드의 이름을 가져옵니다. </summary>
+      <returns>
+        <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> 클래스로 정의된 형식에서 해당 메서드의 이름을 포함하는 <see cref="T:System.String" />입니다. </returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.Type">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.DataContractSerializer" />의 serialization 또는 deserialization 중에 인식해야 할 형식을 가져옵니다. </summary>
+      <returns>serialization 또는 deserialization 중에 사용하는 <see cref="T:System.Type" />입니다. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializedAttribute">
+      <summary>메서드에 적용될 때 메서드는 개체 그래프의 개체가 deserialization 후 즉시 호출되도록 지정합니다.그래프에 있는 다른 개체에 상대적인 역직렬화의 순서는 명확하지 않습니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializedAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.OnDeserializedAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializingAttribute">
+      <summary>메서드에 적용될 때 메서드는 개체 그래프의 개체가 deserialization 중 호출되도록 지정합니다.그래프에 있는 다른 개체에 상대적인 역직렬화의 순서는 명확하지 않습니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializingAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.OnDeserializingAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializedAttribute">
+      <summary>메서드에 적용될 때 메서드는 개체 그래프의 개체가 serialization 후 호출되도록 지정합니다.그래프에 있는 다른 개체에 상대적인 serialization의 순서는 명확하지 않습니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializedAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.OnSerializedAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializingAttribute">
+      <summary>메서드에 적용될 때 메서드는 개체 그래프의 개체가 serialization 중 호출되도록 지정합니다.그래프에 있는 다른 개체에 상대적인 serialization의 순서는 명확하지 않습니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializingAttribute.#ctor">
+      <summary>
+        <see cref="T:System.Runtime.Serialization.OnSerializingAttribute" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.SerializationException">
+      <summary>serialization 또는 deserialization 도중에 오류가 발생할 경우 throw되는 예외입니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor">
+      <summary>기본 속성을 사용하여 <see cref="T:System.Runtime.Serialization.SerializationException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String)">
+      <summary>지정된 메시지를 사용하여 <see cref="T:System.Runtime.Serialization.SerializationException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <param name="message">예외가 발생한 원인을 나타냅니다. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String,System.Exception)">
+      <summary>지정된 오류 메시지와 해당 예외의 근본 원인인 내부 예외에 대한 참조를 사용하여 <see cref="T:System.Runtime.Serialization.SerializationException" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <param name="message">예외에 대한 이유를 설명하는 오류 메시지입니다. </param>
+      <param name="innerException">현재 예외의 원인이 되는 예외입니다.<paramref name="innerException" /> 매개 변수가 null이 아니면 현재 예외는 내부 예외를 처리하는 catch 블록에서 발생합니다.</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.StreamingContext">
+      <summary>serialize된 특정 스트림의 소스 및 대상에 대해 설명하고 호출자 정의 추가 컨텍스트를 제공합니다.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.Equals(System.Object)">
+      <summary>두 <see cref="T:System.Runtime.Serialization.StreamingContext" /> 인스턴스가 동일한 값을 포함하는지 여부를 확인합니다.</summary>
+      <returns>지정된 개체가 <see cref="T:System.Runtime.Serialization.StreamingContext" />의 인스턴스이고 현재 인스턴스의 값과 같으면 true이고, 그렇지 않으면 false입니다.</returns>
+      <param name="obj">현재 인스턴스와 비교할 개체입니다. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.GetHashCode">
+      <summary>이 개체의 해시 코드를 반환합니다.</summary>
+      <returns>이 <see cref="T:System.Runtime.Serialization.StreamingContext" />에 대한 serialization의 소스 또는 대상을 포함하는 <see cref="T:System.Runtime.Serialization.StreamingContextStates" /> 값입니다.</returns>
+    </member>
+  </members>
+</doc>

@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Security.SecureString</name>
+  </assembly>
+  <members>
+    <member name="T:System.Security.SecureString">
+      <summary>더 이상 필요 없게 되면 컴퓨터 메모리에서 삭제되는 텍스트처럼 기밀을 유지해야 하는 텍스트를 나타냅니다.이 클래스는 상속될 수 없습니다.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor">
+      <summary>
+        <see cref="T:System.Security.SecureString" /> 클래스의 새 인스턴스를 초기화합니다.</summary>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this instance.</exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.#ctor(System.Char*,System.Int32)">
+      <summary>
+        <see cref="T:System.Char" /> 개체의 하위 배열에서 <see cref="T:System.Security.SecureString" /> 클래스의 새 인스턴스를 초기화합니다. </summary>
+      <param name="value">
+        <see cref="T:System.Char" /> 개체의 배열에 대한 포인터입니다.</param>
+      <param name="length">새 인스턴스에 포함할 <paramref name="value" />의 요소 수입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="length" /> is less than zero or greater than 65,536.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string. </exception>
+      <exception cref="T:System.NotSupportedException">This operation is not supported on this platform.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.AppendChar(System.Char)">
+      <summary>현재 보안 문자열의 끝에 문자를 추가합니다.</summary>
+      <param name="c">이 보안 문자열에 추가할 문자입니다.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Clear">
+      <summary>현재 보안 문자열의 값을 삭제합니다.</summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Copy">
+      <summary>현재 보안 문자열의 복사본을 만듭니다.</summary>
+      <returns>이 보안 문자열의 복제본입니다.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.Dispose">
+      <summary>현재 <see cref="T:System.Security.SecureString" /> 개체에서 사용하는 모든 리소스를 해제합니다.</summary>
+    </member>
+    <member name="M:System.Security.SecureString.InsertAt(System.Int32,System.Char)">
+      <summary>이 보안 문자열의 지정한 인덱스 위치에 문자를 삽입합니다. </summary>
+      <param name="index">
+        <paramref name="c" /> 매개 변수가 삽입될 인덱스 위치입니다.</param>
+      <param name="c">삽입할 문자입니다.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than the length of this secure string.-or-Performing this operation would make the length of this secure string greater than 65,536 characters.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.IsReadOnly">
+      <summary>이 보안 문자열이 읽기 전용으로 표시되었는지를 나타냅니다.</summary>
+      <returns>이 보안 문자열이 읽기 전용이면 true이고, 그렇지 않으면 false입니다.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="P:System.Security.SecureString.Length">
+      <summary>현재 보안 문자열의 문자 수를 가져옵니다.</summary>
+      <returns>이 보안 문자열에 있는 <see cref="T:System.Char" /> 개체의 수입니다.</returns>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.MakeReadOnly">
+      <summary>이 보안 문자열의 텍스트 값을 읽기 전용으로 만듭니다.   </summary>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.RemoveAt(System.Int32)">
+      <summary>이 보안 문자열에서 지정한 인덱스 위치의 문자를 제거합니다.</summary>
+      <param name="index">이 보안 문자열에서 문자의 인덱스 위치입니다.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="M:System.Security.SecureString.SetAt(System.Int32,System.Char)">
+      <summary>지정한 인덱스 위치의 기존 문자를 다른 문자로 바꿉니다.</summary>
+      <param name="index">이 보안 문자열에서 기존 문자의 인덱스 위치입니다.</param>
+      <param name="c">기존 문자를 바꾸는 문자입니다.</param>
+      <exception cref="T:System.ObjectDisposedException">This secure string has already been disposed.</exception>
+      <exception cref="T:System.InvalidOperationException">This secure string is read-only.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero, or greater than or equal to the length of this secure string.</exception>
+      <exception cref="T:System.Security.Cryptography.CryptographicException">An error occurred while protecting or unprotecting the value of this secure string.</exception>
+    </member>
+    <member name="T:System.Security.SecureStringMarshal"></member>
+    <member name="M:System.Security.SecureStringMarshal.SecureStringToCoTaskMemUnicode(System.Security.SecureString)"></member>
+    <member name="M:System.Security.SecureStringMarshal.ZeroFreeCoTaskMemUnicode(System.IntPtr)"></member>
+  </members>
+</doc>

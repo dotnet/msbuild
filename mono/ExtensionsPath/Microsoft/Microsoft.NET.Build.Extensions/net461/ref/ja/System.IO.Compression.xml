@@ -1,0 +1,446 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.IO.Compression</name>
+  </assembly>
+  <members>
+    <member name="T:System.IO.Compression.CompressionLevel">
+      <summary>圧縮操作で速度または圧縮サイズのどちらを重視するかどうかを示す値を指定します。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.Fastest">
+      <summary>圧縮後のファイルは最適な圧縮ではなくても、圧縮操作はできるだけ迅速に完了する必要があります。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.NoCompression">
+      <summary>ファイルに対して圧縮を行いません。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.Optimal">
+      <summary>圧縮操作の操作が完了するまでに時間がかかりますが、圧縮操作は最適に圧縮する必要があります。</summary>
+    </member>
+    <member name="T:System.IO.Compression.CompressionMode">
+      <summary> 基になるストリームを圧縮するのか、または圧縮解除するのかを指定します。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionMode.Compress">
+      <summary>基になるストリームを圧縮します。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionMode.Decompress">
+      <summary>基になるストリームを圧縮解除します。</summary>
+    </member>
+    <member name="T:System.IO.Compression.DeflateStream">
+      <summary>Deflate アルゴリズムを使用してストリームを圧縮および圧縮解除するためのメソッドとプロパティを提供します。</summary>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel)">
+      <summary>指定したストリームと圧縮レベルを使用して、<see cref="T:System.IO.Compression.DeflateStream" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">圧縮するストリーム。</param>
+      <param name="compressionLevel">ストリームの圧縮時に速度または圧縮の効率性を強調するかどうかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">ストリームは圧縮などの書き込み操作をサポートしません。(ストリーム オブジェクトの <see cref="P:System.IO.Stream.CanWrite" /> プロパティは false です)</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel,System.Boolean)">
+      <summary>指定したストリームと圧縮レベルを使用して <see cref="T:System.IO.Compression.DeflateStream" /> クラスの新しいインスタンスを初期化し、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">圧縮するストリーム。</param>
+      <param name="compressionLevel">ストリームの圧縮時に速度または圧縮の効率性を強調するかどうかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.DeflateStream" /> オブジェクトを破棄した後にストリーム オブジェクトを開いたままにする場合は true、それ以外の場合は false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">ストリームは圧縮などの書き込み操作をサポートしません。(ストリーム オブジェクトの <see cref="P:System.IO.Stream.CanWrite" /> プロパティは false です)</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode)">
+      <summary>指定したストリームと圧縮モードを使用して、<see cref="T:System.IO.Compression.DeflateStream" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">圧縮または圧縮解除するストリーム。</param>
+      <param name="mode">ストリームを圧縮するか圧縮解除するかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> が有効な <see cref="T:System.IO.Compression.CompressionMode" /> 値ではありません。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Compress" /> で、<see cref="P:System.IO.Stream.CanWrite" /> が false です。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Decompress" /> で、<see cref="P:System.IO.Stream.CanRead" /> が false です。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode,System.Boolean)">
+      <summary>指定したストリームと圧縮モードを使用して <see cref="T:System.IO.Compression.DeflateStream" /> クラスの新しいインスタンスを初期化し、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">圧縮または圧縮解除するストリーム。</param>
+      <param name="mode">ストリームを圧縮するか圧縮解除するかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.DeflateStream" /> オブジェクトを破棄した後にストリームを開いたままにする場合は true、それ以外の場合は false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> が有効な <see cref="T:System.IO.Compression.CompressionMode" /> 値ではありません。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Compress" /> で、<see cref="P:System.IO.Stream.CanWrite" /> が false です。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Decompress" /> で、<see cref="P:System.IO.Stream.CanRead" /> が false です。</exception>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.BaseStream">
+      <summary>基になるストリームへの参照を取得します。</summary>
+      <returns>基になるストリームを表すストリーム オブジェクト。</returns>
+      <exception cref="T:System.ObjectDisposedException">基になるストリームが閉じられました。</exception>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanRead">
+      <summary>ファイルの圧縮解除中にストリームが読み取りをサポートするかどうかを示す値を取得します。</summary>
+      <returns>
+        <see cref="T:System.IO.Compression.CompressionMode" /> 値が Decompress で、基になるストリームが開いており、読み取りをサポートしている場合は true。それ以外の場合は false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanSeek">
+      <summary>ストリームがシークをサポートしているかどうかを示す値を取得します。</summary>
+      <returns>常に false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanWrite">
+      <summary>ストリームが書き込みをサポートしているかどうかを示す値を取得します。</summary>
+      <returns>
+        <see cref="T:System.IO.Compression.CompressionMode" /> 値が Compress で、基になるストリームが書き込みをサポートし、閉じられていない場合は true。それ以外の場合は false。</returns>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.IO.Compression.DeflateStream" /> で使用されているアンマネージ リソースを解放し、オプションでマネージ リソースを解放します。</summary>
+      <param name="disposing">マネージ リソースとアンマネージ リソースの両方を解放する場合は true。アンマネージ リソースだけを解放する場合は false。</param>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Flush">
+      <summary>現在実装されているこのメソッドは、何の機能も提供しません。</summary>
+      <exception cref="T:System.ObjectDisposedException">ストリームが閉じられました。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.Length">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.Position">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Read(System.Byte[],System.Int32,System.Int32)">
+      <summary>圧縮解除されたバイト数を、指定したバイト配列に読み取ります。</summary>
+      <returns>バイト配列に読み取られたバイト数。</returns>
+      <param name="array">圧縮解除されたバイトを格納するための配列。</param>
+      <param name="offset">読み取られるバイトが配置される <paramref name="array" /> 内のバイト オフセット。</param>
+      <param name="count">読み取られる、圧縮解除されたバイトの最大数。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> は null です。</exception>
+      <exception cref="T:System.InvalidOperationException">オブジェクトが作成されたとき、<see cref="T:System.IO.Compression.CompressionMode" /> 値が Compress でした。または 基になるストリームが読み取りをサポートしていません。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> または <paramref name="count" /> が 0 未満です。または<paramref name="array" /> の長さからインデックスの開始点を引いた値が <paramref name="count" /> 未満です。</exception>
+      <exception cref="T:System.IO.InvalidDataException">データ形式が無効です。</exception>
+      <exception cref="T:System.ObjectDisposedException">ストリームが閉じられました。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Seek(System.Int64,System.IO.SeekOrigin)">
+      <summary>この操作はサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <param name="offset">ストリーム内の位置。</param>
+      <param name="origin">
+        <see cref="T:System.IO.SeekOrigin" /> 値の 1 つ。</param>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.SetLength(System.Int64)">
+      <summary>この操作はサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <param name="value">ストリーム長。</param>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Write(System.Byte[],System.Int32,System.Int32)">
+      <summary>圧縮されたバイトを、指定したバイト配列から基になるストリームに書き込みます。</summary>
+      <param name="array">圧縮するデータを格納しているバッファー。</param>
+      <param name="offset">バイトの読み取り元となる <paramref name="array" /> 内のバイト オフセット。</param>
+      <param name="count">書き込む最大バイト数。</param>
+    </member>
+    <member name="T:System.IO.Compression.GZipStream">
+      <summary>ストリームの圧縮および圧縮解除を実行するために使用するメソッドとプロパティを提供します。</summary>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel)">
+      <summary>指定したストリームと圧縮レベルを使用して、<see cref="T:System.IO.Compression.GZipStream" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">圧縮されたデータを書き込むストリーム。</param>
+      <param name="compressionLevel">ストリームの圧縮時に速度または圧縮の効率性を強調するかどうかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">ストリームは圧縮などの書き込み操作をサポートしません。(ストリーム オブジェクトの <see cref="P:System.IO.Stream.CanWrite" /> プロパティは false です)</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel,System.Boolean)">
+      <summary>指定したストリームと圧縮レベルを使用して <see cref="T:System.IO.Compression.GZipStream" /> クラスの新しいインスタンスを初期化し、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">圧縮されたデータを書き込むストリーム。</param>
+      <param name="compressionLevel">ストリームの圧縮時に速度または圧縮の効率性を強調するかどうかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.GZipStream" /> オブジェクトを破棄した後にストリーム オブジェクトを開いたままにする場合は true、それ以外の場合は false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">ストリームは圧縮などの書き込み操作をサポートしません。(ストリーム オブジェクトの <see cref="P:System.IO.Stream.CanWrite" /> プロパティは false です)</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode)">
+      <summary>指定したストリームと圧縮モードを使用して、<see cref="T:System.IO.Compression.GZipStream" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">圧縮されたデータまたは圧縮解除されたデータが書き込まれるストリーム。</param>
+      <param name="mode">ストリームを圧縮するか圧縮解除するかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> が有効な <see cref="T:System.IO.Compression.CompressionMode" /> 列挙値ではありません。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Compress" /> で、<see cref="P:System.IO.Stream.CanWrite" /> が false です。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Decompress" /> で、<see cref="P:System.IO.Stream.CanRead" /> が false です。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode,System.Boolean)">
+      <summary>指定したストリームと圧縮モードを使用して <see cref="T:System.IO.Compression.GZipStream" /> クラスの新しいインスタンスを初期化し、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">圧縮されたデータまたは圧縮解除されたデータが書き込まれるストリーム。</param>
+      <param name="mode">ストリームを圧縮するか圧縮解除するかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.GZipStream" /> オブジェクトを破棄した後にストリームを開いたままにする場合は true、それ以外の場合は false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> は null です。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> が有効な <see cref="T:System.IO.Compression.CompressionMode" /> 値ではありません。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Compress" /> で、<see cref="P:System.IO.Stream.CanWrite" /> が false です。または<see cref="T:System.IO.Compression.CompressionMode" /> が <see cref="F:System.IO.Compression.CompressionMode.Decompress" /> で、<see cref="P:System.IO.Stream.CanRead" /> が false です。</exception>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.BaseStream">
+      <summary>基になるストリームへの参照を取得します。</summary>
+      <returns>基になるストリームを表すストリーム オブジェクト。</returns>
+      <exception cref="T:System.ObjectDisposedException">基になるストリームが閉じられました。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanRead">
+      <summary>ファイルの圧縮解除中にストリームが読み取りをサポートするかどうかを示す値を取得します。</summary>
+      <returns>
+        <see cref="T:System.IO.Compression.CompressionMode" /> 値が Decompress, で、基になるストリームが読み取りをサポートし、閉じられていない場合は true。それ以外の場合は false。</returns>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanSeek">
+      <summary>ストリームがシークをサポートしているかどうかを示す値を取得します。</summary>
+      <returns>常に false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanWrite">
+      <summary>ストリームが書き込みをサポートしているかどうかを示す値を取得します。</summary>
+      <returns>
+        <see cref="T:System.IO.Compression.CompressionMode" /> 値が Compress で、基になるストリームが書き込みをサポートし、閉じられていない場合は true。それ以外の場合は false。</returns>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.IO.Compression.GZipStream" /> で使用されているアンマネージ リソースを解放し、オプションでマネージ リソースを解放します。</summary>
+      <param name="disposing">マネージ リソースとアンマネージ リソースの両方を解放する場合は true。アンマネージ リソースだけを解放する場合は false。</param>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Flush">
+      <summary>現在実装されているこのメソッドは、何の機能も提供しません。</summary>
+      <exception cref="T:System.ObjectDisposedException">ストリームが閉じられました。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.Length">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.Position">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Read(System.Byte[],System.Int32,System.Int32)">
+      <summary>圧縮解除されたバイト数を、指定したバイト配列に読み取ります。</summary>
+      <returns>圧縮解除されバイト配列に読み取られたバイト数。既にストリームの末尾に到達している場合は、ゼロまたは読み取られたバイト数が返されます。</returns>
+      <param name="array">圧縮解除されたバイトを格納するために使用する配列。</param>
+      <param name="offset">読み取られるバイトが配置される <paramref name="array" /> 内のバイト オフセット。</param>
+      <param name="count">読み取られる、圧縮解除されたバイトの最大数。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> は null です。</exception>
+      <exception cref="T:System.InvalidOperationException">オブジェクトが作成されたとき、<see cref="T:System.IO.Compression.CompressionMode" /> 値が Compress でした。または基になるストリームが読み取りをサポートしていません。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> または <paramref name="count" /> が 0 未満です。または<paramref name="array" /> の長さからインデックスの開始点を引いた値が <paramref name="count" /> 未満です。</exception>
+      <exception cref="T:System.IO.InvalidDataException">データ形式が無効です。</exception>
+      <exception cref="T:System.ObjectDisposedException">ストリームが閉じられました。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Seek(System.Int64,System.IO.SeekOrigin)">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <returns>long 値。</returns>
+      <param name="offset">ストリーム内の位置。</param>
+      <param name="origin">
+        <see cref="T:System.IO.SeekOrigin" /> 値の 1 つ。</param>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.SetLength(System.Int64)">
+      <summary>このプロパティはサポートされていないため、常に <see cref="T:System.NotSupportedException" /> をスローします。</summary>
+      <param name="value">ストリーム長。</param>
+      <exception cref="T:System.NotSupportedException">このストリームでは、このプロパティはサポートされていません。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Write(System.Byte[],System.Int32,System.Int32)">
+      <summary>圧縮されたバイトを、指定したバイト配列から基になるストリームに書き込みます。</summary>
+      <param name="array">圧縮するデータを格納しているバッファー。</param>
+      <param name="offset">バイトの読み取り元となる <paramref name="array" /> 内のバイト オフセット。</param>
+      <param name="count">書き込む最大バイト数。</param>
+      <exception cref="T:System.ObjectDisposedException">ストリームが閉じているため、書き込み操作を実行できません。</exception>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchive">
+      <summary>zip アーカイブ形式の圧縮ファイルのパッケージを表します。</summary>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream)">
+      <summary>指定したストリームからの <see cref="T:System.IO.Compression.ZipArchive" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">読み取るアーカイブを格納しているストリーム。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed or does not support reading.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream are not in the zip archive format.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode)">
+      <summary>指定したストリームと指定したモードから <see cref="T:System.IO.Compression.ZipArchive" /> クラスの新しいインスタンスを初期化します。</summary>
+      <param name="stream">入力ストリームまたは出力ストリーム。</param>
+      <param name="mode">zip のアーカイブがエントリの読み込み、作成、または更新に使用されているかどうかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean)">
+      <summary>指定されたモードの指定されたストリームで <see cref="T:System.IO.Compression.ZipArchive" /> クラスの新しいインスタンスを初期化し、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">入力ストリームまたは出力ストリーム。</param>
+      <param name="mode">zip のアーカイブがエントリの読み込み、作成、または更新に使用されているかどうかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.ZipArchive" /> オブジェクトを破棄した後にストリームを開いたままにする場合は true、それ以外の場合は false。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Text.Encoding)">
+      <summary>指定されたモードの指定されたストリームで <see cref="T:System.IO.Compression.ZipArchive" /> クラスの新しいインスタンスを初期化し、エントリ名に指定されたエンコーディングを使用します。また、必要に応じて、ストリームを開いたままにします。</summary>
+      <param name="stream">入力ストリームまたは出力ストリーム。</param>
+      <param name="mode">zip のアーカイブがエントリの読み込み、作成、または更新に使用されているかどうかを示す列挙値の 1 つ。</param>
+      <param name="leaveOpen">
+        <see cref="T:System.IO.Compression.ZipArchive" /> オブジェクトを破棄した後にストリームを開いたままにする場合は true、それ以外の場合は false。</param>
+      <param name="entryNameEncoding">このアーカイブのエントリ名の読み取りまたは書き込み時に使用するエンコード。エントリ名の UTF-8 エンコードをサポートしない zip アーカイブ ツールとライブラリとの相互運用性のためにエンコードが必要な場合にのみ、このパラメーターの値を指定してください。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.CreateEntry(System.String)">
+      <summary>指定したパスとエントリ名を持つ空のエントリを zip アーカイブに作成します。</summary>
+      <returns>zip アーカイブ内の空のエントリ。</returns>
+      <param name="entryName">作成されるエントリの名前を指定する、アーカイブのルートを基準とするパス。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support writing.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.CreateEntry(System.String,System.IO.Compression.CompressionLevel)">
+      <summary>指定したエントリ名と圧縮レベルを持つ空のエントリを zip アーカイブに作成します。</summary>
+      <returns>zip アーカイブ内の空のエントリ。</returns>
+      <param name="entryName">作成されるエントリの名前を指定する、アーカイブのルートを基準とするパス。</param>
+      <param name="compressionLevel">エントリの作成時に速度または圧縮の有効性を強調するかどうかを示す列挙値の 1 つ。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support writing.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.Dispose">
+      <summary>
+        <see cref="T:System.IO.Compression.ZipArchive" /> クラスの現在のインスタンスによって使用されているリソースを解放します。</summary>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.Dispose(System.Boolean)">
+      <summary>
+        <see cref="T:System.IO.Compression.ZipArchive" /> クラスの現在のインスタンスによって使用されるアンマネージ リソースを解放するために、<see cref="M:System.IO.Compression.ZipArchive.Dispose" /> メソッドと <see cref="M:System.Object.Finalize" /> メソッドによって呼び出されます。オプションで、アーカイブの書き込みを終了し、マネージ リソースを解放できます。</summary>
+      <param name="disposing">アーカイブの書き込みを終了し、アンマネージ リソースとマネージ リソースを解放する場合は true。アンマネージ リソースだけを解放する場合は false。</param>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchive.Entries">
+      <summary>現在 zip アーカイブ内にあるエントリのコレクションを取得します。</summary>
+      <returns>現在 zip アーカイブ内にあるエントリのコレクション。</returns>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support reading.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The zip archive is corrupt, and its entries cannot be retrieved.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.GetEntry(System.String)">
+      <summary>zip アーカイブ内の指定したエントリのラッパーを取得します。</summary>
+      <returns>アーカイブ内の指定されたエントリのラッパー。エントリがアーカイブに存在しない場合は null。</returns>
+      <param name="entryName">取得するエントリを識別する、アーカイブのルートを基準とするパス。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support reading.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The zip archive is corrupt, and its entries cannot be retrieved.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchive.Mode">
+      <summary>zip アーカイブがエントリで実行できる操作の種類を示す値を取得します。</summary>
+      <returns>zip のアーカイブがエントリ上で実行できる操作の種類 (読み込み、作成、または更新) を示す列挙値の 1 つ。</returns>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchiveEntry">
+      <summary>zip アーカイブ内の圧縮ファイルを表します。</summary>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Archive">
+      <summary>エントリが属する zip アーカイブを取得します。</summary>
+      <returns>エントリが属している zip アーカイブ、または、エントリが削除されている場合は null。</returns>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.CompressedLength">
+      <summary>zip アーカイブ内のエントリの圧縮サイズを取得します。</summary>
+      <returns>zip アーカイブ内のエントリの圧縮サイズ。</returns>
+      <exception cref="T:System.InvalidOperationException">The value of the property is not available because the entry has been modified.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.Delete">
+      <summary>zip アーカイブからエントリを削除します。</summary>
+      <exception cref="T:System.IO.IOException">The entry is already open for reading or writing.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive for this entry was opened in a mode other than <see cref="F:System.IO.Compression.ZipArchiveMode.Update" />. </exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive for this entry has been disposed.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.FullName">
+      <summary>zip アーカイブ内のエントリの相対パスを取得します。</summary>
+      <returns>zip アーカイブ内のエントリの相対パス。</returns>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.LastWriteTime">
+      <summary>zip アーカイブのエントリが最後に変更されたときを取得または設定します。</summary>
+      <returns>zip アーカイブ内のエントリが最後に変更された時間。</returns>
+      <exception cref="T:System.NotSupportedException">The attempt to set this property failed, because the zip archive for the entry is in <see cref="F:System.IO.Compression.ZipArchiveMode.Read" /> mode.</exception>
+      <exception cref="T:System.IO.IOException">The archive mode is set to <see cref="F:System.IO.Compression.ZipArchiveMode.Create" />.- or -The archive mode is set to <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and the entry has been opened.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">An attempt was made to set this property to a value that is either earlier than 1980 January 1 0:00:00 (midnight) or later than 2107 December 31 23:59:58 (one second before midnight).</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Length">
+      <summary>zip アーカイブ内のエントリの非圧縮サイズを取得します。</summary>
+      <returns>zip アーカイブ内のエントリの非圧縮サイズ。</returns>
+      <exception cref="T:System.InvalidOperationException">The value of the property is not available because the entry has been modified.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Name">
+      <summary>zip アーカイブ内のエントリのファイル名を取得します。</summary>
+      <returns>zip アーカイブ内のエントリのファイル名。</returns>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.Open">
+      <summary>zip のアーカイブからエントリを開きます。</summary>
+      <returns>エントリの内容を表すストリーム。</returns>
+      <exception cref="T:System.IO.IOException">The entry is already currently open for writing.-or-The entry has been deleted from the archive.-or-The archive for this entry was opened with the <see cref="F:System.IO.Compression.ZipArchiveMode.Create" /> mode, and this entry has already been written to. </exception>
+      <exception cref="T:System.IO.InvalidDataException">The entry is either missing from the archive or is corrupt and cannot be read. -or-The entry has been compressed by using a compression method that is not supported.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive for this entry has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.ToString">
+      <summary>zip アーカイブ内のエントリの相対パスを取得します。</summary>
+      <returns>エントリの相対パス。これは <see cref="P:System.IO.Compression.ZipArchiveEntry.FullName" /> プロパティに格納されている値です。</returns>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchiveMode">
+      <summary>zip のアーカイブ エントリとの対話のための値を指定します。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Create">
+      <summary>新しいアーカイブ エントリの作成に限り許可されます。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Read">
+      <summary>新しいアーカイブ エントリの読み込みに限り許可されます。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Update">
+      <summary>読み取りと書き込みの両方の操作がアーカイブ エントリで許可されます。</summary>
+    </member>
+  </members>
+</doc>

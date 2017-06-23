@@ -1,0 +1,434 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Net.Sockets</name>
+  </assembly>
+  <members>
+    <member name="T:System.Net.Sockets.ProtocolType">
+      <summary>指定 <see cref="T:System.Net.Sockets.Socket" /> 类支持的协议。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Tcp">
+      <summary>传输控制协议。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Udp">
+      <summary>用户数据报协议。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unknown">
+      <summary>未知协议。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unspecified">
+      <summary>未指定的协议。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.Socket">
+      <summary>实现 Berkeley 套接字接口。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.AddressFamily,System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>使用指定的地址族、套接字类型和协议初始化 <see cref="T:System.Net.Sockets.Socket" /> 类的新实例。</summary>
+      <param name="addressFamily">
+        <see cref="T:System.Net.Sockets.AddressFamily" /> 值之一。</param>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 值之一。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 值之一。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="addressFamily" />、<paramref name="socketType" /> 和 <paramref name="protocolType" /> 的组合会导致无效套接字。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>使用指定的地址族、套接字类型和协议初始化 <see cref="T:System.Net.Sockets.Socket" /> 类的新实例。</summary>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 值之一。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 值之一。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="socketType" /> 和 <paramref name="protocolType" /> 组合将导致套接字无效。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>开始一个异步操作来接受一个传入的连接尝试。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentException">参数无效。如果所提供的缓冲区不够大，将会发生此异常。缓冲区必须至少为 2 * (sizeof(SOCKADDR_STORAGE + 16) 字节。如果指定了多个缓冲区，即 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性不为 null，也会发生此异常。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">参数超出范围。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Count" /> 小于 0，将会发生此异常。</exception>
+      <exception cref="T:System.InvalidOperationException">请求了无效操作。如果接收方 <see cref="T:System.Net.Sockets.Socket" /> 未侦听连接或者绑定了接受的套接字，将发生此异常。<see cref="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)" /> 和 <see cref="M:System.Net.Sockets.Socket.Listen(System.Int32)" /> 方法必须先于 <see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" /> 方法调用。如果套接字已连接或使用指定的 <paramref name="e" /> 参数的套接字操作已经在进行中，也会发生此异常。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.AddressFamily">
+      <summary>获取 <see cref="T:System.Net.Sockets.Socket" /> 的地址族。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.AddressFamily" /> 值之一。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)">
+      <summary>使 <see cref="T:System.Net.Sockets.Socket" /> 与一个本地终结点相关联。</summary>
+      <param name="localEP">要与 <see cref="T:System.Net.Sockets.Socket" /> 关联的本地 <see cref="T:System.Net.EndPoint" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localEP" /> 为 null。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Security.SecurityException">调用堆栈上部的调用方无权执行所请求的操作。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Net.SocketPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.CancelConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>取消一个对远程主机连接的异步请求。</summary>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象，该对象用于通过调用 <see cref="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)" /> 方法之一，请求与远程主机的连接。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 参数不能为 null，并且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不能为空。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Security.SecurityException">调用堆栈上部的调用方无权执行所请求的操作。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>开始一个对远程主机连接的异步请求。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentException">参数无效。如果指定了多个缓冲区，即 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性不为 null，将会发生此异常。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 参数不能为 null，并且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不能为空。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> 正在侦听或已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。如果本地终结点和 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不是相同的地址族，也会发生此异常。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Security.SecurityException">调用堆栈上部的调用方无权执行所请求的操作。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>开始一个对远程主机连接的异步请求。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="socketType">
+        <see cref="T:System.Net.Sockets.SocketType" /> 值之一。</param>
+      <param name="protocolType">
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 值之一。</param>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentException">参数无效。如果指定了多个缓冲区，即 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性不为 null，将会发生此异常。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 参数不能为 null，并且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不能为空。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> 正在侦听或已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。如果本地终结点和 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不是相同的地址族，也会发生此异常。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Security.SecurityException">调用堆栈上部的调用方无权执行所请求的操作。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Connected">
+      <summary>获取一个值，该值指示 <see cref="T:System.Net.Sockets.Socket" /> 是在上次 <see cref="Overload:System.Net.Sockets.Socket.Send" /> 还是 <see cref="Overload:System.Net.Sockets.Socket.Receive" /> 操作时连接到远程主机。</summary>
+      <returns>如果 <see cref="T:System.Net.Sockets.Socket" /> 在最近操作时连接到远程资源，则为 true；否则为 false。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose">
+      <summary>释放由 <see cref="T:System.Net.Sockets.Socket" /> 类的当前实例占用的所有资源。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose(System.Boolean)">
+      <summary>释放由 <see cref="T:System.Net.Sockets.Socket" /> 使用的非托管资源，并可根据需要释放托管资源。</summary>
+      <param name="disposing">如果为 true，则释放托管资源和非托管资源；如果为 false，则仅释放非托管资源。</param>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Finalize">
+      <summary>释放 <see cref="T:System.Net.Sockets.Socket" /> 类使用的资源。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Listen(System.Int32)">
+      <summary>将 <see cref="T:System.Net.Sockets.Socket" /> 置于侦听状态。</summary>
+      <param name="backlog">挂起连接队列的最大长度。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.LocalEndPoint">
+      <summary>获取本地终结点。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.Socket" /> 当前用以进行通信的 <see cref="T:System.Net.EndPoint" />。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.NoDelay">
+      <summary>获取或设置 <see cref="T:System.Boolean" /> 值，该值指定流 <see cref="T:System.Net.Sockets.Socket" /> 是否正在使用 Nagle 算法。</summary>
+      <returns>如果 <see cref="T:System.Net.Sockets.Socket" /> 使用 Nagle 算法，则为 false；否则为 true。默认值为 false。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问 <see cref="T:System.Net.Sockets.Socket" /> 时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv4">
+      <summary>指示基础操作系统和网络适配器是否支持 Internet 协议第 4 版 (IPv4)。</summary>
+      <returns>如果操作系统和网络适配器支持 IPv4 协议，则为 true；否则为 false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv6">
+      <summary>指示基础操作系统和网络适配器是否支持 Internet 协议第 6 版 (IPv6)。</summary>
+      <returns>如果操作系统和网络适配器支持 IPv6 协议，则为 true；否则为 false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ProtocolType">
+      <summary>获取 <see cref="T:System.Net.Sockets.Socket" /> 的协议类型。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.ProtocolType" /> 值之一。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>开始一个异步请求以便从连接的 <see cref="T:System.Net.Sockets.Socket" /> 对象中接收数据。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentException">参数无效。<paramref name="e" /> 参数的 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 或 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性必须引用有效的缓冲区。可以设置这两个属性中的某一个，但不能同时设置这两个属性。</exception>
+      <exception cref="T:System.InvalidOperationException">已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ReceiveBufferSize">
+      <summary>获取或设置一个值，它指定 <see cref="T:System.Net.Sockets.Socket" /> 接收缓冲区的大小。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，它包含接收缓冲区的大小（以字节为单位）。默认值为 8192。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">为设置操作指定的值小于 0。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveFromAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>开始从指定网络设备中异步接收数据。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不能为 null。</exception>
+      <exception cref="T:System.InvalidOperationException">已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.RemoteEndPoint">
+      <summary>获取远程终结点。</summary>
+      <returns>当前和 <see cref="T:System.Net.Sockets.Socket" /> 通信的 <see cref="T:System.Net.EndPoint" />。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>将数据异步发送到连接的 <see cref="T:System.Net.Sockets.Socket" /> 对象。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="e" /> 参数的 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 或 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性必须引用有效的缓冲区。可以设置这两个属性中的某一个，但不能同时设置这两个属性。</exception>
+      <exception cref="T:System.InvalidOperationException">已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <see cref="T:System.Net.Sockets.Socket" /> 尚未连接或者尚未通过 <see cref="M:System.Net.Sockets.Socket.Accept" />、<see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" /> 或 <see cref="Overload:System.Net.Sockets.Socket.BeginAccept" /> 方法获得。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.SendBufferSize">
+      <summary>获取或设置一个值，该值指定 <see cref="T:System.Net.Sockets.Socket" /> 发送缓冲区的大小。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，它包含发送缓冲区的大小（以字节为单位）。默认值为 8192。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">为设置操作指定的值小于 0。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendToAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>向特定远程主机异步发送数据。</summary>
+      <returns>如果 I/O 操作挂起，将返回 true。操作完成时，将引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 操作同步完成，将返回 false。在这种情况下，将不会引发 <paramref name="e" /> 参数的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，并且可能在方法调用返回后立即检查作为参数传递的 <paramref name="e" /> 对象以检索操作的结果。</returns>
+      <param name="e">要用于此异步套接字操作的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不能为 null。</exception>
+      <exception cref="T:System.InvalidOperationException">已经在使用 <paramref name="e" /> 参数中指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 对象执行套接字操作。</exception>
+      <exception cref="T:System.NotSupportedException">此方法需要 Windows XP 或更高版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">指定的协议是面向连接的，但 <see cref="T:System.Net.Sockets.Socket" /> 尚未连接。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)">
+      <summary>禁用某 <see cref="T:System.Net.Sockets.Socket" /> 上的发送和接收。</summary>
+      <param name="how">
+        <see cref="T:System.Net.Sockets.SocketShutdown" /> 值之一，它指定不再允许执行的操作。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。有关更多信息，请参见备注部分。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Ttl">
+      <summary>获取或设置一个值，指定 <see cref="T:System.Net.Sockets.Socket" /> 发送的 Internet 协议 (IP) 数据包的生存时间 (TTL) 值。</summary>
+      <returns>TTL 值。</returns>
+      <exception cref="T:System.ArgumentOutOfRangeException">TTL 值不能设置为负数。</exception>
+      <exception cref="T:System.NotSupportedException">只有对于在 <see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /> 或 <see cref="F:System.Net.Sockets.AddressFamily.InterNetworkV6" /> 族中的套接字，才可以设置此属性。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">试图访问套接字时发生错误。在尝试将 TTL 设置为大于 255 的值时，也将返回此错误。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已关闭。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncEventArgs">
+      <summary>表示异步套接字操作。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.#ctor">
+      <summary>创建一个空的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 实例。</summary>
+      <exception cref="T:System.NotSupportedException">该平台不受支持。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.AcceptSocket">
+      <summary>获取或设置要使用的套接字或创建用于接受与异步套接字方法的连接的套接字。</summary>
+      <returns>要使用的 <see cref="T:System.Net.Sockets.Socket" /> 或者创建用于接受与异步套接字方法的连接的套接字。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer">
+      <summary>获取要用于异步套接字方法的数据缓冲区。</summary>
+      <returns>一个 <see cref="T:System.Byte" /> 数组，表示要用于异步套接字方法的数据缓冲区。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList">
+      <summary>获取或设置一个要用于异步套接字方法的数据缓冲区数组。</summary>
+      <returns>一个 <see cref="T:System.Collections.IList" />，表示要用于异步套接字方法的数据缓冲区数组。</returns>
+      <exception cref="T:System.ArgumentException">存在不明确的缓冲区，这些缓冲区是在 set 操作上指定的。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性已设置为非空值并且尝试将 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性设置为非空值，将引发此异常。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BytesTransferred">
+      <summary>获取在套接字操作中传输的字节数。</summary>
+      <returns>一个 <see cref="T:System.Int32" />，包含在套接字操作中传输的字节数。</returns>
+    </member>
+    <member name="E:System.Net.Sockets.SocketAsyncEventArgs.Completed">
+      <summary>用于完成异步操作的事件。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectByNameError">
+      <summary>当使用 <see cref="T:System.Net.DnsEndPoint" /> 时，在出现连接故障的情况下获取异常。</summary>
+      <returns>一个 <see cref="T:System.Exception" />，指示在为 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 属性指定 <see cref="T:System.Net.DnsEndPoint" /> 时发生连接错误的原因。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectSocket">
+      <summary>成功完成 <see cref="Overload:System.Net.Sockets.Socket.ConnectAsync" /> 方法后创建和连接的 <see cref="T:System.Net.Sockets.Socket" /> 对象。</summary>
+      <returns>连接的 <see cref="T:System.Net.Sockets.Socket" /> 对象。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Count">
+      <summary>获取可在异步操作中发送或接收的最大数据量（以字节为单位）。</summary>
+      <returns>一个 <see cref="T:System.Int32" />，包含可发送或接收的最大数据量（以字节为单位）。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Dispose">
+      <summary>释放由 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 实例使用的非托管资源，并可选择释放托管资源。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Finalize">
+      <summary>释放 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 类使用的资源。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.LastOperation">
+      <summary>获取最近使用此上下文对象执行的套接字操作类型。</summary>
+      <returns>一个 <see cref="T:System.Net.Sockets.SocketAsyncOperation" /> 实例，指示最近使用此上下文对象执行的套接字操作类型。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Offset">
+      <summary>获取 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性引用的数据缓冲区的偏移量（以字节为单位）。</summary>
+      <returns>一个 <see cref="T:System.Int32" />，包含 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性引用的数据缓冲区的偏移量（以字节为单位）。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.OnCompleted(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>表示异步操作完成时调用的方法。</summary>
+      <param name="e">终止的事件。</param>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint">
+      <summary>获取或设置异步操作的远程 IP 终结点。</summary>
+      <returns>一个 <see cref="T:System.Net.EndPoint" />，表示异步操作的远程 IP 终结点。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Byte[],System.Int32,System.Int32)">
+      <summary>设置要用于异步套接字方法的数据缓冲区。</summary>
+      <param name="buffer">要用于异步套接字方法的数据缓冲区。</param>
+      <param name="offset">数据缓冲区中操作开始位置处的偏移量，以字节为单位。</param>
+      <param name="count">可在缓冲区中发送或接收的最大数据量（以字节为单位）。</param>
+      <exception cref="T:System.ArgumentException">指定的缓冲区不明确。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性不为 null，<see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 属性也不为 null，将发生此异常。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">参数超出范围。如果 <paramref name="offset" /> 参数小于零或大于 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性中的数组长度，将发生此异常。如果 <paramref name="count" /> 参数小于零或大于 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性中的数组长度减去 <paramref name="offset" /> 参数的值，也会发生此异常。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Int32,System.Int32)">
+      <summary>设置要用于异步套接字方法的数据缓冲区。</summary>
+      <param name="offset">数据缓冲区中操作开始位置处的偏移量，以字节为单位。</param>
+      <param name="count">可在缓冲区中发送或接收的最大数据量（以字节为单位）。</param>
+      <exception cref="T:System.ArgumentOutOfRangeException">参数超出范围。如果 <paramref name="offset" /> 参数小于零或大于 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性中的数组长度，将发生此异常。如果 <paramref name="count" /> 参数小于零或大于 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 属性中的数组长度减去 <paramref name="offset" /> 参数的值，也会发生此异常。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.SocketError">
+      <summary>获取或设置异步套接字操作的结果。</summary>
+      <returns>一个 <see cref="T:System.Net.Sockets.SocketError" />，表示异步套接字操作的结果。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.UserToken">
+      <summary>获取或设置与此异步套接字操作关联的用户或应用程序对象。</summary>
+      <returns>一个对象，表示与此异步套接字操作关联的用户或应用程序对象。</returns>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncOperation">
+      <summary>最近使用此上下文对象执行的异步套接字操作的类型。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Accept">
+      <summary>一个套接字 Accept 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Connect">
+      <summary>一个套接字 Connect 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.None">
+      <summary>没有套接字操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Receive">
+      <summary>一个套接字 Receive 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.ReceiveFrom">
+      <summary>一个套接字 ReceiveFrom 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Send">
+      <summary>一个套接字 Send 操作。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.SendTo">
+      <summary>一个套接字 SendTo 操作。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketShutdown">
+      <summary>定义 <see cref="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)" /> 方法使用的常量。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Both">
+      <summary>为发送和接收禁用 <see cref="T:System.Net.Sockets.Socket" />。此字段为常数。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Receive">
+      <summary>禁用接收的 <see cref="T:System.Net.Sockets.Socket" />。此字段为常数。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Send">
+      <summary>禁用发送的 <see cref="T:System.Net.Sockets.Socket" />。此字段为常数。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketType">
+      <summary>指定 <see cref="T:System.Net.Sockets.Socket" /> 类的实例表示的套接字类型。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Dgram">
+      <summary>支持数据报，即最大长度固定（通常很小）的无连接、不可靠消息。消息可能会丢失或重复并可能在到达时不按顺序排列。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> 类型的 <see cref="T:System.Net.Sockets.Socket" /> 在发送和接收数据之前不需要任何连接，并且可以与多个对方主机进行通信。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> 使用数据报协议 (<see cref="F:System.Net.Sockets.ProtocolType.Udp" />) 和 <see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /><see cref="T:System.Net.Sockets.AddressFamily" />。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Stream">
+      <summary>支持可靠、双向、基于连接的字节流，而不重复数据，也不保留边界。此类型的 Socket 与单个对方主机通信，并且在通信开始之前需要建立远程主机连接。<see cref="F:System.Net.Sockets.SocketType.Stream" /> 使用传输控制协议 (<see cref="F:System.Net.Sockets.ProtocolType.Tcp" />) <see cref="T:System.Net.Sockets.ProtocolType" /> 和 InterNetwork<see cref="T:System.Net.Sockets.AddressFamily" />。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Unknown">
+      <summary>指定未知的 Socket 类型。</summary>
+    </member>
+  </members>
+</doc>

@@ -1,0 +1,805 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Diagnostics.Tracing</name>
+  </assembly>
+  <members>
+    <member name="T:System.Diagnostics.Tracing.EventActivityOptions">
+      <summary>Указывает отслеживания действия запуска и остановки события. </summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Detachable">
+      <summary>Разрешить перекрытие действий.По умолчанию запуски и остановки действий должны иметь соответствующую вложенность.Т. е. последовательность «Запуск A», «Запуск B», «Остановка A», «Остановка B» не допускается и приведет к остановке B одновременно с A.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Disable">
+      <summary>Отключить запуска и остановки трассировки. </summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.None">
+      <summary>Использовать поведение по умолчанию для отслеживания запуска и остановки.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventActivityOptions.Recursive">
+      <summary>Разрешить рекурсивные запуски действий.По умолчанию действие не может быть рекурсивным.Т. е. последовательность «Запуск A», «Запуск A», «Остановка A», «Остановка A» не допускается.Непреднамеренные рекурсивные действия могут возникать, если во время выполнения приложения для некоторых действий остановка не достигается до вызова запуска другого действия.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventAttribute">
+      <summary>Задает дополнительную информацию схемы для события.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventAttribute.#ctor(System.Int32)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventAttribute" /> с указанным идентификатором события.</summary>
+      <param name="eventId">Идентификатор события для события.</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.ActivityOptions">
+      <summary>Задает поведение событий запуска и остановки действия.Действие — область времени в приложении между запуском и остановкой.</summary>
+      <returns>Возвращает <see cref="T:System.Diagnostics.Tracing.EventActivityOptions" />.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Channel">
+      <summary>Возвращает или задает дополнительный журнал событий, в который должно быть записано событие.</summary>
+      <returns>Дополнительный журнал событий, в который должно быть записано событие.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.EventId">
+      <summary>Возвращает или задает идентификатор события.</summary>
+      <returns>Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Keywords">
+      <summary>Возвращает или задает ключевые слова для события.</summary>
+      <returns>Побитовое сочетание значений перечисления.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Level">
+      <summary>Возвращает или задает уровень для события.</summary>
+      <returns>Одно из значений перечисления, определяющее уровень события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Message">
+      <summary>Возвращает или задает сообщение для события.</summary>
+      <returns>Сообщение для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Opcode">
+      <summary>Возвращает или задает код операции для события.</summary>
+      <returns>Одно из значений перечисления, определяющее код операции.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Tags">
+      <summary>Возвращает и задает <see cref="T:System.Diagnostics.Tracing.EventTags" /> значение для этого <see cref="T:System.Diagnostics.Tracing.EventAttribute" /> объекта.Тег события — это определяемое пользователем значение, передаваемое при регистрации события в журнале.</summary>
+      <returns>Возвращает значение <see cref="T:System.Diagnostics.Tracing.EventTags" />.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Task">
+      <summary>Возвращает или задает задачу для события.</summary>
+      <returns>Задача для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventAttribute.Version">
+      <summary>Возвращает или задает версию события.</summary>
+      <returns>Версия события.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventChannel">
+      <summary>Указывает канал журнала событий для события.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Admin">
+      <summary>Канал журнала администратора.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Analytic">
+      <summary>Аналитический канал.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Debug">
+      <summary>Канал отладки.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.None">
+      <summary>Канал не указан.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventChannel.Operational">
+      <summary>Операционный канал. </summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventCommand">
+      <summary>Описывает команду (свойство <see cref="P:System.Diagnostics.Tracing.EventCommandEventArgs.Command" /> ), которая передается в метод обратного вызова <see cref="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)" />.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Disable">
+      <summary>Отключить событие.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Enable">
+      <summary>Включить событие.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.SendManifest">
+      <summary>Отправить манифест.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventCommand.Update">
+      <summary>Обновление события.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventCommandEventArgs">
+      <summary>Предоставляет аргументы для обратного вызова <see cref="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)" />.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventCommandEventArgs.Arguments">
+      <summary>Получает массив аргументы для обратного вызова.</summary>
+      <returns>Массив аргументов обратного вызова.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventCommandEventArgs.Command">
+      <summary>Получает команду для обратного вызова.</summary>
+      <returns>Команда обратного вызова.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventCommandEventArgs.DisableEvent(System.Int32)">
+      <summary>Отключает событие, имеющее указанный идентификатор.</summary>
+      <returns>Значение true, если параметр <paramref name="eventId" /> является диапазоном; в противном случае — значение false.</returns>
+      <param name="eventId">Идентификатор события, которое требуется отключить.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventCommandEventArgs.EnableEvent(System.Int32)">
+      <summary>Включает событие, имеющее указанный идентификатор.</summary>
+      <returns>Значение true, если параметр <paramref name="eventId" /> является диапазоном; в противном случае — значение false.</returns>
+      <param name="eventId">Идентификатор события, которое требуется включить.</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventDataAttribute">
+      <summary>Указывает тип передаваемых <see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)" /> метод.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventDataAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" />. </summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventDataAttribute.Name">
+      <summary>Возвращает или задает имя, присваиваемое событию, если его тип или свойство не именованы явно.</summary>
+      <returns>Имя, назначаемое событию или свойству.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldAttribute">
+      <summary>
+        <see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" /> Помещается в полях, определяемых пользователем типов, которые передаются как <see cref="T:System.Diagnostics.Tracing.EventSource" /> полезных данных. </summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventFieldAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" />.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventFieldAttribute.Format">
+      <summary>Получает и устанавливает значение, определяющее способ форматирования значения определяемого пользователем типа.</summary>
+      <returns>Возвращает значение <see cref="T:System.Diagnostics.Tracing.EventFieldFormat" />.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventFieldAttribute.Tags">
+      <summary>Возвращает и задает определяемые пользователем <see cref="T:System.Diagnostics.Tracing.EventFieldTags" /> значение, которое требуется для полей, содержащих данные, которые не один из поддерживаемых типов. </summary>
+      <returns>Возвращает <see cref="T:System.Diagnostics.Tracing.EventFieldTags" />.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldFormat">
+      <summary>Определяет способ форматирования значений определяемого пользователем типа и может использоваться для переопределения форматирования поля по умолчанию.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Boolean">
+      <summary>Boolean</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Default">
+      <summary>По умолчанию.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Hexadecimal">
+      <summary>Шестнадцатеричное.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.HResult">
+      <summary>HResult.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Json">
+      <summary>JSON.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.String">
+      <summary>Строка.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldFormat.Xml">
+      <summary>XML.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventFieldTags">
+      <summary>Задает определяемые пользователем тег, который помещается в полях, определяемых пользователем типов, которые передаются как <see cref="T:System.Diagnostics.Tracing.EventSource" /> полезных данных через <see cref="T:System.Diagnostics.Tracing.EventFieldAttribute" />. </summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventFieldTags.None">
+      <summary>Указывает, что тег отсутствует и равен нулю.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventIgnoreAttribute">
+      <summary>Указывает свойство должны игнорироваться при написании тип события с <see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,``0@)" /> метод.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventIgnoreAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventIgnoreAttribute" />.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventKeywords">
+      <summary>Определяет стандартные ключевые слова, которые применяются к событиям.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.All">
+      <summary>Все биты устанавливаются на 1, что представляет любую возможную группу событий.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.AuditFailure">
+      <summary>Вкладывается во все неудавшиеся события аудита безопасности.Используйте это ключевое слово только для событий в журнале безопасности.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.AuditSuccess">
+      <summary>Вкладывается во все успешные события аудита безопасности.Используйте это ключевое слово только для событий в журнале безопасности.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.CorrelationHint">
+      <summary>Вкладывается во все события перемещения, в которых идентификатор действия (корреляционный идентификатор) является вычисленным значением, и его уникальность не гарантируется (т. е. он не является действительным GUID).</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.EventLogClassic">
+      <summary>Вкладывается в события, вызываемые с использованием функции RaiseEvent.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.None">
+      <summary>При публикации события фильтрация по ключевым словам не выполняется.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.Sqm">
+      <summary>Вкладывается во все события механизма качества служб (SQM).</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.WdiContext">
+      <summary>Вкладывается во все контекстные события инфраструктуры диагностики Windows (WDI).</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventKeywords.WdiDiagnostic">
+      <summary>Вкладывается во все диагностические события инфраструктуры диагностики Windows (WDI).</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventLevel">
+      <summary>Определяет уровень события.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Critical">
+      <summary>Данный уровень соответствует критической ошибке, которая является серьезной ошибкой, вызвавшей серьезную неисправность.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Error">
+      <summary>Этот уровень добавляет стандартные ошибки, которые обозначают неполадки.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Informational">
+      <summary>Данный уровень добавляет информационные события или сообщения, не являющиеся ошибками.Данные события будут полезны при трассировке состояния или хода выполнения приложения.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.LogAlways">
+      <summary>Никакой фильтрации уровня в событии не выполняется.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Verbose">
+      <summary>Данный уровень добавляет длительные события или сообщения.Это приводит к тому, что все события регистрируются.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventLevel.Warning">
+      <summary>Данный уровень добавляет события предупреждения (например, события, публикуемые при уровне заполнения пространства диска, близком к максимальному).</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventListener">
+      <summary>Предоставляет методы для включения и отключения событий из источников событий.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.#ctor">
+      <summary>Создание нового экземпляра класса <see cref="T:System.Diagnostics.Tracing.EventListener" />.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.DisableEvents(System.Diagnostics.Tracing.EventSource)">
+      <summary>Отключает все события для заданного источника события.</summary>
+      <param name="eventSource">Источник событий, для которого требуется отключить события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.Dispose">
+      <summary>Освобождает ресурсы, используемые текущим экземпляром класса <see cref="T:System.Diagnostics.Tracing.EventListener" />.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel)">
+      <summary>Включает события для заданного источника событий, который содержит указанный уровень детализации или ниже.</summary>
+      <param name="eventSource">Источник события, для которого требуется включить события.</param>
+      <param name="level">Уровень событий, который требуется разрешить.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords)">
+      <summary>Включает события для заданного источника события, который содержит указанный уровень детализации или ниже, и соответствующие флаги ключевого слова.</summary>
+      <param name="eventSource">Источник события, для которого требуется включить события.</param>
+      <param name="level">Уровень событий, который требуется разрешить.</param>
+      <param name="matchAnyKeyword">Флаги ключевых слов, необходимые для включения событий.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EnableEvents(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords,System.Collections.Generic.IDictionary{System.String,System.String})">
+      <summary>Включает события для заданного источника события, который содержит указанный уровень детализации или ниже, соответствующие флаги ключевого слова и аргументы.</summary>
+      <param name="eventSource">Источник события, для которого требуется включить события.</param>
+      <param name="level">Уровень событий, который требуется разрешить.</param>
+      <param name="matchAnyKeyword">Флаги ключевых слов, необходимые для включения событий.</param>
+      <param name="arguments">Аргументы, сопоставляемые для реализации событий.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.EventSourceIndex(System.Diagnostics.Tracing.EventSource)">
+      <summary>Возвращает маленькое неотрицательное число, представляющее указанный источник события.</summary>
+      <returns>Маленькое неотрицательное число, представляющее указанный источник события.</returns>
+      <param name="eventSource">Источник события, для которого требуется найти индекс.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.OnEventSourceCreated(System.Diagnostics.Tracing.EventSource)">
+      <summary>Вызывается для всех существующих источников событий, когда прослушиватель события создан и когда новый источник события вложен в прослушиватель.</summary>
+      <param name="eventSource">Источник события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventListener.OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs)">
+      <summary>Вызывается, когда событие было записано источником события, для которого прослушиватель события включил события.</summary>
+      <param name="eventData">Аргументы события, описывающие событие.</param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventManifestOptions">
+      <summary>Указывает способ создания манифеста ETW для источника события.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.AllCultures">
+      <summary>Создает узел в папке локализации ресурсов для каждой вспомогательной сборки предоставляются.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.AllowEventSourceOverride">
+      <summary>Переопределяет поведение по умолчанию, текущий <see cref="T:System.Diagnostics.Tracing.EventSource" /> базовый класс для определяемого пользователем типа передается в метод записи.Это позволяет проверки источников событий .NET.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.None">
+      <summary>Параметры не указаны.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.OnlyIfNeededForRegistration">
+      <summary>Создается манифест источником события должен быть зарегистрирован на главном компьютере.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventManifestOptions.Strict">
+      <summary>Вызывает исключение, возникающее при возникновении несогласованности при записи файла манифеста.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventOpcode">
+      <summary>Определяет стандартные коды операций, вложенные в события источником событий.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.DataCollectionStart">
+      <summary>Событие начала коллекции трассировки.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.DataCollectionStop">
+      <summary>Событие окончания коллекции трассировки.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Extension">
+      <summary>Событие расширения.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Info">
+      <summary>Информационное событие.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Receive">
+      <summary>Событие, публикуемое при приеме одним действием данных в приложении.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Reply">
+      <summary>Событие, публикуемое после ответа действия в приложении на событие.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Resume">
+      <summary>Событие, публикуемое после выхода действия в приложении из приостановленного состояния.Событие должно следовать за событием, содержащим код операции <see cref="F:System.Diagnostics.Tracing.EventOpcode.Suspend" />.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Send">
+      <summary>Событие, публикуемое при передаче одним действием в приложении данных или системных ресурсов другому действию.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Start">
+      <summary>Событие, публикуемое при запуске приложением новой транзакции или нового действия.Этот код операции можно внедрять в другие транзакции или действия, если несколько событий, содержащих код <see cref="F:System.Diagnostics.Tracing.EventOpcode.Start" />, следуют друг за другом без промежуточных событий, содержащих код <see cref="F:System.Diagnostics.Tracing.EventOpcode.Stop" />.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Stop">
+      <summary>Событие, публикуемое при завершении действия или транзакции в приложении.Событие соответствует последнему непарному событию с кодом операции <see cref="F:System.Diagnostics.Tracing.EventOpcode.Start" />.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventOpcode.Suspend">
+      <summary>Событие, публикуемое при приостановке действия в приложении.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSource">
+      <summary>Предоставляет возможность создания событий для трассировки событий Windows (ETW).</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor">
+      <summary>Создает новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" />.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Boolean)">
+      <summary>Создает экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> и определяет, следует ли создавать исключение при возникновении ошибки в базовом коде Windows.</summary>
+      <param name="throwOnEventWriteErrors">Значение true для создания исключения при возникновении ошибки в базовом коде Windows; в противном случае — значение false.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Diagnostics.Tracing.EventSourceSettings)">
+      <summary>Создает экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> с указанными параметрами конфигурации.</summary>
+      <param name="settings">Побитовое сочетание значений перечисления, которое определяет параметры конфигурации, применяемые к источнику события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.Diagnostics.Tracing.EventSourceSettings,System.String[])">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> для использования с неконтрактными событиями, который содержит указанные параметры и признаки.</summary>
+      <param name="settings">Побитовое сочетание значений перечисления, которое определяет параметры конфигурации, применяемые к источнику события.</param>
+      <param name="traits">Пары ключ-значение, определяющие признаки для источника события.</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="traits" /> is not specified in key-value pairs.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String)">
+      <summary>Создает экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> с указанным именем.</summary>
+      <param name="eventSourceName">Имя, назначаемое источнику событий.Значение не должно быть равно null.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String,System.Diagnostics.Tracing.EventSourceSettings)">
+      <summary>Создает экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> с указанным именем и параметрами.</summary>
+      <param name="eventSourceName">Имя, назначаемое источнику событий.Значение не должно быть равно null.</param>
+      <param name="config">Побитовое сочетание значений перечисления, которое определяет параметры конфигурации, применяемые к источнику события.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.#ctor(System.String,System.Diagnostics.Tracing.EventSourceSettings,System.String[])">
+      <summary>Создает экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSource" /> с указанными параметрами конфигурации.</summary>
+      <param name="eventSourceName">Имя, назначаемое источнику событий.Значение не должно быть равно null.</param>
+      <param name="config">Побитовое сочетание значений перечисления, которое определяет параметры конфигурации, применяемые к источнику события.</param>
+      <param name="traits">Пары ключ-значение, определяющие признаки для источника события.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventSourceName" /> is null.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="traits" /> is not specified in key-value pairs.</exception>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.ConstructionException">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Возвращает любое исключение, инициированное во время создания источника событий.</summary>
+      <returns>Исключение, инициированное во время создания источника событий, или null, если исключение не создано. </returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.CurrentThreadActivityId">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Получает идентификатор действия текущего потока. </summary>
+      <returns>Идентификатор действия текущего потока. </returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Dispose">
+      <summary>Освобождает все ресурсы, используемые текущим экземпляром класса <see cref="T:System.Diagnostics.Tracing.EventSource" />.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Dispose(System.Boolean)">
+      <summary>Освобождает неуправляемые ресурсы, используемые классом <see cref="T:System.Diagnostics.Tracing.EventSource" /> (при необходимости освобождает и управляемые ресурсы).</summary>
+      <param name="disposing">Значение true позволяет освободить как управляемые, так и неуправляемые ресурсы; значение false освобождает только неуправляемые ресурсы. </param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Finalize">
+      <summary>Позволяет объекту <see cref="T:System.Diagnostics.Tracing.EventSource" /> предпринять попытку освободить ресурсы и выполнить другие операции очистки перед утилизацией объекта в процессе сборки мусора.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GenerateManifest(System.Type,System.String)">
+      <summary>Возвращает строку манифеста XML, связанного с текущим источником события.</summary>
+      <returns>Строка XML-данных.</returns>
+      <param name="eventSourceType">Тип источника события.</param>
+      <param name="assemblyPathToIncludeInManifest">Путь к файлу сборки (DLL-файлу) для включения в элемент поставщик манифеста. </param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GenerateManifest(System.Type,System.String,System.Diagnostics.Tracing.EventManifestOptions)">
+      <summary>Возвращает строку манифеста XML, связанного с текущим источником события.</summary>
+      <returns>Строка XML-данных или null (см. примечания).</returns>
+      <param name="eventSourceType">Тип источника события.</param>
+      <param name="assemblyPathToIncludeInManifest">Путь к файлу сборки (DLL-файлу) для включения в элемент поставщик манифеста. </param>
+      <param name="flags">Побитовое сочетание значений перечисления, определяющее способ создания манифеста.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetGuid(System.Type)">
+      <summary>Получает уникальный идентификатор для данной реализации источника события.</summary>
+      <returns>Уникальный идентификатор для данного типа источника события.</returns>
+      <param name="eventSourceType">Тип источника события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetName(System.Type)">
+      <summary>Возвращает понятное имя источника события.</summary>
+      <returns>Понятное имя источника события.Значение по умолчанию — простое имя класса.</returns>
+      <param name="eventSourceType">Тип источника события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetSources">
+      <summary>Возвращает снимок всех источников событий в домене приложения.</summary>
+      <returns>Перечисление всех источников событий в домене приложения.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.GetTrait(System.String)">
+      <summary>Получает значение признака, связанное с заданным ключом.</summary>
+      <returns>Значение признака, связанное с указанным ключом.Если ключ не найден, возвращает значение null.</returns>
+      <param name="key">Ключ признака, который необходимо получить.</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Guid">
+      <summary>Уникальный идентификатор источника события.</summary>
+      <returns>Уникальный идентификатор источника события.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled">
+      <summary>Определяет, включен ли источник текущего события.</summary>
+      <returns>Значение true, если текущий источник события включен; в противном случае — значение false.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled(System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords)">
+      <summary>Указывает, включен ли источник текущего события, который имеет заданный уровень и ключевое слово.</summary>
+      <returns>Значение true, если источник события включен; в противном случае — значение false.</returns>
+      <param name="level">Уровень источника события.</param>
+      <param name="keywords">Ключевое слово источника события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.IsEnabled(System.Diagnostics.Tracing.EventLevel,System.Diagnostics.Tracing.EventKeywords,System.Diagnostics.Tracing.EventChannel)">
+      <summary>Определяет, включен ли текущий источник для событий с указанным уровнем, ключевыми словами и каналом.</summary>
+      <returns>Значение true, если источник события включен для указанного уровня событий, ключевых слов и канала; в противном случае — значение false.Результат выполнения этого метода только приблизительно показывает, активно ли определенное событие.Используйте его, чтобы избежать ресурсоемких вычислений для ведения журнала, когда оно отключено.Работа источников событий может определяться дополнительной фильтрацией.</returns>
+      <param name="level">Проверяемый уровень событий.Источник событий будет считаться включенным, если этот уровень равен или больше <paramref name="level" />.</param>
+      <param name="keywords">Проверяемые ключевые слова события.</param>
+      <param name="channel">Проверяемый канал событий.</param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Name">
+      <summary>Понятное имя класса, производного от источника события.</summary>
+      <returns>Понятное имя производного класса.Значение по умолчанию — простое имя класса.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs)">
+      <summary>Вызывается, когда источник текущего события обновляется контроллером.</summary>
+      <param name="command">Аргументы для события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SendCommand(System.Diagnostics.Tracing.EventSource,System.Diagnostics.Tracing.EventCommand,System.Collections.Generic.IDictionary{System.String,System.String})">
+      <summary>Отправляет команду указанному источнику события.</summary>
+      <param name="eventSource">Источник событий, которому требуется отправлять команду.</param>
+      <param name="command">Команда события, которую требуется отправить.</param>
+      <param name="commandArguments">Аргументы для команды события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SetCurrentThreadActivityId(System.Guid)">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Задает идентификатор действия в текущем потоке.</summary>
+      <param name="activityId">Новый идентификатор действия текущего потока или <see cref="F:System.Guid.Empty" />, чтобы указать, что работа в этом потоке не связана ни с каким действием. </param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.SetCurrentThreadActivityId(System.Guid,System.Guid@)">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Задает идентификатор действия в текущем потоке и возвращает предыдущий идентификатор действия.</summary>
+      <param name="activityId">Новый идентификатор действия текущего потока или <see cref="F:System.Guid.Empty" />, чтобы указать, что работа в этом потоке не связана ни с каким действием.</param>
+      <param name="oldActivityThatWillContinue">При возврате из этого метода содержит идентификатор предыдущего действия в текущем потоке. </param>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.Settings">
+      <summary>Возвращает параметры, применяемые к этому источнику события.</summary>
+      <returns>Параметры, применяемые к этому источнику события.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.ToString">
+      <summary>Получает строковое представление текущего экземпляра источника события.</summary>
+      <returns>Имя и уникальный идентификатор, определяющие источник текущего события.</returns>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write(System.String)">
+      <summary>Записывает событие без полей, но с указанным именем и параметрами по умолчанию.</summary>
+      <param name="eventName">Имя записываемого события.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)">
+      <summary>Записывает событие без полей, но с указанными именем и параметрами.</summary>
+      <param name="eventName">Имя записываемого события.</param>
+      <param name="options">Параметры события, такие как уровень, ключевые слова и код операции.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="eventName" /> is null.</exception>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)">
+      <summary>Записывает событие с указанными именем, данными и параметрами.</summary>
+      <param name="eventName">Имя события.</param>
+      <param name="options">Параметры события.</param>
+      <param name="data">Данные события.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" />.</param>
+      <typeparam name="T">Тип, определяющий событие и связанные данные.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" />.</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,System.Guid@,System.Guid@,``0@)">
+      <summary>Записывает событие с указанными именем, параметрами, связанным действием и данными.</summary>
+      <param name="eventName">Имя события.</param>
+      <param name="options">Параметры события.</param>
+      <param name="activityId">Идентификатор действия, связанного с событием.</param>
+      <param name="relatedActivityId">Идентификатор связанного действия либо значение <see cref="F:System.Guid.Empty" />, если связанное действие отсутствует.</param>
+      <param name="data">Данные события.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" />.</param>
+      <typeparam name="T">Тип, определяющий событие и связанные данные.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" />.</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions@,``0@)">
+      <summary>Записывает событие с указанными именем, параметрами и данными.</summary>
+      <param name="eventName">Имя события.</param>
+      <param name="options">Параметры события.</param>
+      <param name="data">Данные события.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" />.</param>
+      <typeparam name="T">Тип, определяющий событие и связанные данные.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" />.</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,``0)">
+      <summary>Записывает событие с указанными именем и данными.</summary>
+      <param name="eventName">Имя события.</param>
+      <param name="data">Данные события.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventDataAttribute" />.</param>
+      <typeparam name="T">Тип, определяющий событие и связанные данные.Тип должен быть анонимным или помеченным атрибутом <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" />.</typeparam>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32)">
+      <summary>Записывает событие, используя предоставленный идентификатор события.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Byte[])">
+      <summary>Записывает событие, используя предоставленные идентификатор события и аргумент в виде массива байтов.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Аргумент в виде массива байтов.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 32-разрядный целочисленный аргумент.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.Int32)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 32-разрядные целочисленные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Целочисленный аргумент.</param>
+      <param name="arg2">Целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.Int32,System.Int32)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 32-разрядные целочисленные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Целочисленный аргумент.</param>
+      <param name="arg2">Целочисленный аргумент.</param>
+      <param name="arg3">Целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int32,System.String)">
+      <summary>Записывает событие, используя предоставленный идентификатор, а также строковые и 32-разрядные целочисленные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">32-разрядный целочисленный аргумент.</param>
+      <param name="arg2">Строковый аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 64-разрядный целочисленный аргумент.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">64-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Byte[])">
+      <summary>Записывает данные события, используя указанный идентификатор, а также 64-разрядные целочисленные аргументы и аргументы в виде массива байтов.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">64-разрядный целочисленный аргумент.</param>
+      <param name="arg2">Аргумент в виде массива байтов.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Int64)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 64-разрядные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">64-разрядный целочисленный аргумент.</param>
+      <param name="arg2">64-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.Int64,System.Int64)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и 64-разрядные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">64-разрядный целочисленный аргумент.</param>
+      <param name="arg2">64-разрядный целочисленный аргумент.</param>
+      <param name="arg3">64-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Int64,System.String)">
+      <summary>Записывает событие, используя предоставленный идентификатор, а также строковые и 64-разрядные целочисленные аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">64-разрядный целочисленный аргумент.</param>
+      <param name="arg2">Строковый аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.Object[])">
+      <summary>Записывает событие, используя предоставленные идентификатор события и массив аргументов.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="args">Массив объектов.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и строковый аргумент.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int32)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+      <param name="arg2">32-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int32,System.Int32)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+      <param name="arg2">32-разрядный целочисленный аргумент.</param>
+      <param name="arg3">32-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.Int64)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+      <param name="arg2">64-разрядный целочисленный аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.String)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и строковые аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+      <param name="arg2">Строковый аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEvent(System.Int32,System.String,System.String,System.String)">
+      <summary>Записывает событие, используя предоставленные идентификатор события и строковые аргументы.</summary>
+      <param name="eventId">Идентификатор события.Это значение должно находиться в диапазоне от 0 до 65535.</param>
+      <param name="arg1">Строковый аргумент.</param>
+      <param name="arg2">Строковый аргумент.</param>
+      <param name="arg3">Строковый аргумент.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventCore(System.Int32,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)">
+      <summary>Создает перегрузку <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> с помощью предоставленных идентификатора и данных события.</summary>
+      <param name="eventId">Идентификатор события.</param>
+      <param name="eventDataCount">Число элементов данных события.</param>
+      <param name="data">Структура, содержащая данные события.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventWithRelatedActivityId(System.Int32,System.Guid,System.Object[])">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Записывает событие, которое указывает, что текущее действие связано с другим действием. </summary>
+      <param name="eventId">Идентификатор, который уникально идентифицирует это событие в источнике <see cref="T:System.Diagnostics.Tracing.EventSource" />. </param>
+      <param name="relatedActivityId">Идентификатор связанного действия. </param>
+      <param name="args">Массив объектов, которые содержат данные события. </param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSource.WriteEventWithRelatedActivityIdCore(System.Int32,System.Guid*,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Записывает событие, которое указывает, что текущее действие связано с другим действием.</summary>
+      <param name="eventId">Идентификатор, который уникально идентифицирует это событие в источнике <see cref="T:System.Diagnostics.Tracing.EventSource" />.</param>
+      <param name="relatedActivityId">Указатель на GUID идентификатора связанного действия. </param>
+      <param name="eventDataCount">Число элементов в поле <paramref name="data" />. </param>
+      <param name="data">Указатель на первый элемент в поле данных события. </param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSource.EventData">
+      <summary>Предоставляет данные события для создания быстрые перегрузки <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" /> с помощью метода <see cref="M:System.Diagnostics.Tracing.EventSource.WriteEventCore(System.Int32,System.Int32,System.Diagnostics.Tracing.EventSource.EventData*)" />.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.EventData.DataPointer">
+      <summary>Получает или задает указатель на данные для новой перегрузки <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" />.</summary>
+      <returns>Указатель на данные.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSource.EventData.Size">
+      <summary>Получает или задает количество элементов полезной нагрузки в новой перегрузке <see cref="Overload:System.Diagnostics.Tracing.EventSource.WriteEvent" />.</summary>
+      <returns>Количество элементов полезной нагрузки в новой перегрузке.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceAttribute">
+      <summary>Позволяет определять трассировку событий для имени Windows (ETW) независимо от класса источника события.   </summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSourceAttribute" />.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.Guid">
+      <summary>Получает или задает идентификатор источника события.</summary>
+      <returns>Идентификатор источника события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.LocalizationResources">
+      <summary>Получает или задает имя локализованного файла ресурсов.</summary>
+      <returns>Имя файла ресурсов локализации или null, если файл ресурсов локализации не существует.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceAttribute.Name">
+      <summary>Получает или задает имя источника события.</summary>
+      <returns>Имя источника событий.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceException">
+      <summary>Исключение, которое возникает при ошибке во время трассировки событий для Windows (ETW).</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSourceException" />.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSourceException" /> с указанным сообщением об ошибке.</summary>
+      <param name="message">Сообщение, описывающее ошибку.</param>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.EventSourceException.#ctor(System.String,System.Exception)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Diagnostics.Tracing.EventSourceException" /> с указанным сообщением об ошибке и ссылкой на внутреннее исключение, вызвавшее это исключение.</summary>
+      <param name="message">Сообщение об ошибке с объяснением причин исключения. </param>
+      <param name="innerException">Исключение, вызвавшее текущее исключение, или значение null, если внутреннее исключение не задано. </param>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceOptions">
+      <summary>Указывает переопределения значений по умолчанию события как уровень ведения журнала, ключевые слова и операции кода при <see cref="M:System.Diagnostics.Tracing.EventSource.Write``1(System.String,System.Diagnostics.Tracing.EventSourceOptions,``0)" /> вызывается метод.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.ActivityOptions"></member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Keywords">
+      <summary>Возвращает или задает ключевые слова, применяемое к событию.Если это свойство не задано, будет ключевых слов событий None.</summary>
+      <returns>Ключевые слова, применяемое к событию, или None Если ключевые слова не заданы.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Level">
+      <summary>Возвращает или задает уровень событий, применяемое к событию. </summary>
+      <returns>Уровень событий для события.Если нет, значение по умолчанию — подробный (5).</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Opcode">
+      <summary>Возвращает или задает код операции для указанного события. </summary>
+      <returns>Код операции для указанного события.Если не задано значение по умолчанию — Info (0).</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventSourceOptions.Tags"></member>
+    <member name="T:System.Diagnostics.Tracing.EventSourceSettings">
+      <summary>Задает параметры конфигурации для источника события.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.Default">
+      <summary>Ни один из параметров специальная конфигурация включены.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.EtwManifestEventFormat">
+      <summary>Прослушиватель трассировки событий Windows следует использовать формат на основе манифеста, при вызове событий.Этот параметр является директива прослушиватель трассировки событий Windows следует использовать формат на основе манифеста при вызове событий.Это является параметром по умолчанию при определении типа производного от <see cref="T:System.Diagnostics.Tracing.EventSource" /> с помощью одного из защищенного <see cref="T:System.Diagnostics.Tracing.EventSource" /> конструкторов.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.EtwSelfDescribingEventFormat">
+      <summary>Прослушиватель трассировки событий Windows следует использовать формат самоописанием события.Это является параметром по умолчанию при создании нового экземпляра <see cref="T:System.Diagnostics.Tracing.EventSource" /> с помощью одного из открытых <see cref="T:System.Diagnostics.Tracing.EventSource" /> конструкторов.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventSourceSettings.ThrowOnEventWriteErrors">
+      <summary>Источник события вызывает исключение при возникновении ошибки.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventTags">
+      <summary>Задает отслеживание событий запуска и остановки действия.Следует использовать только младшие 24 бита.Дополнительные сведения см. в разделах <see cref="T:System.Diagnostics.Tracing.EventSourceOptions" /> и <see cref="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)" />.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventTags.None">
+      <summary>Не указывает тег и равняется нулю.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventTask">
+      <summary>Определяет задачи, которые применяются к событиям.</summary>
+    </member>
+    <member name="F:System.Diagnostics.Tracing.EventTask.None">
+      <summary>Неопределенная задача.</summary>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.EventWrittenEventArgs">
+      <summary>Предоставляет данные для обратного вызова <see cref="M:System.Diagnostics.Tracing.EventListener.OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs)" />.</summary>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.ActivityId">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Получает идентификатор действий в потоке, куда было записано событие. </summary>
+      <returns>Идентификатор действий в потоке, куда было записано событие. </returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Channel">
+      <summary>Возвращает канал события.</summary>
+      <returns>Канал события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventId">
+      <summary>Возвращает идентификатор события.</summary>
+      <returns>Идентификатор события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventName">
+      <summary>Возвращает имя события.</summary>
+      <returns>Имя события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.EventSource">
+      <summary>Возвращает объект источника события.</summary>
+      <returns>Объект источника события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Keywords">
+      <summary>Возвращает ключевые слова для события.</summary>
+      <returns>Ключевые слова для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Level">
+      <summary>Возвращает уровень события.</summary>
+      <returns>Уровень события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Message">
+      <summary>Возвращает сообщение для события.</summary>
+      <returns>Сообщение для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Opcode">
+      <summary>Возвращает код операции для события.</summary>
+      <returns>Код операции для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Payload">
+      <summary>Возвращает полезные данные для события.</summary>
+      <returns>Полезные данные для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.PayloadNames">
+      <summary>Возвращает список строк, представляющих имена свойств события.</summary>
+      <returns>Возвращает <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1" />.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.RelatedActivityId">
+      <summary>[Поддерживается только в .NET Framework 4.5.1 и более поздних версиях] Возвращает идентификатор действия, которое связано с действием, представленным текущим экземпляром. </summary>
+      <returns>Идентификатор связанного действия, либо значение <see cref="F:System.Guid.Empty" />, если отсутствует связанная действие.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Tags">
+      <summary>Возвращает указанные теги в вызове метода <see cref="M:System.Diagnostics.Tracing.EventSource.Write(System.String,System.Diagnostics.Tracing.EventSourceOptions)" />.</summary>
+      <returns>Возвращает <see cref="T:System.Diagnostics.Tracing.EventTags" />.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Task">
+      <summary>Возвращает задачу для события.</summary>
+      <returns>Задача для события.</returns>
+    </member>
+    <member name="P:System.Diagnostics.Tracing.EventWrittenEventArgs.Version">
+      <summary>Возвращает версию события.</summary>
+      <returns>Версия события.</returns>
+    </member>
+    <member name="T:System.Diagnostics.Tracing.NonEventAttribute">
+      <summary>Определяет метод, который не создает событие.</summary>
+    </member>
+    <member name="M:System.Diagnostics.Tracing.NonEventAttribute.#ctor">
+      <summary>Создание нового экземпляра класса <see cref="T:System.Diagnostics.Tracing.NonEventAttribute" />.</summary>
+    </member>
+  </members>
+</doc>

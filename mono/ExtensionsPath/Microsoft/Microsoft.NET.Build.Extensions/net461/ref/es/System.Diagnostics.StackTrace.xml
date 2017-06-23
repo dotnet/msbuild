@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Diagnostics.StackTrace</name>
+  </assembly>
+  <members>
+    <member name="T:System.Diagnostics.StackFrame">
+      <summary>Proporciona información sobre un <see cref="T:System.Diagnostics.StackFrame" />, que representa una llamada de función en la pila de llamadas del subproceso actual.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileColumnNumber">
+      <summary>Obtiene el número de columna del archivo que contiene el código que se está ejecutando.Esta información se extrae normalmente de los símbolos de depuración del ejecutable.</summary>
+      <returns>Número de columna del archivo, o 0 (cero) si no se puede determinar el número de columna del archivo.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileLineNumber">
+      <summary>Obtiene el número de línea del archivo que contiene el código que se está ejecutando.Esta información se extrae normalmente de los símbolos de depuración del ejecutable.</summary>
+      <returns>Número de línea del archivo, o 0 (cero) si no se puede determinar el número de línea del archivo.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetFileName">
+      <summary>Obtiene el nombre de archivo que contiene el código que se está ejecutando.Esta información se extrae normalmente de los símbolos de depuración del ejecutable.</summary>
+      <returns>Nombre del archivo o null si no es posible determinarlo.</returns>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetILOffset">
+      <summary>Obtiene el desplazamiento desde el inicio del código del Lenguaje intermedio de Microsoft (MSIL) del método que se está ejecutando.Este desplazamiento puede ser aproximado en función de si el compilador Just-In-Time (JIT) está generando código de depuración.La generación de esta información de depuración está controlada por <see cref="T:System.Diagnostics.DebuggableAttribute" />.</summary>
+      <returns>Desplazamiento desde el inicio del código MSIL del método que se está ejecutando.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.GetMethod">
+      <summary>Obtiene el método en el que se está ejecutando el marco.</summary>
+      <returns>Método en el que se está ejecutando el marco.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Diagnostics.StackFrame.OFFSET_UNKNOWN">
+      <summary>Define el valor que se devuelve desde el método <see cref="M:System.Diagnostics.StackFrame.GetNativeOffset" /> o <see cref="M:System.Diagnostics.StackFrame.GetILOffset" /> cuando se desconoce el desplazamiento nativo o de Lenguaje Intermedio de Microsoft (MSIL).Este campo es constante.</summary>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackFrame.ToString">
+      <summary>Compila una representación legible del seguimiento de pila.</summary>
+      <returns>Representación legible del seguimiento de pila.</returns>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Diagnostics.StackFrameExtensions"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.GetNativeImageBase(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.GetNativeIP(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasILOffset(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasMethod(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasNativeImage(System.Diagnostics.StackFrame)"></member>
+    <member name="M:System.Diagnostics.StackFrameExtensions.HasSource(System.Diagnostics.StackFrame)"></member>
+    <member name="T:System.Diagnostics.StackTrace">
+      <summary>Representa un seguimiento de pila, que es una colección ordenada de uno o más marcos de pila.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.#ctor(System.Exception,System.Boolean)">
+      <summary>Inicializa una nueva instancia de la clase <see cref="T:System.Diagnostics.StackTrace" /> mediante el objeto de excepción que se suministra y, opcionalmente, captura información de origen.</summary>
+      <exception cref="T:System.ArgumentNullException">El parámetro <paramref name="e" /> es null. </exception>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.GetFrames">
+      <summary>Devuelve una copia de todos los marcos de pila del seguimiento de pila actual.</summary>
+      <returns>Matriz de tipo <see cref="T:System.Diagnostics.StackFrame" /> que representa las llamadas a función en el marco de pila.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Diagnostics.StackTrace.ToString">
+      <summary>Compila una representación legible del seguimiento de pila.</summary>
+      <returns>Representación legible del seguimiento de pila.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+  </members>
+</doc>

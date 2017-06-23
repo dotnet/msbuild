@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Primitives</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.CollectionDataContractAttribute">
+      <summary>При применении к типу коллекции позволяет пользователю задавать элементы коллекции.Этот атрибут может применяться только к типам, распознаваемым методом <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> как допустимые сериализуемые коллекции.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.CollectionDataContractAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.CollectionDataContractAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsItemNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsKeyNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReference">
+      <summary>Возвращает или задает значение, указывающее, следует ли сохранять данные ссылки на объект.</summary>
+      <returns>Значение true, если требуется сохранить данные ссылки на объект; в противном случае — значение false.Значение по умолчанию — false.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.IsValueNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ItemName">
+      <summary>Возвращает или задает пользовательское имя для элемента коллекции.</summary>
+      <returns>Имя, применяемое к элементам коллекции.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.KeyName">
+      <summary>Возвращает или задает пользовательское имя для имени ключа словаря.</summary>
+      <returns>Имя, используемое вместо имени ключа словаря по умолчанию.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Name">
+      <summary>Возвращает или задает имя контракта данных для типа коллекции.</summary>
+      <returns>Имя контракта данных для типа коллекции.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.Namespace">
+      <summary>Возвращает или задает пространство имен для контракта данных.</summary>
+      <returns>Пространство имен контракта данных.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.CollectionDataContractAttribute.ValueName">
+      <summary>Возвращает или задает пользовательское имя для имени значения словаря.</summary>
+      <returns>Имя, используемое вместо имени значения словаря по умолчанию.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.ContractNamespaceAttribute">
+      <summary>Задает пространство имен среды CLR и пространство имен XML для контракта данных. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.ContractNamespaceAttribute.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.ContractNamespaceAttribute" />, используя указанное пространство имен. </summary>
+      <param name="contractNamespace">Пространство имен контракта.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ClrNamespace">
+      <summary>Возвращает или задает пространство имен среды CLR для типа контракта данных. </summary>
+      <returns>Пространство имен типа, разрешенное средой CLR.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.ContractNamespaceAttribute.ContractNamespace">
+      <summary>Возвращает пространство имен элементов контракта данных.</summary>
+      <returns>Пространство имен элементов контракта данных.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractAttribute">
+      <summary>Указывает, что тип определяет или реализует контракт данных и может быть сериализован сериализатором, таким как <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.Чтобы сделать тип сериализуемым, авторы типа должны определить для него контракт данных.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataContractAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsNamespaceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReference">
+      <summary>Возвращает или задает значение, указывающее, следует ли сохранять данные ссылки на объект.</summary>
+      <returns>Значение true, если требуется сохранить данные ссылки на объект с помощью стандартного XML; в противном случае — значение false.Значение по умолчанию — false.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.IsReferenceSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Name">
+      <summary>Возвращает или задает имя для контракта данных типа.</summary>
+      <returns>Локальное имя контракта данных.Значение по умолчанию — это имя класса, к которому применяется атрибут.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractAttribute.Namespace">
+      <summary>Возвращает или задает пространство имен для контракта данных типа.</summary>
+      <returns>Пространство имен контракта. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataMemberAttribute">
+      <summary>При применении к элементу типа указывает, что этот элемент является частью контракта данных и сериализуется <see cref="T:System.Runtime.Serialization.DataContractSerializer" />.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataMemberAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.DataMemberAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.EmitDefaultValue">
+      <summary>Возвращает или задает значение, указывающее, следует ли сериализовать значение по умолчанию сериализуемого поля или свойства. </summary>
+      <returns>Значение true, если значение по умолчанию для элемента должно быть создано в потоке сериализации; в противном случае — значение false.Значение по умолчанию — true.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsNameSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.IsRequired">
+      <summary>Возвращает или задает значение, указывающее модулю сериализации, что чтение и десериализация производятся при наличии элемента.</summary>
+      <returns>Значение true, если требуется наличие элемента; в противном случае — значение false.</returns>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">Элемент отсутствует.</exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Name">
+      <summary>Возвращает или задает имя элемента данных. </summary>
+      <returns>Имя элемента данных.Значение по умолчанию — это имя целевого объекта, к которому применяется атрибут.</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataMemberAttribute.Order">
+      <summary>Возвращает или задает порядок сериализации и десериализации элемента.</summary>
+      <returns>Числовой порядок сериализации или десериализации.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.EnumMemberAttribute">
+      <summary>Указывает, что поле является элементом перечисления и должно быть сериализовано.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.EnumMemberAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.EnumMemberAttribute" />. </summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.IsValueSetExplicitly"></member>
+    <member name="P:System.Runtime.Serialization.EnumMemberAttribute.Value">
+      <summary>Возвращает или задает значение, связанное с элементом перечисления, к которому применяется атрибут. </summary>
+      <returns>Значение, связанное с элементом перечисления.</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.IgnoreDataMemberAttribute">
+      <summary>При применении к элементу типа указывает, что этот элемент не является частью контракта данных и не сериализуется.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.IgnoreDataMemberAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.IgnoreDataMemberAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.InvalidDataContractException">
+      <summary>Исключение, которое выдается, если <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> или <see cref="T:System.Runtime.Serialization.NetDataContractSerializer" /> встречает недопустимый контракт данных во время сериализации или десериализации. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.InvalidDataContractException" />.  </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> с указанным сообщением об ошибке. </summary>
+      <param name="message">Описание ошибки. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.InvalidDataContractException.#ctor(System.String,System.Exception)">
+      <summary>Выполняет инициализацию нового экземпляра класса <see cref="T:System.Runtime.Serialization.InvalidDataContractException" /> с указанным сообщением об ошибке и внутренним исключением. </summary>
+      <param name="message">Описание ошибки. </param>
+      <param name="innerException">Исходный объект <see cref="T:System.Exception" />. </param>
+    </member>
+    <member name="T:System.Runtime.Serialization.KnownTypeAttribute">
+      <summary>Задает типы, которые должны распознаваться <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> при сериализации или десериализации указанного типа. </summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> с именем метода, возвращающего интерфейс известных типов <see cref="T:System.Collections.IEnumerable" />. </summary>
+      <param name="methodName">Имя метода, возвращающего интерфейс типов <see cref="T:System.Collections.IEnumerable" />, используемых при сериализации или десериализации данных.</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.KnownTypeAttribute.#ctor(System.Type)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" /> заданным типом. </summary>
+      <param name="type">Тип <see cref="T:System.Type" />, включаемый как известный тип при сериализации или десериализации данных.</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.MethodName">
+      <summary>Возвращает имя метода, который возвратит список типов, которые должны распознаваться при сериализации или десериализации. </summary>
+      <returns>Объект <see cref="T:System.String" />, содержащий имя метода типа, определяемого классом <see cref="T:System.Runtime.Serialization.KnownTypeAttribute" />. </returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.KnownTypeAttribute.Type">
+      <summary>Возвращает тип, который должен распознаваться при сериализации или десериализации <see cref="T:System.Runtime.Serialization.DataContractSerializer" />. </summary>
+      <returns>Тип <see cref="T:System.Type" />, используемый при сериализации или десериализации. </returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializedAttribute">
+      <summary>При применении к методу указывает, что метод вызывается сразу после десериализации объекта в графе объекта.Порядок десериализации относительно других объектов на диаграмме является недетерминированным.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializedAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.OnDeserializedAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnDeserializingAttribute">
+      <summary>При применении к методу указывает, что метод вызывается во время десериализации объекта в графе объекта.Порядок десериализации относительно других объектов на диаграмме является недетерминированным.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnDeserializingAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.OnDeserializingAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializedAttribute">
+      <summary>При применении к методу указывает, что метод вызывается после сериализации объекта в графе объекта.Порядок сериализации относительно других объектов на диаграмме является недетерминированным.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializedAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.OnSerializedAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.OnSerializingAttribute">
+      <summary>При применении к методу указывает, что метод вызывается во время сериализации объекта в графе объекта.Порядок сериализации относительно других объектов на диаграмме является недетерминированным.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.OnSerializingAttribute.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.OnSerializingAttribute" />. </summary>
+    </member>
+    <member name="T:System.Runtime.Serialization.SerializationException">
+      <summary>Данное исключение создается при возникновении ошибки во время сериализации или десериализации.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.SerializationException" /> свойствами по умолчанию.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.SerializationException" /> указанным сообщением.</summary>
+      <param name="message">Указывает причину возникновения исключения. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.SerializationException.#ctor(System.String,System.Exception)">
+      <summary>Инициализирует новый экземпляр класса <see cref="T:System.Runtime.Serialization.SerializationException" /> указанным сообщением об ошибке и ссылкой на внутреннее исключение, которое стало причиной данного исключения.</summary>
+      <param name="message">Сообщение об ошибке с объяснением причин исключения. </param>
+      <param name="innerException">Исключение, которое вызвало текущее исключение.Если значение параметра <paramref name="innerException" /> не равно null, текущее исключение сгенерировано в блоке catch, обрабатывающем внутреннее исключение.</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.StreamingContext">
+      <summary>Описывает источник и назначение данного сериализованного потока и предоставляет дополнительный, определяемый вызывающим, контекст.</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.Equals(System.Object)">
+      <summary>Определяет, содержат ли два экземпляра <see cref="T:System.Runtime.Serialization.StreamingContext" /> одинаковые значения.</summary>
+      <returns>true, если заданный объект является экземпляром <see cref="T:System.Runtime.Serialization.StreamingContext" /> и равен значению текущего экземпляра; в противном случае — false.</returns>
+      <param name="obj">Объект для сравнения с текущим экземпляром. </param>
+    </member>
+    <member name="M:System.Runtime.Serialization.StreamingContext.GetHashCode">
+      <summary>Возвращает хэш-код этого объекта.</summary>
+      <returns>Значение <see cref="T:System.Runtime.Serialization.StreamingContextStates" />, которое содержит источник или назначение для <see cref="T:System.Runtime.Serialization.StreamingContext" />.</returns>
+    </member>
+  </members>
+</doc>

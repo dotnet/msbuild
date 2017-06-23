@@ -1,0 +1,2116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Runtime.Serialization.Xml</name>
+  </assembly>
+  <members>
+    <member name="T:System.Runtime.Serialization.DataContractResolver">
+      <summary>提供在序列化及還原序列化期間，以動態方式來回對應型別與 xsi:type 表示的機制。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractResolver" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.ResolveName(System.String,System.String,System.Type,System.Runtime.Serialization.DataContractResolver)">
+      <summary>覆寫這個方法，以便在還原序列化期間，將指定的 xsi:type 名稱和命名空間對應至資料合約型別。</summary>
+      <returns>xsi:type 名稱和命名空間所對應的型別。</returns>
+      <param name="typeName">要對應的 xsi:type 名稱。</param>
+      <param name="typeNamespace">要對應的 xsi:type 命名空間。</param>
+      <param name="declaredType">在資料合約中宣告的型別。</param>
+      <param name="knownTypeResolver">已知的型別解析程式。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractResolver.TryResolveType(System.Type,System.Type,System.Runtime.Serialization.DataContractResolver,System.Xml.XmlDictionaryString@,System.Xml.XmlDictionaryString@)">
+      <summary>覆寫這個方法，以便在序列化期間，將資料合約型別對應至 xsi:type 名稱和命名空間。</summary>
+      <returns>如果對應成功，則為 true，否則為 false。</returns>
+      <param name="type">要對應的型別。</param>
+      <param name="declaredType">在資料合約中宣告的型別。</param>
+      <param name="knownTypeResolver">已知的型別解析程式。</param>
+      <param name="typeName">xsi:type 名稱。</param>
+      <param name="typeNamespace">xsi:type 命名空間。</param>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractSerializer">
+      <summary>將某個型別的執行個體序列化及還原序列化成使用所提供資料合約的 XML 資料流或文件。此類別無法被繼承。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type)">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以序列化或還原序列化所指定型別的物件。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以序列化或還原序列化所指定型別的物件，以及可能存在物件圖形中的已知型別集合。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+      <param name="knownTypes">
+        <see cref="T:System.Type" /> 的 <see cref="T:System.Collections.Generic.IEnumerable`1" />，其中包含可能存在物件圖形中的型別。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Runtime.Serialization.DataContractSerializerSettings)">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以序列化或還原序列化所指定型別及設定的物件。</summary>
+      <param name="type">要序列化或還原序列化之執行個體的型別。</param>
+      <param name="settings">序列化程式設定。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.String,System.String)">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以便序列化或還原序列化已指定型別的物件 (該型別會使用提供的 XML 根項目和命名空間)。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+      <param name="rootName">內含要序列化或還原序列化之內容的 XML 項目名稱。</param>
+      <param name="rootNamespace">內含要序列化或還原序列化之內容的 XML 項目命名空間。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.String,System.String,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以序列化或還原序列化所指定型別的物件。這個方法也會透過兩個字串參數來指定根 XML 項目和命名空間，以及可能存在於物件圖形內之已知型別的清單。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+      <param name="rootName">內容的根項目名稱。</param>
+      <param name="rootNamespace">根項目的命名空間。</param>
+      <param name="knownTypes">
+        <see cref="T:System.Type" /> 的 <see cref="T:System.Collections.Generic.IEnumerable`1" />，其中包含可能存在物件圖形中的型別。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以便序列化或還原序列化所指定型別的物件 (該型別會使用透過型別 <see cref="T:System.Xml.XmlDictionaryString" /> 之參數所指定的 XML 根項目和命名空間)。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+      <param name="rootName">
+        <see cref="T:System.Xml.XmlDictionaryString" />，其中包含內容的根項目名稱。</param>
+      <param name="rootNamespace">
+        <see cref="T:System.Xml.XmlDictionaryString" />，其中包含根項目的命名空間。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.#ctor(System.Type,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Collections.Generic.IEnumerable{System.Type})">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 類別的新執行個體，以序列化或還原序列化所指定型別的物件。這個方法也會透過兩個 <see cref="T:System.Xml.XmlDictionaryString" /> 參數來指定根 XML 項目和命名空間，以及可能存在於物件圖形內之已知型別的清單。</summary>
+      <param name="type">已序列化或還原序列化之執行個體的型別。</param>
+      <param name="rootName">
+        <see cref="T:System.Xml.XmlDictionaryString" />，其中包含內容的根項目名稱。</param>
+      <param name="rootNamespace">
+        <see cref="T:System.Xml.XmlDictionaryString" />，其中包含根項目的命名空間。</param>
+      <param name="knownTypes">
+        <see cref="T:System.Type" /> 的 <see cref="T:System.Collections.Generic.IEnumerable`1" />，其中包含可能存在物件圖形中的已知型別。</param>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.IgnoreExtensionDataObject">
+      <summary>取得值，這個值會指定當類別序列化或還原序列化時，是否略過類別延伸所提供的資料。</summary>
+      <returns>如果要省略延伸資料則為 true，否則為 false。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.IsStartObject(System.Xml.XmlDictionaryReader)">
+      <summary>判斷 <see cref="T:System.Xml.XmlDictionaryReader" /> 是否置於可還原序列化的物件上。</summary>
+      <returns>如果讀取器位於要讀取之資料流的開始項目，則為 true，否則為 false。</returns>
+      <param name="reader">用於讀取 XML 資料流的 <see cref="T:System.Xml.XmlDictionaryReader" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.IsStartObject(System.Xml.XmlReader)">
+      <summary>判斷 <see cref="T:System.Xml.XmlReader" /> 是否置於可還原序列化的物件上。</summary>
+      <returns>如果讀取器位於要讀取之資料流的開始項目，則為 true，否則為 false。</returns>
+      <param name="reader">用於讀取 XML 資料流的 <see cref="T:System.Xml.XmlReader" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.KnownTypes">
+      <summary>取得型別的集合，這些型別可能會存在於使用這個 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 執行個體所序列化的物件圖形中。</summary>
+      <returns>
+        <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1" />，其中包含已當做已知型別傳入至 <see cref="T:System.Runtime.Serialization.DataContractSerializer" /> 建構函式的預期型別。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph">
+      <summary>取得物件圖形中要序列化或還原序列化的最大項目數。</summary>
+      <returns>要序列化或還原序列化的最大項目數。預設值為 <see cref="F:System.Int32.MaxValue" />。</returns>
+      <exception cref="T:System.ArgumentOutOfRangeException">超過最大值的項目數。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.PreserveObjectReferences">
+      <summary>取得值，這個值會指定是否使用非標準的 XML 建構來保留物件參考資料。</summary>
+      <returns>如果要保留參考，則為 true，否則為 false。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryReader" /> 讀取 XML 資料流並傳回已還原序列化的物件，同時指定是否要先確認物件名稱，再讀取其值。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">用於讀取 XML 資料流的 <see cref="T:System.Xml.XmlDictionaryReader" />。</param>
+      <param name="verifyObjectName">如果要檢查物件的名稱是否對應到建構函式中所提供的根名稱值，則為 true，否則為 false。</param>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">當 <paramref name="verifyObjectName" /> 參數設定為 true，而項目名稱和命名空間並未對應到建構函式中之設定值的情況下。</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlReader)">
+      <summary>使用 <see cref="T:System.Xml.XmlReader" /> 讀取 XML 資料流，然後傳回已還原序列化的物件。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">用於讀取 XML 資料流的 <see cref="T:System.Xml.XmlReader" />。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.ReadObject(System.Xml.XmlReader,System.Boolean)">
+      <summary>使用 <see cref="T:System.Xml.XmlReader" /> 讀取 XML 資料流並傳回已還原序列化的物件，同時指定是否要先確認物件名稱，再讀取其值。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">用於讀取 XML 資料流的 <see cref="T:System.Xml.XmlReader" />。</param>
+      <param name="verifyObjectName">如果要檢查物件的名稱是否對應到建構函式中所提供的根名稱值，則為 true，否則為 false。</param>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">當 <paramref name="verifyObjectName" /> 參數設定為 true，而項目名稱和命名空間並未對應到建構函式中之設定值的情況下。</exception>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializer.SerializeReadOnlyTypes">
+      <summary>取得值，指定是否序列化唯讀型別。</summary>
+      <returns>如果唯讀型別已序列化，則為 true，如果所有型別已序列化，則為 false。</returns>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteEndObject(System.Xml.XmlDictionaryWriter)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryWriter" /> 寫入結尾 XML 項目。</summary>
+      <param name="writer">用於寫入資料流的 <see cref="T:System.Xml.XmlDictionaryWriter" />。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在寫入的執行個體發生問題。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteEndObject(System.Xml.XmlWriter)">
+      <summary>使用 <see cref="T:System.Xml.XmlWriter" /> 寫入結尾 XML 項目。</summary>
+      <param name="writer">用於寫入資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在寫入的執行個體發生問題。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObject(System.Xml.XmlWriter,System.Object)">
+      <summary>使用 <see cref="T:System.Xml.XmlWriter" />，將所有的物件資料 (起始 XML 項目、內容以及結尾項目) 寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用於寫入 XML 文件或資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <param name="graph">包含要寫入至資料流之資料的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在寫入的執行個體發生問題。</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObjectContent(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryWriter" /> 寫入 XML 內容。</summary>
+      <param name="writer">用於寫入資料流的 <see cref="T:System.Xml.XmlDictionaryWriter" />。</param>
+      <param name="graph">要寫入至資料流的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在寫入的執行個體發生問題。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteObjectContent(System.Xml.XmlWriter,System.Object)">
+      <summary>使用 <see cref="T:System.Xml.XmlWriter" /> 寫入 XML 內容。</summary>
+      <param name="writer">用於寫入資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <param name="graph">要寫入至資料流的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在寫入的執行個體發生問題。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteStartObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryWriter" /> 寫入開頭 XML 項目。</summary>
+      <param name="writer">用於寫入 XML 開始項目的 <see cref="T:System.Xml.XmlDictionaryWriter" />。</param>
+      <param name="graph">要寫入的物件。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializer.WriteStartObject(System.Xml.XmlWriter,System.Object)">
+      <summary>使用 <see cref="T:System.Xml.XmlWriter" /> 寫入開頭 XML 項目。</summary>
+      <param name="writer">用於寫入 XML 開始項目的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <param name="graph">要寫入的物件。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Runtime.Serialization.DataContractSerializerSettings">
+      <summary>指定資料合約序列化程式設定。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.DataContractSerializerSettings.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.DataContractSerializerSettings" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.DataContractResolver">
+      <summary>取得或設定用於將 xsi:type 宣告動態對應至已知合約型別的元件。</summary>
+      <returns>用於將 xsi:type 宣告動態對應至已知合約型別的元件。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.KnownTypes">
+      <summary>取得或設定型別的集合，這些型別可能會存在於使用這個 DataContractSerializerSettings 執行個體所序列化的物件圖形中。</summary>
+      <returns>型別的集合，這些型別可能會存在於使用這個 DataContractSerializerSettings 執行個體所序列化的物件圖形中。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.MaxItemsInObjectGraph">
+      <summary>取得或設定物件圖形中要序列化或還原序列化的最大項目數。</summary>
+      <returns>物件圖形中要序列化或還原序列化的最大項目數。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.PreserveObjectReferences">
+      <summary>取得或設定值，這個值會指定是否使用非標準的 XML 建構來保留物件參考資料。</summary>
+      <returns>如果要使用非標準的 XML 建構來保留物件參考資料，則為 True，否則為 false。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.RootName">
+      <summary>取得或設定所選取物件的根名稱。</summary>
+      <returns>所選物件的根名稱。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.RootNamespace">
+      <summary>取得或設定指定物件的根命名空間。</summary>
+      <returns>指定之物件的根命名空間。</returns>
+    </member>
+    <member name="P:System.Runtime.Serialization.DataContractSerializerSettings.SerializeReadOnlyTypes">
+      <summary>取得或設定值，指定是否要序列化唯讀型別。</summary>
+      <returns>True 表示序列化唯讀型別，否則為 false。</returns>
+    </member>
+    <member name="T:System.Runtime.Serialization.XmlObjectSerializer">
+      <summary>提供用來將物件序列化為 XML 資料流或文件的基底類別。這個類別是抽象的。</summary>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.#ctor">
+      <summary>初始化 <see cref="T:System.Runtime.Serialization.XmlObjectSerializer" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.IsStartObject(System.Xml.XmlDictionaryReader)">
+      <summary>取得值，這個值會指定 <see cref="T:System.Xml.XmlDictionaryReader" /> 是否位於能夠讀取的 XML 項目上。</summary>
+      <returns>如果讀取器可以讀取資料，則為 true，否則為 false。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />，用於讀取 XML 資料流或文件。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.IsStartObject(System.Xml.XmlReader)">
+      <summary>取得值，這個值會指定 <see cref="T:System.Xml.XmlReader" /> 是否位於能夠讀取的 XML 項目上。</summary>
+      <returns>如果讀取器位於起始項目上，則為 true，否則為 false。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" />，用於讀取 XML 資料流或文件。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.IO.Stream)">
+      <summary>使用 <see cref="T:System.IO.Stream" /> 讀取 XML 資料流或文件，然後傳回已還原序列化的物件。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="stream">
+        <see cref="T:System.IO.Stream" />，用於讀取 XML 資料流或文件。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlDictionaryReader)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryReader" /> 讀取 XML 文件或資料流，然後傳回已還原序列化的物件。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />，用於讀取 XML 文件。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryReader" /> 讀取 XML 資料流或文件，然後傳回已還原序列化的物件；它也可以讓您指定序列化程式在嘗試讀取資料前是否能夠讀取資料。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />，用於讀取 XML 文件。</param>
+      <param name="verifyObjectName">若要檢查內含的 XML 項目名稱和命名空間是否對應至根名稱以及根命名空間，則為 true，否則為 false，將會略過驗證。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlReader)">
+      <summary>使用 <see cref="T:System.Xml.XmlReader" /> 讀取 XML 文件或資料流，然後傳回已還原序列化的物件。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" />，用於讀取 XML 資料流或文件。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.ReadObject(System.Xml.XmlReader,System.Boolean)">
+      <summary>使用 <see cref="T:System.Xml.XmlReader" /> 讀取 XML 文件或資料流，然後傳回已還原序列化的物件；它也可以讓您指定序列化程式在嘗試讀取資料前是否能夠讀取資料。</summary>
+      <returns>還原序列化的物件。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" />，用於讀取 XML 文件或資料流。</param>
+      <param name="verifyObjectName">若要檢查內含的 XML 項目名稱和命名空間是否對應至根名稱以及根命名空間，則為 true，否則為 false，將會略過驗證。</param>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteEndObject(System.Xml.XmlDictionaryWriter)">
+      <summary>使用 <see cref="T:System.Xml.XmlDictionaryWriter" />，將物件資料的結尾當做結尾 XML 項目寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用來撰寫 XML 文件或資料流的 <see cref="T:System.Xml.XmlDictionaryWriter" />。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteEndObject(System.Xml.XmlWriter)">
+      <summary>使用 <see cref="T:System.Xml.XmlWriter" />，將物件資料的結尾當做結尾 XML 項目寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用來撰寫 XML 文件或資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.IO.Stream,System.Object)">
+      <summary>使用指定的 <see cref="T:System.IO.Stream" />，將物件的完整內容 (開始、內容和結束) 寫入至 XML 文件或資料流。</summary>
+      <param name="stream">
+        <see cref="T:System.IO.Stream" />，用於寫入 XML 文件或資料流。</param>
+      <param name="graph">包含要寫入至資料流之資料的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlDictionaryWriter" />，將物件的完整內容 (開始、內容和結束) 寫入至 XML 文件或資料流。</summary>
+      <param name="writer">
+        <see cref="T:System.Xml.XmlDictionaryWriter" />，用來將內容寫入至 XML 文件或資料流。</param>
+      <param name="graph">包含要寫入之內容的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObject(System.Xml.XmlWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlWriter" />，將物件的完整內容 (開始、內容和結束) 寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用來撰寫 XML 文件或資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <param name="graph">包含要寫入之內容的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObjectContent(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlDictionaryWriter" />，只將物件內容寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用來撰寫 XML 文件或資料流的 <see cref="T:System.Xml.XmlDictionaryWriter" />。</param>
+      <param name="graph">包含要寫入之內容的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteObjectContent(System.Xml.XmlWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlWriter" />，只將物件內容寫入至 XML 文件或資料流。</summary>
+      <param name="writer">用來撰寫 XML 文件或資料流的 <see cref="T:System.Xml.XmlWriter" />。</param>
+      <param name="graph">包含要寫入之內容的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteStartObject(System.Xml.XmlDictionaryWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlDictionaryWriter" />，將物件資料的開始內容當做開頭 XML 項目寫入。</summary>
+      <param name="writer">
+        <see cref="T:System.Xml.XmlDictionaryWriter" />，用於寫入 XML 文件。</param>
+      <param name="graph">要序列化的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Runtime.Serialization.XmlObjectSerializer.WriteStartObject(System.Xml.XmlWriter,System.Object)">
+      <summary>使用指定的 <see cref="T:System.Xml.XmlWriter" />，將物件資料的開始內容當做開頭 XML 項目寫入。</summary>
+      <param name="writer">
+        <see cref="T:System.Xml.XmlWriter" />，用於寫入 XML 文件。</param>
+      <param name="graph">要序列化的物件。</param>
+      <exception cref="T:System.Runtime.Serialization.InvalidDataContractException">正在序列化的型別不符合資料合約規則。例如，<see cref="T:System.Runtime.Serialization.DataContractAttribute" /> 屬性尚未套用至此型別。</exception>
+      <exception cref="T:System.Runtime.Serialization.SerializationException">正在序列化的執行個體發生問題。</exception>
+      <exception cref="T:System.ServiceModel.QuotaExceededException">已超過要序列化的物件數目上限。檢查 <see cref="P:System.Runtime.Serialization.DataContractSerializer.MaxItemsInObjectGraph" /> 屬性。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.IXmlDictionary">
+      <summary>interface，定義 Xml 字典必須實作供 <see cref="T:System.Xml.XmlDictionaryReader" /> 和 <see cref="T:System.Xml.XmlDictionaryWriter" /> 實作 (Implementation) 使用的合約。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>嘗試在字典中查詢項目。</summary>
+      <returns>如果索引鍵存在於字典中，則為 true，否則為 false。</returns>
+      <param name="key">要查詢的索引鍵。</param>
+      <param name="result">如果 <paramref name="key" /> 已定義，則為對應到此索引鍵的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>檢查字典是否有指定的字串值。</summary>
+      <returns>如果這個值存在於字典中，則為 true，否則為 false。</returns>
+      <param name="value">正在檢查的字串值。</param>
+      <param name="result">如果有找到，則為對應的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+    </member>
+    <member name="M:System.Xml.IXmlDictionary.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>檢查字典是否有指定的 <see cref="T:System.Xml.XmlDictionaryString" />。</summary>
+      <returns>如果 <see cref="T:System.Xml.XmlDictionaryString" /> 存在於字典中，則為 true，否則為 false。</returns>
+      <param name="value">正在檢查的 <see cref="T:System.Xml.XmlDictionaryString" />。</param>
+      <param name="result">如果有找到，則為相符的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+    </member>
+    <member name="T:System.Xml.OnXmlDictionaryReaderClose">
+      <summary>在關閉讀取器時用於回呼方法的 delegate。</summary>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />，引發 OnClose 事件。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.UniqueId">
+      <summary>GUID 的最佳化唯一識別項。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor">
+      <summary>使用新的唯一 GUID，建立這個類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Byte[])">
+      <summary>使用表示 <see cref="T:System.Guid" /> 的位元組陣列，建立這個類別的新執行個體。</summary>
+      <param name="guid">表示 <see cref="T:System.Guid" /> 的位元組陣列。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="guid" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="guid" /> 會提供 16 個以下的有效位元組。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Byte[],System.Int32)">
+      <summary>從表示 <see cref="T:System.Guid" /> 之 byte 陣列中的位移 (Offset) 開始，建立這個類別的新執行個體。</summary>
+      <param name="guid">表示 <see cref="T:System.Guid" /> 的 byte 陣列。</param>
+      <param name="offset">表示 <see cref="T:System.Guid" /> 之 byte 陣列內的位移位置。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="guid" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於陣列長度。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="guid " />和<paramref name=" offset" /> 會提供 16 個以下的有效位元組。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Char[],System.Int32,System.Int32)">
+      <summary>從 char 中的位移開始，使用指定之數目的項目，建立這個類別的新執行個體。</summary>
+      <param name="chars">表示 <see cref="T:System.Guid" /> 的 char 陣列。</param>
+      <param name="offset">表示 <see cref="T:System.Guid" /> 之 char 陣列內的位移位置。</param>
+      <param name="count">要使用的陣列項目數目，從 <paramref name="offset" /> 開始算起。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="chars" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於陣列長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> 小於零或大於陣列長度減去 <paramref name="offset" />。</exception>
+      <exception cref="T:System.FormatException">
+        <paramref name="count" /> 等於零。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.Guid)">
+      <summary>使用 <see cref="T:System.Guid" />，建立這個類別的新執行個體。</summary>
+      <param name="guid">
+        <see cref="T:System.Guid" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="guid" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.#ctor(System.String)">
+      <summary>使用字串，建立這個類別的新執行個體。</summary>
+      <param name="value">用來產生 <see cref="T:System.Xml.UniqueId" /> 的字串。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <exception cref="T:System.FormatException">
+        <paramref name=" value" /> 的長度為零。</exception>
+    </member>
+    <member name="P:System.Xml.UniqueId.CharArrayLength">
+      <summary>取得 <see cref="T:System.Xml.UniqueId" /> 之字串表示的長度。</summary>
+      <returns>
+        <see cref="T:System.Xml.UniqueId" /> 之字串表示的長度。</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.Equals(System.Object)">
+      <summary>測試物件是否等於這個 <see cref="T:System.Xml.UniqueId" />。</summary>
+      <returns>如果物件等於這個 <see cref="T:System.Xml.UniqueId" />，則為 true，否則為 false。</returns>
+      <param name="obj">要比較的物件。</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.GetHashCode">
+      <summary>建立這個 <see cref="T:System.Xml.UniqueId" /> 的雜湊程式碼表示。</summary>
+      <returns>這個 <see cref="T:System.Xml.UniqueId" /> 的整數雜湊程式碼表示。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Xml.UniqueId.IsGuid">
+      <summary>指出 <see cref="T:System.Xml.UniqueId" /> 是否為 <see cref="T:System.Guid" />。</summary>
+      <returns>如果 <see cref="T:System.Xml.UniqueId" /> 是 <see cref="T:System.Guid" />，則為 true，否則為 false。</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.op_Equality(System.Xml.UniqueId,System.Xml.UniqueId)">
+      <summary>覆寫等號比較運算子，以測試兩個 <see cref="T:System.Xml.UniqueId" /> 是否相等。</summary>
+      <returns>如果兩個 <see cref="T:System.Xml.UniqueId" /> 相等或都是 null，則為 true；如果不相等或其中一個是 null，則為 false。</returns>
+      <param name="id1">第一個 <see cref="T:System.Xml.UniqueId" />。</param>
+      <param name="id2">第二個 <see cref="T:System.Xml.UniqueId" />。</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.op_Inequality(System.Xml.UniqueId,System.Xml.UniqueId)">
+      <summary>覆寫等號比較運算子，測試兩個 <see cref="T:System.Xml.UniqueId" /> 是否不相等。</summary>
+      <returns>如果覆寫的等號比較運算子傳回 false，則為 true，否則為 false。</returns>
+      <param name="id1">第一個 <see cref="T:System.Xml.UniqueId" />。</param>
+      <param name="id2">第二個 <see cref="T:System.Xml.UniqueId" />。</param>
+    </member>
+    <member name="M:System.Xml.UniqueId.ToCharArray(System.Char[],System.Int32)">
+      <summary>將 <see cref="T:System.Xml.UniqueId" /> 值置入 char 陣列。</summary>
+      <returns>char 陣列中由 <see cref="T:System.Xml.UniqueId" /> 值填滿的項目數目。</returns>
+      <param name="chars">char 陣列。</param>
+      <param name="offset">char 陣列中要開始插入 <see cref="T:System.Xml.UniqueId" /> 值的位置。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="chars" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於陣列長度。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="guid " />和<paramref name=" offset" /> 會提供 16 個以下的有效位元組。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.ToString">
+      <summary>顯示字串格式的 <see cref="T:System.Xml.UniqueId" /> 值。</summary>
+      <returns>
+        <see cref="T:System.Xml.UniqueId" /> 值的字串表示。</returns>
+    </member>
+    <member name="M:System.Xml.UniqueId.TryGetGuid(System.Byte[],System.Int32)">
+      <summary>嘗試取得 <see cref="T:System.Xml.UniqueId" /> 的值做為 <see cref="T:System.Guid" />，並將它儲存在指定之位元組陣列中的指定位移位置。</summary>
+      <returns>如果儲存在這個 <see cref="T:System.Xml.UniqueId" /> 執行個體中的值是 <see cref="T:System.Guid" />，則為 true，否則為 false。</returns>
+      <param name="buffer">包含 <see cref="T:System.Guid" /> 的 byte 陣列。</param>
+      <param name="offset">byte 陣列中要開始插入 <see cref="T:System.Guid" /> 值的位置。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於陣列長度。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="buffer " />和<paramref name=" offset" /> 會提供 16 個以下的有效位元組。</exception>
+    </member>
+    <member name="M:System.Xml.UniqueId.TryGetGuid(System.Guid@)">
+      <summary>嘗試取得 <see cref="T:System.Xml.UniqueId" /> 的值做為 <see cref="T:System.Guid" />。</summary>
+      <returns>如果 UniqueId 表示 <see cref="T:System.Guid" />，則為 true，否則為 false。</returns>
+      <param name="guid">如果成功取得，則為 <see cref="T:System.Guid" />，否則為 <see cref="F:System.Guid.Empty" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="buffer " />和<paramref name=" offset" /> 會提供 16 個以下的有效位元組。</exception>
+    </member>
+    <member name="T:System.Xml.XmlBinaryReaderSession">
+      <summary>啟用以動態方式來管理最佳化的字串。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.#ctor">
+      <summary>初始化 <see cref="T:System.Xml.XmlBinaryReaderSession" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.Add(System.Int32,System.String)">
+      <summary>從輸入參數建立 <see cref="T:System.Xml.XmlDictionaryString" />，並將它加入至內部集合。</summary>
+      <returns>加入內部集合的新建 <see cref="T:System.Xml.XmlDictionaryString" />。</returns>
+      <param name="id">索引鍵值。</param>
+      <param name="value">數值。</param>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="id" /> 小於零。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">具有索引鍵 = <paramref name="id" /> 的項目已存在。</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.Clear">
+      <summary>清除所有內容的內部集合。</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>檢查內部集合是否包含符合索引鍵的項目。</summary>
+      <returns>如果有找到符合 <paramref name="key" /> 的項目，則為 true，否則為 false。</returns>
+      <param name="key">要搜尋的索引鍵。</param>
+      <param name="result">這個方法傳回時，如果找到項目，則包含字串，否則為 null。這個參數會以未初始化的狀態傳遞。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="key" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>檢查內部集合是否包含符合某個值的項目。</summary>
+      <returns>如果有找到符合 <paramref name="value" /> 的項目，則為 true，否則為 false。</returns>
+      <param name="value">要搜尋的值。</param>
+      <param name="result">這個方法傳回時，如果找到項目，則包含字串，否則為 null。這個參數會以未初始化的狀態傳遞。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlBinaryReaderSession.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>檢查內部集合是否包含符合某個值的項目。</summary>
+      <returns>如果有找到符合 <paramref name="value" /> 的項目，則為 true，否則為 false。</returns>
+      <param name="value">要搜尋的值。</param>
+      <param name="result">這個方法傳回時，如果找到項目，則包含字串，否則為 null。這個參數會以未初始化的狀態傳遞。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+    </member>
+    <member name="T:System.Xml.XmlBinaryWriterSession">
+      <summary>允許使用動態字典來壓縮出現在訊息中的常見字串和維護狀態。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.#ctor">
+      <summary>建立此類別的例項。</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.Reset">
+      <summary>清除內部集合。</summary>
+    </member>
+    <member name="M:System.Xml.XmlBinaryWriterSession.TryAdd(System.Xml.XmlDictionaryString,System.Int32@)">
+      <summary>嘗試將 <see cref="T:System.Xml.XmlDictionaryString" /> 加入至內部集合。</summary>
+      <returns>true ，如果字串可以增加;則為，否則為 false。</returns>
+      <param name="value">要相加的 <see cref="T:System.Xml.XmlDictionaryString" />。</param>
+      <param name="key">已成功加入的 <see cref="T:System.Xml.XmlDictionaryString" /> 索引鍵。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">具有索引鍵 = <paramref name="key" /> 的項目已存在。</exception>
+    </member>
+    <member name="T:System.Xml.XmlDictionary">
+      <summary>實作可用來最佳化 Windows Communication Foundation (WCF) 之 XML 讀取器/寫入器實作的字典。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.#ctor">
+      <summary>建立空的 <see cref="T:System.Xml.XmlDictionary" />。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.#ctor(System.Int32)">
+      <summary>使用初始容量，建立 <see cref="T:System.Xml.XmlDictionary" />。</summary>
+      <param name="capacity">字典的初始大小。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.Add(System.String)">
+      <summary>將字串加入至 <see cref="T:System.Xml.XmlDictionary" />。</summary>
+      <returns>已加入的 <see cref="T:System.Xml.XmlDictionaryString" />。</returns>
+      <param name="value">要加入至字典的字串。</param>
+    </member>
+    <member name="P:System.Xml.XmlDictionary.Empty">
+      <summary>取得空的 static<see cref="T:System.Xml.IXmlDictionary" />。</summary>
+      <returns>空的 static<see cref="T:System.Xml.IXmlDictionary" />。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.Int32,System.Xml.XmlDictionaryString@)">
+      <summary>嘗試在字典中查詢項目。</summary>
+      <returns>如果索引鍵存在於字典中，則為 true，否則為 false。</returns>
+      <param name="key">要查詢的索引鍵。</param>
+      <param name="result">如果 <paramref name="key" /> 已定義，則為對應到此索引鍵的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.String,System.Xml.XmlDictionaryString@)">
+      <summary>檢查字典是否有指定的字串值。</summary>
+      <returns>如果這個值存在於字典中，則為 true，否則為 false。</returns>
+      <param name="value">正在檢查的字串值。</param>
+      <param name="result">如果有找到，則為對應的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionary.TryLookup(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString@)">
+      <summary>檢查字典是否有指定的 <see cref="T:System.Xml.XmlDictionaryString" />。</summary>
+      <returns>如果 <see cref="T:System.Xml.XmlDictionaryString" /> 存在於字典中，則為 true，否則為 false。</returns>
+      <param name="value">正在檢查的 <see cref="T:System.Xml.XmlDictionaryString" />。</param>
+      <param name="result">如果有找到，則為相符的 <see cref="T:System.Xml.XmlDictionaryString" />，否則為 null。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReader">
+      <summary>abstract 類別，這是 Windows Communication Foundation (WCF) 為了要執行序列化 (Serialization) 和還原序列化 (Deserialization) 而衍生自 <see cref="T:System.Xml.XmlReader" /> 的類別。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.#ctor">
+      <summary>建立此類別的例項。只能由其衍生類別叫用。</summary>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReader.CanCanonicalize">
+      <summary>這個屬性永遠傳回 false。如果其衍生類別支援標準化，則可以覆寫它們來傳回 true。</summary>
+      <returns>傳回 false。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="offset">要在 <paramref name="buffer" /> 中進行讀取的起始位置。</param>
+      <param name="count">可以從 <paramref name="buffer" /> 中讀取的位元組數目。</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> 使用。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於緩衝區長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> 小於零或大於緩衝區長度減位移值。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas,System.Xml.XmlBinaryReaderSession)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="offset">要在 <paramref name="buffer" /> 中進行讀取的起始位置。</param>
+      <param name="count">可以從 <paramref name="buffer" /> 中讀取的位元組數目。</param>
+      <param name="dictionary">要使用的 <see cref="T:System.Xml.XmlDictionary" />。</param>
+      <param name="quotas">要套用的 <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />。</param>
+      <param name="session">要使用的 <see cref="T:System.Xml.XmlBinaryReaderSession" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於緩衝區長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> 小於零或大於緩衝區長度減位移值。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Int32,System.Int32,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="offset">要在 <paramref name="buffer" /> 中進行讀取的起始位置。</param>
+      <param name="count">可以從 <paramref name="buffer" /> 中讀取的位元組數目。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 小於零或大於緩衝區長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> 小於零或大於緩衝區長度減位移值。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.Byte[],System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> 使用。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 或 <paramref name="quotas" /> 是 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlDictionaryReaderQuotas,System.Xml.XmlBinaryReaderSession)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="dictionary">
+        <see cref="T:System.Xml.XmlDictionary" /> 使用。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <param name="session">
+        <see cref="T:System.Xml.XmlBinaryReaderSession" /> 使用。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateBinaryReader(System.IO.Stream,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立可以讀取 .NET 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryReader" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="quotas">套用至此作業的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateDictionaryReader(System.Xml.XmlReader)">
+      <summary>從現有的 <see cref="T:System.Xml.XmlReader" /> 建立 <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" /> 的執行個體。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="reader" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.Byte[],System.Int32,System.Int32,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立 <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="offset">要在 <paramref name="buffer" /> 中進行讀取的起始位置。</param>
+      <param name="count">可以從 <paramref name="buffer" /> 中讀取的位元組數目。</param>
+      <param name="quotas">套用至讀取器的配額。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.Byte[],System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立 <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="quotas">套用至讀取器的配額。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="buffer" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.IO.Stream,System.Text.Encoding,System.Xml.XmlDictionaryReaderQuotas,System.Xml.OnXmlDictionaryReaderClose)">
+      <summary>建立 <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="encoding">
+        <see cref="T:System.Text.Encoding" /> 物件，指定要套用的編碼屬性。</param>
+      <param name="quotas">要套用的 <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />。</param>
+      <param name="onClose">關閉讀取器時要呼叫的委派。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.CreateTextReader(System.IO.Stream,System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>建立 <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReader" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="quotas">套用至讀取器的配額。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.EndCanonicalization">
+      <summary>尚未實作這個方法。</summary>
+      <exception cref="T:System.NotSupportedException">永遠是。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.GetAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>在衍生類別中覆寫時，取得屬性值。</summary>
+      <returns>屬性的值。</returns>
+      <param name="localName">
+        <see cref="T:System.Xml.XmlDictionaryString" />，表示屬性的本機名稱。</param>
+      <param name="namespaceUri">
+        <see cref="T:System.Xml.XmlDictionaryString" />，表示屬性的命名空間。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IndexOfLocalName(System.String[],System.String)">
+      <summary>取得名稱陣列中目前節點之本機名稱的索引。</summary>
+      <returns>名稱陣列中目前節點之本機名稱的索引。</returns>
+      <param name="localNames">要搜尋的本機名稱字串陣列。</param>
+      <param name="namespaceUri">目前節點的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localNames" /> 或陣列中的任何名稱為 null。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IndexOfLocalName(System.Xml.XmlDictionaryString[],System.Xml.XmlDictionaryString)">
+      <summary>取得名稱陣列中目前節點之本機名稱的索引。</summary>
+      <returns>名稱陣列中目前節點之本機名稱的索引。</returns>
+      <param name="localNames">要搜尋的本機名稱其 <see cref="T:System.Xml.XmlDictionaryString" /> 陣列。</param>
+      <param name="namespaceUri">目前節點的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localNames" /> 或陣列中的任何名稱為 null。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsLocalName(System.String)">
+      <summary>檢查 <paramref name="localName" /> 參數是否為目前節點的本機名稱。</summary>
+      <returns>如果 <paramref name="localName" /> 符合目前節點的本機名稱，則為 true，否則為 false。</returns>
+      <param name="localName">目前節點的本機名稱。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsLocalName(System.Xml.XmlDictionaryString)">
+      <summary>檢查 <paramref name="localName" /> 參數是否為目前節點的本機名稱。</summary>
+      <returns>如果 <paramref name="localName" /> 符合目前節點的本機名稱，則為 true，否則為 false。</returns>
+      <param name="localName">
+        <see cref="T:System.Xml.XmlDictionaryString" />，表示目前節點的本機名稱。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localName" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsNamespaceUri(System.String)">
+      <summary>檢查 <paramref name="namespaceUri" /> 參數是否為目前節點的命名空間。</summary>
+      <returns>如果 <paramref name="namespaceUri" /> 符合目前節點的命名空間，則為 true，否則為 false。</returns>
+      <param name="namespaceUri">目前節點的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsNamespaceUri(System.Xml.XmlDictionaryString)">
+      <summary>檢查 <paramref name="namespaceUri" /> 參數是否為目前節點的命名空間。</summary>
+      <returns>如果 <paramref name="namespaceUri" /> 符合目前節點的命名空間，則為 true，否則為 false。</returns>
+      <param name="namespaceUri">目前節點的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsStartArray(System.Type@)">
+      <summary>檢查讀取器是否位於陣列的起始處。這個類別會傳回 false，但具有陣列概念的衍生類別會傳回 true。</summary>
+      <returns>如果讀取器位於陣列節點的起始處，則為 true，否則為 false。</returns>
+      <param name="type">如果是有效節點，則為節點的型別，否則為 null。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>測試第一個標記是否為開始標記或空白項目標記，以及本機名稱和命名空間 URI 是否與目前節點的相符。</summary>
+      <returns>如果陣列中的第一個標記為開始標記或空白項目標記，且符合 <paramref name="localName" /> 和 <paramref name="namespaceUri" />，則為 true，否則為 false。</returns>
+      <param name="localName">
+        <see cref="T:System.Xml.XmlDictionaryString" />，表示屬性的本機名稱。</param>
+      <param name="namespaceUri">
+        <see cref="T:System.Xml.XmlDictionaryString" />，表示屬性的命名空間。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.IsTextNode(System.Xml.XmlNodeType)">
+      <summary>測試目前節點是否為文字節點。</summary>
+      <returns>如果節點型別為 <see cref="F:System.Xml.XmlNodetype.Text" />、<see cref="F:System.Xml.XmlNodetype.Whitespace" />、<see cref="F:System.Xml.XmlNodetype.SignificantWhitespace" />、<see cref="F:System.Xml.XmlNodetype.CDATA" /> 或 <see cref="F:System.Xml.XmlNodetype.Attribute" />，則為 true，否則為 false。</returns>
+      <param name="nodeType">要測試的節點型別。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement">
+      <summary>測試目前的內容節點為開始項目或空白項目。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.String)">
+      <summary>測試目前的內容節點為開始項目或空白項目，以及項目的 <see cref="P:System.Xml.XmlReader.Name" /> 屬性是否符合指定的引數。</summary>
+      <param name="name">項目的 <see cref="P:System.Xml.XmlReader.Name" /> 屬性。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.String,System.String)">
+      <summary>測試目前的內容節點為開始項目或空白項目，以及項目的 <see cref="P:System.Xml.XmlReader.LocalName" /> 和 <see cref="P:System.Xml.XmlReader.NamespaceURI" /> 屬性是否符合指定的引數。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.MoveToStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>測試目前的內容節點為開始項目或空白項目，以及項目的 <see cref="P:System.Xml.XmlReader.LocalName" /> 和 <see cref="P:System.Xml.XmlReader.NamespaceURI" /> 屬性是否符合指定的引數。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReader.Quotas">
+      <summary>取得套用至此類別之目前執行個體的配額值。</summary>
+      <returns>套用至此類別的目前執行個體 <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Boolean[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Boolean" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的區域名稱。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.DateTime[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.DateTime" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Decimal[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Decimal" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Double[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Double" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Guid[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Guid" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int16[],System.Int32,System.Int32)">
+      <summary>將重複出現的 short 整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int32[],System.Int32,System.Int32)">
+      <summary>將重複出現的整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Int64[],System.Int32,System.Int32)">
+      <summary>將重複出現的 long 整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.Single[],System.Int32,System.Int32)">
+      <summary>將重複出現的 float 數字讀入具型別陣列中。</summary>
+      <returns>放入陣列中的浮點數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放入浮點數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的浮點數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.String,System.String,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.TimeSpan" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Boolean[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Boolean" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.DateTime[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.DateTime" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Decimal[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Decimal" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Double[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Double" /> 節點型別讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Guid[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.Guid" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int16[],System.Int32,System.Int32)">
+      <summary>將重複出現的 short 整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int32[],System.Int32,System.Int32)">
+      <summary>將重複出現的整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int64[],System.Int32,System.Int32)">
+      <summary>將重複出現的 long 整數讀入具型別陣列中。</summary>
+      <returns>放入陣列中的整數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置整數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的整數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Single[],System.Int32,System.Int32)">
+      <summary>將重複出現的 float 數字讀入具型別陣列中。</summary>
+      <returns>放入陣列中的浮點數數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放入浮點數的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的浮點數數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>將重複出現的 <see cref="T:System.TimeSpan" /> 節點讀入具型別陣列中。</summary>
+      <returns>放入陣列中的節點數目。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">要放置節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadBooleanArray(System.String,System.String)">
+      <summary>將重複出現的 <see cref="T:System.Boolean" /> 節點讀入具型別陣列中。</summary>
+      <returns>
+        <see cref="T:System.Boolean" /> 節點的 <see cref="T:System.Boolean" /> 陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadBooleanArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將重複出現的 <see cref="T:System.Boolean" /> 節點讀入具型別陣列中。</summary>
+      <returns>
+        <see cref="T:System.Boolean" /> 節點的 <see cref="T:System.Boolean" /> 陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAs(System.Type,System.Xml.IXmlNamespaceResolver)">
+      <summary>將節點的內容轉換成指定的型別。</summary>
+      <returns>轉換為要求型別的串連文字內容或屬性值。</returns>
+      <param name="type">要傳回之值的 <see cref="T:System.Type" />。</param>
+      <param name="namespaceResolver">
+        <see cref="T:System.Xml.IXmlNamespaceResolver" /> 物件，用來解析任何與型別轉換相關的命名空間前置詞。例如，將 <see cref="T:System.Xml.XmlQualifiedName" /> 物件轉換為 xs:string 時，可以使用它。這個值可以是 null 參考。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBase64">
+      <summary>讀取內容，並傳回 Base64 已解碼的二進位位元組。</summary>
+      <returns>位元組陣列，其中包含 Base64 已解碼二進位位元組。</returns>
+      <exception cref="T:System.Xml.XmlException">陣列大小大於這個讀取器的 MaxArrayLength 配額。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBinHex">
+      <summary>讀取內容，並傳回 BinHex 已解碼的二進位位元組。</summary>
+      <returns>位元組陣列，其中包含 BinHex 已解碼二進位位元組。</returns>
+      <exception cref="T:System.Xml.XmlException">陣列大小大於 <see cref="F:System.Int32.MaxValue" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsBinHex(System.Int32)">
+      <summary>讀取內容，並傳回 BinHex 已解碼的二進位位元組。</summary>
+      <returns>位元組陣列，其中包含 BinHex 已解碼二進位位元組。</returns>
+      <param name="maxByteArrayContentLength">陣列長度上限。</param>
+      <exception cref="T:System.Xml.XmlException">陣列大小大於 <paramref name="maxByteArrayContentLength" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsChars(System.Char[],System.Int32,System.Int32)">
+      <summary>將內容讀入 char 陣列中。</summary>
+      <returns>讀取的字元數。</returns>
+      <param name="chars">要放置字元的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要放入陣列中的字元數目。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsDecimal">
+      <summary>將節點的內容轉換成 decimal。</summary>
+      <returns>節點內容的 decimal 表示。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsFloat">
+      <summary>將節點的內容轉換成 float。</summary>
+      <returns>節點內容的 float 表示。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsGuid">
+      <summary>將節點的內容轉換成 guid。</summary>
+      <returns>節點內容的 guid 表示。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsQualifiedName(System.String@,System.String@)">
+      <summary>將節點的內容轉換成限定名稱表示。</summary>
+      <param name="localName">限定名稱的 <see cref="P:System.Xml.XmlReader.LocalName" /> 部分 (out 參數)。</param>
+      <param name="namespaceUri">限定名稱的 <see cref="P:System.Xml.XmlReader.NamespaceURI" /> 部分 (out 參數)。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString">
+      <summary>將節點的內容轉換成字串。</summary>
+      <returns>字串表示中的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.Int32)">
+      <summary>將節點的內容轉換成字串。</summary>
+      <returns>字串表示中的節點內容。</returns>
+      <param name="maxStringContentLength">字串長度上限。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.String[],System.Int32@)">
+      <summary>將節點的內容轉換成字串。</summary>
+      <returns>字串表示中的節點內容。</returns>
+      <param name="strings">要與內容比對的字串陣列。</param>
+      <param name="index">與內容比對的 <paramref name="strings" /> 中的項目索引。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="strings" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name=" strings" /> 中的項目為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsString(System.Xml.XmlDictionaryString[],System.Int32@)">
+      <summary>將節點的內容轉換成字串。</summary>
+      <returns>字串表示中的節點內容。</returns>
+      <param name="strings">要與內容比對的 <see cref="T:System.Xml.XmlDictionaryString" /> 物件陣列。</param>
+      <param name="index">與內容比對的 <paramref name="strings" /> 中的項目索引。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="strings" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="strings" /> 中的項目為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsTimeSpan">
+      <summary>將節點的內容轉換成 <see cref="T:System.TimeSpan" />。</summary>
+      <returns>節點內容的 <see cref="T:System.TimeSpan" /> 表示。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadContentAsUniqueId">
+      <summary>將節點內容轉換成唯一識別項。</summary>
+      <returns>表示為唯一識別項的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDateTimeArray(System.String,System.String)">
+      <summary>將節點的內容轉換成 <see cref="T:System.DateTime" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.DateTime" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDateTimeArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將節點的內容轉換成 <see cref="T:System.DateTime" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.DateTime" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDecimalArray(System.String,System.String)">
+      <summary>將節點的內容轉換成 <see cref="T:System.Decimal" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.Decimal" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDecimalArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將節點的內容轉換成 <see cref="T:System.Decimal" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.Decimal" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDoubleArray(System.String,System.String)">
+      <summary>將節點的內容轉換成 <see cref="T:System.Double" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.Double" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadDoubleArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將節點的內容轉換成 <see cref="T:System.Double" /> 陣列。</summary>
+      <returns>表示為 <see cref="T:System.Double" /> 陣列的節點內容。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBase64">
+      <summary>將節點的內容轉換成 Base64 位元組的陣列。</summary>
+      <returns>表示為 Base64 位元組陣列的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBinHex">
+      <summary>將節點的內容轉換成 BinHex 位元組的陣列。</summary>
+      <returns>表示為 BinHex 位元組陣列的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsBoolean">
+      <summary>將項目的內容轉換成 <see cref="T:System.Boolean" />。</summary>
+      <returns>表示為 <see cref="T:System.Boolean" /> 的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsDecimal">
+      <summary>將項目的內容轉換成 <see cref="T:System.Decimal" />。</summary>
+      <returns>表示為 <see cref="T:System.Decimal" /> 的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsDouble">
+      <summary>將項目的內容轉換成 <see cref="T:System.Double" />。</summary>
+      <returns>表示為 <see cref="T:System.Double" /> 的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsFloat">
+      <summary>將項目的內容轉換成浮點數 (<see cref="T:System.Single" />)。</summary>
+      <returns>表示為浮點數的節點內容 (<see cref="T:System.Single" />)。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsGuid">
+      <summary>將項目的內容轉換成 <see cref="T:System.Guid" />。</summary>
+      <returns>表示為 <see cref="T:System.Guid" /> 的節點內容。</returns>
+      <exception cref="T:System.ArgumentException">此項目的格式無效。</exception>
+      <exception cref="T:System.FormatException">此項目的格式無效。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsInt">
+      <summary>將項目的內容轉換成整數 (<see cref="T:System.Int32" />)。</summary>
+      <returns>表示為整數的節點內容 (<see cref="T:System.Int32" />)。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsLong">
+      <summary>將項目的內容轉換成長整數 (<see cref="T:System.Int64" />)。</summary>
+      <returns>表示為長整數的節點內容 (<see cref="T:System.Int64" />)。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsString">
+      <summary>將項目的內容轉換成 <see cref="T:System.String" />。</summary>
+      <returns>表示為 <see cref="T:System.String" /> 的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsTimeSpan">
+      <summary>將項目的內容轉換成 <see cref="T:System.TimeSpan" />。</summary>
+      <returns>表示為 <see cref="T:System.TimeSpan" /> 的節點內容。</returns>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadElementContentAsUniqueId">
+      <summary>將項目的內容轉換成唯一識別項。</summary>
+      <returns>表示為唯一識別項的節點內容。</returns>
+      <exception cref="T:System.ArgumentException">此項目的格式無效。</exception>
+      <exception cref="T:System.FormatException">此項目的格式無效。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement">
+      <summary>檢查目前節點是否為項目，並使讀取器前進至下一個節點。</summary>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> 傳回 false。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.String)">
+      <summary>檢查目前節點是否為具有指定之 <paramref name="name" /> 的項目，並使讀取器前進至下一個節點。</summary>
+      <param name="name">項目的限定名稱。</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> 傳回 false。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.String,System.String)">
+      <summary>檢查目前節點是否為具有指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的項目，並使讀取器前進至下一個節點。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> 傳回 false。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadFullStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>檢查目前節點是否為具有指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的項目，並使讀取器前進至下一個節點。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <exception cref="T:System.Xml.XmlException">
+        <see cref="M:System.Xml.XmlDictionaryReader.IsStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)" /> 傳回 false。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadGuidArray(System.String,System.String)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 <see cref="T:System.Guid" /> 陣列。</summary>
+      <returns>
+        <see cref="T:System.Guid" /> 的陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadGuidArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 <see cref="T:System.Guid" /> 陣列。</summary>
+      <returns>
+        <see cref="T:System.Guid" /> 的陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt16Array(System.String,System.String)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 short 整數陣列中 (<see cref="T:System.Int16" />)。</summary>
+      <returns>short 整數的陣列 (<see cref="T:System.Int16" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt16Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 short 整數陣列中 (<see cref="T:System.Int16" />)。</summary>
+      <returns>short 整數的陣列 (<see cref="T:System.Int16" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt32Array(System.String,System.String)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入整數陣列中 (<see cref="T:System.Int32" />)。</summary>
+      <returns>整數的陣列 (<see cref="T:System.Int32" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt32Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入整數陣列中 (<see cref="T:System.Int32" />)。</summary>
+      <returns>整數的陣列 (<see cref="T:System.Int32" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt64Array(System.String,System.String)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 long 整數陣列中 (<see cref="T:System.Int64" />)。</summary>
+      <returns>long 整數的陣列 (<see cref="T:System.Int64" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadInt64Array(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 long 整數陣列中 (<see cref="T:System.Int64" />)。</summary>
+      <returns>long 整數的陣列 (<see cref="T:System.Int64" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadSingleArray(System.String,System.String)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 float 數字陣列中 (<see cref="T:System.Single" />)。</summary>
+      <returns>float 數字的陣列 (<see cref="T:System.Single" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadSingleArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 float 數字陣列中 (<see cref="T:System.Single" />)。</summary>
+      <returns>float 數字的陣列 (<see cref="T:System.Single" />)。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>檢查目前節點是否為具有指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的項目，並使讀取器前進至下一個節點。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadTimeSpanArray(System.String,System.String)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 <see cref="T:System.TimeSpan" /> 陣列。</summary>
+      <returns>
+        <see cref="T:System.TimeSpan" /> 陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadTimeSpanArray(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>將含指定之 <paramref name="localName" /> 和 <paramref name="namespaceUri" /> 的一系列節點其內容讀入 <see cref="T:System.TimeSpan" /> 陣列。</summary>
+      <returns>
+        <see cref="T:System.TimeSpan" /> 陣列。</returns>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.ReadValueAsBase64(System.Byte[],System.Int32,System.Int32)">
+      <summary>未實作。</summary>
+      <returns>未實作。</returns>
+      <param name="buffer">要從其中讀取的緩衝區。</param>
+      <param name="offset">要在 <paramref name="buffer" /> 中進行讀取的起始位置。</param>
+      <param name="count">可以從 <paramref name="buffer" /> 中讀取的位元組數目。</param>
+      <exception cref="T:System.NotSupportedException">永遠是。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])">
+      <summary>尚未實作這個方法。</summary>
+      <param name="stream">要從其中讀取的資料流。</param>
+      <param name="includeComments">判斷是否包含註解。</param>
+      <param name="inclusivePrefixes">要包含的前置詞。</param>
+      <exception cref="T:System.NotSupportedException">永遠是。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetArrayLength(System.Int32@)">
+      <summary>並未在這個類別中實作 (它一律傳回 false)。可能會在衍生類別中覆寫。</summary>
+      <returns>除非在衍生類別中覆寫，否則為 false。</returns>
+      <param name="count">除非在衍生類別中覆寫，否則傳回 0。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetBase64ContentLength(System.Int32@)">
+      <summary>並未在這個類別中實作 (它一律傳回 false)。可能會在衍生類別中覆寫。</summary>
+      <returns>除非在衍生類別中覆寫，否則為 false。</returns>
+      <param name="length">除非在衍生類別中覆寫，否則傳回 0。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetLocalNameAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>並未在這個類別中實作 (它一律傳回 false)。可能會在衍生類別中覆寫。</summary>
+      <returns>除非在衍生類別中覆寫，否則為 false。</returns>
+      <param name="localName">除非在衍生類別中覆寫，否則傳回 null。.</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetNamespaceUriAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>並未在這個類別中實作 (它一律傳回 false)。可能會在衍生類別中覆寫。</summary>
+      <returns>除非在衍生類別中覆寫，否則為 false。</returns>
+      <param name="namespaceUri">除非在衍生類別中覆寫，否則傳回 null。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReader.TryGetValueAsDictionaryString(System.Xml.XmlDictionaryString@)">
+      <summary>並未在這個類別中實作 (它一律傳回 false)。可能會在衍生類別中覆寫。</summary>
+      <returns>除非在衍生類別中覆寫，否則為 false。</returns>
+      <param name="value">除非在衍生類別中覆寫，否則傳回 null。</param>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReaderQuotas">
+      <summary>包含 XmlDictionaryReaders 的可設定配額值。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReaderQuotas.#ctor">
+      <summary>建立這個類別的新執行個體。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryReaderQuotas.CopyTo(System.Xml.XmlDictionaryReaderQuotas)">
+      <summary>根據傳入之配額執行個體中的值，設定這個執行個體上的屬性。</summary>
+      <param name="quotas">要將值複製到其中的 <see cref="T:System.Xml.XmlDictionaryReaderQuotas" /> 執行個體。</param>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於傳入的執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentNullException">傳入的目標<paramref name=" quotas" /> 為 null。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.Max">
+      <summary>取得這個類別的執行個體，且其所有屬性都設定為最大值。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReaderQuotas" /> 執行個體，其屬性設定為 <see cref="F:System.Int32.MaxValue" />。</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxArrayLength">
+      <summary>取得和設定允許的陣列長度上限。</summary>
+      <returns>允許的陣列長度上限。預設值為 16384。</returns>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於此執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentException">嘗試將此值 set 為小於零。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxBytesPerRead">
+      <summary>取得和設定允許每個讀取動作傳回的位元組上限。</summary>
+      <returns>允許每個讀取動作傳回的位元組上限。預設值為 4096。</returns>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於此執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentException">嘗試將此值 set 為小於零。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxDepth">
+      <summary>取得和設定巢狀節點深度上限。</summary>
+      <returns>巢狀節點深度上限。預設為 32。</returns>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於此執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentException">嘗試將此值 set 為小於零。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxNameTableCharCount">
+      <summary>取得和設定資料表名稱允許的字元數目上限。</summary>
+      <returns>資料表名稱允許的字元數目上限。預設值為 16384。</returns>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於此執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentException">嘗試將此值 set 為小於零。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.MaxStringContentLength">
+      <summary>取得和設定讀取器傳回的字串長度上限。</summary>
+      <returns>讀取器傳回的字串長度上限。預設值為 8192。</returns>
+      <exception cref="T:System.InvalidOperationException">嘗試 set 此值，但是配額值對於此執行個體而言是唯讀的。</exception>
+      <exception cref="T:System.ArgumentException">嘗試將此值 set 為小於零。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryReaderQuotas.ModifiedQuotas">
+      <summary>取得 <see cref="T:System.Xml.XmlDictionaryReaderQuotas" /> 的已修改配額。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryReaderQuotas" />的已修改的配額。</returns>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryReaderQuotaTypes">
+      <summary>列舉 XmlDictionaryReaders 的可設定配額值。</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxArrayLength">
+      <summary>指定允許的陣列長度上限。</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxBytesPerRead">
+      <summary>指定允許每個讀取動作傳回的位元組上限。</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxDepth">
+      <summary>指定巢狀節點深度上限。</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxNameTableCharCount">
+      <summary>指定資料表名稱允許的字元數目上限。</summary>
+    </member>
+    <member name="F:System.Xml.XmlDictionaryReaderQuotaTypes.MaxStringContentLength">
+      <summary>指定讀取器傳回的字串長度上限。</summary>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryString">
+      <summary>表示儲存在 <see cref="T:System.Xml.XmlDictionary" /> 中的項目。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryString.#ctor(System.Xml.IXmlDictionary,System.String,System.Int32)">
+      <summary>建立此類別的例項。</summary>
+      <param name="dictionary">包含這個執行個體的 <see cref="T:System.Xml.IXmlDictionary" />。</param>
+      <param name="value">字串，表示字典項目的值。</param>
+      <param name="key">整數，表示字典項目的索引鍵。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="dictionary" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="key" /> 小於 0 或大於 <see cref="F:System.Int32.MaxValue" /> / 4。</exception>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Dictionary">
+      <summary>表示傳遞給這個 <see cref="T:System.Xml.XmlDictionaryString" /> 執行個體之建構函式的 <see cref="T:System.Xml.IXmlDictionary" />。</summary>
+      <returns>這個字典項目的 <see cref="T:System.Xml.IXmlDictionary" />。</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Empty">
+      <summary>取得表示空字串的 <see cref="T:System.Xml.XmlDictionaryString" />。</summary>
+      <returns>表示空字串的 <see cref="T:System.Xml.XmlDictionaryString" />。</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Key">
+      <summary>取得這個類別執行個體的整數索引鍵。</summary>
+      <returns>這個類別執行個體的整數索引鍵。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryString.ToString">
+      <summary>顯示這個物件的文字表示。</summary>
+      <returns>這個類別執行個體的字串值。</returns>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryString.Value">
+      <summary>取得這個類別執行個體的字串值。</summary>
+      <returns>這個類別執行個體的字串值。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Xml.XmlDictionaryWriter">
+      <summary>表示抽象類別，這是 Windows Communication Foundation (WCF) 為了要執行序列化 (Serialization) 和還原序列化 (Deserialization) 而衍生自 <see cref="T:System.Xml.XmlWriter" /> 的類別。</summary>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.#ctor">
+      <summary>初始化 <see cref="T:System.Xml.XmlDictionaryWriter" /> 類別的新執行個體。</summary>
+    </member>
+    <member name="P:System.Xml.XmlDictionaryWriter.CanCanonicalize">
+      <summary>這個屬性永遠傳回 false。如果其衍生類別支援標準化，則可以覆寫它們來傳回 true。</summary>
+      <returns>所有情況下都是 false。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream)">
+      <summary>建立寫入 WCF 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary)">
+      <summary>建立寫入 WCF 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+      <param name="dictionary">要用來做為共用字典的 <see cref="T:System.Xml.XmlDictionary" />。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlBinaryWriterSession)">
+      <summary>建立寫入 WCF 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+      <param name="dictionary">要用來做為共用字典的 <see cref="T:System.Xml.XmlDictionary" />。</param>
+      <param name="session">要使用的 <see cref="T:System.Xml.XmlBinaryWriterSession" />。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateBinaryWriter(System.IO.Stream,System.Xml.IXmlDictionary,System.Xml.XmlBinaryWriterSession,System.Boolean)">
+      <summary>建立寫入 WCF 二進位 XML 格式的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要從中讀取的資料流。</param>
+      <param name="dictionary">要用來做為共用字典的 <see cref="T:System.Xml.XmlDictionary" />。</param>
+      <param name="session">要使用的 <see cref="T:System.Xml.XmlBinaryWriterSession" />。</param>
+      <param name="ownsStream">true 表示寫入器會在完成時關閉資料流；否則為 false。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateDictionaryWriter(System.Xml.XmlWriter)">
+      <summary>從現有的 <see cref="T:System.Xml.XmlWriter" /> 建立 <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="writer">
+        <see cref="T:System.Xml.XmlWriter" /> 的執行個體。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="writer" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream)">
+      <summary>建立寫入文字 XML 的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream,System.Text.Encoding)">
+      <summary>建立寫入文字 XML 的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+      <param name="encoding">輸出的字元編碼。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.CreateTextWriter(System.IO.Stream,System.Text.Encoding,System.Boolean)">
+      <summary>建立寫入文字 XML 的 <see cref="T:System.Xml.XmlDictionaryWriter" /> 執行個體。</summary>
+      <returns>
+        <see cref="T:System.Xml.XmlDictionaryWriter" /> 的執行個體。</returns>
+      <param name="stream">要寫入的資料流。</param>
+      <param name="encoding">資料流的字元編碼。</param>
+      <param name="ownsStream">true 表示寫入器會在完成時關閉資料流；否則為 false。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.EndCanonicalization">
+      <summary>經衍生類別實作之後，它會停止對應之 <see cref="M:System.Xml.XmlDictionaryWriter.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])" /> 呼叫所啟動的標準化。</summary>
+      <exception cref="T:System.NotSupportedException">尚未實作方法。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.StartCanonicalization(System.IO.Stream,System.Boolean,System.String[])">
+      <summary>由衍生類別實作時，它會啟動規範化。</summary>
+      <param name="stream">要寫入的資料流。</param>
+      <param name="includeComments">若要包含註解，則為 true，否則為 false。</param>
+      <param name="inclusivePrefixes">要包含的前置詞。</param>
+      <exception cref="T:System.NotSupportedException">尚未實作方法。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Boolean[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Boolean" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含資料的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列寫入的值數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.DateTime[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.DateTime" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Decimal[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Decimal" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Double[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Double" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Guid[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Guid" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int16[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int16" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int32[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int32" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Int64[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int64" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.Single[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Single" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.String,System.String,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.TimeSpan" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Boolean[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Boolean" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.DateTime[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.DateTime" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Decimal[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Decimal" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Double[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Double" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Guid[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Guid" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int16[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int16" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int32[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int32" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Int64[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Int64" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.Single[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.Single" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteArray(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.TimeSpan[],System.Int32,System.Int32)">
+      <summary>從 <see cref="T:System.TimeSpan" /> 陣列寫入節點。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="array">包含節點的陣列。</param>
+      <param name="offset">陣列中的開始索引。</param>
+      <param name="count">要從陣列取得的節點數目。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 為 &lt; 0 或 &gt; <paramref name="array" /> 長度。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="count" /> &lt; 0 或 &gt; <paramref name="array" /> 長度減去 <paramref name="offset" />。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteAttributeString(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>寫入屬性限定名稱和值。</summary>
+      <param name="prefix">屬性的前置詞。</param>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="namespaceUri">屬性的命名空間 URI。</param>
+      <param name="value">屬性。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteAttributeString(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>寫入屬性限定名稱和值。</summary>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="namespaceUri">屬性的命名空間 URI。</param>
+      <param name="value">屬性。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteElementString(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>寫入具有文字內容的項目。</summary>
+      <param name="prefix">項目的前置詞。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="value">項目內容。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteElementString(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString,System.String)">
+      <summary>寫入具有文字內容的項目。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <param name="value">項目內容。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteNode(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>從 <see cref="T:System.Xml.XmlDictionaryReader" /> 寫入目前的 XML 節點。</summary>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlDictionaryReader" />。</param>
+      <param name="defattr">若要從 XmlReader 複製預設屬性，則為 true，否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="reader" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteNode(System.Xml.XmlReader,System.Boolean)">
+      <summary>從 <see cref="T:System.Xml.XmlReader" /> 寫入目前的 XML 節點。</summary>
+      <param name="reader">
+        <see cref="T:System.Xml.XmlReader" />。</param>
+      <param name="defattr">若要從 <see cref="T:System.Xml.XmlReader" /> 複製預設屬性，則為 true，否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="reader" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteQualifiedName(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>寫出命名空間限定名稱。這個方法會在範圍中查詢指定命名空間的前置詞。</summary>
+      <param name="localName">限定名稱的本機名稱。</param>
+      <param name="namespaceUri">限定名稱的命名空間 URI。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localName" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartAttribute(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>寫入具有指定之前置詞、本機名稱和命名空間 URI 之屬性的開頭。</summary>
+      <param name="prefix">命名空間前置字元。</param>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="namespaceUri">屬性的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>寫入具有指定之本機名稱和命名空間 URI 之屬性的開頭。</summary>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="namespaceUri">屬性的命名空間 URI。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartElement(System.String,System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>寫入指定的開頭標記，並將它與指定的命名空間與前置詞相關聯。</summary>
+      <param name="prefix">項目的前置詞。</param>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <exception cref="T:System.InvalidOperationException">寫入器關閉。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteStartElement(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>寫入指定的開頭標記，並使它與指定的命名空間產生關聯。</summary>
+      <param name="localName">項目的區域名稱。</param>
+      <param name="namespaceUri">項目的命名空間 URI。</param>
+      <exception cref="T:System.InvalidOperationException">寫入器關閉。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteString(System.Xml.XmlDictionaryString)">
+      <summary>寫入指定的文字內容。</summary>
+      <param name="value">要寫入的文字。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteTextNode(System.Xml.XmlDictionaryReader,System.Boolean)">
+      <summary>寫入 <see cref="T:System.Xml.XmlDictionaryReader" /> 目前所在的文字節點。</summary>
+      <param name="reader">要從其中取得文字值的 <see cref="T:System.Xml.XmlDictionaryReader" />。</param>
+      <param name="isAttribute">true 表示讀取器位於屬性值或項目內容上，否則為 false。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Guid)">
+      <summary>寫入 <see cref="T:System.Guid" /> 值。</summary>
+      <param name="value">要寫入的 <see cref="T:System.Guid" /> 值。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.TimeSpan)">
+      <summary>寫入 <see cref="T:System.TimeSpan" /> 值。</summary>
+      <param name="value">要寫入的 <see cref="T:System.TimeSpan" /> 值。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Xml.UniqueId)">
+      <summary>寫入唯一識別碼值。</summary>
+      <param name="value">要寫入的唯一識別碼值。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="value" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteValue(System.Xml.XmlDictionaryString)">
+      <summary>寫入 <see cref="T:System.Xml.XmlDictionaryString" /> 值。</summary>
+      <param name="value">
+        <see cref="T:System.Xml.XmlDictionaryString" /> 值。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlAttribute(System.String,System.String)">
+      <summary>在目前節點中寫入標準 XML 屬性。</summary>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="value">屬性的值。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlAttribute(System.Xml.XmlDictionaryString,System.Xml.XmlDictionaryString)">
+      <summary>在目前節點中寫入 XML 屬性。</summary>
+      <param name="localName">屬性的區域名稱。</param>
+      <param name="value">屬性的值。</param>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlnsAttribute(System.String,System.String)">
+      <summary>寫入命名空間宣告屬性。</summary>
+      <param name="prefix">繫結至指定之命名空間的前置詞。</param>
+      <param name="namespaceUri">前置詞所繫結至的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+    <member name="M:System.Xml.XmlDictionaryWriter.WriteXmlnsAttribute(System.String,System.Xml.XmlDictionaryString)">
+      <summary>寫入命名空間宣告屬性。</summary>
+      <param name="prefix">繫結至指定之命名空間的前置詞。</param>
+      <param name="namespaceUri">前置詞所繫結至的命名空間。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="namespaceUri" /> 為 null。</exception>
+    </member>
+  </members>
+</doc>

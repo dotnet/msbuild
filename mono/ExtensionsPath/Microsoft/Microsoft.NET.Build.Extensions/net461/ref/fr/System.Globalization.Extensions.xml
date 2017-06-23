@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Globalization.Extensions</name>
+  </assembly>
+  <members>
+    <member name="T:System.StringNormalizationExtensions"></member>
+    <member name="M:System.StringNormalizationExtensions.IsNormalized(System.String)"></member>
+    <member name="M:System.StringNormalizationExtensions.IsNormalized(System.String,System.Text.NormalizationForm)"></member>
+    <member name="M:System.StringNormalizationExtensions.Normalize(System.String)"></member>
+    <member name="M:System.StringNormalizationExtensions.Normalize(System.String,System.Text.NormalizationForm)"></member>
+    <member name="T:System.Globalization.GlobalizationExtensions"></member>
+    <member name="M:System.Globalization.GlobalizationExtensions.GetStringComparer(System.Globalization.CompareInfo,System.Globalization.CompareOptions)"></member>
+    <member name="T:System.Globalization.IdnMapping">
+      <summary>Prend en charge l'utilisation de caractères non ASCII pour les noms de domaines Internet.Cette classe ne peut pas être héritée.</summary>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.#ctor">
+      <summary>Initialise une nouvelle instance de la classe <see cref="T:System.Globalization.IdnMapping" />. </summary>
+    </member>
+    <member name="P:System.Globalization.IdnMapping.AllowUnassigned">
+      <summary>Obtient ou définit une valeur qui indique si les points de code Unicode non assignés sont utilisés dans les opérations exécutées par les membres de l'objet <see cref="T:System.Globalization.IdnMapping" /> actuel.</summary>
+      <returns>true si les points de code non assignés sont utilisés dans les opérations ; sinon, false.</returns>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.Equals(System.Object)">
+      <summary>Indique si un objet spécifié et l'objet <see cref="T:System.Globalization.IdnMapping" /> actif sont égaux.</summary>
+      <returns>true si l'objet spécifié par le paramètre <paramref name="obj" /> est dérivé de <see cref="T:System.Globalization.IdnMapping" /> et ses propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" /> sont égales ; sinon false. </returns>
+      <param name="obj">Objet à comparer à l'objet en cours.</param>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String)">
+      <summary>Encode une chaîne d'étiquettes de nom de domaine qui se composent de caractères Unicode en une chaîne de caractères Unicode affichables dans la plage de caractères US-ASCII.La chaîne est mise en forme selon la norme IDNA.</summary>
+      <returns>Équivalent de la chaîne spécifiée par le paramètre <paramref name="unicode" /> qui se compose de caractères Unicode affichables dans la plage de caractère US-ASCII (U+0020 à U+007E) et mise en forme selon la norme IDNA.</returns>
+      <param name="unicode">Chaîne à convertir qui se compose d'une ou de plusieurs étiquettes de nom de domaine délimitées par des séparateurs d'étiquette.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="unicode" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String,System.Int32)">
+      <summary>Encode une sous-chaîne d'étiquettes du nom de domaine qui inclue des caractères Unicode en dehors de la plage de caractères US-ASCII.La sous-chaîne est convertie en une chaîne de caractères Unicode affichables appartenant à la plage de caractères US-ASCII et est mise en forme selon la norme IDNA.</summary>
+      <returns>Équivalent de la sous-chaîne spécifiée par les paramètres <paramref name="unicode" /> et <paramref name="index" /> qui se compose de caractères Unicode affichables dans la plage de caractère US-ASCII (U+0020 à U+007E) et mise en forme selon la norme IDNA.</returns>
+      <param name="unicode">Chaîne à convertir qui se compose d'une ou de plusieurs étiquettes de nom de domaine délimitées par des séparateurs d'étiquette.</param>
+      <param name="index">Décalage de base zéro dans <paramref name="unicode" /> qui spécifie le début de la sous-chaîne à convertir.L'opération de conversion continue jusqu'à la fin de la chaîne <paramref name="unicode" />.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> est inférieur à zéro.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="unicode" />.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="unicode" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetAscii(System.String,System.Int32,System.Int32)">
+      <summary>Encode le nombre spécifié de caractères d'une sous-chaîne d'étiquettes du nom de domaine qui inclue des caractères Unicode en dehors de la plage de caractères US-ASCII.La sous-chaîne est convertie en une chaîne de caractères Unicode affichables appartenant à la plage de caractères US-ASCII et est mise en forme selon la norme IDNA.</summary>
+      <returns>Équivalent de la sous-chaîne spécifiée par les paramètres <paramref name="unicode" />, <paramref name="index" /> et <paramref name="count" />, qui se compose de caractères Unicode affichables dans la plage de caractère US-ASCII (U+0020 à U+007E) et mise en forme selon la norme IDNA.</returns>
+      <param name="unicode">Chaîne à convertir qui se compose d'une ou de plusieurs étiquettes de nom de domaine délimitées par des séparateurs d'étiquette.</param>
+      <param name="index">Offset de base zéro dans <paramref name="unicode" /> qui spécifie le début de la sous-chaîne.</param>
+      <param name="count">Nombre de caractères à convertir dans la sous-chaîne qui démarre à la position spécifiée par <paramref name="index" /> et la chaîne <paramref name="unicode" />. </param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="unicode" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> ou <paramref name="count" /> est inférieur à zéro.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="unicode" />.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="unicode" /> moins <paramref name="count" />.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="unicode" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetHashCode">
+      <summary>Retourne un code de hachage pour cet objet <see cref="T:System.Globalization.IdnMapping" />.</summary>
+      <returns>Une des quatre constantes signées 32 bits dérivées des propriétés d'un objet <see cref="T:System.Globalization.IdnMapping" />.  La valeur de retour n'a aucune signification particulière et ne peut pas être utilisée dans un algorithme de code de hachage.</returns>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String)">
+      <summary>Décode une chaîne d'une ou de plusieurs étiquettes de noms de domaine encodées selon la norme IDNA dans une chaîne de caractères Unicode. </summary>
+      <returns>Équivalent Unicode de la sous-chaîne IDNA spécifiée par le paramètre <paramref name="ascii" />.</returns>
+      <param name="ascii">Chaîne à décoder, qui se compose d'une ou plusieurs étiquettes dans la plage de caractères US-ASCII (U+0020 à U+007E), encodées selon la norme IDNA. </param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="ascii" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String,System.Int32)">
+      <summary>Décode une sous-chaîne d'une ou de plusieurs étiquettes de noms de domaine encodées selon la norme IDNA dans une chaîne de caractères Unicode. </summary>
+      <returns>Équivalent Unicode de la sous-chaîne IDNA spécifiée par les paramètres <paramref name="ascii" /> et <paramref name="index" />.</returns>
+      <param name="ascii">Chaîne à décoder, qui se compose d'une ou plusieurs étiquettes dans la plage de caractères US-ASCII (U+0020 à U+007E), encodées selon la norme IDNA. </param>
+      <param name="index">Décalage de base zéro dans <paramref name="ascii" /> qui spécifie le début de la sous-chaîne à décoder.L'opération de décodage continue jusqu'à la fin de la chaîne <paramref name="ascii" /> .</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> est inférieur à zéro.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="ascii" />.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="ascii" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="M:System.Globalization.IdnMapping.GetUnicode(System.String,System.Int32,System.Int32)">
+      <summary>Décode une sous-chaîne d'une longueur spécifiée qui contient une ou plusieurs étiquettes de nom de domaine, encodées selon la norme IDNA en une chaîne de caractères Unicode. </summary>
+      <returns>Équivalent Unicode de la sous-chaîne IDNA spécifiée par les paramètres <paramref name="ascii" />, <paramref name="index" /> et <paramref name="count" />.</returns>
+      <param name="ascii">Chaîne à décoder, qui se compose d'une ou plusieurs étiquettes dans la plage de caractères US-ASCII (U+0020 à U+007E), encodées selon la norme IDNA. </param>
+      <param name="index">Offset de base zéro dans <paramref name="ascii" /> qui spécifie le début de la sous-chaîne. </param>
+      <param name="count">Nombre de caractères à convertir dans la sous-chaîne qui démarre à la position spécifiée par <paramref name="index" /> et la chaîne <paramref name="ascii" />. </param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="ascii" /> a la valeur null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> ou <paramref name="count" /> est inférieur à zéro.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="ascii" />.ou<paramref name="index" /> est supérieur à la longueur de <paramref name="ascii" /> moins <paramref name="count" />.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="ascii" /> est non valide selon les propriétés <see cref="P:System.Globalization.IdnMapping.AllowUnassigned" /> et <see cref="P:System.Globalization.IdnMapping.UseStd3AsciiRules" />, ainsi que la norme IDNA.</exception>
+    </member>
+    <member name="P:System.Globalization.IdnMapping.UseStd3AsciiRules">
+      <summary>Obtient ou définit une valeur qui indique si les conventions d'affectation de noms standard ou assouplies sont utilisées dans des opérations exécutées par les membres de l'objet <see cref="T:System.Globalization.IdnMapping" /> actuel.</summary>
+      <returns>true si les conventions d'affectation de noms standard sont utilisées dans les opérations ; sinon, false.</returns>
+    </member>
+    <member name="T:System.Text.NormalizationForm">
+      <summary>Définit le type de normalisation à effectuer.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormC">
+      <summary>Indique qu'une chaîne Unicode est normalisée à l'aide de la décomposition canonique complète, suivie du remplacement des séquences par leurs composites principaux, si possible.</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormD">
+      <summary>Indique qu'une chaîne Unicode est normalisée à l'aide de la décomposition canonique complète.</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormKC">
+      <summary>Indique qu'une chaîne Unicode est normalisée à l'aide de la décomposition de compatibilité complète, suivie du remplacement des séquences par leurs composites principaux, si possible.</summary>
+    </member>
+    <member name="F:System.Text.NormalizationForm.FormKD">
+      <summary>Indique qu'une chaîne Unicode est normalisée à l'aide de la décomposition de compatibilité complète.</summary>
+    </member>
+  </members>
+</doc>

@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Threading.Overlapped</name>
+  </assembly>
+  <members>
+    <member name="T:System.Threading.IOCompletionCallback">
+      <summary>I/O 操作がスレッド プールで完了すると、エラー コード、バイト数、および重複値型を受け取ります。</summary>
+      <param name="errorCode">エラー コード。</param>
+      <param name="numBytes">転送されるバイト数。</param>
+      <param name="pOVERLAP">ネイティブな重複値型を指すアンマネージ ポインターを表す <see cref="T:System.Threading.NativeOverlapped" />。</param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.NativeOverlapped">
+      <summary>アンマネージ コードから表示される明示的なレイアウトを提供します。これは、末尾に予約済みフィールドを追加した Win32 OVERLAPPED 構造体のレイアウトと同じです。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.EventHandle">
+      <summary>操作の完了時にシグナル状態に設定されるイベントのハンドルを指定します。呼び出し元のプロセスは、重複関数を呼び出す前には、このメンバーに 0 か有効なイベント ハンドルのいずれかを設定する必要があります。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalHigh">
+      <summary>転送されるデータの長さを指定します。オペレーティング システムで使用するために予約されています。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalLow">
+      <summary>システムに依存するステータスを指定します。オペレーティング システムで使用するために予約されています。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetHigh">
+      <summary>転送の開始位置を示すバイト オフセットの上位ワードを指定します。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetLow">
+      <summary>転送を開始するファイルの位置を指定します。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.Overlapped">
+      <summary>
+        <see cref="T:System.Threading.Overlapped" /> インスタンスからの情報を <see cref="T:System.Threading.NativeOverlapped" /> 構造体に転送するためのメソッドを含む、Win32 OVERLAPPED 構造体のマネージ表現を提供します。</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.#ctor">
+      <summary>
+        <see cref="T:System.Threading.Overlapped" /> クラスの新しい空のインスタンスを初期化します。</summary>
+    </member>
+    <member name="P:System.Threading.Overlapped.AsyncResult">
+      <summary>I/O 操作に関するステータス情報を提供するオブジェクトを取得または設定します。</summary>
+      <returns>
+        <see cref="T:System.IAsyncResult" /> インターフェイスを実装するオブジェクト。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Free(System.Threading.NativeOverlapped*)">
+      <summary>
+        <see cref="Overload:System.Threading.Overlapped.Pack" /> メソッドによって割り当てられたネイティブなオーバーラップ構造体に関連付けられているアンマネージ メモリを解放します。</summary>
+      <param name="nativeOverlappedPtr">解放する <see cref="T:System.Threading.NativeOverlapped" /> 構造体を指すポインター。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" /> は null なので、</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetHigh">
+      <summary>転送を開始するファイル位置の上位ワードを取得または設定します。ファイル位置は、ファイルの開始位置からのバイト オフセットです。</summary>
+      <returns>ファイル位置の上位ワードを表す <see cref="T:System.Int32" /> 値。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetLow">
+      <summary>転送を開始するファイル位置の下位ワードを取得または設定します。ファイル位置は、ファイルの開始位置からのバイト オフセットです。</summary>
+      <returns>ファイル位置の下位ワードを表す <see cref="T:System.Int32" /> 値。</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Pack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>非同期 I/O 操作が完了したときに呼び出すデリゲートと、バッファーとして機能するマネージ オブジェクトを指定して、現在のインスタンスを <see cref="T:System.Threading.NativeOverlapped" /> 構造体にパックします。</summary>
+      <returns>
+        <see cref="T:System.Threading.NativeOverlapped" /> 構造体へのアンマネージ ポインター。</returns>
+      <param name="iocb">非同期 I/O 操作が完了したときに呼び出すコールバック メソッドを表す <see cref="T:System.Threading.IOCompletionCallback" /> デリゲート。</param>
+      <param name="userData">操作の入力バッファーまたは出力バッファーを表す、オブジェクトまたはオブジェクトの配列。各オブジェクトが、バイトの配列などのバッファーを表します。</param>
+      <exception cref="T:System.InvalidOperationException">現在の <see cref="T:System.Threading.Overlapped" /> は既にパックされています。</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Unpack(System.Threading.NativeOverlapped*)">
+      <summary>指定したアンマネージ <see cref="T:System.Threading.NativeOverlapped" /> 構造体をマネージ <see cref="T:System.Threading.Overlapped" /> オブジェクトに展開します。</summary>
+      <returns>ネイティブ構造体から展開された情報を含む <see cref="T:System.Threading.Overlapped" /> オブジェクト。</returns>
+      <param name="nativeOverlappedPtr">
+        <see cref="T:System.Threading.NativeOverlapped" /> 構造体へのアンマネージ ポインター。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" /> は null なので、</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.UnsafePack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>非同期 I/O 操作が完了したときに呼び出すデリゲートと、バッファーとして機能するマネージ オブジェクトを指定して、現在のインスタンスを <see cref="T:System.Threading.NativeOverlapped" /> 構造体にパックします。コール スタックは反映しません。</summary>
+      <returns>
+        <see cref="T:System.Threading.NativeOverlapped" /> 構造体へのアンマネージ ポインター。</returns>
+      <param name="iocb">非同期 I/O 操作が完了したときに呼び出すコールバック メソッドを表す <see cref="T:System.Threading.IOCompletionCallback" /> デリゲート。</param>
+      <param name="userData">操作の入力バッファーまたは出力バッファーを表す、オブジェクトまたはオブジェクトの配列。各オブジェクトが、バイトの配列などのバッファーを表します。</param>
+      <exception cref="T:System.Security.SecurityException">呼び出し元に、必要なアクセス許可がありません。</exception>
+      <exception cref="T:System.InvalidOperationException">現在の <see cref="T:System.Threading.Overlapped" /> は既にパックされています。</exception>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence, ControlPolicy" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Threading.PreAllocatedOverlapped"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.#ctor(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.Dispose"></member>
+    <member name="T:System.Threading.ThreadPoolBoundHandle"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.PreAllocatedOverlapped)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.BindHandle(System.Runtime.InteropServices.SafeHandle)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.Dispose"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.FreeNativeOverlapped(System.Threading.NativeOverlapped*)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.GetNativeOverlappedState(System.Threading.NativeOverlapped*)"></member>
+    <member name="P:System.Threading.ThreadPoolBoundHandle.Handle"></member>
+  </members>
+</doc>

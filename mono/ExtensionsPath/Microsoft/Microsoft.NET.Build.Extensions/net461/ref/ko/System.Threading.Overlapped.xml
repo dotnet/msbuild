@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Threading.Overlapped</name>
+  </assembly>
+  <members>
+    <member name="T:System.Threading.IOCompletionCallback">
+      <summary>스레드 풀의 I/O 연산이 완료되면 오류 코드, 바이트 수 및 겹쳐진 값 형식을 받습니다.</summary>
+      <param name="errorCode">오류 코드입니다. </param>
+      <param name="numBytes">전송된 바이트 수입니다. </param>
+      <param name="pOVERLAP">겹쳐진 값의 네이티브 형식에 대한 관리되지 않는 포인터를 나타내는 <see cref="T:System.Threading.NativeOverlapped" />입니다. </param>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.NativeOverlapped">
+      <summary>비관리 코드에서 볼 수 있고 같은 레이아웃을 끝에 예약 필드가 있는 Win32 OVERLAPPED 구조로 가지는 explicit 레이아웃을 제공합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.EventHandle">
+      <summary>작업이 완료되면 신호 받음 상태로 설정된 이벤트의 핸들을 지정합니다.호출 프로세스에서는 겹쳐진 함수를 호출하기 전에 이 멤버를 0 또는 유효한 이벤트 핸들로 설정해야 합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalHigh">
+      <summary>전송된 데이터의 길이를 지정합니다.운영 체제용으로 예약되어 있습니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.InternalLow">
+      <summary>시스템에 종속된 상태를 지정합니다.운영 체제용으로 예약되어 있습니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetHigh">
+      <summary>전송을 시작할 바이트 오프셋의 상위 단어를 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="F:System.Threading.NativeOverlapped.OffsetLow">
+      <summary>전송을 시작할 파일 위치를 지정합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="T:System.Threading.Overlapped">
+      <summary>
+        <see cref="T:System.Threading.Overlapped" /> 인스턴스의 정보를 <see cref="T:System.Threading.NativeOverlapped" /> 구조체로 전송하는 메서드를 포함하여 Win32 OVERLAPPED 구조체의 관리되는 표현을 제공합니다.</summary>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.#ctor">
+      <summary>
+        <see cref="T:System.Threading.Overlapped" /> 클래스의 비어 있는 새 인스턴스를 초기화합니다.</summary>
+    </member>
+    <member name="P:System.Threading.Overlapped.AsyncResult">
+      <summary>I/O 작업에 대한 상태 정보를 제공하는 개체를 가져오거나 설정합니다.</summary>
+      <returns>
+        <see cref="T:System.IAsyncResult" /> 인터페이스를 구현하는 개체입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Free(System.Threading.NativeOverlapped*)">
+      <summary>
+        <see cref="Overload:System.Threading.Overlapped.Pack" /> 메서드에서 할당하는 중첩된 네이티브 구조체에 연결된 관리되지 않는 메모리를 확보합니다.</summary>
+      <param name="nativeOverlappedPtr">해제할 <see cref="T:System.Threading.NativeOverlapped" /> 구조체에 대한 포인터입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" />가 null입니다.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetHigh">
+      <summary>전송을 시작할 파일 위치의 상위 워드를 가져오거나 설정합니다.파일 위치는 파일의 시작 부분에서 바이트 오프셋만큼 떨어져 있습니다.</summary>
+      <returns>파일 위치의 상위 워드를 나타내는 <see cref="T:System.Int32" /> 값입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="P:System.Threading.Overlapped.OffsetLow">
+      <summary>전송을 시작할 파일 위치의 하위 워드를 가져오거나 설정합니다.파일 위치는 파일의 시작 부분에서 바이트 오프셋만큼 떨어져 있습니다.</summary>
+      <returns>파일 위치의 하위 워드를 나타내는 <see cref="T:System.Int32" /> 값입니다.</returns>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Pack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>비동기 I/O 작업이 완료될 때 호출되는 대리자와 버퍼 역할을 하는 관리되는 개체를 지정하여, 현재 인스턴스를 <see cref="T:System.Threading.NativeOverlapped" /> 구조체로 압축합니다.</summary>
+      <returns>
+        <see cref="T:System.Threading.NativeOverlapped" /> 구조체에 대한 관리되지 않는 포인터입니다. </returns>
+      <param name="iocb">비동기 I/O 작업이 완료될 때 호출하는 콜백 메서드를 나타내는 <see cref="T:System.Threading.IOCompletionCallback" /> 대리자입니다.</param>
+      <param name="userData">작업에 대한 입력 또는 출력 버퍼를 나타내는 개체나 개체 배열입니다.각 개체는 버퍼(예: 바이트 배열)를 나타냅니다.</param>
+      <exception cref="T:System.InvalidOperationException">현재 <see cref="T:System.Threading.Overlapped" />가 이미 압축된 경우</exception>
+      <filterpriority>2</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.Unpack(System.Threading.NativeOverlapped*)">
+      <summary>지정된 관리되지 않는 <see cref="T:System.Threading.NativeOverlapped" /> 구조체를 관리되는 <see cref="T:System.Threading.Overlapped" /> 개체로 압축을 풉니다. </summary>
+      <returns>네이티브 구조체에서 압축을 푼 정보가 들어 있는 <see cref="T:System.Threading.Overlapped" /> 개체입니다.</returns>
+      <param name="nativeOverlappedPtr">
+        <see cref="T:System.Threading.NativeOverlapped" /> 구조체에 대한 관리되지 않는 포인터입니다.</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="nativeOverlappedPtr" />가 null입니다.</exception>
+      <filterpriority>1</filterpriority>
+    </member>
+    <member name="M:System.Threading.Overlapped.UnsafePack(System.Threading.IOCompletionCallback,System.Object)">
+      <summary>비동기 I/O 작업이 완료될 때 호출되는 대리자와 버퍼 역할을 하는 관리되는 개체를 지정하여, 현재 인스턴스를 <see cref="T:System.Threading.NativeOverlapped" /> 구조체로 압축합니다.호출 스택을 전파하지는 않습니다.</summary>
+      <returns>
+        <see cref="T:System.Threading.NativeOverlapped" /> 구조체에 대한 관리되지 않는 포인터입니다. </returns>
+      <param name="iocb">비동기 I/O 작업이 완료될 때 호출하는 콜백 메서드를 나타내는 <see cref="T:System.Threading.IOCompletionCallback" /> 대리자입니다.</param>
+      <param name="userData">작업에 대한 입력 또는 출력 버퍼를 나타내는 개체나 개체 배열입니다.각 개체는 버퍼(예: 바이트 배열)를 나타냅니다.</param>
+      <exception cref="T:System.Security.SecurityException">호출자에게 필요한 권한이 없는 경우 </exception>
+      <exception cref="T:System.InvalidOperationException">현재 <see cref="T:System.Threading.Overlapped" />이 이미 압축된 경우</exception>
+      <filterpriority>2</filterpriority>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="ControlEvidence, ControlPolicy" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Threading.PreAllocatedOverlapped"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.#ctor(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.PreAllocatedOverlapped.Dispose"></member>
+    <member name="T:System.Threading.ThreadPoolBoundHandle"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.IOCompletionCallback,System.Object,System.Object)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.AllocateNativeOverlapped(System.Threading.PreAllocatedOverlapped)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.BindHandle(System.Runtime.InteropServices.SafeHandle)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.Dispose"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.FreeNativeOverlapped(System.Threading.NativeOverlapped*)"></member>
+    <member name="M:System.Threading.ThreadPoolBoundHandle.GetNativeOverlappedState(System.Threading.NativeOverlapped*)"></member>
+    <member name="P:System.Threading.ThreadPoolBoundHandle.Handle"></member>
+  </members>
+</doc>

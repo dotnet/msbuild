@@ -1,0 +1,441 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.Net.Sockets</name>
+  </assembly>
+  <members>
+    <member name="T:System.Net.Sockets.ProtocolType">
+      <summary>指定 <see cref="T:System.Net.Sockets.Socket" /> 類別支援的通訊協定。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Tcp">
+      <summary>傳輸控制通訊協定。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Udp">
+      <summary>使用者資料包通訊協定 (User Datagram Protocol，UDP)。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unknown">
+      <summary>不明的通訊協定。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.ProtocolType.Unspecified">
+      <summary>未指定的通訊協定。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.Socket">
+      <summary>實作 Berkeley 通訊端介面。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.AddressFamily,System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>使用指定的通訊協定家族 (Family)、通訊端類型和通訊協定，初始化 <see cref="T:System.Net.Sockets.Socket" /> 類別的新執行個體。</summary>
+      <param name="addressFamily">一個 <see cref="T:System.Net.Sockets.AddressFamily" /> 值。</param>
+      <param name="socketType">其中一個 <see cref="T:System.Net.Sockets.SocketType" /> 值。</param>
+      <param name="protocolType">其中一個 <see cref="T:System.Net.Sockets.ProtocolType" /> 值。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="addressFamily" />、<paramref name="socketType" /> 和 <paramref name="protocolType" /> 組合所產生的無效通訊端。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.#ctor(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType)">
+      <summary>使用指定的通訊端類型和通訊協定，初始化 <see cref="T:System.Net.Sockets.Socket" /> 類別的新執行個體。</summary>
+      <param name="socketType">其中一個 <see cref="T:System.Net.Sockets.SocketType" /> 值。</param>
+      <param name="protocolType">其中一個 <see cref="T:System.Net.Sockets.ProtocolType" /> 值。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">
+        <paramref name="socketType" /> 和 <paramref name="protocolType" /> 組合產生無效通訊端。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>開始非同步作業以接受連入的連接嘗試。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentException">引數是無效的。如果提供的緩衝區不夠大，就會發生這個例外狀況。緩衝區必須至少為 2 * (sizeof(SOCKADDR_STORAGE + 16) 位元組。如果指定多個緩衝區而 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性不是 null，也會發生這個例外狀況。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">引數超出範圍。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Count" /> 小於 0，就會發生這個例外狀況。</exception>
+      <exception cref="T:System.InvalidOperationException">要求了無效的作業。如果接受的 <see cref="T:System.Net.Sockets.Socket" /> 不接聽連接或接受的通訊端已繫結，就會發生這個例外狀況。您必須先呼叫 <see cref="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)" /> 和 <see cref="M:System.Net.Sockets.Socket.Listen(System.Int32)" /> 方法，再呼叫 <see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" /> 方法。此例外狀況也會在已與通訊端連線，或是通訊端作業已使用指定的 <paramref name="e" /> 參數進行時發生。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.AddressFamily">
+      <summary>取得 <see cref="T:System.Net.Sockets.Socket" /> 的通訊協定家族 (Family)。</summary>
+      <returns>一個 <see cref="T:System.Net.Sockets.AddressFamily" /> 值。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Bind(System.Net.EndPoint)">
+      <summary>使 <see cref="T:System.Net.Sockets.Socket" /> 與本機端點建立關聯。</summary>
+      <param name="localEP">要與 <see cref="T:System.Net.Sockets.Socket" /> 關聯的本機 <see cref="T:System.Net.EndPoint" />。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="localEP" /> 為 null。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Security.SecurityException">在呼叫堆疊中位置較高的呼叫端對於要求的作業沒有使用權限。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Net.SocketPermission, System, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.CancelConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>取消遠端主機連接的非同步要求。</summary>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，藉由呼叫一個 <see cref="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)" /> 方法來要求與遠端主機連接。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 參數不可為 null，而且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 也不可為 null。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Security.SecurityException">在呼叫堆疊中位置較高的呼叫端對於要求的作業沒有使用權限。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>開始與遠端主機連接的非同步要求。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentException">引數是無效的。如果指定多個緩衝區而 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性不是 null，就會發生這個例外狀況。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 參數不可為 null，而且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 也不可為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> 正在接聽，或是通訊端作業正在進行並且使用 <paramref name="e" /> 參數所指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。如果本機端點和 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不是同一個通訊協定家族 (Family)，也會發生這個例外狀況。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Security.SecurityException">在呼叫堆疊中位置較高的呼叫端對於要求的作業沒有使用權限。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ConnectAsync(System.Net.Sockets.SocketType,System.Net.Sockets.ProtocolType,System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>開始與遠端主機連接的非同步要求。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="socketType">其中一個 <see cref="T:System.Net.Sockets.SocketType" /> 值。</param>
+      <param name="protocolType">其中一個 <see cref="T:System.Net.Sockets.ProtocolType" /> 值。</param>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentException">引數是無效的。如果指定多個緩衝區而 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性不是 null，就會發生這個例外狀況。</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="e" /> 參數不可為 null，而且 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 也不可為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">
+        <see cref="T:System.Net.Sockets.Socket" /> 正在接聽，或是通訊端作業正在進行並且使用 <paramref name="e" /> 參數所指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。如果本機端點和 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不是同一個通訊協定家族 (Family)，也會發生這個例外狀況。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Security.SecurityException">在呼叫堆疊中位置較高的呼叫端對於要求的作業沒有使用權限。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Connected">
+      <summary>取得值，指出上一個 <see cref="Overload:System.Net.Sockets.Socket.Send" /> 或 <see cref="Overload:System.Net.Sockets.Socket.Receive" /> 作業是否將 <see cref="T:System.Net.Sockets.Socket" /> 連接至遠端主機。</summary>
+      <returns>如果最近一次的作業是將 <see cref="T:System.Net.Sockets.Socket" /> 連接到遠端資源，則為 true，否則，即為 false。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose">
+      <summary>將 <see cref="T:System.Net.Sockets.Socket" /> 類別目前的執行個體所使用的資源全部釋出。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Dispose(System.Boolean)">
+      <summary>釋放 <see cref="T:System.Net.Sockets.Socket" /> 所使用的 Unmanaged 資源，並選擇性處置 Managed 資源。</summary>
+      <param name="disposing">true，表示釋放 Managed 和 Unmanaged 資源；false，表示只釋放 Unmanaged 資源。</param>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Finalize">
+      <summary>釋放 <see cref="T:System.Net.Sockets.Socket" /> 類別所使用的資源。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Listen(System.Int32)">
+      <summary>將 <see cref="T:System.Net.Sockets.Socket" /> 置於接聽狀態。</summary>
+      <param name="backlog">暫止連接佇列的最大長度。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.LocalEndPoint">
+      <summary>取得本機端點。</summary>
+      <returns>
+        <see cref="T:System.Net.EndPoint" />，<see cref="T:System.Net.Sockets.Socket" /> 正將它用於通訊。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.NoDelay">
+      <summary>取得或設定 <see cref="T:System.Boolean" /> 值，指定資料流 <see cref="T:System.Net.Sockets.Socket" /> 是否使用 Nagle 演算法。</summary>
+      <returns>如果 <see cref="T:System.Net.Sockets.Socket" /> 使用 Nagle 演算法，則為 false，否則為 true。預設值為 false。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取 <see cref="T:System.Net.Sockets.Socket" /> 時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv4">
+      <summary>指出基礎作業系統和網路配置器是否支援網際網路通訊協定第 4 版 (IPv4)。</summary>
+      <returns>如果作業系統和網路配置器支援 IPv4 通訊協定則為 true，否則為 false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.OSSupportsIPv6">
+      <summary>指出基礎作業系統和網路配置器是否支援網際網路通訊協定第 6 版 (IPv6)。</summary>
+      <returns>如果作業系統和網路配置器支援 IPv6 通訊協定則為 true，否則為 false。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ProtocolType">
+      <summary>取得 <see cref="T:System.Net.Sockets.Socket" /> 的通訊協定 (Protocol) 類型。</summary>
+      <returns>其中一個 <see cref="T:System.Net.Sockets.ProtocolType" /> 值。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>開始非同步要求，以接收來自已連接的 <see cref="T:System.Net.Sockets.Socket" /> 物件的資料。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentException">引數無效。<paramref name="e" /> 參數上的 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 或 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性必須參考有效的緩衝區。這兩個屬性可能有一個已經設定，但不會同時都已設定。</exception>
+      <exception cref="T:System.InvalidOperationException">通訊端作業已使用 <paramref name="e" /> 參數內指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件正在進行中。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.ReceiveBufferSize">
+      <summary>取得或設定值，指定 <see cref="T:System.Net.Sockets.Socket" /> 之接收緩衝區的大小。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，包含接收緩衝區的大小 (以位元組為單位)。預設值為 8192。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">為設定作業指定的值小於 0。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.ReceiveFromAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>開始從指定的網路裝置非同步接收資料。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不可以是 null。</exception>
+      <exception cref="T:System.InvalidOperationException">通訊端作業已使用 <paramref name="e" /> 參數內指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件正在進行中。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.RemoteEndPoint">
+      <summary>取得遠端端點。</summary>
+      <returns>
+        <see cref="T:System.Net.EndPoint" />，<see cref="T:System.Net.Sockets.Socket" /> 正在與其通訊。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>將資料以非同步方式傳送至已連接的 <see cref="T:System.Net.Sockets.Socket" /> 物件。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="e" /> 參數上的 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 或 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性必須參考有效的緩衝區。這兩個屬性可能有一個已經設定，但不會同時都已設定。</exception>
+      <exception cref="T:System.InvalidOperationException">通訊端作業已使用 <paramref name="e" /> 參數內指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件正在進行中。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">尚未透過 <see cref="M:System.Net.Sockets.Socket.Accept" />、<see cref="M:System.Net.Sockets.Socket.AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs)" /> 或 <see cref="Overload:System.Net.Sockets.Socket.BeginAccept" /> 方法取得 <see cref="T:System.Net.Sockets.Socket" />，或尚未連接。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.SendBufferSize">
+      <summary>取得或設定值，指定 <see cref="T:System.Net.Sockets.Socket" /> 之傳送緩衝區的大小。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，包含傳送緩衝區的大小 (以位元組為單位)。預設值為 8192。</returns>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">為設定作業指定的值小於 0。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.SendToAsync(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>非同步傳送資料至特定的遠端主機。</summary>
+      <returns>如果 I/O 作業暫止，則傳回 true。作業完成時會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件。如果 I/O 作業同步完成，則傳回 false。在這個情況下，就不會引發與 <paramref name="e" /> 參數有關的 <see cref="E:System.Net.Sockets.SocketAsyncEventArgs.Completed" /> 事件，而在方法呼叫傳回後會立即檢查做為參數傳遞的 <paramref name="e" /> 物件，以擷取作業的結果。</returns>
+      <param name="e">
+        <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件，用於這個非同步通訊端作業。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 不可以是 null。</exception>
+      <exception cref="T:System.InvalidOperationException">通訊端作業已使用 <paramref name="e" /> 參數內指定的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 物件正在進行中。</exception>
+      <exception cref="T:System.NotSupportedException">這個方法需要 Windows XP (含) 以後版本。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">指定的通訊協定是連接導向的，但尚未連接 <see cref="T:System.Net.Sockets.Socket" />。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)">
+      <summary>暫停 <see cref="T:System.Net.Sockets.Socket" /> 上的傳送和接收作業。</summary>
+      <param name="how">其中一個 <see cref="T:System.Net.Sockets.SocketShutdown" /> 值，指定將不再允許的作業。</param>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。如需詳細資訊，請參閱「備註」一節。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.Net.Sockets.Socket.Ttl">
+      <summary>取得或設定值，指定 <see cref="T:System.Net.Sockets.Socket" /> 傳送之網際網路通訊協定 (IP) 封包的存留時間 (TTL) 值。</summary>
+      <returns>TTL 值。</returns>
+      <exception cref="T:System.ArgumentOutOfRangeException">TTL 值不能設定為負數。</exception>
+      <exception cref="T:System.NotSupportedException">這個屬性只可為 <see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /> 或 <see cref="F:System.Net.Sockets.AddressFamily.InterNetworkV6" /> 家族中的通訊端設定。</exception>
+      <exception cref="T:System.Net.Sockets.SocketException">嘗試存取通訊端時發生錯誤。當嘗試將 TTL 設定為大於 255 的值時，也會傳回這個錯誤。</exception>
+      <exception cref="T:System.ObjectDisposedException">
+        <see cref="T:System.Net.Sockets.Socket" /> 已經關閉。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Unrestricted="true" />
+      </PermissionSet>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncEventArgs">
+      <summary>代表非同步 (Asynchronous) 通訊端作業。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.#ctor">
+      <summary>建立空的 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 執行個體。</summary>
+      <exception cref="T:System.NotSupportedException">不支援平台。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.AcceptSocket">
+      <summary>取得或設定要使用的通訊端，或是已建立並且使用非同步通訊端方法接受連線的通訊端。</summary>
+      <returns>要使用的 <see cref="T:System.Net.Sockets.Socket" />，或是已建立並且使用非同步通訊端方法接受連線的通訊端。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer">
+      <summary>取得要和非同步通訊端方法一起使用的資料緩衝區。</summary>
+      <returns>
+        <see cref="T:System.Byte" /> 陣列，表示要和非同步通訊端方法一起使用的資料緩衝區。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList">
+      <summary>取得或設定要和非同步通訊端方法一起使用的資料緩衝區之陣列。</summary>
+      <returns>
+        <see cref="T:System.Collections.IList" />，表示要和非同步通訊端方法一起使用的資料緩衝區之陣列。</returns>
+      <exception cref="T:System.ArgumentException">Set 作業指定了不明確的緩衝區。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性設定成非 Null 值，且嘗試將 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性設定為非 Null 值，就會發生這個例外狀況。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.BytesTransferred">
+      <summary>取得通訊端作業中所傳輸的位元組數目。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，內含通訊端作業中所傳輸的位元組數目。</returns>
+    </member>
+    <member name="E:System.Net.Sockets.SocketAsyncEventArgs.Completed">
+      <summary>用來完成非同步作業的事件。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectByNameError">
+      <summary>取得使用 <see cref="T:System.Net.DnsEndPoint" /> 時發生連接失敗的例外狀況 (Exception)。</summary>
+      <returns>
+        <see cref="T:System.Exception" />，指出當指定 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint" /> 屬性的 <see cref="T:System.Net.DnsEndPoint" /> 條件下發生連接錯誤的原因。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.ConnectSocket">
+      <summary>
+        <see cref="Overload:System.Net.Sockets.Socket.ConnectAsync" /> 方法成功完成後已建立和連接的 <see cref="T:System.Net.Sockets.Socket" /> 物件。</summary>
+      <returns>連接的 <see cref="T:System.Net.Sockets.Socket" /> 物件。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Count">
+      <summary>取得非同步作業中要傳送或接收的資料量上限 (以位元組為單位)。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，內含要傳送或接收的資料量上限 (以位元組為單位)。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Dispose">
+      <summary>釋放 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 執行個體所使用的 Unmanaged 資源，並選擇性地處置 Managed 資源。</summary>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.Finalize">
+      <summary>釋放 <see cref="T:System.Net.Sockets.SocketAsyncEventArgs" /> 所使用的資源。</summary>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.LastOperation">
+      <summary>取得最近使用這個內容物件執行的通訊端作業類型。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.SocketAsyncOperation" /> 執行個體，代表最近使用這個內容物件執行的通訊端作業類型。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.Offset">
+      <summary>取得 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性所參考之資料緩衝區中的位移 (以位元組為單位)。</summary>
+      <returns>
+        <see cref="T:System.Int32" />，內含 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性所參考之資料緩衝區中的位移 (以位元組為單位)。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.OnCompleted(System.Net.Sockets.SocketAsyncEventArgs)">
+      <summary>代表在非同步作業完成時所呼叫的方法。</summary>
+      <param name="e">收到信號的事件。</param>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.RemoteEndPoint">
+      <summary>取得或設定非同步作業的遠端 IP 端點。</summary>
+      <returns>
+        <see cref="T:System.Net.EndPoint" />，表示非同步作業的遠端 IP 端點。</returns>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Byte[],System.Int32,System.Int32)">
+      <summary>設定要和非同步通訊端方法一起使用的資料緩衝區。</summary>
+      <param name="buffer">要和非同步通訊端方法一起使用的資料緩衝區。</param>
+      <param name="offset">作業開始的資料緩衝區位移 (以位元組為單位)。</param>
+      <param name="count">緩衝區中要傳送或接收的資料量上限 (以位元組為單位)。</param>
+      <exception cref="T:System.ArgumentException">指定了不明確的緩衝區。如果 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性和 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.BufferList" /> 屬性都不是 null，就會發生這個例外狀況。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">引數超出範圍。如果 <paramref name="offset" /> 參數小於零或大於 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性中的陣列長度，就會發生這個例外狀況。如果 <paramref name="count" /> 參數小於零或大於 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性中的陣列長度減去 <paramref name="offset" /> 參數，也會發生這個例外狀況。</exception>
+    </member>
+    <member name="M:System.Net.Sockets.SocketAsyncEventArgs.SetBuffer(System.Int32,System.Int32)">
+      <summary>設定要和非同步通訊端方法一起使用的資料緩衝區。</summary>
+      <param name="offset">作業開始的資料緩衝區位移 (以位元組為單位)。</param>
+      <param name="count">緩衝區中要傳送或接收的資料量上限 (以位元組為單位)。</param>
+      <exception cref="T:System.ArgumentOutOfRangeException">引數超出範圍。如果 <paramref name="offset" /> 參數小於零或大於 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性中的陣列長度，就會發生這個例外狀況。如果 <paramref name="count" /> 參數小於零或大於 <see cref="P:System.Net.Sockets.SocketAsyncEventArgs.Buffer" /> 屬性中的陣列長度減去 <paramref name="offset" /> 參數，也會發生這個例外狀況。</exception>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.SocketError">
+      <summary>取得或設定非同步通訊端作業的結果。</summary>
+      <returns>
+        <see cref="T:System.Net.Sockets.SocketError" />，表示非同步通訊端作業的結果。</returns>
+    </member>
+    <member name="P:System.Net.Sockets.SocketAsyncEventArgs.UserToken">
+      <summary>取得或設定與這個非同步通訊端作業相關聯的使用者或應用程式物件。</summary>
+      <returns>物件，表示與這個非同步通訊端作業相關聯的使用者或應用程式物件。</returns>
+    </member>
+    <member name="T:System.Net.Sockets.SocketAsyncOperation">
+      <summary>最近使用這個內容物件執行的非同步通訊端作業類型。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Accept">
+      <summary>通訊端 Accept 作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Connect">
+      <summary>通訊端 Connect 作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.None">
+      <summary>沒有任何一個通訊端作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Receive">
+      <summary>通訊端 Receive 作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.ReceiveFrom">
+      <summary>通訊端 ReceiveFrom 作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.Send">
+      <summary>通訊端 Send 作業。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketAsyncOperation.SendTo">
+      <summary>通訊端 SendTo 作業。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketShutdown">
+      <summary>定義 <see cref="M:System.Net.Sockets.Socket.Shutdown(System.Net.Sockets.SocketShutdown)" /> 方法所使用的常數。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Both">
+      <summary>停用關閉傳送和接收的 <see cref="T:System.Net.Sockets.Socket" />。這個欄位是常數。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Receive">
+      <summary>停用接收的 <see cref="T:System.Net.Sockets.Socket" />。這個欄位是常數。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketShutdown.Send">
+      <summary>停用傳送的 <see cref="T:System.Net.Sockets.Socket" />。這個欄位是常數。</summary>
+    </member>
+    <member name="T:System.Net.Sockets.SocketType">
+      <summary>指定 <see cref="T:System.Net.Sockets.Socket" /> 類別的執行個體 (Instance) 所表示的通訊端 (Socket) 類型。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Dgram">
+      <summary>支援資料包 (Datagram)，這些資料包是固定 (一般為小型) 最大長度的無連線、不可靠訊息。訊息可能會遺失或重複而抵達的順序也可能會混亂。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> 類型的 <see cref="T:System.Net.Sockets.Socket" /> 在傳送和接收資料之前並不需要先連線，並且可以與多個對等端通訊。<see cref="F:System.Net.Sockets.SocketType.Dgram" /> 會使用資料包通訊協定 (<see cref="F:System.Net.Sockets.ProtocolType.Udp" />) 以及 <see cref="F:System.Net.Sockets.AddressFamily.InterNetwork" /><see cref="T:System.Net.Sockets.AddressFamily" />。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Stream">
+      <summary>支援可靠、雙向、連接架構的位元組資料流，而不會導致資料重複且不需保留界限。這個類型的 Socket 可與單一對等端通訊，而在可以開始通訊之前必須連接遠端主機。<see cref="F:System.Net.Sockets.SocketType.Stream" /> 會使用「傳輸控制通訊協定」(<see cref="F:System.Net.Sockets.ProtocolType.Tcp" />) <see cref="T:System.Net.Sockets.ProtocolType" /> 以及 InterNetwork<see cref="T:System.Net.Sockets.AddressFamily" />。</summary>
+    </member>
+    <member name="F:System.Net.Sockets.SocketType.Unknown">
+      <summary>指定未知的 Socket 類型。</summary>
+    </member>
+  </members>
+</doc>

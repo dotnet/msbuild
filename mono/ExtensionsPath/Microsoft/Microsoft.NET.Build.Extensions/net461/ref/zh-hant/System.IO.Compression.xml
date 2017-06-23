@@ -1,0 +1,432 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>System.IO.Compression</name>
+  </assembly>
+  <members>
+    <member name="T:System.IO.Compression.CompressionLevel">
+      <summary>指定值，這個值表示壓縮作業會強調速度還是壓縮大小。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.Fastest">
+      <summary>即使不能有效壓縮所產生的檔案，應該儘速完成壓縮作業。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.NoCompression">
+      <summary>不應該對檔案執行壓縮。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionLevel.Optimal">
+      <summary>壓縮作業應該會進行最佳化壓縮，即使該作業耗費更長的時間才能完成。</summary>
+    </member>
+    <member name="T:System.IO.Compression.CompressionMode">
+      <summary> 指定是要壓縮還是要解壓縮基礎資料流。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionMode.Compress">
+      <summary>壓縮基礎資料流。</summary>
+    </member>
+    <member name="F:System.IO.Compression.CompressionMode.Decompress">
+      <summary>解壓縮基礎資料流。</summary>
+    </member>
+    <member name="T:System.IO.Compression.DeflateStream">
+      <summary>提供方法和屬性，以透過 Deflate 演算法來壓縮和解壓縮資料流。</summary>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel)">
+      <summary>使用指定的資料流和壓縮層級，初始化 <see cref="T:System.IO.Compression.DeflateStream" /> 類別的新執行個體。</summary>
+      <param name="stream">要壓縮的資料流。</param>
+      <param name="compressionLevel">其中一個列舉值，指出當壓縮資料流時是否要強調速度或壓縮的效益。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">資料流不支援寫入作業，例如壓縮。(資料流物件上的 <see cref="P:System.IO.Stream.CanWrite" />屬性是false)。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel,System.Boolean)">
+      <summary>使用指定的資料流和壓縮層級，初始化 <see cref="T:System.IO.Compression.DeflateStream" /> 類別的新執行個體，並選擇性地保持開啟資料流。</summary>
+      <param name="stream">要壓縮的資料流。</param>
+      <param name="compressionLevel">其中一個列舉值，指出當壓縮資料流時是否要強調速度或壓縮的效益。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.DeflateStream" /> 物件之後，將資料流物件保持開啟；否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">資料流不支援寫入作業，例如壓縮。(資料流物件上的 <see cref="P:System.IO.Stream.CanWrite" />屬性是false)。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode)">
+      <summary>使用指定的資料流和壓縮模式，初始化 <see cref="T:System.IO.Compression.DeflateStream" /> 類別的新執行個體。</summary>
+      <param name="stream">要壓縮或解壓縮的資料流。</param>
+      <param name="mode">其中一個列舉值，表示要壓縮還是解壓縮資料流。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> 不是有效的 <see cref="T:System.IO.Compression.CompressionMode" /> 值。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Compress" />，而 <see cref="P:System.IO.Stream.CanWrite" /> 是 false。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Decompress" />，而 <see cref="P:System.IO.Stream.CanRead" /> 是 false。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode,System.Boolean)">
+      <summary>使用指定的資料流和壓縮模式，初始化 <see cref="T:System.IO.Compression.DeflateStream" /> 類別的新執行個體，並選擇性地保持開啟資料流。</summary>
+      <param name="stream">要壓縮或解壓縮的資料流。</param>
+      <param name="mode">其中一個列舉值，表示要壓縮還是解壓縮資料流。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.DeflateStream" /> 物件之後，將資料流保持開啟；否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> 不是有效的 <see cref="T:System.IO.Compression.CompressionMode" /> 值。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Compress" />，而 <see cref="P:System.IO.Stream.CanWrite" /> 是 false。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Decompress" />，而 <see cref="P:System.IO.Stream.CanRead" /> 是 false。</exception>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.BaseStream">
+      <summary>取得基礎資料流的參考。</summary>
+      <returns>資料流物件，表示基礎資料流。</returns>
+      <exception cref="T:System.ObjectDisposedException">已關閉基礎資料流。</exception>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanRead">
+      <summary>取得值，指出在解壓縮檔案時，資料流是否支援讀取。</summary>
+      <returns>如果 <see cref="T:System.IO.Compression.CompressionMode" /> 值為 Decompress，且基礎資料流處於開啟狀態並支援讀取，則為 true；否則為 false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanSeek">
+      <summary>取得值，指出資料流是否支援搜尋。</summary>
+      <returns>所有情況下都是 false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.CanWrite">
+      <summary>取得值，指出資料流是否支援寫入。</summary>
+      <returns>如果 <see cref="T:System.IO.Compression.CompressionMode" /> 值為 Compress，並且基礎資料流支援寫入，且不處於關閉狀態，則為 true；否則為 false。</returns>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Dispose(System.Boolean)">
+      <summary>釋放 <see cref="T:System.IO.Compression.DeflateStream" /> 所使用的 Unmanaged 資源，並選擇性釋放 Managed 資源。</summary>
+      <param name="disposing">true 表示釋放 Managed 和 Unmanaged 資源，false 則表示只釋放 Unmanaged 資源。</param>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Flush">
+      <summary>這個方法目前的實作沒有任何功能。</summary>
+      <exception cref="T:System.ObjectDisposedException">已關閉資料流。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.Length">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.DeflateStream.Position">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Read(System.Byte[],System.Int32,System.Int32)">
+      <summary>將大量解壓縮的位元組讀入指定的位元組陣列。</summary>
+      <returns>已讀入至位元組陣列的位元組數。</returns>
+      <param name="array">用於儲存解壓縮位元組的陣列。</param>
+      <param name="offset">要在其中放置讀取位元組之 <paramref name="array" /> 的位元組位移。</param>
+      <param name="count">要讀取的最大解壓縮位元組數。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">建立物件時，<see cref="T:System.IO.Compression.CompressionMode" /> 的值為 Compress。-或- 基礎資料流不支援讀取。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 或 <paramref name="count" /> 小於零。-或-<paramref name="array" /> 長度減去索引起點小於 <paramref name="count" />。</exception>
+      <exception cref="T:System.IO.InvalidDataException">資料的格式無效。</exception>
+      <exception cref="T:System.ObjectDisposedException">已關閉資料流。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Seek(System.Int64,System.IO.SeekOrigin)">
+      <summary>這個作業不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <param name="offset">在資料流中的位置。</param>
+      <param name="origin">其中一個 <see cref="T:System.IO.SeekOrigin" /> 值。</param>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.SetLength(System.Int64)">
+      <summary>這個作業不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <param name="value">資料流的長度。</param>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+    </member>
+    <member name="M:System.IO.Compression.DeflateStream.Write(System.Byte[],System.Int32,System.Int32)">
+      <summary>從指定的位元組陣列將壓縮的位元組寫入基礎資料流。</summary>
+      <param name="array">包含要壓縮之資料的緩衝區。</param>
+      <param name="offset">
+        <paramref name="array" /> 中的位元組位移，即讀取位元組的來源位置。</param>
+      <param name="count">寫入的最大位元組數。</param>
+    </member>
+    <member name="T:System.IO.Compression.GZipStream">
+      <summary>提供用於壓縮和解壓縮資料流的方法和屬性。</summary>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel)">
+      <summary>使用指定的資料流和壓縮層級，初始化 <see cref="T:System.IO.Compression.GZipStream" /> 類別的新執行個體。</summary>
+      <param name="stream">要寫入壓縮資料的資料流。</param>
+      <param name="compressionLevel">其中一個列舉值，指出當壓縮資料流時是否要強調速度或壓縮的效益。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">資料流不支援寫入作業，例如壓縮。(資料流物件上的 <see cref="P:System.IO.Stream.CanWrite" />屬性是false)。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionLevel,System.Boolean)">
+      <summary>使用指定的資料流和壓縮層級，初始化 <see cref="T:System.IO.Compression.GZipStream" /> 類別的新執行個體，並選擇性地保持開啟資料流。</summary>
+      <param name="stream">要寫入壓縮資料的資料流。</param>
+      <param name="compressionLevel">其中一個列舉值，指出當壓縮資料流時是否要強調速度或壓縮的效益。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.GZipStream" /> 物件之後，將資料流物件保持開啟；否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">資料流不支援寫入作業，例如壓縮。(資料流物件上的 <see cref="P:System.IO.Stream.CanWrite" />屬性是false)。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode)">
+      <summary>使用指定的資料流和壓縮模式，初始化 <see cref="T:System.IO.Compression.GZipStream" /> 類別的新執行個體。</summary>
+      <param name="stream">寫入壓縮或解壓縮資料的資料流。</param>
+      <param name="mode">其中一個列舉值，表示要壓縮還是解壓縮資料流。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> 不是有效的 <see cref="T:System.IO.Compression.CompressionMode" /> 列舉值。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Compress" />，而 <see cref="P:System.IO.Stream.CanWrite" /> 是 false。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Decompress" />，而 <see cref="P:System.IO.Stream.CanRead" /> 是 false。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.#ctor(System.IO.Stream,System.IO.Compression.CompressionMode,System.Boolean)">
+      <summary>使用指定的資料流和壓縮模式，初始化 <see cref="T:System.IO.Compression.GZipStream" /> 類別的新執行個體，並選擇性地保持開啟資料流。</summary>
+      <param name="stream">寫入壓縮或解壓縮資料的資料流。</param>
+      <param name="mode">其中一個列舉值，表示要壓縮還是解壓縮資料流。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.GZipStream" /> 物件之後，將資料流保持開啟；否則為 false。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> 為 null。</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="mode" /> 不是有效的 <see cref="T:System.IO.Compression.CompressionMode" /> 值。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Compress" />，而 <see cref="P:System.IO.Stream.CanWrite" /> 是 false。-或-<see cref="T:System.IO.Compression.CompressionMode" /> 是 <see cref="F:System.IO.Compression.CompressionMode.Decompress" />，而 <see cref="P:System.IO.Stream.CanRead" /> 是 false。</exception>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.BaseStream">
+      <summary>取得基礎資料流的參考。</summary>
+      <returns>資料流物件，表示基礎資料流。</returns>
+      <exception cref="T:System.ObjectDisposedException">已關閉基礎資料流。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanRead">
+      <summary>取得值，指出在解壓縮檔案時，資料流是否支援讀取。</summary>
+      <returns>如果 <see cref="T:System.IO.Compression.CompressionMode" /> 值為 Decompress,，並且基礎資料流支援讀取，且不處於關閉狀態，則為 true；否則為 false。</returns>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanSeek">
+      <summary>取得值，指出資料流是否支援搜尋。</summary>
+      <returns>所有情況下都是 false。</returns>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.CanWrite">
+      <summary>取得值，指出資料流是否支援寫入。</summary>
+      <returns>如果 <see cref="T:System.IO.Compression.CompressionMode" /> 值為 Compress，並且基礎資料流支援寫入，且不處於關閉狀態，則為 true；否則為 false。</returns>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Dispose(System.Boolean)">
+      <summary>釋放 <see cref="T:System.IO.Compression.GZipStream" /> 所使用的 Unmanaged 資源，並選擇性釋放 Managed 資源。</summary>
+      <param name="disposing">true 表示釋放 Managed 和 Unmanaged 資源，false 則表示只釋放 Unmanaged 資源。</param>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Flush">
+      <summary>這個方法目前的實作沒有任何功能。</summary>
+      <exception cref="T:System.ObjectDisposedException">已關閉資料流。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.Length">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="P:System.IO.Compression.GZipStream.Position">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+      <PermissionSet>
+        <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+      </PermissionSet>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Read(System.Byte[],System.Int32,System.Int32)">
+      <summary>將大量解壓縮的位元組讀入指定的位元組陣列。</summary>
+      <returns>解壓縮至位元組陣列的位元組數。如果已達到資料流的結尾，則會傳回零或位元組數。</returns>
+      <param name="array">用於儲存解壓縮位元組的陣列。</param>
+      <param name="offset">要在其中放置讀取位元組之 <paramref name="array" /> 的位元組位移。</param>
+      <param name="count">要讀取的最大解壓縮位元組數。</param>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> 為 null。</exception>
+      <exception cref="T:System.InvalidOperationException">建立物件時，<see cref="T:System.IO.Compression.CompressionMode" /> 的值為 Compress。-或-基礎資料流不支援讀取。</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="offset" /> 或 <paramref name="count" /> 小於零。-或-<paramref name="array" /> 長度減去索引起點小於 <paramref name="count" />。</exception>
+      <exception cref="T:System.IO.InvalidDataException">資料的格式無效。</exception>
+      <exception cref="T:System.ObjectDisposedException">已關閉資料流。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Seek(System.Int64,System.IO.SeekOrigin)">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <returns>長整數值。</returns>
+      <param name="offset">在資料流中的位置。</param>
+      <param name="origin">其中一個 <see cref="T:System.IO.SeekOrigin" /> 值。</param>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.SetLength(System.Int64)">
+      <summary>這個屬性不受支援，而且一律會擲回 <see cref="T:System.NotSupportedException" />。</summary>
+      <param name="value">資料流的長度。</param>
+      <exception cref="T:System.NotSupportedException">這個資料流不支援這個屬性。</exception>
+    </member>
+    <member name="M:System.IO.Compression.GZipStream.Write(System.Byte[],System.Int32,System.Int32)">
+      <summary>從指定的位元組陣列將壓縮的位元組寫入基礎資料流。</summary>
+      <param name="array">包含要壓縮之資料的緩衝區。</param>
+      <param name="offset">
+        <paramref name="array" /> 中的位元組位移，即讀取位元組的來源位置。</param>
+      <param name="count">寫入的最大位元組數。</param>
+      <exception cref="T:System.ObjectDisposedException">無法執行寫入作業，因為資料流已關閉。</exception>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchive">
+      <summary>代表 zip 封存格式的壓縮檔封裝。</summary>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream)">
+      <summary>從指定的資料流，初始化 <see cref="T:System.IO.Compression.ZipArchive" /> 類別的新執行個體。</summary>
+      <param name="stream">包含要讀取之封存的資料流。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed or does not support reading.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream are not in the zip archive format.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode)">
+      <summary>使用指定的模式，從指定的資料流初始化 <see cref="T:System.IO.Compression.ZipArchive" /> 類別的新執行個體。</summary>
+      <param name="stream">輸入或輸出資料流。</param>
+      <param name="mode">其中一個列舉值，指出是否使用 zip 封存讀取、建立或更新項目。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean)">
+      <summary>在指定之模式的指定資料流上，初始化 <see cref="T:System.IO.Compression.ZipArchive" /> 類別的新執行個體，並選擇性地保留資料流開啟狀態。</summary>
+      <param name="stream">輸入或輸出資料流。</param>
+      <param name="mode">其中一個列舉值，指出是否使用 zip 封存讀取、建立或更新項目。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.ZipArchive" /> 物件之後，將資料流保持開啟，否則為 false。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Text.Encoding)">
+      <summary>在指定模式的指定資料流上，初始化 <see cref="T:System.IO.Compression.ZipArchive" /> 類別的新執行個體，使用項目名稱的指定編碼方式，並選擇性地保留資料流開啟狀態。</summary>
+      <param name="stream">輸入或輸出資料流。</param>
+      <param name="mode">其中一個列舉值，指出是否使用 zip 封存讀取、建立或更新項目。</param>
+      <param name="leaveOpen">true 表示在處置 <see cref="T:System.IO.Compression.ZipArchive" /> 物件之後，將資料流保持開啟，否則為 false。</param>
+      <param name="entryNameEncoding">在此封存中讀取或寫入項目名稱時要使用的編碼方式。只有需要編碼以與 Zip 封存工具和程式庫互通，且這類工具和程式庫不支援項目名稱使用 UTF-8 編碼時，才指定此參數的值。</param>
+      <exception cref="T:System.ArgumentException">The stream is already closed, or the capabilities of the stream do not match the mode.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="stream" /> is null.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="mode" /> is an invalid value.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The contents of the stream could not be interpreted as a zip archive.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is missing from the archive or is corrupt and cannot be read.-or-<paramref name="mode" /> is <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and an entry is too large to fit into memory.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.CreateEntry(System.String)">
+      <summary>在 zip 封存中建立具有指定之路徑和項目名稱的空項目。</summary>
+      <returns>Zip 封存中的空項目。</returns>
+      <param name="entryName">指定要建立之項目名稱的路徑 (相對於封存的根目錄)。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support writing.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.CreateEntry(System.String,System.IO.Compression.CompressionLevel)">
+      <summary>在 zip 封存中建立具有指定之項目名稱和壓縮等級的空項目。</summary>
+      <returns>Zip 封存中的空項目。</returns>
+      <param name="entryName">指定要建立之項目名稱的路徑 (相對於封存的根目錄)。</param>
+      <param name="compressionLevel">其中一個列舉值，指出建立項目時是否要強調速度或壓縮的效益。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support writing.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.Dispose">
+      <summary>將 <see cref="T:System.IO.Compression.ZipArchive" /> 類別目前的執行個體所使用的資源釋出。</summary>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.Dispose(System.Boolean)">
+      <summary>由 <see cref="M:System.IO.Compression.ZipArchive.Dispose" /> 和 <see cref="M:System.Object.Finalize" /> 方法呼叫以釋放 <see cref="T:System.IO.Compression.ZipArchive" /> 類別之目前執行個體所使用的 Unmanaged 資源，並選擇性完成封存的寫入以及釋放 Managed 資源。</summary>
+      <param name="disposing">true 表示完成寫入封存並釋放 Managed 和 Unmanaged 資源，false 表示只釋放 Unmanaged 資源。</param>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchive.Entries">
+      <summary>取得目前 zip 封存中所包含項目的集合。</summary>
+      <returns>目前 zip 封存中所包含項目的集合。</returns>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support reading.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The zip archive is corrupt, and its entries cannot be retrieved.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchive.GetEntry(System.String)">
+      <summary>在 zip 封存中擷取指定項目的包裝函式。</summary>
+      <returns>封存中指定項目的包裝函式，如果項目不存在於封存中則為 null。</returns>
+      <param name="entryName">識別要擷取之項目的路徑 (相對於封存的根目錄)。</param>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="entryName" /> is <see cref="F:System.String.Empty" />.</exception>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="entryName" /> is null.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive does not support reading.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive has been disposed.</exception>
+      <exception cref="T:System.IO.InvalidDataException">The zip archive is corrupt, and its entries cannot be retrieved.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchive.Mode">
+      <summary>取得值，描述 zip 封存可以在項目上執行的動作類型。</summary>
+      <returns>其中一個列舉值，其描述 zip 封存可以在項目上執行的動作類型 (讀取、建立或更新)。</returns>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchiveEntry">
+      <summary>表示 zip 封存中的壓縮檔。</summary>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Archive">
+      <summary>取得項目所屬的 zip 封存。</summary>
+      <returns>項目所屬的 Zip 封存，如果已刪除項目，則為 null。</returns>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.CompressedLength">
+      <summary>取得 Zip 封存中的項目壓縮大小。</summary>
+      <returns>Zip 封存中項目的壓縮大小。</returns>
+      <exception cref="T:System.InvalidOperationException">The value of the property is not available because the entry has been modified.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.Delete">
+      <summary>從 zip 封存中刪除項目。</summary>
+      <exception cref="T:System.IO.IOException">The entry is already open for reading or writing.</exception>
+      <exception cref="T:System.NotSupportedException">The zip archive for this entry was opened in a mode other than <see cref="F:System.IO.Compression.ZipArchiveMode.Update" />. </exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive for this entry has been disposed.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.FullName">
+      <summary>取得 Zip 封存中的項目相對路徑。</summary>
+      <returns>Zip 封存中的項目相對路徑。</returns>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.LastWriteTime">
+      <summary>取得或設定上次變更 zip 封存中之項目的時間。</summary>
+      <returns>上次變更 zip 封存中之項目的時間。</returns>
+      <exception cref="T:System.NotSupportedException">The attempt to set this property failed, because the zip archive for the entry is in <see cref="F:System.IO.Compression.ZipArchiveMode.Read" /> mode.</exception>
+      <exception cref="T:System.IO.IOException">The archive mode is set to <see cref="F:System.IO.Compression.ZipArchiveMode.Create" />.- or -The archive mode is set to <see cref="F:System.IO.Compression.ZipArchiveMode.Update" /> and the entry has been opened.</exception>
+      <exception cref="T:System.ArgumentOutOfRangeException">An attempt was made to set this property to a value that is either earlier than 1980 January 1 0:00:00 (midnight) or later than 2107 December 31 23:59:58 (one second before midnight).</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Length">
+      <summary>取得 Zip 封存中的項目未壓縮大小。</summary>
+      <returns>Zip 封存中的項目未壓縮大小。</returns>
+      <exception cref="T:System.InvalidOperationException">The value of the property is not available because the entry has been modified.</exception>
+    </member>
+    <member name="P:System.IO.Compression.ZipArchiveEntry.Name">
+      <summary>取得 Zip 封存中的項目檔名。</summary>
+      <returns>Zip 封存中的項目檔名。</returns>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.Open">
+      <summary>從 zip 封存中開啟項目。</summary>
+      <returns>代表此項目內容的資料流。</returns>
+      <exception cref="T:System.IO.IOException">The entry is already currently open for writing.-or-The entry has been deleted from the archive.-or-The archive for this entry was opened with the <see cref="F:System.IO.Compression.ZipArchiveMode.Create" /> mode, and this entry has already been written to. </exception>
+      <exception cref="T:System.IO.InvalidDataException">The entry is either missing from the archive or is corrupt and cannot be read. -or-The entry has been compressed by using a compression method that is not supported.</exception>
+      <exception cref="T:System.ObjectDisposedException">The zip archive for this entry has been disposed.</exception>
+    </member>
+    <member name="M:System.IO.Compression.ZipArchiveEntry.ToString">
+      <summary>擷取 Zip 封存中項目的相對路徑。</summary>
+      <returns>項目的相對路徑，其為儲存在 <see cref="P:System.IO.Compression.ZipArchiveEntry.FullName" /> 屬性中的值。</returns>
+    </member>
+    <member name="T:System.IO.Compression.ZipArchiveMode">
+      <summary>指定與 zip 封存項目互動的值。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Create">
+      <summary>僅允許建立新的封存項目。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Read">
+      <summary>僅允許讀取封存項目。</summary>
+    </member>
+    <member name="F:System.IO.Compression.ZipArchiveMode.Update">
+      <summary>封存項目允許讀取及寫入作業。</summary>
+    </member>
+  </members>
+</doc>
