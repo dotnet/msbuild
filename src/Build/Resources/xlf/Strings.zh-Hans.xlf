@@ -1989,8 +1989,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="updated">MSB4234: 二进制记录器需要单个参数(输出文件名)。传递了 {0} 个参数:“{1}”。</target>
-        <note></note>
+        <target state="translated">MSB4234: 无效的二进制记录器参数: “{0}”。 预期应为: ProjectImports={{None,Embed,ZipFile}} 和/或 [LogFile=]filePath.binlog (日志文件名称或路径必须包含“.binlog” 扩展名)。</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
@@ -2024,28 +2024,28 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
         <source>Project Evaluation Performance Summary:</source>
-        <target state="new">Project Evaluation Performance Summary:</target>
-        <note></note>
+        <target state="translated">项目评估性能摘要:</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</target>
-        <note></note>
+        <target state="translated">由于 false 条件，项目“{0}” 不由 ({2}、{3}) 处的“{1}”导入， ({4}) 的计算结果为 ({5}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</target>
-        <note></note>
+        <target state="translated">由于没有匹配的文件，项目“{0}” 不由 ({2}、{3}) 处的“{1}”导入。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</target>
-        <note></note>
+        <target state="translated">由于文件为空，项目“{0}”不由 ({2}、{3}) 处的“{1}”导入。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
-        <target state="new">Importing project "{0}" into project "{1}" at ({2},{3}).</target>
-        <note></note>
+        <target state="translated">正在将项目“{0}”导入 ({2}、{3}) 处的项目“{1}”。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

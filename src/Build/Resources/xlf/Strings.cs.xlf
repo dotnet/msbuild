@@ -1989,8 +1989,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="updated">MSB4234: Binární protokolovací nástroj očekává jediný parametr (název výstupního souboru). Předané parametry ({0}): {1}</target>
-        <note></note>
+        <target state="translated">MSB4234: Neplatné binární parametry protokolovacího nástroje: {0}. Očekávalo se: ProjectImports={{None,Embed,ZipFile}} nebo [LogFile=]filePath.binlog (název souboru nebo cesta protokolu musí mít příponu .binlog).</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
@@ -2024,28 +2024,28 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
         <source>Project Evaluation Performance Summary:</source>
-        <target state="new">Project Evaluation Performance Summary:</target>
-        <note></note>
+        <target state="translated">Souhrnné informace o výkonu vyhodnocení projektu:</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</target>
-        <note></note>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}) z důvodu nepravdivé podmínky; ({4}) se vyhodnotil jako ({5}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</target>
-        <note></note>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože nejsou žádné shodné soubory.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</target>
-        <note></note>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože soubor je prázdný.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
-        <target state="new">Importing project "{0}" into project "{1}" at ({2},{3}).</target>
-        <note></note>
+        <target state="translated">Importuje se projekt {0} do projektu {1} v ({2},{3}).</target>
+        <note />
       </trans-unit>
     </body>
   </file>

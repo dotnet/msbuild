@@ -1308,16 +1308,49 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">/binaryLogger[:output.binlog]
-Serializa todos os eventos de build em um arquivo binário compactado.
-Por padrão, o arquivo está no diretório atual e se chama "msbuild.binlog". O log binário é uma descrição detalhada do processo de build, que pode ser usado posteriormente para reconstruir os logs de texto, e utilizado por outras ferramentas de análise. Um log binário geralmente é 10 a 20 vezes menor do que o log de texto de nível de diagnóstico mais detalhado, mas contém mais informações.
-(Forma abreviada: /bl)
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa todos os eventos de build para um arquivo binário compactado.
+                     Por padrão o arquivo está no diretório atual e é chamado de
+                     "msbuild.binlog". O log binário é uma descrição detalhada 
+                     do processo de build que pode mais tarde ser usado para reconstruir
+                     log de texto e ser usado por outras ferramentas de análise. Um log binário
+                     normalmente é 10-20x menor que o log de nível
+                     de diagnóstico de texto mais detalhado, mas contém mais informações.
+                     (Formato curto: /bl)
 
-Exemplos:
-/bl
-/bl:output.binlog
-/bl:..\..\custom.binlog
-/binaryLogger</target>
+                     O agente binário por padrão coleta o texto fonte dos
+                     arquivos de projeto, incluindo todos os projetos importados e arquivos
+                     de destino encontrado durante o build. O comutador 
+                     ProjectImports opcional controla esse comportamento:
+
+                      ProjectImports=None     – Não coletar as importações 
+                                                do projeto.
+                      ProjectImports=Embed    – Inserir as importações do projeto
+                                                no arquivo de log.
+                      ProjectImports=ZipFile  – Salvar os arquivos de projeto para 
+                                                output.projectimports.zip,
+                                                em que a saída tem o mesmo nome que o
+                                                nome do arquivo de log binário.
+
+                     A configuração padrão para ProjectImports é Embed.
+                     Nota: o agente não coleta arquivos de fonte não MSBuild,
+                     como .cs, .cpp etc.
+
+                     Um arquivo .binlog pode ser "reproduzido novamente" parrando-o para
+                     msbuild.exe como um argumento, em vez de como um projeto/solução.
+                     Outros agentes receberão as informações contidas no arquivo de log
+                     como se o build orignal estivesse acontecendo.
+                     Você pode ler mais sobre o log binário e seus usos em:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+
+                     Exemplos:
+                       /bl
+                       /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
+                       /bl:..\..\custom.binlog
+                       /binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild" 

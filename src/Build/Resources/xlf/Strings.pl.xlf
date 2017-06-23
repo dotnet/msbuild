@@ -1989,8 +1989,8 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="updated">MSB4234: Rejestrator danych binarnych oczekuje pojedynczego parametru (nazwy pliku wyjściowego). Liczba przekazanych parametrów to {0}: „{1}”.</target>
-        <note></note>
+        <target state="translated">MSB4234: Nieprawidłowe parametry rejestratora binarnego: „{0}”. Oczekiwano: ProjectImports={{None,Embed,ZipFile}} i/lub [LogFile=]ścieżkaPliku.binlog (nazwa lub ścieżka pliku dziennika musi mieć rozszerzenie „binlog”).</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
@@ -2024,28 +2024,28 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
         <source>Project Evaluation Performance Summary:</source>
-        <target state="new">Project Evaluation Performance Summary:</target>
-        <note></note>
+        <target state="translated">Podsumowanie wydajności oceny projektu:</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</target>
-        <note></note>
+        <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” o ({2},{3}) z powodu niespełnionego warunku; ({4}) oceniono jako ({5}).</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</target>
-        <note></note>
+        <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” o ({2},{3}) z powodu braku zgodnych plików.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</target>
-        <note></note>
+        <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” o ({2},{3}), ponieważ plik był pusty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
-        <target state="new">Importing project "{0}" into project "{1}" at ({2},{3}).</target>
-        <note></note>
+        <target state="translated">Importowanie projektu „{0}” do projektu „{1}” o ({2},{3}).</target>
+        <note />
       </trans-unit>
     </body>
   </file>

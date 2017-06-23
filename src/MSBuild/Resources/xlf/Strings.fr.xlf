@@ -1309,19 +1309,46 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]
                      Sérialise tous les événements de build dans un fichier binaire compressé.
                      Par défaut, le fichier se trouve dans le répertoire actif et se nomme
                      "msbuild.binlog". Le journal binaire est une description détaillée
                      du processus de génération, qui peut servir plus tard à reconstruire
-                     les journaux texte et être utilisé par d'autres outils d'analyse. Un journal binaire
-                     est généralement 10 à 20 fois plus petit que le journal
-                     de diagnostic de type texte le plus détaillé, mais il contient plus d'informations.
-                     (Forme abrégée : /bl)
+                     les journaux texte et être utilisé par d'autres outils d'analyse. Un journal
+                     binaire est généralement 10 à 20 fois plus petit que le journal
+                     de diagnostic de type texte le plus détaillé, mais il contient plus
+                      d’informations (Forme abrégée : /bl)
+
+                     L’enregistreur d’événements binaire par défaut collecte le texte source
+                     des fichiers projet, notamment tous les projets importés et les
+                     fichiers cibles rencontrés pendant la build. Le commutateur 
+                     facultatif ProjectImports gère ce comportement :
+
+                      ProjectImports=None     - Ne collecte pas les importations
+                                                du projet.
+                      ProjectImports=Embed    - Incorpore les importations du projet
+                                                dans le fichier journal.
+                      ProjectImports=ZipFile  - Enregistre les fichiers projet dans 
+                                                output.projectimports.zip,
+                                                où la sortie porte le même nom que
+                                                celui du fichier journal binaire.
+
+                     Le paramètre par défaut de ProjectImports est Embed.
+                     Remarque : L’enregistreur d’événements ne collecte pas les
+                     fichiers sources non-MSBuild comme .cs, .cpp, etc.
+
+                     Vous pouvez "lire" un fichier .binlog en le passant à msbuild.exe
+                     en tant qu’argument plutôt qu’en tant que projet/solution.
+                     D’autres enregistreurs d’événements reçoivent les informations
+                     contenues dans le fichier journal comme si la build d’origine était en
+                     cours de création. Pour en savoir plus sur le journal binaire et ses usages,
+                     consultez https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Exemples :
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>

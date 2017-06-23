@@ -1989,8 +1989,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="updated">MSB4234: バイナリ ロガーには単一のパラメーター (出力ファイル名) が必要です。{0} 個のパラメーターが渡されました: "{1}"。</target>
-        <note></note>
+        <target state="translated">MSB4234: バイナリー ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
+        <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
         <source>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</source>
@@ -2024,28 +2024,28 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
         <source>Project Evaluation Performance Summary:</source>
-        <target state="new">Project Evaluation Performance Summary:</target>
-        <note></note>
+        <target state="translated">プロジェクト評価パフォーマンスの概要:</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedFalseCondition">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</target>
-        <note></note>
+        <target state="translated">false 条件のために、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。({4}) は ({5}) として評価されました。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedNoMatches">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</target>
-        <note></note>
+        <target state="translated">合致するファイルがないため、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedEmptyFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</target>
-        <note></note>
+        <target state="translated">ファイルが空であるため、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImported">
         <source>Importing project "{0}" into project "{1}" at ({2},{3}).</source>
-        <target state="new">Importing project "{0}" into project "{1}" at ({2},{3}).</target>
-        <note></note>
+        <target state="translated">プロジェクト "{0}" を ({2},{3}) でプロジェクト "{1}" にインポートしています。</target>
+        <note />
       </trans-unit>
     </body>
   </file>
