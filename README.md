@@ -2,19 +2,19 @@
 
 [![.NET Slack Status](https://aspnetcoreslack.herokuapp.com/badge.svg?2)](http://tattoocoder.com/aspnet-slack-sign-up/) [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation.
+This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms and the documentation.
 
 Looking for V1 of the .NET Core tooling?
 ----------------------------------------
 
-If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
+If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), see https://dot.net/core.
 
-> **Note:** the release/2.0.0 branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
+> **Note:** the release/2.0.0 branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, use 
 > v1 of the tools.
 
 Found an issue?
 ---------------
-You can consult the [known issues page](https://github.com/dotnet/core/blob/release/2.0.0/cli/known-issues.md) to find out the current issues and to see the workarounds.  
+You can consult the [known issues page](https://github.com/dotnet/core/blob/release/2.0.0/cli/known-issues.md) to find out the current issues and to see workarounds.  
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
@@ -62,10 +62,10 @@ Installers and Binaries
 
 You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, tar.gz). .NET Core SDK contains both the .NET Core runtime and CLI tools.
 
-In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
+In order to download the .NET Core runtime without the SDK, see https://github.com/dotnet/core-setup#daily-builds.
 
-> **Note:** please be aware that below installers are the **latest bits**. If you
-> want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
+> **Note:** The following installers are the **latest prerelease bits**. If you
+> want to install the latest released versions, see the [preceding section](#looking-for-v1-of-the-net-core-tooling).
 
 | Platform | release/2.0.0<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
