@@ -136,6 +136,11 @@ Le {1} actuel est '{2}'.</target>
 {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="new">'{0}' is not a valid project file.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
