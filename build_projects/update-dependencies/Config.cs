@@ -82,7 +82,8 @@ namespace Microsoft.DotNet.Scripts
 
         private static string GetDefaultCoreSetupVersionFragment()
         {
-            string coreSetupChannel = GetRepoMSBuildPropValue("BundledRuntimes.props", "CoreSetupChannel") ?? "master";
+            // by default, the current core-setup branch should match the current cli branch name
+            string coreSetupChannel = Instance.GitHubUpstreamBranch;
 
             return $"dotnet/core-setup/{coreSetupChannel}";
         }
