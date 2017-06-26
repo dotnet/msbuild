@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
@@ -39,17 +40,26 @@ namespace Microsoft.DotNet.Tools.Run
                 EnsureProjectIsBuilt();
             }
 
-            ICommand runCommand = GetRunCommand();
-            int launchSettingsApplicationResult = ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
-
-            if (launchSettingsApplicationResult != 0)
+            try
             {
-                return launchSettingsApplicationResult;
-            }
+                ICommand runCommand = GetRunCommand();
+                int launchSettingsApplicationResult = ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
 
-            return runCommand
-                .Execute()
-                .ExitCode;
+                if (launchSettingsApplicationResult != 0)
+                {
+                    return launchSettingsApplicationResult;
+                }
+
+                return runCommand
+                    .Execute()
+                    .ExitCode;
+            }
+            catch (InvalidProjectFileException e)
+            {
+                throw new GracefulException(
+                    string.Format(LocalizableStrings.RunCommandSpecifiecFileIsNotAValidProject, Project),
+                    e);
+            }
         }
 
         public RunCommand(string configuration,

@@ -196,4 +196,7 @@ The current {1} is '{2}'.</value>
     <value>An error was encountered when reading launchSettings.json.
 {0}</value>
   </data>
+  <data name="RunCommandSpecifiecFileIsNotAValidProject" xml:space="preserve">
+    <value>'{0}' is not a valid project file.</value>
+  </data>
 </root>
