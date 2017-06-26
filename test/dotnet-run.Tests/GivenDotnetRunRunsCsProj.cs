@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--no-restore")
                 .Should().Fail()
-                .And.HaveStdOutContaining("project.assets.json' not found.");;
+                .And.HaveStdOutContaining("project.assets.json");
         }
 
         [Fact]
