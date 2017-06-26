@@ -22,7 +22,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0-preview2-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25405-01" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview2-final" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.0-preview2-final" Condition="'$(IndividualAuth)' == 'True' OR '$(OrganizationalAuth)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="2.0.0-preview2-final" Condition="'$(OrganizationalAuth)' == 'True' OR '$(IndividualB2CAuth)' == 'True'" />
