@@ -1308,19 +1308,46 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      すべてのビルド イベントを圧縮バイナリ ファイルにシリアル化します。
-                     既定では、このファイルは "msbuild.binlog" という名前
-                     で現在のディレクトリに置かれます。バイナリ ログはビルド プロセスの
+                     既定では、このファイルは "msbuild.binlog" という名前で
+                     現在のディレクトリに置かれます。バイナリ ログはビルド プロセスの
                      詳細な説明であり、後でテキスト ログを再構築するために使用でき、
-                      他の分析ツールでも使用できます。バイナリ ログは
-                      通常、ほとんどの詳細なテキスト診断レベル ログより
-                      10-20 倍小さいとはいえ、より多くの情報を含んでいます。
+                     他の分析ツールでも使用できます。バイナリ ログは通常、
+                     ほとんどの詳細なテキスト診断レベル ログと比べて 10 分の 1 から
+                     20 分の 1 の大きさですが、より多くの情報を含んでいます。
                      (短い形式: /bl)
+
+                     既定では、バイナリー ロガーはプロジェクト ファイルのソース テキストを
+                     収集します。それには、ビルド中に検出された、すべてのインポート済み
+                     プロジェクトとターゲット ファイルが含まれます。オプションの
+                     ProjectImports スイッチは次のように動作を制御します。
+
+                      ProjectImports=None     - プロジェクト インポートを収集しません。
+                                                
+                      ProjectImports=Embed    - プロジェクト インポートをログ ファイルに
+                                                組み込みます。
+                      ProjectImports=ZipFile  - プロジェクト ファイルを
+                                                output.projectimports.zip に保存します。
+                                                ここで、output はバイナリ ログ 
+                                                ファイル名と同じ名前です。
+
+                     ProjectImports の既定の設定は Embed です。
+                     メモ: ロガーは、MSBuild 以外のソース ファイルを収集しません
+                     (.cs、.cpp など)。
+
+                     プロジェクト/ソリューションの代わりに、引数として .binlog ファイルを
+                     msbuild.exe に渡すと、そのファイルを "再生" することができます。
+                     他のロガーは、オリジナルのビルドが行われたときのように、
+                     ログ ファイルに含まれる情報を受け取ることができます。
+                     バイナリ― ログとその使用法の詳細については、以下をお読みください。
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      例:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>
