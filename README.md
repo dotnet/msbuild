@@ -14,7 +14,7 @@ If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild a
 
 Found an issue?
 ---------------
-You can consult the [known issues page](https://github.com/dotnet/core/blob/release/2.0.0/cli/known-issues.md) to find out the current issues and to see the workarounds.  
+You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.  
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
