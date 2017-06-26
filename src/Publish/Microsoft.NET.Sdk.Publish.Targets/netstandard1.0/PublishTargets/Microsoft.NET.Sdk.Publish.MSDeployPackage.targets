@@ -25,6 +25,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="CreateMSDeployScript" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <_DotNetPublishFiles>
@@ -40,10 +41,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSDeployPackagePublishDependsOn>
       $(MSDeployPackagePublishDependsOn);
-      _InitMSDeployPackageLocation;
+      _InitMSDeployPackageProperties;
       _PrepareForMsDeployPublish;
       _CreateManifestFiles;
       _CreateParameterFiles;
+      _CreateMSDeployScript;
     </MSDeployPackagePublishDependsOn>
   </PropertyGroup>
 
@@ -107,11 +109,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ***********************************************************************************************
-  TARGET : _InitMSDeployPackageLocation
+  TARGET : _InitMSDeployPackageProperties
   ***********************************************************************************************
  -->
 
-  <Target Name="_InitMSDeployPackageLocation">
+  <Target Name="_InitMSDeployPackageProperties">
    
     <PropertyGroup>
       <DefaultPackageFileName Condition="'$(DefaultPackageFileName)'==''">$(MSBuildProjectName).zip</DefaultPackageFileName>
@@ -120,6 +122,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' And !HasTrailingSlash('$(PackageLocation)')">$(PackageLocation)\</PackageLocation>
       <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' ">$(PackageLocation)$(DefaultPackageFileName)</PackageLocation>
       <DeployIisAppPath Condition="'$(DeployIisAppPath)' ==''">Default Web Site</DeployIisAppPath>
+      <EnableOptimisticParameterDefaultValue Condition="'$(EnableOptimisticParameterDefaultValue)'==''">True</EnableOptimisticParameterDefaultValue>
     </PropertyGroup>
 
     <ConvertToAbsolutePath Paths="$(PackageLocation)">
@@ -140,10 +143,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(PackageLocation)))\</_destinationFolder>
       <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
       <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
+      <_MSDeploySetParametersFilePath Condition="'$(_MSDeploySetParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SetParameters.xml</_MSDeploySetParametersFilePath>
+      <_MSDeployScriptFilePath Condition="'$(_MSDeployScriptFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).deploy.cmd</_MSDeployScriptFilePath>
+      <_MSDeployReadMeFilePath Condition="'$(_MSDeployReadMeFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).deploy-readme.txt</_MSDeployReadMeFilePath>
     </PropertyGroup>
 
     <ItemGroup>
-      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
+      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath);$(_MSDeploySetParametersFilePath);$(_MSDeployScriptFilePath);$(_MSDeployReadMeFilePath)" />
     </ItemGroup>
     
     <MakeDir Directories="$(_destinationFolder)" Condition="!Exists('$(_destinationFolder)')" ContinueOnError="true"/>
@@ -176,6 +182,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CreateManifestFile
       Manifests="@(MsDeploySourceManifest)"
       ManifestFile="$(_MsDeploySourceManifestPath)" />
+  </Target>
+  
+    <!--
+  ***********************************************************************************************
+  TARGET : _CreateMSDeployScript
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_CreateMSDeployScript">
+
+    <CreateMsDeployScript
+      Condition="'$(IsCreateMSDeployScriptDisabled)' != 'true'"
+      ProjectName="$(MSBuildProjectName)"
+      ScriptFullPath="$(_MSDeployScriptFilePath)" 
+      ReadMeFullPath="$(_MSDeployReadMeFilePath)"/>
+      
   </Target>
 
   <!--
@@ -220,6 +242,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Parameters="@(MsDeployDeclareParameters)"
       DeclareSetParameterFile="$(_MSDeployParametersFilePath)"
       IncludeDefaultValue="True"
+      OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
+      SetParameterFile="$(_MSDeploySetParametersFilePath)"
       GenerateFileEvenIfEmpty="True" />
   </Target>
 

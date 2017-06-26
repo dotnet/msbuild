@@ -11,8 +11,8 @@
 namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     using System;
     using System.Reflection;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -613,6 +613,37 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static string MSDEPLOY_InvalidVerbForTheInput {
             get {
                 return ResourceManager.GetString("MSDEPLOY_InvalidVerbForTheInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to @rem ---------------------------------------------------------------------------------
+        ///@rem This is provided as sample to deploy the package using msdeploy.exe
+        ///@rem For information about IIS Web Deploy technology,
+        ///@rem please visit https://go.microsoft.com/?linkid=9278654
+        ///@rem Note: This batch file assumes the package and setparameters.xml are in the same folder with this file
+        ///@rem ---------------------------------------------------------------------------------
+        ///@if %_echo%!==! echo off
+        ///setlocal
+        ///@re [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string MsDeployBatchFile {
+            get {
+                return ResourceManager.GetString("MsDeployBatchFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ===========================
+        ///Prerequisites :
+        ///--------------------------
+        ///To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+        ///https://go.microsoft.com/?linkid=9278654
+        ///This batch file requires that the package file &quot;$$ProjectName$$.zip&quot; and optionally provided the parameters file &quot;$$ProjectName$$.SetParameters.xml&quot; in the same folder or destination folder by environment varia [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string MsDeployReadMe {
+            get {
+                return ResourceManager.GetString("MsDeployReadMe", resourceCulture);
             }
         }
         
