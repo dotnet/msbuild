@@ -13,8 +13,7 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "-h|--help",
                 CommonLocalizableStrings.ShowHelpDescription,
-                Accept.NoArguments(),
-                materialize: o => o.Option.Command().HelpView());
+                Accept.NoArguments());
 
         public static Option VerbosityOption() =>
             Create.Option(
