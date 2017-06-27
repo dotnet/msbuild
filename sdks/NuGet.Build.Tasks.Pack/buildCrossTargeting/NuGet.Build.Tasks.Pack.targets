@@ -1,0 +1,267 @@
+﻿<!--
+***********************************************************************************************
+NuGet.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Load NuGet.Build.Tasks.Pack.dll, this can be overridden to use a different version with $(NugetTaskAssemblyFile) -->
+  <PropertyGroup Condition="$(NugetTaskAssemblyFile) == ''">
+    <NugetTaskAssemblyFile Condition="'$(MSBuildRuntimeType)' == 'Core'">..\CoreCLR\NuGet.Build.Tasks.Pack.dll</NugetTaskAssemblyFile>
+    <NugetTaskAssemblyFile Condition="'$(MSBuildRuntimeType)' != 'Core'">..\Desktop\NuGet.Build.Tasks.Pack.dll</NugetTaskAssemblyFile>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  <UsingTask TaskName="NuGet.Build.Tasks.Pack.PackTask" AssemblyFile="$(NugetTaskAssemblyFile)" />
+  <UsingTask TaskName="NuGet.Build.Tasks.Pack.PackNuspecTask" AssemblyFile="$(NugetTaskAssemblyFile)" />
+
+  <PropertyGroup>
+    <PackageId Condition=" '$(PackageId)' == '' ">$(AssemblyName)</PackageId>
+    <PackageVersion Condition=" '$(PackageVersion)' == '' ">$(Version)</PackageVersion>
+    <IncludeContentInPack Condition="'$(IncludeContentInPack)'==''">true</IncludeContentInPack>
+    <GenerateNuspecDependsOn>_LoadPackInputItems; _WalkEachTargetPerFramework; _GetPackageFiles; $(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
+    <Description Condition="'$(Description)'==''">Package Description</Description>
+    <IsPackable Condition="'$(IsPackable)'==''">true</IsPackable>
+    <IncludeBuildOutput Condition="'$(IncludeBuildOutput)'==''">true</IncludeBuildOutput>
+    <BuildOutputTargetFolder Condition="'$(BuildOutputTargetFolder)' == '' AND '$(IsTool)' == 'true'">tools</BuildOutputTargetFolder>
+    <BuildOutputTargetFolder Condition="'$(BuildOutputTargetFolder)' == ''">lib</BuildOutputTargetFolder>
+    <ContentTargetFolders Condition="'$(ContentTargetFolders)' == ''">content;contentFiles</ContentTargetFolders>
+    <PackDependsOn>GenerateNuspec; $(PackDependsOn)</PackDependsOn>
+    <IsInnerBuild Condition="'$(TargetFramework)' != '' AND '$(TargetFrameworks)' != ''">true</IsInnerBuild>
+    <NoBuild Condition="'$(GeneratePackageOnBuild)' == 'true'">true</NoBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NoBuild)' == 'true' ">
+    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NoBuild)' != 'true' ">
+    <GenerateNuspecDependsOn>Build;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectCapability Include="Pack"/>
+    <_TargetFrameworks Condition="'$(TargetFramework)' == ''" Include="$(TargetFrameworks.Split(';'))"/>
+    <_TargetFrameworks Condition="'$(TargetFramework)' != ''" Include="$(TargetFramework)"/>
+  </ItemGroup>
+
+  <!--
+    ============================================================
+    Pack
+    Post Build Target
+    ============================================================
+  -->
+  <Target Name="_PackAsBuildAfterTarget"
+          AfterTargets="Build" 
+          Condition="'$(GeneratePackageOnBuild)' == 'true' AND '$(IsInnerBuild)' != 'true'"
+          DependsOnTargets="Pack">
+  </Target>
+
+  <Target Name="_CleanPackageFiles"
+          AfterTargets="Clean"
+          Condition="'$(GeneratePackageOnBuild)' == 'true'">
+    <ItemGroup>
+      <_PackageFilesToDelete Include="$(PackageOutputPath)*.nupkg"/>
+      <_PackageFilesToDelete Include="$(BaseIntermediateOutputPath)*.nuspec"/>
+    </ItemGroup>
+    <Delete Files="@(_PackageFilesToDelete)"/>
+  </Target>
+
+  <!--
+    ============================================================
+    Pack
+    Main entry point for packing packages
+    ============================================================
+  -->
+  <Target Name="Pack" DependsOnTargets="_IntermediatePack;$(PackDependsOn)">
+  </Target>
+  <Target Name="_IntermediatePack">
+    <PropertyGroup>
+      <ContinuePackingAfterGeneratingNuspec>true</ContinuePackingAfterGeneratingNuspec>
+    </PropertyGroup>
+  </Target>
+  <Target Name="GenerateNuspec" DependsOnTargets="$(GenerateNuspecDependsOn)" Condition="$(IsPackable) == 'true'">
+    <PropertyGroup Condition="$(ContinuePackingAfterGeneratingNuspec) == '' ">
+      <ContinuePackingAfterGeneratingNuspec>false</ContinuePackingAfterGeneratingNuspec>
+    </PropertyGroup>
+    <PropertyGroup>
+      <PackageOutputPath Condition=" '$(PackageOutputPath)' == '' ">$(OutputPath)</PackageOutputPath>
+      <RestoreOutputPath Condition=" '$(RestoreOutputPath)' == '' " >$(BaseIntermediateOutputPath)</RestoreOutputPath>
+    </PropertyGroup>
+    
+    <ConvertToAbsolutePath Paths="$(RestoreOutputPath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="RestoreOutputAbsolutePath" />
+    </ConvertToAbsolutePath>
+    <ConvertToAbsolutePath Paths="$(PackageOutputPath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PackageOutputAbsolutePath" />
+    </ConvertToAbsolutePath>
+    <ConvertToAbsolutePath Condition="$(NuspecFile) != ''" Paths="$(NuspecFile)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="NuspecFileAbsolutePath" />
+    </ConvertToAbsolutePath>
+    
+    <!-- Call Pack -->
+    <PackTask PackItem="$(PackProjectInputFile)"
+              PackageFiles="@(_PackageFiles)"
+              PackageFilesToExclude="@(_PackageFilesToExclude)"
+              PackageVersion="$(PackageVersion)"
+              PackageId="$(PackageId)"
+              Title="$(Title)"
+              Authors="$(Authors)"
+              Description="$(Description)"
+              Copyright="$(Copyright)"
+              RequireLicenseAcceptance="$(PackageRequireLicenseAcceptance)"
+              LicenseUrl="$(PackageLicenseUrl)"
+              ProjectUrl="$(PackageProjectUrl)"
+              IconUrl="$(PackageIconUrl)"
+              ReleaseNotes="$(PackageReleaseNotes)"
+              Tags="$(PackageTags)"
+              TargetPathsToAssemblies="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')"
+              TargetPathsToSymbols="@(_TargetPathsToSymbols)"
+              TargetFrameworks="@(_TargetFrameworks)"
+              AssemblyName="$(AssemblyName)"
+              PackageOutputPath="$(PackageOutputAbsolutePath)"
+              IncludeSymbols="$(IncludeSymbols)"
+              IncludeSource="$(IncludeSource)"
+              PackageTypes="$(PackageType)"
+              IsTool="$(IsTool)"
+              RepositoryUrl="$(RepositoryUrl)"
+              RepositoryType="$(RepositoryType)"
+              SourceFiles="@(_SourceFiles->Distinct())"
+              NoPackageAnalysis="$(NoPackageAnalysis)"
+              MinClientVersion="$(MinClientVersion)"
+              Serviceable="$(Serviceable)"
+              AssemblyReferences="@(_References)"
+              ContinuePackingAfterGeneratingNuspec="$(ContinuePackingAfterGeneratingNuspec)"
+              NuspecOutputPath="$(BaseIntermediateOutputPath)"
+              IncludeBuildOutput="$(IncludeBuildOutput)"
+              BuildOutputFolder="$(BuildOutputTargetFolder)"
+              ContentTargetFolders="$(ContentTargetFolders)"
+              RestoreOutputPath="$(RestoreOutputAbsolutePath)"
+              NuspecFile="$(NuspecFileAbsolutePath)"
+              NuspecBasePath="$(NuspecBasePath)"
+              NuspecProperties="$(NuspecProperties)"/>
+  </Target>
+  
+  <!--
+    ============================================================
+    _LoadPackGraphEntryPoints
+    Find project entry points and load them into items.
+    ============================================================
+  -->
+  <Target Name="_LoadPackInputItems">
+    <!-- Allow overriding items with ProjectFileToPack -->
+    <PropertyGroup Condition="'$(PackProjectInputFile)' == ''">
+      <PackProjectInputFile>$(ProjectFileToPack)</PackProjectInputFile>
+    </PropertyGroup>
+
+    <!-- Project case -->
+    <PropertyGroup Condition="$(MSBuildProjectFullPath.EndsWith('.csproj')) == 'true' AND '$(PackProjectInputFile)' == ''">
+      <PackProjectInputFile>$(MSBuildProjectFullPath)</PackProjectInputFile>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_WalkEachTargetPerFramework">
+    <MSBuild
+      Condition="'$(IncludeBuildOutput)' == 'true'"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="BuiltProjectOutputGroup;DocumentationProjectOutputGroup"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                  BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_TargetPathsToAssemblies" />
+    </MSBuild>
+    
+    <!--Projects with target framework like UWP, Win8, wpa81 produce a Pri file
+    in their bin dir. This Pri file is not included in the BuiltProjectGroupOutput, and
+    has to be added manually here.-->
+    <ItemGroup Condition="'$(IncludeProjectPriFile)' == 'true'">
+      <_TargetPathsToAssemblies Include="$(ProjectPriFullPath)">
+        <FinalOutputPath>$(ProjectPriFullPath)</FinalOutputPath>
+      </_TargetPathsToAssemblies>
+    </ItemGroup>
+
+    <MSBuild
+      Condition="'$(IncludeSymbols)' == 'true' OR '$(IncludeSource)' == 'true'"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="DebugSymbolsProjectOutputGroup"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                  BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_TargetPathsToSymbols" />
+    </MSBuild>
+
+    <MSBuild
+      Condition="'$(IncludeSource)' == 'true'"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="SourceFilesProjectOutputGroup"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                  BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_SourceFiles" />
+    </MSBuild>
+  </Target>
+
+  <!--
+    ============================================================
+    _GetPackageFiles
+    Entry point for generating the project to project references.
+    ============================================================
+  -->
+  <Target Name="_GetPackageFiles" Condition="$(IncludeContentInPack) == 'true'">
+    <ItemGroup>
+      <_PackageFilesToExclude Include="@(Content)" Condition="'%(Content.Pack)' == 'false'"/>
+    </ItemGroup>
+    <!-- Include PackageFiles and Content of the project being packed -->
+    <ItemGroup>
+      <_PackageFiles Include="@(Content)" Condition=" %(Content.Pack) != 'false' ">
+        <BuildAction>Content</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(Compile)" Condition=" %(Compile.Pack) == 'true' ">
+        <BuildAction>Compile</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(None)" Condition=" %(None.Pack) == 'true' ">
+        <BuildAction>None</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(EmbeddedResource)" Condition=" %(EmbeddedResource.Pack) == 'true' ">
+        <BuildAction>EmbeddedResource</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(ApplicationDefinition)" Condition=" %(ApplicationDefinition.Pack) == 'true' ">
+        <BuildAction>ApplicationDefinition</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(Page)" Condition=" %(Page.Pack) == 'true' ">
+        <BuildAction>Page</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(Resource)" Condition=" %(Resource.Pack) == 'true' ">
+        <BuildAction>Resource</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(SplashScreen)" Condition=" %(SplashScreen.Pack) == 'true' ">
+        <BuildAction>SplashScreen</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(DesignData)" Condition=" %(DesignData.Pack) == 'true' ">
+        <BuildAction>DesignData</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(DesignDataWithDesignTimeCreatableTypes)" Condition=" %(DesignDataWithDesignTimeCreatableTypes.Pack) == 'true' ">
+        <BuildAction>DesignDataWithDesignTimeCreatableTypes</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(CodeAnalysisDictionary)" Condition=" %(CodeAnalysisDictionary.Pack) == 'true' ">
+        <BuildAction>CodeAnalysisDictionary</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(AndroidAsset)" Condition=" %(AndroidAsset.Pack) == 'true' ">
+        <BuildAction>AndroidAsset</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(AndroidResource)" Condition=" %(AndroidResource.Pack) == 'true' ">
+        <BuildAction>AndroidResource</BuildAction>
+      </_PackageFiles>
+      <_PackageFiles Include="@(BundleResource)" Condition=" %(BundleResource.Pack) == 'true' ">
+        <BuildAction>BundleResource</BuildAction>
+      </_PackageFiles>
+    </ItemGroup>
+  </Target>
+</Project>
