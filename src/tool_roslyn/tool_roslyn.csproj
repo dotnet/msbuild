@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.DiaSymReader.Native" Version="$(CLI_DiaSymNative_Version)" Condition="'$(OSName)' == 'win'" />
+    <PackageReference Include="CliDeps.Satellites.Roslyn" Version="$(CLI_Roslyn_Satellites_Version)" />
   </ItemGroup>
 
   <ItemGroup>
