@@ -44,6 +44,7 @@
 
       <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.props" />
       <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.targets" />
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.dll" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
