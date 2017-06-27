@@ -18,7 +18,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _RemoveExcludeFiles;
       _DeletePublishIntermediateOutputPath;
       _CopyFilesToPublishIntermediateOutputPath;
-      _CopyAspNetCoreFilesToIntermediateOutputPath;
+      _CopyManagedProjectFilesToPublishIntermediateOutputPath;
     </_DotNetPublishCopyFiles>
   </PropertyGroup>
 
@@ -65,25 +65,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 
   <!--********************************************************************-->
-  <!-- Target _CopyAspNetCoreFilesToIntermediateOutputPath -->
+  <!-- Target _CopyManagedProjectFilesToPublishIntermediateOutputPath -->
   <!--********************************************************************-->
   <PropertyGroup>
-    <_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
-      $(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn);
-      _PrepareForAspNetCoreProjectSystemPublish;
+    <_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn>
+      $(_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn);
+      _PrepareForManagedProjectSystemPublish;
       Publish;
-    </_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
+    </_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn>
   </PropertyGroup>
   
-  <Target Name="_CopyAspNetCoreFilesToIntermediateOutputPath" 
-    Condition="'$(_PublishProjectType)' == 'AspNetCore'"
-    DependsOnTargets="$(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn)">
+  <Target Name="_CopyManagedProjectFilesToPublishIntermediateOutputPath" 
+    Condition="'$(_PublishProjectType)' == 'Managed'"
+    DependsOnTargets="$(_CopyManagedProjectFilesToPublishIntermediateOutputPathDependsOn)">
   </Target>
 
   <!--********************************************************************-->
-  <!-- Target _PrepareForAspNetCoreProjectSystemPublish -->
+  <!-- Target _PrepareForManagedProjectSystemPublish -->
   <!--********************************************************************-->
-  <Target Name="_PrepareForAspNetCoreProjectSystemPublish">
+  <Target Name="_PrepareForManagedProjectSystemPublish">
     <PropertyGroup>
       <PublishDir>$(PublishIntermediateOutputPath)</PublishDir>
       <TargetFramework>$(PublishFramework)</TargetFramework>

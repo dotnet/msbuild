@@ -29,8 +29,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_DetermineProjectType" >
     <PropertyGroup>
-      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsAspNetCoreProject)' == 'true' ">AspNetCore</_PublishProjectType>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsManagedProject)' == 'true' ">Managed</_PublishProjectType>
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>

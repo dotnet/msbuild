@@ -204,22 +204,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     packages references.
     ============================================================
     -->
-  <UsingTask TaskName="Microsoft.NET.Build.Tasks.CollectResolvedSDKReferencesDesignTime"
-             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.CollectSDKReferencesDesignTime"
+         AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <Target Name="CollectSDKReferencesDesignTime"
           Returns="@(_SDKReference)"
-          DependsOnTargets="ResolvePackageDependenciesDesignTime">
+          DependsOnTargets="CollectPackageReferences">
 
-    <CollectResolvedSDKReferencesDesignTime
-          ResolvedSdkReferences="@(SdkReference)"
-          DependenciesDesignTime="@(_DependenciesDesignTime)">
+    <CollectSDKReferencesDesignTime
+          SdkReferences="@(SdkReference)"
+          PackageReferences="@(PackageReference)"
+          DefaultImplicitPackages="$(DefaultImplicitPackages)">
 
-      <Output TaskParameter="ResolvedSDKReferencesDesignTime" ItemName="_SDKReference" />
-
-    </CollectResolvedSDKReferencesDesignTime>
+      <Output TaskParameter="SDKReferencesDesignTime" ItemName="_SDKReference" />
+    </CollectSDKReferencesDesignTime>
   </Target>
-          
+
   <!--
     ============================================================
                      CollectResolvedSDKReferencesDesignTime
@@ -228,19 +228,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     packages produced by ResolvePackageDependencies.
     ============================================================
     -->
-
   <Target Name="CollectResolvedSDKReferencesDesignTime"
           Returns="@(_ResolvedSDKReference)"
-          DependsOnTargets="ResolveSDKReferencesDesignTime;ResolvePackageDependenciesDesignTime">
+          DependsOnTargets="ResolveSDKReferencesDesignTime;CollectPackageReferences">
 
-    <CollectResolvedSDKReferencesDesignTime
-          ResolvedSdkReferences="@(ResolvedSdkReference)"
-          DependenciesDesignTime="@(_DependenciesDesignTime)">
+    <CollectSDKReferencesDesignTime
+          SdkReferences="@(ResolvedSdkReference)"
+          PackageReferences="@(PackageReference)"
+          DefaultImplicitPackages="$(DefaultImplicitPackages)">
 
-      <Output TaskParameter="ResolvedSDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
-    </CollectResolvedSDKReferencesDesignTime>
+      <Output TaskParameter="SDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
+    </CollectSDKReferencesDesignTime>
   </Target>
-  
+          
   <!--
     ============================================================
                      RunProduceContentAssets

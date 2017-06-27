@@ -83,8 +83,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       the exact version of the runtime to use with the RuntimeFrameworkVersion property.    
     -->
     <!-- If targeting netcoreapp1.1, and RuntimeFrameworkVersion is not specified, use version 1.1.1 -->
-    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.4</RuntimeFrameworkVersion>
-    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.1</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.5</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.2</RuntimeFrameworkVersion>
     
     <!-- Default to use the version of the framework runtime matching the target framework version-->
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>

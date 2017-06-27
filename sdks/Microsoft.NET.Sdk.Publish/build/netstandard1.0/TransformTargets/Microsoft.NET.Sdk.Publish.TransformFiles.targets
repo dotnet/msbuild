@@ -33,20 +33,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_TransformWebConfig">
 
     <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
+      
+      <_IsPortable Condition=" '$(_IsPortable)' == '' 
+                   And '$(_IsManagedProject)' == 'true' 
+                   And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' 
+                   And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
+      
+      <_IsPortable Condition=" '$(_IsPortable)' == '' 
+                   And '$(_IsManagedProject)' == 'true' 
+                   And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">false</_IsPortable>
+      
       <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
-      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
+      
       <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>
     
 
     <TransformWebConfig
-        Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true'"
+        Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
         IsPortable="$(_IsPortable)"
-        ExecutableExtension="$(_ExecutableExtension)"
         IsAzure="$(_TransformWebConfigForAzure)"
         ProjectGuid="$(ProjectGuid)"
         IgnoreProjectGuid="$(IgnoreProjectGuid)" 
@@ -62,11 +71,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <Target Name="_TransformAppSettings">
     <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
     </PropertyGroup>
 
     <TransformAppSettings
-      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformAppSettingsDisabled)' != 'true' And @(DestinationConnectionStrings) != ''"
+      Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformAppSettingsDisabled)' != 'true' And @(DestinationConnectionStrings) != ''"
       PublishDirectory="$(PublishIntermediateOutputPath)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
       DestinationConnectionStrings="@(DestinationConnectionStrings)"
@@ -83,18 +93,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_GenerateEFSQLScripts">
     <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
       <_EFPublishDirectory Condition="'$(CopyEFSQLScriptsToOutputFolder)' == 'true'">$(PublishIntermediateOutputPath)</_EFPublishDirectory>
       <_EFPublishDirectory Condition="'$(_EFPublishDirectory)' == ''">$(PublishIntermediateTempPath)</_EFPublishDirectory>
     </PropertyGroup>
 
     <GenerateEFSQLScripts
-      Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsGenerateEFSQLScriptsDisabled)' != 'true' And @(EfMigrations) != ''"
+      Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsGenerateEFSQLScriptsDisabled)' != 'true' And @(EfMigrations) != ''"
       ProjectDirectory="$(MSBuildProjectDirectory)"
       EFPublishDirectory="$(_EFPublishDirectory)"
       EFSQLScriptsFolderName="$(EFSQLScriptsFolderName)"
-      EFMigrations="@(EFMigrations)"
-      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)">
+      EFMigrations="@(EFMigrations)">
       <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
     </GenerateEFSQLScripts>
   </Target>

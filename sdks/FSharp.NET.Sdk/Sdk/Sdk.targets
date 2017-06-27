@@ -15,6 +15,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
+  <Target Name="CreateManifestResourceNames">
+    <!-- the CreateManifestResourceNames target is required.
+         Will be overriden in restored FSharp.NET.Sdk  -->
+    <Warning Text="The 'CreateManifestResourceNames' target should be overriden in 'FSharp.NET.Sdk' package. Maybe you need to add 'FSharp.NET.Sdk' package to fsproj or run restore" />
+  </Target>
+
+  <Target Name="CoreCompile">
+    <!-- the CoreCompile target is required.
+         Will be overriden in restored FSharp.NET.Sdk  -->
+    <Warning Text="The 'CoreCompile' target should be overriden in 'FSharp.NET.Sdk' package. Maybe you need to add 'FSharp.NET.Sdk' package to fsproj or run restore" />
+  </Target>
+
   <PropertyGroup Condition=" '$(LanguageTargets)' == '' and '$(MSBuildProjectExtension)' == '.fsproj' ">
 
     <!-- On restore -->
@@ -22,7 +34,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Normal commands -->
     <LanguageTargets Condition=" '$(FSharpLanguageTargets)' != '' ">$(FSharpLanguageTargets)</LanguageTargets>
-
   </PropertyGroup>
 
 </Project>

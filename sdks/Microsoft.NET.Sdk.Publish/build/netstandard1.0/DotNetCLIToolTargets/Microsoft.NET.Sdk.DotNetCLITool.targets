@@ -16,10 +16,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_InitProjectCapabilityProperties">
     <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
     </PropertyGroup>
-  </Target>
-
+  </Target>  
+  
   <!--
   ***********************************************************************************************
   TARGET : DotNet CLI Publish Command : Pre-Publish
@@ -29,7 +30,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_DotNetCLIPrePublishDependsOn>
       _InitProjectCapabilityProperties;
-      _AspNetCoreProjectSystemPrePublish;
+      _ManagedProjectSystemPrePublish;
     </_DotNetCLIPrePublishDependsOn>
   </PropertyGroup>
 
@@ -39,18 +40,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'$(DeployOnBuild)' != 'true'">
   </Target>
 
-  <PropertyGroup>
-    <_AspNetCoreProjectSystemPrePublishDependsOn>
-      BeforePublish;
-    </_AspNetCoreProjectSystemPrePublishDependsOn>
-  </PropertyGroup>
+    <PropertyGroup>
+      <_ManagedProjectSystemPrePublishDependsOn>
+        BeforePublish;
+      </_ManagedProjectSystemPrePublishDependsOn>
+    </PropertyGroup>
 
-  <Target Name="_AspNetCoreProjectSystemPrePublish"
-          Condition="'$(_IsAspNetCoreProject)' == 'true'"
-          DependsOnTargets="$(_AspNetCoreProjectSystemPrePublishDependsOn)">
-  </Target>
+    <Target Name="_ManagedProjectSystemPrePublish"
+            Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
+            DependsOnTargets="$(_ManagedProjectSystemPrePublishDependsOn)">
+    </Target>
 
-  <!--
+    <!--
   ***********************************************************************************************
   TARGET : DotNet CLI Publish Command: Post-Publish
   ***********************************************************************************************
@@ -58,7 +59,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_DotNetCLIPostPublishDependsOn>
       _InitProjectCapabilityProperties;
-      _AspNetCoreProjectSystemPostPublish;
+      _ManagedProjectSystemPostPublish;
       AfterPublish;
     </_DotNetCLIPostPublishDependsOn>
   </PropertyGroup>
@@ -71,15 +72,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 
   <PropertyGroup>
-    <_AspNetCoreProjectSystemPostPublishDependsOn>
+    <_ManagedProjectSystemPostPublishDependsOn>
       _InitPublishIntermediateOutputPath;
       $(_DotNetPublishTransformFiles);
-    </_AspNetCoreProjectSystemPostPublishDependsOn>
+    </_ManagedProjectSystemPostPublishDependsOn>
   </PropertyGroup>
 
-  <Target Name="_AspNetCoreProjectSystemPostPublish"
-          Condition="'$(_IsAspNetCoreProject)' == 'true'"
-          DependsOnTargets="$(_AspNetCoreProjectSystemPostPublishDependsOn)">
+  <Target Name="_ManagedProjectSystemPostPublish"
+          Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
+          DependsOnTargets="$(_ManagedProjectSystemPostPublishDependsOn)">
   </Target>
 
   <Target Name="_InitPublishIntermediateOutputPath">

@@ -17,20 +17,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default configuration and platform to Debug|AnyCPU--> 
   <PropertyGroup>
+    <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
+    <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
-
-  <!--
-    Ensure VS sees two default configurations: Debug|AnyCPU and Release|AnyCPU
-
-    This is temporary until we have designed and implemented a new configuration management scheme,
-    which is tracked by https://github.com/dotnet/sdk/issues/350. In the meantime, one consequence of
-    defining these defaults here with the old inference-from-usage scheme here is that the user cannot
-    remove or rename them.
-  -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
 
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
@@ -113,6 +104,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
   
+  <!-- List of supported .NET Core and .NET Standard TFMs -->
+  <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
+  
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
@@ -127,6 +121,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
+
+  <!-- Workaround: https://github.com/dotnet/sdk/issues/1001 -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />

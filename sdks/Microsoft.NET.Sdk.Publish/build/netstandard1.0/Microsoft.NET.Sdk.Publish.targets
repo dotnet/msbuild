@@ -20,9 +20,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- We want to force this property to be true, hence not adding a condition check -->
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
     <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</_PublishTaskFramework>
+    <_PublishTaskNameSuffix Condition=" '$(MSBuildRuntimeType)' == 'Core'">Core</_PublishTaskNameSuffix>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
-    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
+    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET$(_PublishTaskNameSuffix).Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
     <_BeforePublishTargetsDir Condition=" '$(_BeforePublishTargetsDir)' == ''">$(MSBuildThisFileDirectory)BeforePublishTargets\</_BeforePublishTargetsDir>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
     <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
@@ -45,7 +46,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.vbproj' ">$(MSBuildProjectDirectory)\My Project\PublishProfiles\</_PublishProfileRootFolder>
     <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == '' and '$(MSBuildProjectExtension)' =='.csproj' ">$(MSBuildProjectDirectory)\Properties\PublishProfiles\</_PublishProfileRootFolder>
-    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
+    <PublishProfile Condition="'$(PublishProfile)' ==''">DefaultProfile</PublishProfile>
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
     <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
     <PublishProfileFullPath Condition="!Exists('$(PublishProfileFullPath)')">$(_PublishProfilesDir)$(PublishProfileName).pubxml</PublishProfileFullPath>

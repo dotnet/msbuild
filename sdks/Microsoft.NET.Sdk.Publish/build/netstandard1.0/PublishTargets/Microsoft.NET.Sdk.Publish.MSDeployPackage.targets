@@ -23,6 +23,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+  <UsingTask TaskName="RegexEscape" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
@@ -40,7 +41,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSDeployPackagePublishDependsOn>
       $(MSDeployPackagePublishDependsOn);
-      _InitMSDeployPackageLocation;
       _PrepareForMsDeployPublish;
       _CreateManifestFiles;
       _CreateParameterFiles;
@@ -56,15 +56,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
       <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
+
       <!--Destination is alway a manifest-->
       <MSDeployPublishDestinationType>Package</MSDeployPublishDestinationType>
-      <MSDeployPublishDestinationRoot>$(PackageLocation)</MSDeployPublishDestinationRoot>
+      <MSDeployPublishDestinationRoot>$(DesktopBuildPackageLocation)</MSDeployPublishDestinationRoot>
+
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
+
       <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
       <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
+
       <!-- UserAgent string sent to msdeploy -->
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
       <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
+
     </PropertyGroup>
 
     <!--  Data Passed to MSDeploy -->
@@ -106,24 +111,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ExePath="$(MSDeployPath)"
       />
   </Target>
-
-  <!--
-  ***********************************************************************************************
-  TARGET : _InitMSDeployPackageLocation
-  ***********************************************************************************************
- -->
-
-  <Target Name="_InitMSDeployPackageLocation">
-   
-    <PropertyGroup>
-      <DefaultPackageFileName Condition="'$(DefaultPackageFileName)'==''">MSDeployPackage.zip</DefaultPackageFileName>
-      <PackageLocation Condition="'$(PackageLocation)' == ''">$(DesktopBuildPackageLocation)</PackageLocation>
-      <PackageLocation Condition="'$(PackageLocation)' == ''">$(OutputPath)</PackageLocation>
-      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' And !HasTrailingSlash('$(PackageLocation)')">$(PackageLocation)\</PackageLocation>
-      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' ">$(PackageLocation)$(DefaultPackageFileName)</PackageLocation>
-    </PropertyGroup>
-
-  </Target>
   
   <!--
   ***********************************************************************************************
@@ -134,7 +121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForMsDeployPublish">
 
     <PropertyGroup>
-      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(PackageLocation)))\</_destinationFolder>
+      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(DesktopBuildPackageLocation)))\</_destinationFolder>
       <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
       <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
     </PropertyGroup>
@@ -183,13 +170,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_CreateParameterFiles">
 
+    <!--Parameterize the default value of the Path-->
+    <RegexEscape Text="$(PublishIntermediateOutputPath)">
+      <Output TaskParameter="Result" PropertyName="_Escaped_PublishIntermediateOutputPath" />
+    </RegexEscape>
+
     <ItemGroup>
       <MsDeployDeclareParameters Remove="@(MsDeployDeclareParameters)" />
 
       <MsDeployDeclareParameters Include="IIS Web Application Name" >
         <Kind>ProviderPath</Kind>
         <Scope>IisApp</Scope>
-        <Match>$(PublishIntermediateOutputPath)</Match>
+        <Match>^$(_Escaped_PublishIntermediateOutputPath)$</Match>
         <Description></Description>
         <DefaultValue>$(DeployIisAppPath)</DefaultValue>
         <Value>$(DeployIisAppPath)</Value>
@@ -203,7 +195,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
         <Kind>ProviderPath</Kind>
         <Scope>dbfullsql</Scope>
-        <Match>%(_EFSQLScripts.Identity)</Match>
+        <Match>^%(_EFSQLScripts.EscapedPath)$</Match>
         <Description></Description>
         <DefaultValue>%(_EFSQLScripts.ConnectionString)</DefaultValue>
         <Value>%(_EFSQLScripts.ConnectionString)</Value>
