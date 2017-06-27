@@ -216,7 +216,9 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln add");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($"Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\n{CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
+{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}
+{CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd}");
         }
 
         [Theory]

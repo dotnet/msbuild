@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Cli
             DefaultHelpViewText.Synopsis.Command = UsageCommandToken;
             DefaultHelpViewText.Synopsis.Options = UsageOptionsToken;
             DefaultHelpViewText.Synopsis.Title = UsageHeader;
+
+            ValidationMessages.Current = new CommandLineValidationMessages();
         }
 
         public static CommandLine.Parser Instance { get; } = new CommandLine.Parser(
