@@ -2,10 +2,12 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>2.0.0-preview3-25426-01</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.3.0-preview-000388-01</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.3.0-preview-000400-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta3-61816-04</CLI_Roslyn_Version>
+    <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170624-6</CLI_Roslyn_Satellites_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
-    <CLI_FSharp_Version>4.2.0-rc-170602-0</CLI_FSharp_Version>
+    <CLI_FSharp_Version>4.2.0-rc-170621-0</CLI_FSharp_Version>
+    <CLI_FSharp_Satellites_Version>4.4.1-pre-20170624-6</CLI_FSharp_Satellites_Version>
 
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
@@ -20,28 +22,28 @@
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170608-254</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170612-258</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170612-258</TemplateEngineTemplate2_0Version>
+    <TemplateEngineVersion>1.0.0-beta2-20170614-260</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170620-266</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170620-266</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview3-25426-01</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview3-25426-01</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <SpaTemplateVersion>1.0.0-preview-000297</SpaTemplateVersion>
+    <SpaTemplateVersion>1.0.0-preview-000321</SpaTemplateVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
-    <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>2.0.0-preview2-186</AspNetCoreRuntimeVersion>
+    <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
+    <AspNetCoreRuntimeVersion>2.0.0-preview2-215</AspNetCoreRuntimeVersion>
     <AspNetCoherenceLabel>preview2</AspNetCoherenceLabel>
-    <AspNetCoreCoherenceTimestamp>25661</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreCoherenceTimestamp>25794</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
   <PropertyGroup>
-    <VersionToolsVersion>1.0.27-prerelease-01611-04</VersionToolsVersion>
+    <VersionToolsVersion>1.0.27-prerelease-01723-01</VersionToolsVersion>
     <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
   </PropertyGroup>
 </Project>

@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput("--no-restore")
                 .Should().Fail()
-                .And.HaveStdOutContaining("project.assets.json' not found.");;
+                .And.HaveStdOutContaining("project.assets.json");
         }
 
         [Fact]
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput();
             cmd.Should().Pass();
-            cmd.StdOut.Should().ContainVisuallySameFragment(expectedBuildSummary);
+            cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(expectedBuildSummary);
         }
     }
 }

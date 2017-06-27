@@ -136,6 +136,11 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
 {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="new">'{0}' is not a valid project file.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
