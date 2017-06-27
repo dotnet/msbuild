@@ -1,4 +1,4 @@
-﻿namespace Company.WebApplication1
+namespace Company.WebApplication1
 
 open System
 open System.Collections.Generic

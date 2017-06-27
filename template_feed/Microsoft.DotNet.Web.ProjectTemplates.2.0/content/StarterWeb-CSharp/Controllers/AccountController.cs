@@ -33,7 +33,7 @@ using Company.WebApplication1.Services;
 
 namespace Company.WebApplication1.Controllers
 {
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
     [Authorize]
 #endif
     public class AccountController : Controller

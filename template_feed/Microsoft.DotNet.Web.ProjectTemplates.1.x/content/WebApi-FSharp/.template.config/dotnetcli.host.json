@@ -9,16 +9,15 @@
     "Framework": {
       "longName": "framework"
     },
-    "EnablePack": {
-      "shortName": "p",
-      "longName": "enable-pack"
-    },
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
+    },
+    "IncludeApplicationInsights": {
+      "isHidden": "true"
     }
   },
   "usageExamples": [
-    ""
+    "--framework netcoreapp1.1"
   ]
 }

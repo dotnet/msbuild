@@ -1,4 +1,4 @@
-﻿namespace Company.WebApplication1
+namespace Company.WebApplication1
 
 open System
 open System.Collections.Generic
@@ -6,7 +6,7 @@ open System.Linq
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Configuration
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 
 
@@ -21,18 +21,6 @@ type Startup (configuration: IConfiguration) =
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment) =
-
-        if (env.IsDevelopment()) then
-            app.UseDeveloperExceptionPage() |> ignore
-        else
-            app.UseExceptionHandler("/Home/Error") |> ignore
-
-        app.UseStaticFiles() |> ignore
-
-        app.UseMvc(fun routes ->
-            routes.MapRoute(
-                name = "default",
-                template = "{controller=Home}/{action=Index}/{id?}") |> ignore
-            ) |> ignore
+        app.UseMvc() |> ignore
 
     member val Configuration : IConfiguration = null with get, set
