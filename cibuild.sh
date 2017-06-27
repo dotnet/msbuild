@@ -322,7 +322,8 @@ restoreBuildTools
 
 echo
 echo "** Rebuilding MSBuild with downloaded binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS $CSC_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
+# Avoid SourceLink on our ancient bootstrap binaries
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS $CSC_ARGS /p:SourceLinkCreate=false /p:DebugType=portable" "$BOOTSTRAP_BUILD_LOG_PATH"
 
 if [[ $BUILD_ONLY = true ]]; then
     exit $?

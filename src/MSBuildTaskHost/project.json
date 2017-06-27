@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
+    "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5",
+    "PdbGit": "3.0.41",
+    "SourceLink.Create.CommandLine": "2.1.2"
   },
   "frameworks": {
     "net35": { }
