@@ -21,6 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
+    <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
