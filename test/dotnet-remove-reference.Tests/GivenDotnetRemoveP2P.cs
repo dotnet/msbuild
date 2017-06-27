@@ -14,9 +14,7 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
     public class GivenDotnetRemoveReference : TestBase
     {
-        private const string HelpText = @".NET Remove Project to Project reference Command
-
-Usage: dotnet remove <PROJECT> reference [options] <args>
+        private const string HelpText = @"Usage: dotnet remove <PROJECT> reference [options] <args>
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -27,9 +25,7 @@ Options:
   -f, --framework <FRAMEWORK>   Remove reference only when targeting a specific framework
 ";
 
-        private const string RemoveCommandHelpText = @".NET Remove Command
-
-Usage: dotnet remove [options] <PROJECT> [command]
+        private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.

@@ -12,9 +12,7 @@ namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 {
     public class GivenDotnetRemovePackage : TestBase
     {
-        private const string HelpText = @".NET Remove Package reference Command.
-
-Usage: dotnet remove <PROJECT> package [options] <PACKAGE_NAME>
+        private const string HelpText = @"Usage: dotnet remove <PROJECT> package [options] <PACKAGE_NAME>
 
 Arguments:
   <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -24,9 +22,7 @@ Options:
   -h, --help   Show help information.
 ";
 
-        private const string RemoveCommandHelpText = @".NET Remove Command
-
-Usage: dotnet remove [options] <PROJECT> [command]
+        private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
