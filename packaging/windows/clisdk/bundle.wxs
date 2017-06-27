@@ -37,6 +37,7 @@
       </MsiPackage>
        <MsiPackage SourceFile="$(var.CLISDKMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
+        <MsiProperty Name="EXEFULLPATH" Value="[WixBundleOriginalSource]" />
       </MsiPackage>
       <?if $(var.Platform)=x86?>
         <PackageGroupRef Id="PG_AspNetCorePackageStore_x86"/>
