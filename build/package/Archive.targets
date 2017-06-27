@@ -20,13 +20,15 @@
         Condition=" '$(OSName)' == 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
 
     <TarGzFileCreateFromDirectory
         Condition=" '$(OSName)' != 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
 
     <ItemGroup>
       <Archives Include="$(GenerateArchivesDestinationArchive)" />
@@ -42,6 +44,7 @@
         <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)</Outputs>
         <InputDirectory>$(LayoutDirectory)/%(LayoutDefinition.Name)</InputDirectory>
         <OutFileName>%(LayoutDefinition.NameWithVersion)</OutFileName>
+        <ExcludePatterns>%(LayoutDefinition.ExcludePatterns)</ExcludePatterns>
       </GenerateArchivesInputsOutputs>
     </ItemGroup>
   </Target>
