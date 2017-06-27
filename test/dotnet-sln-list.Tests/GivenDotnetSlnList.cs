@@ -14,9 +14,7 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
     public class GivenDotnetSlnList : TestBase
     {
-        private const string HelpText = @".NET List project(s) in a solution file Command
-
-Usage: dotnet sln <SLN_FILE> list [options]
+        private const string HelpText = @"Usage: dotnet sln <SLN_FILE> list [options]
 
 Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
@@ -25,9 +23,7 @@ Options:
   -h, --help   Show help information.
 ";
 
-        private const string SlnCommandHelpText = @".NET modify solution file command
-
-Usage: dotnet sln [options] <SLN_FILE> [command]
+        private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
 Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
