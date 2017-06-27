@@ -48,10 +48,6 @@
       "isHidden": "true",
       "longName": "no-tools"
     },
-    "skipRestore": {
-      "longName": "no-restore",
-      "shortName": ""
-    },
     "HttpsPort": {
       "isHidden": true
     },
