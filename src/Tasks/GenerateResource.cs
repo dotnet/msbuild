@@ -2432,6 +2432,12 @@ namespace Microsoft.Build.Tasks
                     {
                         if (String.Compare(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.CurrentCultureIgnoreCase) == 0)
                         {
+                            string itemSpec = _assemblyFiles[i].ItemSpec;
+
+                            if (requestedAssemblyName.Name.Contains("System.Runtime"))
+                            {
+                                itemSpec = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "System.Runtime.dll");
+                            }
                             return Assembly.ReflectionOnlyLoadFrom(itemSpec);
                         }
                     }
