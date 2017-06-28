@@ -10,7 +10,8 @@
   "dependencies": {
     "xunit": "2.1.0",
     "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
-    "System.IO.FileSystem": "4.0.1"
+    "System.IO.FileSystem": "4.0.1",
+    "Shouldly": "2.8.3"
   },
   "frameworks": {
     "net46": {
