@@ -9,7 +9,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
     {
         public static string GenerateDefaultAppSettingsJsonFile()
         {
-            string tempFileFullPath = Path.GetTempFileName();
+            string tempFileFullPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string defaultAppSettingsJsonString = JsonConvert.SerializeObject(new
             {
                 ConnectionStrings = new
