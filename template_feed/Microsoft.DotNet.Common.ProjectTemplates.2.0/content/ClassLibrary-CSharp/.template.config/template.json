@@ -57,12 +57,6 @@
     "HostIdentifier": {
       "type": "bind",
       "binding": "HostIdentifier"
-    },
-    "skipRestore": {
-      "type": "parameter",
-      "datatype": "bool",
-      "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
     }
   },
   "primaryOutputs": [
@@ -74,15 +68,6 @@
   ],
   "defaultName": "ClassLibrary1",
   "postActions": [
-    {
-      "condition": "(!skipRestore)",
-      "description": "Restore NuGet packages required by this project.",
-      "manualInstructions": [
-        { "text": "Run 'dotnet restore'" }
-      ],
-      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
-      "continueOnError": true
-    },
     {
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "description": "Opens Class1.cs in the editor",
