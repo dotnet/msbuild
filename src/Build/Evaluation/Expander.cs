@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
@@ -2025,9 +2026,24 @@ namespace Microsoft.Build.Evaluation
                 internal static IEnumerable<Tuple<string, S>> GetItemTupleEnumerator(IEnumerable<S> itemsOfType)
                 {
                     // iterate over the items, and yield out items in the tuple format
-                    foreach (S item in itemsOfType)
+                    foreach (var item in itemsOfType)
                     {
-                        yield return new Tuple<string, S>(item.EvaluatedIncludeEscaped, item);
+                        if (Traits.Instance.UseLazyWildCardEvaluation)
+                        {
+                            foreach (
+                                var resultantItem in
+                                EngineFileUtilities.GetFileListEscaped(
+                                    item.ProjectDirectory,
+                                    item.EvaluatedIncludeEscaped,
+                                    forceEvaluate: true))
+                            {
+                                yield return new Tuple<string, S>(resultantItem, item);
+                            }
+                        }
+                        else
+                        {
+                            yield return new Tuple<string, S>(item.EvaluatedIncludeEscaped, item);
+                        }
                     }
                 }
 
