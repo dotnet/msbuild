@@ -311,7 +311,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void WriteLinesWriteOnlyWhenDifferentTest()
         {
             string file = FileUtilities.GetTemporaryFile();
