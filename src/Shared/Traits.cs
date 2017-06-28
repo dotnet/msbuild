@@ -21,6 +21,8 @@ namespace Microsoft.Build.Utilities
         {
             EscapeHatches = new EscapeHatches();
         }
+
+        public readonly bool EnableAllPropertyFunctions = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
     }
 
     internal class EscapeHatches
@@ -58,6 +60,12 @@ namespace Microsoft.Build.Utilities
         /// Whether to warn when we set a property for the first time, after it was previously used.
         /// </summary>
         public readonly bool WarnOnUninitializedProperty = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY"));
+
+        // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
+        // for https://github.com/Microsoft/msbuild/issues/1751. It should
+        // be removed (permanently set to false) after establishing that
+        // it's unneeded (at least by the 16.0 timeframe).
+        public readonly bool UseCaseSensitiveItemNames = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1";
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
         {

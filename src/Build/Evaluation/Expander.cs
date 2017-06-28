@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -3709,9 +3710,9 @@ namespace Microsoft.Build.Evaluation
                     return true;
                 }
 
-                if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
+                if (Traits.Instance.EnableAllPropertyFunctions)
                 {
-                    // If MSBUILDENABLEALLPROPERTYFUNCTION == 1, then anything goes
+                    // anything goes
                     return true;
                 }
 

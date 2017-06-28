@@ -34,6 +34,7 @@ using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 #if (!STANDALONEBUILD)
@@ -241,6 +242,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private IDictionary<string, object> _projectLevelLocalsForBuild;
 #endif
+
+        /// <summary>
+        /// The search paths are machine specific and should not change during builds
+        /// </summary>
+        private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -2285,7 +2291,7 @@ namespace Microsoft.Build.Evaluation
 
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
-                if (!Directory.Exists(extensionPathExpanded))
+                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     continue;
                 }
