@@ -11,9 +11,7 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetHelpCommand : TestBase
     {
         private const string HelpText =
-@".NET CLI help utility
-
-Usage: dotnet help [options] <COMMAND_NAME>
+@"Usage: dotnet help [options] <COMMAND_NAME>
 
 Arguments:
   <COMMAND_NAME>   CLI command for which to view more detailed help.

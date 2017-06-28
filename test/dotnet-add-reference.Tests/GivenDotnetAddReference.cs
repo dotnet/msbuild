@@ -15,9 +15,7 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
     public class GivenDotnetAddReference : TestBase
     {
-        private const string HelpText = @".NET Add Project to Project reference Command
-
-Usage: dotnet add <PROJECT> reference [options] <args>
+        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <args>
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -28,9 +26,7 @@ Options:
   -f, --framework <FRAMEWORK>   Add reference only when targeting a specific framework
 ";
 
-        private const string AddCommandHelpText = @".NET Add Command
-
-Usage: dotnet add [options] <PROJECT> [command]
+        private const string AddCommandHelpText = @"Usage: dotnet add [options] <PROJECT> [command]
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.

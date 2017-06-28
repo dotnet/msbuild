@@ -12,7 +12,7 @@
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.0-preview2-20170615-7</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.0-preview3-20170622-1</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
 
     <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
@@ -27,7 +27,7 @@
     <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170620-266</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0-preview3-25426-01</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0-preview3-25426-01</DependencyModelVersion>
-    <CliCommandLineParserVersion>0.1.0-alpha-142</CliCommandLineParserVersion>
+    <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <SpaTemplateVersion>1.0.0-preview-000321</SpaTemplateVersion>

@@ -14,9 +14,7 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : TestBase
     {
-        private const string HelpText = @".NET Core Project-to-Project dependency viewer
-
-Usage: dotnet list <PROJECT> reference [options]
+        private const string HelpText = @"Usage: dotnet list <PROJECT> reference [options]
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -25,9 +23,7 @@ Options:
   -h, --help   Show help information.
 ";
 
-        private const string ListCommandHelpText = @".NET List Command
-
-Usage: dotnet list [options] <PROJECT> [command]
+        private const string ListCommandHelpText = @"Usage: dotnet list [options] <PROJECT> [command]
 
 Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
