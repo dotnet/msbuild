@@ -68,7 +68,7 @@ namespace Microsoft.Build.Evaluation
             return Enumerable.Empty<ToolsetPropertyDefinition>();
         }
 
-        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
+        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             return new Dictionary<string, ProjectImportPathMatch>();
         }

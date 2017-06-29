@@ -407,7 +407,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
         /// </summary>
-        protected abstract Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os);
+        protected abstract Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os, Expander<ProjectPropertyInstance, ProjectItemInstance> expander);
 
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
@@ -511,7 +511,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                var importSearchPathsTable = GetProjectImportSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath());
+                var importSearchPathsTable = GetProjectImportSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath(), expander);
                 toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion, importSearchPathsTable);
             }
             catch (ArgumentException e)

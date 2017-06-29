@@ -501,14 +501,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                        <property name=""MSBuildBinPath"" value="".""/>
                        <projectImportSearchPaths>
                          <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
-                           <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1)"" />
+                           <property name=""MSBuildExtensionsPath"" value=""$(FallbackExpandDir1);/tmp/_non_existant_"" />
                          </searchPaths>
                        </projectImportSearchPaths>
                       </toolset>
                    </msbuildToolsets>
                  </configuration>";
 
-            string extnDir1 = null;
+            string extnDir1 = null, emptyDir = null;
             string mainProjectPath = null;
 
             try
@@ -516,13 +516,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
                     extnTargetsFileContentTemplate);
 
+                emptyDir = Path.Combine(Path.GetDirectoryName(extnDir1), "other");
+
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj",
                     GetMainTargetFileContent());
 
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
-                var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = extnDir1});
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = $"{emptyDir};{extnDir1}" });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -569,7 +571,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                    </msbuildToolsets>
                  </configuration>";
 
-            string extnDir1 = null;
+            string extnDir1 = null, emptyDir = null;
             string mainProjectPath = null;
 
             try
@@ -577,13 +579,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"),
                     extnTargetsFileContentTemplate);
 
+                emptyDir = Path.Combine(Path.GetDirectoryName(extnDir1), "other");
+
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj",
                     GetMainTargetFileContent());
 
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
-                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = $"{emptyDir};{extnDir1}" });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -592,6 +596,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
 
                 // Expanded $(FallbackExpandDir) will appear in quotes in the log
+                logger.AssertLogContains("\"" + emptyDir + "\"");
                 logger.AssertLogContains("\"" + extnDir1 + "\"");
             }
             finally
