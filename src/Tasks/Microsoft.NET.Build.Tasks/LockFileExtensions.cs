@@ -12,6 +12,33 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime)
+        {
+            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
+
+            if (lockFileTarget == null)
+            {
+                string frameworkString = framework.DotNetFrameworkName;
+                string targetMoniker = string.IsNullOrEmpty(runtime) ?
+                    frameworkString :
+                    $"{frameworkString}/{runtime}";
+
+                string message;
+                if (string.IsNullOrEmpty(runtime))
+                {
+                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                }
+                else
+                {
+                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                }
+
+                throw new BuildErrorException(message);
+            }
+
+            return lockFileTarget;
+        }
+
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile,
             NuGetFramework framework,
@@ -28,17 +55,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new ArgumentNullException(nameof(framework));
             }
 
-            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
-
-            if (lockFileTarget == null)
-            {
-                string frameworkString = framework.DotNetFrameworkName;
-                string targetMoniker = string.IsNullOrEmpty(runtime) ?
-                    frameworkString :
-                    $"{frameworkString}/{runtime}";
-
-                throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
-            }
+            var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
             bool isFrameworkDependent = platformLibrary != null && (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
@@ -95,17 +112,44 @@ namespace Microsoft.NET.Build.Tasks
             return exclusionList;
         }
 
+        public static HashSet<PackageIdentity> GetTransitivePackagesList(
+            this LockFileTarget lockFileTarget,
+            LockFileTargetLibrary package,
+            IDictionary<string, LockFileTargetLibrary> libraryLookup)
+        {
+            var exclusionList = new HashSet<PackageIdentity>();
+
+            exclusionList.Add(new PackageIdentity(package.Name, package.Version));
+            CollectDependencies(libraryLookup, package.Dependencies, exclusionList);
+
+            return exclusionList;
+        }
+
         private static void CollectDependencies(
             IDictionary<string, LockFileTargetLibrary> libraryLookup,
             IEnumerable<PackageDependency> dependencies,
             HashSet<string> exclusionList)
+        {
+            var excludedPackages = new HashSet<PackageIdentity>();
+            CollectDependencies(libraryLookup, dependencies, excludedPackages);
+
+            foreach (var pkg in excludedPackages)
+            {
+                exclusionList.Add(pkg.Id);
+            }
+        }
+
+        private static void CollectDependencies(
+            IDictionary<string, LockFileTargetLibrary> libraryLookup,
+            IEnumerable<PackageDependency> dependencies,
+            HashSet<PackageIdentity> exclusionList)
         {
             foreach (PackageDependency dependency in dependencies)
             {
                 LockFileTargetLibrary library = libraryLookup[dependency.Id];
                 if (library.Version.Equals(dependency.VersionRange.MinVersion))
                 {
-                    if (exclusionList.Add(library.Name))
+                    if (exclusionList.Add(new PackageIdentity(library.Name, library.Version)))
                     {
                         CollectDependencies(libraryLookup, library.Dependencies, exclusionList);
                     }

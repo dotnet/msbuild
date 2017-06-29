@@ -17,6 +17,9 @@ using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using NuGet.ProjectModel;
+using NuGet.Common;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -51,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-       [Fact]
+        [Fact]
         public void It_builds_the_library_twice_in_a_row()
         {
             var testAsset = _testAssetsManager
@@ -530,31 +533,117 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [Fact]
-        public void It_fails_gracefully_if_targetframework_is_empty()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_is_empty(bool useSolution)
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "EmptyTargetFramework")
-                .WithSource()
-                .WithProjectChanges(project => 
-                {
-                    project.Root
-                        .Elements("PropertyGroup")
-                        .Elements("TargetFramework")
-                        .Single()
-                        .SetValue("");
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+            string targetFramework = "";
+            TestInvalidTargetFramework("EmptyTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' was not recognized");
+        }
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_is_invalid(bool useSolution)
+        {
+            string targetFramework = "notaframework";
+            TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' was not recognized");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
+        {
+            string targetFramework = "netcoreapp2.0;net461";
+            TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
+                $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
+        }
+
+        private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
+        {
+            var testProject = new TestProject()
+            {
+                Name = testName,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            string identifier = useSolution ? "_Solution" : "";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
+
+            if (targetFramework.Contains(";"))
+            {
+                //  The TestProject class doesn't differentiate between TargetFramework and TargetFrameworks, and helpfully selects
+                //  which property to use based on whether there's a semicolon.
+                //  For this test, we need to override this behavior
+                testAsset = testAsset.WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Element(ns + "PropertyGroup")
+                        .Element(ns + "TargetFrameworks")
+                        .Name = ns + "TargetFramework";
+                });
+            }
+
+            TestCommand restoreCommand;
+            TestCommand buildCommand;
+
+            if (useSolution)
+            {
+                var dotnetCommand = new DotnetCommand(Log)
+                {
+                    WorkingDirectory = testAsset.TestRoot
+                };
+
+                dotnetCommand.Execute("new", "sln")
+                    .Should()
+                    .Pass();
+
+                var relativePathToProject = Path.Combine(testProject.Name, testProject.Name + ".csproj");
+                dotnetCommand.Execute($"sln", "add", relativePathToProject)
+                    .Should()
+                    .Pass();
+
+                var relativePathToSln = testProject.Name + identifier + ".sln";
+
+                restoreCommand = testAsset.GetRestoreCommand(Log, relativePathToSln);
+                buildCommand = new BuildCommand(Log, testAsset.TestRoot, relativePathToSln);
+            }
+            else
+            {
+                restoreCommand = testAsset.GetRestoreCommand(Log, testProject.Name);
+                buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            }
+
+            //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
+            //  See https://github.com/NuGet/Home/issues/5309
+            var restore = restoreCommand.Execute("/p:RestoreContinueOnError=ErrorAndContinue");
+            if (targetFramework.Contains(';'))
+            {
+                // Restore does not error on TargetFramework with semicolons, it treats it equivalently to TargetFrameworks.
+                // The error is therefore deferred to the build check below.
+                restore.Should().Pass();
+            }
+            else
+            {
+                // Intentionally not checking the error message on restore here as we can't put ourselves in front of
+                // restore and customize the  message forinvalid target frameworks as that would break restoring packages
+                // like MSBuild.Sdk.Extras that add support for extra TFMs.
+                restore.Should().Fail();
+            }
 
             buildCommand
                 .Execute()
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
-                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
+                .And
+                .HaveStdOutContaining(expectedOutput)
+                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version when TargetFramework was blank;
         }
 
         [Theory]
@@ -591,19 +680,61 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_passes_ridless_target_to_compiler()
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "RidlessLib")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-            var fullPathProjectFile = new BuildCommand(Log, libraryProjectDirectory).FullPathProjectFile;
+            var testProject = new TestProject()
+            {
+                Name = "CompileDoesntUseRid",
+                TargetFrameworks = "netcoreapp2.0",
+                RuntimeIdentifier = runtimeIdentifier,
+                IsSdkProject = true
+            };
 
-            // compile should still pass with unknown RID because references are always pulled 
-            // from RIDLess target
-            var buildCommand = new MSBuildCommand(Log, "Compile", fullPathProjectFile);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    //  Set property to disable logic in Microsoft.NETCore.App package that will otherwise cause a failure
+                    //  when we remove everything under the rid-specific targets in the assets file
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Element(ns + "PropertyGroup")
+                        .Add(new XElement(ns + "EnsureNETCoreAppRuntime", false));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            //  Test that compilation doesn't depend on any rid-specific assets by removing them from the assets file after it's been restored
+            var assetsFilePath = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "project.assets.json");
+
+            JObject assetsContents = JObject.Parse(File.ReadAllText(assetsFilePath));
+            foreach (JProperty target in assetsContents["targets"])
+            {
+                if (target.Name.Contains("/"))
+                {
+                    //  This is a target element with a RID specified, so remove all its contents
+                    target.Value = new JObject();
+                }
+            }
+            string newContents = assetsContents.ToString();
+            File.WriteAllText(assetsFilePath, newContents);
+
             buildCommand
-                .Execute("/p:RuntimeIdentifier=unkownrid")
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_can_target_uwp_using_sdk_extras()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("UwpUsingSdkExtras")
+                .WithSource()
+                .Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute()
                 .Should()
                 .Pass();
         }

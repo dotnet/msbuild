@@ -1,0 +1,332 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
+    <body>
+      <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
+        <source>At least one possible target framework must be specified.</source>
+        <target state="translated">Необходимо указать хотя бы одну целевую платформу.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoCompatibleTargetFramework">
+        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <target state="translated">Проект "{0}" предназначен для "{2}". На него не может ссылаться проект, предназначенный для "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFrameworkName">
+        <source>Invalid framework name: '{0}'.</source>
+        <target state="translated">Недопустимое имя платформы: "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssetsFileNotFound">
+        <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
+        <target state="translated">Файл ресурсов "{0}" не найден. Выполните восстановление пакета NuGet, чтобы создать этот файл.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssetsFileMissingTarget">
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="needs-review-translation">Файл ресурсов "{0}" не имеет целевого объекта для "{1}". Убедитесь, что выполнено восстановление этого проекта для TargetFramework="{2}" и RuntimeIdentifier="{3}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssetsFilePathNotRooted">
+        <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="translated">Путь к файлу ресурсов "{0}" должен содержать корневой каталог. Поддерживаются только полные пути.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindProjectInfo">
+        <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
+        <target state="translated">Невозможно найти сведения о проекте для "{0}". Возможно, отсутствует ссылка на проект.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
+        <source>Content file '{0}' does not contain expected parent package information.</source>
+        <target state="translated">Файл содержимого "{0}" не содержит ожидаемые сведения о родительском пакете.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingItemMetadata">
+        <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
+        <target state="translated">Отсутствуют метаданные "{0}" для элемента "{2}" "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedPreprocessorToken">
+        <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
+        <target state="translated">Нераспознанный маркер препроцессора "{0}" в "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContentPreproccessorParameterRequired">
+        <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
+        <target state="translated">В задачу "{0}" необходимо передать значение для параметра "{1}" для использования предварительно обработанного содержимого.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
+        <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
+        <target state="translated">Ресурсы используются из проекта "{0}", однако соответствующий путь к проекту MSBuild не найден в "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedFileType">
+        <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
+        <target state="translated">Непредвиденный тип файла для "{0}". Тип является "{1}" и "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+        <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
+        <target state="needs-review-translation">Невозможно определить TargetFrameworkIdentifier и (или) TargetFrameworkVersion на основе TargetFramework="{0}". Они должны быть указаны явно.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContentItemDoesNotProvideOutputPath">
+        <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
+        <target state="translated">Элемент содержимого для "{0}" задает "{1}", но не предоставляет "{2}" или "{3}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicatePreprocessorToken">
+        <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
+        <target state="translated">Для маркера препроцессора "{0}" задано несколько значений. Выбор "{1}" в качестве значения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
+        <source>Errors occured when emitting satellite assembly '{0}'.</source>
+        <target state="translated">При выпуске вспомогательной сборки "{0}" возникли ошибки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToFindResolvedPath">
+        <source>Unable to find resolved path for '{0}'.</source>
+        <target state="translated">Не удается найти разрешенный путь для "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
+        <source>Unexpected dependency '{0}' with no version number.</source>
+        <target state="translated">Непредвиденная зависимость "{0}" без номера версии.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssetPreprocessorMustBeConfigured">
+        <source>Asset preprocessor must be configured before assets are processed.</source>
+        <target state="translated">Препроцессор ресурсов необходимо настроить перед обработкой ресурсов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionString">
+        <source>Invalid NuGet version string: '{0}'.</source>
+        <target state="translated">Недопустимая строка версии Invalid NuGet: "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1011">
+        <source>Framework not installed: {0} in {1}</source>
+        <target state="translated">Платформа не установлена: {0} в {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1012">
+        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
+        <target state="translated">Не указан каталог ссылочной сборки. Вы можете задать это расположение с помощью переменной среды DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1013">
+        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
+        <target state="translated">Следующие зависимости помечены с типом "platform", но всего одна зависимость может иметь этот тип: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1014">
+        <source>Failed to read lock file</source>
+        <target state="translated">Не удалось считать файл блокировки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1017">
+        <source>Project file does not exist '{0}'.</source>
+        <target state="translated">Файл проекта не существует: "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1001">
+        <source>The dependency '{0}' could not be resolved.</source>
+        <target state="translated">Не удалось разрешить зависимость "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1002">
+        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
+        <target state="translated">Зависимость "{0}" в проекте "{1}" не поддерживает платформу "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1006">
+        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">{0}. Выполните команду "dotnet restore" для создания нового файла активов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1007">
+        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
+        <target state="translated">Была указана зависимость "{0}", но в конце стоит "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1008">
+        <source>{0} is an unsupported framework.</source>
+        <target state="translated">Платформа {0} не поддерживается.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1009">
+        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">Ожидаемый файл активов не существует. Выполните команду "dotnet restore" для создания нового файла активов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1010">
+        <source>The dependency type was changed</source>
+        <target state="translated">Тип зависимости был изменен.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1011">
+        <source>The dependency target '{0}' is unsupported.</source>
+        <target state="translated">Целевой объект зависимости "{0}" не поддерживается.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1012">
+        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
+        <target state="translated">Конфликт зависимостей. "{0}" ожидал "{1}", но получил "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateItemsError">
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="translated">Были включены повторяющиеся элементы ("{0}"). Пакет .NET SDK по умолчанию включает элементы "{0}" из каталога проекта. Можно удалить эти элементы из файла проекта или присвоить свойству "{1}" значение "{2}", если нужно явно включить их в файл проекта. Дополнительные сведения см. в разделе {4}. Повторяющиеся элементы: {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceOverrideWarning">
+        <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="translated">PackageReference для "{0}" был включен в проект. На этот пакет неявно указывает пакет .NET SDK и обычно не нужно ссылаться на него из проекта. Дополнительные сведения: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncorrectPackageRoot">
+        <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
+        <target state="translated">Корневой каталог пакета {0} неправильно указан для разрешаемой библиотеки {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleFilesResolved">
+        <source>More than one file found for {0}</source>
+        <target state="translated">Для {0} найдено несколько файлов</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FolderAlreadyExists">
+        <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
+        <target state="translated">Папка "{0}" уже существует. Удалите ее или укажите другой каталог ComposeWorkingDir</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ParsingFiles">
+        <source>Parsing the Files : '{0}'</source>
+        <target state="translated">Анализируются файлы: "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageInfoLog">
+        <source>Package Name='{0}', Version='{1}' was parsed</source>
+        <target state="translated">Пакет с именем "{0}" версии "{1}" был проанализирован</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierWasNotSpecified">
+        <source>Specify a RuntimeIdentifier</source>
+        <target state="translated">Укажите RuntimeIdentifier</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncorrectTargetFormat">
+        <source>The target manifest {0} provided is of not the correct format</source>
+        <target state="translated">Указанный целевой манифест {0} имеет неправильный формат</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">Невозможно использовать файл "{0}" в качестве исполняемого файла узла приложения, так как он не содержит требуемой последовательности байтов "{1}", которая отмечает место, где должно записываться имя приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">Длина указанного имени файла "{0}" превышает 1024 байта</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
+        <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="translated">Сборка или публикация автономного приложения без указания идентификатора RuntimeIdentifier не поддерживается. Укажите RuntimeIdentifier или присвойте свойству SelfContained значение false.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ChoosingAssemblyVersion">
+        <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
+        <target state="translated">Выбирается "{0}", так как значение AssemblyVersion "{1}" больше "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ChoosingFileVersion">
+        <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
+        <target state="translated">Выбирается "{0}", так как версия файла "{1}" больше "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ChoosingPlatformItem">
+        <source>Choosing '{0}' because it is a platform item.</source>
+        <target state="translated">Выбирается "{0}", так как это элемент платформы.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ChoosingPreferredPackage">
+        <source>Choosing '{0}' because it comes from a package that is preferred.</source>
+        <target state="translated">Выбирается "{0}", так как источником является предпочтительный пакет.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictCouldNotDetermineWinner">
+        <source>Could not determine winner due to equal file and assembly versions.</source>
+        <target state="translated">Не удалось определить победителя, так как версии файла и сборки одинаковы.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_DoesntExist">
+        <source>Could not determine winner because '{0}' does not exist.</source>
+        <target state="translated">Не удалось определить победителя, так как "{0}" не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_FileVersion">
+        <source>Could not determine a winner because '{0}' has no file version.</source>
+        <target state="translated">Не удалось определить победителя, так как "{0}" не имеет версии файла.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
+        <source>Could not determine a winner because '{0}' is not an assembly.</source>
+        <target state="translated">Не удалось определить победителя, так как "{0}" не является сборкой.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EncounteredConflict">
+        <source>Encountered conflict between '{0}' and '{1}'.</source>
+        <target state="translated">Обнаружен конфликт между "{0}" и "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotLoadPlatformManifest">
+        <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
+        <target state="translated">Не удалось загрузить манифест PlatformManifest из "{0}", так как он не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingPlatformManifest">
+        <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
+        <target state="translated">Ошибка при анализе PlatformManifest со строки "{0}" {1}. Строки должны иметь формат {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
+        <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
+        <target state="translated">Ошибка анализа PlatformManifest со строки "{0}" {1}. Недопустимый {2} "{3}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetFrameworkVersion">
+        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
+        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFileMissingRuntimeIdentifier">
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetFrameworkWithSemicolon">
+        <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
+        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetDependsOnNETStandardFailedWithException">
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
+        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedSDKVersionForNetStandard20">
+        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

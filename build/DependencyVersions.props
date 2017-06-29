@@ -10,9 +10,11 @@
     <MsBuildPackagesVersion>15.2.0-preview-000093-02</MsBuildPackagesVersion>
     <DependencyModelVersion>2.0.0-preview1-001960</DependencyModelVersion>
     <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
-    <NuGetVersion>4.3.0-preview1-2500</NuGetVersion>
+    <NuGetVersion>4.3.0-preview3-4168</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
+    <NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25405-01</NETStandardLibraryNETFrameworkVersion>
+    <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
   </PropertyGroup>
 
   <!-- Dependencies from test projects -->

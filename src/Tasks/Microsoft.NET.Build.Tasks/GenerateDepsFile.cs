@@ -58,6 +58,9 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ReferenceSatellitePaths { get; set; }
 
         [Required]
+        public ITaskItem[] ReferenceAssemblies { get; set; }
+
+        [Required]
         public ITaskItem[] FilesToSkip { get; set; }
 
         public ITaskItem CompilerOptions { get; set; }
@@ -111,8 +114,8 @@ namespace Microsoft.NET.Build.Tasks
                     AssemblyVersion,
                     AssemblySatelliteAssemblies);            
 
-            IEnumerable<ReferenceInfo> frameworkReferences =
-                ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
+            IEnumerable<ReferenceInfo> referenceAssemblyInfos =
+                ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
             IEnumerable<ReferenceInfo> directReferences =
                 ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths);
@@ -131,7 +134,7 @@ namespace Microsoft.NET.Build.Tasks
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
                 .WithMainProjectInDepsFile(IncludeMainProject)
-                .WithFrameworkReferences(frameworkReferences)
+                .WithReferenceAssemblies(referenceAssemblyInfos)
                 .WithDirectReferences(directReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithExcludeFromPublishAssets(excludeFromPublishAssets)

@@ -137,16 +137,33 @@ namespace Microsoft.NET.TestFramework
 
         }
 
-        public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "", params string[] args)
+        public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {
             return new RestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
                 .AddSourcesFromCurrentConfig()
                 .AddSource(RepoInfo.PackagesPath);
         }
 
+        public NuGetRestoreCommand GetNuGetRestoreCommand(ITestOutputHelper log, string relativePath = "")
+        {
+            return new NuGetRestoreCommand(log, System.IO.Path.Combine(TestRoot, relativePath))
+                .AddSourcesFromCurrentConfig()
+                .AddSource(RepoInfo.PackagesPath);
+        }
+
         public TestAsset Restore(ITestOutputHelper log, string relativePath = "", params string[] args)
         {
-            var commandResult = GetRestoreCommand(log, relativePath, args)
+            var commandResult = GetRestoreCommand(log, relativePath)
+                .Execute(args);
+
+            commandResult.Should().Pass();
+
+            return this;
+        }
+
+        public TestAsset NuGetRestore(ITestOutputHelper log, string relativePath = "", params string[] args)
+        {
+            var commandResult = GetNuGetRestoreCommand(log, relativePath)
                 .Execute(args);
 
             commandResult.Should().Pass();

@@ -107,13 +107,6 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var targetFramework = "netcoreapp2.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
@@ -167,13 +160,78 @@ public static class Program
             });
 
             Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .EnsureExecutable()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello from a netcoreapp2.0.!");
+        }
+		
+		//Note: Pre Netcoreapp2.0 standalone activation uses renamed dotnet.exe
+        //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
+        [CoreMSBuildOnlyTheory]
+        [InlineData("win-arm")]
+        [InlineData("win8-arm")]
+        [InlineData("win81-arm")]
+        [InlineData("win10-arm")]
+        [InlineData("win10-arm64")]
+        public void Publish_standalone_post_netcoreapp2_arm_app(string runtimeIdentifier)
+        {
+            // Tests for existence of expected files when publishing an ARM project
+            // See https://github.com/dotnet/sdk/issues/1239
+
+            var targetFramework = "netcoreapp2.0";
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "Hello",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                RuntimeIdentifier = runtimeIdentifier,
+                IsExe = true,
+            };
+            
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(""Hello from an arm netcoreapp2.0 app!"");
+    }
+}
+";
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            testProjectInstance.Restore(Log, testProject.Name);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishResult = publishCommand.Execute();
+
+            publishResult.Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework: targetFramework,
+                runtimeIdentifier: runtimeIdentifier);
+            
+            // The name of the self contained executable depends on the runtime identifier.
+            // For Windows family ARM publishing, it'll always be Hello.exe.
+            // We shouldn't use "Constants.ExeSuffix" for the suffix here because that changes
+            // depending on the RuntimeInformation
+            var selfContainedExecutable = "Hello.exe";
+
+            publishDirectory.Should().HaveFiles(new[] {
+                selfContainedExecutable,
+                "Hello.dll",
+                "Hello.pdb",
+                "Hello.deps.json",
+                "Hello.runtimeconfig.json",
+                "coreclr.dll",
+                "hostfxr.dll",
+                "hostpolicy.dll",
+                "mscorlib.dll",
+                "System.Private.CoreLib.dll",
+            });
         }
 
         [Fact]
@@ -196,13 +254,6 @@ public static class Program
 
         void Conflicts_are_resolved_when_publishing(bool selfContained, bool ridSpecific, [CallerMemberName] string callingMethod = "")
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             if (selfContained && !ridSpecific)
             {
                 throw new ArgumentException("Self-contained apps must be rid specific");
@@ -312,8 +363,7 @@ public static class Program
                     .And
                     .OnlyHaveNativeAssembliesWhichAreInFolder(rid, publishDirectory.FullName, testProject.Name);
 
-                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { })
-                    .EnsureExecutable();
+                runCommand = Command.Create(selfContainedExecutableFullPath, new string[] { });
             }
             else
             {

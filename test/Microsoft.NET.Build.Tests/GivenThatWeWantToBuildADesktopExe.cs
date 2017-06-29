@@ -28,6 +28,40 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        [Fact]
+        public void It_builds_a_simple_desktop_app()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var targetFramework = "net45";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
+                })
+                .Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "HelloWorld.exe",
+                "HelloWorld.pdb",
+            });
+        }
+
         [Theory]
 
         // If we don't set platformTarget and don't use native dependency, we get working AnyCPU app.

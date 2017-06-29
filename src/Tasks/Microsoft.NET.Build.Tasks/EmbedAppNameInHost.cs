@@ -59,7 +59,15 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Directory.CreateDirectory(destinationDirectory);
             }
-            File.WriteAllBytes(ModifiedAppHostPath, array);
+
+            // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
+            File.Copy(AppHostSourcePath, ModifiedAppHostPath);
+
+            // Re-write ModifiedAppHostPath with the proper contents.
+            using (FileStream fs = new FileStream(ModifiedAppHostPath, FileMode.Truncate, FileAccess.ReadWrite, FileShare.Read))
+            {
+                fs.Write(array, 0, array.Length);
+            }
         }
 
         // See: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm

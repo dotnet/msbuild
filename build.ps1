@@ -58,6 +58,14 @@ Invoke-WebRequest $DOTNET_INSTALL_SCRIPT_URL -OutFile "$env:DOTNET_INSTALL_DIR\d
 & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Version $DotnetCLIVersion $dotnetInstallVerbosity
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
+# This is a hack to prevent this target from being imported twice. We want to import the one that is build in the repo. If anyone knows
+# of a better way to do this, let licavalc known and I will immediatelly fix it.
+$NETBuildExtensionsTargets = "$env:DOTNET_INSTALL_DIR\sdk\$DotnetCLIVersion\15.0\Microsoft.Common.targets\ImportAfter\Microsoft.NET.Build.Extensions.targets"
+if (Test-Path $NETBuildExtensionsTargets)
+{
+    Remove-Item $NETBuildExtensionsTargets
+}
+
 # Install 1.0.4 shared framework
 if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.0.5"))
 {
@@ -70,6 +78,14 @@ if (!(Test-Path "$env:DOTNET_INSTALL_DIR\shared\Microsoft.NETCore.App\1.1.2"))
 {
     & "$env:DOTNET_INSTALL_DIR\dotnet-install.ps1" -Channel "Release/1.1.0" -Version 1.1.2 -SharedRuntime
     if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
+}
+
+# Download nuget.exe
+if (!(Test-Path "$RepoRoot\.nuget"))
+{
+    mkdir "$RepoRoot\.nuget" | Out-Null
+    $NUGET_EXE_URL="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+    Invoke-WebRequest $NUGET_EXE_URL -OutFile "$RepoRoot\.nuget\nuget.exe"
 }
 
 # Put the stage0 on the path

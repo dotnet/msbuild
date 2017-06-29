@@ -31,13 +31,6 @@ namespace Microsoft.NET.Build.Tests
             string referencerTarget,
             string dependencyTarget)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
 
             TestProject dependencyProject = new TestProject()

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;uap10.0</TargetFrameworks>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.3" PrivateAssets="All" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.2.2" />
+  </ItemGroup>
+  
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+  
+  <!-- Force default language targets so that we can test on machines without UWP workload installed and on core msbuild -->
+  <PropertyGroup>
+    <LanguageTargets />
+    <_ExtrasMissingLangTargets>false</_ExtrasMissingLangTargets>
+    <DisableStandardFrameworkResolution>true</DisableStandardFrameworkResolution>
+  </PropertyGroup>
+  
+</Project>

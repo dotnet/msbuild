@@ -8,6 +8,10 @@
                 "Sdks/Microsoft.NET.Sdk/tools/netcoreapp1.0/*/Microsoft.NET.Build.Tasks.resources.dll",
                 "Sdks/Microsoft.NET.Sdk/tools/net46/Microsoft.NET.Build.Tasks.dll",
                 "Sdks/Microsoft.NET.Sdk/tools/net46/*/Microsoft.NET.Build.Tasks.resources.dll",
+                "Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/netcoreapp1.0/Microsoft.NET.Build.Extensions.Tasks.dll",
+                "Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/netcoreapp1.0/*/Microsoft.NET.Build.Extensions.Tasks.resources.dll",
+                "Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/net46/Microsoft.NET.Build.Extensions.Tasks.dll",
+                "Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/tools/net46/*/Microsoft.NET.Build.Extensions.Tasks.resources.dll"
             ]
         }
     ]

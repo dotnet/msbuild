@@ -31,7 +31,7 @@ namespace Microsoft.NET.TestFramework.Commands
             ProjectFile = FindProjectFile(ref _projectRootPath, relativePathToProject);
         }
 
-        private static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
+        internal static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
         {
             if (File.Exists(projectRootPath) && string.IsNullOrEmpty(relativePathToProject))
             {
@@ -71,6 +71,14 @@ namespace Microsoft.NET.TestFramework.Commands
             runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
             string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
+            return new DirectoryInfo(output);
+        }
+
+        public virtual DirectoryInfo GetNonSDKOutputDirectory(string configuration = "Debug")
+        {
+            configuration = configuration ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration);
             return new DirectoryInfo(output);
         }
 

@@ -1,19 +1,19 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-using Microsoft.DotNet.Cli.Utils;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
-using System.Runtime.InteropServices;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
@@ -124,10 +124,18 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_projects_with_simple_dependencies_with_filter_profile()
         {
             string project = "SimpleDependencies";
+            string targetFramework = "netcoreapp2.0";
 
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
+                .WithProjectChanges(projectFile =>
+                {
+                    var ns = projectFile.Root.Name.Namespace;
+
+                    var targetFrameworkElement = projectFile.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
+                    targetFrameworkElement.SetValue(targetFramework);
+                })
                 .Restore(Log);
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
@@ -138,42 +146,53 @@ namespace Microsoft.NET.Publish.Tests
 
             PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute( $"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
+                .Execute($"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory();
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
             publishDirectory.Should().OnlyHaveFiles(new[] {
                 $"{project}.dll",
                 $"{project}.pdb",
                 $"{project}.deps.json",
                 $"{project}.runtimeconfig.json",
-                "System.Collections.NonGeneric.dll"
             });
 
-           var runtimeConfig = ReadJson(System.IO.Path.Combine(publishDirectory.ToString(), $"{project}.runtimeconfig.json"));
-           runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be("netcoreapp1.1");
+            var runtimeConfig = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.runtimeconfig.json"));
+            runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(targetFramework);
 
-            var depsJson = ReadJson(System.IO.Path.Combine(publishDirectory.ToString(), $"{project}.deps.json"));
+            var depsJson = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.deps.json"));
             depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
 
-//TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
+            // The end-to-end test of running the published app happens in the dotnet/cli repo.
+            // See https://github.com/dotnet/cli/blob/358568b07f16749108dd33e7fea2f2c84ccf4563/test/dotnet-store.Tests/GivenDotnetStoresAndPublishesProjects.cs
         }
 
         [Fact]
         public void It_publishes_projects_with_filter_and_rid()
         {
             string project = "SimpleDependencies";
+            string targetFramework = "netcoreapp2.0";
             var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
+                .WithProjectChanges(projectFile =>
+                {
+                    var ns = projectFile.Root.Name.Namespace;
+
+                    var targetFrameworkElement = projectFile.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
+                    targetFrameworkElement.SetValue(targetFramework);
+                })
                 .Restore(Log, "", $"/p:RuntimeIdentifier={rid}");
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
             string manifestFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
-            
+
+            // According to https://github.com/dotnet/sdk/issues/1362 publish should throw an error
+            // since this scenario is not supported. Running the published app doesn't work currently.
+            // This test should be updated when that bug is fixed.
 
             PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
@@ -181,7 +200,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(runtimeIdentifier: rid);
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
 
             publishDirectory.Should().HaveFiles(new[] {
                 $"{project}.dll",
@@ -194,15 +213,10 @@ namespace Microsoft.NET.Publish.Tests
 
             publishDirectory.Should().NotHaveFiles(new[] {
                 "Newtonsoft.Json.dll",
-                "System.Runtime.Serialization.Primitives.dll"
             });
-
-//TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
 
-        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-        //  See https://github.com/dotnet/sdk/issues/1077
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("GenerateDocumentationFile=true", true, true)]
         [InlineData("GenerateDocumentationFile=true;PublishDocumentationFile=false", false, true)]
         [InlineData("GenerateDocumentationFile=true;PublishReferencesDocumentationFiles=false", true, false)]
@@ -245,13 +259,6 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("PublishReferencesDocumentationFiles=true", true)]
         public void It_publishes_referenced_assembly_documentation(string property, bool expectAssemblyDocumentationFilePublished)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var identifier = property.Replace("=", "");
 
             var libProject = new TestProject

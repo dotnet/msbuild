@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string DependenciesMetadata = "Dependencies";
         public const string CompileTimeAssemblyMetadata = "CompileTimeAssembly";
         public const string ResolvedMetadata = "Resolved";
+        public const string VisibleMetadata = "Visible";
 
         [Required]
         public ITaskItem[] TargetDefinitions { get; set; }
@@ -40,6 +42,12 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public string DefaultImplicitPackages { get; set; }
+
+        [Required]
+        public ITaskItem[] References { get; set; }
+
+        [Required]
+        public string TargetFrameworkMoniker { get; set; }
 
         public ITaskItem[] InputDiagnosticMessages { get; set; }
 
@@ -63,6 +71,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private HashSet<string> ImplicitPackageReferences { get; set; }
 
+        private ITaskItem[] ExistingReferenceItemDependencies { get; set; }
+
         protected override void ExecuteCore()
         {
             ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
@@ -72,6 +82,7 @@ namespace Microsoft.NET.Build.Tasks
             PopulatePackages();
 
             PopulateAssemblies();
+            PopulateExistingReferenceItems();
 
             InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
             PopulateDiagnosticsMap();
@@ -92,6 +103,8 @@ namespace Microsoft.NET.Build.Tasks
                 var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
+
+            AddDependenciesToTheWorld(Assemblies, ExistingReferenceItemDependencies);
 
             AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
@@ -182,6 +195,69 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        /// <summary>
+        /// Update FileDefinitions and FileDependencies to pretend that certain Reference items
+        /// explicitly added by a .targets file in the NETStandard.Library are actually normal
+        /// package items. This allows them to show up properly under the "SDK" node in Solution
+        /// Explorer, rather than just under the "Assemblies" node.
+        ///
+        /// This is not meant to be a general mechanism for injecting files that can't be handled
+        /// through the normal NuGet package mechanisms.
+        /// </summary>
+        private void PopulateExistingReferenceItems()
+        {
+            var existingReferenceItemDependencies = new List<ITaskItem>();
+            foreach (var reference in References)
+            {
+                var packageName = reference.GetMetadata("NuGetPackageId");
+                var packageVersion = reference.GetMetadata("NuGetPackageVersion");
+
+                // This is not a "pre-resolved" assembly; skip it.
+                if (packageName == null || packageVersion == null)
+                {
+                    continue;
+                }
+
+                // If we don't know about the specified package, skip it.
+                var packageId = $"{packageName}/{packageVersion}";
+                if (!Packages.TryGetValue(packageId, out ItemMetadata packageItemMetadata))
+                {
+                    continue;
+                }
+
+                // If the file isn't actually a part of the package, skip it.
+                var packageMetadata = (PackageMetadata)packageItemMetadata;
+                if (!reference.ItemSpec.StartsWith(packageMetadata.Path, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var referenceRelativePath = reference.ItemSpec.Substring(packageMetadata.Path.Length).Trim('\\');
+                var referenceKey = $"{packageId}/{referenceRelativePath.Replace('\\', '/')}";
+
+                // If we already know about the assembly file, skip it.
+                if (Assemblies.TryGetValue(referenceKey, out ItemMetadata assemblyItemMetadata))
+                {
+                    continue;
+                }
+
+                // Create the appropriate metadata.
+                var name = Path.GetFileName(referenceKey);
+                var facadeMetadata = reference.GetBooleanMetadata("Facade");
+                var visible = facadeMetadata.HasValue ? !facadeMetadata.Value : true;
+                var assembly = new ExistingReferenceItemMetadata(name, reference.ItemSpec, visible);
+                Assemblies[referenceKey] = assembly;
+
+                // Create the file dependency.
+                existingReferenceItemDependencies.Add(new ExistingReferenceItemDependency(
+                    referenceKey,
+                    TargetFrameworkMoniker,
+                    packageId));
+            }
+
+            ExistingReferenceItemDependencies = existingReferenceItemDependencies.ToArray();
+        }
+
         private void PopulateDiagnosticsMap()
         {
             foreach (var diagnostic in InputDiagnosticMessages)
@@ -236,7 +312,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 var currentPackageUniqueId = $"{parentTargetId}/{currentItemId}";
                 // add current package to dependencies world
-                var currentItem = items[currentItemId];
+                var currentItem = GetItem(items, currentItemId);
                 DependenciesWorld[currentPackageUniqueId] = currentItem;
 
                 // update parent
@@ -255,11 +331,11 @@ namespace Microsoft.NET.Build.Tasks
                     // Update parent's Dependencies count and make sure parent is in the dependencies world
                     if (!string.IsNullOrEmpty(parentPackageId))
                     {
-                        parentDependency = Packages[parentPackageId];
+                        parentDependency = GetItem(Packages, parentPackageId);
                     }
                     else
                     {
-                        parentDependency = Targets[parentTargetId];
+                        parentDependency = GetItem(Targets, parentTargetId);
                         currentItem.IsTopLevelDependency = true;
                     }
 
@@ -269,12 +345,18 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
+        {
+            return Targets.Count > 1 ? items[id].Clone() : items[id];
+        }
+
         private abstract class ItemMetadata
         {
-            public ItemMetadata(DependencyType type)
+            public ItemMetadata(DependencyType type, IList<string> dependencies = null, bool isTopLevelDependency = false)
             {
                 Type = type;
-                Dependencies = new List<string>();
+                Dependencies = dependencies == null ? new List<string>() : new List<string>(dependencies);
+                IsTopLevelDependency = isTopLevelDependency;
             }
 
             public DependencyType Type { get; protected set; }
@@ -291,6 +373,11 @@ namespace Microsoft.NET.Build.Tasks
             /// </summary>
             /// <returns></returns>
             public abstract IDictionary<string, string> ToDictionary();
+
+            /// <summary>
+            /// Creates a copy of the item
+            /// </summary>
+            public abstract ItemMetadata Clone();
         }
 
         private class TargetMetadata : ItemMetadata
@@ -302,6 +389,22 @@ namespace Microsoft.NET.Build.Tasks
                 TargetFrameworkMoniker = item.GetMetadata(MetadataKeys.TargetFrameworkMoniker) ?? string.Empty;
                 FrameworkName = item.GetMetadata(MetadataKeys.FrameworkName) ?? string.Empty;
                 FrameworkVersion = item.GetMetadata(MetadataKeys.FrameworkVersion) ?? string.Empty;
+            }
+
+            private TargetMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string runtimeIdentifier,
+                string targetFrameworkMoniker,
+                string frameworkName,
+                string frameworkVersion)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                RuntimeIdentifier = runtimeIdentifier;
+                TargetFrameworkMoniker = targetFrameworkMoniker;
+                FrameworkName = frameworkName;
+                FrameworkVersion = frameworkVersion;
             }
 
             public string RuntimeIdentifier { get; }
@@ -321,6 +424,18 @@ namespace Microsoft.NET.Build.Tasks
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
             }
+
+            public override ItemMetadata Clone()
+            {
+                return new TargetMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    RuntimeIdentifier,
+                    TargetFrameworkMoniker,
+                    FrameworkName,
+                    FrameworkVersion);
+            }
         }
 
         private class PackageMetadata : ItemMetadata
@@ -334,6 +449,24 @@ namespace Microsoft.NET.Build.Tasks
                 Path = (Resolved
                         ? item.GetMetadata(MetadataKeys.ResolvedPath)
                         : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
+            }
+
+            protected PackageMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string name,
+                string version,
+                string path,
+                bool resolved,
+                bool isImplicitlyDefined)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                Name = name;
+                Version = version;
+                Path = path;
+                Resolved = resolved;
+                IsImplicitlyDefined = isImplicitlyDefined;
             }
 
             public string Name { get; protected set; }
@@ -356,6 +489,19 @@ namespace Microsoft.NET.Build.Tasks
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
             }
+
+            public override ItemMetadata Clone()
+            {
+                return new PackageMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    Name,
+                    Version,
+                    Path,
+                    Resolved,
+                    IsImplicitlyDefined);
+            }
         }
 
         private class AssemblyMetadata : PackageMetadata
@@ -367,6 +513,51 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Name = name ?? string.Empty;
                 Type = type;
+            }
+        }
+
+        /// <summary>
+        /// Represents metadata for a Reference item that we want to pretend was resolved as a
+        /// standard NuGet package assembly.
+        /// </summary>
+        private class ExistingReferenceItemMetadata : ItemMetadata
+        {
+            public ExistingReferenceItemMetadata(string name, string path, bool visible)
+                : base(
+                      type: DependencyType.Assembly,
+                      dependencies: null,
+                      isTopLevelDependency: false)
+            {
+                Name = name;
+                Path = path;
+                Visible = visible;
+            }
+
+            public string Name { get; }
+            public string Path { get; }
+            public bool Visible { get; }
+
+            public override IDictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, Name },
+                    { MetadataKeys.Path, Path },
+                    { MetadataKeys.Type, Type.ToString() },
+                    { MetadataKeys.IsImplicitlyDefined, "false" },
+                    { MetadataKeys.IsTopLevelDependency, "false" },
+                    { ResolvedMetadata, "true" },
+                    { VisibleMetadata, Visible.ToString() },
+                    { DependenciesMetadata, string.Empty }
+                };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new ExistingReferenceItemMetadata(
+                    Name,
+                    Path,
+                    Visible);
             }
         }
 
@@ -383,6 +574,30 @@ namespace Microsoft.NET.Build.Tasks
                 StartColumn = item.GetMetadata(MetadataKeys.StartColumn) ?? string.Empty;
                 EndLine = item.GetMetadata(MetadataKeys.EndLine) ?? string.Empty;
                 EndColumn = item.GetMetadata(MetadataKeys.EndColumn) ?? string.Empty;
+            }
+
+            private DiagnosticMetadata(
+                DependencyType type,
+                IList<string> dependencies,
+                bool isTopLevelDependency,
+                string diagnosticCode,
+                string message,
+                string filePath,
+                string severity,
+                string startLine,
+                string startColumn,
+                string endLine,
+                string endColumn)
+                : base(type, dependencies, isTopLevelDependency)
+            {
+                DiagnosticCode = diagnosticCode;
+                Message = message;
+                FilePath = filePath;
+                Severity = severity;
+                StartLine = startLine;
+                StartColumn = startColumn;
+                EndLine = endLine;
+                EndColumn = endColumn;
             }
 
             public string DiagnosticCode { get; }
@@ -410,6 +625,78 @@ namespace Microsoft.NET.Build.Tasks
                     { MetadataKeys.Type, Type.ToString() },
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
+            }
+
+            public override ItemMetadata Clone()
+            {
+                return new DiagnosticMetadata(
+                    Type,
+                    Dependencies,
+                    IsTopLevelDependency,
+                    DiagnosticCode,
+                    Message,
+                    FilePath,
+                    Severity,
+                    StartLine,
+                    StartColumn,
+                    EndLine,
+                    EndColumn);
+            }
+        }
+
+        /// <summary>
+        /// Represents the FileDependency metadata for a Reference item that we want to pretend was
+        /// resolved as a standard NuGet package assembly.
+        /// </summary>
+        private sealed class ExistingReferenceItemDependency : ITaskItem
+        {
+            private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>(capacity: 3, comparer: StringComparer.OrdinalIgnoreCase);
+
+            public ExistingReferenceItemDependency(string itemSpec, string parentTarget, string parentPackage)
+            {
+                ItemSpec = itemSpec;
+                _metadata[MetadataKeys.FileGroup] = CompileTimeAssemblyMetadata;
+                _metadata[MetadataKeys.ParentTarget] = parentTarget;
+                _metadata[MetadataKeys.ParentPackage] = parentPackage;
+            }
+
+            public string ItemSpec { get; set; }
+
+            public ICollection MetadataNames => _metadata.Keys;
+
+            public int MetadataCount => _metadata.Count;
+
+            public IDictionary CloneCustomMetadata()
+            {
+                return new Dictionary<string, string>(_metadata, _metadata.Comparer);
+            }
+
+            public void CopyMetadataTo(ITaskItem destinationItem)
+            {
+                foreach (var pair in _metadata)
+                {
+                    destinationItem.SetMetadata(pair.Key, pair.Value);
+                }
+            }
+
+            public string GetMetadata(string metadataName)
+            {
+                if (_metadata.TryGetValue(metadataName, out string metadataValue))
+                {
+                    return metadataValue;
+                }
+
+                return null;
+            }
+
+            public void RemoveMetadata(string metadataName)
+            {
+                _metadata.Remove(metadataName);
+            }
+
+            public void SetMetadata(string metadataName, string metadataValue)
+            {
+                _metadata[metadataName] = metadataValue;
             }
         }
 

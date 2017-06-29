@@ -12,6 +12,7 @@ using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -82,7 +83,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = isExe,
                 RuntimeIdentifier = runtimeIdentifier
-            };            
+            };
 
             var extraArgs = extraMSBuildArguments?.Split(' ') ?? Array.Empty<string>();
 
@@ -97,15 +98,30 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
-            //  Self-contained apps don't write a framework version to the runtimeconfig, so only check this for framework-dependent apps
-            if (isExe && !selfContained)
+            if (isExe)
             {
-                string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
-                string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
-                JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+                //  Self-contained apps don't write a framework version to the runtimeconfig, so only check this for framework-dependent apps
+                if (!selfContained)
+                {
+                    string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+                    string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+                    JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
 
-                string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
-                actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+                    string actualRuntimeFrameworkVersion = ((JValue)runtimeConfig["runtimeOptions"]["framework"]["version"]).Value<string>();
+                    actualRuntimeFrameworkVersion.Should().Be(expectedRuntimeVersion);
+                }
+
+                var runtimeconfigDevFileName = testProject.Name + ".runtimeconfig.dev.json";
+                outputDirectory.Should()
+                        .HaveFile(runtimeconfigDevFileName);
+
+                string devruntimeConfigContents = File.ReadAllText(Path.Combine(outputDirectory.FullName, runtimeconfigDevFileName));
+                JObject devruntimeConfig = JObject.Parse(devruntimeConfigContents);
+
+                var additionalProbingPaths = ((JArray)devruntimeConfig["runtimeOptions"]["additionalProbingPaths"]).Values<string>();
+                // can't use Path.Combine on segments with an illegal `|` character
+                var expectedPath = $"{Path.Combine(GetUserProfile(), ".dotnet", "store")}{Path.DirectorySeparatorChar}|arch|{Path.DirectorySeparatorChar}|tfm|";
+                additionalProbingPaths.Should().Contain(expectedPath);
             }
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(buildCommand.ProjectRootPath, "obj", "project.assets.json"), NullLogger.Instance);
@@ -118,14 +134,6 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_restores_only_ridless_tfm()
         {
-            //  Disable this test when using full Framework MSBuild, until MSBuild is updated 
-            //  to provide conditions in NuGet ImportBefore/ImportAfter props/targets
-            //  https://github.com/dotnet/sdk/issues/874
-            if (UsingFullFrameworkMSBuild)
-            {
-                return;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
@@ -172,13 +180,6 @@ namespace Microsoft.NET.Build.Tests
 
         private void RunAppFromOutputFolder(string testName, bool useRid, bool includeConflicts)
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             var targetFramework = "netcoreapp2.0";
             var runtimeIdentifier = useRid ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
@@ -249,13 +250,6 @@ public static class Program
         [Fact]
         public void It_trims_conflicts_from_the_deps_file()
         {
-            if (UsingFullFrameworkMSBuild)
-            {
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             TestProject project = new TestProject()
             {
                 Name = "NetCore2App",
@@ -354,6 +348,21 @@ public static class Program
                 .Select(Path.GetFileName)
                 .Should()
                 .BeEquivalentTo("netcoreapp1.1");
+        }
+
+        private static string GetUserProfile()
+        {
+            string userDir;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                userDir = "USERPROFILE";
+            }
+            else
+            {
+                userDir = "HOME";
+            }
+
+            return Environment.GetEnvironmentVariable(userDir);
         }
     }
 }

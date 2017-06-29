@@ -43,6 +43,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UseTargetPlatformAsNuGetTargetMoniker Condition="'$(UseTargetPlatformAsNuGetTargetMoniker)' == '' AND '$(TargetFrameworkMoniker)' == '.NETCore,Version=v5.0'">true</UseTargetPlatformAsNuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' != 'true'">$(TargetFrameworkMoniker)</NuGetTargetMoniker>
+
+    <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">true</EmitAssetsLogMessages>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -62,10 +64,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
       ResolvePackageDependenciesForBuild;
+      _HandlePackageFileConflicts;
     </ResolveAssemblyReferencesDependsOn>
 
     <PrepareResourcesDependsOn>
       ResolvePackageDependenciesForBuild;
+      _HandlePackageFileConflicts;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
   </PropertyGroup>
@@ -119,8 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
-      IncludeTransitiveProjectReferences;
-      _HandlePackageFileConflicts
+      IncludeTransitiveProjectReferences
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
@@ -145,13 +148,25 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.ResolvePackageDependencies"
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.CheckForTargetInAssetsFile"
+           AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- The condition on this target causes it to be skipped during design-time builds if
         the restore operation hasn't run yet.  This is to avoid displaying an error in
         the Visual Studio error list when a project is created before NuGet restore has
         run and created the assets file. -->
   <Target Name="RunResolvePackageDependencies"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          DependsOnTargets="ReportAssetsLogMessages">
+    
+    <!-- Verify that the assets file has a target for the right framework.  Otherwise, if we restored for the
+         wrong framework, we'd end up finding no references to pass to the compiler, and we'd get a ton of
+         compile errors. -->
+    <CheckForTargetInAssetsFile
+      AssetsFilePath="$(ProjectAssetsFile)"
+      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
+      RuntimeIdentifier="$(RuntimeIdentifier)" />
+
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
@@ -190,8 +205,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
           FileDependencies="@(FileDependencies)"
+          References="@(Reference)"
           DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          InputDiagnosticMessages="@(DiagnosticMessages)">
+          InputDiagnosticMessages="@(DiagnosticMessages)"
+          TargetFrameworkMoniker="$(NuGetTargetMoniker)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
@@ -241,7 +258,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="SDKReferencesDesignTime" ItemName="_ResolvedSDKReference" />
     </CollectSDKReferencesDesignTime>
   </Target>
-          
+
   <!--
     ============================================================
                      RunProduceContentAssets
@@ -282,6 +299,42 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
   </Target>
+
+  <!--
+    ============================================================
+                     ReportAssetsLogMessages
+
+    Report Log Messages in the assets file to MSBuild and raise them as
+    DiagnosticMessage items that can be consumed downstream (e.g. by the
+    dependency node in the solution explorer)
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.ReportAssetsLogMessages"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- The condition on this target causes it to be skipped during design-time builds if
+        the restore operation hasn't run yet.  This is to avoid displaying an error in
+        the Visual Studio error list when a project is created before NuGet restore has
+        run and created the assets file. -->
+  <Target Name="ReportAssetsLogMessages"
+          Condition="'$(EmitAssetsLogMessages)' == 'true' And ('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)'))">
+
+    <ReportAssetsLogMessages
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ContinueOnError="ErrorAndContinue">
+
+      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
+    </ReportAssetsLogMessages>
+
+  </Target>
+
+  <PropertyGroup>
+    <EmitsDependencyDiagnosticMessages>
+      ReportAssetsLogMessages;
+      $(EmitsDependencyDiagnosticMessages)
+    </EmitsDependencyDiagnosticMessages>
+  </PropertyGroup>
 
   <!--
     ============================================================

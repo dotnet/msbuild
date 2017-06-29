@@ -23,17 +23,33 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        // https://github.com/dotnet/sdk/issues/1327
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+        [InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
+        public void Nuget_reference_compat_core_only(
+            string referencerTarget,
+            string testDescription,
+            string rawDependencyTargets,
+            bool restoreSucceeds,
+            bool buildSucceeds)
+        {
+            Nuget_reference_compat(
+                referencerTarget,
+                testDescription,
+                rawDependencyTargets,
+                restoreSucceeds,
+                buildSucceeds);
+        }
+
         [Theory]
         [InlineData("net45", "Full", "netstandard1.0 netstandard1.1 net45", true, true)]
         [InlineData("net451", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 net45 net451", true, true)]
         [InlineData("net46", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 net45 net451 net46", true, true)]
         [InlineData("net461", "PartM3", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 net45 net451 net46 net461", true, true)]
         [InlineData("net462", "PartM2", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 net45 net451 net46 net461", true, true)]
-        //  Fullframework NuGet versioning on Jenkins infrastructure issue
-        //        https://github.com/dotnet/sdk/issues/1041
-        //[InlineData("net461", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
-        //[InlineData("net462", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
-
+        [InlineData("net461", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
+        [InlineData("net462", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 net45 net451 net46 net461", true, true)]
         [InlineData("netstandard1.0", "Full", "netstandard1.0", true, true)]
         [InlineData("netstandard1.1", "Full", "netstandard1.0 netstandard1.1", true, true)]
         [InlineData("netstandard1.2", "Full", "netstandard1.0 netstandard1.1 netstandard1.2", true, true)]
@@ -46,26 +62,9 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.1", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1", true, true)]
         [InlineData("netcoreapp2.0", "PartM1", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
         [InlineData("netcoreapp2.0", "Full", "netstandard1.0 netstandard1.1 netstandard1.2 netstandard1.3 netstandard1.4 netstandard1.5 netstandard1.6 netstandard2.0 netcoreapp1.0 netcoreapp1.1 netcoreapp2.0", true, true)]
-
-        //  OptIn matrix throws an exception for each permutation
-        //        https://github.com/dotnet/sdk/issues/1025
-        //[InlineData("netstandard2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-        //[InlineData("netcoreapp2.0", "OptIn", "net45 net451 net46 net461", true, true)]
-
         public void Nuget_reference_compat(string referencerTarget, string testDescription, string rawDependencyTargets,
                 bool restoreSucceeds, bool buildSucceeds)
         {
-            if (UsingFullFrameworkMSBuild &&
-                (referencerTarget == "netcoreapp2.0" || referencerTarget == "netstandard2.0"))
-            {
-                //  Fullframework NuGet versioning on Jenkins infrastructure issue
-                //        https://github.com/dotnet/sdk/issues/1041
-
-                //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
-                //  See https://github.com/dotnet/sdk/issues/1077
-                return;
-            }
-
             string referencerDirectoryNamePostfix = "_" + referencerTarget + "_" + testDescription;
 
             TestProject referencerProject = GetTestProject(ConstantStringValues.ReferencerDirectoryName, referencerTarget, true);
@@ -146,6 +145,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        // https://github.com/dotnet/sdk/issues/1327
         [CoreMSBuildAndWindowsOnlyTheory]
         [InlineData("netstandard2.0")]
         [InlineData("netcoreapp2.0")]
@@ -179,7 +179,7 @@ namespace Microsoft.NET.Build.Tests
             restoreCommand.Execute().Should().Fail();
         }
 
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void It_is_possible_to_disabled_net461_implicit_package_target_fallback()
         {
             const string testProjectName = "netstandard20_disabled_ptf";
@@ -187,7 +187,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectTestAsset = CreateTestAsset(
                 testProjectName,
                 "netstandard2.0",
-                new Dictionary<string, string> { {"DisableImplicitPackageTargetFallback", "true" } });
+                new Dictionary<string, string> { {"DisableImplicitAssetTargetFallback", "true" } });
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.AddSource(Path.GetDirectoryName(_net461PackageReference.NupkgPath));

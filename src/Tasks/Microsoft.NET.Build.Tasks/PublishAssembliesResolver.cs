@@ -12,7 +12,6 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class PublishAssembliesResolver
     {
-        private  HashSet<PackageIdentity> _allResolvedPackages = new HashSet<PackageIdentity>();
         private readonly IPackageResolver _packageResolver;
         private IEnumerable<string> _excludeFromPublishPackageIds;
         private bool _preserveStoreLayout;
@@ -42,14 +41,13 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     continue;
                 }
-
-                _allResolvedPackages.Add(new PackageIdentity(targetLibrary.Name, targetLibrary.Version));
+                var targetLibraryPackage = new PackageIdentity(targetLibrary.Name, targetLibrary.Version);
 
                 string pkgRoot;
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version, out pkgRoot);
 
-                results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath, pkgRoot, AssetType.Runtime));
-                results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, libraryPath, pkgRoot, AssetType.Native));
+                results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, targetLibraryPackage, libraryPath, pkgRoot, AssetType.Runtime));
+                results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, targetLibraryPackage, libraryPath, pkgRoot, AssetType.Native));
 
                 foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets.FilterPlaceHolderFiles())
                 {
@@ -66,6 +64,7 @@ namespace Microsoft.NET.Build.Tasks
                                 destinationSubDirectory: GetDestinationSubDirectory(sourcePath,
                                                                                     pkgRoot,
                                                                                     GetRuntimeTargetDestinationSubDirectory(runtimeTarget)),
+                                package: targetLibraryPackage,
                                 assetType: _assetType));
                     }
                 }
@@ -85,6 +84,7 @@ namespace Microsoft.NET.Build.Tasks
                         new ResolvedFile(
                             sourcePath: sourcePath,
                             destinationSubDirectory: locale,
+                            package: targetLibraryPackage,
                             assetType: AssetType.Resources));
                 }
             }
@@ -92,12 +92,7 @@ namespace Microsoft.NET.Build.Tasks
             return results;
         }
 
-        public IEnumerable<PackageIdentity> GetResolvedPackages()
-        {
-            return _allResolvedPackages;
-        }
-
-        private IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath, string pkgRoot, AssetType assetType)
+        private IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, PackageIdentity package, string libraryPath, string pkgRoot, AssetType assetType)
         {
             foreach (LockFileItem item in items.FilterPlaceHolderFiles())
             {
@@ -106,6 +101,7 @@ namespace Microsoft.NET.Build.Tasks
                 yield return new ResolvedFile(
                     sourcePath: srcpath,
                     destinationSubDirectory: GetDestinationSubDirectory(srcpath, pkgRoot),
+                    package: package,
                     assetType: assetType);
             }
         }
