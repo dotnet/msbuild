@@ -6,11 +6,12 @@ open System.Linq
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 
 
-type Startup (configuration: IConfiguration) =
+type Startup private () =
+    new (configuration: IConfiguration) as this =
         Startup() then
         this.Configuration <- configuration
 
