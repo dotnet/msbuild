@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">netcoreapp2.0</TargetFramework>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' != ''">TargetFrameworkOverride</TargetFramework>
+    <PreserveCompilationContext>false</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,10 +11,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-25892" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-25975" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-25892" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-25975" />
   </ItemGroup>
 
 </Project>
