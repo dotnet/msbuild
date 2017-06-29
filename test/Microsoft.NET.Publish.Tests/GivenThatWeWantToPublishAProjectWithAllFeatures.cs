@@ -66,15 +66,17 @@ namespace Microsoft.NET.Publish.Tests
                 // TestLibrary has a hard dependency on Newtonsoft.Json.
                 // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
                 // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
-                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.0/");
+                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.0/", null);
 
                 // Verify P2P references get created correctly in the .deps.json file.
-                VerifyDependency(dependencyContext, "TestLibrary", "",
+                VerifyDependency(dependencyContext, "TestLibrary", "", null,
                     "da", "de", "fr");
 
                 // Verify package reference with satellites gets created correctly in the .deps.json file
-                VerifyDependency(dependencyContext, "System.Spatial", "lib/portable-net45+wp8+win8+wpa/",
-                    "de", "es", "fr", "it", "ja", "ko", "ru", "zh-Hans", "zh-Hant");
+                VerifyDependency(dependencyContext, "Humanizer.Core", "lib/netstandard1.0/", "Humanizer",
+                    "af", "ar", "bg", "bn-BD", "cs", "da", "de", "el", "es", "fa", "fi-FI", "fr", "fr-BE", "he", "hr",
+                    "hu", "id", "it", "ja", "lv", "nb", "nb-NO", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr",
+                    "sr-Latn", "sv", "tr", "uk", "uz-Cyrl-UZ", "uz-Latn-UZ", "vi", "zh-CN", "zh-Hans", "zh-Hant");
             }
 
             var runtimeConfigJsonContents = File.ReadAllText(Path.Combine(publishDirectory.FullName, "TestApp.runtimeconfig.json"));
@@ -106,8 +108,18 @@ namespace Microsoft.NET.Publish.Tests
                 .BeEquivalentTo(baselineConfigJsonObject);
         }
 
-        private static void VerifyDependency(DependencyContext dependencyContext, string name, string path, params string[] locales)
+        private static void VerifyDependency(
+            DependencyContext dependencyContext,
+            string name,
+            string path,
+            string dllName,
+            params string[] locales)
         {
+            if (string.IsNullOrEmpty(dllName))
+            {
+                dllName = name;
+            }
+
             var library = dependencyContext
                 .RuntimeLibraries
                 .FirstOrDefault(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -116,18 +128,31 @@ namespace Microsoft.NET.Publish.Tests
             library.RuntimeAssemblyGroups.Count.Should().Be(1);
             library.RuntimeAssemblyGroups[0].Runtime.Should().Be(string.Empty);
             library.RuntimeAssemblyGroups[0].AssetPaths.Count.Should().Be(1);
-            library.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be($"{path}{name}.dll");
-
-            library.ResourceAssemblies.Count.Should().Be(locales.Length);
-
+            library.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be($"{path}{dllName}.dll");
+            
             foreach (string locale in locales)
             {
-                library
+                // Try to get the locale as part of a dependency package: Humanizer.Core.af
+                var localeLibrary = dependencyContext
+                    .RuntimeLibraries
+                    .FirstOrDefault(l => string.Equals(l.Name, $"{name}.{locale}", StringComparison.OrdinalIgnoreCase));
+
+                if (!LocaleInSeparatePackage(localeLibrary))
+                {
+                    localeLibrary = library;
+                }
+                
+                localeLibrary
                    .ResourceAssemblies
-                   .FirstOrDefault(r => r.Locale == locale && r.Path == $"{path}{locale}/{name}.resources.dll")
+                   .FirstOrDefault(r => r.Locale == locale && r.Path == $"{path}{locale}/{dllName}.resources.dll")
                    .Should()
                    .NotBeNull();
             }
+        }
+
+        private static bool LocaleInSeparatePackage(RuntimeLibrary localeLibrary)
+        {
+            return localeLibrary != null;
         }
 
         public static IEnumerable<object[]> PublishData
@@ -153,7 +178,7 @@ namespace Microsoft.NET.Publish.Tests
                         "NoneCopyOutputAlways.txt",
                         "NoneCopyOutputPreserveNewest.txt",
                         "CopyToOutputFromProjectReference.txt",
-                        "System.Spatial.dll",
+                        "Humanizer.dll",
                         "System.AppContext.dll",
                         "System.Buffers.dll",
                         "System.Collections.Concurrent.dll",
@@ -182,15 +207,46 @@ namespace Microsoft.NET.Publish.Tests
                         "de/TestLibrary.resources.dll",
                         "fr/TestApp.resources.dll",
                         "fr/TestLibrary.resources.dll",
-                        "de/System.Spatial.resources.dll",
-                        "es/System.Spatial.resources.dll",
-                        "fr/System.Spatial.resources.dll",
-                        "it/System.Spatial.resources.dll",
-                        "ja/System.Spatial.resources.dll",
-                        "ko/System.Spatial.resources.dll",
-                        "ru/System.Spatial.resources.dll",
-                        "zh-Hans/System.Spatial.resources.dll",
-                        "zh-Hant/System.Spatial.resources.dll",
+                        "de/Humanizer.resources.dll",
+                        "es/Humanizer.resources.dll",
+                        "fr/Humanizer.resources.dll",
+                        "it/Humanizer.resources.dll",
+                        "ja/Humanizer.resources.dll",
+                        "ru/Humanizer.resources.dll",
+                        "zh-Hans/Humanizer.resources.dll",
+                        "zh-Hant/Humanizer.resources.dll",
+                        "zh-CN/Humanizer.resources.dll",
+                        "vi/Humanizer.resources.dll",
+                        "uz-Latn-UZ/Humanizer.resources.dll",
+                        "uz-Cyrl-UZ/Humanizer.resources.dll",
+                        "uk/Humanizer.resources.dll",
+                        "tr/Humanizer.resources.dll",
+                        "sv/Humanizer.resources.dll",
+                        "sr-Latn/Humanizer.resources.dll",
+                        "sr/Humanizer.resources.dll",
+                        "sl/Humanizer.resources.dll",
+                        "sk/Humanizer.resources.dll",
+                        "ro/Humanizer.resources.dll",
+                        "pt/Humanizer.resources.dll",
+                        "pl/Humanizer.resources.dll",
+                        "nl/Humanizer.resources.dll",
+                        "nb-NO/Humanizer.resources.dll",
+                        "nb/Humanizer.resources.dll",
+                        "lv/Humanizer.resources.dll",
+                        "id/Humanizer.resources.dll",
+                        "hu/Humanizer.resources.dll",
+                        "hr/Humanizer.resources.dll",
+                        "he/Humanizer.resources.dll",
+                        "fr-BE/Humanizer.resources.dll",
+                        "fi-FI/Humanizer.resources.dll",
+                        "fa/Humanizer.resources.dll",
+                        "el/Humanizer.resources.dll",
+                        "da/Humanizer.resources.dll",
+                        "cs/Humanizer.resources.dll",
+                        "bn-BD/Humanizer.resources.dll",
+                        "bg/Humanizer.resources.dll",
+                        "ar/Humanizer.resources.dll",
+                        "af/Humanizer.resources.dll",
                         "runtimes/debian.8-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
                         "runtimes/fedora.23-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
                         "runtimes/fedora.24-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
@@ -250,16 +306,47 @@ namespace Microsoft.NET.Publish.Tests
                         "de/TestLibrary.resources.dll",
                         "fr/TestApp.resources.dll",
                         "fr/TestLibrary.resources.dll",
-                        "System.Spatial.dll",
-                        "de/System.Spatial.resources.dll",
-                        "es/System.Spatial.resources.dll",
-                        "fr/System.Spatial.resources.dll",
-                        "it/System.Spatial.resources.dll",
-                        "ja/System.Spatial.resources.dll",
-                        "ko/System.Spatial.resources.dll",
-                        "ru/System.Spatial.resources.dll",
-                        "zh-Hans/System.Spatial.resources.dll",
-                        "zh-Hant/System.Spatial.resources.dll"
+                        "Humanizer.dll",
+                        "de/Humanizer.resources.dll",
+                        "es/Humanizer.resources.dll",
+                        "fr/Humanizer.resources.dll",
+                        "it/Humanizer.resources.dll",
+                        "ja/Humanizer.resources.dll",
+                        "ru/Humanizer.resources.dll",
+                        "zh-Hans/Humanizer.resources.dll",
+                        "zh-Hant/Humanizer.resources.dll",
+                        "zh-CN/Humanizer.resources.dll",
+                        "vi/Humanizer.resources.dll",
+                        "uz-Latn-UZ/Humanizer.resources.dll",
+                        "uz-Cyrl-UZ/Humanizer.resources.dll",
+                        "uk/Humanizer.resources.dll",
+                        "tr/Humanizer.resources.dll",
+                        "sv/Humanizer.resources.dll",
+                        "sr-Latn/Humanizer.resources.dll",
+                        "sr/Humanizer.resources.dll",
+                        "sl/Humanizer.resources.dll",
+                        "sk/Humanizer.resources.dll",
+                        "ro/Humanizer.resources.dll",
+                        "pt/Humanizer.resources.dll",
+                        "pl/Humanizer.resources.dll",
+                        "nl/Humanizer.resources.dll",
+                        "nb-NO/Humanizer.resources.dll",
+                        "nb/Humanizer.resources.dll",
+                        "lv/Humanizer.resources.dll",
+                        "id/Humanizer.resources.dll",
+                        "hu/Humanizer.resources.dll",
+                        "hr/Humanizer.resources.dll",
+                        "he/Humanizer.resources.dll",
+                        "fr-BE/Humanizer.resources.dll",
+                        "fi-FI/Humanizer.resources.dll",
+                        "fa/Humanizer.resources.dll",
+                        "el/Humanizer.resources.dll",
+                        "da/Humanizer.resources.dll",
+                        "cs/Humanizer.resources.dll",
+                        "bn-BD/Humanizer.resources.dll",
+                        "bg/Humanizer.resources.dll",
+                        "ar/Humanizer.resources.dll",
+                        "af/Humanizer.resources.dll"
                     }
                 };
             }

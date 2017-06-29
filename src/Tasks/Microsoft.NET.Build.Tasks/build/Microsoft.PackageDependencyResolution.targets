@@ -64,10 +64,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
       ResolvePackageDependenciesForBuild;
+      _HandlePackageFileConflicts;
     </ResolveAssemblyReferencesDependsOn>
 
     <PrepareResourcesDependsOn>
       ResolvePackageDependenciesForBuild;
+      _HandlePackageFileConflicts;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
   </PropertyGroup>
@@ -121,8 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
-      IncludeTransitiveProjectReferences;
-      _HandlePackageFileConflicts
+      IncludeTransitiveProjectReferences
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
@@ -163,7 +164,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          compile errors. -->
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
-      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)" />
 
     <ResolvePackageDependencies
@@ -204,8 +205,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
           FileDependencies="@(FileDependencies)"
+          References="@(Reference)"
           DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          InputDiagnosticMessages="@(DiagnosticMessages)">
+          InputDiagnosticMessages="@(DiagnosticMessages)"
+          TargetFrameworkMoniker="$(NuGetTargetMoniker)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>

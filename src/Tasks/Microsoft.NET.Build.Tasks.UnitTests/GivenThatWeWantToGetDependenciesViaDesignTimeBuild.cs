@@ -69,7 +69,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -145,7 +147,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepNoType, mockPackageDepUnknown };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -203,7 +207,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepUnresolved };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -415,7 +421,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockPackageReferenceDep
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -550,7 +558,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildPackageDep2
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -760,7 +770,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockWinmdDep,
                 mockReferenceDep
             };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -936,7 +948,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildAssemblyNoCompileMetadataDep,
                 mockChildAnalyzerAssemblyDep
             };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = "Package3;Package4";
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -1064,7 +1078,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDep1, mockPackageDep2, mockChildPackageDep1 };
             task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { };
             task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = string.Empty;
 
             // Act
             var result = task.Execute();
@@ -1092,6 +1108,180 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             resultPackage1.Length.Should().Be(1);
             resultPackage1[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
                              .Should().Be("");
+        }
+
+        [Fact]
+        public void ItShouldCreateDependenciesForReferencesWithNuGetMetadata()
+        {
+            // Arrange
+            // target definitions
+            var netStandard20Target = new MockTaskItem(
+                itemSpec: ".NETStandard,Version=v2.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.RuntimeIdentifier, "netstandard2.0" },
+                    { MetadataKeys.TargetFrameworkMoniker, ".NETStandard,Version=v2.0" },
+                    { MetadataKeys.FrameworkName, ".NETStandard" },
+                    { MetadataKeys.FrameworkVersion, "2.0" },
+                    { MetadataKeys.Type, "Target" }
+                });
+
+            // package definitions
+            var myPackage = new MockTaskItem(
+                itemSpec: "MyPackage/1.5.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, "MyPackage" },
+                    { MetadataKeys.Version, "1.5.0" },
+                    { MetadataKeys.Path, "Packages\\MyPackage\\1.5.0" },
+                    { MetadataKeys.ResolvedPath, "" },
+                    { MetadataKeys.Type, "Package" },
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                });
+
+            // package dependencies
+            var myPackageDependency = new MockTaskItem(
+                itemSpec: "MyPackage/1.5.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.ParentTarget, ".NETStandard,Version=v2.0" }
+                });
+
+            // references
+            var referenceWithMetadata = new MockTaskItem(
+                itemSpec: "Packages\\MyPackage\\1.5.0\\AnAssembly.dll",
+                metadata: new Dictionary<string, string>
+                {
+                    { "NuGetPackageId", "MyPackage" },
+                    { "NuGetPackageVersion", "1.5.0" }
+                });
+
+            var referenceWithoutMetadata = new MockTaskItem(
+                itemSpec: "Packages\\MyPackage\\1.5.0\\AnotherAssembly.dll",
+                metadata: new Dictionary<string, string>());
+
+            var task = new PreprocessPackageDependenciesDesignTime();
+            task.TargetDefinitions = new[] { netStandard20Target };
+            task.PackageDefinitions = new ITaskItem[] { myPackage };
+            task.FileDefinitions = new ITaskItem[] {  };
+            task.PackageDependencies = new ITaskItem[] { myPackageDependency };
+            task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { referenceWithMetadata, referenceWithoutMetadata };
+            task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = ".NETStandard,Version=v2.0";
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(3);
+
+            var resultPackage = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0")).ToArray();
+            resultPackage.Length.Should().Be(1);
+            resultPackage[0].GetMetadata(PreprocessPackageDependenciesDesignTime.DependenciesMetadata)
+                            .Should().Be("MyPackage/1.5.0/AnAssembly.dll");
+        }
+
+        [Fact]
+        public void ItShouldMakeFacadeReferencesInvisible()
+        {
+            // Arrange
+            // target definitions
+            var netStandard20Target = new MockTaskItem(
+                itemSpec: ".NETStandard,Version=v2.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.RuntimeIdentifier, "netstandard2.0" },
+                    { MetadataKeys.TargetFrameworkMoniker, ".NETStandard,Version=v2.0" },
+                    { MetadataKeys.FrameworkName, ".NETStandard" },
+                    { MetadataKeys.FrameworkVersion, "2.0" },
+                    { MetadataKeys.Type, "Target" }
+                });
+
+            // package definitions
+            var myPackage = new MockTaskItem(
+                itemSpec: "MyPackage/1.5.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, "MyPackage" },
+                    { MetadataKeys.Version, "1.5.0" },
+                    { MetadataKeys.Path, "Packages\\MyPackage\\1.5.0" },
+                    { MetadataKeys.ResolvedPath, "" },
+                    { MetadataKeys.Type, "Package" },
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                });
+
+            // package dependencies
+            var myPackageDependency = new MockTaskItem(
+                itemSpec: "MyPackage/1.5.0",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.ParentTarget, ".NETStandard,Version=v2.0" }
+                });
+
+            // references
+            var alphaReference = new MockTaskItem(
+                itemSpec: "Packages\\MyPackage\\1.5.0\\AlphaAssembly.dll",
+                metadata: new Dictionary<string, string>
+                {
+                    { "NuGetPackageId", "MyPackage" },
+                    { "NuGetPackageVersion", "1.5.0" }
+                });
+
+            var betaReference = new MockTaskItem(
+                itemSpec: "Packages\\MyPackage\\1.5.0\\BetaAssembly.dll",
+                metadata: new Dictionary<string, string>
+                {
+                    { "NuGetPackageId", "MyPackage" },
+                    { "NuGetPackageVersion", "1.5.0" },
+                    { "Facade", "false" }
+                });
+
+            var gammaReference = new MockTaskItem(
+                itemSpec: "Packages\\MyPackage\\1.5.0\\GammaAssembly.dll",
+                metadata: new Dictionary<string, string>
+                {
+                    { "NuGetPackageId", "MyPackage" },
+                    { "NuGetPackageVersion", "1.5.0" },
+                    { "Facade", "true" }
+                });
+
+            var task = new PreprocessPackageDependenciesDesignTime();
+            task.TargetDefinitions = new[] { netStandard20Target };
+            task.PackageDefinitions = new ITaskItem[] { myPackage };
+            task.FileDefinitions = new ITaskItem[] { };
+            task.PackageDependencies = new ITaskItem[] { myPackageDependency };
+            task.FileDependencies = new ITaskItem[] { };
+            task.References = new ITaskItem[] { alphaReference, betaReference, gammaReference };
+            task.DefaultImplicitPackages = string.Empty;
+            task.TargetFrameworkMoniker = ".NETStandard,Version=v2.0";
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            result.Should().BeTrue();
+            task.DependenciesDesignTime.Count().Should().Be(5);
+
+            var alphaDependency = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/AlphaAssembly.dll"))
+                .Single();
+            alphaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
+                .Should().BeTrue();
+
+            var betaDependency = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/BetaAssembly.dll"))
+                .Single();
+            betaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
+                .Should().BeTrue();
+
+            var gammaDependency = task.DependenciesDesignTime
+                .Where(x => x.ItemSpec.Equals(".NETStandard,Version=v2.0/MyPackage/1.5.0/GammaAssembly.dll"))
+                .Single();
+            gammaDependency.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.VisibleMetadata)
+                .Should().BeFalse();
         }
 
         private void VerifyTargetTaskItem(DependencyType type, ITaskItem input, ITaskItem output)

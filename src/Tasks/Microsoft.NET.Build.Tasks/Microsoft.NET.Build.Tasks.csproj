@@ -29,6 +29,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MsBuildPackagesVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetVersion)" ExcludeAssets="All" />
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp1.0' " />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" />
@@ -36,16 +37,23 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
+    <Compile Include="..\Common\src\**\*.cs">
+      <Link>Common\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+    </Compile>
     <None Include="build\**\*" PackagePath="build\" />
     <None Include="buildCrossTargeting\**\*" PackagePath="buildCrossTargeting\" />
     <None Include="sdk\**\*" PackagePath="Sdk\" />
-    <None Include="Resources\xlf\**\*" />
-    <EmbeddedResource Include="Resources\Strings.resx">
+    <None Include="..\Common\Resources\xlf\**\*">
+      <Link>Resources\xlf\%(FileName)%(Extension)</Link>
+    </None>
+    <EmbeddedResource Include="..\Common\Resources\Strings.resx">
+      <Link>Resources\%(FileName)%(Extension)</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
     </EmbeddedResource>
-    <Compile Update="Resources\Strings.Designer.cs">
+    <Compile Include="..\Common\Resources\Strings.Designer.cs">
+      <Link>Resources\%(FileName)%(Extension)</Link>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>

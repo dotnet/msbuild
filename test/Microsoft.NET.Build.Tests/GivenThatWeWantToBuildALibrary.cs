@@ -620,18 +620,30 @@ namespace Microsoft.NET.Build.Tests
                 buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             }
 
-            foreach (var command in new TestCommand[] { restoreCommand, buildCommand })
+            //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
+            //  See https://github.com/NuGet/Home/issues/5309
+            var restore = restoreCommand.Execute("/p:RestoreContinueOnError=ErrorAndContinue");
+            if (targetFramework.Contains(';'))
             {
-                //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
-                //  See https://github.com/NuGet/Home/issues/5309
-                command
-                    .Execute("/p:RestoreContinueOnError=ErrorAndContinue")
-                    .Should()
-                    .Fail()
-                    .And
-                    .HaveStdOutContaining(expectedOutput)
-                    .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version when TargetFramework was blank;
+                // Restore does not error on TargetFramework with semicolons, it treats it equivalently to TargetFrameworks.
+                // The error is therefore deferred to the build check below.
+                restore.Should().Pass();
             }
+            else
+            {
+                // Intentionally not checking the error message on restore here as we can't put ourselves in front of
+                // restore and customize the  message forinvalid target frameworks as that would break restoring packages
+                // like MSBuild.Sdk.Extras that add support for extra TFMs.
+                restore.Should().Fail();
+            }
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(expectedOutput)
+                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version when TargetFramework was blank;
         }
 
         [Theory]
@@ -706,6 +718,21 @@ namespace Microsoft.NET.Build.Tests
             string newContents = assetsContents.ToString();
             File.WriteAllText(assetsFilePath, newContents);
 
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_can_target_uwp_using_sdk_extras()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("UwpUsingSdkExtras")
+                .WithSource()
+                .Restore(Log);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute()
                 .Should()

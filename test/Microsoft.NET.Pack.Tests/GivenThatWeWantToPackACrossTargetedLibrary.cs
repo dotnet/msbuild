@@ -20,7 +20,8 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        // https://github.com/dotnet/sdk/issues/1327
+        [CoreMSBuildOnlyFact]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager

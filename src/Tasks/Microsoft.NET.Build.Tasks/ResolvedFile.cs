@@ -3,6 +3,7 @@
 
 using System.IO;
 using System;
+using NuGet.Packaging.Core;
 namespace Microsoft.NET.Build.Tasks
 {
     internal enum AssetType
@@ -16,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks
     internal class ResolvedFile
     {
         public string SourcePath { get; }
-
+        public PackageIdentity Package { get; }
         public string DestinationSubDirectory { get; }
         public AssetType Asset{ get; }
         public string FileName
@@ -34,11 +35,13 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        public ResolvedFile(string sourcePath, string destinationSubDirectory, AssetType assetType = AssetType.None)
+        public ResolvedFile(string sourcePath, string destinationSubDirectory, PackageIdentity package, AssetType assetType = AssetType.None)
         {
             SourcePath = Path.GetFullPath(sourcePath);
             DestinationSubDirectory = destinationSubDirectory;
             Asset = assetType;
+            Package = package;
+
         }
 
         public override bool Equals(object obj)

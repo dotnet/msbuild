@@ -1,0 +1,87 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Build.Extensions.NETFramework.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <!-- Add NETStandard references if targetframeworkversion supports netstandard2.0 (net461 or later) -->
+    <ImplicitlyExpandNETStandardFacades Condition="'$(ImplicitlyExpandNETStandardFacades)' == '' AND '$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'">true</ImplicitlyExpandNETStandardFacades>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GetDependsOnNETStandard" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <UsingTask TaskName="NETBuildExtensionsError" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <Target Name="ImplicitlyExpandNETStandardFacades"
+          Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'"
+          BeforeTargets="_HandlePackageFileConflicts;ResolveAssemblyReferences">
+
+    <ItemGroup>
+      <_CandidateNETStandardReferences Include="@(Reference);@(_ResolvedProjectReferencePaths)" />
+      <_InboxNETStandardFolders Include="$(TargetFrameworkDirectory)" />
+    </ItemGroup>
+
+    <!-- determine if NETStandard.dll is supported inbox for this TargetFramework -->
+    <PropertyGroup Condition="'$(NETStandardInbox)' == ''">
+      <NETStandardInbox Condition="Exists('%(_InboxNETStandardFolders.Identity)\netstandard.dll')">true</NETStandardInbox>
+    </PropertyGroup>
+
+    <!-- determine if any references depend on NETStandard -->
+    <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true' AND '@(_CandidateNETStandardReferences)' != ''" 
+                             References="@(_CandidateNETStandardReferences)">
+      <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />
+    </GetDependsOnNETStandard>
+
+    <!-- prevent using an older SDK version with NETStandard2.0 references -->
+    <PropertyGroup>
+      <_UsingOldSDK Condition="'$(UsingMicrosoftNETSdk)' != 'true' AND ('$(TargetFramework)' != '' OR '$(TargetFrameworks)' != '')">true</_UsingOldSDK>
+    </PropertyGroup>
+    <NETBuildExtensionsError Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true' AND '$(_UsingOldSDK)' == 'true'"
+                             ResourceName="UnsupportedSDKVersionForNetStandard20"/>
+    
+    <!-- if any reference depends on netstandard and it is not inbox, add references and implementation assemblies for netstandard2.0  -->
+    <ItemGroup Condition="'$(DependsOnNETStandard)' == 'true' AND '$(NETStandardInbox)' != 'true'">
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
+                                                Include="$(MSBuildThisFileDirectory)\net47\ref\*.dll" />
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
+                                                Include="$(MSBuildThisFileDirectory)\net462\ref\*.dll"
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net462\ref\%(FileName).dll')" />
+      <_NETStandardLibraryNETFrameworkReference Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
+                                                Include="$(MSBuildThisFileDirectory)\net461\ref\*.dll"
+                                                Exclude="@(_NETStandardLibraryNETFrameworkReference->'$(MSBuildThisFileDirectory)\net461\ref\%(FileName).dll')" />
+
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7'"
+                                          Include="$(MSBuildThisFileDirectory)\net47\lib\*.dll" />
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.2'"
+                                          Include="$(MSBuildThisFileDirectory)\net462\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net462\lib\%(FileName).dll')" />
+      <_NETStandardLibraryNETFrameworkLib Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.6.1'"
+                                          Include="$(MSBuildThisFileDirectory)\net461\lib\*.dll"
+                                          Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)\net461\lib\%(FileName).dll')" />
+
+      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
+           consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in 
+           _NETStandardLibraryNETFrameworkReference.
+           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
+           including all computed references, thus this target is scheduled after references have been raised by NuGet
+           targets. -->
+      <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
+
+      <Reference Include="@(_NETStandardLibraryNETFrameworkReference)">
+        <Private>false</Private>
+      </Reference>
+
+      <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)">
+        <Private>false</Private>
+      </ReferenceCopyLocalPaths>
+    </ItemGroup>
+  </Target>
+</Project>

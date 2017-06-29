@@ -80,8 +80,17 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == ''">
     <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
+
+  <!--
+    NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM 
+          support from being provided by a nuget package such as MSBuild.Sdk.Extras.
+
+          We run before RunResolvePackageDependencies and GetReferenceAssemblyPaths so that design-time builds
+          which do not currently invoke _CheckForInvalidConfigurationAndPlatform, will not trigger spurious 
+          errors that are only consequences of the root cause identified here.
+  -->
   <Target Name="_CheckForUnsupportedTargetFramework"
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_GenerateRestoreProjectSpec;CollectPackageReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetReferenceAssemblyPaths"
           Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
           >
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
@@ -98,10 +107,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     but we need this to be a valid version so that our error message does not get pre-empted by failure to interpret
     version comparison expressions, which is currently unrecoverable in VS.
 
-    This is also an extra safeguard to ensure we never end up with common targets default of .NetFramework,Version=v4.0
+    Also don't leave TargetFrameworkIdentifier unset as it will be defaulted to .NETFramework by common targets, which
+    can cause restore (which we cannot block, see above) to silently succeed for empty TargetFramework.
   -->
   <PropertyGroup Condition="'$(TargetFrameworkVersion)' == ''">
     <TargetFrameworkVersion >v0.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == ''">
+    <TargetFrameworkIdentifier>_</TargetFrameworkIdentifier>
   </PropertyGroup>
   
   <!--

@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
+    <value>At least one possible target framework must be specified.</value>
+  </data>
+  <data name="NoCompatibleTargetFramework" xml:space="preserve">
+    <value>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</value>
+  </data>
+  <data name="InvalidFrameworkName" xml:space="preserve">
+    <value>Invalid framework name: '{0}'.</value>
+  </data>
+  <data name="AssetsFileNotFound" xml:space="preserve">
+    <value>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
+  </data>
+  <data name="AssetsFileMissingTarget" xml:space="preserve">
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</value>
+  </data>
+  <data name="AssetsFilePathNotRooted" xml:space="preserve">
+    <value>Assets file path '{0}' is not rooted. Only full paths are supported.</value>
+  </data>
+  <data name="CannotFindProjectInfo" xml:space="preserve">
+    <value>Cannot find project info for '{0}'. This can indicate a missing project reference.</value>
+  </data>
+  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
+    <value>Content file '{0}' does not contain expected parent package information.</value>
+  </data>
+  <data name="MissingItemMetadata" xml:space="preserve">
+    <value>Missing '{0}' metadata on '{1}' item '{2}'.</value>
+  </data>
+  <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
+    <value>Unrecognized preprocessor token '{0}' in '{1}'.</value>
+  </data>
+  <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
+    <value>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</value>
+  </data>
+  <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
+    <value>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</value>
+  </data>
+  <data name="UnexpectedFileType" xml:space="preserve">
+    <value>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</value>
+  </data>
+  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+    <value>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</value>
+  </data>
+  <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
+    <value>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</value>
+  </data>
+  <data name="DuplicatePreprocessorToken" xml:space="preserve">
+    <value>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</value>
+  </data>
+  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
+    <value>Errors occured when emitting satellite assembly '{0}'.</value>
+  </data>
+  <data name="UnableToFindResolvedPath" xml:space="preserve">
+    <value>Unable to find resolved path for '{0}'.</value>
+  </data>
+  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
+    <value>Unexpected dependency '{0}' with no version number.</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>Asset preprocessor must be configured before assets are processed.</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>Invalid NuGet version string: '{0}'.</value>
+  </data>
+  <data name="DOTNET1011" xml:space="preserve">
+    <value>Framework not installed: {0} in {1}</value>
+  </data>
+  <data name="DOTNET1012" xml:space="preserve">
+    <value>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</value>
+  </data>
+  <data name="DOTNET1013" xml:space="preserve">
+    <value>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</value>
+  </data>
+  <data name="DOTNET1014" xml:space="preserve">
+    <value>Failed to read lock file</value>
+  </data>
+  <data name="DOTNET1017" xml:space="preserve">
+    <value>Project file does not exist '{0}'.</value>
+  </data>
+  <data name="NU1001" xml:space="preserve">
+    <value>The dependency '{0}' could not be resolved.</value>
+  </data>
+  <data name="NU1002" xml:space="preserve">
+    <value>The dependency '{0}' in project '{1}' does not support framework '{2}'.</value>
+  </data>
+  <data name="NU1006" xml:space="preserve">
+    <value>{0}. Please run 'dotnet restore' to generate a new asset file.</value>
+  </data>
+  <data name="NU1007" xml:space="preserve">
+    <value>Dependency specified was '{0}' but ended up with '{1}'.</value>
+  </data>
+  <data name="NU1008" xml:space="preserve">
+    <value>{0} is an unsupported framework.</value>
+  </data>
+  <data name="NU1009" xml:space="preserve">
+    <value>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</value>
+  </data>
+  <data name="NU1010" xml:space="preserve">
+    <value>The dependency type was changed</value>
+  </data>
+  <data name="NU1011" xml:space="preserve">
+    <value>The dependency target '{0}' is unsupported.</value>
+  </data>
+  <data name="NU1012" xml:space="preserve">
+    <value>Dependency conflict. '{0}' expected '{1}' but received '{2}'</value>
+  </data>
+  <data name="IncorrectPackageRoot" xml:space="preserve">
+    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+  </data>
+  <data name="MultipleFilesResolved" xml:space="preserve">
+    <value>More than one file found for {0}</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
+  </data>
+  <data name="FolderAlreadyExists" xml:space="preserve">
+    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+  </data>
+  <data name="IncorrectTargetFormat" xml:space="preserve">
+    <value>The target manifest {0} provided is of not the correct format</value>
+  </data>
+  <data name="ParsingFiles" xml:space="preserve">
+    <value>Parsing the Files : '{0}'</value>
+  </data>
+  <data name="PackageInfoLog" xml:space="preserve">
+    <value>Package Name='{0}', Version='{1}' was parsed</value>
+  </data>
+  <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
+    <value>Specify a RuntimeIdentifier</value>
+  </data>
+  <data name="AppHostHasBeenModified" xml:space="preserve">
+    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+  </data>
+  <data name="FileNameIsTooLong" xml:space="preserve">
+    <value>Given file name '{0}' is longer than 1024 bytes</value>
+  </data>
+  <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
+    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+  </data>
+  <data name="ChoosingAssemblyVersion" xml:space="preserve">
+    <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+  </data>
+  <data name="ChoosingFileVersion" xml:space="preserve">
+    <value>Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+  </data>
+  <data name="ChoosingPlatformItem" xml:space="preserve">
+    <value>Choosing '{0}' because it is a platform item.</value>
+  </data>
+  <data name="ChoosingPreferredPackage" xml:space="preserve">
+    <value>Choosing '{0}' because it comes from a package that is preferred.</value>
+  </data>
+  <data name="ConflictCouldNotDetermineWinner" xml:space="preserve">
+    <value>Could not determine winner due to equal file and assembly versions.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
+    <value>Could not determine winner because '{0}' does not exist.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
+    <value>Could not determine a winner because '{0}' has no file version.</value>
+  </data>
+  <data name="CouldNotDetermineWinner_NotAnAssembly" xml:space="preserve">
+    <value>Could not determine a winner because '{0}' is not an assembly.</value>
+  </data>
+  <data name="EncounteredConflict" xml:space="preserve">
+    <value>Encountered conflict between '{0}' and '{1}'.</value>
+  </data>
+  <data name="CouldNotLoadPlatformManifest" xml:space="preserve">
+    <value>Could not load PlatformManifest from '{0}' because it did not exist.</value>
+  </data>
+  <data name="ErrorParsingPlatformManifest" xml:space="preserve">
+    <value>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+  </data>
+  <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
+    <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
+  </data>
+  <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
+    <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+  </data>
+  <data name="TargetFrameworkWithSemicolon" xml:space="preserve">
+    <value>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
+  </data>
+  <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
+  </data>
+  <data name="SkippingAdditionalProbingPaths" xml:space="preserve">
+    <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
+  </data>
+  <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
+    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
+  </data>
+  <data name="UnsupportedSDKVersionForNetStandard20" xml:space="preserve">
+    <value>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</value>
+  </data>
+</root>
