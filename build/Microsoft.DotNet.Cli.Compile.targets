@@ -126,6 +126,12 @@
                    VersionSuffix="$(VersionSuffix)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
+    <DotNetPublish ToolPath="%(Stage.DotnetDir)"
+                   Output="$(SdkOutputDirectory)/FSharp"
+                   Configuration="$(Configuration)"
+                   VersionSuffix="$(VersionSuffix)"
+                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
+
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="$(BinaryToCorehostifyRelDir)/%(RuntimeTargetsAssetsToRemoveFromDeps.Identity).exe" />
@@ -169,6 +175,7 @@
 
         <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
         <SdkFilesExclude Include="$(SdkOutputDirectory)/TestHost*/**/*" />
+
         <SdkFiles Include="$(SdkOutputDirectory)/**/*" Exclude="@(SdkFilesExclude)" />
         <SdkFilesWithPEMarker Remove="*" />
       </ItemGroup>
@@ -194,7 +201,8 @@
                 JITPath="$(LibCLRJitPath)"
                 CrossgenPath="$(CrossgenPath)"
                 ReadyToRun="True"
-                PlatformAssemblyPaths="@(PlatformAssemblies);
+                PlatformAssemblyPaths="%(CrossgenTargets.RootDir)%(CrossgenTargets.Directory);
+                                       @(PlatformAssemblies);
                                        @(CompileStageSdkDirectories);
                                        $(SharedFrameworkNameVersionPath)" />
 
