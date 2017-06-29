@@ -245,7 +245,7 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            string newArgs = $"console -o \"{rootPath}\"";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)

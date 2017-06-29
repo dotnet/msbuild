@@ -209,7 +209,7 @@ Commands:
 
             try
             {
-                string newArgs = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive --no-restore";
+                string newArgs = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive";
                 new NewCommandShim()
                     .WithWorkingDirectory(dir.Path)
                     .ExecuteWithCapturedOutput(newArgs)
