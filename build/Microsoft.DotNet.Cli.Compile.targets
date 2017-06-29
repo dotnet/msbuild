@@ -241,12 +241,6 @@
             DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <ItemGroup>
-        <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
-      </ItemGroup>
-
-      <Delete Files="@(FilesToClean)" />
-
-      <ItemGroup>
         <FilesToCopy Include="$(StageDirectory)/**/*" />
         <PdbsToClean Include="$(StageDirectory)/sdk/**/*.pdb" />
       </ItemGroup>
