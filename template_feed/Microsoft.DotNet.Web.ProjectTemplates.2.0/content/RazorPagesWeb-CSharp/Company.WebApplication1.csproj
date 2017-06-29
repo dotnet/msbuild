@@ -7,19 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-25892" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-25975" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-25892" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview3-25892" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview3-25892" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview3-25892" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview3-25892" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-preview3-25892" Condition="'$(UseBrowserLink)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-25975" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview3-25975" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview3-25975" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview3-25975" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview3-25975" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-preview3-25975" Condition="'$(UseBrowserLink)' == 'True'" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview3-25892" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview3-25975" />
   </ItemGroup>
 
 </Project>
