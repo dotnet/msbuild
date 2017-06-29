@@ -23,6 +23,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
 
+        /// <summary>
+        /// Cache wildcard expansions
+        /// </summary>
+        public readonly bool MSBuildCacheFileEnumerations = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileEnumerations"));
+
         public Traits()
         {
             EscapeHatches = new EscapeHatches();

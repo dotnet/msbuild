@@ -590,5 +590,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Assert.Equal(string.Empty, project.GetConcatenatedItemsOfType("RecursiveDir"));
             }
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DifferentExcludesOnSameWildcardProduceDifferentResults(bool cacheFileEnumerations)
+        {
+            var projectContents = @"
+<Project>
+   <ItemGroup>
+      <i Include=`**/*.cs`/>
+      <i Include=`**/*.cs` Exclude=`*a.cs`/>
+      <i Include=`**/*.cs` Exclude=`a.cs;c.cs`/>
+   </ItemGroup>
+</Project>
+".Cleanup();
+
+            try
+            {
+                using (var env = TestEnvironment.Create())
+                {
+                    if (cacheFileEnumerations)
+                    {
+                        env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
+                    }
+
+                    ObjectModelHelpers.AssertItemEvaluation(
+                        projectContents,
+                        inputFiles: new[] {"a.cs", "b.cs", "c.cs"},
+                        expectedInclude: new[] {"a.cs", "b.cs", "c.cs", "b.cs", "c.cs", "b.cs"});
+                }
+            }
+            finally
+            {
+                FileMatcher.TestClearCaches();
+            }
+        }
     }
 }
