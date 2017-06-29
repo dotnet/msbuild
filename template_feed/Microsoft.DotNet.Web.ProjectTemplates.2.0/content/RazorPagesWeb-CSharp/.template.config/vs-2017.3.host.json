@@ -14,8 +14,56 @@
   "icon": "vs-2017.3/WebApplication.png",
   "learnMoreLink": "https://go.microsoft.com/fwlink/?LinkID=784881",
   "uiFilters": [ "oneaspnet" ],
+  "isApi": false,
+  "usesOidc": true,
   "supportsDocker": true,
   "useBrowserLink": true,
   "legacyTemplateIdentity": "Microsoft.NetCore.CSharp.RazorPages",
+  "supportedAuthentications": [
+    {
+      "auth": "None",
+      "authenticationType": "NoAuth"
+    },
+    {
+      "auth": "Individual",
+      "authenticationType": "IndividualAuth",
+      "b2cAuthenticationOptions": "CloudExisting"
+    },
+    {
+      "auth": "Individual",
+      "authenticationType": "IndividualAuth",
+      "b2cAuthenticationOptions": "Local"
+    },
+    {
+      "auth": "SingleOrg",
+      "authenticationType": "OrgAuth",
+      "orgAuthenticationOptions": "SSO"
+    },
+    {
+      "auth": "MultiOrg",
+      "authenticationType": "OrgAuth",
+      "orgAuthenticationOptions": "MultiOrg"
+    },
+    {
+      "auth": "Windows",
+      "authenticationType": "WindowsAuth"
+    }
+  ],
+  "ports": [
+    {
+      "name": "IISExpressPort",
+      "useHttps": false
+    },
+    {
+      "name": "KestrelPort",
+      "useHttps": false
+    },
+    {
+      "name": "HttpsPort",
+      "useHttps": true
+    }
+  ],
+  "azureReplyUrlPortName": "HttpsPort",
+  "includeLaunchSettings": true,
   "minFullFrameworkVersion": "4.6.1"
 }

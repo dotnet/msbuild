@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -34,6 +34,11 @@
                     <li><a asp-page="/About">About</a></li>
                     <li><a asp-page="/Contact">Contact</a></li>
                 </ul>
+@*#if (IndividualAuth || OrganizationalAuth)
+                @await Html.PartialAsync("_LoginPartial")
+#elseif (WindowsAuth)
+                <p class="nav navbar-text navbar-right">Hello, @User.Identity.Name!</p>
+#endif*@
             </div>
         </div>
     </nav>
