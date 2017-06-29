@@ -121,6 +121,35 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [Fact]
+        public void Packing_an_app_exclude_dependencys_framework_assemblies_dependency()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+            TestProject testProject = new TestProject()
+            {
+                Name = "PackNet461App",
+                IsSdkProject = true,
+                TargetFrameworks = "net461",
+            };
+
+            testProject.PackageReferences.Add(
+                new TestPackageReference(
+                    "System.IO.Compression",
+                    "4.3.0",
+                    null));
+            testProject.References.Add("System.Web");
+
+            var dependencies = GetFrameworkAssemblies(PackAndGetNuspec(testProject), out var _);
+            
+            dependencies.Count().Should().Be(1);
+            dependencies.Single().Attribute("assemblyName").Value.Should().Be("System.Web");
+        }
+
+        //  Disabled on full framework MSBuild until CI machines have VS with bundled .NET Core / .NET Standard versions
+        //  See https://github.com/dotnet/sdk/issues/1077
+        [CoreMSBuildOnlyFact]
         public void Packing_a_netcoreapp_2_0_app_includes_the_implicit_dependency()
         {
             TestProject testProject = new TestProject()
@@ -158,7 +187,7 @@ namespace Microsoft.NET.Pack.Tests
                 testProject.TargetFrameworks += ";net461";
             }
 
-            var dependencyGroups = PackAndGetDependencyGroups(testProject, out var ns);
+            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject), out var ns);
 
             void ExpectDependencyGroup(string targetFramework, string dependencyId)
             {
@@ -188,7 +217,31 @@ namespace Microsoft.NET.Pack.Tests
             }
         }
 
-        private List<XElement> PackAndGetDependencyGroups(TestProject testProject, out XNamespace ns)
+        private List<XElement> GetDependencyGroups(XDocument nuspec, out XNamespace ns)
+        {
+            ns = nuspec.Root.Name.Namespace;
+
+            var dependencyGroups = nuspec.Root
+                .Element(ns + "metadata")
+                .Element(ns + "dependencies")
+                .Elements()
+                .ToList();
+
+            return dependencyGroups;
+        }
+
+        private List<XElement> GetFrameworkAssemblies(XDocument nuspec, out XNamespace ns)
+        {
+            ns = nuspec.Root.Name.Namespace;
+
+            return nuspec.Root
+                .Element(ns + "metadata")
+                .Element(ns + "frameworkAssemblies")
+                .Elements()
+                .ToList();
+        }
+
+        private XDocument PackAndGetNuspec(TestProject testProject)
         {
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
                 .Restore(Log, testProject.Name);
@@ -201,20 +254,12 @@ namespace Microsoft.NET.Pack.Tests
 
             string nuspecPath = packCommand.GetIntermediateNuspecPath();
             var nuspec = XDocument.Load(nuspecPath);
-            ns = nuspec.Root.Name.Namespace;
-
-            var dependencyGroups = nuspec.Root
-                .Element(ns + "metadata")
-                .Element(ns + "dependencies")
-                .Elements()
-                .ToList();
-
-            return dependencyGroups;
+            return nuspec;
         }
 
         private List<XElement> PackAndGetDependencies(TestProject testProject)
         {
-            var dependencyGroups = PackAndGetDependencyGroups(testProject, out var ns);
+            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject), out var ns);
 
             //  There should be only one dependency group for these tests
             dependencyGroups.Count().Should().Be(1);
@@ -225,6 +270,18 @@ namespace Microsoft.NET.Pack.Tests
             var dependencies = dependencyGroups.Single().Elements(ns + "dependency").ToList();
 
             return dependencies;
+        }
+
+        private List<XElement> PackAndGetFrameworkAssemblies(TestProject testProject)
+        {
+            var frameworkAssemblies = GetFrameworkAssemblies(PackAndGetNuspec(testProject), out var ns);
+
+            //  There should be only one dependency group for these tests
+            frameworkAssemblies.Count().Should().Be(1);
+
+            frameworkAssemblies.Should().Contain(f => f.Name == "frameworkAssembly");
+
+            return frameworkAssemblies.Elements(ns + "frameworkAssembly").ToList();
         }
     }
 }
