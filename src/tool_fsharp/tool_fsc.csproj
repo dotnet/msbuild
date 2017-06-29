@@ -20,7 +20,6 @@
     </Content>
   </ItemGroup>
 
-    
   <Target Name="AddHackFilesToPublish" 
           AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
@@ -29,8 +28,9 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(HackFilesToCopy)"
-        DestinationFiles="@(HackFilesToCopy->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(HackFilesToCopy->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
+
   <Target Name="MakeFscRunnableAndMoveToPublishDir"
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
