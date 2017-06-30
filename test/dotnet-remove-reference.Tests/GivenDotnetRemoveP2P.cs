@@ -65,7 +65,7 @@ Commands:
 
             try
             {
-                string newArgs = $"classlib -o \"{projDir.Path}\" --no-restore";
+                string newArgs = $"classlib -o \"{projDir.Path}\"";
                 new NewCommandShim()
                     .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(newArgs)
@@ -151,7 +151,8 @@ Commands:
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
+{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
         }
 
         [Theory]

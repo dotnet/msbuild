@@ -68,7 +68,7 @@ Commands:
 
             try
             {
-                string args = $"classlib -o \"{projDir.Path}\" --debug:ephemeral-hive --no-restore";
+                string args = $"classlib -o \"{projDir.Path}\" --debug:ephemeral-hive";
                 new NewCommandShim()
                     .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(args)
@@ -125,8 +125,8 @@ Commands:
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().BeVisuallyEquivalentTo(
-                "Unrecognized command or argument 'two'\r\nUnrecognized command or argument 'three'");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
+{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
         }
 
         [Theory]
