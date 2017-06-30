@@ -10,7 +10,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
+    <AssemblyName>MSBuild</AssemblyName>
+    <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
+    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
