@@ -15,6 +15,7 @@
   <?define LCID  = "$(var.ProductLanguage)"?>
   <?define DowngradeErrorMessage  = "A newer version is already installed; please uninstall it and re-run setup."?>
 
+  <?define Platform   =   "$(sys.BUILDARCH)" ?>
   <?define Program_Files="ProgramFilesFolder"?>
   <?define Win64AttributeValue=no?>
 
