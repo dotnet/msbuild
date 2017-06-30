@@ -17,6 +17,11 @@
       <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
 
       <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+
+      <MSBuildExtensionsInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/**/*" />
+      <MSBuildExtensionsVerInput Include="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/**/*" />
+      <CombinedMSBuildExtensionsInput Include="@(MSBuildExtensionsInput)" />
+      <CombinedMSBuildExtensionsInput Include="@(MSBuildExtensionsVerInput)" />
     </ItemGroup>
 
     <MakeRelative
@@ -39,6 +44,22 @@
       Path2="%(SdkLanguagePackInput.Identity)" >
       <Output TaskParameter="RelativePath" ItemName="SdkLanguagePackRelativeOutputFiles" />
     </MakeRelative>
+
+    <MakeRelative
+      Path1="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions/"
+      Path2="%(MSBuildExtensionsInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="MSBuildExtensionsRelativeOutputFiles" />
+    </MakeRelative>
+    <MakeRelative
+      Path1="$(MSBuildExtensionsLayoutDirectory)/msbuildExtensions-ver/"
+      Path2="%(MSBuildExtensionsVerInput.Identity)" >
+      <Output TaskParameter="RelativePath" ItemName="MSBuildExtensionsVerRelativeOutputFiles" />
+    </MakeRelative>
+
+    <ItemGroup>
+      <CombinedMSBuildExtensionsRelativeOutputFiles Include="@(MSBuildExtensionsRelativeOutputFiles)" />
+      <CombinedMSBuildExtensionsRelativeOutputFiles Include="@(MSBuildExtensionsVerRelativeOutputFiles -> '14.0/%(Identity)')" />
+    </ItemGroup>
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
@@ -71,7 +92,13 @@
         <NameWithVersion>$(ArtifactNameWithVersionSdkLanguagePack)</NameWithVersion>
         <Name>$(ArtifactNameSdkLanguagePack)</Name>
       </LayoutDefinition>
+    </ItemGroup>
 
+    <ItemGroup Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x86' ">
+      <LayoutDefinition Include="MSBuildExtensions">
+        <InputFiles>@(CombinedMSBuildExtensionsInput)</InputFiles>
+        <OutputFiles>@(CombinedMSBuildExtensionsRelativeOutputFiles -> '$(MSBuildExtensionsOutputDirectory)/%(Identity)')</OutputFiles>
+      </LayoutDefinition>
     </ItemGroup>
   </Target>
 
