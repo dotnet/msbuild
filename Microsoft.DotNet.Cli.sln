@@ -197,6 +197,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Cli.Sln.In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Cli.Sln.Internal.Tests", "test\Microsoft.DotNet.Cli.Sln.Internal.Tests\Microsoft.DotNet.Cli.Sln.Internal.Tests.csproj", "{56F1E090-B80F-4BDF-8991-4B0F9B5B8C9A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tool_fsc", "src\tool_fsharp\tool_fsc.csproj", "{602976C5-2477-4B4C-AD9A-1EAFB250529A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1621,5 +1623,6 @@ Global
 		{F2D1A7DA-B3EB-4CA7-BAA9-A18CEC398853} = {88278B81-7649-45DC-8A6A-D3A645C5AFC3}
 		{C98C7C2E-2C29-4A40-958C-60561ED77791} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{56F1E090-B80F-4BDF-8991-4B0F9B5B8C9A} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 	EndGlobalSection
 EndGlobal
