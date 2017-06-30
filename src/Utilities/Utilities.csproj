@@ -166,6 +166,9 @@
     <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
       <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>Traits</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

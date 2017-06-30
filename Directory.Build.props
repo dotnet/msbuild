@@ -11,6 +11,11 @@
     <!-- TODO: these should come from a packageref, not the buildtools magic folder. -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Tools\MSFT.snk</AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyFile Condition="$(MSBuildProjectFullPath.Contains('UnitTests'))">$(MSBuildThisFileDirectory)\Tools\Test.snk</AssemblyOriginatorKeyFile>
+
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
