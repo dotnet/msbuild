@@ -209,6 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
-    <ProjectReference Include="..\XMakeBuildEngine\XMakeBuildEngine.csproj" />
+    <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
   </ItemGroup>
 </Project>

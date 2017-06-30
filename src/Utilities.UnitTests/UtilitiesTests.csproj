@@ -12,10 +12,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
 
-    <ProjectReference Include="..\Utilities.csproj" />
-    <ProjectReference Include="..\..\XMakeBuildEngine\XMakeBuildEngine.csproj" />
-    <ProjectReference Include="..\..\XMakeTasks\XMakeTasks.csproj" />
-    <ProjectReference Include="..\..\Framework\Framework.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
+    <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
+    <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
