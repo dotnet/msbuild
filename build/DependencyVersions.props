@@ -17,7 +17,7 @@
 
     <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25331-02</CLI_NETStandardLibraryNETFrameworkVersion>
-    <CLI_WEBSDK_Version>2.0.0-rel-20170518-512</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>2.0.0-rel-20170629-588</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.3.0-preview-20170618-03</CLI_TestPlatform_Version>
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
