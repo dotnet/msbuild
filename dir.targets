@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="CheckDesignTime">
 
+  <PropertyGroup>
+    <!-- Referenced assembly 'XXXX, Version=N.N.N.N, Culture=neutral, PublicKeyToken=null' does not have a strong name. -->
+    <NoWarn Condition=" '$(IsTestProject)' == 'true' ">$(NoWarn);8002</NoWarn>
+  </PropertyGroup>
+
   <Target Name="_DisplayBuildInfo">
       <!-- Cannot do both MonoBuild and NetCoreBuild -->
       <Error Condition="'$(MonoBuild)' == 'true' and '$(NetCoreBuild)' == 'true'"
