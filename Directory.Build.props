@@ -1,0 +1,172 @@
+﻿<Project>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
+
+    <!--TODO: this should come from NB.GV-->
+    <Version>15.1.0</Version>
+
+    <SignAssembly>True</SignAssembly>
+    <PublicSign>true</PublicSign>
+
+    <!-- TODO: these should come from a packageref, not the buildtools magic folder. -->
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Tools\MSFT.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile Condition="$(MSBuildProjectFullPath.Contains('UnitTests'))">$(MSBuildThisFileDirectory)\Tools\Test.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <DefineConstants>$(DefineConstants);FEATURE_64BIT_ENVIRONMENT_QUERY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
+    <FeatureAppDomain>true</FeatureAppDomain>
+    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CODEDOM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_CONSOLE_FALLBACK</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTUREINFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTURES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_FUSION_COMPAREASSEMBLYIDENTITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLE_SAFEWAITHANDLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETFULLPATH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PIPE_SECURITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_TOOLSETS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_SDKS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESGEN</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
+    <!-- System.Resources.ResourceManager.GetResourceSet() method is currently only in full framework -->
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCEMANAGER_GETRESOURCESET</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESX_RESOURCE_READER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_RTLMOVEMEMORY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' == 'true'">$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
+    <FeatureSpecialFolders>true</FeatureSpecialFolders>
+    <DefineConstants>$(DefineConstants);FEATURE_STRING_INTERN</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_STRONG_NAMES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYSTEMPAGESIZE</DefineConstants>
+    <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
+    <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TASKHOST</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_USERINTERACTIVE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_USERDOMAINNAME</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
+    <FeatureXamlTypes>true</FeatureXamlTypes>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore'))">
+    <NetCoreBuild>true</NetCoreBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(NetCoreBuild)'=='true'">
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+
+    <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
+         If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
+
+    <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Change define constants as needed -->
+  <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true' AND '$(MonoBuild)' != 'true'">
+    <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Setup some common paths -->
+  <PropertyGroup>
+    <CommonPath>$(SourceDir)Common\src</CommonPath>
+    <CommonTestPath>$(SourceDir)Common\tests</CommonTestPath>
+  </PropertyGroup>
+
+  <!-- Setup the default output and intermediate paths -->
+  <PropertyGroup>
+    <!--<BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
+
+    <RelativeOutputPathWithConfig>$(Configuration)$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
+    <RelativeOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
+
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(RelativeOutputPathWithConfig)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+
+    <OutputPath>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig),"Output"))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
+
+    <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+
+    --><!-- BuildTools uses this path to write some files --><!--
+    <ObjDir>$(IntermediateOutputPath)</ObjDir>
+
+    --><!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way --><!--
+    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
+
+    <DeploymentDirName>$(TargetPlatformIdentifier)_Deployment</DeploymentDirName>
+    <TestDeploymentDirName>$(DeploymentDirName)_Test</TestDeploymentDirName>
+
+    <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
+    <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
+
+    --><!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property --><!--
+    <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>-->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
+
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <AssemblyName>Microsoft.Build.Framework</AssemblyName>
+    <RootNamespace>Microsoft.Build.Framework</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
+    <Compile Remove="XamlTypes\**" />
+    <EmbeddedResource Remove="XamlTypes\**" />
+    <None Remove="XamlTypes\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
+
+    <Reference Include="System.Xaml" Condition="'$(FeatureXamlTypes)' == 'true'" />
+  </ItemGroup>
+</Project>
