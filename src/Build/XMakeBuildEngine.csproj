@@ -1,0 +1,326 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
+
+    <RootNamespace>Microsoft.Build</RootNamespace>
+    <AssemblyName>Microsoft.Build</AssemblyName>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
+
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**;Collections\RetrievableEntryHashSet\Originals\*" />
+    <EmbeddedResource Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
+    <None Remove="UnitTests\**;UnitTestsPublicOM\**;ApexTests\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.2.304-preview5" Condition="'$(TargetFramework)' == 'net46'" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.Collections.NonGeneric" Version="4.0.1" />
+    <PackageReference Include="System.Diagnostics.Contracts" Version="4.0.1" />
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" />
+    <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <PackageReference Include="System.IO.Pipes" Version="4.0.0" />
+    <PackageReference Include="System.Linq.Parallel" Version="4.0.1" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.0.0" Condition="'$(TargetFramework)' == 'netstandard1.5'" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.6.0" />
+    <PackageReference Include="System.Threading.ThreadPool" Version="4.0.10" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
+    <PackageReference Include="System.Xml.XPath.XmlDocument" Version="4.0.1" />
+
+    <ProjectReference Include="..\Framework\Framework.csproj" />
+
+    <Reference Include="System.Configuration" Condition="'$(TargetFramework)' == 'net46'" />
+
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) != 'net46'">
+    <Compile Remove="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) != 'true'" />
+
+
+    <Compile Include="..\Shared\Compat\Base64Encoder.cs">
+      <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
+      <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
+      <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\TypeExtensions.cs">
+      <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\ValidateNames.cs">
+      <Link>SharedUtilities\Compat\ValidateNames.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlCharType.cs">
+      <Link>SharedUtilities\Compat\XmlCharType.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlReservedNs.cs">
+      <Link>SharedUtilities\Compat\XmlReservedNs.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
+      <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlTextWriter.cs">
+      <Link>SharedUtilities\Compat\XmlTextWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
+      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\defaultbinder.cs">
+      <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\PipeSecurity.cs">
+      <Link>SharedUtilities\Compat\PipeSecurity.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+      <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EnvironmentUtilities.cs">
+      <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
+      <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EncodingStringWriter.cs">
+      <Link>SharedUtilities\EncodingStringWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyNameComparer.cs">
+      <Link>SharedUtilities\AssemblyNameComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AwaitExtensions.cs">
+      <Link>SharedUtilities\AwaitExtensions</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyNameReverseVersionComparer.cs">
+      <Link>SharedUtilities\AssemblyNameReverseVersionComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\CanonicalError.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\Constants.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\HybridDictionary.cs">
+      <Link>Collections\HybridDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NGen.cs">
+      <Link>SharedUtilities\NGen.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Pair.cs">
+      <Link>SharedUtilities\Pair.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\PropertyParser.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
+      <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\StringBuilderCache.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
+    <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
+    <Compile Include="..\Shared\TaskLoader.cs" />
+    <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
+    <Compile Include="..\Shared\IKeyed.cs" />
+    <Compile Include="..\Shared\INodeEndpoint.cs" />
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
+    <Compile Include="..\Shared\INodePacketTranslator.cs" />
+    <Compile Include="..\Shared\NodePacketTranslator.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
+    <Compile Include="..\Shared\NodePacketFactory.cs" />
+    <Compile Include="..\Shared\NodeBuildComplete.cs" />
+    <Compile Include="..\Shared\NodeShutdown.cs" />
+    <Compile Include="..\Shared\TaskLoggingHelper.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
+    <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>SharedUtilities\VisualStudioLocationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
+    <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="..\Shared\OpportunisticIntern.cs" />
+    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
+      <Link>Collections\CopyOnWriteDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
+    <Compile Include="..\Shared\ReadOnlyCollection.cs" />
+    <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+
+
+
+
+
+
+
+    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
+      <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
+      <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ReadOnlyEmptyList.cs">
+      <Link>SharedUtilities\ReadOnlyEmptyList.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyNameExtension.cs">
+      <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\BuildEventFileInfo.cs">
+      <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ConversionUtilities.cs">
+      <Link>SharedUtilities\ConversionUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileDelegates.cs">
+      <Link>SharedUtilities\FileDelegates.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>Errors\ErrorUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\EscapingUtilities.cs">
+      <Link>SharedUtilities\EscapingUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\VersionUtilities.cs">
+      <Link>SharedUtilities\VersionUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\EventArgsFormatting.cs">
+      <Link>SharedUtilities\EventArgsFormatting.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ExceptionHandling.cs">
+      <Link>SharedUtilities\ExceptionHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileMatcher.cs">
+      <Link>SharedUtilities\FileMatcher.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <Link>SharedUtilities\FileUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\TempFileUtilities.cs" />
+    <Compile Include="..\Shared\Modifiers.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
+      <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
+      <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\IElementLocation.cs">
+      <Link>SharedUtilities\IElementLocation.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\InternalErrorException.cs">
+      <Link>Errors\InternalErrorException.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\LoadedType.cs">
+      <Link>SharedUtilities\LoadedType.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <Link>SharedUtilities\NativeMethodsShared.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <Link>SharedUtilities\AssemblyUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
+      <Link>InprocTrackingNativeMethods.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ProjectErrorUtilities.cs">
+      <Link>Errors\ProjectErrorUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
+      <Link>Errors\ProjectFileErrorUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ProjectWriter.cs">
+      <Link>SharedUtilities\ProjectWriter.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs">
+      <Link>SharedUtilities\ResourceUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Tracing.cs" />
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(NetCoreBuild)'=='true'" />
+    <Compile Include="..\Shared\TypeLoader.cs">
+      <Link>SharedUtilities\TypeLoader.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VisualStudioConstants.cs">
+      <Link>VisualStudioConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\XMakeAttributes.cs">
+      <Link>Resources\XMakeAttributes.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\XMakeElements.cs">
+      <Link>Resources\XMakeElements.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\XmlUtilities.cs">
+      <Link>SharedUtilities\XmlUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+
+    <ProjectReference Include="..\Utilities.csproj" />
+    <ProjectReference Include="..\..\XMakeBuildEngine\XMakeBuildEngine.csproj" />
+    <ProjectReference Include="..\..\XMakeTasks\XMakeTasks.csproj" />
+    <ProjectReference Include="..\..\Framework\Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs" />
+    <Compile Include="..\..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
+    <Compile Include="..\..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
+  </ItemGroup>
+
+</Project>
