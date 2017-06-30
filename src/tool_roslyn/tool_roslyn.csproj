@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="RunCsc.sh;RunCsc.cmd">
+    <Content Include="RunCsc.sh;RunCsc.cmd;RunVbc.sh;RunVbc.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -33,7 +33,7 @@
         DestinationFiles="@(HackFilesToCopy->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
-  <Target Name="MakeCscRunnableAndMoveToPublishDir"
+  <Target Name="MakeCscAndVbcRunnableAndMoveToPublishDir"
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
     <ItemGroup>
@@ -55,6 +55,13 @@
           DestinationFiles="$(PublishDir)/csc.exe;
                             $(PublishDir)/csc.runtimeconfig.json;
                             $(PublishDir)/csc.deps.json;" />
+
+    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/vbc.dll;
+                       $(PublishDir)/$(TargetName).runtimeconfig.json;
+                       $(PublishDir)/$(TargetName).deps.json;"
+          DestinationFiles="$(PublishDir)/vbc.exe;
+                            $(PublishDir)/vbc.runtimeconfig.json;
+                            $(PublishDir)/vbc.deps.json;" />
   </Target>
 
   <Target Name="RemoveFilesAfterPublish"
