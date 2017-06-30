@@ -19,6 +19,7 @@ using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -4180,6 +4181,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // the value of any of the sub-toolset properties.
             logger.AssertLogContains("|changed|");
             logger.AssertLogContains("||a3||");
+        }
+
+        /// <summary>
+        /// Verifies that if no VisualStudioVersion is set that the toolset with set a value.
+        /// </summary>
+        [Fact]
+        public void VerifyVisualStudioVersionSetByToolset()
+        {
+            string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
+
+            try
+            {
+                // Ensure that VisualStudioVersion is not set as an environment variable
+                //
+                Environment.SetEnvironmentVariable("VisualStudioVersion", null);
+
+                // No global properties are passed to the ProjectCollection so VisualStudioVersion should not be set
+                //
+                Project project = new Project(null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+
+                string actual = project.GetPropertyValue(Constants.VisualStudioVersionPropertyName);
+
+                Assert.Equal(MSBuildConstants.CurrentVisualStudioVersion, actual);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("VisualStudioVersion", originalVisualStudioVersion);
+            }
         }
 
         /// <summary>

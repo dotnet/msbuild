@@ -1265,7 +1265,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Assert.Equal(t.DefaultSubToolsetVersion, p.SubToolsetVersion);
 
-                Assert.Equal(t.DefaultSubToolsetVersion ?? string.Empty, p.GetPropertyValue("VisualStudioVersion"));
+                Assert.Equal(t.DefaultSubToolsetVersion ?? MSBuildConstants.CurrentVisualStudioVersion, p.GetPropertyValue("VisualStudioVersion"));
             }
             finally
             {

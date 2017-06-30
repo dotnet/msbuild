@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 if (p.Toolset.DefaultSubToolsetVersion == null)
                 {
-                    Assert.Equal(String.Empty, p.GetPropertyValue("VisualStudioVersion"));
+                    Assert.Equal(MSBuildConstants.CurrentVisualStudioVersion, p.GetPropertyValue("VisualStudioVersion"));
                 }
                 else
                 {
