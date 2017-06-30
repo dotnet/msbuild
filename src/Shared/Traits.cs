@@ -25,6 +25,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));
 
         /// <summary>
+        /// Eliminate locking in OpportunisticIntern at the expense of memory
+        /// </summary>
+        public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleInternConcurrency"));
+
+        /// <summary>
         /// Cache wildcard expansions
         /// </summary>
         public readonly bool MSBuildCacheFileEnumerations = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileEnumerations"));
