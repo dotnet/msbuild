@@ -579,7 +579,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Remove ="%(ResolvedFileToRemove.Identity)"/>
 
       <ResolvedFileToPublish Include="%(NativeAppHostNETCore.Identity)">
-        <RelativePath>$(AssemblyName)%(Extension)</RelativePath>
+        <RelativePath>$(AssemblyName)$(_NativeExecutableExtension)</RelativePath>
       </ResolvedFileToPublish>
       
 
