@@ -232,7 +232,7 @@
         <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/Roslyn/RunVbc.sh">
           <Mode>755</Mode>
         </SdkOutputChmodTargets>
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/Roslyn/RunFsc.sh">
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/FSharp/RunFsc.sh">
           <Mode>755</Mode>
         </SdkOutputChmodTargets>
       </ItemGroup>
