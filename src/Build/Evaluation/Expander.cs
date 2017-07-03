@@ -70,6 +70,11 @@ namespace Microsoft.Build.Evaluation
         BreakOnNotEmpty = 0x10,
 
         /// <summary>
+        /// When an error occurs expanding a property, just leave it unexpanded.  This should only be used when attempting to log a message with a best effort expansion of a string.
+        /// </summary>
+        LeavePropertiesUnexpandedOnError = 0x20,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -1181,10 +1186,17 @@ namespace Microsoft.Build.Evaluation
 
                 if (function != null)
                 {
-                    // Because of the rich expansion capabilities of MSBuild, we need to keep things
-                    // as strings, since property expansion & string embedding can happen anywhere
-                    // propertyValue can be null here, when we're invoking a static function
-                    propertyValue = function.Execute(propertyValue, properties, options, elementLocation);
+                    try
+                    {
+                        // Because of the rich expansion capabilities of MSBuild, we need to keep things
+                        // as strings, since property expansion & string embedding can happen anywhere
+                        // propertyValue can be null here, when we're invoking a static function
+                        propertyValue = function.Execute(propertyValue, properties, options, elementLocation);
+                    }
+                    catch (Exception) when (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                    {
+                        propertyValue = propertyBody;
+                    }
                 }
 
                 return propertyValue;

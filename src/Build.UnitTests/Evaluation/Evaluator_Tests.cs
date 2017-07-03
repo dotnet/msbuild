@@ -4385,6 +4385,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        /// <summary>
+        /// Tests that an import, target, or task with a condition that contains an error but it short circuited does not fail the build.  This can happen when you have a condition like:
+        /// 'true' == 'false' AND '$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))' != ''
+        /// 
+        /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
+        /// 
+        /// https://github.com/Microsoft/msbuild/issues/2259
+        /// </summary>
+        [Theory]
+        [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
+        [InlineData("<Target Name=\"Build\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
+        [InlineData("<Target Name=\"Build\"><Message Text=\"Build executed\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" /></Target>")]
+        public void ConditionWithShortCircuitAndErrorDoesNotFailBuild(string projectInnerXml)
+        {
+            string content = ObjectModelHelpers.CleanupFileContents($@"
+                             <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                                {projectInnerXml}
+                             </Project>");
+
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+                MockLogger logger = new MockLogger();
+
+                bool result = project.Build(logger);
+
+                Assert.True(result);
+            }
+        }
+
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
