@@ -21,13 +21,13 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"console --debug:ephemeral-hive --no-restore");
+                .Execute($"console --debug:ephemeral-hive");
 
             DateTime expectedState = Directory.GetLastWriteTime(rootPath);
 
             var result = new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput($"console --debug:ephemeral-hive --no-restore");
+                .ExecuteWithCapturedOutput($"console --debug:ephemeral-hive");
 
             DateTime actualState = Directory.GetLastWriteTime(rootPath);
 
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"{projectType} --debug:ephemeral-hive --no-restore")
+                .Execute($"{projectType} --debug:ephemeral-hive")
                 .Should().Pass();
 
             // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
-                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive --no-restore")
+                .Execute($"{type} --name {projectName} -o . --debug:ephemeral-hive")
                 .Should().Pass();
 
             new RestoreCommand()

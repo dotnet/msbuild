@@ -65,7 +65,7 @@ Commands:
 
             try
             {
-                string newArgs = $"classlib -o \"{projDir.Path}\" --no-restore";
+                string newArgs = $"classlib -o \"{projDir.Path}\"";
                 new NewCommandShim()
                     .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(newArgs)
