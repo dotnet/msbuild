@@ -23,8 +23,7 @@
                              UploadArtifactsToAzure;
                              UploadChecksumsToAzure;
                              PublishDebFilesToDebianRepo;
-                             PublishCliVersionBadge;
-                             PublishCliCoherentBadge" />
+                             PublishCliVersionBadge" />
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
@@ -46,6 +45,8 @@
   <Target Name="PublishCliVersionBadge">
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
+      <CliVersionBadgeToUpload Include="$(CoherentBadge)"
+              Condition=" '$(Coherent)' == 'true' " />
     </ItemGroup>
 
     <ItemGroup>
@@ -66,31 +67,5 @@
       AccountName="$(ArtifactCloudDropAccountName)"
       ContainerName="$(ArtifactContainerName)"
       Items="@(CliVersionBadgeToUpload)" />
-  </Target>
-
-  <Target Name="PublishCliCoherentBadge"
-          Condition=" '$(Coherent)' == 'true' ">
-    <ItemGroup>
-      <CliCoherentBadgeToUpload Include="$(CoherentBadge)" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <CliCoherentBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
-      </CliCoherentBadgeToUpload>
-    </ItemGroup>
-
-    <UploadToAzure
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliCoherentBadgeToUpload)"
-      Overwrite="$(OverwriteOnPublish)" />
-
-    <SetBlobPropertiesBasedOnFileType 
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliCoherentBadgeToUpload)" />
   </Target>
 </Project>
