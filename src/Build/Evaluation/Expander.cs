@@ -3199,6 +3199,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     // We ended up with something other than a function expression
                     string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
+                    if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                    {
+                        // If the caller wants to ignore errors (in a log statement for example), just return the partially evaluated value
+                        return partiallyEvaluated;
+                    }
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.InnerException.Message.Replace("\r\n", " "));
                     return null;
                 }
