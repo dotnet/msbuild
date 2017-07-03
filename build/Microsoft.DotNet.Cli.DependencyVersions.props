@@ -5,12 +5,12 @@
     <CLI_MSBuild_Version>15.3.0-preview-000402-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta3-61816-04</CLI_Roslyn_Version>
     <CLI_FSharp_Version>4.2.0-rc-170621-0</CLI_FSharp_Version>
-    <CLI_NETSDK_Version>1.1.0-alpha-20170615-3</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>1.1.0-alpha-20170630-2</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.3.0-preview3-4168</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170516-2-509</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0</CLI_TestPlatform_Version>
-    <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta1-20170427-174</TemplateEngineTemplateVersion>
+    <TemplateEngineVersion>1.0.0-beta2-20170629-269</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170629-269</TemplateEngineTemplateVersion>
     <PlatformAbstractionsVersion>1.0.3</PlatformAbstractionsVersion>
     <DependencyModelVersion>1.0.3</DependencyModelVersion>
   </PropertyGroup>
