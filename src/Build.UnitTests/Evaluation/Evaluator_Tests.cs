@@ -4386,7 +4386,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Tests that an import, target, or task with a condition that contains an error but it short circuited does not fail the build.  This can happen when you have a condition like:
+        /// Tests that an import, target, or task with a condition that contains an error but is short-circuited does not fail the build.  This can happen when you have a condition like:
         /// 'true' == 'false' AND '$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))' != ''
         /// 
         /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
