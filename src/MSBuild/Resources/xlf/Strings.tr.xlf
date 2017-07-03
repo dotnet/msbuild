@@ -1309,19 +1309,46 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
-                     Tüm derleme olaylarını sıkıştırılmış bir ikili dosyada serileştirir.
-                     Varsayılan olarak, dosya geçerli dizinde bulunur ve 
-                     "msbuild.binlog" olarak adlandırılır. İkili dosya günlüğü, derleme
-                     işleminin ayrıntılı bir açıklamasıdır, daha sonra metin günlüklerini yeniden
-                     oluşturmak için kullanılabilir ve diğer analiz araçları tarafından kullanılabilir.
-                     İkili dosya günlükleri genellikle en ayrıntılı metin tanılama günlüklerinden
-                     10-20 kat daha küçüktür ancak daha fazla bilgi içerir.
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Tüm derleme olaylarını sıkıştırılmış bir ikili dosyada seri hale getirir.
+                     Varsayılan olarak, dosya geçerli dizinde bulunur ve "msbuild.binlog"
+                     olarak adlandırılır. Daha sonra metin günlüklerini yeniden
+                     yapılandırmak için kullanılabilen ve diğer analiz araçları tarafından
+                     kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır.
+                     İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
+                     10-20 kat küçüktür ancak daha fazla bilgi içerir.
                      (Kısa biçim: /bl)
+
+                     İkili günlükçü varsayılan olarak, derleme sırasında karşılaşılan
+                     tüm içeri aktarılmış projeler ve hedef dosyalar dahil olmak üzere
+                     proje dosyalarının kaynak dosyalarını toplar. İsteğe bağlı 
+                     ProjectImports anahtarı bu davranışı denetler:
+
+                      ProjectImports=None     - Proje içeri aktarmalarını
+                                                toplama.
+                      ProjectImports=Embed    - Proje içeri aktarmalarını günlük dosyasına
+                                                ekle.
+                      ProjectImports=ZipFile  - Proje dosyalarını 
+                                                çıkış.projectimports.zip
+                                                dosyasına kaydet (burada çıkış, ikili
+                                                günlük dosyası adıyla aynı ada sahiptir.
+
+                     ProjectImports için varsayılan ayar Embed’dir.
+                     Not: Günlükçü .cs, .cpp vb. MSBuild olmayan kaynak
+                     dosyaları toplamaz.
+
+                     Bir .binlog dosyası msbuild.exe’ye bir proje/çözüm
+                     yerine bağımsız değişken olarak geçirilerek “yeniden oynatılabilir”.
+                     Diğer günlükçüler, günlük dosyasındaki bilgileri özgün
+                     derleme gerçekleşiyormuş gibi alır.
+                     İkili günlük ve kullanımı hakkında daha fazla bilgiyi aşağıdaki adreste bulabilirsiniz:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Örnekler:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>

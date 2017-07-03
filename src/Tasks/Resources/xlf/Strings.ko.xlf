@@ -2566,7 +2566,7 @@
       </trans-unit>
       <trans-unit id="XmlPeek.NamespacesParameterNoAttribute">
         <source>The specified Namespaces attribute does not have attribute "{0}".</source>
-        <target state="translated">지정한 Namespaces 특성에 "{0}" 특성이 없습니다..</target>
+        <target state="translated">지정한 Namespaces 특성에 "{0}" 특성이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XmlPeek.NamespacesParameterNotWellFormed">

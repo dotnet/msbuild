@@ -1308,19 +1308,46 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      將所有建置事件序列化成壓縮的二進位檔。
                      根據預設，此檔案存放在目前的目錄下，
-                     並會命名為 "msbuild.binlog"。此二進位記錄是建置處理的詳細描述，
-                     之後可用於重新建構文字記錄，
-                     以及供其他分析工具使用。二進位記錄
+                     並會命名為 "msbuild.binlog"。此二進位記錄檔是
+                     建置流程的詳細描述，之後可用於重建文字記錄，
+                     以及供其他分析工具使用。二進位記錄檔
                      的大小通常會比大部分的詳細文字
-                     診斷層級記錄小 10-20x，但包含了更多資訊。
+                     診斷層級記錄小 10-20 倍，但包含了更多資訊。
                      (簡短形式: /bl)
+
+                     根據預設，二進位記錄器會收集專案檔的
+                     原始程式文字，包括在建置期間遇到的
+                     匯入專案及目標檔案。選擇性的 ProjectImports 參數
+                     會控制這此行為:
+
+                      ProjectImports=None     - 不收集專案
+                                                匯入。
+                      ProjectImports=Embed    - 在記錄檔中內嵌
+                                                專案匯入。
+                      ProjectImports=ZipFile  - 將專案檔儲存到 
+                                                output.projectimports.zip，
+                                                其中輸出的名稱與
+                                                二進位記錄檔名稱相同。
+
+                     ProjectImports 的預設設定為 Embed。
+                     注意: 記錄器不會收集非 MSBuild 的原始程式檔，
+                     例如 .cs、.cpp 等。
+
+                     將 .binlog file 傳遞到 msbuild.exe 作為引數而非
+                     專案/解決方案，即可加以「播放」。
+                     其他記錄器會收到記錄檔中包含的資訊，
+                     就如同原始組建發生時的情況。
+                     若要深入閱讀二進位記錄檔及其使用方式，請前往:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      範例:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>

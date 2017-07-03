@@ -15,6 +15,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -40,11 +41,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
-        // MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
-        // for https://github.com/Microsoft/msbuild/issues/1751. It should
-        // be removed (permanently set to false) after establishing that
-        // it's unneeded (at least by the 16.0 timeframe).
-        private Dictionary<string, LazyItemList> _itemLists = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+        private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
@@ -364,7 +361,7 @@ namespace Microsoft.Build.Evaluation
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Environment.GetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES") == "1" ?
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 

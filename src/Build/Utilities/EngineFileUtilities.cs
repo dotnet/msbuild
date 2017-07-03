@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -251,6 +252,21 @@ namespace Microsoft.Build.Internal
                 FileMatcher.s_defaultGetFileSystemEntries);
 
             return isLegal ? regex : null;
+        }
+
+        internal class IOCache
+        {
+            private readonly Lazy<ConcurrentDictionary<string, bool>> existenceCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(), true);
+
+            public virtual bool DirectoryExists(string directory)
+            {
+                return existenceCache.Value.GetOrAdd(directory, Directory.Exists);
+            }
+
+            public virtual bool FileExists(string file)
+            {
+                return existenceCache.Value.GetOrAdd(file, File.Exists);
+            }
         }
     }
 }

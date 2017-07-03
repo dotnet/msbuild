@@ -1308,19 +1308,51 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
-                     Serializuje všechny události sestavení do komprimovaného binárního souboru.
-                     Tento soubor se standardně nachází v aktuálním adresáři a má název
-                     msbuild.binlog. Binární protokol je podrobný popis
-                     procesu sestavení, který se dá později použít k rekonstrukci
-                     textových protokolů a který můžou používat jiné nástroje pro analýzu. Binární protokol
-                     má obvykle 10–20x menší velikost než nejpodrobnější textový
-                     protokol úrovně diagnostiky, ale obsahuje více informací.
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializuje všechny události sestavení do komprimovaného
+                     binárního souboru. Tento soubor se standardně nachází
+                     v aktuálním adresáři a má název msbuild.binlog. Binární
+                     protokol je podrobný popis procesu sestavení, který se
+                     dá později použít k rekonstrukci textových protokolů
+                     a který můžou používat jiné nástroje pro analýzu.
+                     Binární protokol má obvykle 10–20x menší velikost než
+                     nejpodrobnější textový protokol na úrovni diagnostiky,
+                     ale obsahuje více informací.
                      (Krátký formát: /bl)
+
+                     Binární protokolovací nástroj standardně shromažďuje
+                     zdrojový text projektových souborů včetně všech
+                     importovaných projektů a cílových souborů zjištěných
+                     při sestavování. Toto chování řídí volitelný parametr
+                     ProjectImports:
+
+                      ProjectImports=None     - Neshromažďovat importované
+                                                projekty
+                      ProjectImports=Embed    - Vložit importované projekty
+                                                do souboru protokolu
+                      ProjectImports=ZipFile  - Uložit projektové soubory
+                                                do output.projectimports.zip,
+                                                kde output je stejný název
+                                                jako název souboru binárního
+                                                protokolu
+
+                     Výchozí nastavení pro ProjectImports je Embed.
+                     Poznámka: Protokolovací nástroj neshromažďuje zdrojové
+                     soubory nepatřící pod MSBuild, jako .cs, .cpp atd.
+
+                     Soubor .binlog se dá „znovu přehrát“ tak, že se předá
+                     souboru msbuild.exe jako argument místo projektu/řešení.
+                     Jiné protokolovací nástroje obdrží informace obsažené
+                     v souboru protokolu, jako by šlo o původní sestavení.
+                     Více o binárním protokolu a jeho použití si můžete
+                     přečíst na stránce:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Příklady:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>

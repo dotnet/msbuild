@@ -1308,19 +1308,47 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
-                     将所有生成事件序列化为一个压缩的二进制文件。
-                     该文件默认位于当前目录且命名为
-                     "msbuild.binlog"。二进制日志详细描述了
-                     稍后可用于重建
-                     文本日志并可由其他分析工具使用的生成进程。二进制日志
-                     通常比最详细的文本诊断级别的
-                     日志小 10-20 倍，但其包含更多信息。
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     将所有生成事件序列化为压缩的二进制文件。
+                     默认情况下该文件位于当前目录并且名为“msbuild.binlog”。
+                     二进制日志是生成过程的详细描述，
+                     以后可将其于重新构建文本日志
+                     并由其他分析工具所使用。
+                     二进制日志通常比大多数详细的文本诊断级日志小 10 到 20 倍，
+                     但它可以包含更多信息。
                      (缩写: /bl)
+
+                     默认情况下，二进制记录器收集项目文件的源文本，
+                     包括生成期间所有导入的
+                     项目和目标文件。可选的
+                     ProjectImports 开关控制此行为:
+                     
+
+                      ProjectImports=None     - 不收集项目
+                                                导入项。
+                      ProjectImports=Embed    - 在日志文件中
+                                                嵌入项目导入项。
+                      ProjectImports=ZipFile  - 将项目文件保存到
+                                                output.projectimports.zip，
+                                                其中输出的名称
+                                                与二进制日志文件名称相同。
+
+                     ProjectImports 的默认设置为 Embed。
+                     注意: 记录器不会收集非 MSBuild 源文件，
+                     例如 .cs、 .cpp 等。
+
+                     可将 .binlog 文件以参数（而不是项目/解决方案）的形式传递给
+                     msbuild.exe 对其进行“播放”。
+                     其他记录器将接收日志文件中的信息，
+                     就像原始的生成正在发生一样。
+                     你可以通过以下网址阅读有关二进制文件及其用法的详细信息:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      示例:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>
