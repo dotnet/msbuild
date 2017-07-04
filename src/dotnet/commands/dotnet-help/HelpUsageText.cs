@@ -5,7 +5,7 @@ internal static class HelpUsageText
 {
     public static readonly string UsageText =
 $@"{LocalizableStrings.Usage}: dotnet [runtime-options] [path-to-application]
-{LocalizableStrings.Usage}: dotnet [command] [arguments] [command-options]
+{LocalizableStrings.Usage}: dotnet [sdk-options] [command] [arguments] [command-options]
 
 path-to-application:
   {LocalizableStrings.PathToApplicationDefinition}
@@ -27,9 +27,6 @@ path-to-application:
   nuget            {LocalizableStrings.NugetDefinition}
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
-  -v|--version     {LocalizableStrings.SDKVersionCommandDefinition}
-  -i|--info        {LocalizableStrings.SDKInfoCommandDefinition}
-  -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbosity        {CommonLocalizableStrings.VerbosityOptionDescription}
@@ -37,10 +34,13 @@ path-to-application:
 
 {LocalizableStrings.RunDotnetCommandHelpForMore}
 
+sdk-options:
+  --version        {LocalizableStrings.SDKVersionCommandDefinition}
+  --info           {LocalizableStrings.SDKInfoCommandDefinition}
+  -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
+
 runtime-options:
   --additionalprobingpath <path>    {LocalizableStrings.AdditionalprobingpathDefinition}
-  --depsfile <path>                 {LocalizableStrings.DepsfilDefinition}
-  --runtimeconfig <path>            {LocalizableStrings.RuntimeconfigDefinition}
   --fx-version <version>            {LocalizableStrings.FxVersionDefinition}
   --roll-forward-on-no-candidate-fx {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
   --additional-deps <path>          {LocalizableStrings.AdditionalDeps}
