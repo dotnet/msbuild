@@ -226,6 +226,15 @@
           <!-- Executables need x -->
           <Mode>u=rwx,g=rx,o=rx</Mode>
         </SdkOutputChmodTargets>
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/Roslyn/RunCsc.sh">
+          <Mode>755</Mode>
+        </SdkOutputChmodTargets>
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/Roslyn/RunVbc.sh">
+          <Mode>755</Mode>
+        </SdkOutputChmodTargets>
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/FSharp/RunFsc.sh">
+          <Mode>755</Mode>
+        </SdkOutputChmodTargets>
       </ItemGroup>
 
       <Chmod Condition=" '$(OSName)' != 'win' "

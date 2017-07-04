@@ -28,6 +28,7 @@ using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using NuGet.Frameworks;
+using Command = Microsoft.DotNet.Cli.Utils.Command;
 
 namespace Microsoft.DotNet.Cli
 {
