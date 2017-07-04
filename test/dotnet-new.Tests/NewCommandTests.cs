@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd.ExitCode.Should().NotBe(0);
 
-            cmd.StdErr.Should().StartWith("No templates matched the input template name: [Web1.1]");
+            cmd.StdErr.Should().StartWith("No templates matched the input template name: Web1.1.");
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd.ExitCode.Should().NotBe(0);
 
-            cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: [c]");
+            cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: c.");
         }
     }
 }
