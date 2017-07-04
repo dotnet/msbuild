@@ -13,13 +13,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-26027" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-26065" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-26027" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview3-26027" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview3-26027" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview3-26027" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-26065" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview3-26065" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview3-26065" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview3-26065" />
   </ItemGroup>
 
 </Project>
