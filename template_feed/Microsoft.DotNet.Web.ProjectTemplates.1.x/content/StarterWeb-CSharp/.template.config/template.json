@@ -4,7 +4,7 @@
   "classifications": ["Web", "MVC"],
   "name": "ASP.NET Core Web App",
   "generatorVersions": "[1.0.0.0-*)",
-  "description": "A project template for creating an ASP.NET Core application with example ASP.NET MVC Views and Controllers. This template can also be used for RESTful HTTP services.",
+  "description": "A project template for creating an ASP.NET Core application with example ASP.NET Core MVC Views and Controllers. This template can also be used for RESTful HTTP services.",
   "groupIdentity": "Microsoft.Web.Mvc",
   "precedence": "100",
   "identity": "Microsoft.Web.Mvc.CSharp",

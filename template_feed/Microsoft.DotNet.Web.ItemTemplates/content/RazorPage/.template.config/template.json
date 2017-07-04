@@ -45,6 +45,10 @@
     "HostIdentifier": {
       "type": "bind",
       "binding": "HostIdentifier"
+    },
+    "NameIsPage": {
+      "type": "computed",      
+      "value": "(name == \"Page\")"
     }
   },
   "postActions": [

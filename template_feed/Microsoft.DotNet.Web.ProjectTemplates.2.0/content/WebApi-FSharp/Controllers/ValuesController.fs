@@ -12,7 +12,7 @@ type ValuesController () =
 
     [<HttpGet>]
     member this.Get() =
-        [|"value1" , "value2"|]
+        [|"value1"; "value2"|]
 
     [<HttpGet("{id}")>]
     member this.Get(id:int) =
