@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // NOTE: Currently, only the NET46 build ships (with Visual Studio/desktop msbuild), 
-// but the netstandard1.3 adaptation here acts a proof-of-concept for cross-platform 
+// but the netstandard1.5 adaptation here acts a proof-of-concept for cross-platform 
 // portability of the underlying hostfxr API and gives us build and test coverage 
 // on non-Windows machines.
-#if NETSTANDARD1_3
+#if NETSTANDARD1_5
 
 using System.Runtime.InteropServices;
 using System.Text;
@@ -34,4 +34,4 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     }
 }
 
-#endif // NETSTANDARD1_3
+#endif // NETSTANDARD1_5
