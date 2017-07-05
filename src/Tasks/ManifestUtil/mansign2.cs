@@ -1175,6 +1175,13 @@ namespace System.Deployment.Internal.CodeSigning
                 return oldCsp;
             }
 
+            // 3rd party crypto providers in general don't need to be forcefully upgraded.
+            // This not an ideal way to check for that but is the best we have available.
+            if (!oldCsp.CspKeyContainerInfo.ProviderName.StartsWith("Microsoft", StringComparison.Ordinal))
+            {
+                return oldCsp;
+            }
+
             const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
             CspParameters csp = new CspParameters();
             csp.ProviderType = PROV_RSA_AES;
