@@ -29,6 +29,12 @@ namespace Microsoft.NET.Build.Tasks
                             {
                                 return true;
                             }
+                            
+                            if (reader.StringComparer.Equals(reference.Name, SystemRuntimeAssemblyName) &&
+                                reference.Version >= SystemRuntimeMinVersion)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
