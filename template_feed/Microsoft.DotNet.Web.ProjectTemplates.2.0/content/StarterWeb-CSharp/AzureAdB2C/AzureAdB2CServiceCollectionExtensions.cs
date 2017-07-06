@@ -11,20 +11,19 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 {
     public static class AzureAdB2CServiceCollectionExtensions
     {
-        public static IServiceCollection AddAzureAdB2CAuthentication(this IServiceCollection services)
+        public static IServiceCollection AddAzureAdB2C(this IServiceCollection services)
         {
             // Move to config binding
             services.AddAuthentication(sharedOptions =>
             {
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            });
+            })
+            .AddOpenIdConnect()
+            .AddCookie();
 
             services.AddSingleton<IConfigureOptions<AzureAdB2COptions>, BindAzureAdB2COptions>();
             services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
-            services.AddOpenIdConnectAuthentication();
-            services.AddCookieAuthentication();
+
             return services;
         }
 
@@ -74,7 +73,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                 return Task.FromResult(0);
             }
  
-            public Task OnRemoteFailure(FailureContext context)
+            public Task OnRemoteFailure(RemoteFailureContext context)
             {
                 context.HandleResponse();
                 // Handle the error code that Azure AD B2C throws when trying to reset a password from the login page 

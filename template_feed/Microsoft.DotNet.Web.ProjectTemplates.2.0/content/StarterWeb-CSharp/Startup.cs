@@ -63,9 +63,9 @@ namespace Company.WebApplication1
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 #elseif (IndividualB2CAuth)
-            services.AddAzureAdB2CAuthentication();
+            services.AddAzureAdB2C();
 #elseif (OrganizationalAuth)
-            services.AddAzureAdAuthentication();
+            services.AddAzureAd();
 #endif
 #if (IndividualLocalAuth)
 

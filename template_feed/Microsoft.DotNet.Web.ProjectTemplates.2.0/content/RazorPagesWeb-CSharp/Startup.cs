@@ -63,18 +63,18 @@ namespace Company.WebApplication1
                 .AddDefaultTokenProviders();
 
 #elseif (IndividualB2CAuth)
-            services.AddAzureAdB2CAuthentication();
+            services.AddAzureAdB2C();
 
 #elseif (OrganizationalAuth)
-            services.AddAzureAdAuthentication();
+            services.AddAzureAd();
 
 #endif
 #if (IndividualLocalAuth)
             services.AddMvc()
             .AddRazorPagesOptions(options =>
             {
-                options.AuthorizeFolder("/Account/Manage");
-                options.AuthorizePage("/Account/Logout");
+                options.Conventions.AuthorizeFolder("/Account/Manage");
+                options.Conventions.AuthorizePage("/Account/Logout");
             });
 
             // Register no-op EmailSender used by account confirmation and password reset during development

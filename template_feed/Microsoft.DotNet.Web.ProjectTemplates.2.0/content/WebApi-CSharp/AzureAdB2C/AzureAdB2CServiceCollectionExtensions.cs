@@ -7,18 +7,18 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 {
     public static class AzureAdServiceCollectionExtensions
     {
-        public static IServiceCollection AddAzureAdB2CBearerAuthentication(this IServiceCollection services)
+        public static IServiceCollection AddAzureAdB2CBearer(this IServiceCollection services)
         {
             // Move to config binding
             services.AddAuthentication(sharedOptions =>
             {
                 sharedOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            });
+            })
+            .AddJwtBearer();
 
             services.AddSingleton<IConfigureOptions<AzureAdB2COptions>, BindAzureAdB2COptions>();
             services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, PostConfigureAzureOptions>();
-            services.AddJwtBearerAuthentication();
+
             return services;
         }
 

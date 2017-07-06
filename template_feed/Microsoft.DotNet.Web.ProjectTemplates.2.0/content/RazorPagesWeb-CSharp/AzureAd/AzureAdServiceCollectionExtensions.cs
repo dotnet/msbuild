@@ -15,20 +15,19 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 {
     public static class AzureAdServiceCollectionExtensions
     {
-        public static IServiceCollection AddAzureAdAuthentication(this IServiceCollection services)
+        public static IServiceCollection AddAzureAd(this IServiceCollection services)
         {
             // Move to config binding
             services.AddAuthentication(sharedOptions =>
             {
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            });
+            })
+            .AddOpenIdConnect()
+            .AddCookie();
 
             services.AddSingleton<IConfigureOptions<AzureAdOptions>, BindAzureAdOptions>();
             services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
-            services.AddOpenIdConnectAuthentication();
-            services.AddCookieAuthentication();
+
             return services;
         }
 
