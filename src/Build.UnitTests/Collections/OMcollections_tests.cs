@@ -83,11 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.Equal(properties.PropertyNames.Count, deserializedProperties.PropertyNames.Count);
-            foreach (string propertyName in properties.PropertyNames)
-            {
-                Assert.Equal(properties[propertyName].EvaluatedValue, deserializedProperties[propertyName].EvaluatedValue);
-            }
+            Assert.Equal(properties, deserializedProperties);
         }
 
         /// <summary>
@@ -102,7 +98,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.Equal(properties.PropertyNames.Count, deserializedProperties.PropertyNames.Count);
+            Assert.Equal(properties, deserializedProperties);
         }
 
         /// <summary>
