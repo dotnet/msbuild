@@ -38,7 +38,9 @@
     <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
-
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
     <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>
     </Compile>
