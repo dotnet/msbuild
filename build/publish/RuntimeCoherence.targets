@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="RuntimeCoherence"
+  <Target Name="EvaluateRuntimeCoherence"
           DependsOnTargets="ReadAspNetCoreSharedRuntimeVersionFile;
-                            EvaluateRuntimeCoherence" />
+                            CompareRuntimeVersions" />
 
   <Target Name="ReadAspNetCoreSharedRuntimeVersionFile"
         DependsOnTargets="DownloadHostAndSharedFxArtifacts">
@@ -16,8 +16,7 @@
     </ReadLinesFromFile>
   </Target>
   
-  <Target Name="EvaluateRuntimeCoherence"
-      DependsOnTargets="ReadAspNetCoreSharedRuntimeVersionFile">
+  <Target Name="CompareRuntimeVersions">
     <PropertyGroup>
       <Coherent>false</Coherent>
       <Coherent Condition=" '$(CLI_SharedFrameworkVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>

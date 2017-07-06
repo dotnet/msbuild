@@ -12,7 +12,7 @@
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
                             Package;
-                            RuntimeCoherence;
+                            EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
 
