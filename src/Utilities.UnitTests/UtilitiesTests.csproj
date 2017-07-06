@@ -28,9 +28,7 @@
     <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
     <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
-    <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj"
-                      ReferenceOutputAssembly="false"
-                      OutputItemType="ReferenceCopyLocalPaths" />
+    <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj" ReferenceOutputAssembly="false" OutputItemType="ReferenceCopyLocalPaths" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,6 +57,12 @@
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TrackedDependencies\TestFiles\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
