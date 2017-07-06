@@ -12,6 +12,11 @@
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
+    <PackageReference Include="System.Net.Primitives " Version="4.3.0" />
+    <PackageReference Include="System.Threading.Overlapped" Version="4.3.0" />
+    <PackageReference Include="System.Security.Principal" Version="4.3.0" />
 
     <!-- TODO: get this from a package -->
     <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' != 'true'" />
