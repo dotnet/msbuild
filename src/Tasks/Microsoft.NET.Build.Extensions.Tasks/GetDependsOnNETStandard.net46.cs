@@ -48,6 +48,17 @@ namespace Microsoft.NET.Build.Tasks
                 var asmRefEnum = IntPtr.Zero;
                 var asmRefTokens = new UInt32[16];
                 UInt32 fetched;
+
+                var assemblyMD = new ASSEMBLYMETADATA()
+                {
+                    rpLocale = IntPtr.Zero,
+                    cchLocale = 0,
+                    rpProcessors = IntPtr.Zero,
+                    cProcessors = 0,
+                    rOses = IntPtr.Zero,
+                    cOses = 0
+                };
+
                 // Ensure the enum handle is closed.
                 try
                 {
@@ -72,7 +83,7 @@ namespace Microsoft.NET.Build.Tasks
                                 null,
                                 0,
                                 out asmNameLength,
-                                IntPtr.Zero,
+                                ref assemblyMD,
                                 out hashDataPtr,
                                 out hashDataLength,
                                 out flags);
@@ -88,7 +99,7 @@ namespace Microsoft.NET.Build.Tasks
                                 assemblyNameBuffer,
                                 (uint)assemblyNameBuffer.Capacity,
                                 out asmNameLength,
-                                IntPtr.Zero,
+                                ref assemblyMD,
                                 out hashDataPtr,
                                 out hashDataLength,
                                 out flags);
@@ -98,6 +109,16 @@ namespace Microsoft.NET.Build.Tasks
                             if (assemblyName.Equals(NetStandardAssemblyName, StringComparison.Ordinal))
                             {
                                 return true;
+                            }
+
+                            if (assemblyName.Equals(SystemRuntimeAssemblyName, StringComparison.Ordinal))
+                            {
+                                var assemblyVersion = new Version(assemblyMD.usMajorVersion, assemblyMD.usMinorVersion, assemblyMD.usBuildNumber, assemblyMD.usRevisionNumber);
+
+                                if (assemblyVersion >= SystemRuntimeMinVersion)
+                                {
+                                    return true;
+                                }
                             }
                         }
                     } while (fetched > 0);
@@ -145,7 +166,7 @@ namespace Microsoft.NET.Build.Tasks
         internal interface IMetaDataAssemblyImport
         {
             void GetAssemblyProps(UInt32 mdAsm, out IntPtr pPublicKeyPtr, out UInt32 ucbPublicKeyPtr, out UInt32 uHashAlg, StringBuilder strName, UInt32 cchNameIn, out UInt32 cchNameRequired, IntPtr amdInfo, out UInt32 dwFlags);
-            void GetAssemblyRefProps(UInt32 mdAsmRef, out IntPtr ppbPublicKeyOrToken, out UInt32 pcbPublicKeyOrToken, StringBuilder strName, UInt32 cchNameIn, out UInt32 pchNameOut, IntPtr amdInfo, out IntPtr ppbHashValue, out UInt32 pcbHashValue, out UInt32 pdwAssemblyRefFlags);
+            void GetAssemblyRefProps(UInt32 mdAsmRef, out IntPtr ppbPublicKeyOrToken, out UInt32 pcbPublicKeyOrToken, StringBuilder strName, UInt32 cchNameIn, out UInt32 pchNameOut, ref ASSEMBLYMETADATA amdInfo, out IntPtr ppbHashValue, out UInt32 pcbHashValue, out UInt32 pdwAssemblyRefFlags);
             void GetFileProps([In] UInt32 mdFile, StringBuilder strName, UInt32 cchName, out UInt32 cchNameRequired, out IntPtr bHashData, out UInt32 cchHashBytes, out UInt32 dwFileFlags);
             void GetExportedTypeProps();
             void GetManifestResourceProps();
@@ -162,6 +183,39 @@ namespace Microsoft.NET.Build.Tasks
             void CloseEnum([In] IntPtr phEnum);
             void FindAssembliesByName();
         }
+
+
+        /*
+        From cor.h:
+            typedef struct
+            {
+                USHORT      usMajorVersion;         // Major Version.
+                USHORT      usMinorVersion;         // Minor Version.
+                USHORT      usBuildNumber;          // Build Number.
+                USHORT      usRevisionNumber;       // Revision Number.
+                LPWSTR      szLocale;               // Locale.
+                ULONG       cbLocale;               // [IN/OUT] Size of the buffer in wide chars/Actual size.
+                DWORD       *rProcessor;            // Processor ID array.
+                ULONG       ulProcessor;            // [IN/OUT] Size of the Processor ID array/Actual # of entries filled in.
+                OSINFO      *rOS;                   // OSINFO array.
+                ULONG       ulOS;                   // [IN/OUT]Size of the OSINFO array/Actual # of entries filled in.
+            } ASSEMBLYMETADATA;
+        */
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct ASSEMBLYMETADATA
+        {
+            public UInt16 usMajorVersion;
+            public UInt16 usMinorVersion;
+            public UInt16 usBuildNumber;
+            public UInt16 usRevisionNumber;
+            public IntPtr rpLocale;
+            public UInt32 cchLocale;
+            public IntPtr rpProcessors;
+            public UInt32 cProcessors;
+            public IntPtr rOses;
+            public UInt32 cOses;
+        }
+
         #endregion
     }
 }
