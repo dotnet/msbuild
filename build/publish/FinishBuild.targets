@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="FinishBuild"
           DependsOnTargets="CheckIfAllBuildsHavePublished;
-                            EvaluateRuntimeCoherence;
                             FinalizeBuild" />
 
   <Target Name="CheckIfAllBuildsHavePublished">
@@ -13,27 +12,6 @@
                                    VersionBadgeMoniker="$(VersionBadgeMoniker)">
       <Output TaskParameter="HaveAllBuildsPublished" PropertyName="HaveAllBuildsPublished" />
     </CheckIfAllBuildsHavePublished>
-  </Target>
-
-  <Target Name="EvaluateRuntimeCoherence"
-        DependsOnTargets="ReadAspNetCoreSharedRuntimeVersionFile"
-        BeforeTargets="FinalizeBuild">
-    <PropertyGroup>
-      <Coherent>false</Coherent>
-      <Coherent Condition=" '$(CLI_SharedFrameworkVersion)' == '@(AspNetCoreSharedRuntimeVersion)' ">true</Coherent>
-    </PropertyGroup>
-  </Target>
-
-  <Target Name="ReadAspNetCoreSharedRuntimeVersionFile"
-          DependsOnTargets="DownloadHostAndSharedFxArtifacts">
-    <ItemGroup>
-      <File Include="$(AspNetCoreSharedRuntimeVersionFile)" />
-    </ItemGroup>
-    <ReadLinesFromFile File="@(File)">
-      <Output
-          TaskParameter="Lines"
-          ItemName="AspNetCoreSharedRuntimeVersion"/>
-    </ReadLinesFromFile>
   </Target>
   
   <Target Name="FinalizeBuild"
