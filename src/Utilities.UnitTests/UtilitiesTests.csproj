@@ -28,6 +28,9 @@
     <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
     <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="ReferenceCopyLocalPaths" />
   </ItemGroup>
 
   <ItemGroup>
