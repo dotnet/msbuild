@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -9,41 +8,29 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.AspNetCore.Authentication.Extensions
 {
-    public static class AzureAdB2CServiceCollectionExtensions
+    public static class AzureAdB2CAuthenticationBuilderExtensions
     {
-        public static IServiceCollection AddAzureAdB2C(this IServiceCollection services)
+        public static AuthenticationBuilder AddAzureAdB2C(this AuthenticationBuilder builder)
+            => builder.AddAzureAdB2C(_ => { });
+
+        public static AuthenticationBuilder AddAzureAdB2C(this AuthenticationBuilder builder, Action<AzureAdB2COptions> configureOptions)
         {
-            // Move to config binding
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            })
-            .AddOpenIdConnect()
-            .AddCookie();
-
-            services.AddSingleton<IConfigureOptions<AzureAdB2COptions>, BindAzureAdB2COptions>();
-            services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
-
-            return services;
+            builder.Services.Configure(configureOptions);
+            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureAzureOptions>();
+            builder.AddOpenIdConnect();
+            return builder;
         }
 
-        private class BindAzureAdB2COptions : ConfigureOptions<AzureAdB2COptions>
-        {
-            public BindAzureAdB2COptions(IConfiguration config) : 
-                base(options => config.GetSection("AzureAdB2C").Bind(options))
-            { }
-        }
-
-        private class PostConfigureAzureOptions: IPostConfigureOptions<OpenIdConnectOptions>
+        private class ConfigureAzureOptions: IConfigureNamedOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdB2COptions _azureOptions;
 
-            public PostConfigureAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
+            public ConfigureAzureOptions(IOptions<AzureAdB2COptions> azureOptions)
             {
                 _azureOptions = azureOptions.Value;
             }
 
-            public void PostConfigure(string name, OpenIdConnectOptions options)
+            public void Configure(string name, OpenIdConnectOptions options)
             {
                 options.ClientId = _azureOptions.ClientId;
                 options.Authority = $"{_azureOptions.Instance}/{_azureOptions.Domain}/{_azureOptions.SignUpSignInPolicyId}/v2.0";
@@ -57,6 +44,11 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                     OnRedirectToIdentityProvider = OnRedirectToIdentityProvider,
                     OnRemoteFailure = OnRemoteFailure
                 };
+            }
+
+            public void Configure(OpenIdConnectOptions options)
+            {
+                Configure(Options.DefaultName, options);
             }
 
             public Task OnRedirectToIdentityProvider(RedirectContext context)

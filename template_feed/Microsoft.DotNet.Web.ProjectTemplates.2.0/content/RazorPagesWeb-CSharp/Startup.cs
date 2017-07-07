@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
-using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 #endif
 #if (OrganizationalAuth || IndividualAuth)
@@ -22,9 +23,6 @@ using Microsoft.AspNetCore.Authentication.Extensions;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.Extensions.Options;
-#endif
 #if (OrganizationalAuth && OrgReadAccess)
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 #endif
@@ -52,34 +50,47 @@ namespace Company.WebApplication1
         {
 #if (IndividualLocalAuth)
             services.AddDbContext<ApplicationDbContext>(options =>
-#if (UseLocalDB)
+    #if (UseLocalDB)
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-#else
+    #else
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-#endif
+    #endif
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-#elseif (IndividualB2CAuth)
-            services.AddAzureAdB2C();
-
-#elseif (OrganizationalAuth)
-            services.AddAzureAd();
+#elseif (OrganizationalAuth || IndividualB2CAuth)
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+    #if (OrganizationalAuth)
+            .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+    #elseif (IndividualB2CAuth)
+            .AddAzureAdB2C(options => Configuration.Bind("AzureAdB2C", options))
+    #endif
+            .AddCookie();
 
 #endif
 #if (IndividualLocalAuth)
             services.AddMvc()
-            .AddRazorPagesOptions(options =>
-            {
-                options.Conventions.AuthorizeFolder("/Account/Manage");
-                options.Conventions.AuthorizePage("/Account/Logout");
-            });
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/Account/Manage");
+                    options.Conventions.AuthorizePage("/Account/Logout");
+                });
 
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
+#elseif (OrganizationalAuth)
+            services.AddMvc()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/");
+                });
 #else
             services.AddMvc();
 #endif

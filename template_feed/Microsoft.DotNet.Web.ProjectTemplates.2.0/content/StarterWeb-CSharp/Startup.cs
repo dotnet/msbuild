@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
-using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 #endif
 #if (OrganizationalAuth || IndividualAuth)
@@ -22,9 +23,6 @@ using Microsoft.AspNetCore.Authentication.Extensions;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.Extensions.Options;
-#endif
 #if (OrganizationalAuth && OrgReadAccess)
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 #endif
@@ -62,18 +60,25 @@ namespace Company.WebApplication1
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-#elseif (IndividualB2CAuth)
-            services.AddAzureAdB2C();
-#elseif (OrganizationalAuth)
-            services.AddAzureAd();
-#endif
-#if (IndividualLocalAuth)
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
-#endif
 
+#elseif (OrganizationalAuth || IndividualB2CAuth)
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+    #if (OrganizationalAuth)
+            .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+    #elseif (IndividualB2CAuth)
+            .AddAzureAdB2C(options => Configuration.Bind("AzureAdB2C", options))
+    #endif
+            .AddCookie();
+
+#endif
             services.AddMvc();
         }
 
