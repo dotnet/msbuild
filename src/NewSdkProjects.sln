@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26621.2
+VisualStudioVersion = 15.0.26703.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XMakeBuildEngine", "Build\XMakeBuildEngine.csproj", "{C2A63EB2-51DD-4DBA-AD62-5DDD654CEA87}"
 EndProject
@@ -15,6 +15,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrameworkTests", "Framework.UnitTests\FrameworkTests.csproj", "{27E8BC3E-D1AC-44E5-9E58-A43B0BA9A5D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "Utilities\Utilities.csproj", "{0132B5B2-6DDB-49EF-89E5-97454BFF33A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBuild.UnitTests", "MSBuild.UnitTests\MSBuild.UnitTests.csproj", "{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +112,18 @@ Global
 		{0132B5B2-6DDB-49EF-89E5-97454BFF33A5}.Release|x64.Build.0 = Release|Any CPU
 		{0132B5B2-6DDB-49EF-89E5-97454BFF33A5}.Release|x86.ActiveCfg = Release|Any CPU
 		{0132B5B2-6DDB-49EF-89E5-97454BFF33A5}.Release|x86.Build.0 = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|x64.Build.0 = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Debug|x86.Build.0 = Debug|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|x64.ActiveCfg = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|x64.Build.0 = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|x86.ActiveCfg = Release|Any CPU
+		{A8B8B766-249A-4957-A7FF-ADDCFA9B37F5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
