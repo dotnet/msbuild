@@ -16,8 +16,8 @@ param(
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
 $RepoRoot = Convert-Path "$PSScriptRoot\..\..\.."
 
-$InstallFileswsx = "install-files.wxs"
-$InstallFilesWixobj = "install-files.wixobj"
+$InstallFileswsx = "install-msbuild-extensions-files.wxs"
+$InstallFilesWixobj = "install-msbuild-extensions-files.wixobj"
 
 function RunHeat
 {
