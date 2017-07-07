@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests
             Assert.Equal(mockTelemetry.EventName, args[0]);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void InternalreportinstallsuccessCommandCollectExeNameWithEventname()
         {
             MockTelemetry mockTelemetry = new MockTelemetry();
