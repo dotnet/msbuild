@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.5</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
     <WarningsAsErrors>true</WarningsAsErrors>
@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(CLI_SharedFrameworkVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
   </ItemGroup>
 

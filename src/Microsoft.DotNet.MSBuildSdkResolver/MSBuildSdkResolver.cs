@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                             + " the version specified in global.json."
                         });
                 }
+
                 string minimumMSBuildVersionString = GetMinimumMSBuildVersion(netcoreSdkDir);
                 var minimumMSBuildVersion = Version.Parse(minimumMSBuildVersionString);
                 if (context.MSBuildVersion < minimumMSBuildVersion)
@@ -75,6 +77,18 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                             + $" of MSBuild. The current available version of MSBuild is {context.MSBuildVersion.ToString()}."
                             + " Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild"
                             + " version currently available."
+                        });
+                }
+
+                string minimumVSDefinedSDKVersion = GetMinimumVSDefinedSDKVersion();                
+                if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, minimumVSDefinedSDKVersion))
+                {
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK is smaller than the minimum version"
+                            + $" {minimumVSDefinedSDKVersion} required by Visual Studio. Check that a recent enough"
+                            + " .NET Core SDK is installed or increase the version specified in global.json."
                         });
                 }
             }
@@ -105,6 +119,22 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             return File.ReadLines(minimumVersionFilePath).First().Trim();
+        }
+
+        private static string GetMinimumVSDefinedSDKVersion()
+        {
+            string dotnetMSBuildSdkResolverDirectory =
+                Path.GetDirectoryName(typeof(DotNetMSBuildSdkResolver).GetTypeInfo().Assembly.Location);
+            string minimumVSDefinedSdkVersionFilePath =
+                Path.Combine(dotnetMSBuildSdkResolverDirectory, "minimumVSDefinedSDKVersion");
+
+            if (!File.Exists(minimumVSDefinedSdkVersionFilePath))
+            {
+                // smallest version that is required by VS 15.3.
+                return "1.0.4";
+            }
+
+            return File.ReadLines(minimumVSDefinedSdkVersionFilePath).First().Trim();
         }
 
         private bool IsNetCoreSDKSmallerThanTheMinimumVersion(string netcoreSdkVersion, string minimumVersion)
