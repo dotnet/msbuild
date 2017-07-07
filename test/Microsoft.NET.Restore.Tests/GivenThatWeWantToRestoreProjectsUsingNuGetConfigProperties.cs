@@ -29,13 +29,17 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("netcoreapp1.1", "1.1", true)]
         [InlineData("netstandard2.0", "2.0", false)]
         [InlineData("netcoreapp2.0", "2.0app", false)]
+        [InlineData("net461", "461app", false)]
+        // https://github.com/NuGet/Home/issues/5596 and https://github.com/dotnet/project-system/issues/2605
+        //[InlineData("netcoreapp2.0;net461", "multiTFM20app", false)]
+        //[InlineData("netcoreapp1.0;netcoreapp2.0", "multiTFM1020app", true)]
         public void I_can_restore_a_project_with_implicit_msbuild_nuget_config(
-            string framework,
+            string frameworks,
             string projectPrefix,
             bool fileExists)
         {
             string testProjectName = $"{projectPrefix}Fallback";
-            TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, framework);
+            TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, frameworks);
 
             var packagesFolder = Path.Combine(RepoInfo.TestsFolder, "packages", testProjectName);
 
@@ -56,16 +60,16 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("netcoreapp1.1", "1.1")]
         [InlineData("netstandard2.0", "2.0")]
         [InlineData("netcoreapp2.0", "2.0app")]
-        public void I_can_disable_implicit_msbuild_nuget_config(string framework, string projectPrefix)
+        public void I_can_disable_implicit_msbuild_nuget_config(string frameworks, string projectPrefix)
         {
             string testProjectName = $"{projectPrefix}DisabledFallback";
-            TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, framework);
+            TestAsset testProjectTestAsset = CreateTestAsset(testProjectName, frameworks);
 
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.Execute($"/p:DisableImplicitNuGetFallbackFolder=true").Should().Fail();
         }
 
-        private TestAsset CreateTestAsset(string testProjectName, string framework)
+        private TestAsset CreateTestAsset(string testProjectName, string frameworks)
         {
             var packageInNuGetFallbackFolder = CreatePackageInNuGetFallbackFolder();
 
@@ -73,7 +77,7 @@ namespace Microsoft.NET.Restore.Tests
                 new TestProject
                 {
                     Name = testProjectName,
-                    TargetFrameworks = framework,
+                    TargetFrameworks = frameworks,
                     IsSdkProject = true
                 };
 
