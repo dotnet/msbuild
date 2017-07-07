@@ -1,7 +1,7 @@
-﻿#if (MultiOrgAuth)
+﻿using System;
+#if (MultiOrgAuth)
 using System.Threading.Tasks;
 #endif
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,42 +13,29 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.AspNetCore.Authentication.Extensions
 {
-    public static class AzureAdServiceCollectionExtensions
-    {
-        public static IServiceCollection AddAzureAdAuthentication(this IServiceCollection services)
-        {
-            // Move to config binding
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            });
+    public static class AzureAdAuthenticationBuilderExtensions
+    {        
+        public static AuthenticationBuilder AddAzureAd(this AuthenticationBuilder builder)
+            => builder.AddAzureAd(_ => { });
 
-            services.AddSingleton<IConfigureOptions<AzureAdOptions>, BindAzureAdOptions>();
-            services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureAzureOptions>();
-            services.AddOpenIdConnectAuthentication();
-            services.AddCookieAuthentication();
-            return services;
+        public static AuthenticationBuilder AddAzureAd(this AuthenticationBuilder builder, Action<AzureAdOptions> configureOptions)
+        {
+            builder.Services.Configure(configureOptions);
+            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureAzureOptions>();
+            builder.AddOpenIdConnect();
+            return builder;
         }
 
-        private class BindAzureAdOptions : ConfigureOptions<AzureAdOptions>
-        {
-            public BindAzureAdOptions(IConfiguration config) :
-                base(options => config.GetSection("AzureAd").Bind(options))
-            { }
-        }
-
-        private class PostConfigureAzureOptions: IPostConfigureOptions<OpenIdConnectOptions>
+        private class ConfigureAzureOptions: IConfigureNamedOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdOptions _azureOptions;
 
-            public PostConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
+            public ConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
             {
                 _azureOptions = azureOptions.Value;
             }
 
-            public void PostConfigure(string name, OpenIdConnectOptions options)
+            public void Configure(string name, OpenIdConnectOptions options)
             {
                 options.ClientId = _azureOptions.ClientId;
                 options.Authority = $"{_azureOptions.Instance}{_azureOptions.TenantId}";
@@ -89,6 +76,11 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                     //}
                 };
 #endif
+            }
+
+            public void Configure(OpenIdConnectOptions options)
+            {
+                Configure(Options.DefaultName, options);
             }
         }
     }

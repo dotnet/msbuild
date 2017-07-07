@@ -73,6 +73,13 @@
           "exclude": [
             "Views/Account/SignedOut.cshtml"
           ]
+        },
+        {
+          "copyOnly": [
+            "wwwroot/lib/**",
+            "wwwroot/images/**",
+            "wwwroot/favicon.ico"
+          ]
         }
       ]
     }
