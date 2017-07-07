@@ -44,5 +44,53 @@
                 </form>
             }
         </dd>
+        <dt>Authenticator App:</dt>
+        <dd>
+            @if (!Model.HasAuthenticator)
+            {
+                <a asp-page="./EnableAuthenticator" class="btn-bracketed">Add an authenticator</a>
+            }
+            else
+            {
+                <a asp-page="./ResetAuthenticator" class="btn-bracketed">Reset authenticator key</a>
+                <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">Reset recovery codes</a>
+                @if (Model.RecoveryCodesLeft == 0)
+                {
+                    <div class="alert alert-danger">
+                        <strong>You have no recovery codes left.</strong>
+                        <p>You must <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a> before you can login with a recovery code.</p>
+                    </div>
+
+                }
+                else if (Model.RecoveryCodesLeft == 1)
+                {
+                    <div class="alert alert-danger">
+                        <strong>You have 1 recovery code left.</strong>
+                        <p>You can <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a>.</p>
+                    </div>
+                }
+                else if (Model.RecoveryCodesLeft <= 3)
+                {
+                    <div class="alert alert-warning">
+                        <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
+                        <p>You should <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a>.</p>
+                    </div>
+                }
+            }
+        </dd>
+        @if (Model.HasAny2faProviders)
+        {
+            <dt>Two-Factor Auth:</dt>
+            <dd>
+                @if (!Model.Is2faEnabled)
+                {
+                    <a asp-page="./Enable2fa" class="btn-bracketed">Enable</a>
+                }
+                else
+                {
+                    <a asp-page="./Disable2fa" class="btn-bracketed">Disable</a>
+                }
+            </dd>
+        }
     </dl>
 </div>

@@ -11,6 +11,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
     {
         public void OnGet()
         {
+            
         }
     }
 }

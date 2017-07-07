@@ -30,20 +30,28 @@ namespace Company.WebApplication1.Pages.Account.Manage
             _emailSender = emailSender;
         }
 
+        public string Email { get; set; }
+
+        public bool HasAuthenticator { get; set; }
+
         public bool HasPassword { get; set; }
+
+        public bool HasAny2faProviders { get; set; }
+
+        public bool IsEmailConfirmed { get; set; }
+
+        public bool Is2faEnabled { get; set; }
 
         public IList<UserLoginInfo> Logins { get; set; }
 
-        public string Email { get; set; }
+        public int RecoveryCodesLeft { get ; set;}
 
-        public bool IsEmailConfirmed { get; set; }
+        public bool ShowStatusMessage => !string.IsNullOrEmpty(StatusMessage);
 
         [TempData]
         public string StatusMessage { get; set; }
 
         public string StatusMessageClass => StatusMessage.Equals(ManageMessages.Error) ? "error" : "success";
-
-        public bool ShowStatusMessage => !string.IsNullOrEmpty(StatusMessage);
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -53,10 +61,14 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 return RedirectToPage("/Error");
             }
 
+            HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
             HasPassword = await _userManager.HasPasswordAsync(user);
             Logins = await _userManager.GetLoginsAsync(user);
             Email = await _userManager.GetEmailAsync(user);
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
+            HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
+            RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
 
             return Page();
         }
