@@ -5,7 +5,11 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+#endif
+#if (OrganizationalAuth)
+using Microsoft.AspNetCore.Authorization;
 #endif
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
@@ -18,8 +22,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 #endif
 using Microsoft.AspNetCore.Hosting;
-#if (OrganizationalAuth || IndividualB2CAuth)
-using Microsoft.AspNetCore.Authentication.Extensions;
+#if (OrganizationalAuth)
+using Microsoft.AspNetCore.Mvc.Authorization;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,11 +90,17 @@ namespace Company.WebApplication1
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
 #elseif (OrganizationalAuth)
-            services.AddMvc()
-                .AddRazorPagesOptions(options =>
-                {
-                    options.Conventions.AuthorizeFolder("/");
-                });
+            services.AddMvc(options =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+                options.Filters.Add(new AuthorizeFilter(policy));
+            })
+            .AddRazorPagesOptions(options =>
+            {
+                options.Conventions.AllowAnonymousToFolder("/Account");
+            });
 #else
             services.AddMvc();
 #endif
