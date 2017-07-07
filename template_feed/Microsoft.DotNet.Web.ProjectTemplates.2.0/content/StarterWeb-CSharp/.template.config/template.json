@@ -81,6 +81,12 @@
           "exclude": [
             "AzureAdB2C/**"
           ]
+        },
+        {
+          "condition": "(!IndividualB2CAuth)",
+          "exclude": [
+            "AzureAdB2C/**"
+          ]
         }
       ]
     }

@@ -16,12 +16,6 @@
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols": {
-    "IncludeApplicationInsights": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "description": "Whether or not to include Application Insights in the project"
-    },
     "TargetFrameworkOverride": {
       "type": "parameter",
       "description": "Overrides the target framework",
