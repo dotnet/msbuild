@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
+
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170517-02" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+
+    <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
+    <ProjectReference Include="..\Framework\Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj" />
+    <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
+      <!-- Extension methods -->
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\HybridDictionary_Tests.cs">
+      <Link>HybridDictionary_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>XmakeAttributes_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>AssemblyNameEx_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
+      <Link>TaskParameter_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
+      <Link>TestData\GlobbingTestData.cs</Link>
+    </Compile>
+
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
