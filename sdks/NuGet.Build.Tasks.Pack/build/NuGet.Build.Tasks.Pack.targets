@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 NuGet.targets
 
@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -17,7 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <UsingTask TaskName="NuGet.Build.Tasks.Pack.PackTask" AssemblyFile="$(NugetTaskAssemblyFile)" />
-  <UsingTask TaskName="NuGet.Build.Tasks.Pack.PackNuspecTask" AssemblyFile="$(NugetTaskAssemblyFile)" />
 
   <PropertyGroup>
     <PackageId Condition=" '$(PackageId)' == '' ">$(AssemblyName)</PackageId>
@@ -25,6 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeContentInPack Condition="'$(IncludeContentInPack)'==''">true</IncludeContentInPack>
     <GenerateNuspecDependsOn>_LoadPackInputItems; _WalkEachTargetPerFramework; _GetPackageFiles; $(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
     <Description Condition="'$(Description)'==''">Package Description</Description>
+    <IsPackable Condition="'$(IsPackable)'=='' AND '$(IsTestProject)'=='true'">false</IsPackable>
     <IsPackable Condition="'$(IsPackable)'==''">true</IsPackable>
     <IncludeBuildOutput Condition="'$(IncludeBuildOutput)'==''">true</IncludeBuildOutput>
     <BuildOutputTargetFolder Condition="'$(BuildOutputTargetFolder)' == '' AND '$(IsTool)' == 'true'">tools</BuildOutputTargetFolder>
@@ -33,6 +33,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackDependsOn>GenerateNuspec; $(PackDependsOn)</PackDependsOn>
     <IsInnerBuild Condition="'$(TargetFramework)' != '' AND '$(TargetFrameworks)' != ''">true</IsInnerBuild>
     <NoBuild Condition="'$(GeneratePackageOnBuild)' == 'true'">true</NoBuild>
+    <AddPriFileDependsOn Condition="'$(MicrosoftPortableCurrentVersionPropsHasBeenImported)' == 'true'">DeterminePortableBuildCapabilities</AddPriFileDependsOn>
+    <ImportNuGetBuildTasksPackTargetsFromSdk Condition="'$(ImportNuGetBuildTasksPackTargetsFromSdk)' == ''">false</ImportNuGetBuildTasksPackTargetsFromSdk>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NoBuild)' == 'true' ">
     <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
@@ -45,6 +47,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_TargetFrameworks Condition="'$(TargetFramework)' == ''" Include="$(TargetFrameworks.Split(';'))"/>
     <_TargetFrameworks Condition="'$(TargetFramework)' != ''" Include="$(TargetFramework)"/>
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <BuildOutputInPackage>
+      <TargetFramework>$(TargetFramework)</TargetFramework>
+    </BuildOutputInPackage>
+    <TfmSpecificPackageFile>
+      <BuildAction>None</BuildAction>
+    </TfmSpecificPackageFile>
+  </ItemDefinitionGroup>
 
   <!--
     ============================================================
@@ -68,20 +78,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Delete Files="@(_PackageFilesToDelete)"/>
   </Target>
 
-  <!--
-    ============================================================
-    Pack
-    Main entry point for packing packages
-    ============================================================
-  -->
-  <Target Name="Pack" DependsOnTargets="_IntermediatePack;$(PackDependsOn)">
-  </Target>
-  <Target Name="_IntermediatePack">
-    <PropertyGroup>
-      <ContinuePackingAfterGeneratingNuspec>true</ContinuePackingAfterGeneratingNuspec>
-    </PropertyGroup>
-  </Target>
-  <Target Name="GenerateNuspec" DependsOnTargets="$(GenerateNuspecDependsOn)" Condition="$(IsPackable) == 'true'">
+  <Target Name="_CalculateInputsOutputsForPack">
     <PropertyGroup Condition="$(ContinuePackingAfterGeneratingNuspec) == '' ">
       <ContinuePackingAfterGeneratingNuspec>false</ContinuePackingAfterGeneratingNuspec>
     </PropertyGroup>
@@ -99,7 +96,47 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ConvertToAbsolutePath Condition="$(NuspecFile) != ''" Paths="$(NuspecFile)">
       <Output TaskParameter="AbsolutePaths" PropertyName="NuspecFileAbsolutePath" />
     </ConvertToAbsolutePath>
-    
+
+    <ItemGroup>
+      <!--This catches changes to properties-->
+      <NuGetPackInput Include="$(MSBuildAllProjects)"/>
+      <NuGetPackInput Include="@(_PackageFiles)"/>
+      <NuGetPackInput Include="@(_PackageFilesToExclude)"/>
+      <NuGetPackInput Include="@(_BuildOutputInPackage->'%(FinalOutputPath)')"/>
+      <NuGetPackInput Include="@(_TargetPathsToSymbols->'%(FinalOutputPath)')"/>
+      <NuGetPackInput Include="@(_SourceFiles)"/>
+      <NuGetPackInput Include="@(_References)"/>
+      <NuGetPackOutput Include="$(RestoreOutputAbsolutePath)$(PackageId).$(PackageVersion).nuspec"/>
+
+      <NuGetPackOutput Include="$(PackageOutputAbsolutePath)$(PackageId).$(PackageVersion).nupkg" 
+                       Condition="'$(ContinuePackingAfterGeneratingNuspec)' == 'true'"/>
+
+      <NuGetPackOutput Include="$(PackageOutputAbsolutePath)$(PackageId).$(PackageVersion).symbols.nupkg"
+                       Condition="'$(IncludeSource)' == 'true'
+                               OR '$(IncludeSymbols)' == 'true'"/>
+
+      <NuGetPackOutput Include="$(RestoreOutputAbsolutePath)$(PackageId).$(PackageVersion).symbols.nuspec"
+                       Condition="'$(IncludeSource)' == 'true'
+                             OR '$(IncludeSymbols)' == 'true'"/>
+    </ItemGroup>
+  </Target>
+  
+  <!--
+    ============================================================
+    Pack
+    Main entry point for packing packages
+    ============================================================
+  -->
+  <Target Name="Pack" DependsOnTargets="_IntermediatePack;$(PackDependsOn)">
+  </Target>
+  <Target Name="_IntermediatePack">
+    <PropertyGroup>
+      <ContinuePackingAfterGeneratingNuspec>true</ContinuePackingAfterGeneratingNuspec>
+    </PropertyGroup>
+  </Target>
+  
+  <Target Name="GenerateNuspec" DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack" Condition="$(IsPackable) == 'true'"
+          Inputs="@(NuGetPackInput)" Outputs="@(NuGetPackOutput)">
     <!-- Call Pack -->
     <PackTask PackItem="$(PackProjectInputFile)"
               PackageFiles="@(_PackageFiles)"
@@ -116,7 +153,8 @@ Copyright (c) .NET Foundation. All rights reserved.
               IconUrl="$(PackageIconUrl)"
               ReleaseNotes="$(PackageReleaseNotes)"
               Tags="$(PackageTags)"
-              TargetPathsToAssemblies="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')"
+              DevelopmentDependency="$(DevelopmentDependency)"
+              BuildOutputInPackage="@(_BuildOutputInPackage)"
               TargetPathsToSymbols="@(_TargetPathsToSymbols)"
               TargetFrameworks="@(_TargetFrameworks)"
               AssemblyName="$(AssemblyName)"
@@ -131,7 +169,7 @@ Copyright (c) .NET Foundation. All rights reserved.
               NoPackageAnalysis="$(NoPackageAnalysis)"
               MinClientVersion="$(MinClientVersion)"
               Serviceable="$(Serviceable)"
-              AssemblyReferences="@(_References)"
+              FrameworkAssemblyReferences="@(_FrameworkAssemblyReferences)"
               ContinuePackingAfterGeneratingNuspec="$(ContinuePackingAfterGeneratingNuspec)"
               NuspecOutputPath="$(BaseIntermediateOutputPath)"
               IncludeBuildOutput="$(IncludeBuildOutput)"
@@ -146,17 +184,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
     _LoadPackGraphEntryPoints
-    Find project entry points and load them into items.
+    Find project entry point and load them into items.
     ============================================================
   -->
   <Target Name="_LoadPackInputItems">
-    <!-- Allow overriding items with ProjectFileToPack -->
+    <!-- Allow overriding items with PackProjectInputFile -->
     <PropertyGroup Condition="'$(PackProjectInputFile)' == ''">
-      <PackProjectInputFile>$(ProjectFileToPack)</PackProjectInputFile>
-    </PropertyGroup>
-
-    <!-- Project case -->
-    <PropertyGroup Condition="$(MSBuildProjectFullPath.EndsWith('.csproj')) == 'true' AND '$(PackProjectInputFile)' == ''">
       <PackProjectInputFile>$(MSBuildProjectFullPath)</PackProjectInputFile>
     </PropertyGroup>
   </Target>
@@ -165,30 +198,30 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuild
       Condition="'$(IncludeBuildOutput)' == 'true'"
       Projects="$(MSBuildProjectFullPath)"
-      Targets="BuiltProjectOutputGroup;DocumentationProjectOutputGroup"
-      Properties="TargetFramework=%(_TargetFrameworks.Identity);
-                  BuildProjectReferences=false;">
+      Targets="_GetBuildOutputFilesWithTfm"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);">
 
       <Output
           TaskParameter="TargetOutputs"
-          ItemName="_TargetPathsToAssemblies" />
+          ItemName="_BuildOutputInPackage" />
     </MSBuild>
     
-    <!--Projects with target framework like UWP, Win8, wpa81 produce a Pri file
-    in their bin dir. This Pri file is not included in the BuiltProjectGroupOutput, and
-    has to be added manually here.-->
-    <ItemGroup Condition="'$(IncludeProjectPriFile)' == 'true'">
-      <_TargetPathsToAssemblies Include="$(ProjectPriFullPath)">
-        <FinalOutputPath>$(ProjectPriFullPath)</FinalOutputPath>
-      </_TargetPathsToAssemblies>
-    </ItemGroup>
+    <MSBuild
+      Condition="'$(TargetsForTfmSpecificContentInPackage)' != ''"
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetTfmSpecificContentForPackage"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);">
+      
+    <Output
+        TaskParameter="TargetOutputs"
+        ItemName="_PackageFiles"/>
+    </MSBuild>
 
     <MSBuild
       Condition="'$(IncludeSymbols)' == 'true' OR '$(IncludeSource)' == 'true'"
       Projects="$(MSBuildProjectFullPath)"
-      Targets="DebugSymbolsProjectOutputGroup"
-      Properties="TargetFramework=%(_TargetFrameworks.Identity);
-                  BuildProjectReferences=false;">
+      Targets="_GetDebugSymbolsWithTfm"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);">
 
       <Output
           TaskParameter="TargetOutputs"
@@ -206,6 +239,66 @@ Copyright (c) .NET Foundation. All rights reserved.
           TaskParameter="TargetOutputs"
           ItemName="_SourceFiles" />
     </MSBuild>
+
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="_GetFrameworkAssemblyReferences"
+      Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                  BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_FrameworkAssemblyReferences" />
+    </MSBuild>
+  </Target>
+
+  <Target Name ="_GetFrameworkAssemblyReferences" DependsOnTargets="ResolveReferences" Returns="@(TfmSpecificFrameworkAssemblyReferences)">
+    <ItemGroup>
+      <TfmSpecificFrameworkAssemblyReferences Include="@(ReferencePath->'%(OriginalItemSpec)')" 
+      Condition="'%(ReferencePath.Pack)' != 'false' AND '%(ReferencePath.ResolvedFrom)' == '{TargetFrameworkDirectory}'">
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </TfmSpecificFrameworkAssemblyReferences>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="_GetBuildOutputFilesWithTfm"
+          DependsOnTargets="BuiltProjectOutputGroup;DocumentationProjectOutputGroup;SatelliteDllsProjectOutputGroup;_AddPriFileToPackBuildOutput;$(TargetsForTfmSpecificBuildOutput)"
+          Returns="@(BuildOutputInPackage)">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(SatelliteDllsProjectOutputGroupOutput);
+                            @(BuiltProjectOutputGroupOutput);
+                            @(DocumentationProjectOutputGroupOutput);
+                            @(_PathToPriFile)"/>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="_GetTfmSpecificContentForPackage"
+          DependsOnTargets="$(TargetsForTfmSpecificContentInPackage)"
+          Returns="@(TfmSpecificPackageFile)">
+  </Target>
+
+  <Target Name="_GetDebugSymbolsWithTfm"
+          DependsOnTargets="DebugSymbolsProjectOutputGroup"
+          Returns="@(_TargetPathsToSymbolsWithTfm)">
+    <ItemGroup>
+      <_TargetPathsToSymbolsWithTfm Include="@(DebugSymbolsProjectOutputGroupOutput)">
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </_TargetPathsToSymbolsWithTfm>
+    </ItemGroup>
+  </Target>
+  
+  <!--Projects with target framework like UWP, Win8, wpa81 produce a Pri file
+    in their bin dir. This Pri file is not included in the BuiltProjectGroupOutput, and
+    has to be added manually here.-->
+  <Target Name="_AddPriFileToPackBuildOutput"
+          Returns="@(_PathToPriFile)"
+          DependsOnTargets="$(AddPriFileDependsOn)">
+    <ItemGroup Condition="'$(IncludeProjectPriFile)' == 'true'">
+      <_PathToPriFile Include="$(ProjectPriFullPath)">
+        <FinalOutputPath>$(ProjectPriFullPath)</FinalOutputPath>
+        <TargetPath>$(ProjectPriFileName)</TargetPath>
+      </_PathToPriFile>
+    </ItemGroup>
   </Target>
 
   <!--

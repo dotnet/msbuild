@@ -12,14 +12,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <VBRuntime>Embed</VBRuntime>
+    <VBRuntime Condition=" '$(VBRuntime)' == '' ">Embed</VBRuntime>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <WarningLevel Condition=" '$(WarningLevel)' == '' ">1</WarningLevel>
     <NoWarn Condition=" '$(NoWarn)' == '' ">41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
-    <OptionExplicit>On</OptionExplicit>
-    <OptionCompare>Binary</OptionCompare>
-    <OptionStrict>Off</OptionStrict>
-    <OptionInfer>On</OptionInfer>
+    <OptionExplicit Condition=" '$(OptionExplicit)' == '' ">On</OptionExplicit>
+    <OptionCompare Condition=" '$(OptionCompare)' == '' ">Binary</OptionCompare>
+    <OptionStrict Condition=" '$(OptionStrict)' == '' ">Off</OptionStrict>
+    <OptionInfer Condition=" '$(OptionInfer)' == '' ">On</OptionInfer>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

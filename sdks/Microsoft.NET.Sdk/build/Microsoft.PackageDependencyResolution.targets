@@ -43,6 +43,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UseTargetPlatformAsNuGetTargetMoniker Condition="'$(UseTargetPlatformAsNuGetTargetMoniker)' == '' AND '$(TargetFrameworkMoniker)' == '.NETCore,Version=v5.0'">true</UseTargetPlatformAsNuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' != 'true'">$(TargetFrameworkMoniker)</NuGetTargetMoniker>
+
+    <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">true</EmitAssetsLogMessages>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -150,7 +152,8 @@ Copyright (c) .NET Foundation. All rights reserved.
         the Visual Studio error list when a project is created before NuGet restore has
         run and created the assets file. -->
   <Target Name="RunResolvePackageDependencies"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          DependsOnTargets="ReportAssetsLogMessages">
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
@@ -282,6 +285,42 @@ Copyright (c) .NET Foundation. All rights reserved.
     </CreateItem>
   </Target>
 
+  <!--
+    ============================================================
+                     ReportAssetsLogMessages
+
+    Report Log Messages in the assets file to MSBuild and raise them as 
+    DiagnosticMessage items that can be consumed downstream (e.g. by the
+    dependency node in the solution explorer)
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.ReportAssetsLogMessages"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- The condition on this target causes it to be skipped during design-time builds if
+        the restore operation hasn't run yet.  This is to avoid displaying an error in
+        the Visual Studio error list when a project is created before NuGet restore has
+        run and created the assets file. -->
+  <Target Name="ReportAssetsLogMessages"
+          Condition="'$(EmitAssetsLogMessages)' == 'true' And ('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)'))">
+    
+    <ReportAssetsLogMessages
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ContinueOnError="ErrorAndContinue">
+
+      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
+    </ReportAssetsLogMessages>
+    
+  </Target>
+
+  <PropertyGroup>
+    <EmitsDependencyDiagnosticMessages>
+      ReportAssetsLogMessages;
+      $(EmitsDependencyDiagnosticMessages)
+    </EmitsDependencyDiagnosticMessages>
+  </PropertyGroup>
+  
   <!--
     ============================================================
     HELPERS: Get Package and File Dependencies matching active TFM and RID
