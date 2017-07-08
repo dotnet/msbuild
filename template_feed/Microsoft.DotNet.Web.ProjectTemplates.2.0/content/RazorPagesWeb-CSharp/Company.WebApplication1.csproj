@@ -5,18 +5,18 @@
     <UserSecretsId>aspnet-Company.WebApplication1-0ce56475-d1db-490f-8af1-a881ea4fcd2d</UserSecretsId>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview3-26096" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-rtm-26151" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-preview3-26096" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-preview3-26096" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-preview3-26096" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-preview3-26096" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-preview3-26096" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-preview3-26096" Condition="'$(UseBrowserLink)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-rtm-26151" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0-rtm-26151" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.0-rtm-26151" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0-rtm-26151" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0-rtm-26151" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0-rtm-26151" Condition="'$(UseBrowserLink)' == 'True'" />
   </ItemGroup>
   <ItemGroup Condition="'$(NoTools)' != 'True'">
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview3-26096" Condition="'$(OrganizationalAuth)' == 'True'" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview3-26096" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-rtm-26151" Condition="'$(OrganizationalAuth)' == 'True'" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-rtm-26151" />
   </ItemGroup>
 </Project>
