@@ -52,10 +52,11 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 return 0;
             }
 
-            host.VirtualizeDirectory(Path.Combine(profileDir, ".templateengine"));
+            string hivePath = Path.Combine(profileDir, ".tetestharness");
+            host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), FirstRun, passthroughArgs);
+            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), FirstRun, passthroughArgs, hivePath);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)
@@ -120,7 +121,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             {
                 return true;
             }
-            
+
             Console.Error.WriteLine($"Expected a file {path} to exist but it did not");
             return false;
         }
