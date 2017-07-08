@@ -337,7 +337,21 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message).Bold().Red());
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+                    //Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+
+                    if (string.Equals(instantiateResult.Message, "--name", StringComparison.Ordinal))
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+                    }
+                    else
+                    {
+                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.Message.Split(new[] { ',' })
+                            .Select(x => _commandInput.VariantsForCanonical(x.Trim())
+                                                        .DefaultIfEmpty(x.Trim()).First())
+                            .ToList();
+                        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
+                    }
                     break;
                 case CreationResultStatus.OperationNotSpecified:
                     break;
