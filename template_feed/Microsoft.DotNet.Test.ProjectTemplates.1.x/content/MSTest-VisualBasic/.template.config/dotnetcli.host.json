@@ -12,6 +12,10 @@
     "EnablePack": {
       "shortName": "p",
       "longName": "enable-pack"
+    },
+    "skipRestore": {
+      "longName": "no-restore",
+      "shortName": ""
     }
   },
   "usageExamples": [
