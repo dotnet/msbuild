@@ -23,7 +23,6 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-
 |Windows x64 |Windows x86 |Mac OS X |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Ubuntu 16.10 |Debian 8 |RHEL 7.2 |
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
@@ -65,11 +64,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 > **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
-| Latest Coherent Build<sup>1</sup><br>*release/2.0.0*<br>[![][coherent-version-badge]][coherent-version] |
-| -------- |
 
-Reference notes:
-> **1**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
 
 | Platform | Latest Daily Build<br>*release/2.0.0*<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
@@ -86,8 +81,12 @@ Reference notes:
 | **Fedora 24** | tar.gz - See **Linux x64** |
 | **OpenSUSE 42.1** | tar.gz - See **Linux x64** |
 
+
+| Latest Coherent Build<sup>1</sup><br>*release/2.0.0*<br>[![][coherent-version-badge]][coherent-version] |
+
 Reference notes:
-> **2**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
+> **1**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
+> <br><br>**2**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 
 [version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
