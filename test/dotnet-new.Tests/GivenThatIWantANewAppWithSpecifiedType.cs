@@ -25,18 +25,15 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("F#", "mstest", false)]
         [InlineData("F#", "xunit", false)]
         [InlineData("F#", "mvc", true)]
+        [InlineData("VB", "console", false)]
+        [InlineData("VB", "classlib", false)]
+        [InlineData("VB", "mstest", false)]
+        [InlineData("VB", "xunit", false)]
         public void TemplateRestoresAndBuildsWithoutWarnings(
             string language,
             string projectType,
             bool useNuGetConfigForAspNet)
         {
-            if (language == "F#" && !EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
-            {
-                // F# requires netcoreapp1.0 to be present in order to build
-                // https://github.com/dotnet/netcorecli-fsc/issues/76
-                return;
-            }
-
             string rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
