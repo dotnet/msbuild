@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             string outputDirectory,
             string workingDirectory)
         {
-            RunCommand("new", new string[] { "console", "-o", workingDirectory, "--debug:ephemeral-hive" }, workingDirectory);
+            RunCommand("new", new string[] { "console", "-o", workingDirectory, "--debug:ephemeral-hive", "--no-restore" }, workingDirectory);
         }
         private void RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)
         {

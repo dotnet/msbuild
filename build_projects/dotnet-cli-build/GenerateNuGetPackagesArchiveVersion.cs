@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Build
                 {
                     ToolPath = ToolPath,
                     TemplateType = newArgs[0],
-                    TemplateArgs = newArgs[1] + $" --debug:ephemeral-hive -n TempProject -o \"{outputDir}\"",
+                    TemplateArgs = newArgs[1] + $" --debug:ephemeral-hive -n TempProject -o \"{outputDir}\" --no-restore",
                     HostObject = HostObject,
                     BuildEngine = BuildEngine
                 };
