@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
 
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
@@ -12,14 +12,25 @@
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
 
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+
     <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
     <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj" />
     <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+
+    <!-- TODO: get this from a package -->
+    <Reference Include="..\..\tools\net45\roslyn\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' != 'true'" />
+    <Reference Include="..\..\tools\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(NetCoreBuild)' == 'true'" />
+
+    <Reference Include="System.Configuration" Condition="'$(NetCoreBuild)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Definition\ToolsetConfigurationReaderTestHelper.cs" />
+    <Compile Include="Definition\ToolsetConfigurationReaderTestHelper.cs" Condition="'$(NetCoreBuild)' != 'true'" />
+
     <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
       <!-- Extension methods -->
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
