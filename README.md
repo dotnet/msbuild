@@ -83,6 +83,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 
 
 | Latest Coherent Build<sup>1</sup><br>*release/2.0.0*<br>[![][coherent-version-badge]][coherent-version] |
+|:------:|
 
 Reference notes:
 > **1**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
