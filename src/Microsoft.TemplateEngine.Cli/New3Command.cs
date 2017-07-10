@@ -45,10 +45,15 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
 
         public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput)
+            : this(commandName, host, telemetryLogger, onFirstRun, commandInput, null)
+        {
+        }
+
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput, string hivePath)
         {
             _telemetryLogger = telemetryLogger;
             host = _host = new ExtendedTemplateEngineHost(host, this);
-            EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
+            EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x), hivePath);
             _settingsLoader = (SettingsLoader)EnvironmentSettings.SettingsLoader;
             Installer = new Installer(EnvironmentSettings);
             _templateCreator = new TemplateCreator(EnvironmentSettings);
@@ -145,7 +150,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (IFilteredTemplateInfo info in listToFilter)
             {
-                // ChoicesAndDescriptions is invoked as case insensitive 
+                // ChoicesAndDescriptions is invoked as case insensitive
                 if (info.Info.Tags == null ||
                     info.Info.Tags.TryGetValue("language", out ICacheTag languageTag) &&
                     languageTag.ChoicesAndDescriptions.ContainsKey(language))
@@ -222,6 +227,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
         {
+            return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
+        }
+
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        {
             if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.Ordinal)))
             {
                 Console.ReadLine();
@@ -233,7 +243,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
-            New3Command instance = new New3Command(commandName, host, telemetryLogger, onFirstRun, commandInput);
+            New3Command instance = new New3Command(commandName, host, telemetryLogger, onFirstRun, commandInput, hivePath);
 
             commandInput.OnExecute(instance.ExecuteAsync);
 
@@ -337,7 +347,19 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message).Bold().Red());
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+                    if (string.Equals(instantiateResult.Message, "--name", StringComparison.Ordinal))
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+                    }
+                    else
+                    {
+                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.Message.Split(new[] { ',' })
+                            .Select(x => _commandInput.VariantsForCanonical(x.Trim())
+                                                        .DefaultIfEmpty(x.Trim()).First())
+                            .ToList();
+                        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
+                    }
                     break;
                 case CreationResultStatus.OperationNotSpecified:
                     break;
@@ -388,7 +410,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     if (param != null)
                     {
-                        // Get the best input format available. 
+                        // Get the best input format available.
                         IReadOnlyList<string> inputVariants = _commandInput.VariantsForCanonical(param.Name);
                         string displayName = inputVariants.FirstOrDefault(x => x.Contains(param.Name))
                             ?? inputVariants.Aggregate("", (max, cur) => max.Length > cur.Length ? max : cur)
@@ -1043,7 +1065,7 @@ namespace Microsoft.TemplateEngine.Cli
         private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false)
         {
             IList<ITemplateParameter> filteredParams = parameterDefinitions
-                .Where(x => x.Priority != TemplateParameterPriority.Implicit 
+                .Where(x => x.Priority != TemplateParameterPriority.Implicit
                         && !hiddenParams.Contains(x.Name) && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase) && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
                         && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1)).ToList();    // for filtering "tags"
 

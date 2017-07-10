@@ -67,7 +67,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var email = await _userManager.GetEmailAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            await _emailSender.SendEmailConfirmationAsync(Email, callbackUrl);
+            await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
             return RedirectToPage("./EmailConfirmationSent");
         }
     }

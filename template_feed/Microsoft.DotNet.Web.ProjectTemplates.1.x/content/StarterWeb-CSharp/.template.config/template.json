@@ -2,7 +2,7 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
   "classifications": ["Web", "MVC"],
-  "name": "ASP.NET Core Web App",
+  "name": "ASP.NET Core Web App (Model-View-Controller)",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project template for creating an ASP.NET Core application with example ASP.NET Core MVC Views and Controllers. This template can also be used for RESTful HTTP services.",
   "groupIdentity": "Microsoft.Web.Mvc",
@@ -72,13 +72,6 @@
           "condition": "(IndividualAuth)",
           "exclude": [
             "Views/Account/SignedOut.cshtml"
-          ]
-        },
-        {
-          "copyOnly": [
-            "wwwroot/lib/**",
-            "wwwroot/images/**",
-            "wwwroot/favicon.ico"
           ]
         }
       ]
@@ -209,7 +202,7 @@
         "sourceVariableName": "IISExpressPort",
         "fallbackVariableName": "IISExpressPortGenerated"
       },
-      "replaces": "55555"
+      "replaces": "55556"
     },
     "OrganizationalAuth": {
       "type": "computed",
@@ -296,8 +289,25 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ],
-  "defaultName": "WebApplication1"
+  "defaultName": "WebApplication1",
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
 }
