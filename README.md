@@ -65,79 +65,70 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 > **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
-| Platform | Latest Daily Build<br>*release/2.0.0* | Latest Coherent Build<sup>1</sup><br>*release/2.0.0* |
-| -------- | :-------------------------------------: | :-------------------------------------: |
-| **Windows x64** | [![][win-x64-version-badge]][version]<br>[Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] | [![][win-x64-coherent-badge]][coherent-version] |
-| **Windows x86** | [![][win-x86-version-badge]][version]<br>[Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] | [![][win-x86-coherent-badge]][coherent-version] |
-| **Mac OS X** | [![][osx-version-badge]][version]<br>[Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] | [![][osx-coherent-badge]][coherent-version] |
-| **Linux x64** | [![][linux-version-badge]][version]<br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] | [![][linux-coherent-badge]][coherent-version] |
-| **Ubuntu 14.04 / Linux Mint 17** | [![][ubuntu-14.04-version-badge]][version]<br>[Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** | [![][ubuntu-14.04-coherent-badge]][coherent-version] |
-| **Ubuntu 16.04** | [![][ubuntu-16.04-version-badge]][version]<br>[Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** | [![][ubuntu-16.04-coherent-badge]][coherent-version] |
-| **Ubuntu 16.10** | [![][ubuntu-16.10-version-badge]][version]<br>[Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** | [![][ubuntu-16.10-coherent-badge]][coherent-version] |
-| **Debian 8**  | [![][debian-8-version-badge]][version]<br>[Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** | [![][debian-8-coherent-badge]][coherent-version] |
-| **RHEL 7.2** | [![][rhel-7-version-badge]][version]<br>[Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** | [![][rhel-7-coherent-badge]][coherent-version] |
-| **CentOS 7.1 / Oracle Linux 7** | tar.gz - See **Linux x64** ||
-| **Fedora 24** | tar.gz - See **Linux x64** ||
-| **OpenSUSE 42.1** | tar.gz - See **Linux x64** ||
+| Latest Coherent Build<sup>1</sup><br>*release/2.0.0*<br>[![][coherent-version-badge]][coherent-version] |
+| -------- |
 
 Reference notes:
 > **1**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
-> <br><br>**2**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
+
+| Platform | Latest Daily Build<br>*release/2.0.0*<br>[![][version-badge]][version] |
+| -------- | :-------------------------------------: |
+| **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
+| **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
+| **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
+| **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
+| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** |
+| **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** |
+| **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** |
+| **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** |
+| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>2</sup><br>tar.gz - See **Linux x64** |
+| **CentOS 7.1 / Oracle Linux 7** | tar.gz - See **Linux x64** |
+| **Fedora 24** | tar.gz - See **Linux x64** |
+| **OpenSUSE 42.1** | tar.gz - See **Linux x64** |
+
+Reference notes:
+> **2**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 
 [version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
+[comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
+[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
+
 [coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.coherent.version
+[comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
+[coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
 
 [win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe
 [win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe.sha
 [win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip
 [win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip.sha
-[win-x64-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe
 [win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe.sha
 [win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip
 [win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip.sha
-[win-x86-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg
 [osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg.sha
 [osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz
 [osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz.sha
-[osx-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz
 [linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz.sha
-[linux-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb
 [ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb.sha
-[ubuntu-14.04-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb
 [ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
-[ubuntu-16.04-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb
 [ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
-[ubuntu-16.10-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb
 [debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb.sha
-[debian-8-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
 
 [rhel-7-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm
 [rhel-7-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm.sha
-[rhel-7-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
-
-[win-x64-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[win-x86-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[osx-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[linux-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[ubuntu-14.04-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[ubuntu-16.04-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[ubuntu-16.10-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[debian-8-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
-[rhel-7-coherent-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_coherent_badge.svg
 
 # Debian daily feed
 
