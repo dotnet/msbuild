@@ -31,10 +31,10 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("F#", "mstest", false, false)]
         [InlineData("F#", "xunit", false, false)]
         [InlineData("F#", "mvc", true, false)]
-        [InlineData("VB", "console", false)]
-        [InlineData("VB", "classlib", false)]
-        [InlineData("VB", "mstest", false)]
-        [InlineData("VB", "xunit", false)]
+        [InlineData("VB", "console", false, false)]
+        [InlineData("VB", "classlib", false, false)]
+        [InlineData("VB", "mstest", false, false)]
+        [InlineData("VB", "xunit", false, false)]
         public void TemplateRestoresAndBuildsWithoutWarnings(
             string language,
             string projectType,
