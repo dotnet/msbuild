@@ -87,13 +87,6 @@
           "exclude": [
             "AzureAdB2C/**"
           ]
-        },
-        {
-          "copyOnly": [
-            "wwwroot/lib/**",
-            "wwwroot/images/**",
-            "wwwroot/favicon.ico"
-          ]
         }
       ]
     }
