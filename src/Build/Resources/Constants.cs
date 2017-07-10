@@ -137,9 +137,14 @@ namespace Microsoft.Build.Internal
         internal static string defaultSolutionWrapperProjectToolsVersion = MSBuildConstants.CurrentToolsVersion;
 
         /// <summary>
+        /// Name of the property used to specify a Visual Studio version.
+        /// </summary>
+        internal const string VisualStudioVersionPropertyName = "VisualStudioVersion";
+
+        /// <summary>
         /// Name of the property used to select which sub-toolset to use. 
         /// </summary>
-        internal const string SubToolsetVersionPropertyName = "VisualStudioVersion";
+        internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
         /// <summary>
         /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed. 
