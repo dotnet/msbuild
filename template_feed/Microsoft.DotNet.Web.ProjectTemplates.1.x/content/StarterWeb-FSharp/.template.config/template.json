@@ -16,19 +16,6 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "sources": [
-    {
-      "modifiers": [
-        {
-          "copyOnly": [
-            "wwwroot/lib/**",
-            "wwwroot/images/**",
-            "wwwroot/favicon.ico"
-          ]
-        }
-      ]
-    }
-  ],
   "symbols":{
     "TargetFrameworkOverride": {
       "type": "parameter",
