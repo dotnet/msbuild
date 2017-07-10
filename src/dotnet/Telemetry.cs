@@ -76,6 +76,15 @@ namespace Microsoft.DotNet.Cli
             );
         }
 
+        public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
+        {
+            if (!Enabled)
+            {
+                return;
+            }
+            TrackEventTask(eventName, properties, measurements);
+        }
+
         private void InitializeTelemetry()
         {
             try

@@ -17,13 +17,14 @@ namespace Microsoft.DotNet.Tests
         public bool Enabled { get; set; }
 
         public string EventName { get; set; }
+        public IDictionary<string, string> Properties { get; set; }
 
         public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             EventName = eventName;
+            Properties = properties;
         }
     }
-
 
     public class TelemetryCommandTests : TestBase
     {
@@ -34,6 +35,24 @@ namespace Microsoft.DotNet.Tests
             string[] args = { "help" };
             Microsoft.DotNet.Cli.Program.ProcessArgs(args, mockTelemetry);
             Assert.Equal(mockTelemetry.EventName, args[0]);
+        }
+
+        [WindowsOnlyFact]
+        public void InternalreportinstallsuccessCommandCollectExeNameWithEventname()
+        {
+            MockTelemetry mockTelemetry = new MockTelemetry();
+            string[] args = { "c:\\mypath\\dotnet-sdk-latest-win-x64.exe" };
+
+            InternalReportinstallsuccess.ProcessInputAndSendTelemetry(args, mockTelemetry);
+
+            mockTelemetry.EventName.Should().Be("reportinstallsuccess");
+            mockTelemetry.Properties["exeName"].Should().Be("dotnet-sdk-latest-win-x64.exe");
+        }
+
+        [Fact]
+        public void InternalreportinstallsuccessCommandIsRegistedInBuiltIn()
+        {
+            BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
         }
     }
 }
