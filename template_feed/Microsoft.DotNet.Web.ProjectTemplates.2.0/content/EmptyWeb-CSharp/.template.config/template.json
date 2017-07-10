@@ -70,7 +70,7 @@
         "sourceVariableName": "IISExpressPort",
         "fallbackVariableName": "IISExpressPortGenerated"
       },
-      "replaces": "55555"
+      "replaces": "55556"
     },
     "TargetFrameworkOverride": {
       "type": "parameter",

@@ -12,7 +12,7 @@
       "applicationUrl": "https://localhost:43434/",
       "sslPort": 43434
 //#else
-      "applicationUrl": "http://localhost:55555/",
+      "applicationUrl": "http://localhost:55556/",
       "sslPort": 0
 //#endif
     }
