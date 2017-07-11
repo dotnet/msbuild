@@ -1,0 +1,23 @@
+﻿@page
+@model Reset2faModel
+@{
+    ViewData["Title"] = "Reset 2FA codes";
+    ViewData["ActivePage"] = "TwoFactorAuthentication";
+}
+
+<h2>@ViewData["Title"]</h2>
+<div class="alert alert-warning" role="alert">
+    <p>
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <strong>If you reset your 2FA codes your autenticator will not work until you reconfigure it.</strong>
+    </p>
+    <p>
+        This process disable 2FA until you verify your authenticator and will also reset your 2FA recovery codes.
+        If you do not complete your authenticator configuration you may lose access to your account.
+    </p>
+</div>
+<div>
+    <form method="post" class="form-group">
+        <button class="btn btn-danger" type="submit">Reset 2FA</button>
+    </form>
+</div>

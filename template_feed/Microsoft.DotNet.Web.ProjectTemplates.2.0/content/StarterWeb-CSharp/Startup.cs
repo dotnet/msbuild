@@ -66,7 +66,7 @@ namespace Company.WebApplication1
 #elseif (OrganizationalAuth || IndividualB2CAuth)
             services.AddAuthentication(sharedOptions =>
             {
-                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
     #if (OrganizationalAuth)

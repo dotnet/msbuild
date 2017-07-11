@@ -53,6 +53,23 @@ namespace Company.WebApplication1.Pages.Account.Manage
             public string ConfirmPassword { get; set; }
         }
 
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return RedirectToPage("/Error");
+            }
+
+            var hasPassword = await _userManager.HasPasswordAsync(user);
+            if (!hasPassword)
+            {
+                return RedirectToPage("./SetPassword");
+            }
+
+            return Page();
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -61,26 +78,26 @@ namespace Company.WebApplication1.Pages.Account.Manage
             }
 
             var user = await _userManager.GetUserAsync(HttpContext.User);
-
-            if (user != null)
+            if (user == null)
             {
-                var result = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User changed their password successfully.");
-                    StatusMessage = ManageMessages.ChangePasswordSuccess;
-                    return RedirectToPage("./Index");
-                }
-                foreach (var error in result.Errors)
+                return RedirectToPage("/Error");
+            }
+
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
                 return Page();
             }
 
-            StatusMessage = ManageMessages.Error;
-            return RedirectToPage("./Index");
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            _logger.LogInformation("User changed their password successfully.");
+            StatusMessage = "Your password has been changed.";
+
+            return RedirectToPage();
         }
     }
 }

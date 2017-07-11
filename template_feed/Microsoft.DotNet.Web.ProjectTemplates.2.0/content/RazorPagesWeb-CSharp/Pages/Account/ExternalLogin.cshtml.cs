@@ -39,6 +39,13 @@ namespace Company.WebApplication1.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+        }
+
         public IActionResult OnGetAsync()
         {
             return RedirectToPage("./Login");
@@ -50,13 +57,6 @@ namespace Company.WebApplication1.Pages.Account
             var redirectUrl = Url.Page("./ExternalLogin", new { handler = "Callback", returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
-        }
-
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
         }
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
@@ -73,15 +73,11 @@ namespace Company.WebApplication1.Pages.Account
             }
 
             // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor : true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(Url.GetLocalUrl(returnUrl));
-            }
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToPage("./SendCode", new { returnUrl });
             }
             if (result.IsLockedOut)
             {
@@ -92,7 +88,13 @@ namespace Company.WebApplication1.Pages.Account
                 // If the user does not have an account, then ask the user to create an account.
                 ReturnUrl = returnUrl;
                 LoginProvider = info.LoginProvider;
-                Input.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                {
+                    Input = new InputModel
+                    {
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                    };
+                }
                 return Page();
             }
         }
@@ -105,7 +107,7 @@ namespace Company.WebApplication1.Pages.Account
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    return RedirectToPage("./ExternalLoginFailure");
+                    return RedirectToPage("/Error");
                 }
                 var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user);

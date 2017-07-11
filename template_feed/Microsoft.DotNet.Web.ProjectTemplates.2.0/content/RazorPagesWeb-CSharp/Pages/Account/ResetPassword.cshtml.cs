@@ -49,7 +49,10 @@ namespace Company.WebApplication1.Pages.Account
             }
             else
             {
-                Input.Code = code;
+                Input = new InputModel()
+                {
+                    Code = code
+                };
                 return Page();
             }
         }

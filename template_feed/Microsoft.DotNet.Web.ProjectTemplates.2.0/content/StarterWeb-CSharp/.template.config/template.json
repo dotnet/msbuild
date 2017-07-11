@@ -33,7 +33,7 @@
         },
         {
           "condition": "(!IndividualAuth || UseLocalDB)",
-          "exclude": [ "Company.WebApplication1.db" ]
+          "exclude": [ "app.db" ]
         },
         {
           "condition": "(!IndividualLocalAuth)",
@@ -237,7 +237,7 @@
         "sourceVariableName": "KestrelPort",
         "fallbackVariableName": "KestrelPortGenerated"
       },
-      "replaces": "5000"
+      "replaces": "5001"
     },
     "IISExpressPort": {
       "type": "parameter",

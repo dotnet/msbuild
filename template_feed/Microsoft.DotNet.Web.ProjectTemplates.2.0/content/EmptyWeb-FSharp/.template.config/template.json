@@ -5,8 +5,8 @@
   "generatorVersions": "[1.0.0.0-*)",
   "description": "An empty project template for creating an ASP.NET Core application. This template does not have any content in it.",
   "groupIdentity": "Microsoft.Web.Empty",
-  "precedence": "100",
-  "identity": "Microsoft.Web.Empty.FSharp",
+  "precedence": "2000",
+  "identity": "Microsoft.Web.Empty.FSharp.2.0",
   "shortName": "web",
   "thirdPartyNotices": "https://aka.ms/template-3pn",
   "tags": {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Company.WebApplication1.Data;
 using Company.WebApplication1.Extensions;
 using Company.WebApplication1.Services;
-
 
 namespace Company.WebApplication1.Pages.Account.Manage
 {
@@ -30,20 +30,26 @@ namespace Company.WebApplication1.Pages.Account.Manage
             _emailSender = emailSender;
         }
 
-        public bool HasPassword { get; set; }
-
-        public IList<UserLoginInfo> Logins { get; set; }
-
-        public string Email { get; set; }
+        public string Username { get; set; }
 
         public bool IsEmailConfirmed { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
 
-        public string StatusMessageClass => StatusMessage.Equals(ManageMessages.Error) ? "error" : "success";
+        [BindProperty]
+        public InputModel Input { get; set; }
 
-        public bool ShowStatusMessage => !string.IsNullOrEmpty(StatusMessage);
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+        }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -53,22 +59,72 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 return RedirectToPage("/Error");
             }
 
-            HasPassword = await _userManager.HasPasswordAsync(user);
-            Logins = await _userManager.GetLoginsAsync(user);
-            Email = await _userManager.GetEmailAsync(user);
+            Username = user.UserName;
+
+            Input = new InputModel()
+            {
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            };
+
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostConfirmEmailAsync()
+        public async Task<IActionResult> OnPostAsync()
         {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var email = await _userManager.GetEmailAsync(user);
+            if (user == null)
+            {
+                return RedirectToPage("/Error");
+            }
+
+            if (Input.Email != user.Email)
+            {
+                var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
+                if (!setEmailResult.Succeeded)
+                {
+                    return RedirectToPage("/Error");
+                }
+            }
+
+            if (Input.PhoneNumber != user.PhoneNumber)
+            {
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                if (!setPhoneResult.Succeeded)
+                {
+                    return RedirectToPage("/Error");
+                }
+            }
+
+            StatusMessage = "Your profile has been updated";
+            return RedirectToPage();
+        }
+        public async Task<IActionResult> OnPostSendVerificationEmailAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return RedirectToPage("/Error");
+            }
+
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
-            return RedirectToPage("./EmailConfirmationSent");
+            await _emailSender.SendEmailConfirmationAsync(Input.Email, callbackUrl);
+
+            StatusMessage = "Verification email sent. Please check your email.";
+            return RedirectToPage();
         }
     }
 }

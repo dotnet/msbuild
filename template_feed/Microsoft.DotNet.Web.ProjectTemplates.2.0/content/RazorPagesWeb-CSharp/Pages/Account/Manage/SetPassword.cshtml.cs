@@ -27,10 +27,22 @@ namespace Company.WebApplication1.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public string ReturnUrl { get; set; }
-
         [TempData]
         public string StatusMessage { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "New password")]
+            public string NewPassword { get; set; }
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm new password")]
+            [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+        }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -50,20 +62,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
             return Page();
         }
 
-        public class InputModel
-        {
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "New password")]
-            public string NewPassword { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm new password")]
-            [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-        }
-
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -72,24 +70,25 @@ namespace Company.WebApplication1.Pages.Account.Manage
             }
 
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (user != null)
+            if (user == null)
             {
-                var result = await _userManager.AddPasswordAsync(user, Input.NewPassword);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    StatusMessage = ManageMessages.SetPasswordSuccess;
-                    return RedirectToPage("./Index");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return Page();
+                return RedirectToPage("/Error");
             }
 
-            StatusMessage = ManageMessages.Error;
-            return RedirectToPage("./Index");
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, Input.NewPassword);
+            if (!addPasswordResult.Succeeded)
+            {
+                foreach (var error in addPasswordResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                    return Page();
+                }
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            StatusMessage = "Your password has been set.";
+
+            return RedirectToPage();
         }
     }
 }
