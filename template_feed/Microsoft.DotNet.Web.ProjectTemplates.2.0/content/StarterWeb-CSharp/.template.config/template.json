@@ -237,7 +237,7 @@
         "sourceVariableName": "KestrelPort",
         "fallbackVariableName": "KestrelPortGenerated"
       },
-      "replaces": "5000"
+      "replaces": "5001"
     },
     "IISExpressPort": {
       "type": "parameter",
