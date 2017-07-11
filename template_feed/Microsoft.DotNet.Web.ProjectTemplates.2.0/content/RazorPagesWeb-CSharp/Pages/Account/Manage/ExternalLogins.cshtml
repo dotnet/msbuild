@@ -4,15 +4,7 @@
     ViewData["Title"] = "Manage your external logins";
 }
 
-<h2>@ViewData["Title"].</h2>
-
-@if (Model.ShowStatusMessage)
-{
-    <div class="alert alert-@Model.StatusMessageClass alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        @Model.StatusMessage
-    </div>
-}
+@Html.Partial("StatusMessage", Model.StatusMessage)
 @if (Model.CurrentLogins?.Count > 0)
 {
     <h4>Registered Logins</h4>
@@ -25,7 +17,7 @@
                     <td>
                         @if (Model.ShowRemoveButton)
                         {
-                            <form asp-page-handler="RemoveLogin" method="post" class="form-horizontal">
+                            <form asp-page-handler="RemoveLogin" method="post">
                                 <div>
                                     <input asp-for="@login.LoginProvider" name="LoginProvider" type="hidden" />
                                     <input asp-for="@login.ProviderKey" name="ProviderKey" type="hidden" />

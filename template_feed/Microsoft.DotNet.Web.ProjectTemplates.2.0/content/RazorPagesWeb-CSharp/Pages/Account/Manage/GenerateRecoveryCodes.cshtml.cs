@@ -28,7 +28,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-
             if (user == null)
             {
                 return RedirectToPage("/Error");

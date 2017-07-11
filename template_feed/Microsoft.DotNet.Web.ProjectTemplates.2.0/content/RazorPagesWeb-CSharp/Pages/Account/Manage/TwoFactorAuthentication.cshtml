@@ -1,0 +1,62 @@
+﻿@page
+@model TwoFactorAuthenticationModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+}
+
+<h4>@ViewData["Title"]</h4>
+@if (Model.HasAny2faProviders)
+{
+    if (Model.Is2faEnabled)
+    {
+        if (Model.RecoveryCodesLeft == 0)
+        {
+            <div class="alert alert-danger">
+                <strong>You have no recovery codes left.</strong>
+                <p>You must <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can login with a recovery code.</p>
+            </div>
+        }
+        else if (Model.RecoveryCodesLeft == 1)
+        {
+            <div class="alert alert-danger">
+                <strong>You have 1 recovery code left.</strong>
+                <p>You can <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+            </div>
+        }
+        else if (Model.RecoveryCodesLeft <= 3)
+        {
+            <div class="alert alert-warning">
+                <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
+                <p>You should <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+            </div>
+        }
+    }
+
+    <form asp-page-handler="Enable2fa" method="post" id="Enable2fa">
+        <div class="checkbox">
+            <label>
+                <input asp-for="Is2faEnabled" type="checkbox" onchange="document.forms['Enable2fa'].submit();">
+                Enable two-factor authentication
+            </label>
+        </div>
+    </form>
+
+    if (Model.Is2faEnabled)
+    {
+        <a asp-page="./GenerateRecoveryCodes" class="btn btn-default">Reset recovery codes</a>
+    }
+}
+
+@if (!Model.HasAuthenticator)
+{
+    <a asp-page="./EnableAuthenticator" class="btn btn-default">Add authentiator app</a>
+}
+else
+{
+    <h4>Authenticator app</h4>
+    <a asp-page="./ResetAuthenticator" class="btn btn-default">Reset authenticator key</a>
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

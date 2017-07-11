@@ -28,23 +28,21 @@ namespace Company.WebApplication1.Pages.Account.Manage
             _logger = logger;
         }
 
-        public string AuthenticatorUri { get; set; }
-
         public string PublicKey { get; set; }
 
-        [TempData]
-        public string StatusMessage { get; set; }
-
-        public string StatusMessageClass => StatusMessage.Equals(ManageMessages.Error) ? "error" : "success";
-
-        public bool ShowStatusMessage => !string.IsNullOrEmpty(StatusMessage);
+        public string AuthenticatorUri { get; set; }
 
         [BindProperty]
-        [Required]
-        [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Text)]
-        [Display(Name = "Verification Code")]
-        public string VerificationCode { get; set; }        
+        public InputModel Input { get; set; }
+
+        public class InputModel
+        {
+            [Required]
+            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Text)]
+            [Display(Name = "Verification Code")]
+            public string Code { get; set; }
+        }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -60,7 +58,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 await _userManager.ResetAuthenticatorKeyAsync(user);
                 unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
-
             PublicKey = FormatKey(unformattedKey);
             AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
 
@@ -69,37 +66,32 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
                 return RedirectToPage("/Error");
             }
 
-            if (ModelState.IsValid)
-            {
-                // Strip spaces and hypens
-                VerificationCode = VerificationCode.Replace(" ", string.Empty).Replace("-", string.Empty);
-                
-                var result = await _userManager.VerifyTwoFactorTokenAsync(user, _userManager.Options.Tokens.AuthenticatorTokenProvider, VerificationCode);
+            // Strip spaces and hypens
+            var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-                if (result)
-                {
-                    await _userManager.SetTwoFactorEnabledAsync(user, true);
-                    _logger.LogInformation("{UserName} has enabled 2FA with an authenticator app.", user.UserName);
-                    return RedirectToPage("./GenerateRecoveryCodes");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Confirmation code is incorrect.");
-                    VerificationCode = string.Empty;
-                }
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+                user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+
+            if (!is2faTokenValid)
+            {
+                ModelState.AddModelError(string.Empty, "Verification code is invalid.");
+                return Page();
             }
 
-            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-            PublicKey = FormatKey(unformattedKey);
-            AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
-
-            return Page();
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
+            _logger.LogInformation("{UserName} has enabled 2FA with an authenticator app.", user.UserName);
+            return RedirectToPage("./GenerateRecoveryCodes");
         }
 
         private string FormatKey(string unformattedKey)
@@ -126,7 +118,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 "Company.WebApplication1",
                 email,
                 unformattedKey);
-
         }
     }
 }

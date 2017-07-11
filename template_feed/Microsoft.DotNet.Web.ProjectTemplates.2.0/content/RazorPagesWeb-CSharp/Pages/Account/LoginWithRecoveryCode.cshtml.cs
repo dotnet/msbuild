@@ -27,11 +27,19 @@ namespace Company.WebApplication1.Pages.Account
 
         public string ReturnUrl { get; set; }
 
+        public class InputModel
+        {
+            [BindProperty]
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Recovery Code")]
+            public string RecoveryCode { get; set; }
+        }
+
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-
             if (user == null)
             {
                 return RedirectToPage("/Error");
@@ -44,8 +52,12 @@ namespace Company.WebApplication1.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(bool rememberMe, string returnUrl = null)
         {
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
 
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
                 return RedirectToPage("/Error");
@@ -72,15 +84,6 @@ namespace Company.WebApplication1.Pages.Account
                 return Page();
             }
 
-        }
-
-        public class InputModel
-        {
-            [BindProperty]
-            [Required]
-            [DataType(DataType.Text)]
-            [Display(Name = "Recovery Code")]
-            public string RecoveryCode { get; set; }
         }
     }
 }

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Options;
 using Company.WebApplication1.Data;
 
 namespace Company.WebApplication1.Pages.Account.Manage
@@ -34,14 +33,9 @@ namespace Company.WebApplication1.Pages.Account.Manage
         [TempData]
         public string StatusMessage { get; set; }
 
-        public string StatusMessageClass => StatusMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0 ? "error" : "success";
-
-        public bool ShowStatusMessage => !string.IsNullOrEmpty(StatusMessage);
-
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-
             if (user == null)
             {
                 return RedirectToPage("/Error");
@@ -57,17 +51,20 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostRemoveLoginAsync(string loginProvider, string providerKey)
         {
-            StatusMessage = ManageMessages.Error;
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            if (user != null)
+            if (user == null)
             {
-                var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                }
+                return RedirectToPage("/Error");
             }
-            StatusMessage = ManageMessages.RemoveLoginSuccess;
+
+            var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
+            if (!result.Succeeded)
+            {
+                return RedirectToPage("/Error");
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            StatusMessage = "The external login was removed.";
             return RedirectToPage();
         }
 
@@ -93,21 +90,19 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
             if (info == null)
             {
-                StatusMessage = ManageMessages.Error;
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                StatusMessage = ManageMessages.Error;
-                return RedirectToPage();
+                return RedirectToPage("/Error");
             }
 
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            StatusMessage = ManageMessages.AddLoginSuccess;
+            StatusMessage = "The external login was added.";
             return RedirectToPage();
         }
     }

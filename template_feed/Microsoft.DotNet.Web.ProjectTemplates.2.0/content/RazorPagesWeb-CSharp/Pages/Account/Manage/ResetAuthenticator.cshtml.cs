@@ -46,7 +46,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
             _logger.LogInformation("{UserName} has reset their authentication app key.", user.UserName);
 
             return RedirectToPage("./EnableAuthenticator");
-
         }
     }
 }

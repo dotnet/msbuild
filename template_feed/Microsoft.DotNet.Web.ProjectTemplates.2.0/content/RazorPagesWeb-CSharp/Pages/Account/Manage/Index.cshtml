@@ -1,96 +1,45 @@
 @page
 @model IndexModel
 @{
-    ViewData["Title"] = "Manage your account";
+    ViewData["Title"] = "Profile";
 }
 
-<h2>@ViewData["Title"].</h2>
-@if (Model.ShowStatusMessage)
-{
-    <div class="alert alert-@Model.StatusMessageClass alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        @Model.StatusMessage
-    </div>
-}
-<div>
-    <h4>Change your account settings</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>Password:</dt>
-        <dd>
-            @if (Model.HasPassword)
-            {
-                <a asp-page="./ChangePassword" class="btn-bracketed">Change</a>
-            }
-            else
-            {
-                <a asp-page="./SetPassword" class="btn-bracketed">Create</a>
-            }
-        </dd>
-        <dt>External Logins:</dt>
-        <dd>
-            @Model.Logins.Count <a asp-page="./ExternalLogins" class="btn-bracketed">Manage</a>
-        </dd>
-        <dt>Email:</dt>
-        <dd>
-            @if (Model.IsEmailConfirmed)
-            {
-                <span class="text-success">Confirmed</span>
-            }
-            else
-            {
-                <form asp-page-handler="ConfirmEmail" method="post">
-                    <button type="submit" class="btn-link btn-bracketed">Confirm</button>
-                </form>
-            }
-        </dd>
-        <dt>Authenticator App:</dt>
-        <dd>
-            @if (!Model.HasAuthenticator)
-            {
-                <a asp-page="./EnableAuthenticator" class="btn-bracketed">Add an authenticator</a>
-            }
-            else
-            {
-                <a asp-page="./ResetAuthenticator" class="btn-bracketed">Reset authenticator key</a>
-                <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">Reset recovery codes</a>
-                @if (Model.RecoveryCodesLeft == 0)
+<h4>@ViewData["Title"]</h4>
+@Html.Partial("StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                @if (Model.IsEmailConfirmed)
                 {
-                    <div class="alert alert-danger">
-                        <strong>You have no recovery codes left.</strong>
-                        <p>You must <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a> before you can login with a recovery code.</p>
+                    <div class="input-group">
+                        <input asp-for="Input.Email" class="form-control" />
+                        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
                     </div>
-
-                }
-                else if (Model.RecoveryCodesLeft == 1)
-                {
-                    <div class="alert alert-danger">
-                        <strong>You have 1 recovery code left.</strong>
-                        <p>You can <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a>.</p>
-                    </div>
-                }
-                else if (Model.RecoveryCodesLeft <= 3)
-                {
-                    <div class="alert alert-warning">
-                        <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
-                        <p>You should <a asp-page="./GenerateRecoveryCodes" class="btn-bracketed">generate a new set of recovery codes</a>.</p>
-                    </div>
-                }
-            }
-        </dd>
-        @if (Model.HasAny2faProviders)
-        {
-            <dt>Two-Factor Auth:</dt>
-            <dd>
-                @if (!Model.Is2faEnabled)
-                {
-                    <a asp-page="./Enable2fa" class="btn-bracketed">Enable</a>
                 }
                 else
                 {
-                    <a asp-page="./Disable2fa" class="btn-bracketed">Disable</a>
+                    <input asp-for="Input.Email" class="form-control" />
+                    <button asp-page-handler="SendVerificationEmail" class="btn btn-link">Send verification email</button>
                 }
-            </dd>
-        }
-    </dl>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-default">Save</button>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

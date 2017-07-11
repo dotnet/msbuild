@@ -1,27 +1,23 @@
 ﻿@page
 @model LoginWith2faModel
 @{
-    ViewData["Title"] = "Two Step Verification";
+    ViewData["Title"] = "Two-factor authentication";
 }
 
-<h2>@ViewData["Title"].</h2>
+<h2>@ViewData["Title"]</h2>
+<hr />
+<p>Your login is protected with an authenticator app. Enter your authenticator code below.</p>
 <div class="row">
-    <p>Your login is protected with an authenticator app. Enter your authenticator code below.</p>
-
-    <hr />
-
-    <form method="post" class="form-horizontal" asp-route-returnUrl="@Model.ReturnUrl">
-        <input asp-for="RememberMe" type="hidden" />
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="form-group">
-            <label asp-for="Input.TwoFactorCode" class="col-md-2 control-label"></label>
-            <div class="col-md-10">
+    <div class="col-md-4">
+        <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+            <input asp-for="RememberMe" type="hidden" />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.TwoFactorCode"></label>
                 <input asp-for="Input.TwoFactorCode" class="form-control" autocomplete="off" />
                 <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
             </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
+            <div class="form-group">
                 <div class="checkbox">
                     <label asp-for="Input.RememberMachine">
                     <input asp-for="Input.RememberMachine" />
@@ -29,12 +25,13 @@
                     </label>
                 </div>
             </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
+            <div class="form-group">
                 <button type="submit" class="btn btn-default">Log in</button>
             </div>
-        </div>
-    </form>
-    <p>Don't have access to your authenticator device? You can <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">login with a recovery code</a>.</p>
+        </form>
+    </div>
 </div>
+<p>
+    Don't have access to your authenticator device? You can 
+    <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">login with a recovery code</a>.
+</p>

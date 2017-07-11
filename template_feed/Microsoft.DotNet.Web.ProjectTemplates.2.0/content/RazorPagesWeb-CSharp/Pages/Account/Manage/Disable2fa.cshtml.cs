@@ -50,7 +50,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             _logger.LogInformation("{UserName} has disabled 2fa.", user.UserName);
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("./TwoFactorAuthentication");
         }
     }
 }

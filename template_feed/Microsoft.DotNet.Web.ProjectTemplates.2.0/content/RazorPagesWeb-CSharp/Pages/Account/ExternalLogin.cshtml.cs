@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -40,6 +39,13 @@ namespace Company.WebApplication1.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+        }
+
         public IActionResult OnGetAsync()
         {
             return RedirectToPage("./Login");
@@ -51,13 +57,6 @@ namespace Company.WebApplication1.Pages.Account
             var redirectUrl = Url.Page("./ExternalLogin", new { handler = "Callback", returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
-        }
-
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
         }
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
@@ -108,7 +107,7 @@ namespace Company.WebApplication1.Pages.Account
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    return RedirectToPage("./ExternalLoginFailure");
+                    return RedirectToPage("/Error");
                 }
                 var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user);
