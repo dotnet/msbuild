@@ -30,7 +30,7 @@ namespace Company.WebApplication1
 #if (OrganizationalAuth || IndividualB2CAuth)
             services.AddAuthentication(sharedOptions =>
             {
-                sharedOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
     #if (IndividualB2CAuth)
             .AddAzureAdB2CBearer(options => Configuration.Bind("AzureAdB2C", options));
