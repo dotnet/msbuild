@@ -23,4 +23,4 @@ Installation Note
 --------------
 A command will be run during the install process that will improve project restore speed and enable offline access. It will take up to a minute to complete."
 
-dotnet new > /dev/null 2>&1 || true
+dotnet internal-reportinstallsuccess "rpmpackage" > /dev/null 2>&1 || true
