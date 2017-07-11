@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 #endif
 
-namespace Microsoft.AspNetCore.Authentication.Extensions
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class AzureAdAuthenticationBuilderExtensions
     {        
@@ -58,19 +58,19 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
                 options.Events = new OpenIdConnectEvents
                 {
-                    OnTicketReceived = (context) =>
+                    OnTicketReceived = context =>
                     {
                         // If your authentication logic is based on users then add your logic here
-                        return Task.FromResult(0);
+                        return Task.CompletedTask;
                     },
-                    OnAuthenticationFailed = (context) =>
+                    OnAuthenticationFailed = context =>
                     {
                         context.Response.Redirect("/Home/Error");
                         context.HandleResponse(); // Suppress the exception
-                        return Task.FromResult(0);
+                        return Task.CompletedTask;
                     },
                     // If your application needs to do authenticate single users, add your user validation below.
-                    //OnTokenValidated = (context) =>
+                    //OnTokenValidated = context =>
                     //{
                     //    return myUserValidationLogic(context.Ticket.Principal);
                     //}

@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Company.WebApplication1.Models.ManageViewModels
 {
-    public class AddPhoneNumberViewModel
+    public class GenerateRecoveryCodesViewModel
     {
-        [Required]
-        [Phone]
-        [Display(Name = "Phone number")]
-        public string PhoneNumber { get; set; }
+        public string[] RecoveryCodes { get; set; }
     }
 }
