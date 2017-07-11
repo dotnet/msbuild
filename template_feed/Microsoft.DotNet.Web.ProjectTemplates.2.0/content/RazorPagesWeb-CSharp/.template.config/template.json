@@ -33,7 +33,7 @@
         },
         {
           "condition": "(!IndividualLocalAuth || UseLocalDB)",
-          "exclude": [ "Company.WebApplication1.db" ]
+          "exclude": [ "app.db" ]
         },
         {
           "condition": "(!IndividualLocalAuth)",
