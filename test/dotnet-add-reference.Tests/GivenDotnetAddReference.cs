@@ -68,7 +68,7 @@ Commands:
 
             try
             {
-                string args = $"classlib -o \"{projDir.Path}\" --debug:ephemeral-hive";
+                string args = $"classlib -o \"{projDir.Path}\" --debug:ephemeral-hive --no-restore";
                 new NewCommandShim()
                     .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(args)

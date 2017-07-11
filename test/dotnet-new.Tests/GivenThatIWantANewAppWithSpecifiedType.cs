@@ -42,9 +42,11 @@ namespace Microsoft.DotNet.New.Tests
             bool skipSpaWebpackSteps)
         {
             string rootPath = TestAssets.CreateTestDirectory(identifier: $"{language}_{projectType}").FullName;
+            //This works around the SPA templates not currently supporting the "--no-restore" switch
+            string noRestoreDirective = skipSpaWebpackSteps ? "" : "--no-restore";
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive")
+                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive {noRestoreDirective}")
                 .Should().Pass();
 
             if (useNuGetConfigForAspNet)
