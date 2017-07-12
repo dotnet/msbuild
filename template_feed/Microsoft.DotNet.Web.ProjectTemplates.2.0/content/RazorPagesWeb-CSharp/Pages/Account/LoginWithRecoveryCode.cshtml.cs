@@ -83,7 +83,6 @@ namespace Company.WebApplication1.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return Page();
             }
-
         }
     }
 }
