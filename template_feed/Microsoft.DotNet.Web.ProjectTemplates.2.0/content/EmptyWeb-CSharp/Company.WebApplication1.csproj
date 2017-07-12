@@ -10,10 +10,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkOverride)' == ''">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-rtm-26210" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-rtm-26239" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkOverride)' != ''">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-rtm-26210" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0-rtm-26239" />
   </ItemGroup>
 
 </Project>
