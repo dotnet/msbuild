@@ -27,7 +27,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             return Page();
@@ -38,7 +38,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);

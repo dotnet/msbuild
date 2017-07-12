@@ -38,7 +38,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             CurrentLogins = await _userManager.GetLoginsAsync(user);
@@ -54,13 +54,13 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unexpected error occurred removing external login for user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
@@ -84,19 +84,19 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
             if (info == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unexpected error occurred loading external login info for user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unexpected error occurred adding external login for user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             // Clear the existing external cookie to ensure a clean login process

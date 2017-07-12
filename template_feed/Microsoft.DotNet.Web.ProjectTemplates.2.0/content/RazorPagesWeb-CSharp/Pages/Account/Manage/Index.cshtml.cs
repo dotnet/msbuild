@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Company.WebApplication1.Data;
-using Company.WebApplication1.Extensions;
 using Company.WebApplication1.Services;
 
 namespace Company.WebApplication1.Pages.Account.Manage
@@ -56,7 +55,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             Username = user.UserName;
@@ -82,7 +81,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             if (Input.Email != user.Email)
@@ -90,7 +89,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    return RedirectToPage("/Error");
+                    throw new ApplicationException($"Unexpected error occurred setting email for user with name '{HttpContext.User.Identity.Name}'.");
                 }
             }
 
@@ -99,7 +98,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    return RedirectToPage("/Error");
+                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with name '{HttpContext.User.Identity.Name}'.");
                 }
             }
 
@@ -116,7 +115,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

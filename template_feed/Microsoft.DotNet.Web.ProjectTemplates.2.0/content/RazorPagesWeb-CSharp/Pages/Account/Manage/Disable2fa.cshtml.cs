@@ -28,12 +28,12 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             if (!await _userManager.GetTwoFactorEnabledAsync(user))
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Cannot disable 2FA for user with name '{HttpContext.User.Identity.Name}' as it's not currently enabled.");
             }
 
             return Page();
@@ -44,7 +44,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);

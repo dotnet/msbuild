@@ -35,7 +35,7 @@
     <form asp-page-handler="Enable2fa" method="post" id="Enable2fa">
         <div class="checkbox">
             <label>
-                <input asp-for="Is2faEnabled" type="checkbox" onchange="document.forms['Enable2fa'].submit();">
+                <input asp-for="Is2faEnabled" type="checkbox" onchange="document.getElementById('Enable2fa').submit();">
                 Enable two-factor authentication
             </label>
         </div>

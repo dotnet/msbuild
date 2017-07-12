@@ -35,3 +35,7 @@
     Don't have access to your authenticator device? You can 
     <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">login with a recovery code</a>.
 </p>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

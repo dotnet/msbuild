@@ -45,11 +45,11 @@ namespace Company.WebApplication1.Pages.Account
         {
             if (code == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException("A code must be supplied for password reset.");
             }
             else
             {
-                Input = new InputModel()
+                Input = new InputModel
                 {
                     Code = code
                 };

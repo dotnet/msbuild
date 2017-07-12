@@ -7,8 +7,8 @@
 <h2>@ViewData["Title"]</h2>
 <hr />
 <p>
-    You have requested to login with a recovery code. This login will not be remembered until you provide
-    an authenticator app code at login or disable 2FA and login again.
+    You have requested to log in with a recovery code. This login will not be remembered until you provide
+    an authenticator app code at log in or disable 2FA and log in again.
 </p>
 <div class="row">
     <div class="col-md-4">
@@ -24,3 +24,6 @@
     </div>
 </div>
  
+ @section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

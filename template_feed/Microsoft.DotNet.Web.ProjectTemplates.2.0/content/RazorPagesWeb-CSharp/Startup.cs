@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 #if (OrganizationalAuth)
@@ -18,12 +17,12 @@ using Microsoft.AspNetCore.Identity;
 #if (OrganizationalAuth || IndividualAuth)
 using Microsoft.AspNetCore.Http;
 #endif
-#if (IndividualAuth)
-using Microsoft.EntityFrameworkCore;
-#endif
 using Microsoft.AspNetCore.Hosting;
 #if (OrganizationalAuth)
 using Microsoft.AspNetCore.Mvc.Authorization;
+#endif
+#if (IndividualAuth)
+using Microsoft.EntityFrameworkCore;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

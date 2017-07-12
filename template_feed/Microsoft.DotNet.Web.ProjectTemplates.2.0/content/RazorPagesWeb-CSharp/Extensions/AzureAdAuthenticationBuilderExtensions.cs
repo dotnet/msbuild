@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 #endif
 
-namespace Microsoft.AspNetCore.Authentication.Extensions
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class AzureAdAuthenticationBuilderExtensions
     {
@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
             return builder;
         }
 
-        private class ConfigureAzureOptions: IConfigureNamedOptions<OpenIdConnectOptions>
+        private class ConfigureAzureOptions : IConfigureNamedOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdOptions _azureOptions;
 
@@ -46,8 +46,8 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    // Instead of using the default validation (validating against a single issuer value, as we do in line of business apps),
-                    // we inject our own multitenant validation logic
+                    // Instead of using the default validation (validating against a single issuer value, as we do in
+                    // line of business apps), we inject our own multitenant validation logic
                     ValidateIssuer = false,
 
                     // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
@@ -58,19 +58,19 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
 
                 options.Events = new OpenIdConnectEvents
                 {
-                    OnTicketReceived = (context) =>
+                    OnTicketReceived = context =>
                     {
                         // If your authentication logic is based on users then add your logic here
-                        return Task.FromResult(0);
+                        return Task.CompletedTask;
                     },
-                    OnAuthenticationFailed = (context) =>
+                    OnAuthenticationFailed = context =>
                     {
-                        context.Response.Redirect("/Home/Error");
+                        context.Response.Redirect("/Error");
                         context.HandleResponse(); // Suppress the exception
-                        return Task.FromResult(0);
+                        return Task.CompletedTask;
                     },
                     // If your application needs to do authenticate single users, add your user validation below.
-                    //OnTokenValidated = (context) =>
+                    //OnTokenValidated = context =>
                     //{
                     //    return myUserValidationLogic(context.Ticket.Principal);
                     //}

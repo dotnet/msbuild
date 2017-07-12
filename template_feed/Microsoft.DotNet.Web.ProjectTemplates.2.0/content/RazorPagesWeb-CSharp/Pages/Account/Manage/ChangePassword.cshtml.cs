@@ -58,7 +58,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -80,7 +80,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);

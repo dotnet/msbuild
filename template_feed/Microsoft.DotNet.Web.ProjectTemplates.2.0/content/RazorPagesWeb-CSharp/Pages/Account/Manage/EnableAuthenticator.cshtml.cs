@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Text;
@@ -28,8 +29,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
             _logger = logger;
         }
 
-        public string PublicKey { get; set; }
-
         public string AuthenticatorUri { get; set; }
 
         [BindProperty]
@@ -42,6 +41,9 @@ namespace Company.WebApplication1.Pages.Account.Manage
             [DataType(DataType.Text)]
             [Display(Name = "Verification Code")]
             public string Code { get; set; }
+
+            [ReadOnly(true)]
+            public string PublicKey { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -49,7 +51,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
@@ -58,7 +60,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 await _userManager.ResetAuthenticatorKeyAsync(user);
                 unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
-            PublicKey = FormatKey(unformattedKey);
+            Input = new InputModel { PublicKey = FormatKey(unformattedKey) };
             AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
 
             return Page();
@@ -74,7 +76,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             // Strip spaces and hypens
@@ -85,7 +87,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError(string.Empty, "Verification code is invalid.");
+                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
                 return Page();
             }
 
@@ -96,7 +98,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         private string FormatKey(string unformattedKey)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             int currentPosition = 0;
             while (currentPosition + 4 < unformattedKey.Length)
             {

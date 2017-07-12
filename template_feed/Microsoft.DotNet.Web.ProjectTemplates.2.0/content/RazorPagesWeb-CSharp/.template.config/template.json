@@ -61,9 +61,10 @@
             "Pages/Account/ResetPasswordConfirmation.cshtml",
             "Pages/Account/ResetPasswordConfirmation.cshtml.cs",
             "Pages/Account/Manage/**",
+            "Extensions/EmailSenderExtensions.cs",
+            "Extensions/UrlHelperExtensions.cs",
             "Services/**",
-            "Data/**",
-            "Extensions/**"
+            "Data/**"
           ]
         },
         {
@@ -75,13 +76,14 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "AzureAd/**"
+            "Extensions/AzureAdAuthenticationBuilderExtensions.cs",
+            "Extensions/AzureAdOptions.cs"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "AzureAdB2C/**"
+            "Extensions/AzureAdB2C*.cs"
           ]
         }
       ]

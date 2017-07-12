@@ -43,7 +43,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
@@ -59,7 +59,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(HttpContext.User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
             }
 
             if (!Is2faEnabled)
@@ -71,7 +71,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, Is2faEnabled);
                 if (!enable2faResult.Succeeded)
                 {
-                    return RedirectToPage("/Error");
+                    throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with name '{HttpContext.User.Identity.Name}'.");
                 }
             }
 
