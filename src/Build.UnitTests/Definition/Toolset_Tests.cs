@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(t.OverrideTasksPath, t2.OverrideTasksPath);
             Assert.Equal(t.Properties.Count, t2.Properties.Count);
 
-            foreach (string key in t.Properties.Keys)
+            foreach (string key in t.Properties.Values.Select(p => p.Name))
             {
                 Assert.Equal(t.Properties[key].Name, t2.Properties[key].Name);
                 Assert.Equal(t.Properties[key].EvaluatedValue, t2.Properties[key].EvaluatedValue);
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     Assert.Equal(subToolset1.SubToolsetVersion, subToolset2.SubToolsetVersion);
                     Assert.Equal(subToolset1.Properties.Count, subToolset2.Properties.Count);
 
-                    foreach (string subToolsetPropertyKey in subToolset1.Properties.Keys)
+                    foreach (string subToolsetPropertyKey in subToolset1.Properties.Values.Select(p => p.Name))
                     {
                         Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].Name, subToolset2.Properties[subToolsetPropertyKey].Name);
                         Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].EvaluatedValue, subToolset2.Properties[subToolsetPropertyKey].EvaluatedValue);

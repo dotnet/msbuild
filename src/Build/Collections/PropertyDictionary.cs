@@ -101,7 +101,10 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                return PropertyNames;
+                ErrorUtilities.ThrowInternalError("Keys is not supported on PropertyDictionary.");
+
+                // Show the compiler that this always throws:
+                throw new NotImplementedException();
             }
         }
 
@@ -157,21 +160,6 @@ namespace Microsoft.Build.Collections
                 lock (_properties)
                 {
                     return _properties.Count;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Retrieves a collection containing the names of all the properties present in the dictionary.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal ICollection<string> PropertyNames
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Keys;
                 }
             }
         }
@@ -370,7 +358,10 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            return PropertyNames.Contains(key);
+            lock (_properties)
+            {
+                return _properties.ContainsKey(key);
+            }
         }
 
         /// <summary>
