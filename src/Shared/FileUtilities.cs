@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.Shared
 
         internal static string TrimTrailingSlashes(this string s)
         {
-            return s.TrimEnd('/', '\\');
+            return s.TrimEnd(Slashes);
         }
 
         /// <summary>
