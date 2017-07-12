@@ -174,8 +174,18 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
+            var dotnetExe = environmentProvider.GetCommandPath("dotnet");
 
-            return Path.GetDirectoryName(environmentProvider.GetCommandPath("dotnet"));
+#if NETSTANDARD1_5
+            if (dotnetExe != null && !Interop.RunningOnWindows)
+            {
+                // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
+                // resolve it to get the actual path to the binary
+                dotnetExe = Interop.realpath(dotnetExe) ?? dotnetExe;
+            }
+#endif
+
+            return Path.GetDirectoryName(dotnetExe);
         }
     }
 }
