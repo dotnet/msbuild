@@ -520,6 +520,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to cmd.exe</returns>
         protected override string GenerateFullPathToTool()
         {
+            return CommandProcessorPath.Value;
+        }
+
+        private static readonly Lazy<string> CommandProcessorPath = new Lazy<string>(() =>
+        {
             // Get the fully qualified path to cmd.exe
             if (NativeMethodsShared.IsWindows)
             {
@@ -541,7 +546,7 @@ namespace Microsoft.Build.Tasks
             {
                 return "sh";
             }
-        }
+        });
 
         /// <summary>
         /// Gets the working directory to use for the process. Should return null if ToolTask should use the
