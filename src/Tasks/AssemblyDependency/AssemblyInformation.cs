@@ -656,7 +656,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return new string[0];
+                return Array.Empty<string>();
             }
 
 #if FEATURE_ASSEMBLY_LOADFROM

@@ -194,8 +194,8 @@ namespace Microsoft.Build.Tasks
                     item.SetMetadata("PlatformVersion", sdk.Value.Item2);
 
                     // Need to stash these so we can unroll the platform via GetMatchingPlatformSDK when we get the reference files for the sdks
-                    item.SetMetadata(DirectoryRootsMetadataName, String.Join(";", SDKDirectoryRoots ?? new string[0]));
-                    item.SetMetadata(ExtensionDirectoryRootsMetadataName, String.Join(";", SDKExtensionDirectoryRoots ?? new string[0]));
+                    item.SetMetadata(DirectoryRootsMetadataName, String.Join(";", SDKDirectoryRoots ?? Array.Empty<string>()));
+                    item.SetMetadata(ExtensionDirectoryRootsMetadataName, String.Join(";", SDKExtensionDirectoryRoots ?? Array.Empty<string>()));
                     item.SetMetadata(RegistryRootMetadataName, SDKRegistryRoot);
 
                     outputItems.Add(item);

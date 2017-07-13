@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     {
         private bool _updateToAbsolutePaths = false;
         private ITaskItem _path = null;
-        private ITaskItem[] _files = new TaskItem[0];
+        private ITaskItem[] _files = Array.Empty<TaskItem>();
         private ITaskItem[] _inPath = null;
         private ITaskItem[] _outOfPath = null;
 

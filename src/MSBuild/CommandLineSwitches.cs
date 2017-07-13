@@ -683,7 +683,7 @@ namespace Microsoft.Build.CommandLine
             }
             else if (IsParameterlessSwitchSet(parameterlessSwitch))
             {
-                result = new string[] { };
+                result = Array.Empty<string>();
             }
 
             return result;

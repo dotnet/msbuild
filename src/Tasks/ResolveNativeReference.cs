@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _containedTypeLibraries = null;
         private ITaskItem[] _containedLooseTlbFiles = null;
         private ITaskItem[] _containedLooseEtcFiles = null;
-        private string[] _additionalSearchPaths = new string[0];
+        private string[] _additionalSearchPaths = Array.Empty<string>();
         #endregion
 
         #region Nested classes

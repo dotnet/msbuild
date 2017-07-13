@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Outputs
         {
-            get { return _outputs ?? new ITaskItem[0]; }
+            get { return _outputs ?? Array.Empty<ITaskItem>(); }
             set { _outputs = value; }
         }
 
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput
         {
-            get { return !ConsoleToMSBuild ? new ITaskItem[0] : _nonEmptyOutput.ToArray(); }
+            get { return !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray(); }
         }
 
         #endregion

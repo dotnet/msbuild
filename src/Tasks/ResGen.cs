@@ -286,7 +286,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (!File.Exists(outputFile.ItemSpec))
                         {
-                            this.OutputFiles = new ITaskItem[0];
+                            this.OutputFiles = Array.Empty<ITaskItem>();
                         }
                     }
 
