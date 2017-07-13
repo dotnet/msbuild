@@ -81,8 +81,8 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 foreach (var error in addPasswordResult.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
-                    return Page();
                 }
+                return Page();
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
