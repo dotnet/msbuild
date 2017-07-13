@@ -200,7 +200,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of project property names / list of search paths for the specified toolsVersion and os
         /// </summary>
-        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
             Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
             var key = toolsVersion + ":" + os;
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Evaluation
                 return kindToPathsCache;
             }
 
-            kindToPathsCache = ComputeDistinctListOfSearchPaths(propertyCollection, expander);
+            kindToPathsCache = ComputeDistinctListOfSearchPaths(propertyCollection);
 
             return kindToPathsCache;
         }
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a list of the search paths for a given search path property collection
         /// </summary>
-        private Dictionary<string, ProjectImportPathMatch> ComputeDistinctListOfSearchPaths(ToolsetElement.PropertyElementCollection propertyCollection, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        private Dictionary<string, ProjectImportPathMatch> ComputeDistinctListOfSearchPaths(ToolsetElement.PropertyElementCollection propertyCollection)
         {
             var pathsTable = new Dictionary<string, ProjectImportPathMatch>();
 
@@ -239,11 +239,8 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                var location = ElementLocation.Create(property.ElementInformation.Source, property.ElementInformation.LineNumber, 0);
-                string expandedValue = expander.ExpandIntoStringAndUnescape(property.Value, ExpanderOptions.ExpandProperties, location);
-
                 //FIXME: handle ; in path on Unix
-                var paths = expandedValue
+                var paths = property.Value
                     .Split(new[] {_separatorForExtensionsPathSearchPaths}, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()
                     .Where(path => !string.IsNullOrEmpty(path));

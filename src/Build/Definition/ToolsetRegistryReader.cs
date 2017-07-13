@@ -292,7 +292,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns a map of MSBuildExtensionsPath* property names/kind to list of search paths
         /// </summary>
-        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
             return new Dictionary<string, ProjectImportPathMatch>();
         }
