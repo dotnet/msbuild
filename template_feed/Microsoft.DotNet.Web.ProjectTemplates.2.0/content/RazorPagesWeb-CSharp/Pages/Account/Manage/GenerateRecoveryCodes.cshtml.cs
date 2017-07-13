@@ -27,15 +27,15 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             if (!user.TwoFactorEnabled)
             {
-                throw new ApplicationException($"Cannot generate recovery codes for user with name '{HttpContext.User.Identity.Name}' as they do not have 2FA enabled.");
+                throw new ApplicationException($"Cannot generate recovery codes for user with name '{User.Identity.Name}' as they do not have 2FA enabled.");
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);

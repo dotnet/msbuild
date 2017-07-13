@@ -10,24 +10,24 @@ using Company.WebApplication1.Data;
 
 namespace Company.WebApplication1.Pages.Account.Manage
 {
-    public class Reset2faModel : PageModel
+    public class ResetAuthenticatorModel : PageModel
     {
         UserManager<ApplicationUser> _userManager;
-        ILogger<Reset2faModel> _logger;
+        ILogger<ResetAuthenticatorModel> _logger;
 
-        public Reset2faModel(
+        public ResetAuthenticatorModel(
             UserManager<ApplicationUser> userManager,
-            ILogger<Reset2faModel> logger)
+            ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;
             _logger = logger;
         }
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             return Page();
@@ -35,10 +35,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);

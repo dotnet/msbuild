@@ -35,10 +35,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             CurrentLogins = await _userManager.GetLoginsAsync(user);
@@ -51,16 +51,16 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostRemoveLoginAsync(string loginProvider, string providerKey)
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred removing external login for user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unexpected error occurred removing external login for user with name '{User.Identity.Name}'.");
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
@@ -75,28 +75,28 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(HttpContext.User));
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
             return new ChallengeResult(provider, properties);
         }
 
         public async Task<IActionResult> OnGetLinkLoginCallbackAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
             if (info == null)
             {
-                throw new ApplicationException($"Unexpected error occurred loading external login info for user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unexpected error occurred loading external login info for user with name '{User.Identity.Name}'.");
             }
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred adding external login for user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unexpected error occurred adding external login for user with name '{User.Identity.Name}'.");
             }
 
             // Clear the existing external cookie to ensure a clean login process

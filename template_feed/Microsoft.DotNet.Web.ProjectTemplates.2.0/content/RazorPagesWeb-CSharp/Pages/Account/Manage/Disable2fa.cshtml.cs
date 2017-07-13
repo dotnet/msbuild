@@ -25,15 +25,15 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             if (!await _userManager.GetTwoFactorEnabledAsync(user))
             {
-                throw new ApplicationException($"Cannot disable 2FA for user with name '{HttpContext.User.Identity.Name}' as it's not currently enabled.");
+                throw new ApplicationException($"Cannot disable 2FA for user with name '{User.Identity.Name}' as it's not currently enabled.");
             }
 
             return Page();
@@ -41,10 +41,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);

@@ -1,7 +1,7 @@
 ﻿@page
-@model EnableAuthenticator
+@model EnableAuthenticatorModel
 @{
-    ViewData["Title"] = "Enable authenticator";
+    ViewData["Title"] = "Configure authenticator app";
     ViewData["ActivePage"] = "TwoFactorAuthentication";
 }
 
@@ -10,7 +10,7 @@
     <p>To use an authenticator app go through the following steps:</p>
     <ol class="list">
         <li>
-            Download a two factor authenticator app like Microsoft Authenticator for
+            Download a two-factor authenticator app like Microsoft Authenticator for
             <a href="https://go.microsoft.com/fwlink/?Linkid=825071">Windows Phone</a>,
             <a href="https://go.microsoft.com/fwlink/?Linkid=825072">Android</a> and
             <a href="https://go.microsoft.com/fwlink/?Linkid=825073">iOS</a> or
@@ -18,15 +18,14 @@
             <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Android</a> and
             <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>.
         </li>
-        <li>Scan the QR Code or enter this key <kbd>@Model.Input.PublicKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</li>
+        <li>Scan the QR Code or enter this key <kbd>@Model.SharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</li>
         <li>
-            Once you have scanned the QR code or input the key above your two factor authentication app will provide you
+            Once you have scanned the QR code or input the key above, your two factor authentication app will provide you
             with a unique code. Enter the code in the confirmation box below.
 
             <div class="row">
                 <div class="col-md-6">
                     <form method="post">
-                        <input asp-for="Input.PublicKey" type="hidden" />
                         <div class="form-group">
                             <label asp-for="Input.Code" class="control-label">Verification Code</label>
                             <input asp-for="Input.Code" class="form-control" autocomplete="off" />

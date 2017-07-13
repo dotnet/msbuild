@@ -46,10 +46,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -69,10 +69,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 return Page();
             }
 
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             var addPasswordResult = await _userManager.AddPasswordAsync(user, Input.NewPassword);

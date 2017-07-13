@@ -9,7 +9,7 @@ public class SignedOutModel : PageModel
 {
     public IActionResult OnGet()
     {
-        if (HttpContext.User.Identity.IsAuthenticated)
+        if (User.Identity.IsAuthenticated)
         {
             // Redirect to home page if the user is authenticated.
             return RedirectToPage("/Index");

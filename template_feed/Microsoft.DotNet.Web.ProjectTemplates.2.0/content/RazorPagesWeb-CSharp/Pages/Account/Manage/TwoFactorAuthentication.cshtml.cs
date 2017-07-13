@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Company.WebApplication1.Data;
 
@@ -40,10 +39,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
             HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
@@ -56,22 +55,22 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostEnable2fa()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{HttpContext.User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
             }
 
-            if (!Is2faEnabled)
+            if (Is2faEnabled)
             {
                 return RedirectToPage("./Disable2fa");
             }
             else
             { 
-                var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, Is2faEnabled);
+                var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
                 if (!enable2faResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with name '{HttpContext.User.Identity.Name}'.");
+                    throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with name '{User.Identity.Name}'.");
                 }
             }
 
