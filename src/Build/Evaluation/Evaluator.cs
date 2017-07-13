@@ -34,6 +34,7 @@ using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 #if (!STANDALONEBUILD)
@@ -241,6 +242,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private IDictionary<string, object> _projectLevelLocalsForBuild;
 #endif
+
+        /// <summary>
+        /// The search paths are machine specific and should not change during builds
+        /// </summary>
+        private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -728,7 +734,6 @@ namespace Microsoft.Build.Evaluation
             ICollection<P> builtInProperties = AddBuiltInProperties();
             ICollection<P> environmentProperties = AddEnvironmentProperties();
             ICollection<P> toolsetProperties = AddToolsetProperties();
-            ICollection<P> subToolsetProperties = AddSubToolsetProperties();
             ICollection<P> globalProperties = AddGlobalProperties();
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -740,7 +745,6 @@ namespace Microsoft.Build.Evaluation
                 _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.BuiltIn].Name, builtInProperties));
                 _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Environment].Name, environmentProperties));
                 _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Toolset].Name, toolsetProperties));
-                _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.SubToolset].Name, subToolsetProperties));
                 _initialLocals.Add(new KeyValuePair<string, object>(s_initialLocalsTypes[(int)LocalsTypes.Global].Name, globalProperties));
 
                 DebuggerManager.DefineState(_projectRootElement.Location, _projectRootElement.ElementName, s_initialLocalsTypes);
@@ -1499,18 +1503,17 @@ namespace Microsoft.Build.Evaluation
                 toolsetProperties.Add(property);
             }
 
-            return toolsetProperties;
-        }
-
-        /// <summary>
-        /// Put all the sub-toolset's properties into our property bag.  Run after 
-        /// AddToolsetProperties to ensure that, if there are any overlaps, the sub-toolset wins.
-        /// </summary>
-        private ICollection<P> AddSubToolsetProperties()
-        {
-            List<P> subToolsetProperties = new List<P>();
-
-            if (_data.SubToolsetVersion != null)
+            if (_data.SubToolsetVersion == null)
+            {
+                // In previous versions of MSBuild, there is almost always a subtoolset that adds a VisualStudioVersion property.  Since there
+                // is most likely not a subtoolset now, we need to add VisualStudioVersion if its not already a property.
+                if (!_data.Properties.Contains(Constants.VisualStudioVersionPropertyName))
+                {
+                    P subToolsetVersionProperty = _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
+                    toolsetProperties.Add(subToolsetVersionProperty);
+                }
+            }
+            else
             {
                 SubToolset subToolset = null;
 
@@ -1520,7 +1523,7 @@ namespace Microsoft.Build.Evaluation
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
                     P subToolsetVersionProperty = _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
-                    subToolsetProperties.Add(subToolsetVersionProperty);
+                    toolsetProperties.Add(subToolsetVersionProperty);
                 }
 
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
@@ -1528,12 +1531,12 @@ namespace Microsoft.Build.Evaluation
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
                     {
                         P property = _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
-                        subToolsetProperties.Add(property);
+                        toolsetProperties.Add(property);
                     }
                 }
             }
 
-            return subToolsetProperties;
+            return toolsetProperties;
         }
 
         /// <summary>
@@ -2285,7 +2288,7 @@ namespace Microsoft.Build.Evaluation
 
                 string extensionPathExpanded = _data.ExpandString(extensionPath);
 
-                if (!Directory.Exists(extensionPathExpanded))
+                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     continue;
                 }

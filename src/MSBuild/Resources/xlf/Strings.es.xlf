@@ -1308,22 +1308,55 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
-                     Serializa todos los eventos de compilación en un archivo binario comprimido.
-                     De manera predeterminada, el archivo se encuentra en el directorio actual y tiene el nombre
-                     "msbuild.binlog". El registro binario es una descripción detallada
-                     del proceso de compilación que se puede utilizar más adelante para volver a construir
-                     registros de texto y que otras herramientas de análisis pueden emplear. Un registro binario
-                     es normalmente unas 10-20 veces más pequeño que el registro de nivel de diagnóstico
-                     de texto más detallado, pero contiene más información.
-                     (Forma breve: /bl)
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa todos los eventos de compilación en un archivo
+                     binario comprimido. De manera predeterminada,
+                     el archivo se encuentra en el directorio actual y tiene
+                     el nombre "msbuild.binlog". El registro binario es una
+                     descripción detallada del proceso de compilación que
+                     se puede utilizar más adelante para reconstruir registros
+                     de texto y que otras herramientas de análisis pueden
+                     emplear. Un registro binario suele ser de 10 a 20 veces
+                     más pequeño que el registro de nivel de diagnóstico de
+                     texto más detallado, pero contiene más información
+                     (formato corto: /bl).
+
+                     De manera predeterminada, el registrador binario recopila
+                     el texto de origen de los archivos del proyecto, incluidos
+                     todos los proyectos y archivos de destino importados
+                     que se encuentren durante la compilación. El modificador
+                     opcional ProjectImports controla este comportamiento:
+
+                      ProjectImports=None     - No recopilar importaciones
+                                                de proyecto.
+                      ProjectImports=Embed    - Insertar importaciones de
+                                                proyecto en el archivo de registro.
+                      ProjectImports=ZipFile  - Guardar los archivos del
+                                                proyecto en salida.projectimports.zip,
+                                                donde "salida" es el mismo nombre que
+                                                el del archivo de registro binario.
+
+                     La configuración predeterminada de ProjectImports es
+                     Embed.
+                     Nota: El registrador no recopila archivos de código fuente
+                     que no sean de MSBuild, como .cs, .cpp, etc.
+
+                     Un archivo .binlog se puede "reproducir" pasándolo a
+                     msbuild.exe como argumento en lugar de proyecto o
+                     solución. Otros registradores recibirán la información
+                     que contiene el archivo de registro como si se estuviera
+                     ejecutando la compilación original. Encontrará más 
+                     información sobre el registro binario y su uso en:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Ejemplos:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
-    </target>
+</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild" 

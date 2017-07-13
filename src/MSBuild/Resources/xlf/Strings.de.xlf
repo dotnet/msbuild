@@ -1308,19 +1308,46 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </source>
-        <target state="updated">  /binaryLogger[:output.binlog]
+        <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serialisiert alle Buildereignisse in eine komprimierte Binärdatei.
                      Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
                      "msbuild.binlog". Das binäre Protokoll ist eine detaillierte Beschreibung
                      des Buildprozesses, der später zum Rekonstruieren von
-                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte Textprotokolle
-                     auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
+                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte
+                     Textprotokolle auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
                      binäre Protokolle, letztere enthalten jedoch mehr Informationen.
                      (Kurzform: /bl)
+
+                     Die binäre Protokollierung erfasst standardmäßig den Quelltext von
+                     Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen importierten
+                     Projekte und Zieldateien. Der optionale Schalter
+                     ProjectImports steuert dieses Verhalten:
+
+                      ProjectImports=None     - Projektimporte nicht
+                                                erfassen
+                      ProjectImports=Embed    - Projektimporte in die
+                                                Protokolldatei einbetten
+                      ProjectImports=ZipFile  - Projektdateien in
+                                                output.projectimports.zip
+                                                speichern, wobei "output" dem Namen
+                                                der binären Protokolldatei entspricht.
+
+                     Die Standardeinstellung für ProjectImports ist "Embed".
+                     Hinweis: Die Protokollierung erfasst nur MSBuild-Quelldateien.
+                     Andere Dateien wie etwa CS, CPP usw. werden nicht erfasst.
+
+                     Eine BINLOG-Datei kann wiedergegeben werden, indem sie an
+                     msbuild.exe als Argument und nicht als Projekt/Projektmappe übergeben wird.
+                     Andere Protokollierungen erhalten die Informationen, die
+                     wie beim ursprünglichen Buildvorgang in der Protokolldatei enthalten sind.
+                     Weitere Informationen zu binären Protokollen und ihrer Verwendung erhalten Sie unter:
+                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
                      Beispiele:
                        /bl
                        /bl:output.binlog
+                       /bl:output.binlog;ProjectImports=None
+                       /bl:output.binlog;ProjectImports=ZipFile
                        /bl:..\..\custom.binlog
                        /binaryLogger
     </target>

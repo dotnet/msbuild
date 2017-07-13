@@ -55,6 +55,9 @@
           Condition="'$(CopyBuildOutputToDeploymentDirectories)' != 'false'">
     <ItemGroup>
       <OutputItems Include="$(OutputPath)\**\*.*"/>
+
+      <!-- Avoid race condition between project's IncrementalClean coming along to delete the .pdb and this project copying it. -->
+      <OutputItems Remove="$(OutputPath)\**\*.pdb" Condition="'$(DebugType)' == 'embedded'" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OutputItems)"

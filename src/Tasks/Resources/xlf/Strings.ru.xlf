@@ -2186,7 +2186,7 @@
       </trans-unit>
       <trans-unit id="SGen.InvalidPath">
         <source>MSB3473: Path for "{0}" is invalid. {1}</source>
-        <target state="translated">MSB3473: Путь для "{0}" является недопустимым.. {1}</target>
+        <target state="translated">MSB3473: Путь для "{0}" является недопустимым. {1}</target>
         <note>{StrBegin="MSB3473: "}</note>
       </trans-unit>
       <trans-unit id="SignFile.CertNotInStore">

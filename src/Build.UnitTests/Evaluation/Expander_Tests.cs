@@ -30,6 +30,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 
 using Xunit;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Engine.UnitTests;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -2321,24 +2322,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void PropertyStaticFunctionAllEnabled()
         {
-            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
-
-            string env = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS");
-
-            try
+            using (var env = TestEnvironment.Create())
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
-                string result = expander.ExpandIntoStringLeaveEscaped("$([System.Type]::GetType(`System.Type`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
-                Assert.Equal(0, String.Compare("System.Type", result, StringComparison.OrdinalIgnoreCase));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", env);
-                AvailableStaticMethods.Reset_ForUnitTestsOnly();
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+                try
+                {
+                    string result = expander.ExpandIntoStringLeaveEscaped("$([System.Type]::GetType(`System.Type`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                    Assert.Equal(0, String.Compare("System.Type", result, StringComparison.OrdinalIgnoreCase));
+                }
+                finally
+                {
+                    AvailableStaticMethods.Reset_ForUnitTestsOnly();
+                }
             }
         }
 

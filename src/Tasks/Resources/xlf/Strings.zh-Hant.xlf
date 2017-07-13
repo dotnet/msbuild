@@ -2791,7 +2791,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion">
         <source>MSB3783: Project "{0}" depends upon SDK "{1} v{2}" which was released originally for apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</source>
-        <target state="translated">MSB3783: 專案 "{0}" 相依於 SDK "{1} v{2}"，這個版本原本是針對以 "{3} {4}" 為目標的應用程式而發行。若要驗證 "{1} v{2}" 是否與 "{5} {6}" 相容，請連絡 SDK 作者或瀏覽 http://social.technet.microsoft.com/wiki/contents/articles/19093.extension-sdk-support-for-windows-versions.aspx。</target>
+        <target state="translated">MSB3783: 專案 "{0}" 相依於 SDK "{1} v{2}"，這個版本原本是針對以 "{3} {4}" 為目標的應用程式而發行。若要驗證 "{1} v{2}" 是否與 "{5} {6}" 相容，請連絡 SDK 作者或瀏覽 http://go.microsoft.com/fwlink/?LinkID=309181。</target>
         <note>{StrBegin="MSB3783: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.InvalidDependencyInPlatform">
@@ -2801,7 +2801,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.MaxPlatformVersionNotSpecified">
         <source>MSB3842: Project "{0}" depends upon SDK "{1} v{2}" which supports apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</source>
-        <target state="translated">MSB3842: 專案 "{0}" 相依於 SDK "{1} v{2}"，這個版本支援以 "{3} {4}" 為目標的應用程式。若要驗證 "{1} v{2}" 是否與 "{5} {6}" 相容，請連絡 SDK 作者或瀏覽 http://social.technet.microsoft.com/wiki/contents/articles/19093.extension-sdk-support-for-windows-versions.aspx。</target>
+        <target state="translated">MSB3842: 專案 "{0}" 相依於 SDK "{1} v{2}"，這個版本支援以 "{3} {4}" 為目標的應用程式。若要驗證 "{1} v{2}" 是否與 "{5} {6}" 相容，請連絡 SDK 作者或瀏覽 http://go.microsoft.com/fwlink/?LinkID=309181。</target>
         <note>{StrBegin="MSB3842: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch">
