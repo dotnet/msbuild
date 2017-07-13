@@ -39,11 +39,11 @@
     <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
     <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <AspNetCoreCoherenceTimestamp>26239</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreRuntimePackageTimestamp>26239</AspNetCoreRuntimePackageTimestamp>
 
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
     <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
-    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
+    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->

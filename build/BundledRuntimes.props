@@ -40,7 +40,7 @@
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
 
-    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeStoreSuffix>
+    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeStoreSuffix>
     <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimeStoreSuffix)' != ''">-$(AspNetCoreRelease)$(AspNetCoreRuntimeStoreSuffix)</AspNetCoreRuntimeInstallerArchiveSuffix>
     <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(AspNetCoreRuntimeInstallerArchiveSuffix)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
