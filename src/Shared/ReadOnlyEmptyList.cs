@@ -8,6 +8,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.Build.Shared;
 
@@ -110,7 +111,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            yield break;
+            return Enumerable.Empty<T>().GetEnumerator();
         }
 
         /// <summary>
