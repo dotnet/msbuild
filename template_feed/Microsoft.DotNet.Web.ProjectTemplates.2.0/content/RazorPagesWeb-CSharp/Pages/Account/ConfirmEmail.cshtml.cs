@@ -34,7 +34,7 @@ namespace Company.WebApplication1.Pages.Account
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (!result.Succeeded)
             {
-                throw new ApplicationException($"Error confirming email for user with id '{userId}':");
+                throw new ApplicationException($"Error confirming email for user with ID '{userId}':");
             }
 
             return Page();

@@ -35,13 +35,13 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             if (!user.TwoFactorEnabled)
             {
-                throw new ApplicationException($"Cannot generate recovery codes for user with id '{user.Id}' as they do not have 2FA enabled.");
+                throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' as they do not have 2FA enabled.");
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             RecoveryCodes = recoveryCodes.ToArray();
 
-            _logger.LogInformation("User with id '{UserId}' has generated new 2FA recovery codes.", user.Id);
+            _logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", user.Id);
 
             return Page();
         }

@@ -64,10 +64,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
             if (!enable2faResult.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with id '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            _logger.LogInformation("User with id '{UserId}' has enabled 2fa.", _userManager.GetUserId(User));
+            _logger.LogInformation("User with ID '{UserId}' has enabled 2fa.", _userManager.GetUserId(User));
 
             return RedirectToPage();
         }

@@ -33,7 +33,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             if (!await _userManager.GetTwoFactorEnabledAsync(user))
             {
-                throw new ApplicationException($"Cannot disable 2FA for user with id '{_userManager.GetUserId(User)}' as it's not currently enabled.");
+                throw new ApplicationException($"Cannot disable 2FA for user with ID '{_userManager.GetUserId(User)}' as it's not currently enabled.");
             }
 
             return Page();
@@ -50,10 +50,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
             if (!disable2faResult.Succeeded)
             {
-                throw new ApplicationException($"Unexpected error occurred disabling 2FA for user with id '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Unexpected error occurred disabling 2FA for user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            _logger.LogInformation("User with id '{UserId}' has disabled 2fa.", _userManager.GetUserId(User));
+            _logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", _userManager.GetUserId(User));
 
             return RedirectToPage("./TwoFactorAuthentication");
         }

@@ -43,7 +43,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.Id);
+            _logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
 
             return RedirectToPage("./EnableAuthenticator");
         }

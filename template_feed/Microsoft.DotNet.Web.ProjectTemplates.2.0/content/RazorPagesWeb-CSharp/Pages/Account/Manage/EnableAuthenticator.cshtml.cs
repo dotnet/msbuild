@@ -90,7 +90,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _logger.LogInformation("User with id '{UserId}' has enabled 2FA with an authenticator app.", user.Id);
+            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", user.Id);
             return RedirectToPage("./GenerateRecoveryCodes");
         }
 
