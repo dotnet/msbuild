@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_SharedFrameworkVersion>2.0.0-preview3-25507-02</CLI_SharedFrameworkVersion>
+    <CLI_SharedFrameworkVersion>2.0.0-preview3-25511-03</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.3.0-preview-000402-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.0-beta4-61830-03</CLI_Roslyn_Version>
     <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170624-6</CLI_Roslyn_Satellites_Version>
@@ -22,11 +22,11 @@
     <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170707-280</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170707-280</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170707-280</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.0.0-preview3-25507-02</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0-preview3-25507-02</DependencyModelVersion>
+    <TemplateEngineVersion>1.0.0-beta2-20170710-283</TemplateEngineVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170710-283</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170710-283</TemplateEngineTemplate2_0Version>
+    <PlatformAbstractionsVersion>2.0.0-preview3-25511-03</PlatformAbstractionsVersion>
+    <DependencyModelVersion>2.0.0-preview3-25511-03</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
@@ -35,9 +35,9 @@
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>dev-270</AspNetCoreRuntimeVersion>
+    <AspNetCoreRuntimeVersion>dev-277</AspNetCoreRuntimeVersion>
     <AspNetCoherenceLabel>rtm</AspNetCoherenceLabel>
-    <AspNetCoreCoherenceTimestamp>26151</AspNetCoreCoherenceTimestamp>
+    <AspNetCoreCoherenceTimestamp>26182</AspNetCoreCoherenceTimestamp>
 
   </PropertyGroup>
 
