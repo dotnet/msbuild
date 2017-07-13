@@ -473,6 +473,7 @@
     <Compile Include="ListOperators\RemoveDuplicates.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="LockCheck.cs" />
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

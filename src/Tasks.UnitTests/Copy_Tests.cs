@@ -705,7 +705,10 @@ namespace Microsoft.Build.UnitTests
                     engine.AssertLogContains("MSB3021"); // copy failed
                     engine.AssertLogContains("MSB3026"); // DID retry
 
-                    Assert.Equal(2, engine.Errors); // retries failed, and actual failure
+#if !RUNTIME_TYPE_NETCORE && !MONO
+                    engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
+#endif
+                    Assert.Equal(2, engine.Errors); // retries failed and the actual failure
                     Assert.Equal(10, engine.Warnings);
                 }
             }
