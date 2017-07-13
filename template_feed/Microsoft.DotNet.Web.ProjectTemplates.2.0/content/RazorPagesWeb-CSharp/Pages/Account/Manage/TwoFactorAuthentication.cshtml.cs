@@ -42,7 +42,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
@@ -58,21 +58,16 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            if (Is2faEnabled)
+            var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
+            if (!enable2faResult.Succeeded)
             {
-                return RedirectToPage("./Disable2fa");
+                throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with id '{_userManager.GetUserId(User)}'.");
             }
-            else
-            { 
-                var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
-                if (!enable2faResult.Succeeded)
-                {
-                    throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with id '{_userManager.GetUserId(User)}'.");
-                }
-            }
+
+            _logger.LogInformation("User with id '{UserId}' has enabled 2fa.", _userManager.GetUserId(User));
 
             return RedirectToPage();
         }

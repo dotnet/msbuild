@@ -87,7 +87,7 @@ namespace Company.WebApplication1.Pages.Account
             }
             else
             {
-                _logger.LogWarning("Invalid authenticator code entered for user with id '{UserId}' }.", user.Id);
+                _logger.LogWarning("Invalid authenticator code entered for user with id '{UserId}'.", user.Id);
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return Page();
             }
