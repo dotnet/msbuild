@@ -34,6 +34,14 @@ This will make sure that your local assignments to the `Platform` property are r
 # Visual Studio Background Builds
 Set the `TRACEDESIGNTIME=true` environment variable to output design-time build logs to TEMP: read more here: https://blogs.msdn.microsoft.com/jeremykuhne/2016/06/06/vs-background-builds
 
+# Visual Studio Design-time (IntelliSense) builds
+
+Use this command-line to approximate what the design-time build does:
+
+```
+/t:CollectResolvedSDKReferencesDesignTime;DebugSymbolsProjectOutputGroup;CollectPackageReferences;ResolveComReferencesDesignTime;ContentFilesProjectOutputGroup;DocumentationProjectOutputGroupDependencies;SGenFilesOutputGroup;ResolveProjectReferencesDesignTime;SourceFilesProjectOutputGroup;DebugSymbolsProjectOutputGroupDependencies;SatelliteDllsProjectOutputGroup;BuiltProjectOutputGroup;SGenFilesOutputGroupDependencies;ResolveAssemblyReferencesDesignTime;CollectAnalyzersDesignTime;CollectSDKReferencesDesignTime;DocumentationProjectOutputGroup;PriFilesOutputGroup;BuiltProjectOutputGroupDependencies;ResolvePackageDependenciesDesignTime;SatelliteDllsProjectOutputGroupDependencies;SDKRedistOutputGroup;CompileDesignTime /p:SkipCompilerExecution=true /p:ProvideCommandLineArgs=true /p:BuildingInsideVisualStudio=true /p:DesignTimeBuild=true
+```
+
 # Extend all builds (at system-wide level)
 See https://www.simple-talk.com/dotnet/.net-tools/extending-msbuild, "Extending all builds" section. Also read about [MSBuildUserExtensionsPath](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,33), [CustomBeforeMicrosoftCommonProps](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [CustomBeforeMicrosoftCommonTargets](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and CustomAfterMicrosoftCommonProps/CustomAfterMicrosoftCommonTargets.
 
