@@ -892,8 +892,8 @@ namespace Microsoft.Build.BackEnd
                         (
                         projectFileNames,
                         propertyDictionaries,
-                        toolsVersion ?? new string[] { },
-                        targetNames ?? new string[] { },
+                        toolsVersion ?? Array.Empty<string>(),
+                        targetNames ?? Array.Empty<string>(),
                         true
                         );
 

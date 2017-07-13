@@ -79,12 +79,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Set of sdk references to resolve to paths on disk.
         /// </summary>
-        private ITaskItem[] _sdkReferences = new ITaskItem[0];
+        private ITaskItem[] _sdkReferences = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// The list of installed SDKs the location of the SDK, the SDKName metadata is the SDKName.
         /// </summary>
-        private ITaskItem[] _installedSDKs = new ITaskItem[0];
+        private ITaskItem[] _installedSDKs = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Should resolution errors be logged as warnings or errors.
@@ -356,7 +356,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            ResolvedSDKReferences = new TaskItem[0];
+            ResolvedSDKReferences = Array.Empty<TaskItem>();
 
             if (InstalledSDKs.Length == 0)
             {

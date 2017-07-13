@@ -861,7 +861,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Submit the build request.
-                BuildRequestBlocker blocker = new BuildRequestBlocker(-1, new string[0], new BuildRequest[] { submission.BuildRequest });
+                BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { submission.BuildRequest });
                 _workQueue.Post(() =>
                 {
                     try
@@ -948,7 +948,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, new string[] { }), null /* use the instance's tools version */, null /* shouldn't need to get toolsets because ProjectInstance's ToolsVersion overrides */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */, null /* shouldn't need to get toolsets because ProjectInstance's ToolsVersion overrides */);
             }
             else
             {

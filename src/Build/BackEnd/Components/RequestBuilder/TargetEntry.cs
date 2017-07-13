@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!condition)
             {
-                _targetResult = new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
                 _state = TargetEntryState.Completed;
 
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
@@ -708,7 +708,7 @@ namespace Microsoft.Build.BackEnd
             // create a result for this target to report when it gets to the Completed state.
             if (null == _targetResult)
             {
-                _targetResult = new TargetResult(new TaskItem[] { }, new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
+                _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
             }
 
             _state = TargetEntryState.Completed;

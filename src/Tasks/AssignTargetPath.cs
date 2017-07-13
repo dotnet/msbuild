@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         private string _rootFolder = null;
-        private ITaskItem[] _files = new ITaskItem[0];
+        private ITaskItem[] _files = Array.Empty<ITaskItem>();
         private ITaskItem[] _assignedFiles = null;
 
         /// <summary>

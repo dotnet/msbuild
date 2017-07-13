@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
         private bool _success = true;
 
-        private readonly static string[] s_emptyArray = new string[] { };
+        private readonly static string[] s_emptyArray = Array.Empty<string>();
 
         // These must be defined in sorted order!
         private readonly static string[] s_knownImplementedCategories = new string[]

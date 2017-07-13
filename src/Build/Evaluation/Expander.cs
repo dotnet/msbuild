@@ -2825,7 +2825,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = new string[0];
+                    _arguments = Array.Empty<string>();
                 }
                 else
                 {
@@ -3403,7 +3403,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = new string[0];
+                    functionArguments = Array.Empty<string>();
                 }
                 else
                 {
@@ -3488,7 +3488,7 @@ namespace Microsoft.Build.Evaluation
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
                         argumentsContent = String.Empty;
-                        functionArguments = new string[0];
+                        functionArguments = Array.Empty<string>();
                     }
                     else
                     {
@@ -3498,7 +3498,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (String.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = new string[0];
+                            functionArguments = Array.Empty<string>();
                         }
                         else
                         {
@@ -3521,7 +3521,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = new string[0];
+                    functionArguments = Array.Empty<string>();
 
                     if (nextMethodIndex > 0)
                     {

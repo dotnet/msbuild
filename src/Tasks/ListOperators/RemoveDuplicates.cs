@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class RemoveDuplicates : TaskExtension
     {
-        private ITaskItem[] _inputs = new TaskItem[0];
+        private ITaskItem[] _inputs = Array.Empty<TaskItem>();
         private ITaskItem[] _filtered = null;
 
         /// <summary>

@@ -30,22 +30,22 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set of resolvedSDK references which we will use to find the reference assemblies.
         /// </summary>
-        private ITaskItem[] _resolvedSDKReferences = new TaskItem[0];
+        private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
 
         /// <summary>
         /// Set of the redist files for the resolved sdks
         /// </summary>
-        private ITaskItem[] _sdkRedistFiles = new TaskItem[0];
+        private ITaskItem[] _sdkRedistFiles = Array.Empty<TaskItem>();
 
         /// <summary>
         /// Resolved reference assemblies from the SDK
         /// </summary>
-        private ITaskItem[] _references = new TaskItem[0];
+        private ITaskItem[] _references = Array.Empty<TaskItem>();
 
         /// <summary>
         /// Redist files from the SDKs
         /// </summary>
-        private ITaskItem[] _redistFiles = new TaskItem[0];
+        private ITaskItem[] _redistFiles = Array.Empty<TaskItem>();
 
         /// <summary>
         /// Set of resolved reference assemblies. This removes any duplicate ones between sdks.
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Files to be copied locally
         /// </summary>
-        private ITaskItem[] _copyLocalFiles = new TaskItem[0];
+        private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
 
         /// <summary>
         /// Set of reference assembly extensions to look for.
@@ -1302,7 +1302,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories).ToList<string>();
                 }
 
-                return new string[0];
+                return Array.Empty<string>();
             }
 
             /// <summary>
@@ -1316,7 +1316,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories).ToList<string>();
                 }
 
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
