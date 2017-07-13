@@ -50,6 +50,11 @@
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
+      <HostRidInAspNetCoreRuntimeRpmInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeRpmInstallerFileName>
+      <HostRidInAspNetCoreRuntimeRpmInstallerFileName Condition=" '$(HostRid)' == 'rhel.7-x64' ">rhel-x64</HostRidInAspNetCoreRuntimeRpmInstallerFileName>
+      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimePackageVersion>$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageVersion>
+      <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -74,7 +79,6 @@
       <SDKManpages Include="$(ManPagesDir)/**/*"/>
       <SDKTemplatesFiles Include="$(TemplatesDir)/**/*"/>
       <SDKScriptsFiles Include="$(ScriptsDir)/**/*"/>
-      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(SDKFiles)"
@@ -101,16 +105,16 @@
           SkipUnchangedFiles="False"
           UseHardlinksIfPossible="False"/>
 
-    <Copy SourceFiles="@(AspNetRuntimeFilesInput)"
-          DestinationFiles="@(AspNetRuntimeFilesInput ->'$(RpmLayoutPackageRoot)/%(RecursiveDir)%(Filename)%(Extension)')"
-          OverwriteReadOnlyFiles="True"
-          SkipUnchangedFiles="False"
-          UseHardlinksIfPossible="False"/>
-
     <!-- Replace config json variables -->
     <ItemGroup>
       <SDKTokenValue Include="%SHARED_HOST_RPM_VERSION%">
         <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
+      </SDKTokenValue>
+      <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%">
+        <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
+      </SDKTokenValue>
+      <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_VERSION%">
+        <ReplacementString>$(AspNetCoreRuntimePackageVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%SHARED_HOST_RPM_NAME%">
         <ReplacementString>$(SharedFxRpmPackageName)</ReplacementString>
@@ -162,6 +166,16 @@
 
   </Target>
 
+  <Target Name="DownloadAspNetCoreRuntimeRpmInstaller"
+        DependsOnTargets="SetupDebProps">
+    <PropertyGroup>
+      <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
+    </PropertyGroup>
+    <DownloadFile
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)"
+               DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
+  </Target>
+
   <Target Name="TestFPMTool">
 
     <!-- run FPM  -->
@@ -182,11 +196,12 @@
   </Target>
 
   <Target Name="TestSdkRpm"
-          DependsOnTargets="RestoreTests"
+          DependsOnTargets="RestoreTests;DownloadAspNetCoreRuntimeRpmInstaller"
           Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
+              $(DownloadedSharedAspNetCoreRuntime);
               $(RpmTestResultsXmlFile);"
           Outputs="$(RpmTestResultsXmlFile)" >
 
@@ -194,6 +209,7 @@
     <Exec Command="sudo yum -y install $(DownloadedSharedHostInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedHostFxrInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedSharedFrameworkInstallerFile)" />
+    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime)" />
 
     <Exec Command="sudo yum -y install $(SdkInstallerFile)" />
 
@@ -207,6 +223,8 @@
 
     <!-- Clean up Packages -->
     <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
+
+    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName)" />
     <Exec Command="sudo yum remove -y $(SharedFxRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />

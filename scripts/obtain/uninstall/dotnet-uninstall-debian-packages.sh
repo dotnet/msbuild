@@ -13,8 +13,10 @@ if [ $current_userid -ne 0 ]; then
 fi
 
 host_package_name="dotnet-host"
+aspnetcore_package_store_package_name="^aspnetcore-store.*"
 
 remove_all(){
+    apt-get purge -y $aspnetcore_package_store_package_name
     apt-get purge -y $host_package_name
 }
 

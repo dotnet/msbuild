@@ -35,10 +35,15 @@
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
     <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
-    <AspNetCoreRuntimeVersion>2.0.0</AspNetCoreRuntimeVersion>
-    <AspNetCoherenceLabel>rtm</AspNetCoherenceLabel>
-    <AspNetCoreCoherenceTimestamp>26239</AspNetCoreCoherenceTimestamp>
+    <!--BranchName and AspNetCoreVersion will not always be the same-->
+    <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
+    <AspNetCoreRelease>rtm</AspNetCoreRelease>
+    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
+    <AspNetCoreRuntimePackageTimestamp>26239</AspNetCoreRuntimePackageTimestamp>
 
+    <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
+    <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
+    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->

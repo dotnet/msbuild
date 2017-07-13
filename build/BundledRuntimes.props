@@ -31,7 +31,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeVersion)-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeInstallerBlobRootUrl>
+    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
     <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
     <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
     
@@ -40,8 +40,8 @@
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
     <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
 
-    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreCoherenceTimestamp)</AspNetCoreRuntimeStoreSuffix>
-    <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimeStoreSuffix)' != ''">-$(AspNetCoherenceLabel)$(AspNetCoreRuntimeStoreSuffix)</AspNetCoreRuntimeInstallerArchiveSuffix>
+    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeStoreSuffix>
+    <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimeStoreSuffix)' != ''">-$(AspNetCoreRelease)$(AspNetCoreRuntimeStoreSuffix)</AspNetCoreRuntimeInstallerArchiveSuffix>
     <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(AspNetCoreRuntimeInstallerArchiveSuffix)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
 
