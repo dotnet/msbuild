@@ -97,7 +97,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return (_metadata == null) ? ReadOnlyEmptyList<ProjectMetadata>.Instance : (IEnumerable<ProjectMetadata>)_metadata;
+                return (_metadata == null) ? Array.Empty<ProjectMetadata>() : (IEnumerable<ProjectMetadata>)_metadata;
             }
         }
 

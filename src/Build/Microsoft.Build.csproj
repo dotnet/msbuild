@@ -631,9 +631,6 @@
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
       <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyList.cs">
-      <Link>SharedUtilities\ReadOnlyEmptyList.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

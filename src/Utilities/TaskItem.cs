@@ -203,7 +203,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                List<string> metadataNames = new List<string>((_metadata == null) ? ReadOnlyEmptyList<string>.Instance : _metadata.Keys);
+                List<string> metadataNames = new List<string>(_metadata?.Keys ?? Array.Empty<string>());
                 metadataNames.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                 return metadataNames;

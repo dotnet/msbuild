@@ -177,7 +177,6 @@
     </Compile>
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyList.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\Traits.cs">
       <Link>SharedTraits.cs</Link>
@@ -557,7 +556,7 @@
     <Compile Include="AxTlbBaseTask.cs" />
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>    
+    </Compile>
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

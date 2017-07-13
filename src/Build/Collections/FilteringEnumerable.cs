@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.Collections
 {
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Collections
         {
             if (_enumerable == null)
             {
-                return ReadOnlyEmptyList<Filter>.Instance.GetEnumerator();
+                return Enumerable.Empty<Filter>().GetEnumerator();
             }
 
             return new FilteringEnumerator<Base, Filter>(_enumerable.GetEnumerator());
