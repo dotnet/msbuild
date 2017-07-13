@@ -30,18 +30,18 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             if (!user.TwoFactorEnabled)
             {
-                throw new ApplicationException($"Cannot generate recovery codes for user with name '{User.Identity.Name}' as they do not have 2FA enabled.");
+                throw new ApplicationException($"Cannot generate recovery codes for user with id '{user.Id}' as they do not have 2FA enabled.");
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             RecoveryCodes = recoveryCodes.ToArray();
 
-            _logger.LogInformation("{UserName} has generated new 2FA recovery codes.", user.UserName);
+            _logger.LogInformation("User with id '{UserId}' has generated new 2FA recovery codes.", user.Id);
 
             return Page();
         }

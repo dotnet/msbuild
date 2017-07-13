@@ -55,7 +55,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             Username = user.UserName;
@@ -81,7 +81,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             if (Input.Email != user.Email)
@@ -89,7 +89,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting email for user with name '{User.Identity.Name}'.");
+                    throw new ApplicationException($"Unexpected error occurred setting email for user with id '{user.Id}'.");
                 }
             }
 
@@ -98,7 +98,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with name '{User.Identity.Name}'.");
+                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with id '{user.Id}'.");
                 }
             }
 
@@ -115,7 +115,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

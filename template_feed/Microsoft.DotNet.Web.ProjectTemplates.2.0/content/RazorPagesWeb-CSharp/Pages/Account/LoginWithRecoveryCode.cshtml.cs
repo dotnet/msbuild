@@ -69,17 +69,17 @@ namespace Company.WebApplication1.Pages.Account
                 
             if (result.Succeeded)
             {
-                _logger.LogInformation("{UserName} logged in with a recovery code.", user.UserName);
+                _logger.LogInformation("User with id '{UserId}' logged in with a recovery code.", user.Id);
                 return LocalRedirect(Url.GetLocalUrl(returnUrl));
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("{UserName} account locked out.", user.UserName);
+                _logger.LogWarning("User with id '{UserId}' account locked out.", user.Id);
                 return RedirectToPage("./Lockout");
             }
             else
             {
-                _logger.LogWarning("Invalid recovery code entered for {UserName}", user.UserName);
+                _logger.LogWarning("Invalid recovery code entered for user with id '{UserId}' ", user.Id);
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return Page();
             }

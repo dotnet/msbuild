@@ -27,7 +27,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             return Page();
@@ -38,12 +38,12 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("{UserName} has reset their authentication app key.", user.UserName);
+            _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.Id);
 
             return RedirectToPage("./EnableAuthenticator");
         }

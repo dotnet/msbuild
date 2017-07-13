@@ -28,12 +28,12 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             if (!await _userManager.GetTwoFactorEnabledAsync(user))
             {
-                throw new ApplicationException($"Cannot disable 2FA for user with name '{User.Identity.Name}' as it's not currently enabled.");
+                throw new ApplicationException($"Cannot disable 2FA for user with id '{_userManager.GetUserId(User)}' as it's not currently enabled.");
             }
 
             return Page();
@@ -44,11 +44,11 @@ namespace Company.WebApplication1.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with name '{User.Identity.Name}'.");
+                throw new ApplicationException($"Unable to load user with id '{_userManager.GetUserId(User)}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
-            _logger.LogInformation("{UserName} has disabled 2fa.", user.UserName);
+            _logger.LogInformation("User with id '{UserId}' has disabled 2fa.", _userManager.GetUserId(User));
 
             return RedirectToPage("./TwoFactorAuthentication");
         }
