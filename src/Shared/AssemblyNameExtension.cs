@@ -780,11 +780,11 @@ namespace Microsoft.Build.Shared
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
             {
-                aPKT = Array.Empty<byte>();
+                aPKT = new byte[0];
             }
             if (bPKT == null)
             {
-                bPKT = Array.Empty<byte>();
+                bPKT = new byte[0];
             }
 
             if (aPKT.Length != bPKT.Length)

@@ -184,7 +184,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    byteArray = Array.Empty<byte>();
+                    byteArray = new byte[0];
                 }
             }
 
@@ -1611,5 +1611,5 @@ namespace Microsoft.Build.BackEnd
             }
         }
 #endif
-                }
+    }
 }
