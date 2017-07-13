@@ -25,12 +25,14 @@
         {
             "package_name": "%SHARED_HOST_RPM_NAME%",
             "package_version": "%SHARED_HOST_RPM_VERSION%"
+        },
+        {
+            "package_name": "%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%",
+            "package_version": "%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_VERSION%"
         }
     ],
     "directories": [
         "/usr/share/dotnet/sdk",
-        "/usr/share/dotnet/store",
-        "/usr/share/dotnet/additionalDeps",
         "/usr/share/doc/%SDK_RPM_PACKAGE_NAME%"
     ],
     "after_install_source": "scripts/after_install_host.sh",

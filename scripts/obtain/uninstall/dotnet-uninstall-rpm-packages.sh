@@ -13,9 +13,11 @@ if [ $current_userid -ne 0 ]; then
 fi
 
 host_package_name="dotnet-host"
+aspnetcore_package_store_package_name="aspnetcore-store*"
 
 remove_all(){
     yum remove -y $host_package_name
+    yum remove -y $aspnetcore_package_store_package_name
 }
 
 is_dotnet_host_installed(){
