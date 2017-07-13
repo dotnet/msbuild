@@ -483,20 +483,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   See https://github.com/dotnet/sdk/issues/1403 for more context
   ============================================================
   -->
-  
-  <Target Name="InjectTargetPathMetadata"
-        BeforeTargets="GetTargetPath"
-        DependsOnTargets="GetTargetPathWithTargetPlatformMoniker">
 
-    <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker>
-        <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
-        <TargetFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</TargetFrameworkVersion>
-      </TargetPathWithTargetPlatformMoniker>
-    </ItemGroup>
-    
-  </Target>
-  
+  <ItemDefinitionGroup>
+    <TargetPathWithTargetPlatformMoniker>
+      <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
+      <TargetFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</TargetFrameworkVersion>
+    </TargetPathWithTargetPlatformMoniker>
+  </ItemDefinitionGroup>
   
   <!--
   ============================================================
