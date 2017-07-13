@@ -127,7 +127,7 @@ namespace Microsoft.Build.Collections
                 {
                     if (!_itemLists.TryGetValue(itemtype, out list))
                     {
-                        return ReadOnlyEmptyList<T>.Instance;
+                        return Array.Empty<T>();
                     }
                 }
 
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Collections
         {
             ICollection<T> result = this[itemType];
 
-            return (result == null) ? ReadOnlyEmptyList<T>.Instance : result;
+            return result ?? Array.Empty<T>();
         }
 
         #endregion

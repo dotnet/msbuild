@@ -13,6 +13,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -93,13 +94,7 @@ namespace Microsoft.Build.Evaluation
         /// This is a read-only collection.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public IEnumerable<ProjectMetadata> Metadata
-        {
-            get
-            {
-                return (_metadata == null) ? ReadOnlyEmptyList<ProjectMetadata>.Instance : (IEnumerable<ProjectMetadata>)_metadata;
-            }
-        }
+        public IEnumerable<ProjectMetadata> Metadata => _metadata ?? Enumerable.Empty<ProjectMetadata>();
 
         /// <summary>
         /// Count of metadata on the item definition.

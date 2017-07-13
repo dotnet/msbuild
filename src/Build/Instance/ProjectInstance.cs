@@ -2068,7 +2068,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return ReadOnlyEmptyList<TargetSpecification>.Instance;
+                return Array.Empty<TargetSpecification>();
             }
         }
 
@@ -2085,7 +2085,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return ReadOnlyEmptyList<TargetSpecification>.Instance;
+                return Array.Empty<TargetSpecification>();
             }
         }
 

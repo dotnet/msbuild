@@ -2364,7 +2364,7 @@ namespace Microsoft.Build.Evaluation
 
                     _loadedProjects.TryGetValue(fullPath, out candidates);
 
-                    return candidates ?? (IList<Project>)ReadOnlyEmptyList<Project>.Instance;
+                    return candidates ?? (IList<Project>)Enumerable.Empty<Project>();
                 }
             }
 

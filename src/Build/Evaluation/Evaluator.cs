@@ -1546,7 +1546,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (_data.GlobalPropertiesDictionary == null)
             {
-                return ReadOnlyEmptyList<P>.Instance;
+                return Array.Empty<P>();
             }
 
             List<P> globalProperties = new List<P>(_data.GlobalPropertiesDictionary.Count);

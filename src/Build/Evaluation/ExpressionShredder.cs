@@ -71,7 +71,7 @@ namespace Microsoft.Build.Evaluation
 
             if (expression.Length == 0)
             {
-                return ReadOnlyEmptyList<string>.Instance;
+                return Array.Empty<string>();
             }
 
             List<string> splitList = new List<string>(1);

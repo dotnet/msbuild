@@ -315,7 +315,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (expression.Length == 0)
             {
-                return ReadOnlyEmptyList<T>.Instance;
+                return Array.Empty<T>();
             }
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
@@ -390,7 +390,7 @@ namespace Microsoft.Build.Evaluation
             if (expression.Length == 0)
             {
                 isTransformExpression = false;
-                return ReadOnlyEmptyList<T>.Instance;
+                return Array.Empty<T>();
             }
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");

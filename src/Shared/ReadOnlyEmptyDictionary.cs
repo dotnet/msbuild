@@ -5,8 +5,10 @@
 // <summary>Enumerable over a notional read-only empty dictionary</summary>
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -70,18 +72,22 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Gets empty collection
         /// </summary>
-        public ICollection<K> Keys
-        {
-            get { return ReadOnlyEmptyList<K>.Instance; }
-        }
+        public ICollection<K> Keys =>
+#if CLR2COMPATIBILITY
+            new K[0];
+#else
+            Array.Empty<K>();
+#endif
 
         /// <summary>
         /// Gets empty collection
         /// </summary>
-        public ICollection<V> Values
-        {
-            get { return ReadOnlyEmptyList<V>.Instance; }
-        }
+        public ICollection<V> Values =>
+#if CLR2COMPATIBILITY
+            new V[0];
+#else
+            Array.Empty<V>();
+#endif
 
         /// <summary>
         /// Is it fixed size
@@ -236,7 +242,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
         {
-            return ReadOnlyEmptyList<KeyValuePair<K, V>>.Instance.GetEnumerator();
+            return Enumerable.Empty<KeyValuePair<K, V>>().GetEnumerator();
         }
 
         /// <summary>
