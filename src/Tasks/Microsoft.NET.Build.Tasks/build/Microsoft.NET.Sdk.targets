@@ -488,12 +488,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         BeforeTargets="GetTargetPath"
         DependsOnTargets="GetTargetPathWithTargetPlatformMoniker">
 
-    <PropertyGroup>
+    <ItemGroup>
       <TargetPathWithTargetPlatformMoniker>
         <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
         <TargetFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</TargetFrameworkVersion>
       </TargetPathWithTargetPlatformMoniker>
-    </PropertyGroup>
+    </ItemGroup>
     
   </Target>
   
