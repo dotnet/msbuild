@@ -1,0 +1,115 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+
+    <IsPackable>false</IsPackable>
+
+    <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS_UNITTESTS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="microsoft.xunit.netcore.extensions" Version="1.0.0-prerelease-00629-09" />
+
+    <ProjectReference Include="..\Build\XMakeBuildEngine.csproj" />
+    <ProjectReference Include="..\Framework\Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\XMakeCommandLine.csproj" />
+    <ProjectReference Include="..\Tasks\XMakeTasks.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="PresentationFramework" Condition="'$(OS)' == 'Windows_NT'" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs" />
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs" />
+    <Compile Include="..\Shared\QuotingUtilities.cs" />
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
+    <Compile Remove="CommandLineGenerator_Tests.cs" />
+    <Compile Remove="XamlDataDrivenToolTask_Tests.cs" />
+    <Compile Remove="XamlTaskFactory_Tests.cs" />
+    <Compile Remove="XamlTestHelpers.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+    <Compile Remove="Al_Tests.cs" />
+    <Compile Remove="AppConfig_Tests.cs" />
+    <Compile Remove="AspNetCompiler_Tests.cs" />
+    <Compile Remove="AssemblyRegistrationCache_Tests.cs" />
+    <Compile Remove="AssignProjectConfiguration_Tests.cs" />
+    <Compile Remove="AxImp_Tests.cs" />
+    <Compile Remove="AxTlbBaseTask_Tests.cs" />
+    <Compile Remove="CommandLine_Support.cs" />
+    <Compile Remove="ComReferenceWalker_Tests.cs" />
+    <Compile Remove="ComReference_Tests.cs" />
+    <Compile Remove="CreateVisualBasicManifestResourceName_Tests.cs" />
+    <Compile Remove="CSharpParserUtilitites_Tests.cs" />
+    <Compile Remove="CSharpTokenizer_Tests.cs" />
+    <Compile Remove="DependentAssembly_Tests.cs" />
+    <Compile Remove="ErrorWarningMessage_Tests.cs" />
+    <Compile Remove="FindInvalidProjectReferences_Tests.cs" />
+    <Compile Remove="GenerateResourceOutOfProc_Tests.cs" />
+    <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
+    <Compile Remove="GetSDKReference_Tests.cs" />
+    <Compile Remove="LC_Tests.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Remove="MockTypeInfo.cs" />
+    <Compile Remove="MockTypeLib.cs" />
+    <Compile Remove="ResGen_Tests.cs" />
+    <Compile Remove="ResGenDependencies_Tests.cs" />
+    <Compile Remove="AssemblyDependency\AssemblyFoldersFromConfig_Tests.cs" />
+    <Compile Remove="AssemblyDependency\FilePrimary.cs" />
+    <Compile Remove="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
+    <Compile Remove="AssemblyDependency\InstalledSDKResolverFixture.cs" />
+    <Compile Remove="AssemblyDependency\Miscellaneous.cs" />
+    <Compile Remove="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
+    <Compile Remove="AssemblyDependency\Perf.cs" />
+    <Compile Remove="AssemblyDependency\ReferenceTests.cs" />
+    <Compile Remove="AssemblyDependency\ResolveAssemblyReferenceTestFixture.cs" />
+    <Compile Remove="AssemblyDependency\SpecificVersionPrimary.cs" />
+    <Compile Remove="AssemblyDependency\StronglyNamedDependency.cs" />
+    <Compile Remove="AssemblyDependency\StronglyNamedDependencyAppConfig.cs" />
+    <Compile Remove="AssemblyDependency\StronglyNamedDependencyAutoUnify.cs" />
+    <Compile Remove="AssemblyDependency\VerifyIgnoreVersionForFrameworkReference.cs" />
+    <Compile Remove="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
+    <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
+    <Compile Remove="AssemblyDependency\WinMDTests.cs" />
+    <Compile Remove="ResolveComReference_Tests.cs" />
+    <Compile Remove="ResolveNonMSBuildProjectOutput_Tests.cs" />
+    <Compile Remove="ResolveSDKReference_Tests.cs" />
+    <Compile Remove="SdkToolsPathUtility_Tests.cs" />
+    <Compile Remove="SGen_Tests.cs" />
+    <Compile Remove="TlbImp_Tests.cs" />
+    <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />
+    <Compile Remove="VisualBasicTokenizer_Tests.cs" />
+    <Compile Remove="WinMDExp_Tests.cs" />
+    <Compile Remove="XslTransformation_Tests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+
+  </ItemGroup>
+</Project>

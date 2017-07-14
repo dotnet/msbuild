@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26703.0
+VisualStudioVersion = 15.0.26712.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XMakeBuildEngine", "Build\XMakeBuildEngine.csproj", "{C2A63EB2-51DD-4DBA-AD62-5DDD654CEA87}"
 EndProject
@@ -21,6 +21,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build.OM.UnitTests", "Build.OM.UnitTests\Build.OM.UnitTests.csproj", "{259D1C5A-35ED-4D9E-A99A-922E9C99908A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build.UnitTests", "Build.UnitTests\Build.UnitTests.csproj", "{2D6844B9-71E9-4C39-82A5-6BCA65A5E113}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tasks.UnitTests", "Tasks.UnitTests\Tasks.UnitTests.csproj", "{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +154,18 @@ Global
 		{2D6844B9-71E9-4C39-82A5-6BCA65A5E113}.Release|x64.Build.0 = Release|Any CPU
 		{2D6844B9-71E9-4C39-82A5-6BCA65A5E113}.Release|x86.ActiveCfg = Release|Any CPU
 		{2D6844B9-71E9-4C39-82A5-6BCA65A5E113}.Release|x86.Build.0 = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|x64.Build.0 = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Debug|x86.Build.0 = Debug|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|x64.ActiveCfg = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|x64.Build.0 = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{51E27D70-1AEF-4E0E-92D6-0684F29D65FB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
