@@ -47,6 +47,14 @@
     <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs" />
+
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(FeatureXamlTypes)' != 'true'">
