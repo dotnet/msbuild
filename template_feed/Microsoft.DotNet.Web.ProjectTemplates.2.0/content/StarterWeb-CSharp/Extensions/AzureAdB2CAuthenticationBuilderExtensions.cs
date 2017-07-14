@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.AspNetCore.Authentication.Extensions
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class AzureAdB2CAuthenticationBuilderExtensions
     {
@@ -37,9 +37,9 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                 options.UseTokenLifetime = true;
                 options.CallbackPath = _azureOptions.CallbackPath;
 
-                options.TokenValidationParameters = new TokenValidationParameters() { NameClaimType = "name" };
+                options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name" };
 
-                options.Events = new OpenIdConnectEvents()
+                options.Events = new OpenIdConnectEvents
                 {
                     OnRedirectToIdentityProvider = OnRedirectToIdentityProvider,
                     OnRemoteFailure = OnRemoteFailure
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                         .Replace($"/{defaultPolicy.ToLower()}/", $"/{policy.ToLower()}/");
                     context.Properties.Items.Remove(AzureAdB2COptions.PolicyAuthenticationProperty);
                 }
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
  
             public Task OnRemoteFailure(RemoteFailureContext context)
@@ -84,7 +84,7 @@ namespace Microsoft.AspNetCore.Authentication.Extensions
                 {
                     context.Response.Redirect("/Home/Error");
                 }
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
         }
     }

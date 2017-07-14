@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Company.WebApplication1.Models.AccountViewModels
 {
-    public class ExternalLoginConfirmationViewModel
+    public class ExternalLoginViewModel
     {
         [Required]
         [EmailAddress]
