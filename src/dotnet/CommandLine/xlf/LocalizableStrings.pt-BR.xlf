@@ -109,57 +109,57 @@
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneArgument">
         <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
-        <target state="new">Command '{0}' only accepts a single argument but {1} were provided.</target>
+        <target state="translated">O comando '{0}' aceita somente um único argumento, mas {1} foram fornecidos.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneSubcommand">
         <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
-        <target state="new">Command '{0}' only accepts a single subcommand but multiple were provided: {1}</target>
+        <target state="translated">O comando '{0}' aceita somente um único subcomando, mas vários foram fornecidos: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
         <source>File does not exist: {0}</source>
-        <target state="new">File does not exist: {0}</target>
+        <target state="translated">O arquivo não existe: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoArgumentsAllowed">
         <source>Arguments not allowed for option: {0}</source>
-        <target state="new">Arguments not allowed for option: {0}</target>
+        <target state="translated">Argumentos não permitidos para a opção: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionAcceptsOnlyOneArgument">
         <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
-        <target state="new">Option '{0}' only accepts a single argument but {1} were provided.</target>
+        <target state="translated">A opção '{0}' aceita somente um único argumento, mas {1} foram fornecidos.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredArgumentMissingForCommand">
         <source>Required argument missing for command: {0}</source>
-        <target state="new">Required argument missing for command: {0}</target>
+        <target state="translated">Argumento obrigatório ausente para o comando: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredArgumentMissingForOption">
         <source>Required argument missing for option: {0}</source>
-        <target state="new">Required argument missing for option: {0}</target>
+        <target state="translated">Argumento obrigatório ausente para a opção: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredCommandWasNotProvided">
         <source>Required command was not provided.</source>
-        <target state="new">Required command was not provided.</target>
+        <target state="translated">O comando necessário não foi fornecido.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedArgument">
         <source>Argument '{0}' not recognized. Must be one of: {1}</source>
-        <target state="new">Argument '{0}' not recognized. Must be one of: {1}</target>
+        <target state="translated">Argumento '{0}' não reconhecido. Ele deve ser um dos seguintes: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedCommandOrArgument">
         <source>Unrecognized command or argument '{0}'</source>
-        <target state="new">Unrecognized command or argument '{0}'</target>
+        <target state="translated">Comando ou argumento '{0}' não reconhecido</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedOption">
         <source>Option '{0}' not recognized. Must be one of: {1}</source>
-        <target state="new">Option '{0}' not recognized. Must be one of: {1}</target>
+        <target state="translated">Opção '{0}' não reconhecida. Ela deve ser uma das seguintes: {1}</target>
         <note />
       </trans-unit>
     </body>
