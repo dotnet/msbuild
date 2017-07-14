@@ -11,9 +11,6 @@ using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
 #endif
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.AspNetCore.Http;
-#endif
 #if (IndividualAuth)
 using Microsoft.EntityFrameworkCore;
 #endif
