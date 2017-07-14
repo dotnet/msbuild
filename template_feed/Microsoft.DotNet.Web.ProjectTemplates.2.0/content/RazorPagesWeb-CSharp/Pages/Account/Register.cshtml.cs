@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Company.WebApplication1.Data;
 using Company.WebApplication1.Services;
-using Company.WebApplication1.Extensions;
 
 namespace Company.WebApplication1.Pages.Account
 {

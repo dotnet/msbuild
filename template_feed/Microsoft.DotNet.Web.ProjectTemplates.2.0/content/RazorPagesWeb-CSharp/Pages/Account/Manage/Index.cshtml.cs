@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Company.WebApplication1.Data;
-using Company.WebApplication1.Extensions;
 using Company.WebApplication1.Services;
 
 namespace Company.WebApplication1.Pages.Account.Manage
@@ -53,15 +52,15 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             Username = user.UserName;
 
-            Input = new InputModel()
+            Input = new InputModel
             {
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber
@@ -79,10 +78,10 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 return Page();
             }
 
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             if (Input.Email != user.Email)
@@ -90,7 +89,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    return RedirectToPage("/Error");
+                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
                 }
             }
 
@@ -99,7 +98,7 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    return RedirectToPage("/Error");
+                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
                 }
             }
 
@@ -113,15 +112,15 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 return Page();
             }
 
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            await _emailSender.SendEmailConfirmationAsync(Input.Email, callbackUrl);
+            await _emailSender.SendEmailConfirmationAsync(user.Email, callbackUrl);
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();

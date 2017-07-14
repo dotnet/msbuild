@@ -10,24 +10,24 @@ using Company.WebApplication1.Data;
 
 namespace Company.WebApplication1.Pages.Account.Manage
 {
-    public class Reset2faModel : PageModel
+    public class ResetAuthenticatorModel : PageModel
     {
         UserManager<ApplicationUser> _userManager;
-        ILogger<Reset2faModel> _logger;
+        ILogger<ResetAuthenticatorModel> _logger;
 
-        public Reset2faModel(
+        public ResetAuthenticatorModel(
             UserManager<ApplicationUser> userManager,
-            ILogger<Reset2faModel> logger)
+            ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;
             _logger = logger;
         }
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             return Page();
@@ -35,15 +35,15 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
-            _logger.LogInformation("{UserName} has reset their authentication app key.", user.UserName);
+            _logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
 
             return RedirectToPage("./EnableAuthenticator");
         }
