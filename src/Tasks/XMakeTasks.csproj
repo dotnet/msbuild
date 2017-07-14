@@ -296,6 +296,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\Resolver.cs">
+      <SubType>Code</SubType>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs">
@@ -497,6 +498,10 @@
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
     <Compile Include="WriteCodeFragment.cs" />
+    <Compile Include="XmlPeek.cs" />
+    <Compile Include="XmlPoke.cs" />
+    <Compile Include="CodeTaskFactory.cs" />
+    <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -528,7 +533,6 @@
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="CodeTaskFactory.cs" />
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -656,6 +660,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
+    <Compile Include="XslTransformation.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
@@ -671,12 +676,8 @@
     <Compile Include="XamlTaskFactory\XamlDataDrivenToolTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
-    <Compile Include="XmlPeek.cs" />
-    <Compile Include="XmlPoke.cs" />
-    <Compile Include="XslTransformation.cs" />
     <!-- Shim targets only work when the destination targets are installed. -->
     <Content Include="Microsoft.Data.Entity.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -959,5 +960,6 @@
     <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Resources.Writer" Version="4.0.0" />
+    <PackageReference Include="System.Xml.XPath.XmlDocument" Version="4.0.1" />
   </ItemGroup>
 </Project>
