@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="translated">Uygulamayı belirtilen çerçeveyi kullanarak derleyin ve çalıştırın. Çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <target state="translated">Uygulamayı belirtilen çerçeveyi kullanarak derleyin ve çalıştırın. Çerçevenin proje dosyasında belirtilmesi gerekir. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -72,73 +72,73 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="new">The name of the launch profile (if any) to use when launching the application.</target>
+        <target state="translated">Uygulama başlatılırken kullanılacak başlatma profilinin (varsa) adı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="new">Do not attempt to use launchSettings.json to configure the application.</target>
+        <target state="translated">Uygulamayı yapılandırmak için launchSettings.json kullanmayı denemeyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile could not be located.</source>
-        <target state="new">The specified launch profile could not be located.</target>
+        <target state="translated">Belirtilen başlatma profili bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="new">The launch profile "{0}" could not be applied.
+        <target state="translated">"{0}" başlatma profili uygulanamadı.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
-        <target state="new">(Default)</target>
+        <target state="translated">(Varsayılan)</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
-        <target state="new">Using launch settings from {0}...</target>
+        <target state="translated">{0} içindeki başlatma ayarları kullanılıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>Launch profile is not a JSON object.</source>
-        <target state="new">Launch profile is not a JSON object.</target>
+        <target state="translated">Başlatma profili bir JSON nesnesi değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
         <source>The launch profile type '{0}' is not supported.</source>
-        <target state="new">The launch profile type '{0}' is not supported.</target>
+        <target state="translated">'{0}' başlatma profili türü desteklenmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="new">A usable launch profile could not be located.</target>
+        <target state="translated">Kullanılabilir bir başlatma profili bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="new">An unexpected exception occurred while processing launch settings:
+        <target state="translated">Başlatma ayarları işlenirken beklenmeyen bir özel durum oluştu:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
         <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
-        <target state="new">The 'profiles' property of the launch settings document is not a JSON object.</target>
+        <target state="translated">Başlatma ayarları belgesinin 'profiles' özelliği bir JSON nesnesi değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="new">An error was encountered when reading launchSettings.json.
+        <target state="translated">launchSettings.json okunurken bir hatayla karşılaşıldı.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
         <source>'{0}' is not a valid project file.</source>
-        <target state="new">'{0}' is not a valid project file.</target>
+        <target state="translated">'{0}' geçerli bir proje dosyası değil.</target>
         <note />
       </trans-unit>
     </body>

@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help.</source>
-        <target state="needs-review-translation">Показать справку</target>
+        <target state="translated">Показать справку.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">

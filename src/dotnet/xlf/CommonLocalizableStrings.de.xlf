@@ -671,7 +671,7 @@
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
-        <target state="new">Does not do an implicit restore when executing the command.</target>
+        <target state="translated">Führt beim Ausführen des Befehls keine implizite Wiederherstellung durch.</target>
         <note />
       </trans-unit>
     </body>

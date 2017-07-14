@@ -72,73 +72,73 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="new">The name of the launch profile (if any) to use when launching the application.</target>
+        <target state="translated">アプリケーションを起動するときに使用する起動プロファイルの名前 (存在する場合)。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="new">Do not attempt to use launchSettings.json to configure the application.</target>
+        <target state="translated">launchSettings.json の使用によるアプリケーションの構成は行わないでください。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile could not be located.</source>
-        <target state="new">The specified launch profile could not be located.</target>
+        <target state="translated">指定された起動プロファイルが見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="new">The launch profile "{0}" could not be applied.
+        <target state="translated">起動プロファイル "{0}" を適用できませんでした。
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
-        <target state="new">(Default)</target>
+        <target state="translated">(既定)</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
-        <target state="new">Using launch settings from {0}...</target>
+        <target state="translated">{0} からの起動設定を使用中...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>Launch profile is not a JSON object.</source>
-        <target state="new">Launch profile is not a JSON object.</target>
+        <target state="translated">起動プロファイルが JSON オブジェクトではありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
         <source>The launch profile type '{0}' is not supported.</source>
-        <target state="new">The launch profile type '{0}' is not supported.</target>
+        <target state="translated">起動プロファイルの種類 '{0}' はサポートされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="new">A usable launch profile could not be located.</target>
+        <target state="translated">使用可能な起動プロファイルが見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="new">An unexpected exception occurred while processing launch settings:
+        <target state="translated">起動設定の処理中に予期しない例外が発生しました:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
         <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
-        <target state="new">The 'profiles' property of the launch settings document is not a JSON object.</target>
+        <target state="translated">起動設定のドキュメントの 'profiles' プロパティが JSON オブジェクトではありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="new">An error was encountered when reading launchSettings.json.
+        <target state="translated">launchSettings.json を読み取るときにエラーが発生しました。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
         <source>'{0}' is not a valid project file.</source>
-        <target state="new">'{0}' is not a valid project file.</target>
+        <target state="translated">'{0}' は有効なプロジェクト ファイルではありません。</target>
         <note />
       </trans-unit>
     </body>

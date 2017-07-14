@@ -72,73 +72,73 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="new">The name of the launch profile (if any) to use when launching the application.</target>
+        <target state="translated">응용 프로그램을 시작할 때 사용하는 시작 프로필(있는 경우)의 이름입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="new">Do not attempt to use launchSettings.json to configure the application.</target>
+        <target state="translated">launchSettings.json을 사용하여 응용 프로그램을 구성하지 마세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile could not be located.</source>
-        <target state="new">The specified launch profile could not be located.</target>
+        <target state="translated">지정한 시작 프로필을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="new">The launch profile "{0}" could not be applied.
+        <target state="translated">시작 프로필 "{0}"을(를) 적용할 수 없습니다.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
-        <target state="new">(Default)</target>
+        <target state="translated">(기본값)</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
-        <target state="new">Using launch settings from {0}...</target>
+        <target state="translated">{0}의 시작 설정을 사용하는 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>Launch profile is not a JSON object.</source>
-        <target state="new">Launch profile is not a JSON object.</target>
+        <target state="translated">시작 프로필이 JSON 개체가 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
         <source>The launch profile type '{0}' is not supported.</source>
-        <target state="new">The launch profile type '{0}' is not supported.</target>
+        <target state="translated">시작 프로필 형식 '{0}'은(는) 지원되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="new">A usable launch profile could not be located.</target>
+        <target state="translated">사용할 수 있는 시작 프로필을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="new">An unexpected exception occurred while processing launch settings:
+        <target state="translated">시작 설정을 처리하는 동안 예기치 않은 예외가 발생했습니다.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
         <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
-        <target state="new">The 'profiles' property of the launch settings document is not a JSON object.</target>
+        <target state="translated">시작 설정 문서의 '프로필' 속성이 JSON 개체가 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="new">An error was encountered when reading launchSettings.json.
+        <target state="translated">launchSettings.json을 읽는 동안 오류가 발생했습니다.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
         <source>'{0}' is not a valid project file.</source>
-        <target state="new">'{0}' is not a valid project file.</target>
+        <target state="translated">'{0}'은(는) 유효한 프로젝트 파일이 아닙니다.</target>
         <note />
       </trans-unit>
     </body>

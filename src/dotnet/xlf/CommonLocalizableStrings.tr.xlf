@@ -584,7 +584,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
+        <target state="translated">ÇERÇEVE</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
@@ -671,7 +671,7 @@
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
-        <target state="new">Does not do an implicit restore when executing the command.</target>
+        <target state="translated">Komut yürütülürken örtük geri yükleme gerçekleştirmez.</target>
         <note />
       </trans-unit>
     </body>

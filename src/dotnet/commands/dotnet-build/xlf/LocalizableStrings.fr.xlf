@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
-        <target state="translated">RÉP_SORTIE</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
     </body>

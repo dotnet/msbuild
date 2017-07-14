@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/FICHIER_SOLUTION/RÉP_PROJET</target>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
