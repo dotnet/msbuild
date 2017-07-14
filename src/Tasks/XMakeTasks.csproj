@@ -10,6 +10,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
+
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
