@@ -107,7 +107,11 @@
     },
     "HttpsPortGenerated": {
       "type": "generated",
-      "generator": "port"
+      "generator": "port",
+      "parameters": {
+        "low": 44300,
+        "high": 44399
+      }
     },
     "HttpsPortReplacer": {
       "type": "generated",

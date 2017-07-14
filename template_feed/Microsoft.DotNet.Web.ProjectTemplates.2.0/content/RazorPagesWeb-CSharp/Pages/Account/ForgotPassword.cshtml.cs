@@ -45,13 +45,8 @@ namespace Company.WebApplication1.Pages.Account
                 // For more information on how to enable account confirmation and password reset please 
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.Page(
-                    "./ResetPassword",
-                    pageHandler: null,
-                    values: new { userId = user.Id, code = code },
-                    protocol: HttpContext.Request.Scheme);
-                await _emailSender.SendEmailAsync(Input.Email, "Reset Password",
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
+                await _emailSender.SendResetPasswordAsync(Input.Email, callbackUrl);
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 

@@ -5,15 +5,11 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
-#endif
-#if (OrganizationalAuth || IndividualAuth)
-using Microsoft.AspNetCore.Http;
 #endif
 #if (IndividualAuth)
 using Microsoft.EntityFrameworkCore;
@@ -60,8 +56,7 @@ namespace Company.WebApplication1
                 .AddDefaultTokenProviders();
 
             // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddTransient<IEmailSender, EmailSender>();
 
 #elseif (OrganizationalAuth || IndividualB2CAuth)
             services.AddAuthentication(sharedOptions =>

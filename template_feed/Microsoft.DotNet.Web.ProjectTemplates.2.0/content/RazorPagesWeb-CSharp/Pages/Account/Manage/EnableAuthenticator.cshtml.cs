@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Text;
@@ -7,28 +8,27 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Company.WebApplication1.Data;
 
 namespace Company.WebApplication1.Pages.Account.Manage
 {
-    public class EnableAuthenticator : PageModel
+    public class EnableAuthenticatorModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<EnableAuthenticator> _logger;
+        private readonly ILogger<EnableAuthenticatorModel> _logger;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
 
-        public EnableAuthenticator(
+        public EnableAuthenticatorModel(
             UserManager<ApplicationUser> userManager,
-            ILogger<EnableAuthenticator> logger)
+            ILogger<EnableAuthenticatorModel> logger)
         {
             _userManager = userManager;
             _logger = logger;
         }
 
-        public string PublicKey { get; set; }
+        public string SharedKey { get; set; }
 
         public string AuthenticatorUri { get; set; }
 
@@ -46,35 +46,34 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
-            if (string.IsNullOrEmpty(unformattedKey))
+            await LoadSharedKeyAndQrCodeUriAsync(user);
+            if (string.IsNullOrEmpty(SharedKey))
             {
                 await _userManager.ResetAuthenticatorKeyAsync(user);
-                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+                await LoadSharedKeyAndQrCodeUriAsync(user);
             }
-            PublicKey = FormatKey(unformattedKey);
-            AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Error");
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await LoadSharedKeyAndQrCodeUriAsync(user);
+                return Page();
             }
 
             // Strip spaces and hypens
@@ -85,18 +84,30 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError(string.Empty, "Verification code is invalid.");
+                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                await LoadSharedKeyAndQrCodeUriAsync(user);
                 return Page();
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
-            _logger.LogInformation("{UserName} has enabled 2FA with an authenticator app.", user.UserName);
+            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", user.Id);
             return RedirectToPage("./GenerateRecoveryCodes");
+        }
+
+        private async Task LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
+        {
+            // Load the authenticator key & QR code URI to display on the form
+            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (!string.IsNullOrEmpty(unformattedKey))
+            {
+                SharedKey = FormatKey(unformattedKey);
+                AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
+            }
         }
 
         private string FormatKey(string unformattedKey)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             int currentPosition = 0;
             while (currentPosition + 4 < unformattedKey.Length)
             {

@@ -5,41 +5,35 @@ using System.Threading.Tasks;
 #if (OrganizationalAuth || IndividualB2CAuth)
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-    #if (IndividualB2CAuth)
-using Microsoft.AspNetCore.Authentication.Extensions;
-    #endif
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 #if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
 #endif
 using Microsoft.AspNetCore.Mvc;
-    #if (IndividualLocalAuth)
+#if (IndividualLocalAuth)
 using Microsoft.Extensions.Logging;
 using Company.WebApplication1.Data;
-    #endif
+#endif
 #if (IndividualB2CAuth)
 using Microsoft.Extensions.Options;
 #endif
 
 namespace Company.WebApplication1.Controllers
 {
+    [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
 #if (IndividualLocalAuth)
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
 
-        public AccountController(
-            SignInManager<ApplicationUser> signInManager,
-            ILoggerFactory loggerFactory)
+        public AccountController(SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger)
         {
             _signInManager = signInManager;
-            _logger = loggerFactory.CreateLogger<AccountController>();
+            _logger = logger;
         }
 
-        //
-        // POST: /Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -49,93 +43,70 @@ namespace Company.WebApplication1.Controllers
             return RedirectToPage("/Index");
         }
 #elseif (OrganizationalAuth)
-        //
-        // GET: /Account/SignIn
         [HttpGet]
         public IActionResult SignIn()
         {
+            var redirectUrl = Url.Page("/Index");
             return Challenge(
-                new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectDefaults.AuthenticationScheme);
+                new AuthenticationProperties { RedirectUri = redirectUrl },
+                OpenIdConnectDefaults.AuthenticationScheme
+            );
         }
 
-        //
-        // GET: /Account/SignOut
         [HttpGet]
         public IActionResult SignOut()
         {
-            var callbackUrl = Url.Action(nameof(SignedOut), "Account", values: null, protocol: Request.Scheme);
-            return SignOut(new AuthenticationProperties { RedirectUri = callbackUrl },
-                CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
-        }
-
-        //
-        // GET: /Account/SignedOut
-        [HttpGet]
-        public IActionResult SignedOut()
-        {
-            if (HttpContext.User.Identity.IsAuthenticated)
-            {
-                // Redirect to home page if the user is authenticated.
-                return RedirectToAction("Index");
-            }
-
-            return View();
+            var callbackUrl = Url.Page("/SignedOut", pageHandler: null, values: null, protocol: Request.Scheme);
+            return SignOut(
+                new AuthenticationProperties { RedirectUri = callbackUrl },
+                CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme
+            );
         }
 #elseif (IndividualB2CAuth)
+        private readonly AzureAdB2COptions _options;
+
         public AccountController(IOptions<AzureAdB2COptions> b2cOptions)
         {
-            Options = b2cOptions.Value;
+            _options = b2cOptions.Value;
         }
 
-        public AzureAdB2COptions Options { get; set; }
-
-        //
-        // GET: /Account/SignIn
         [HttpGet]
         public IActionResult SignIn()
         {
+            var redirectUrl = Url.Page("/Index");
             return Challenge(
-                new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectDefaults.AuthenticationScheme);
+                new AuthenticationProperties { RedirectUri = redirectUrl },
+                OpenIdConnectDefaults.AuthenticationScheme
+            );
         }
 
         [HttpGet]
         public IActionResult ResetPassword()
         {
-            var properties = new AuthenticationProperties() { RedirectUri = "/" };
-            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.ResetPasswordPolicyId;
+            var redirectUrl = Url.Page("/Index");
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = _options.ResetPasswordPolicyId;
             return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
 
         [HttpGet]
         public IActionResult EditProfile()
         {
-            var properties = new AuthenticationProperties() { RedirectUri = "/" };
-            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = Options.EditProfilePolicyId;
+            var redirectUrl = Url.Page("/Index");
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            properties.Items[AzureAdB2COptions.PolicyAuthenticationProperty] = _options.EditProfilePolicyId;
             return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
-        
-        //
-        // GET: /Account/SignOut
+
         [HttpGet]
         public IActionResult SignOut()
         {
-            var callbackUrl = Url.Action(nameof(SignedOut), "Account", values: null, protocol: Request.Scheme);
-            return SignOut(new AuthenticationProperties { RedirectUri = callbackUrl },
-                CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
-        }
-
-        //
-        // GET: /Account/SignedOut
-        [HttpGet]
-        public IActionResult SignedOut()
-        {
-            if (HttpContext.User.Identity.IsAuthenticated)
-            {
-                // Redirect to home page if the user is authenticated.
-                return RedirectToPage("Index");
-            }
-
-            return View();
+            var callbackUrl = Url.Page("/SignedOut", pageHandler: null, values: null, protocol: Request.Scheme);
+            return SignOut(
+                new AuthenticationProperties { RedirectUri = callbackUrl },
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectDefaults.AuthenticationScheme
+            );
         }
 #endif
     }

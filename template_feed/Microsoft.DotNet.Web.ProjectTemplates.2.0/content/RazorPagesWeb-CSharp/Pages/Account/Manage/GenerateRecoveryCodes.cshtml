@@ -15,9 +15,11 @@
         If you lose your device and don't have the recovery codes you will lose access to your account.
     </p>
 </div>
-<div class="container">
-    @for (var row = 0; row < Model.RecoveryCodes.Count(); row += 2)
-    {
-        <code>@Model.RecoveryCodes[row]</code><text>&nbsp;</text><code>@Model.RecoveryCodes[row + 1]</code><br />
-    }
+<div class="row">
+    <div class="col-md-12">
+        @for (var row = 0; row < Model.RecoveryCodes.Count(); row += 2)
+        {
+            <code>@Model.RecoveryCodes[row]</code><text>&nbsp;</text><code>@Model.RecoveryCodes[row + 1]</code><br />
+        }
+    </div>
 </div>
