@@ -78,10 +78,6 @@ test -d ${DESTDIR}${XBUILD_DIR}/14.0/Imports && cp -R ${DESTDIR}${XBUILD_DIR}/14
 cp -R nuget-support/tv/* ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 cp -R nuget-support/tasks-targets/* ${DESTDIR}${XBUILD_DIR}/
 
-# The directory might not exist on bockbuild when it runs this script.
-# Bockbuild will handle copying these files
-test -d ${XBUILD_DIR}/Microsoft/NuGet && for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -f -s $f ${DESTDIR}${XBUILD_DIR} ; done
-
 # man page
 mkdir -p ${DESTDIR}${MONO_PREFIX}/share/man/man1
 cp mono/msbuild.1 ${DESTDIR}${MONO_PREFIX}/share/man/man1/
