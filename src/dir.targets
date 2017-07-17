@@ -105,10 +105,6 @@
        so that the debugger can download the exact matching source files during debugging -->
   <Import Project="$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.targets" Condition="'$(DebugType)' == 'full' And '$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\pdbgit\3.0.41\build\PdbGit.targets')" />
 
-  <PropertyGroup Condition="'$(SourceLinkCreate)' == 'true'">
-      <SourceLinkOriginUrlCommand>git config --get remote.mono_msbuild.url</SourceLinkOriginUrlCommand>
-  </PropertyGroup>
-
   <!-- https://github.com/ctaggart/SourceLink - stamps portable or embedded .pdbs with URLs to sources on GitHub
        so that debugger can download the exact matching source files during debugging -->
   <Import Project="$(PackagesDir)\sourcelink.create.commandline\2.1.2\build\SourceLink.Create.CommandLine.targets" Condition="'$(SourceLinkCreate)' == 'true' And '$(DebugType)' != 'full' And '$(IsTestProject)' != 'true' And Exists('$(PackagesDir)\sourcelink.create.commandline\2.1.2\build\SourceLink.Create.CommandLine.targets')" />
