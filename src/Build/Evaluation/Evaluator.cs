@@ -1546,7 +1546,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (_data.GlobalPropertiesDictionary == null)
             {
-                return ReadOnlyEmptyList<P>.Instance;
+                return Array.Empty<P>();
             }
 
             List<P> globalProperties = new List<P>(_data.GlobalPropertiesDictionary.Count);
@@ -2367,8 +2367,8 @@ namespace Microsoft.Build.Evaluation
             {
                 if (_logProjectImportedEvents)
                 {
-                    // Expand the expression for the Log.
-                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties, importElement.ConditionLocation);
+                    // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
+                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError, importElement.ConditionLocation);
 
                     ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                         importElement.Location.Line,

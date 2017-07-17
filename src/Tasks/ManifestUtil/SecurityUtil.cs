@@ -525,7 +525,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     a[i++] = node.Value;
             }
             else
-                a = new string[0];
+                a = Array.Empty<string>();
             return a;
         }
 

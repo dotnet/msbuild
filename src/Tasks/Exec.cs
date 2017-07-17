@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Outputs
         {
-            get { return _outputs ?? new ITaskItem[0]; }
+            get { return _outputs ?? Array.Empty<ITaskItem>(); }
             set { _outputs = value; }
         }
 
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput
         {
-            get { return !ConsoleToMSBuild ? new ITaskItem[0] : _nonEmptyOutput.ToArray(); }
+            get { return !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray(); }
         }
 
         #endregion
@@ -520,16 +520,33 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to cmd.exe</returns>
         protected override string GenerateFullPathToTool()
         {
+            return CommandProcessorPath.Value;
+        }
+
+        private static readonly Lazy<string> CommandProcessorPath = new Lazy<string>(() =>
+        {
             // Get the fully qualified path to cmd.exe
             if (NativeMethodsShared.IsWindows)
             {
-                return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+                var systemCmd = ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+
+#if !FEATURE_SPECIAL_FOLDERS
+                // Work around https://github.com/Microsoft/msbuild/issues/2273 and
+                // https://github.com/dotnet/corefx/issues/19110, which result in
+                // a bad path being returned above on Nano Server SKUs of Windows.
+                if (!File.Exists(systemCmd))
+                {
+                    return Environment.GetEnvironmentVariable("ComSpec");
+                }
+#endif
+
+                return systemCmd;
             }
             else
             {
                 return "sh";
             }
-        }
+        });
 
         /// <summary>
         /// Gets the working directory to use for the process. Should return null if ToolTask should use the

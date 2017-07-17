@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                results = new BuildResult[] { };
+                results = Array.Empty<BuildResult>();
             }
 
             ErrorUtilities.VerifyThrow(requests.Length == results.Length, "# results != # requests");

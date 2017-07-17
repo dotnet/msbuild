@@ -149,7 +149,7 @@ namespace Microsoft.Build.Shared
 
             if (entries == null)
             {
-                entries = new string[0];
+                entries = Array.Empty<string>();
             }
 
             return entries;
@@ -205,12 +205,12 @@ namespace Microsoft.Build.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return new string[0];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
@@ -257,12 +257,12 @@ namespace Microsoft.Build.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return new string[0];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
@@ -1524,14 +1524,14 @@ namespace Microsoft.Build.Shared
                     // - maintain legacy behaviour where an illegal filespec is treated as a normal string
                     if (FileUtilities.PathsEqual(filespecUnescaped, excludeSpec))
                     {
-                        return new string[0];
+                        return Array.Empty<string>();
                     }
 
                     var match = FileMatch(excludeSpec, filespecUnescaped);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
-                        return new string[0];
+                        return Array.Empty<string>();
                     }
                 }
             }
@@ -1580,7 +1580,7 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnEmptyList)
             {
-                return new string[0];
+                return Array.Empty<string>();
             }
             else if (action == SearchAction.ReturnFileSpec)
             {

@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        private ITaskItem[] _files = new TaskItem[0];
+        private ITaskItem[] _files = Array.Empty<TaskItem>();
         private ITaskItem[] _assignedFiles = null;
         private ITaskItem[] _assignedFilesWithCulture = null;
         private ITaskItem[] _assignedFilesWithNoCulture = null;

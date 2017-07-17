@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_cancellationToken.IsCancellationRequested || errorResult)
                     {
-                        results[i] = new TargetResult(new TaskItem[] { }, new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                        results[i] = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
                     }
                     else
                     {
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            results[i] = new TargetResult(new TaskItem[] { }, new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                            results[i] = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
                         }
                     }
                 }
