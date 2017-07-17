@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 #pragma warning disable 0219
@@ -19,8 +20,7 @@ namespace Microsoft.Build.UnitTests
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 0, 0, 0);
-            Assert.Equal(
-                      "source.cs : CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs : CS error 312: Missing ;");
         }
 
         // Valid forms for line/col number patterns:
@@ -30,8 +30,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 0, 0);
-            Assert.Equal(
-                      "source.cs(1-2): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1-2): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -39,8 +38,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 1, 2, 0);
-            Assert.Equal(
-                      "source.cs : CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs : CS error 312: Missing ;");
         }
 
         [Fact]
@@ -48,8 +46,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 4, 0);
-            Assert.Equal(
-                      "source.cs(1,3,2,4): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1,3,2,4): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -57,8 +54,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 3, 4, 0);
-            Assert.Equal(
-                      "source.cs(1,3-4): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1,3-4): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -66,8 +62,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 0, 0);
-            Assert.Equal(
-                      "source.cs(1-2,3): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1-2,3): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -75,8 +70,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 3, 0);
-            Assert.Equal(
-                      "source.cs(1-2): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1-2): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -84,8 +78,7 @@ namespace Microsoft.Build.UnitTests
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 2, 0, 0);
-            Assert.Equal(
-                      "source.cs(1,2): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(1,2): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -94,8 +87,7 @@ namespace Microsoft.Build.UnitTests
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 42, 0, 0, 0, 0);
-            Assert.Equal(
-                      "source.cs(42): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(42): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -110,11 +102,11 @@ namespace Microsoft.Build.UnitTests
             string errorString2 = EventArgsFormatting.FormatEventMessage(error, false);
             string warningString2 = EventArgsFormatting.FormatEventMessage(warning, false);
 
-            Assert.Equal("source.cs(42): CS error 312: message\\r Hello", errorString);
-            Assert.Equal("source.cs(42): CS warning 312: message\\r Hello", warningString);
+            errorString.ShouldBe("source.cs(42): CS error 312: message\\r Hello");
+            warningString.ShouldBe("source.cs(42): CS warning 312: message\\r Hello");
 
-            Assert.Equal("source.cs(42): CS error 312: message\r Hello", errorString2);
-            Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString2);
+            errorString2.ShouldBe("source.cs(42): CS error 312: message\r Hello");
+            warningString2.ShouldBe("source.cs(42): CS warning 312: message\r Hello");
         }
 
         [Fact]
@@ -123,8 +115,7 @@ namespace Microsoft.Build.UnitTests
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 233, 236, 4, 8, 0);
-            Assert.Equal(
-                    "source.cs(233,4,236,8): CS error 312: Missing ;", s);
+            s.ShouldBe("source.cs(233,4,236,8): CS error 312: Missing ;");
         }
 
         [Fact]
@@ -148,8 +139,7 @@ namespace Microsoft.Build.UnitTests
                         "31415", "file.vb", 42, 0, 0, 0,
                         "Some long message", "help", "sender");
             string s = l.FormatErrorEvent(beea);
-            Assert.Equal(
-               "file.vb(42): VBC error 31415: Some long message", s);
+            s.ShouldBe("file.vb(42): VBC error 31415: Some long message");
         }
 
         /// <summary>
@@ -163,8 +153,7 @@ namespace Microsoft.Build.UnitTests
                         "31415", "file.vb", 42, 0, 0, 0,
                         "Some long message", "help", "sender");
             string s = l.FormatWarningEvent(bwea);
-            Assert.Equal(
-               "file.vb(42): VBC warning 31415: Some long message", s);
+            s.ShouldBe("file.vb(42): VBC warning 31415: Some long message");
         }
 
         /// <summary>
@@ -173,7 +162,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FormatEventMessageOnNullBEEA()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 MyLogger l = new MyLogger();
                 BuildErrorEventArgs beea = null;
@@ -187,7 +176,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FormatEventMessageOnNullBWEA()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 MyLogger l = new MyLogger();
                 BuildWarningEventArgs bwea = null;

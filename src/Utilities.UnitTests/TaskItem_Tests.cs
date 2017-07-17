@@ -9,7 +9,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
+using Shouldly;
 using Xunit;
 
 #pragma warning disable 0219
@@ -28,19 +28,20 @@ namespace Microsoft.Build.UnitTests
             from.SetMetadata("Cat", "Morris");
 
             TaskItem to = new TaskItem((ITaskItem)from);
-            Assert.Equal("Monkey.txt", to.ItemSpec);
-            Assert.Equal("Monkey.txt", (string)to);
-            Assert.Equal("Bingo", to.GetMetadata("Dog"));
-            Assert.Equal("Morris", to.GetMetadata("Cat"));
+            to.ItemSpec.ShouldBe("Monkey.txt");
+            ((string)to).ShouldBe("Monkey.txt");
+            
+            to.GetMetadata("Dog").ShouldBe("Bingo");
+            to.GetMetadata("Cat").ShouldBe("Morris");
 
             // Test that item metadata are case-insensitive.
             to.SetMetadata("CaT", "");
-            Assert.Equal("", to.GetMetadata("Cat"));
+            to.GetMetadata("Cat").ShouldBe("");
 
             // manipulate the item-spec a bit
-            Assert.Equal("Monkey", to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
-            Assert.Equal(".txt", to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
-            Assert.Equal(String.Empty, to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir));
+            to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("Monkey");
+            to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".txt");
+            to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).ShouldBe(String.Empty);
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
@@ -60,17 +61,17 @@ namespace Microsoft.Build.UnitTests
             to.SetMetadata("Cat", "Mike");
             from.CopyMetadataTo(to);
 
-            Assert.Equal("Bonobo.txt", to.ItemSpec);          // ItemSpec is never overwritten
-            Assert.Equal("Bob", to.GetMetadata("Sponge"));   // Metadata not in source are preserved.
-            Assert.Equal("Harriet", to.GetMetadata("Dog"));  // Metadata present on destination are not overwritten.
-            Assert.Equal("Mike", to.GetMetadata("Cat"));
-            Assert.Equal("Big", to.GetMetadata("Bird"));
+            to.ItemSpec.ShouldBe("Bonobo.txt");          // ItemSpec is never overwritten
+            to.GetMetadata("Sponge").ShouldBe("Bob");   // Metadata not in source are preserved.
+            to.GetMetadata("Dog").ShouldBe("Harriet");  // Metadata present on destination are not overwritten.
+            to.GetMetadata("Cat").ShouldBe("Mike");
+            to.GetMetadata("Bird").ShouldBe("Big");
         }
 
         [Fact]
         public void NullITaskItem()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 ITaskItem item = null;
                 TaskItem taskItem = new TaskItem(item);
@@ -88,20 +89,20 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem taskItem = new TaskItem("x");
 
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataNames.Count);
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataCount);
+            taskItem.MetadataNames.Count.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
+            taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
 
             // Now add one
             taskItem.SetMetadata("m", "m1");
 
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataNames.Count);
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataCount);
+            taskItem.MetadataNames.Count.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
+            taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
         }
 
         [Fact]
         public void NullITaskItemCast()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 TaskItem item = null;
                 string result = (string)item;
@@ -121,15 +122,15 @@ namespace Microsoft.Build.UnitTests
             TaskItem t = new TaskItem("bamboo.baz", h);
 
             // item-spec modifiers were not overridden by dictionary passed to constructor
-            Assert.Equal("bamboo", t.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
-            Assert.Equal(".baz", t.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
-            Assert.Equal("hello", t.GetMetadata("CUSTOM"));
+            t.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("bamboo");
+            t.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".baz");
+            t.GetMetadata("CUSTOM").ShouldBe("hello");
         }
 
         [Fact]
         public void CannotChangeModifiers()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Should.Throw<ArgumentException>(() =>
             {
                 TaskItem t = new TaskItem("foo");
 
@@ -150,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CannotRemoveModifiers()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Should.Throw<ArgumentException>(() =>
             {
                 TaskItem t = new TaskItem("foor");
 
@@ -172,11 +173,11 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem t = new TaskItem("foo");
 
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, t.MetadataCount);
+            t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
 
             t.SetMetadata("grog", "RUM");
 
-            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, t.MetadataCount);
+            t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
         }
 
 
@@ -185,13 +186,12 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath).ShouldBe(
                 Path.Combine
                 (
                     Directory.GetCurrentDirectory(),
                     "Monkey.txt"
-                ),
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath)
+                )
             );
         }
 
@@ -200,13 +200,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(
-                Path.GetPathRoot
-                (
-                    from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath)
-                ),
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.RootDir)
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.RootDir).ShouldBe(Path.GetPathRoot(from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath)));
         }
 
         [Fact]
@@ -214,10 +208,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(
-                "Monkey",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Filename)
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("Monkey");
         }
 
         [Fact]
@@ -225,10 +216,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(
-                ".txt",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Extension)
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".txt");
         }
 
         [Fact]
@@ -236,7 +224,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).Length);
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).Length.ShouldBe(0);
         }
 
         [Fact]
@@ -244,9 +232,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = NativeMethodsShared.IsWindows ? @"c:\subdir\Monkey.txt" : "/subdir/Monkey.txt";
-            Assert.Equal(
-                NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory));
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/");
         }
 
         [Fact]
@@ -259,10 +245,7 @@ namespace Microsoft.Build.UnitTests
 
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
-            Assert.Equal(
-                @"subdir\",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory)
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
         }
 
         [Fact]
@@ -271,7 +254,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
 
-            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir).Length);
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir).Length.ShouldBe(0);
         }
 
         [Fact]
@@ -279,10 +262,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.Equal(
-                "Monkey.txt",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Identity)
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.Identity).ShouldBe("Monkey.txt");
         }
 
         [Fact]
@@ -291,25 +271,19 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = FileUtilities.GetTemporaryFile();
 
-            Assert.True(
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length > 0
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length.ShouldBeGreaterThan(0);
 
-            Assert.True(
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length > 0
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length.ShouldBeGreaterThan(0);
 
-            Assert.True(
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length > 0
-            );
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length.ShouldBeGreaterThan(0);
 
             File.Delete(from.ItemSpec);
 
-            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length);
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length.ShouldBe(0);
 
-            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length);
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length.ShouldBe(0);
 
-            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length);
+            from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -318,7 +292,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CreateNullNamedMetadata()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata(null, "x");
@@ -331,7 +305,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CreateEmptyNamedMetadata()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Should.Throw<ArgumentException>(() =>
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata("", "x");
@@ -349,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             metadata.Add("m", null);
 
             TaskItem item = new TaskItem("bar", (IDictionary)metadata);
-            Assert.Equal(String.Empty, item.GetMetadata("m"));
+            item.GetMetadata("m").ShouldBe(String.Empty);
         }
 
         /// <summary>
@@ -361,7 +335,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem item = new TaskItem("bar");
             item.SetMetadata("m", null);
-            Assert.Equal(String.Empty, item.GetMetadata("m"));
+            item.GetMetadata("m").ShouldBe(String.Empty);
         }
 
 #if FEATURE_APPDOMAIN
@@ -403,14 +377,14 @@ namespace Microsoft.Build.UnitTests
                 {
                     itemsInThisAppDomain[i] = new TaskItem(creator.CreatedTaskItems[i]);
 
-                    Assert.Equal(creator.CreatedTaskItems[i].ItemSpec, itemsInThisAppDomain[i].ItemSpec);
-                    Assert.Equal(creator.CreatedTaskItems[i].MetadataCount + 1, itemsInThisAppDomain[i].MetadataCount);
+                    itemsInThisAppDomain[i].ItemSpec.ShouldBe(creator.CreatedTaskItems[i].ItemSpec);
+                    itemsInThisAppDomain[i].MetadataCount.ShouldBe(creator.CreatedTaskItems[i].MetadataCount + 1);
 
                     foreach (string metadatum in creator.CreatedTaskItems[i].MetadataNames)
                     {
                         if (!String.Equals("OriginalItemSpec", metadatum))
                         {
-                            Assert.Equal(creator.CreatedTaskItems[i].GetMetadata(metadatum), itemsInThisAppDomain[i].GetMetadata(metadatum));
+                            itemsInThisAppDomain[i].GetMetadata(metadatum).ShouldBe(creator.CreatedTaskItems[i].GetMetadata(metadatum));
                         }
                     }
                 }
