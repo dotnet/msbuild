@@ -17,7 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.SharedUtilities;
+using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
