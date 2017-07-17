@@ -35,6 +35,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <!-- determine if any references depend on NETStandard -->
+
+    <!-- Check metadata of _ResolvedProjectReferencePaths items.  This handles the case where we are doing a design-time build and a referenced project
+         hasn't been built yet, so there is no corresponding assembly on disk for the GetDependsOnNETStandard task to examine.
+         
+         More context: https://github.com/dotnet/sdk/issues/1403
+         -->
+    <PropertyGroup Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true'">
+      <DependsOnNETStandard Condition="('%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard') And ('%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' >= '1.5')">true</DependsOnNETStandard>
+    </PropertyGroup>
+    
     <GetDependsOnNETStandard Condition="'$(DependsOnNETStandard)' == '' AND '$(NETStandardInbox)' != 'true' AND '@(_CandidateNETStandardReferences)' != ''" 
                              References="@(_CandidateNETStandardReferences)">
       <Output TaskParameter="DependsOnNETStandard" PropertyName="DependsOnNETStandard" />

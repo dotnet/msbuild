@@ -472,6 +472,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
+                                      InjectTargetPathMetadata
+  
+  Update TargetPathWithTargetPlatformMoniker with target framework
+  identifier and version metadata.  This is so that the
+  ImplicitlyExpandNETStandardFacades target can determine if a
+  referenced project needs the .NET Standard facades even if
+  the project hasn't been compiled to disk yet.
+  
+  See https://github.com/dotnet/sdk/issues/1403 for more context
+  ============================================================
+  -->
+
+  <ItemDefinitionGroup>
+    <TargetPathWithTargetPlatformMoniker>
+      <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
+      <TargetFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</TargetFrameworkVersion>
+    </TargetPathWithTargetPlatformMoniker>
+  </ItemDefinitionGroup>
+  
+  <!--
+  ============================================================
                                          Project Capabilities
   ============================================================
   -->

@@ -137,6 +137,65 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [FullMSBuildOnlyFact]
+        public void It_includes_netstandard_in_design_time_builds()
+        {
+            //  Verify that a P2P reference to a .NET Standard 2.0 project is correctly detected
+            //  even if doing a design-time build where there is no output on disk to examine
+            //  See https://github.com/dotnet/sdk/issues/1403
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopAppWithLibrary-NonSDK")
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (IsAppProject(projectPath))
+                    {
+                        AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
+                    }
+                });
+
+            testAsset.Restore(Log, relativePath: AppName);
+
+            var getCommandLineCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, AppName), "", "CscCommandLineArgs", GetValuesCommand.ValueType.Item);
+
+            getCommandLineCommand
+                .Execute("/p:SkipCompilerExecution=true /p:ProvideCommandLineArgs=true /p:BuildingInsideVisualStudio=true /p:DesignTimeBuild=true".Split())
+                .Should()
+                .Pass();
+
+
+            //  Verify that neither of the projects were actually built
+            string valuesFilename = "CscCommandLineArgsValues.txt";
+
+            var outputDirectory = getCommandLineCommand.GetNonSDKOutputDirectory();
+            outputDirectory.Should().OnlyHaveFiles(new[] { valuesFilename });
+
+            var testLibraryDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "TestLibrary"));
+            testLibraryDirectory.Should().NotHaveSubDirectories("bin");
+
+            //  Verify that netstandard.dll was passed to compiler
+            var references = getCommandLineCommand.GetValues()
+                                .Where(arg => arg.StartsWith("/reference:"))
+                                .Select(arg => arg.Substring("/reference:".Length))
+                                //  Strip quotes if there are any
+                                .Select(r =>
+                                {
+                                    if (r.StartsWith('"') && r.EndsWith('"'))
+                                    {
+                                        return r.Substring(1, r.Length - 2);
+                                    }
+                                    else
+                                    {
+                                        return r;
+                                    }
+                                })
+                                .ToList();
+
+            references.Select(r => Path.GetFileName(r))
+                .Should().Contain("netstandard.dll");
+        }
+
         [WindowsOnlyTheory]
         [InlineData(true, false)]
         [InlineData(false, false)]
