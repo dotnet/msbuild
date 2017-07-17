@@ -30,7 +30,7 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs"  Condition="'$(NetCoreBuild)' == 'true'">
       <Link>SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs">
