@@ -16,18 +16,16 @@ namespace Microsoft.Build.Shared
     internal static class EventArgsFormatting
     {
         /// <summary>
-        /// Escape the carriage Return from a string
+        /// Escape the carriage return from a string
         /// </summary>
         /// <param name="stringWithCarriageReturn"></param>
-        /// <returns>String with carriage returns escaped as \\r </returns>
+        /// <returns>String with CRLF replaced with LF and standalone CR escaped.</returns>
         internal static string EscapeCarriageReturn(string stringWithCarriageReturn)
         {
-            if (!string.IsNullOrEmpty(stringWithCarriageReturn))
-            {
-                return stringWithCarriageReturn.Replace("\r", "\\r");
-            }
             // If the string is null or empty or then we just return the string
-            return stringWithCarriageReturn;
+            if (string.IsNullOrEmpty(stringWithCarriageReturn)) return stringWithCarriageReturn;
+
+            return stringWithCarriageReturn.Replace("\r\n", "\n").Replace("\r", @"\r");
         }
 
         /// <summary>
