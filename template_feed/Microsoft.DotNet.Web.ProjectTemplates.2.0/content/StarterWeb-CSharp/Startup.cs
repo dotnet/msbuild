@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 #if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
-#endif
-#if (IndividualAuth)
 using Microsoft.EntityFrameworkCore;
 #endif
 using Microsoft.AspNetCore.Hosting;
