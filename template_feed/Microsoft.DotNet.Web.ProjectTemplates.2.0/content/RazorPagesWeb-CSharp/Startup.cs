@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Hosting;
 #if (OrganizationalAuth)
 using Microsoft.AspNetCore.Mvc.Authorization;
 #endif
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 using Microsoft.EntityFrameworkCore;
 #endif
 using Microsoft.Extensions.Configuration;
