@@ -7,6 +7,8 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
+using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
+
 namespace Microsoft.DotNet.Cli.Run.Tests
 {
     public class GivenDotnetRunBuildsCsproj : TestBase
@@ -280,7 +282,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput("--launch-profile test")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!")
-                         .And.HaveStdErrContaining("The specified launch profile could not be located.");
+                         .And.HaveStdErrContaining(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile);
         }
 
         [Fact]
@@ -368,7 +370,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput("--launch-profile Third")
                 .Should().Pass()
                          .And.HaveStdOutContaining("(NO MESSAGE)")
-                         .And.HaveStdErrContaining("The launch profile \"Third\" could not be applied.");
+                         .And.HaveStdErrContaining(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, "Third", "").Trim());
         }
 
         [Fact]
@@ -396,7 +398,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput("--launch-profile \"IIS Express\"")
                 .Should().Pass()
                          .And.HaveStdOutContaining("(NO MESSAGE)")
-                         .And.HaveStdErrContaining("The launch profile \"IIS Express\" could not be applied.");
+                         .And.HaveStdErrContaining(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, "IIS Express", "").Trim());
         }
 
         [Fact]
@@ -485,7 +487,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("(NO MESSAGE)")
-                .And.HaveStdErrContaining("The launch profile \"(Default)\" could not be applied.");
+                .And.HaveStdErrContaining(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, LocalizableStrings.DefaultLaunchProfileDisplayName, "").Trim());
         }
 
         [Fact]
@@ -514,7 +516,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("(NO MESSAGE)")
-                .And.HaveStdErrContaining("The launch profile \"(Default)\" could not be applied.");
+                .And.HaveStdErrContaining(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, LocalizableStrings.DefaultLaunchProfileDisplayName, "").Trim());
         }
     }
 }

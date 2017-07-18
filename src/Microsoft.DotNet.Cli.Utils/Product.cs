@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class Product
     {
-        public static readonly string LongName = LocalizableStrings.DotNetCommandLineTools;
+        public static string LongName => LocalizableStrings.DotNetCommandLineTools;
         public static readonly string Version = GetProductVersion();
 
         private static string GetProductVersion()
