@@ -1,10 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// NOTE: Currently, only the NET46 build ships (with Visual Studio/desktop msbuild), 
-// but the netstandard1.5 adaptation here acts a proof-of-concept for cross-platform 
+// NOTE: the NET46 build ships with Visual Studio/desktop msbuild on Windows. 
+// The netstandard1.5 adaptation here acts a proof-of-concept for cross-platform 
 // portability of the underlying hostfxr API and gives us build and test coverage 
-// on non-Windows machines.
+// on non-Windows machines. It also ships with msbuild on Mono.
 #if NETSTANDARD1_5
 
 using System;
