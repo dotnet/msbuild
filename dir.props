@@ -165,7 +165,7 @@
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' != 'full'">
+  <PropertyGroup Condition="'$(IsTestProject)' != 'true' And '$(DebugType)' != 'full' And '$(MonoBuild)' != 'true'">
     <SourceLinkCreate>true</SourceLinkCreate>
   </PropertyGroup>
 
