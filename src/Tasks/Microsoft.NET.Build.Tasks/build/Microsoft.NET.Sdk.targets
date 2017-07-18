@@ -400,8 +400,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="GetAssemblyAttributes" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+
   <Target Name="CoreGenerateSatelliteAssemblies"
-          DependsOnTargets="ResolveAssemblyReferences;GenerateAssemblyInfo"
+          DependsOnTargets="ResolveAssemblyReferences;_GetAssemblyInfoFromTemplateFile"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
@@ -414,7 +416,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ItemGroup>
-      <SatelliteAssemblyAttribute Include="@(AssemblyAttribute)" />
       <SatelliteAssemblyAttribute Include="System.Reflection.AssemblyCultureAttribute" Condition="'%(_SatelliteAssemblyResourceInputs.Culture)' != ''">
         <_Parameter1>%(_SatelliteAssemblyResourceInputs.Culture)</_Parameter1>
       </SatelliteAssemblyAttribute>
@@ -443,6 +444,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </Csc>
+  </Target>
+
+  <Target Name="_GetAssemblyInfoFromTemplateFile">
+    <GetAssemblyAttributes PathToTemplateFile="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" >
+      <Output TaskParameter="AssemblyAttributes" ItemName="_AssemblyAttributesFromTemplateFile" />
+    </GetAssemblyAttributes>
+
+    <ItemGroup>
+      <SatelliteAssemblyAttribute Include="@(_AssemblyAttributesFromTemplateFile)" />
+    </ItemGroup>
+
   </Target>
 
   <!--
