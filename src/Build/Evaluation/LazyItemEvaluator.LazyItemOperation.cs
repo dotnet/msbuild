@@ -59,6 +59,7 @@ namespace Microsoft.Build.Evaluation
                 return listBuilder.Select(itemData => itemData.Item).ToList();
             }
 
+            // todo Refactoring: MutateItems should clone each item before mutation (see Update). Make a template method that clones the items to be mutated so that all operations get the behaviour
             protected virtual void MutateItems(ICollection<I> items) { }
 
             protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }

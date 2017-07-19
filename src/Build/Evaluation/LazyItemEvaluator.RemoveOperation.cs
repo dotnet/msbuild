@@ -16,6 +16,7 @@ namespace Microsoft.Build.Evaluation
             {
             }
 
+            //todo port the self referencing matching optimization (e.g. <I Remove="@(I)">) from Update to Remove as well. Ideally make one mechanism for both
             protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return SelectItemsMatchingItemSpec(listBuilder, _itemElement.RemoveLocation).ToImmutableHashSet();
