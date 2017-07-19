@@ -3524,8 +3524,10 @@ $(
         public void PropertyFunctionWithNewLines()
         {
             const string propertyFunction = @"$(SomeProperty
-.Substring(0, 10)
-.Substring(0, 5))";
+ .Substring(0, 10)
+  .ToString()
+   .Substring(0, 5)
+     .ToString())";
 
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
