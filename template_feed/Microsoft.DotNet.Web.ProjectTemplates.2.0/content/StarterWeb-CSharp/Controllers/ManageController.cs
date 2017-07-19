@@ -314,7 +314,6 @@ namespace Company.WebApplication1.Controllers
 
             var model = new TwoFactorAuthenticationViewModel
             {
-                HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any(),
                 HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null,
                 Is2faEnabled = user.TwoFactorEnabled,
                 RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user),

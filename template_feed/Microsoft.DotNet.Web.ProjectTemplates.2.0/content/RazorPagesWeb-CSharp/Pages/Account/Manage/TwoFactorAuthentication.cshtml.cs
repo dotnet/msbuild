@@ -30,8 +30,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public bool HasAuthenticator { get; set; }
 
-        public bool HasAny2faProviders { get; set; }
-
         public int RecoveryCodesLeft { get; set; }
 
         [BindProperty]
@@ -45,7 +43,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
             Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
             RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
