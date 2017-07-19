@@ -56,18 +56,6 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e)
         {
-            return FormatEventMessage(e, false);
-        }
-
-        /// <summary>
-        /// Format the warning message and all the other event data into a
-        /// single string.
-        /// </summary>
-        /// <param name="e">Warning to format</param>
-        /// <param name="removeCarriageReturn"><code>true</code> to remove any carriage returns, otherwise <code>false</code>.</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e, bool removeCarriageReturn)
-        {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "warning" should not be localized
@@ -81,10 +69,9 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Warning to format</param>
-        /// <param name="removeCarriageReturn"><code>true</code> to remove any carriage returns, otherwise <code>false</code>.</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e, bool removeCarriageReturn, bool showProjectFile)
+        internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
