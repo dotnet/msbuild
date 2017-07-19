@@ -323,25 +323,6 @@ namespace Company.WebApplication1.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Enable2fa()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
-            if (!enable2faResult.Succeeded)
-            {
-                throw new ApplicationException($"Unexpected error occured enabling 2FA for user with ID '{user.Id}'.");
-            }
-
-            return RedirectToAction(nameof(TwoFactorAuthentication));
-        }
-
         [HttpGet]
         public async Task<IActionResult> Disable2faWarning()
         {
@@ -394,11 +375,11 @@ namespace Company.WebApplication1.Controllers
                 await _userManager.ResetAuthenticatorKeyAsync(user);
                 unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
-            var email = user.Email;
+
             var model = new EnableAuthenticatorViewModel 
             {
                 SharedKey = FormatKey(unformattedKey),
-                AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey)
+                AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey)
             };
 
             return View(model);
