@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="AttemptingToFindCommand">
         <source>{0}: attempting to find command {1} in {2}</source>
-        <target state="translated">{0}: pokus o nalezení příkazu {1} v {2}</target>
+        <target state="translated">{0}: Pokus o nalezení příkazu {1} v {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindToolAssembly">
         <source>{0}: failed to find toolAssembly for {1}</source>
-        <target state="translated">{0}: nepodařilo se najít toolAssembly pro {1}</target>
+        <target state="translated">{0}: Nepodařilo se najít toolAssembly pro {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindCommandPath">
         <source>{0}: failed to find commandPath {1}</source>
-        <target state="translated">{0}: nepodařilo se najít commandPath {1}</target>
+        <target state="translated">{0}: Nepodařilo se najít commandPath {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateDotnetMultiplexer">
@@ -121,7 +121,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToCreateCommandSpec">
         <source>{0}: attempting to create commandspec</source>
-        <target state="translated">{0}: pokus o vytvoření specifikace příkazu commandspec</target>
+        <target state="translated">{0}: Pokus o vytvoření specifikace příkazu commandspec</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSpecIsNull">
@@ -131,7 +131,7 @@
       </trans-unit>
       <trans-unit id="ExpectDepsJsonAt">
         <source>{0}: expect deps.json at: {1}</source>
-        <target state="translated">{0}: soubor deps.json se očekává v: {1}</target>
+        <target state="translated">{0}: Soubor deps.json se očekává v: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="GeneratingDepsJson">
@@ -206,7 +206,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} skončil s {1} ve {2} ms.</target>
+        <target state="translated">&lt; {0} skončil s {1} za {2} ms.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -231,7 +231,7 @@
       </trans-unit>
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="translated">Spustitelný soubor příkazu {0} se nenašel. Projekt zřejmě nebyl obnoven, nebo obnovení selhalo – spusťte příkaz run `dotnet restore`.</target>
+        <target state="translated">Spustitelný soubor příkazu {0} se nenašel. Projekt se nepodařilo obnovit nebo jeho obnovení nebylo úspěšné. Spusťte příkaz dotnet restore.</target>
         <note />
       </trans-unit>
     </body>

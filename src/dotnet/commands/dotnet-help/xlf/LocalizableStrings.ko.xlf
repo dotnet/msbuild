@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help.</source>
-        <target state="needs-review-translation">도움말 표시</target>
+        <target state="translated">도움말을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">

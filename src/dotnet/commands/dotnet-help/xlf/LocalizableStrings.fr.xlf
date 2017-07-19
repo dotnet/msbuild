@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help.</source>
-        <target state="needs-review-translation">Afficher l'aide</target>
+        <target state="translated">Affichez l'aide.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -204,7 +204,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="translated">Exécutez 'dotnet COMMANDE --help' pour plus d'informations sur une commande.</target>
+        <target state="translated">Exécutez 'dotnet COMMAND --help' pour plus d'informations sur une commande.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">

@@ -64,7 +64,7 @@ Defaults to current directory if nothing is specified.</source>
       </trans-unit>
       <trans-unit id="CmdSkipBackupDescription">
         <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
-        <target state="translated">마이그레이션을 완료한 후 project.json, global.json 및 *.xproj를 `백업` 디렉터리로 이동하는 작업을 건너뜁니다.</target>
+        <target state="translated">마이그레이션을 완료한 후 project.json, global.json 및 *.xproj를 '백업' 디렉터리로 이동하는 작업을 건너뜁니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrationFailedError">

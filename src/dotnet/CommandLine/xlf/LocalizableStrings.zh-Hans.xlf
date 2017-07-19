@@ -109,57 +109,57 @@
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneArgument">
         <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
-        <target state="new">Command '{0}' only accepts a single argument but {1} were provided.</target>
+        <target state="translated">命令“{0}”仅接受一个参数但 {1} 已提供。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneSubcommand">
         <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
-        <target state="new">Command '{0}' only accepts a single subcommand but multiple were provided: {1}</target>
+        <target state="translated">命令“{0}”仅接受一个子命令但已提供多个子命令: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
         <source>File does not exist: {0}</source>
-        <target state="new">File does not exist: {0}</target>
+        <target state="translated">文件不存在: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NoArgumentsAllowed">
         <source>Arguments not allowed for option: {0}</source>
-        <target state="new">Arguments not allowed for option: {0}</target>
+        <target state="translated">选项不允许参数: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionAcceptsOnlyOneArgument">
         <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
-        <target state="new">Option '{0}' only accepts a single argument but {1} were provided.</target>
+        <target state="translated">选项“{0}”仅接受一个参数但 {1} 已提供。</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredArgumentMissingForCommand">
         <source>Required argument missing for command: {0}</source>
-        <target state="new">Required argument missing for command: {0}</target>
+        <target state="translated">命令缺少所需参数: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredArgumentMissingForOption">
         <source>Required argument missing for option: {0}</source>
-        <target state="new">Required argument missing for option: {0}</target>
+        <target state="translated">选项缺少所需参数: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredCommandWasNotProvided">
         <source>Required command was not provided.</source>
-        <target state="new">Required command was not provided.</target>
+        <target state="translated">未提供必需的命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedArgument">
         <source>Argument '{0}' not recognized. Must be one of: {1}</source>
-        <target state="new">Argument '{0}' not recognized. Must be one of: {1}</target>
+        <target state="translated">未识别参数“{0}”。必须为一个: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedCommandOrArgument">
         <source>Unrecognized command or argument '{0}'</source>
-        <target state="new">Unrecognized command or argument '{0}'</target>
+        <target state="translated">未识别命令或参数“{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedOption">
         <source>Option '{0}' not recognized. Must be one of: {1}</source>
-        <target state="new">Option '{0}' not recognized. Must be one of: {1}</target>
+        <target state="translated">未识别选项“{0}”。必须为一个: {1}</target>
         <note />
       </trans-unit>
     </body>

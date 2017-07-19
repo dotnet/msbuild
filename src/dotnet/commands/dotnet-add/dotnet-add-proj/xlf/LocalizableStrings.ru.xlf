@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Solution Command</source>
-        <target state="translated">Команда "Добавить проект в решение" .NET</target>
+        <target state="translated">Команда .NET "Добавить проект в решение"</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">

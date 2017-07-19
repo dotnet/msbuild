@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">ESTRUTURA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
