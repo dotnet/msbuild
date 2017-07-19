@@ -79,9 +79,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Theory]
-        [InlineData(null, null, "", "")]
+        [InlineData(null, null, ".NETCoreApp,Version=v1.0", "")]
         [InlineData(new string[] { ".NETCoreApp,Version=v1.0" }, null, ".NETCoreApp,Version=v1.0", "")]
-        [InlineData(null, "LibA", "", "")]
+        [InlineData(null, "LibA", ".NETCoreApp,Version=v1.0", "LibA/1.2.3")]
         [InlineData(new string[] { ".NETCoreApp,Version=v1.0" }, "LibA", ".NETCoreApp,Version=v1.0", "LibA/1.2.3")]
         public void ItReportsDiagnosticsWithAllTargetLibraryCases(string[] targetGraphs, string libraryId, string expectedTarget, string expectedPackage)
         {
