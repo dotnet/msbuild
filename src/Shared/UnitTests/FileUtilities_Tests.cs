@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                path = Shared.FileUtilities.GetTemporaryFile(".bat");
+                path = FileUtilities.GetTemporaryFile(".bat");
 
                 Assert.Equal(true, path.EndsWith(".bat"));
                 Assert.Equal(true, File.Exists(path));
@@ -751,7 +751,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                path = Shared.FileUtilities.GetTemporaryFile(directory, ".bat");
+                path = FileUtilities.GetTemporaryFile(directory, ".bat");
 
                 Assert.Equal(true, path.EndsWith(".bat"));
                 Assert.Equal(true, File.Exists(path));
@@ -774,7 +774,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                path = Shared.FileUtilities.GetTemporaryFile("bat");
+                path = FileUtilities.GetTemporaryFile("bat");
 
                 Assert.Equal(true, path.EndsWith(".bat"));
                 Assert.Equal(true, File.Exists(path));
@@ -797,7 +797,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<IOException>(() =>
             {
-                Shared.FileUtilities.GetTemporaryFile("|");
+                FileUtilities.GetTemporaryFile("|");
             }
            );
         }
@@ -809,7 +809,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                Shared.FileUtilities.GetTemporaryFile(String.Empty);
+                FileUtilities.GetTemporaryFile(String.Empty);
             }
            );
         }
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<IOException>(() =>
             {
-                Shared.FileUtilities.GetTemporaryFile("|", ".tmp");
+                FileUtilities.GetTemporaryFile("|", ".tmp");
             }
            );
         }

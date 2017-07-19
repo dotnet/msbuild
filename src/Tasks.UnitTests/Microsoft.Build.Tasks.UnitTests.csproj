@@ -38,9 +38,6 @@
     </Compile>
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
@@ -165,6 +162,10 @@
     <Compile Include="XslTransformation_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj">
+      <Project>{e1adb824-2b34-4920-953f-746dfd6db3c1}</Project>
+      <Name>Microsoft.Build.UnitTests.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>

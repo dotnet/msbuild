@@ -19,6 +19,7 @@
     <Project Include="Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
     <Project Include="Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
     <Project Include="Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj" />
+    <Project Include="UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
   </ItemGroup>
 
   <Import Project="dir.targets" />
