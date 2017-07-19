@@ -399,8 +399,8 @@ namespace Microsoft.Build.Tasks
             // If there are no source files then just return success.
             if (_sourceFiles == null || _sourceFiles.Length == 0)
             {
-                _destinationFiles = new TaskItem[0];
-                _copiedFiles = new TaskItem[0];
+                _destinationFiles = Array.Empty<TaskItem>();
+                _copiedFiles = Array.Empty<TaskItem>();
                 return true;
             }
 
@@ -539,7 +539,7 @@ namespace Microsoft.Build.Tasks
                     {
                         Log.LogErrorWithCodeFromResources("Copy.Error", _sourceFiles[i].ItemSpec, _destinationFolder.ItemSpec, e.Message);
                         // Clear the outputs.
-                        _destinationFiles = new ITaskItem[0];
+                        _destinationFiles = Array.Empty<ITaskItem>();
                         return false;
                     }
 

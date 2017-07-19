@@ -21,8 +21,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
         private bool _success = true;
 
-        private readonly static string[] s_emptyArray = new string[] { };
-
         // These must be defined in sorted order!
         private readonly static string[] s_knownImplementedCategories = new string[]
         {
@@ -118,7 +116,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void CheckForUnknownSubKeys(RegistryKey key)
         {
-            CheckForUnknownSubKeys(key, s_emptyArray);
+            CheckForUnknownSubKeys(key, Array.Empty<string>());
         }
 
         private void CheckForUnknownSubKeys(RegistryKey key, string[] knownNames)
@@ -131,7 +129,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void CheckForUnknownValues(RegistryKey key)
         {
-            CheckForUnknownValues(key, s_emptyArray);
+            CheckForUnknownValues(key, Array.Empty<string>());
         }
 
         private void CheckForUnknownValues(RegistryKey key, string[] knownNames)

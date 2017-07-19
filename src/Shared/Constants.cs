@@ -5,19 +5,19 @@ using System;
 using System.Reflection;
 
 // This file is compiled into both Microsoft.Build.Framework and Microsoft.Build.Tasks which can cause collisions.
-#if MICROSOFT_BUILD_TASKS 
+#if MICROSOFT_BUILD_TASKS
 namespace Microsoft.Build.Tasks
 #else
 namespace Microsoft.Build.Shared
 #endif
 {
     /// <summary>
-    /// Constants that we want to be shareable across all our assemblies. 
+    /// Constants that we want to be shareable across all our assemblies.
     /// </summary>
     internal static class MSBuildConstants
     {
         /// <summary>
-        /// The name of the property that indicates the tools path 
+        /// The name of the property that indicates the tools path
         /// </summary>
         internal const string ToolsPath = "MSBuildToolsPath";
 
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Shared
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
 
         /// <summary>
-        /// The most current Visual Studio Version known to this version of MSBuild. 
+        /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>
 #if STANDALONEBUILD
         internal const string CurrentVisualStudioVersion = "15.0";
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Shared
 #endif
 
         /// <summary>
-        /// The most current ToolsVersion known to this version of MSBuild. 
+        /// The most current ToolsVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentToolsVersion = CurrentVisualStudioVersion;
 
@@ -65,12 +65,12 @@ namespace Microsoft.Build.Shared
         internal const string MSBuildDummyGlobalPropertyHeader = "MSBuildProjectInstance";
 
         /// <summary>
-        /// The most current ToolsVersion known to this version of MSBuild as a Version object. 
+        /// The most current ToolsVersion known to this version of MSBuild as a Version object.
         /// </summary>
         internal static Version CurrentToolsVersionAsVersion = new Version(CurrentToolsVersion);
 
         /// <summary>
-        /// The most current VSGeneralAssemblyVersion known to this version of MSBuild. 
+        /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
 #if STANDALONEBUILD
         internal const string CurrentAssemblyVersion = "15.1.0.0";
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
         internal const string CurrentAssemblyVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralAssemblyVersion;
 #endif
 
-        internal const string CurrentAssemblyFileVersion = "15.3.0.0";
+        internal const string CurrentAssemblyFileVersion = "15.5.0.0";
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"

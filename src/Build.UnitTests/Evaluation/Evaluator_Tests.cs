@@ -19,6 +19,7 @@ using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -4183,6 +4184,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Verifies that if no VisualStudioVersion is set that the toolset with set a value.
+        /// </summary>
+        [Fact]
+        public void VerifyVisualStudioVersionSetByToolset()
+        {
+            string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
+
+            try
+            {
+                // Ensure that VisualStudioVersion is not set as an environment variable
+                //
+                Environment.SetEnvironmentVariable("VisualStudioVersion", null);
+
+                // No global properties are passed to the ProjectCollection so VisualStudioVersion should not be set
+                //
+                Project project = new Project(null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+
+                string actual = project.GetPropertyValue(Constants.VisualStudioVersionPropertyName);
+
+                Assert.Equal(MSBuildConstants.CurrentVisualStudioVersion, actual);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("VisualStudioVersion", originalVisualStudioVersion);
+            }
+        }
+
+        /// <summary>
         /// Verify that DTD processing is disabled when loading a project
         /// We add some invalid DTD code to a MSBuild project, if such code is ever parsed a XmlException will be thrown
         /// If DTD parsing is disabled (desired behavior), no XmlException should be caught
@@ -4382,6 +4411,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {
                     FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Tests that an import, target, or task with a condition that contains an error but is short-circuited does not fail the build.  This can happen when you have a condition like:
+        /// 'true' == 'false' AND '$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))' != ''
+        /// 
+        /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
+        /// 
+        /// https://github.com/Microsoft/msbuild/issues/2259
+        /// </summary>
+        [Theory]
+        [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
+        [InlineData("<Target Name=\"Build\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
+        [InlineData("<Target Name=\"Build\"><Message Text=\"Build executed\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" /></Target>")]
+        public void ConditionWithShortCircuitAndErrorDoesNotFailBuild(string projectInnerXml)
+        {
+            string content = ObjectModelHelpers.CleanupFileContents($@"
+                             <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                                {projectInnerXml}
+                             </Project>");
+
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+
+                MockLogger logger = new MockLogger();
+
+                bool result = project.Build(logger);
+
+                Assert.True(result);
             }
         }
 

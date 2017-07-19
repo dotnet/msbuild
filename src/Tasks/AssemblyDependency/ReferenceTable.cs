@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
         private Dictionary<AssemblyNameExtension, Reference> _references = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private DependentAssembly[] _remappedAssemblies = new DependentAssembly[0];
+        private DependentAssembly[] _remappedAssemblies = Array.Empty<DependentAssembly>();
         /// <summary>If true, then search for dependencies.</summary>
         private bool _findDependencies = true;
         /// <summary>
@@ -2434,13 +2434,13 @@ namespace Microsoft.Build.Tasks
             out ITaskItem[] copyLocalFiles
         )
         {
-            primaryFiles = new ITaskItem[0];
-            dependencyFiles = new ITaskItem[0];
-            relatedFiles = new ITaskItem[0];
-            satelliteFiles = new ITaskItem[0];
-            serializationAssemblyFiles = new ITaskItem[0];
-            scatterFiles = new ITaskItem[0];
-            copyLocalFiles = new ITaskItem[0];
+            primaryFiles = Array.Empty<ITaskItem>();
+            dependencyFiles = Array.Empty<ITaskItem>();
+            relatedFiles = Array.Empty<ITaskItem>();
+            satelliteFiles = Array.Empty<ITaskItem>();
+            serializationAssemblyFiles = Array.Empty<ITaskItem>();
+            scatterFiles = Array.Empty<ITaskItem>();
+            copyLocalFiles = Array.Empty<ITaskItem>();
 
             ArrayList primaryItems = new ArrayList();
             ArrayList dependencyItems = new ArrayList();

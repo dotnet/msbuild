@@ -1547,7 +1547,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
-            string[] targets = (target == null) ? new string[] { } : new string[] { target };
+            string[] targets = (target == null) ? Array.Empty<string>() : new string[] { target };
 
             return Build(targets, loggers, remoteLoggers);
         }
@@ -1989,7 +1989,7 @@ namespace Microsoft.Build.Execution
 
             if (null == targets)
             {
-                targets = new string[] { };
+                targets = Array.Empty<string>();
             }
 
             BuildResult results;
@@ -2068,7 +2068,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return ReadOnlyEmptyList<TargetSpecification>.Instance;
+                return Array.Empty<TargetSpecification>();
             }
         }
 
@@ -2085,7 +2085,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return ReadOnlyEmptyList<TargetSpecification>.Instance;
+                return Array.Empty<TargetSpecification>();
             }
         }
 

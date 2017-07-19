@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
@@ -43,18 +44,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumerator over the entries in this table
         /// </summary>
-        internal IEnumerable<EvaluatorMetadata> Entries
-        {
-            get
-            {
-                if (_metadata == null)
-                {
-                    return ReadOnlyEmptyList<EvaluatorMetadata>.Instance;
-                }
-
-                return _metadata.Values;
-            }
-        }
+        internal IEnumerable<EvaluatorMetadata> Entries => _metadata?.Values ?? Enumerable.Empty<EvaluatorMetadata>();
 
         /// <summary>
         /// Retrieves any value we have in our metadata table for the metadata name specified,

@@ -1611,5 +1611,5 @@ namespace Microsoft.Build.BackEnd
             }
         }
 #endif
-                }
+    }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
@@ -14,10 +15,10 @@ namespace Microsoft.Build.Framework.UnitTests
             SdkReference sdk;
             var parsed = SdkReference.TryParse(sdkString, out sdk);
 
-            Assert.True(parsed);
-            Assert.Equal("Name", sdk.Name);
-            Assert.Null(sdk.Version);
-            Assert.Null(sdk.MinimumVersion);
+            parsed.ShouldBeTrue();
+            sdk.Name.ShouldBe("Name");
+            sdk.Version.ShouldBeNull();
+            sdk.MinimumVersion.ShouldBeNull();
         }
 
         [Fact]
@@ -27,11 +28,11 @@ namespace Microsoft.Build.Framework.UnitTests
             SdkReference sdk;
             var parsed = SdkReference.TryParse(sdkString, out sdk);
 
-            Assert.True(parsed);
-            Assert.Equal("Name", sdk.Name);
-            Assert.Equal("Version", sdk.Version);
-            Assert.Null(sdk.MinimumVersion);
-            Assert.Equal(sdkString, sdk.ToString());
+            parsed.ShouldBeTrue();
+            sdk.Name.ShouldBe("Name");
+            sdk.Version.ShouldBe("Version");
+            sdk.MinimumVersion.ShouldBeNull();
+            sdk.ToString().ShouldBe(sdkString);
         }
 
         [Fact]
@@ -41,11 +42,11 @@ namespace Microsoft.Build.Framework.UnitTests
             SdkReference sdk;
             var parsed = SdkReference.TryParse(sdkString, out sdk);
 
-            Assert.True(parsed);
-            Assert.Equal("Name", sdk.Name);
-            Assert.Null(sdk.Version);
-            Assert.Equal("Version", sdk.MinimumVersion);
-            Assert.Equal(sdkString, sdk.ToString());
+            parsed.ShouldBeTrue();
+            sdk.Name.ShouldBe("Name");
+            sdk.Version.ShouldBeNull();
+            sdk.MinimumVersion.ShouldBe("Version");
+            sdk.ToString().ShouldBe(sdkString);
         }
 
         [Fact]
@@ -55,11 +56,11 @@ namespace Microsoft.Build.Framework.UnitTests
             SdkReference sdk;
             var parsed = SdkReference.TryParse(sdkString, out sdk);
 
-            Assert.True(parsed);
-            Assert.Equal("Name", sdk.Name);
-            Assert.Null(sdk.Version);
-            Assert.Equal("Version", sdk.MinimumVersion);
-            Assert.Equal("Name/min=Version", sdk.ToString());
+            parsed.ShouldBeTrue();
+            sdk.Name.ShouldBe("Name");
+            sdk.Version.ShouldBeNull();
+            sdk.MinimumVersion.ShouldBe("Version");
+            sdk.ToString().ShouldBe("Name/min=Version");
         }
 
         [Theory]
@@ -70,8 +71,8 @@ namespace Microsoft.Build.Framework.UnitTests
         {
             SdkReference sdk;
             var parsed = SdkReference.TryParse(sdkString, out sdk);
-            Assert.False(parsed);
-            Assert.Null(sdk);
+            parsed.ShouldBeFalse();
+            sdk.ShouldBeNull();
         }
 
         [Fact]
@@ -79,14 +80,14 @@ namespace Microsoft.Build.Framework.UnitTests
         {
             SdkReference sdk = new SdkReference("Name", "Version", "Min");
 
-            Assert.Equal(sdk, new SdkReference("Name", "Version", "Min"));
-            Assert.NotEqual(sdk, new SdkReference("Name", "Version", null));
-            Assert.NotEqual(sdk, new SdkReference("Name", null, "Min"));
-            Assert.NotEqual(sdk, new SdkReference("Name", null, null));
-            Assert.NotEqual(sdk, new SdkReference("Name", "version", "Min"));
-            Assert.NotEqual(sdk, new SdkReference("name", "Version", "Min"));
-            Assert.NotEqual(sdk, new SdkReference("Name", "Version", "min"));
-            Assert.NotEqual(sdk, new SdkReference("Name2", "Version", "Min"));
+            sdk.ShouldBe(new SdkReference("Name", "Version", "Min"));
+            sdk.ShouldNotBe(new SdkReference("Name", "Version", null));
+            sdk.ShouldNotBe(new SdkReference("Name", null, "Min"));
+            sdk.ShouldNotBe(new SdkReference("Name", null, null));
+            sdk.ShouldNotBe(new SdkReference("Name", "version", "Min"));
+            sdk.ShouldNotBe(new SdkReference("name", "Version", "Min"));
+            sdk.ShouldNotBe(new SdkReference("Name", "Version", "min"));
+            sdk.ShouldNotBe(new SdkReference("Name2", "Version", "Min"));
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Scatter files associated with this reference.
         /// </summary>
-        private string[] _scatterFiles = new string[0];
+        private string[] _scatterFiles = Array.Empty<string>();
 
         /// <summary>
         /// ArrayList of Exception.
@@ -378,7 +378,7 @@ namespace Microsoft.Build.Tasks
         {
             if (scatterFilesToAttach == null || scatterFilesToAttach.Length == 0)
             {
-                _scatterFiles = new string[0];
+                _scatterFiles = Array.Empty<string>();
             }
             else
             {
@@ -645,7 +645,7 @@ namespace Microsoft.Build.Tasks
 
                     if (_fullPath == null || _fullPath.Length == 0)
                     {
-                        _scatterFiles = new string[0];
+                        _scatterFiles = Array.Empty<string>();
                         _satelliteFiles = new ArrayList();
                         _serializationAssemblyFiles = new ArrayList();
                         _assembliesConsideredAndRejected = new ArrayList();

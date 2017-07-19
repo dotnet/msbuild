@@ -1,10 +1,9 @@
 {
-  "version": "15.3",
-  "buildNumberOffset": "300",
+  "version": "15.5-preview",
   "assemblyVersion": "15.1",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
-    "^refs/heads/xplat$"
+    "^refs/heads/vs.*$"
   ],
   "cloudBuild": {
     "buildNumber": {

@@ -60,7 +60,7 @@ namespace Microsoft.Build.Shared
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
         /// </summary>
 
-        internal static char[] InvalidPathChars => new char[]
+        internal static readonly char[] InvalidPathChars = new char[]
         {
             '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Shared
         /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static char[] InvalidFileNameChars => new char[]
+        internal static readonly char[] InvalidFileNameChars = new char[]
         {
             '\"', '<', '>', '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.Shared
 
         internal static string TrimTrailingSlashes(this string s)
         {
-            return s.TrimEnd('/', '\\');
+            return s.TrimEnd(Slashes);
         }
 
         /// <summary>

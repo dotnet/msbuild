@@ -71,6 +71,11 @@ namespace Microsoft.Build.Evaluation
         BreakOnNotEmpty = 0x10,
 
         /// <summary>
+        /// When an error occurs expanding a property, just leave it unexpanded.  This should only be used when attempting to log a message with a best effort expansion of a string.
+        /// </summary>
+        LeavePropertiesUnexpandedOnError = 0x20,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -315,7 +320,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (expression.Length == 0)
             {
-                return ReadOnlyEmptyList<T>.Instance;
+                return Array.Empty<T>();
             }
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
@@ -390,7 +395,7 @@ namespace Microsoft.Build.Evaluation
             if (expression.Length == 0)
             {
                 isTransformExpression = false;
-                return ReadOnlyEmptyList<T>.Instance;
+                return Array.Empty<T>();
             }
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
@@ -1182,10 +1187,17 @@ namespace Microsoft.Build.Evaluation
 
                 if (function != null)
                 {
-                    // Because of the rich expansion capabilities of MSBuild, we need to keep things
-                    // as strings, since property expansion & string embedding can happen anywhere
-                    // propertyValue can be null here, when we're invoking a static function
-                    propertyValue = function.Execute(propertyValue, properties, options, elementLocation);
+                    try
+                    {
+                        // Because of the rich expansion capabilities of MSBuild, we need to keep things
+                        // as strings, since property expansion & string embedding can happen anywhere
+                        // propertyValue can be null here, when we're invoking a static function
+                        propertyValue = function.Execute(propertyValue, properties, options, elementLocation);
+                    }
+                    catch (Exception) when (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                    {
+                        propertyValue = propertyBody;
+                    }
                 }
 
                 return propertyValue;
@@ -2825,7 +2837,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = new string[0];
+                    _arguments = Array.Empty<string>();
                 }
                 else
                 {
@@ -2952,7 +2964,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex);
+                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex).Trim();
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3188,6 +3200,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     // We ended up with something other than a function expression
                     string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
+                    if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                    {
+                        // If the caller wants to ignore errors (in a log statement for example), just return the partially evaluated value
+                        return partiallyEvaluated;
+                    }
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.InnerException.Message.Replace("\r\n", " "));
                     return null;
                 }
@@ -3403,7 +3420,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = new string[0];
+                    functionArguments = Array.Empty<string>();
                 }
                 else
                 {
@@ -3488,7 +3505,7 @@ namespace Microsoft.Build.Evaluation
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
                         argumentsContent = String.Empty;
-                        functionArguments = new string[0];
+                        functionArguments = Array.Empty<string>();
                     }
                     else
                     {
@@ -3498,7 +3515,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (String.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = new string[0];
+                            functionArguments = Array.Empty<string>();
                         }
                         else
                         {
@@ -3506,7 +3523,7 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFunction.Substring(argumentsEndIndex + 1);
+                        remainder = expressionFunction.Substring(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -3521,12 +3538,12 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = new string[0];
+                    functionArguments = Array.Empty<string>();
 
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunction.Substring(nextMethodIndex);
+                        remainder = expressionFunction.Substring(nextMethodIndex).Trim();
                     }
 
                     string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();

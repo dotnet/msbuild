@@ -83,8 +83,8 @@ namespace Microsoft.Build.BackEnd.Logging
             ProjectPropertyInstanceEnumeratorProxy properties = null;
             ProjectItemInstanceEnumeratorProxy items = null;
 
-            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Collections.ReadOnlyEmptyList<ProjectPropertyInstance>.Instance : null;
-            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Collections.ReadOnlyEmptyList<ProjectItemInstance>.Instance : null;
+            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Array.Empty<ProjectPropertyInstance>() : null;
+            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Array.Empty<ProjectItemInstance>() : null;
 
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
