@@ -97,22 +97,9 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Message to format</param>
-        /// <param name="removeCarriageReturn">Escape CR or leave as is</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool removeCarriageReturn)
-        {
-            return FormatEventMessage(e, removeCarriageReturn, false);
-        }
-
-        /// <summary>
-        /// Format the message and all the other event data into a
-        /// single string.
-        /// </summary>
-        /// <param name="e">Message to format</param>
-        /// <param name="removeCarriageReturn">Escape CR or leave as is</param>
         /// <param name="showProjectFile">Show project file or not</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool removeCarriageReturn, bool showProjectFile)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
