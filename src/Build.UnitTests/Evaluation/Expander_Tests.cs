@@ -31,6 +31,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Engine.UnitTests;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -3517,6 +3518,24 @@ $(
             result = expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::EnsureTrailingSlash($(SomeProperty)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(path + Path.DirectorySeparatorChar, result);
+        }
+
+        [Fact]
+        public void PropertyFunctionWithNewLines()
+        {
+            const string propertyFunction = @"$(SomeProperty
+.Substring(0, 10)
+.Substring(0, 5))";
+
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            pg.Set(ProjectPropertyInstance.Create("SomeProperty", "6C8546D5297C424F962201B0E0E9F142"));
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            string result = expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            result.ShouldBe("6C854");
         }
     }
 }
