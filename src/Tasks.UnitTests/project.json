@@ -6,7 +6,7 @@
     "xunit.assert": "2.1.0",
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
-    "Shouldly": "2.8.3"
+    "Shouldly": "3.0.0-beta0001"
   },
   "frameworks": {
     "net46": {
