@@ -99,20 +99,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void EscapeCarriageReturnMessages()
+        public void CarriageReturnInMessageIsUnchanged()
         {
             BuildErrorEventArgs error = new BuildErrorEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
             BuildWarningEventArgs warning = new BuildWarningEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
 
             // Testing the method in Shared.EventArgsFormatting directly
             string errorString = EventArgsFormatting.FormatEventMessage(error);
-            string warningString = EventArgsFormatting.FormatEventMessage(warning, true);
-            string warningString2 = EventArgsFormatting.FormatEventMessage(warning, false);
+            string warningString = EventArgsFormatting.FormatEventMessage(warning);
 
-            Assert.Equal("source.cs(42): CS error 312: message\\r Hello", errorString);
-            Assert.Equal("source.cs(42): CS warning 312: message\\r Hello", warningString);
-
-            Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString2);
+            Assert.Equal("source.cs(42): CS error 312: message\r Hello", errorString);
+            Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString);
         }
 
         [Fact]
