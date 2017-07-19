@@ -3291,8 +3291,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
-      <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
-      <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
+      <CoreCompileCache Include="@(Compile)" />
+      <CoreCompileCache Include="@(ReferencePath)" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(CoreCompileCache)">
