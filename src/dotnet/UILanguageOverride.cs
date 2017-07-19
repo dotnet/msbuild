@@ -15,15 +15,20 @@ namespace Microsoft.DotNet.Cli
         public static void Setup()
         {
             CultureInfo language = GetOverriddenUILanguage();
-            if (language == null)
+            if (language != null)
             {
-                return;
+                ApplyOverrideToCurrentProcess(language);
+                FlowOverrideToChildProcesses(language);
             }
+        }
 
-            // Make the current process respect the override.
+        private static void ApplyOverrideToCurrentProcess(CultureInfo language)
+        {
             CultureInfo.DefaultThreadCurrentUICulture = language;
+        }
 
-            // Pass down the override to other processes that we start via appropriate environment variables
+        private static void FlowOverrideToChildProcesses(CultureInfo language)
+        {
             // Do not override any environment variables that are already set as we do not want to clobber a more granular setting with our global setting.
             SetIfNotAlreadySet(DOTNET_CLI_UI_LANGUAGE, language.Name);
             SetIfNotAlreadySet(VSLANG, language.LCID); // for tools following VS guidelines to just work in CLI

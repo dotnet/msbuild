@@ -199,7 +199,6 @@ namespace Microsoft.DotNet.Cli
             // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            // Honor UI language customization
             UILanguageOverride.Setup();
         }
 
