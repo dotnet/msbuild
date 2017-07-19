@@ -2964,7 +2964,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex);
+                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex).Trim();
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3523,7 +3523,7 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFunction.Substring(argumentsEndIndex + 1);
+                        remainder = expressionFunction.Substring(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -3543,7 +3543,7 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunction.Substring(nextMethodIndex);
+                        remainder = expressionFunction.Substring(nextMethodIndex).Trim();
                     }
 
                     string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();
