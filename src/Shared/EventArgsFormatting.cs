@@ -16,19 +16,6 @@ namespace Microsoft.Build.Shared
     internal static class EventArgsFormatting
     {
         /// <summary>
-        /// Escape the carriage return from a string
-        /// </summary>
-        /// <param name="stringWithCarriageReturn"></param>
-        /// <returns>String with CRLF replaced with LF and standalone CR escaped.</returns>
-        internal static string EscapeCarriageReturn(string stringWithCarriageReturn)
-        {
-            // If the string is null or empty or then we just return the string
-            if (string.IsNullOrEmpty(stringWithCarriageReturn)) return stringWithCarriageReturn;
-
-            return stringWithCarriageReturn.Replace("\r\n", "\n").Replace("\r", @"\r");
-        }
-
-        /// <summary>
         /// Format the error event message and all the other event data into
         /// a single string.
         /// </summary>
@@ -51,7 +38,7 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "error" should not be localized
-            return FormatEventMessage("error", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
+            return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
         }
@@ -69,7 +56,7 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "error" should not be localized
-            return FormatEventMessage("error", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
+            return FormatEventMessage("error", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
         }
@@ -97,7 +84,7 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "warning" should not be localized
-            return FormatEventMessage("warning", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
+            return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
         }
@@ -115,7 +102,7 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "warning" should not be localized
-            return FormatEventMessage("warning", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
+            return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
         }
@@ -156,7 +143,7 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "message" should not be localized
-            return FormatEventMessage("message", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
+            return FormatEventMessage("message", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
         }
 
