@@ -23,18 +23,6 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e)
         {
-            return FormatEventMessage(e, false);
-        }
-
-        /// <summary>
-        /// Format the error event message and all the other event data into
-        /// a single string.
-        /// </summary>
-        /// <param name="e">Error to format</param>
-        /// <param name="removeCarriageReturn"><code>true</code> to remove any carriage returns, otherwise <code>false</code>.</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e, bool removeCarriageReturn)
-        {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
             // "error" should not be localized

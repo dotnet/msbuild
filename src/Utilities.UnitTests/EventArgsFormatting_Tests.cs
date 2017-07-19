@@ -105,15 +105,13 @@ namespace Microsoft.Build.UnitTests
             BuildWarningEventArgs warning = new BuildWarningEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
 
             // Testing the method in Shared.EventArgsFormatting directly
-            string errorString = EventArgsFormatting.FormatEventMessage(error, true);
+            string errorString = EventArgsFormatting.FormatEventMessage(error);
             string warningString = EventArgsFormatting.FormatEventMessage(warning, true);
-            string errorString2 = EventArgsFormatting.FormatEventMessage(error, false);
             string warningString2 = EventArgsFormatting.FormatEventMessage(warning, false);
 
             Assert.Equal("source.cs(42): CS error 312: message\\r Hello", errorString);
             Assert.Equal("source.cs(42): CS warning 312: message\\r Hello", warningString);
 
-            Assert.Equal("source.cs(42): CS error 312: message\r Hello", errorString2);
             Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString2);
         }
 
