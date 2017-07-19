@@ -71,7 +71,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var itemExpressionFragment = itemSpec.Fragments.First() as ItemExpressionFragment<P, I>;
+                var itemExpressionFragment = itemSpec.Fragments.Single() as ItemExpressionFragment<P, I>;
 
                 if (itemExpressionFragment == null)
                 {
