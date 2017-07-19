@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Archive
             }
 
             long compressedSize = inStream.Length - inStream.Position;
-            var lzmaProgress = new LzmaProgress(progress, "Decompressing", outSize, MeasureBy.Output);
+            var lzmaProgress = new LzmaProgress(progress, LocalizableStrings.Decompressing, outSize, MeasureBy.Output);
             lzmaProgress.SetProgress(0, 0);
             decoder.Code(inStream, outStream, compressedSize, outSize, lzmaProgress);
             lzmaProgress.SetProgress(inStream.Length, outSize);
