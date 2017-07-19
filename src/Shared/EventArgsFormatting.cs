@@ -36,10 +36,9 @@ namespace Microsoft.Build.Shared
         /// a single string.
         /// </summary>
         /// <param name="e">Error to format</param>
-        /// <param name="removeCarriageReturn"><code>true</code> to remove any carriage returns, otherwise <code>false</code>.</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e, bool removeCarriageReturn, bool showProjectFile)
+        internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
 
