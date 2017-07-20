@@ -440,8 +440,6 @@ namespace Microsoft.Build.UnitTests
          * have different dates or sizes.
          */
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void DoCopyOverDifferentFile()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
