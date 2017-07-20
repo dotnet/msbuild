@@ -11,8 +11,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
 {
     public class ValidationMessageTests
     {
-        private readonly ITestOutputHelper output;
-
         [Fact]
         public void ValidationMessagesFormatCorrectly()
         {
