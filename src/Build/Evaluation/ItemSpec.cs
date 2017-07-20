@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The fragments that compose an item spec string (values, globs, item references)
         /// </summary>
-        public IEnumerable<ItemFragment> Fragments { get; }
+        public ImmutableList<ItemFragment> Fragments { get; }
 
         /// <summary>
         /// The expander needs to have a default item factory set.
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Evaluation
             Fragments = BuildItemFragments(itemSpecLocation, expandProperties);
         }
 
-        private IEnumerable<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
+        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
         {
             var builder = ImmutableList.CreateBuilder<ItemFragment>();
 
@@ -160,7 +160,16 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">The item to attempt to find a match for.</param>
         public bool MatchesItem(I item)
         {
-            return Fragments.Any(f => f.MatchCount(item.EvaluatedInclude) > 0);
+            // Avoid unnecessary LINQ/Func/Enumerator allocations on this path, this is called a lot
+
+            string evaluatedInclude = item.EvaluatedInclude;
+            foreach (ItemFragment fragment in Fragments)
+            {
+                if (fragment.MatchCount(evaluatedInclude) > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
