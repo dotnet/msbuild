@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AspNetCore.Authentication.Extensions
+﻿namespace MMicrosoft.AspNetCore.Authentication
 {
     public class AzureAdB2COptions
     {
