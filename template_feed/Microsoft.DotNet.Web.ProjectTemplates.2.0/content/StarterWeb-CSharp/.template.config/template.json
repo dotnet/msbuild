@@ -299,7 +299,7 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "Whether or not to use LocalDB instead of SQLite"
+      "description": "Whether to use LocalDB instead of SQLite. This option only applies if --auth Individual or --auth IndividualB2C is specified."
     },
     "TargetFrameworkOverride": {
       "type": "parameter",
