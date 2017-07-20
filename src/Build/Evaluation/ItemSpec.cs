@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The fragments that compose an item spec string (values, globs, item references)
         /// </summary>
-        public IEnumerable<ItemFragment> Fragments { get; }
+        public ImmutableList<ItemFragment> Fragments { get; }
 
         /// <summary>
         /// The expander needs to have a default item factory set.
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Evaluation
             Fragments = BuildItemFragments(itemSpecLocation, expandProperties);
         }
 
-        private IEnumerable<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
+        private ImmutableList<ItemFragment> BuildItemFragments(IElementLocation itemSpecLocation, bool expandProperties)
         {
             var builder = ImmutableList.CreateBuilder<ItemFragment>();
 
