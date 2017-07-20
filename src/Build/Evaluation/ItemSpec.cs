@@ -160,7 +160,16 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">The item to attempt to find a match for.</param>
         public bool MatchesItem(I item)
         {
-            return Fragments.Any(f => f.MatchCount(item.EvaluatedInclude) > 0);
+            // Avoid unnecessary LINQ/Func/Enumerator allocations on this path, this is called a lot
+
+            string evaluatedInclude = item.EvaluatedInclude;
+            foreach (ItemFragment fragment in Fragments)
+            {
+                if (fragment.MatchCount(evaluatedInclude) > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
