@@ -16,7 +16,7 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "guids": [ 
+  "guids": [
     "09732173-2cef-46b7-83db-1334bcb079d3", // Tenant ID
     "53bc9b9d-9d6a-45d4-8429-2a2761773502" // Client ID
   ],
@@ -38,13 +38,15 @@
         {
           "condition": "(!OrganizationalAuth)",
           "exclude": [
-            "AzureAd/**"
+            "Extensions/AzureAdAuthenticationBuilderExtensions.cs",
+            "Extensions/AzureAdOptions.cs"
           ]
         },
         {
           "condition": "(!IndividualB2CAuth)",
           "exclude": [
-            "AzureAdB2C/**"
+            "Extensions/AzureAdB2CAuthenticationBuilderExtensions.cs",
+            "Extensions/AzureAdB2COptions.cs"
           ]
         }
       ]
