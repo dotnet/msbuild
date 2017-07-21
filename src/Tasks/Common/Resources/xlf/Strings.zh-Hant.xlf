@@ -327,6 +327,11 @@
         <target state="translated">此專案所使用的 Microsoft.NET.Sdk 版本，不足以支援此專案參考所需的 .NET Standard 2.0。請安裝 NET Core SDK 2.0 版或更高版本。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

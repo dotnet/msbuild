@@ -186,3 +186,6 @@ Project.vbproj
 
 # VS Code
 .vscode/
+
+# VS for mac
+*.userprefs
