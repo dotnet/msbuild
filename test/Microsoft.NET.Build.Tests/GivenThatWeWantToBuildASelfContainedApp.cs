@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_errors_out_when_RuntimeIdentifier_architecture_and_PlatformTarget_do_no_match()
+        public void It_errors_out_when_RuntimeIdentifier_architecture_and_PlatformTarget_do_not_match()
         {
 			var testAsset = _testAssetsManager
 				.CopyTestAsset("HelloWorld")
@@ -94,7 +94,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
 		[Fact]
-		public void It_does_not_error_out_when_RuntimeIdentifier_architecture_and_PlatformTarget_do_no_match_but_PlatformTarget_is_AnyCPU()
+		public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
 		{
 			var targetFramework = "netcoreapp1.1";
 			var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
