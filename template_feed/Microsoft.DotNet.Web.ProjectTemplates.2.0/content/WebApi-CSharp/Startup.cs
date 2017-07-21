@@ -49,8 +49,8 @@ namespace Company.WebApplication1
             {
                 app.UseDeveloperExceptionPage();
             }
-#if (OrganizationalAuth || IndividualAuth)
 
+#if (OrganizationalAuth || IndividualAuth)
             app.UseAuthentication();
 #endif
             app.UseMvc();
