@@ -258,6 +258,9 @@
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
     <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
   </data>
+  <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
+    <value>The RuntimeIdentifier platform and the PlatformTarget must match.</value>
+  </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
     <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
   </data>

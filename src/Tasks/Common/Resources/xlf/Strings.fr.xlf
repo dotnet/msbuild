@@ -327,6 +327,11 @@
         <target state="translated">La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge .NET Standard 2.0, lequel est nécessaire aux références de ce projet. Installez la version 2.0 ou une version ultérieure du kit .NET Core SDK.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
