@@ -48,6 +48,11 @@ namespace Company.WebApplication1
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 #if (OrganizationalAuth)
 
             app.UseJwtBearerAuthentication(new JwtBearerOptions
