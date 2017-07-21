@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Company.WebApplication1.Models;
@@ -375,7 +374,7 @@ namespace Company.WebApplication1.Controllers
                 unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
 
-            var model = new EnableAuthenticatorViewModel 
+            var model = new EnableAuthenticatorViewModel
             {
                 SharedKey = FormatKey(unformattedKey),
                 AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey)
