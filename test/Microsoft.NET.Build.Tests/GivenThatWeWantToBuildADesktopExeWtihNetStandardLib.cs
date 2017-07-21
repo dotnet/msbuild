@@ -176,21 +176,10 @@ namespace Microsoft.NET.Build.Tests
 
             //  Verify that netstandard.dll was passed to compiler
             var references = getCommandLineCommand.GetValues()
-                                .Where(arg => arg.StartsWith("/reference:"))
-                                .Select(arg => arg.Substring("/reference:".Length))
-                                //  Strip quotes if there are any
-                                .Select(r =>
-                                {
-                                    if (r.StartsWith('"') && r.EndsWith('"'))
-                                    {
-                                        return r.Substring(1, r.Length - 2);
-                                    }
-                                    else
-                                    {
-                                        return r;
-                                    }
-                                })
-                                .ToList();
+                .Where(arg => arg.StartsWith("/reference:"))
+                .Select(arg => arg.Substring("/reference:".Length))
+                .Select(r => r.Trim('"'))
+                .ToList();
 
             references.Select(r => Path.GetFileName(r))
                 .Should().Contain("netstandard.dll");
