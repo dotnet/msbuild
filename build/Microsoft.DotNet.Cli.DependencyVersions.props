@@ -6,7 +6,7 @@
     <CLI_Roslyn_Version>2.3.0-beta4-61830-03</CLI_Roslyn_Version>
     <CLI_FSharp_Version>4.2.0-rc-170630-0</CLI_FSharp_Version>
     <CLI_NETSDK_Version>1.1.0-alpha-20170719-3</CLI_NETSDK_Version>
-    <CLI_NuGet_Version>4.3.0-rtm-4294</CLI_NuGet_Version>
+    <CLI_NuGet_Version>4.3.0-rtm-4315</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170516-2-509</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0</CLI_TestPlatform_Version>
     <TemplateEngineVersion>1.0.0-beta2-20170629-269</TemplateEngineVersion>
