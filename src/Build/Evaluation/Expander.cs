@@ -113,6 +113,10 @@ namespace Microsoft.Build.Evaluation
         where P : class, IProperty
         where I : class, IItem
     {
+        private static readonly char[] s_singleQuoteChar = { '\'' };
+        private static readonly char[] s_backtickChar = { '`' };
+        private static readonly char[] s_doubleQuoteChar = { '"' };
+
         /// <summary>
         /// Those characters which indicate that an expression may contain expandable
         /// expressions
@@ -578,15 +582,15 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
                     {
-                        arguments.Add(argValue.Trim('\''));
+                        arguments.Add(argValue.Trim(s_singleQuoteChar));
                     }
                     else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
                     {
-                        arguments.Add(argValue.Trim('`'));
+                        arguments.Add(argValue.Trim(s_backtickChar));
                     }
                     else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
                     {
-                        arguments.Add(argValue.Trim('"'));
+                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
                     }
                     else
                     {
