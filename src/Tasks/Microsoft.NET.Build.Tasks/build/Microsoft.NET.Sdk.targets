@@ -400,7 +400,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
 
-  <UsingTask TaskName="GetAssemblyAttributes" AssemblyFile="$(MicrosoftNETBuildExtensionsTasksAssembly)" />
+  <UsingTask TaskName="GetAssemblyAttributes" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="CoreGenerateSatelliteAssemblies"
           DependsOnTargets="ResolveAssemblyReferences;_GetAssemblyInfoFromTemplateFile"
