@@ -637,7 +637,7 @@ namespace Microsoft.Build.Evaluation
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
                                 }
 
-                                argumentBuilder.Append(argumentsString.Substring(nestedPropertyStart, (n - nestedPropertyStart) + 1));
+                                argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
                             }
                             else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                             {
@@ -651,7 +651,7 @@ namespace Microsoft.Build.Evaluation
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedQuote"));
                                 }
 
-                                argumentBuilder.Append(argumentsString.Substring(quoteStart, (n - quoteStart) + 1));
+                                argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
                             }
                             else if (argumentsContent[n] == ',')
                             {
