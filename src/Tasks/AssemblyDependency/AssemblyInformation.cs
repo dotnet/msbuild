@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         private string _sourceFile;
         private FrameworkName _frameworkName;
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
         private bool _metadataRead;
 #endif
 
@@ -347,7 +347,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
         /// <summary>
         /// Read everything from the assembly in a single stream.
         /// </summary>
