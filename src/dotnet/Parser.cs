@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Cli
             DefaultHelpViewText.Synopsis.Command = UsageCommandToken;
             DefaultHelpViewText.Synopsis.Options = UsageOptionsToken;
             DefaultHelpViewText.Synopsis.Title = UsageHeader;
+
+            ValidationMessages.Current = new CommandLineValidationMessages();
         }
 
         public static CommandLine.Parser Instance { get; } = new CommandLine.Parser(
@@ -52,6 +54,7 @@ namespace Microsoft.DotNet.Cli
                                     Create.Command("msbuild", ""),
                                     Create.Command("vstest", ""),
                                     CompleteCommandParser.Complete(),
+                                    InternalReportinstallsuccessCommandParser.InternalReportinstallsuccess(),
                                     CommonOptions.HelpOption(),
                                     Create.Option("--info", ""),
                                     Create.Option("-d", ""),

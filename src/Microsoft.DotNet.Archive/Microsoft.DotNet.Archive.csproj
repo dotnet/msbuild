@@ -11,7 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
     <PackageReference Include="System.Linq.Parallel" Version="4.0.1" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="All" />
   </ItemGroup>
 </Project>

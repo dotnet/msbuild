@@ -180,4 +180,37 @@
   <data name="MSBuildAdditionalArgsHelpText" xml:space="preserve">
     <value>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</value>
   </data>
+  <data name="CommandAcceptsOnlyOneArgument" xml:space="preserve">
+    <value>Command '{0}' only accepts a single argument but {1} were provided.</value>
+  </data>
+  <data name="CommandAcceptsOnlyOneSubcommand" xml:space="preserve">
+    <value>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</value>
+  </data>
+  <data name="FileDoesNotExist" xml:space="preserve">
+    <value>File does not exist: {0}</value>
+  </data>
+  <data name="NoArgumentsAllowed" xml:space="preserve">
+    <value>Arguments not allowed for option: {0}</value>
+  </data>
+  <data name="OptionAcceptsOnlyOneArgument" xml:space="preserve">
+    <value>Option '{0}' only accepts a single argument but {1} were provided.</value>
+  </data>
+  <data name="RequiredArgumentMissingForCommand" xml:space="preserve">
+    <value>Required argument missing for command: {0}</value>
+  </data>
+  <data name="RequiredArgumentMissingForOption" xml:space="preserve">
+    <value>Required argument missing for option: {0}</value>
+  </data>
+  <data name="RequiredCommandWasNotProvided" xml:space="preserve">
+    <value>Required command was not provided.</value>
+  </data>
+  <data name="UnrecognizedArgument" xml:space="preserve">
+    <value>Argument '{0}' not recognized. Must be one of: {1}</value>
+  </data>
+  <data name="UnrecognizedCommandOrArgument" xml:space="preserve">
+    <value>Unrecognized command or argument '{0}'</value>
+  </data>
+  <data name="UnrecognizedOption" xml:space="preserve">
+    <value>Option '{0}' not recognized. Must be one of: {1}</value>
+  </data>
 </root>

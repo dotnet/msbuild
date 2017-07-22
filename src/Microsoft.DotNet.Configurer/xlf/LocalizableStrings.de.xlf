@@ -21,11 +21,7 @@ Telemetrie
 --------------
 Über die .NET Core-Tools werden Nutzungsdaten erfasst, damit wir die Benutzeroberfläche weiter für Sie verbessern können. Die Daten sind anonym und enthalten keine Befehlszeilenargumente. Die Daten werden von Microsoft gesammelt und mit der Community geteilt.
 Sie können die Erfassung von Telemetriedaten deaktivieren, indem Sie die Umgebungsvariable DOTNET_CLI_TELEMETRY_OPTOUT mithilfe Ihrer bevorzugten Shell auf 1 festlegen.
-Weitere Informationen zur Telemetrie der .NET Core-Tools finden Sie unter https://aka.ms/dotnet-cli-telemetry.
-
-Konfiguration wird durchgeführt...
--------------------
-Ein Befehl wird ausgeführt, um Ihren lokalen Paketcache erstmals aufzufüllen, die Wiederherstellungsgeschwindigkeit zu verbessern und Onlinezugriff zu ermöglichen. Die Ausführung dieses Befehls nimmt bis zu einer Minute in Anspruch und wird einmalig ausgeführt.</target>
+Weitere Informationen zur Telemetrie der .NET Core-Tools finden Sie unter https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -37,9 +33,9 @@ Ein Befehl wird ausgeführt, um Ihren lokalen Paketcache erstmals aufzufüllen, 
         <source>Configuring...
 ----------------------------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="new">Configuring...
-----------------------------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</target>
+        <target state="translated">Konfiguration wird durchgeführt...
+-------------------
+Ein Befehl wird ausgeführt, um Ihren lokalen Paketcache erstmals aufzufüllen, die Wiederherstellungsgeschwindigkeit zu verbessern und Onlinezugriff zu ermöglichen. Die Ausführung dieses Befehls nimmt bis zu einer Minute in Anspruch und wird einmalig ausgeführt.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -51,13 +47,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">Die Berechtigung zum Ändern des Ordners "{0}" wurde verweigert.
 
-Here are some options to fix this error:
+Im Folgenden finden Sie einige Optionen, um diesen Fehler zu beheben:
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. Führen Sie diesen Befehl mit erhöhten Zugriffsrechten noch mal aus.
+2. Deaktivieren Sie die erste Ausführung, indem Sie die Umgebungsvariable DOTNET_SKIP_FIRST_TIME_EXPERIENCE auf "true" festlegen.
+3. Kopieren Sie das .NET Core SDK an einen nicht geschützten Speicherort, und kopieren Sie es von dort.
     </target>
         <note />
       </trans-unit>

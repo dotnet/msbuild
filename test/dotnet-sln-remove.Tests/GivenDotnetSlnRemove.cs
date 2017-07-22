@@ -188,7 +188,9 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln remove");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($"Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\n{CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
+{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}
+{CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove}");
         }
 
         [Theory]

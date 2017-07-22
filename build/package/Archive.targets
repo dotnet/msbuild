@@ -39,7 +39,7 @@
   <Target Name="SetupGenerateArchivesInputsOutputs"
           DependsOnTargets="Init">
     <ItemGroup>
-      <GenerateArchivesInputsOutputs Include="%(LayoutDefinition.Name)">
+      <GenerateArchivesInputsOutputs Condition=" '%(LayoutDefinition.Name)' != '' " Include="%(LayoutDefinition.Name)">
         <Inputs>%(LayoutDefinition.OutputFiles)</Inputs>
         <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)</Outputs>
         <InputDirectory>$(LayoutDirectory)/%(LayoutDefinition.Name)</InputDirectory>

@@ -72,73 +72,73 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="new">The name of the launch profile (if any) to use when launching the application.</target>
+        <target state="translated">启动应用程序时使用的启动配置文件名称（如果有）。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="new">Do not attempt to use launchSettings.json to configure the application.</target>
+        <target state="translated">请勿尝试使用 launchSettings.json 配置应用程序。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile could not be located.</source>
-        <target state="new">The specified launch profile could not be located.</target>
+        <target state="translated">找不到指定的启动配置文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="new">The launch profile "{0}" could not be applied.
+        <target state="translated">无法应用启动配置文件“{0}”。
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
-        <target state="new">(Default)</target>
+        <target state="translated">(默认值)</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
-        <target state="new">Using launch settings from {0}...</target>
+        <target state="translated">从 {0} 使用启动设置...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>Launch profile is not a JSON object.</source>
-        <target state="new">Launch profile is not a JSON object.</target>
+        <target state="translated">启动配置文件不是 JSON 对象。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
         <source>The launch profile type '{0}' is not supported.</source>
-        <target state="new">The launch profile type '{0}' is not supported.</target>
+        <target state="translated">不支持启动配置文件类型“{0}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="new">A usable launch profile could not be located.</target>
+        <target state="translated">找不到可用的启动配置文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="new">An unexpected exception occurred while processing launch settings:
+        <target state="translated">处理启动设置时出现意外异常:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
         <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
-        <target state="new">The 'profiles' property of the launch settings document is not a JSON object.</target>
+        <target state="translated">启动设置文档的“profiles”属性不是 JSON 对象。</target>
         <note />
       </trans-unit>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="new">An error was encountered when reading launchSettings.json.
+        <target state="translated">读取 launchSettings.json 时发生错误。
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
         <source>'{0}' is not a valid project file.</source>
-        <target state="new">'{0}' is not a valid project file.</target>
+        <target state="translated">“{0}”不是有效的项目文件。</target>
         <note />
       </trans-unit>
     </body>

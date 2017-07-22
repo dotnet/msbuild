@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
+        <target state="translated">PROYECTO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
+        <target state="translated">ORIGEN</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIRECTORY</source>
-        <target state="translated">PACKAGES_DIRECTORY</target>
+        <target state="translated">DIRECTORIO_DE:PAQUETES</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="new">Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</target>
+        <target state="translated">Establezca este indicador para forzar la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente. Esta acción es equivalente a eliminar project.assets.json.</target>
         <note />
       </trans-unit>
     </body>

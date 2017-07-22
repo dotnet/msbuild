@@ -5,24 +5,27 @@
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
-
+  <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
+  
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' != '' "
           DependsOnTargets="Init;
                             Package;
+                            EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
 
   <!-- UploadToAzure target comes from Build Tools -->
   <Target Name="PublishArtifacts"
-          DependsOnTargets="GenerateVersionBadge;
-                            GatherItemsForPattern;
-                            GenerateChecksums;
-                            UploadArtifactsToAzure;
-                            UploadChecksumsToAzure;
-                            PublishDebFilesToDebianRepo;
-                            PublishCliVersionBadge" />
+           DependsOnTargets="GenerateVersionBadge;
+                             GenerateCoherentBadge;
+                             GatherItemsForPattern;
+                             GenerateChecksums;
+                             UploadArtifactsToAzure;
+                             UploadChecksumsToAzure;
+                             PublishDebFilesToDebianRepo;
+                             PublishCliVersionBadge" />
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
@@ -44,6 +47,8 @@
   <Target Name="PublishCliVersionBadge">
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
+      <CliVersionBadgeToUpload Include="$(CoherentBadge)"
+              Condition=" '$(Coherent)' == 'true' " />
     </ItemGroup>
 
     <ItemGroup>

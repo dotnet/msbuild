@@ -107,6 +107,61 @@
         <target state="translated">'{0}' seçeneği için gerekli değer sağlanmadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">'{0}' komutu yalnızca bir bağımsız değişken kabul ediyor ancak {1} bağımsız değişken sağlandı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">'{0}' komutu yalnızca bir alt komut kabul ediyor ancak birden çok sağlandı: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">Dosya yok: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">Seçenek için bağımsız değişkenlere izin verilmiyor: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">'{0}' seçeneği yalnızca bir bağımsız değişken kabul ediyor ancak {1} bağımsız değişken sağlandı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">Komut için gerekli bağımsız değişken eksik: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">Seçenek için gerekli bağımsız değişken eksik: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">Gerekli komut sağlanmadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' bağımsız değişkeni tanınmıyor. Şunlardan biri olmalıdır: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">Tanınmayan komut veya bağımsız değişken: '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' seçeneği tanınmıyor. Şunlardan biri olmalıdır: {1}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -20,12 +20,8 @@ En savoir plus sur .NET Core @ https://aka.ms/dotnet-docs. Utilisez dotnet --hel
 Télémétrie
 --------------
 Les outils .NET Core collectent des données d'utilisation pour améliorer votre expérience utilisateur. Ces données sont anonymes et n'incluent aucun argument de ligne de commande. Les données sont collectées par Microsoft et partagées par la communauté.
-Vous pouvez refuser l'adhésion à la télémétrie en assignant la valeur 1 à la variable d'environnement DOTNET_CLI_TELEMETRY_OPTOUT via l'interpréteur de commandes de votre choix.
-Pour plus d'informations sur la télémétrie des outils .NET Core, consultez https://aka.ms/dotnet-cli-telemetry.
-
-Configuration en cours...
--------------------
-Une commande s'exécute pour remplir votre cache de package local, améliorer la vitesse de restauration et activer l'accès hors connexion. L'exécution de cette commande peut prendre jusqu'à une minute et n'a lieu qu'une seule fois.</target>
+Vous pouvez refuser l'adhésion à la télémétrie en affectant la valeur 1 à la variable d'environnement DOTNET_CLI_TELEMETRY_OPTOUT via l'interpréteur de commandes de votre choix.
+Pour plus d'informations sur la télémétrie des outils .NET Core, consultez https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -37,9 +33,9 @@ Une commande s'exécute pour remplir votre cache de package local, améliorer la
         <source>Configuring...
 ----------------------------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="new">Configuring...
-----------------------------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</target>
+        <target state="translated">Configuration en cours...
+-------------------
+Une commande s'exécute pour remplir votre cache de package local, améliorer la vitesse de restauration et activer l'accès hors connexion. L'exécution de cette commande peut prendre jusqu'à une minute et n'a lieu qu'une seule fois.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -51,13 +47,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">Autorisation refusée pour la modification du dossier '{0}'.
 
-Here are some options to fix this error:
+Voici quelques options pour corriger cette erreur :
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. Réexécutez cette commande avec un accès élevé.
+2. Désactivez l'introduction de l'interface logicielle lors de la première utilisation en affectant la valeur true à la variable d'environnement DOTNET_SKIP_FIRST_TIME_EXPERIENCE.
+3. Copiez le kit .NET Core SDK à un emplacement non protégé à partir duquel vous l'utiliserez ensuite.
     </target>
         <note />
       </trans-unit>

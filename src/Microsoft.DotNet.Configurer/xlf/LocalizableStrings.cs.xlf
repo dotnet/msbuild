@@ -20,12 +20,8 @@ Další informace o .NET Core najdete na https://aka.ms/dotnet-docs. Dostupné p
 Telemetrie
 --------------
 Nástroje .NET Core shromažďují data o využití s cílem vylepšit vaše prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou.
-S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 prostřednictvím vašeho oblíbeného rozhraní.
-Další informace o telemetrii nástrojů .NET Core si můžete přečíst na webu https://aka.ms/dotnet-cli-telemetry.
-
-Probíhá konfigurace...
--------------------
-Běží příkaz pro počáteční naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu může trvat až minutu a proběhne jen jednou.</target>
+S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 prostřednictvím svého oblíbeného rozhraní.
+Další informace o telemetrii nástrojů .NET Core si můžete přečíst na webu https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -37,9 +33,9 @@ Běží příkaz pro počáteční naplnění vaší místní mezipaměti balí�
         <source>Configuring...
 ----------------------------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="new">Configuring...
-----------------------------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</target>
+        <target state="translated">Probíhá konfigurace...
+-------------------
+Běží příkaz pro počáteční naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu může trvat až minutu a proběhne jen jednou.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -51,13 +47,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">Oprávnění ke změně složky {0} bylo zamítnuto.
 
-Here are some options to fix this error:
+Tuto chybu můžete opravit pomocí některé z těchto možností:
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. Znovu spusťte tento příkaz pomocí přístupu se zvýšenou úrovní oprávnění.
+2. Zakažte software spouštěný při prvním zapnutí počítače tak, že nastavíte proměnnou prostředí DOTNET_SKIP_FIRST_TIME_EXPERIENCE na hodnotu Pravda.
+3. Zkopírujte sadu .NET Core SDK do nechráněného umístění a použijte ji z tohoto umístění.
     </target>
         <note />
       </trans-unit>

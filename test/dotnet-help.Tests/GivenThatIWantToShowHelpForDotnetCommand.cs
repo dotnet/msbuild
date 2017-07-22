@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Help.Tests
     {
         private const string HelpText =
 @"Usage: dotnet [runtime-options] [path-to-application]
-Usage: dotnet [command] [arguments] [command-options]
+Usage: dotnet [sdk-options] [command] [arguments] [command-options]
 
 path-to-application:
   The path to an application .dll file to execute.
@@ -38,9 +38,6 @@ SDK commands:
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
-  -v|--version     Display .NET Core SDK version.
-  -i|--info        Display .NET Core information.
-  -d|--diagnostics Enable diagnostic output.
 
 Common options:
   -v|--verbosity        Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].
@@ -48,10 +45,13 @@ Common options:
 
 Run 'dotnet COMMAND --help' for more information on a command.
 
+sdk-options:
+  --version        Display .NET Core SDK version.
+  --info           Display .NET Core information.
+  -d|--diagnostics Enable diagnostic output.
+
 runtime-options:
   --additionalprobingpath <path>    Path containing probing policy and assemblies to probe for.
-  --depsfile <path>                 Path to <application>.deps.json file.
-  --runtimeconfig <path>            Path to <application>.runtimeconfig.json file.
   --fx-version <version>            Version of the installed Shared Framework to use to run the application.
   --roll-forward-on-no-candidate-fx Roll forward on no candidate shared framework is enabled.
   --additional-deps <path>          Path to additonal deps.json file.";

@@ -72,73 +72,73 @@ O {1} atual é '{2}'.</target>
       </trans-unit>
       <trans-unit id="CommandOptionLaunchProfileDescription">
         <source>The name of the launch profile (if any) to use when launching the application.</source>
-        <target state="new">The name of the launch profile (if any) to use when launching the application.</target>
+        <target state="translated">O nome do perfil de inicialização (se houver) a ser usado ao iniciar o aplicativo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionNoLaunchProfileDescription">
         <source>Do not attempt to use launchSettings.json to configure the application.</source>
-        <target state="new">Do not attempt to use launchSettings.json to configure the application.</target>
+        <target state="translated">Não tente usar o launchSettings.json para configurar o aplicativo.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile could not be located.</source>
-        <target state="new">The specified launch profile could not be located.</target>
+        <target state="translated">O perfil de inicialização especificado não pôde ser localizado.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="new">The launch profile "{0}" could not be applied.
+        <target state="translated">O perfil de inicialização "{0}" não pôde ser aplicado.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
-        <target state="new">(Default)</target>
+        <target state="translated">(Padrão)</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">
         <source>Using launch settings from {0}...</source>
-        <target state="new">Using launch settings from {0}...</target>
+        <target state="translated">Usando as configurações de inicialização de {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>Launch profile is not a JSON object.</source>
-        <target state="new">Launch profile is not a JSON object.</target>
+        <target state="translated">O perfil de inicialização não é um objeto JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
         <source>The launch profile type '{0}' is not supported.</source>
-        <target state="new">The launch profile type '{0}' is not supported.</target>
+        <target state="translated">Não há suporte para o tipo de perfil de inicialização '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsableLaunchProfileCannotBeLocated">
         <source>A usable launch profile could not be located.</source>
-        <target state="new">A usable launch profile could not be located.</target>
+        <target state="translated">Um perfil de inicialização utilizável não pôde ser localizado.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="new">An unexpected exception occurred while processing launch settings:
+        <target state="translated">Ocorreu uma exceção inesperada durante o processamento das configurações de inicialização:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
         <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
-        <target state="new">The 'profiles' property of the launch settings document is not a JSON object.</target>
+        <target state="translated">A propriedade 'perfis' do documento de configurações de inicialização não é um objeto JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="new">An error was encountered when reading launchSettings.json.
+        <target state="translated">Um erro foi encontrado durante a leitura do launchSettings.json.
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
         <source>'{0}' is not a valid project file.</source>
-        <target state="new">'{0}' is not a valid project file.</target>
+        <target state="translated">'{0}' não é um arquivo de projeto válido.</target>
         <note />
       </trans-unit>
     </body>

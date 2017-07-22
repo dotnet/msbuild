@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <target state="translated">PROJETO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgDescription">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="translated">ARQUIVO_CONFIGURAÇÕES</target>
+        <target state="translated">SETTINGS_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="translated">EXPRESSÃO</target>
+        <target state="translated">EXPRESSION</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
@@ -82,7 +82,7 @@
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURAÇÃO</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
@@ -92,7 +92,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">ESTRUTURA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -102,7 +102,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
@@ -112,7 +112,7 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="translated">CAMINHO_PARA_ARQUIVO</target>
+        <target state="translated">PATH_TO_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">

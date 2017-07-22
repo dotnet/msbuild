@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="ErrorMessageFormatString">
         <source>Invalid format in line {0}: {1}</source>
-        <target state="translated">Formato non valido a riga {0}: {1}</target>
+        <target state="translated">Formato non valido alla riga {0}: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectParsingErrorFormatString">

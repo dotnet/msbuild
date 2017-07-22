@@ -21,11 +21,7 @@ Telemetria
 --------------
 Gli strumenti di .NET Core consentono di raccogliere i dati di utilizzo allo scopo di migliorare l'esperienza. I dati sono anonimi e non includono gli argomenti della riga di comando. Vengono raccolti da Microsoft e condivisi con la community.
 È possibile escludere la telemetria impostando la variabile di ambiente DOTNET_CLI_TELEMETRY_OPTOUT su 1 nella shell preferita.
-Per altre informazioni sulla telemetria degli strumenti di .NET Core, vedere https://aka.ms/dotnet-cli-telemetry.
-
-Configurazione...
--------------------
-È in esecuzione un comando per popolare inizialmente la cache dei pacchetti locale, migliorare la velocità di ripristino e abilitare l'accesso offline. Il completamento di questo comando, che viene eseguito una sola volta, richiede circa un minuto.</target>
+Per altre informazioni sulla telemetria degli strumenti di .NET Core, vedere https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -37,9 +33,9 @@ Configurazione...
         <source>Configuring...
 ----------------------------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="new">Configuring...
-----------------------------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</target>
+        <target state="translated">Configurazione...
+-------------------
+È in esecuzione un comando per popolare inizialmente la cache dei pacchetti locale, migliorare la velocità di ripristino e abilitare l'accesso offline. Il completamento di questo comando, che viene eseguito una sola volta, richiede circa un minuto.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -51,13 +47,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">L'autorizzazione per modificare la cartella '{0}' è stata negata.
 
-Here are some options to fix this error:
+Ecco alcune opzioni per correggere questo errore:
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. Eseguire di nuovo questo comando con privilegi di accesso elevati.
+2. Disabilitare il completamento dell'installazione impostando su true la variabile di ambiente DOTNET_SKIP_FIRST_TIME_EXPERIENCE.
+3. Copiare .NET Core SDK in un percorso non protetto e usarlo da tale posizione.
     </target>
         <note />
       </trans-unit>

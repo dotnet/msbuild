@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. W przypadku większości projektów ustawienie domyślne to „Debug”.</target>
+        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -169,7 +169,7 @@ Argumenty RunSettings:
       <trans-unit id="cmdCollectDescription">
         <source>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</source>
-        <target state="translated">Włącza moduł zbierający dane dla uruchomienia testu.
+        <target state="translated">Włącza moduł zbierający dane dotyczące uruchomienia testu.
                                         Więcej informacji można znaleźć tutaj: https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
