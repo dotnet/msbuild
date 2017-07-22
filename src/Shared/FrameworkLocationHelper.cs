@@ -1046,11 +1046,8 @@ namespace Microsoft.Build.Shared
 
             if (ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
             {
-                Configuration configuration = BuildEnvironmentHelper.Instance.RunningTests
-                                                  ? ConfigurationManager.OpenExeConfiguration(
-                                                      BuildEnvironmentHelper.Instance.CurrentMSBuildExePath)
-                                                  : ConfigurationManager.OpenExeConfiguration(
-                                                      ConfigurationUserLevel.None);
+                Configuration configuration = ConfigurationManager.OpenExeConfiguration(
+                                                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
 
                 configurationSection = ToolsetConfigurationReaderHelpers.ReadToolsetConfigurationSection(configuration);
             }
