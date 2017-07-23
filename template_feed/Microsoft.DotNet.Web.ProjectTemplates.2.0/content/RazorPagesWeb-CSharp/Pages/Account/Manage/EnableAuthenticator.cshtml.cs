@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -17,15 +18,18 @@ namespace Company.WebApplication1.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EnableAuthenticatorModel> _logger;
+        private readonly UrlEncoder _urlEncoder;
 
-        private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
+        private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
         public EnableAuthenticatorModel(
             UserManager<ApplicationUser> userManager,
-            ILogger<EnableAuthenticatorModel> logger)
+            ILogger<EnableAuthenticatorModel> logger,
+            UrlEncoder urlEncoder)
         {
             _userManager = userManager;
             _logger = logger;
+            _urlEncoder = urlEncoder;
         }
 
         public string SharedKey { get; set; }
@@ -126,8 +130,8 @@ namespace Company.WebApplication1.Pages.Account.Manage
         {
             return string.Format(
                 AuthenicatorUriFormat,
-                "Company.WebApplication1",
-                email,
+                _urlEncoder.Encode("Company.WebApplication1"),
+                _urlEncoder.Encode(email),
                 unformattedKey);
         }
     }
