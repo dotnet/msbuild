@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -684,6 +684,36 @@ namespace Microsoft.Build.UnitTests
         {
             ValidateFileMatch(@"c:\mydir\**\*.", @"c:\mydir\subdir\bing", true, /* simulate filesystem? */ false);
             ValidateNoFileMatch(@"c:\mydir\**\*.", @"c:\mydir\subdir\bing.txt", true);
+        }
+
+        [Fact]
+        public void FileEnumerationCacheTakesExcludesIntoAccount()
+        {
+            try
+            {
+                using (var env = TestEnvironment.Create())
+                {
+                    env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
+
+                    var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] {"a.cs", "b.cs", "c.cs"});
+
+                    var files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs");
+                    Array.Sort(files);
+                    Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
+
+                    files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs"});
+                    Array.Sort(files);
+                    Assert.Equal(new[] {"b.cs", "c.cs" }, files);
+
+                    files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs", "c.cs"});
+                    Array.Sort(files);
+                    Assert.Equal(new[] {"b.cs" }, files);
+                }
+            }
+            finally
+            {
+                FileMatcher.TestClearCaches();
+            }
         }
 
         [Fact]

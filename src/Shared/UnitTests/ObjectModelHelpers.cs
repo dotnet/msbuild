@@ -1008,6 +1008,11 @@ namespace Microsoft.Build.UnitTests
             return items;
         }
 
+        internal static string GetConcatenatedItemsOfType(this Project project, string itemType, string itemSeparator = ";")
+        {
+            return string.Join(itemSeparator, project.Items.Where(i => i.ItemType.Equals(itemType)).Select(i => i.EvaluatedInclude));
+        }
+
         /// <summary>
         /// Get the items of type "i" in the project provided
         /// </summary>
