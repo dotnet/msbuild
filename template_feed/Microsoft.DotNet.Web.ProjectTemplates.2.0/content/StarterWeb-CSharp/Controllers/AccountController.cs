@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 #if (IndividualAuth)
 using Microsoft.AspNetCore.Authorization;
+#endif
+#if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
 #endif
 using Microsoft.AspNetCore.Mvc;
@@ -541,7 +543,7 @@ namespace Company.WebApplication1.Controllers
         {
             return View();
         }
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 
         #region Helpers
 
