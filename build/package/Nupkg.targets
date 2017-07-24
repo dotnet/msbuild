@@ -11,6 +11,10 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" >
+        <ProjectName>Microsoft.DotNet.MSBuildSdkResolver</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+      </ProjectsToPack>
     </ItemGroup>
   </Target>
 
