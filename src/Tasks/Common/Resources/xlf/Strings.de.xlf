@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">Die Ressourcendatei "{0}" hat kein Ziel für "{1}". Vergewissern Sie sich, dass Sie dieses Projekt für das Zielframework "{2}" und die Laufzeit-ID "{3}" wiederhergestellt haben.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">Die Ressourcendatei "{0}" verfügt über kein Ziel für "{1}". Stellen Sie sicher, dass die Wiederherstellung ausgeführt wurde und dass Sie "{2}" in die TargetFrameworks für Ihr Projekt aufgenommen haben.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">"TargetFrameworkIdentifier" und/oder "TargetFrameworkVersion" kann nicht von "TargetFramework='{0}'" abgeleitet werden. Sie müssen explizit angegeben werden.</target>
+        <target state="translated">Der TargetFramework-Wert "{0}" wurde nicht erkannt. Unter Umständen ist die Schreibweise nicht korrekt. Andernfalls müssen die Eigenschaften TargetFrameworkIdentifier und/oder TargetFrameworkVersion explizit angegeben werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="translated">Fehler beim Lesen der Sperrdatei</target>
+        <target state="translated">Fehler beim Lesen der Sperrdatei.</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
@@ -239,12 +239,12 @@
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">"{0} wird ausgewählt, da AssemblyVersion "{1}" größer ist als "{2}".</target>
+        <target state="translated">"{0} wird ausgewählt, da AssemblyVersion "{1}" höher ist als "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">"{0} wird ausgewählt, da die Dateiversion "{1}" größer ist als "{2}".</target>
+        <target state="translated">"{0} wird ausgewählt, da die Dateiversion "{1}" höher ist als "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">Das aktuelle .NET SDK unterstützt {0} {1} nicht als Ziel. Geben Sie entweder {0} {2} oder niedriger als Ziel an, oder verwenden Sie eine .NET SDK-Version, die {0} {1} unterstützt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">Die Ressourcendatei "{0}" verfügt über kein Ziel für "{1}". Stellen Sie sicher, dass die Wiederherstellung ausgeführt wurde, und dass Sie "{2}" in die TargetFrameworks für Ihr Projekt aufgenommen haben. Unter Umständen müssen Sie auch "{3}" in die RuntimeIdentifiers Ihres Projekts aufnehmen.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">Der TargetFramework-Wert "{0}" ist nicht gültig. Verwenden Sie für mehrere Ziele die Eigenschaft "TargetFrameworks".</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">Für GenerateRuntimeConfigurationFiles wurden "AdditionalProbingPaths" angegeben, sie werden jedoch übersprungen, da "RuntimeConfigDevPath" leer ist.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">Die aufgelöste Datei enthält ein fehlerhaftes Image oder keine Metadaten, oder der Zugriff ist aus anderen Gründen nicht möglich. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">Die von diesem Projekt verwendete Microsoft.NET.Sdk-Version ist für die Unterstützung von .NET Standard 2.0 nicht ausreichend, was für die Verweise dieses Projekts jedoch erforderlich ist. Installieren Sie Version 2.0 oder höher des .NET Core SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

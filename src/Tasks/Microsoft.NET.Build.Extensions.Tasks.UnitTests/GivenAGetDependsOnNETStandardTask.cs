@@ -28,8 +28,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
             task.Execute().Should().BeTrue();
 
-            // this test happens to compile against System.Runtime, update if the test TFM changes to netstandard2.x
-            task.DependsOnNETStandard.Should().BeFalse();
+            // this test compiles against a sufficiently high System.Runtime
+            task.DependsOnNETStandard.Should().BeTrue();
         }
 
         [Fact]
@@ -51,8 +51,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
             task.Execute().Should().BeTrue();
 
-            // this test happens to compile against System.Runtime, update if the test TFM changes to netstandard2.x
-            task.DependsOnNETStandard.Should().BeFalse();
+            // this test compiles against a sufficiently high System.Runtime
+            task.DependsOnNETStandard.Should().BeTrue();
         }
 
 

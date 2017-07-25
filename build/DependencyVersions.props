@@ -10,7 +10,7 @@
     <MsBuildPackagesVersion>15.2.0-preview-000093-02</MsBuildPackagesVersion>
     <DependencyModelVersion>2.0.0-preview1-001960</DependencyModelVersion>
     <PlatformAbstractionsVersion>2.0.0-preview1-001960</PlatformAbstractionsVersion>
-    <NuGetVersion>4.3.0-preview3-4168</NuGetVersion>
+    <NuGetVersion>4.3.0-rtm-4315</NuGetVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.0-preview2-25405-01</NETStandardLibraryNETFrameworkVersion>
@@ -24,7 +24,7 @@
     <xunitConsoleRunnerVersion>2.3.0-beta1-build3642</xunitConsoleRunnerVersion>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <DotNetCliUtilsVersion>2.0.0-preview2-005905</DotNetCliUtilsVersion>
+    <DotNetCliUtilsVersion>2.0.0-preview3-006805</DotNetCliUtilsVersion>
   </PropertyGroup>
   
 </Project>

@@ -118,6 +118,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
+  <Target Name="_CheckForMismatchingPlatform"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(RuntimeIdentifier)' != '' and '$(PlatformTarget)' != ''">
+
+    <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpper().Contains($(PlatformTarget.ToUpper())))"
+                 ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" />
+
+  </Target>
+
   <PropertyGroup>
     <!-- Projects can opt out of having the RID appended to the output path by setting this to false. -->
     <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">true</AppendRuntimeIdentifierToOutputPath>

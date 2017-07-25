@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Linked\LinkedClass.cs" />
+  </ItemGroup>
+
+  <Import Project="..\SharedProject\SharedProject.projitems" Label="Shared" />
+
+  <Target Name="WriteItems" DependsOnTargets="Compile">
+    <ItemGroup>
+      <LinesToWrite Include="Compile%09%(Compile.FullPath)%09%(Compile.Link)" />
+      <LinesToWrite Include="AdditionalFiles%09%(AdditionalFiles.FullPath)%09%(AdditionalFiles.Link)" />
+      <LinesToWrite Include="None%09%(None.FullPath)%09%(None.Link)" />
+      <LinesToWrite Include="Content%09%(Content.FullPath)%09%(Content.Link)" />
+      <LinesToWrite Include="EmbeddedResource%09%(EmbeddedResource.FullPath)%09%(EmbeddedResource.Link)" />
+      <LinesToWrite Include="CustomItem%09%(CustomItem.FullPath)%09%(CustomItem.Link)" />
+    </ItemGroup>
+
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)\Items.txt"
+      Lines="@(LinesToWrite)"
+      Overwrite="true"
+      Encoding="Unicode"
+      />
+  </Target>
+
+</Project>

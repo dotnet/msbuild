@@ -130,7 +130,7 @@
     <value>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
   </data>
   <data name="AssetsFileMissingTarget" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</value>
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</value>
   </data>
   <data name="AssetsFilePathNotRooted" xml:space="preserve">
     <value>Assets file path '{0}' is not rooted. Only full paths are supported.</value>
@@ -258,6 +258,9 @@
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
     <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
   </data>
+  <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
+    <value>The RuntimeIdentifier platform and the PlatformTarget must match.</value>
+  </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
     <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
   </data>
@@ -301,7 +304,7 @@
     <value>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
   </data>
   <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
+    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
   </data>
   <data name="SkippingAdditionalProbingPaths" xml:space="preserve">
     <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>

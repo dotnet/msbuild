@@ -101,12 +101,31 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> NotHaveSubDirectories()
+        public AndConstraint<DirectoryInfoAssertions> NotHaveSubDirectories(params string[] notExpectedSubdirectories)
         {
+            notExpectedSubdirectories = notExpectedSubdirectories ?? Array.Empty<string>();
+
             var subDirectories = _dirInfo.EnumerateDirectories();
 
-            Execute.Assertion.ForCondition(!subDirectories.Any())
-                .FailWith("Directory {0} should not have any sub directories.", _dirInfo.FullName);
+            
+            if (!notExpectedSubdirectories.Any())
+            {
+                //  If no subdirectories were passed in, it means there should be no subdirectories at all
+                Execute.Assertion.ForCondition(!subDirectories.Any())
+                    .FailWith("Directory {0} should not have any sub directories.", _dirInfo.FullName);
+            }
+            else
+            {
+                var actualSubDirectories = subDirectories
+                                            .Select(f => f.FullName.Substring(_dirInfo.FullName.Length + 1) // make relative to _dirInfo
+                                            .Replace("\\", "/")); // normalize separator
+
+                var errorSubDirectories = notExpectedSubdirectories.Intersect(actualSubDirectories);
+
+                var nl = Environment.NewLine;
+                Execute.Assertion.ForCondition(!errorSubDirectories.Any())
+                    .FailWith($"The following subdirectories should not be found inside directory {_dirInfo.FullName} {nl} {string.Join(nl, errorSubDirectories)}");
+            }
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }

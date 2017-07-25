@@ -405,6 +405,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <ResolvedFrameworkAssemblies Include="@(_FrameworkAssemblies->'%(FrameworkAssembly)')">
         <Private>false</Private>
+        <Pack>false</Pack>
         <NuGetIsFrameworkReference>true</NuGetIsFrameworkReference>
         <NuGetSourceType>Package</NuGetSourceType>
         <NuGetPackageId>%(PackageName)</NuGetPackageId>
