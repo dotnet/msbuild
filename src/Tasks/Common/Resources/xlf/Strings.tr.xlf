@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">'{0}' varlık dosyasında '{1}' için hedef yok. TargetFramework='{2}' ve RuntimeIdentifier='{3}' için bu projeyi geri yüklediğinizden emin olun.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild projesi bulunamadı.</target>
+        <target state="translated">'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild proje yolu bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">TargetFrameworkIdentifier ve/veya TargetFrameworkVersion, TargetFramework='{0}' içinden çıkarsanamıyor. Bunlar açıkça belirtilmelidir.</target>
+        <target state="translated">'{0}' TargetFramework değeri tanınmadı. Yanlış yazılmış olabilir. Sorun bundan kaynaklanmıyorsa, TargetFrameworkIdentifier ve/veya TargetFrameworkVersion özelliklerinin açık bir şekilde belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</target>
+        <target state="translated">{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1007">
@@ -159,7 +159,7 @@
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">Beklenen varlık dosyası yok.Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</target>
+        <target state="translated">Beklenen varlık dosyası yok. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1010">
@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama ana bilgisayarı yürütülebiliri olarak kullanılamıyor.</target>
+        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama konak yürütülebiliri olarak kullanılamıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin veya {0} {1} destekleyen bir .NET SDK’sı kullanın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun. Ayrıca '{3}' öğesini projenizin RuntimeIdentifiers’ına eklemeniz gerekebilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">'{0}' TargetFramework değeri geçerli değil. Çoklu hedefleme için 'TargetFrameworks' özelliğini kullanın.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">GenerateRuntimeConfigurationFiles için 'AdditionalProbingPaths' belirtildi ancak 'RuntimeConfigDevPath' boş olduğundan atlanıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">Bu proje tarafından kullanılan Microsoft.NET.Sdk, proje başvurularının gerektirdiği .NET Standard 2.0’ı desteklemek için yeterli değil. Lütfen .NET Core SDK 2.0 veya sonraki bir sürümü yükleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

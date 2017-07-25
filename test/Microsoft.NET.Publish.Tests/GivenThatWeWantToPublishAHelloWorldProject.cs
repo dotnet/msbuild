@@ -102,6 +102,45 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
+        [Fact]
+        public void Publish_self_contained_app_with_dot_in_the_name()
+        {
+            var targetFramework = "netcoreapp2.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "Hello.World",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                RuntimeIdentifier = rid,
+                IsExe = true,
+            };
+            
+
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+public static class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine(""Hello from a netcoreapp2.0.!"");
+    }
+}
+";
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            testProjectInstance.Restore(Log, testProject.Name);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework: targetFramework,
+                runtimeIdentifier: rid);
+
+            publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
+        }
+
         //Note: Pre Netcoreapp2.0 stanalone activation uses renamed dotnet.exe
         //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
         [Fact]
@@ -109,7 +148,6 @@ namespace Microsoft.NET.Publish.Tests
         {
             var targetFramework = "netcoreapp2.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-
 
             TestProject testProject = new TestProject()
             {

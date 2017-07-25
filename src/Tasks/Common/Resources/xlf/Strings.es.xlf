@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="translated">Nombre de plataforma no válido: '{0}'.</target>
+        <target state="translated">Nombre de plataforma no válido: "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
@@ -23,78 +23,78 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">El archivo de recursos '{0}' no tiene un destino para '{1}'. Asegúrese de que ha restaurado el proyecto para TargetFramework='{2}' y RuntimeIdentifier='{3}'.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">El archivo de recursos "{0}" no tiene un destino para "{1}". Asegúrese de que la restauración se haya ejecutado y de que haya incluido "{2}" en TargetFrameworks para su proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">La ruta de acceso del archivo de recursos '{0}' no tiene raíz. Solo se admiten rutas de acceso completas.</target>
+        <target state="translated">La ruta de acceso del archivo de recursos "{0}" no tiene raíz. Solo se admiten rutas de acceso completas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">No se encuentra la información de proyecto de '{0}'. Esto puede indicar que falta una referencia de proyecto.</target>
+        <target state="translated">No se encuentra la información de proyecto de "{0}". Esto puede indicar que falta una referencia de proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">El archivo de contenido '{0}' no tiene la información de paquete primario que se esperaba.</target>
+        <target state="translated">El archivo de contenido "{0}" no tiene la información de paquete primario que se esperaba.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="translated">Faltan los metadatos de '{0}' en el elemento de '{1}' '{2}'.</target>
+        <target state="translated">Faltan los metadatos de "{0}" en el elemento de "{1}" "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">Token de preprocesador no reconocido '{0}' en '{1}'.</target>
+        <target state="translated">Token de preprocesador no reconocido "{0}" en "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="translated">Debe darse un valor al parámetro '{1}' de la tarea '{0}' para poder consumir contenido preprocesado.</target>
+        <target state="translated">Debe darse un valor al parámetro "{1}" de la tarea "{0}" para poder consumir contenido preprocesado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">Los recursos se consumen desde el proyecto '{0}', pero no se ha encontrado la ruta de acceso de proyecto de MSBuild correspondiente en '{1}'.</target>
+        <target state="translated">Los recursos se consumen desde el proyecto "{0}", pero no se ha encontrado la ruta de acceso de proyecto de MSBuild correspondiente en "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">Tipo de archivo no esperado para '{0}'. El tipo es tanto '{1}' como '{2}'.</target>
+        <target state="translated">Tipo de archivo no esperado para "{0}". El tipo es tanto "{1}" como "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">No se puede inferir TargetFrameworkIdentifier y/o TargetFrameworkVersion de TargetFramework='{0}'. Deben especificarse de forma explícita.</target>
+        <target state="translated">El valor de TargetFramework "{0}" no se reconoció. Puede que esté mal escrito. Si este no es el caso, las propiedades TargetFrameworkIdentifier o TargetFrameworkVersion se deben especificar explícitamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">El elemento de contenido de '{0}' establece '{1}', pero no proporciona '{2}' ni '{3}'.</target>
+        <target state="translated">El elemento de contenido de "{0}" establece "{1}", pero no proporciona "{2}" ni "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">Se han dado varios valores para el token de preprocesador '{0}'. Se va a elegir '{1}' como valor.</target>
+        <target state="translated">Se han dado varios valores para el token de preprocesador "{0}". Se va a elegir "{1}" como valor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">Se han producido errores al emitir el ensamblado satélite '{0}'.</target>
+        <target state="translated">Se han producido errores al emitir el ensamblado satélite "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="translated">No se encuentra la ruta de acceso resuelta para '{0}'.</target>
+        <target state="translated">No se encuentra la ruta de acceso resuelta para "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">Dependencia '{0}' sin número de versión no esperada.</target>
+        <target state="translated">Dependencia "{0}" sin número de versión no esperada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">Cadena de versión de NuGet no válida: '{0}'.</target>
+        <target state="translated">Cadena de versión de NuGet no válida: "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1011">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">El SDK de .NET actual no admite el destino {0} {1}. Use el destino {0} {2} u otro inferior, o bien una versión del SDK de .NET que admita {0} {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">El archivo de recursos "{0}" no tiene un destino para "{1}". Asegúrese de que la restauración se haya ejecutado y de que haya incluido "{2}" en TargetFrameworks para su proyecto. Puede que deba incluir también "{3}" en el valor RuntimeIdentifiers de su proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">El valor de TargetFramework "{0}" no es válido. Para varios destinos, use en su lugar la propiedad "TargetFrameworks".</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">Se especificaron valores adicionales de "AdditionalProbingPaths" para GenerateRuntimeConfigurationFiles, pero se van a omitir porque el valor de "RuntimeConfigDevPath" está vacío.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">El archivo resuelto tiene una imagen incorrecta, no tiene metadatos o no es posible su acceso. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">La versión de Microsoft.NET.Sdk que se usa en este proyecto no es suficiente para admitir .NET Standard 2.0, que es necesario para las referencias de este proyecto. Instale la versión 2.0 o superior del SDK de .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

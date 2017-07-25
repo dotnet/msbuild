@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">资产文件“{0}”没有“{1}”的目标。确保已针对 TargetFramework=“{2}”和 RuntimeIdentifier=“{3}”还原此项目。</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">资产文件“{0}”没有“{1}”的目标。确保已运行还原，且“{2}”已包含在项目的 TargetFrameworks 中。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">“{1}”中无法识别的预处理器标记“{0}”。</target>
+        <target state="translated">“{1}”中无法识别预处理器标记“{0}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
@@ -64,17 +64,17 @@
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">“{0}”的意外文件类型。类型是“{1}”和“{2}”。</target>
+        <target state="translated">“{0}”的文件类型非预期。类型是“{1}”和“{2}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">无法从 TargetFramework=“{0}”推断 TargetFrameworkIdentifier 和/或 TargetFrameworkVersion。必须显式指定这两项。</target>
+        <target state="translated">未识别 TargetFramework 值“{0}”。可能是因为拼写错误。如果拼写正确，必须显式指定 TargetFrameworkIdentifier 和/或 TargetFrameworkVersion 属性。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">“{0}”的内容项设置“{1}”，但不提供“{2}”或“{3}”。</target>
+        <target state="translated">“{0}”的内容项设置为“{1}”，但不提供“{2}”或“{3}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">不具有版本号的意外依赖项“{0}”。</target>
+        <target state="translated">意外出现不带版本号的依赖项“{0}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">未安装的框架: {1} 中的 {0}</target>
+        <target state="translated">{1} 中的框架 {0} 未安装</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
@@ -174,12 +174,12 @@
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">依赖项冲突。“{0}”预期“{1}”，但接收到“{2}”</target>
+        <target state="translated">依赖项冲突。“{0}”预期为“{1}”，但接收到“{2}”</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">包含了重复的“{0}”项。.NET SDK 默认包含你项目中的“{0}”项。可从项目文件中删除这些项；如果希望将其显式包含在项目文件中，可将“{1}”属性设置为“{2}”。有关详细信息，请参阅 {4}。重复项为: {3}</target>
+        <target state="translated">包含了重复的“{0}”项。.NET SDK 默认包含你项目目录中的“{0}”项。可从项目文件中删除这些项；如果希望将其显式包含在项目文件中，可将“{1}”属性设置为“{2}”。有关详细信息，请参阅 {4}。重复项为: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">当前 .NET SDK 不支持将 {0} {1} 设置为目标。请将 {0} {2} 或更低版本设置为目标，或使用支持 {0} {1} 的 .NET SDK 版本。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">资产文件“{0}”没有“{1}”的目标。确保已运行还原，且“{2}”已包含在项目的 TargetFrameworks 中。可能需要在项目 RuntimeIdentifiers 中包括“{3}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">TargetFramework 值“{0}”无效。若要设置多个目标，请改用“TargetFrameworks”属性。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">“AdditionalProbingPaths”被指定给 GenerateRuntimeConfigurationFiles，但被跳过，因为“RuntimeConfigDevPath”为空。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">解析的文件包含错误图像、无元数据或不可访问。{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">该项目使用的 Microsoft.NET.Sdk 版本不足以支持项目引用所需的 .NET Standard 2.0。请安装 2.0 版本或更高版本的 .NET Core SDK。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

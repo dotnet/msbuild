@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.NET.Build.Tasks.ConflictResolution
+namespace Microsoft.NET.Build.Tasks
 {
     static partial class FileUtilities
     {

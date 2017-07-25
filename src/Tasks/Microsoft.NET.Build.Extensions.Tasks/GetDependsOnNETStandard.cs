@@ -14,6 +14,14 @@ namespace Microsoft.NET.Build.Tasks
     public partial class GetDependsOnNETStandard : TaskBase
     {
         private const string NetStandardAssemblyName = "netstandard";
+
+        // System.Runtime from netstandard1.5
+        // We also treat this as depending on netstandard so that we can provide netstandard1.5 and netstandard1.6 compatible 
+        // facades since net461 was previously only compatible with netstandard1.4 and thus packages only provided netstandard1.4
+        // compatible facades.
+        private const string SystemRuntimeAssemblyName = "System.Runtime";
+        private static readonly Version SystemRuntimeMinVersion = new Version(4, 1, 0, 0);
+
         /// <summary>
         /// Set of reference items to analyze.
         /// </summary>

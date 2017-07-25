@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">Le fichier de composant '{0}' n'a pas de cible pour '{1}'. Vérifiez que vous avez restauré ce projet pour TargetFramework='{2}' et RuntimeIdentifier='{3}'.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">Le fichier d'actifs '{0}' n'a aucune cible pour '{1}'. Vérifiez que la restauration s'est exécutée et que vous avez inclus '{2}' dans TargetFrameworks pour votre projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">Impossible de déduire TargetFrameworkIdentifier et/ou TargetFrameworkVersion à partir de TargetFramework='{0}'. Ils doivent être spécifiés explicitement.</target>
+        <target state="translated">La valeur TargetFramework '{0}' n'a pas été reconnue. Elle est peut-être mal orthographiée. Sinon, vous devez spécifier explicitement les propriétés TargetFrameworkIdentifier et/ou TargetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">Le kit .NET SDK actuel ne prend pas en charge le ciblage de {0} {1}. Vous devez soit cibler {0} {2} ou une version antérieure, soit utiliser une version du kit .NET SDK qui prend en charge {0} {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">Le fichier d'actifs '{0}' n'a aucune cible pour '{1}'. Vérifiez que la restauration s'est exécutée et que vous avez inclus '{2}' dans TargetFrameworks pour votre projet. Vous devrez peut-être également inclure '{3}' dans les RuntimeIdentifiers de votre projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">La valeur TargetFramework '{0}' est non valide. Pour effectuer un multiciblage, utilisez la propriété 'TargetFrameworks' à la place.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">Des 'AdditionalProbingPaths' ont été spécifiés pour GenerateRuntimeConfigurationFiles, mais ils sont ignorés, car 'RuntimeConfigDevPath' est vide.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">Le fichier résolu a une image incorrecte, ne comporte pas de métadonnées ou n'est pas accessible. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge .NET Standard 2.0, lequel est nécessaire aux références de ce projet. Installez la version 2.0 ou une version ultérieure du kit .NET Core SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="translated">Проект "{0}" предназначен для "{2}". На него не может ссылаться проект, предназначенный для "{1}".</target>
+        <target state="translated">Проект "{0}" предназначен для платформы "{2}". На него не может ссылаться проект, предназначенный для платформы "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">Файл ресурсов "{0}" не имеет целевого объекта для "{1}". Убедитесь, что выполнено восстановление этого проекта для TargetFramework="{2}" и RuntimeIdentifier="{3}".</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">Файл ресурсов "{0}" не имеет целевого объекта для "{1}". Убедитесь, что восстановление выполнено и что вы включили "{2}" в свойство "TargetFrameworks" для проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">Невозможно определить TargetFrameworkIdentifier и (или) TargetFrameworkVersion на основе TargetFramework="{0}". Они должны быть указаны явно.</target>
+        <target state="translated">Значение "{0}" свойства "TargetFramework" не было распознано. Возможно, оно содержит опечатку. В противном случае следует явным образом задать свойства "TargetFrameworkIdentifier" и (или) "TargetFrameworkVersion".</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">Не указан каталог ссылочной сборки. Вы можете задать это расположение с помощью переменной среды DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
+        <target state="translated">Не указан каталог базовых сборок. Вы можете задать это расположение с помощью переменной среды DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Выполните команду "dotnet restore" для создания нового файла активов.</target>
+        <target state="translated">{0}. Выполните команду "dotnet restore" для создания нового файла ресурсов.</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1007">
@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">PackageReference для "{0}" был включен в проект. На этот пакет неявно указывает пакет .NET SDK и обычно не нужно ссылаться на него из проекта. Дополнительные сведения: {1}</target>
+        <target state="translated">PackageReference для "{0}" был включен в проект. На этот пакет неявно указывает пакет .NET SDK, и ссылаться на него из проекта обычно не нужно. Дополнительные сведения: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="translated">Корневой каталог пакета {0} неправильно указан для разрешаемой библиотеки {1}</target>
+        <target state="translated">Корневой каталог пакета {0} неправильно указан для разрешенной библиотеки {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">Текущий пакет SDK для .NET не поддерживает целевой выбор {0} {1}. Выберите {0} {2} или более раннюю версию либо используйте версию пакета SDK для .NET, которая поддерживает {0} {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">Файл ресурсов "{0}" не имеет целевого объекта для "{1}". Убедитесь, что восстановление выполнено и что вы включили "{2}" в свойство "TargetFrameworks"для проекта. Возможно, также потребуется включить "{3}" в свойство "RuntimeIdentifiers" проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">Значение "{0}" свойства "TargetFramework" недопустимо. Для нацеливания на несколько платформ используйте свойство "TargetFrameworks".</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">Для "GenerateRuntimeConfigurationFiles" были указаны "AdditionalProbingPaths", но они пропускаются, так как свойство "RuntimeConfigDevPath" пусто.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">Найденный файл имеет неправильный образ, не имеет метаданных или недоступен по другим причинам. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">Используемая для этого проекта версия Microsoft.NET.SDK недостаточна для поддержки версии .NET Standard 2.0, необходимой согласно документам по этому проекту. Установите пакет SDK для .NET Core версии 2.0 или более поздней.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

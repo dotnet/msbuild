@@ -137,6 +137,54 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [FullMSBuildOnlyFact]
+        public void It_includes_netstandard_in_design_time_builds()
+        {
+            //  Verify that a P2P reference to a .NET Standard 2.0 project is correctly detected
+            //  even if doing a design-time build where there is no output on disk to examine
+            //  See https://github.com/dotnet/sdk/issues/1403
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopAppWithLibrary-NonSDK")
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (IsAppProject(projectPath))
+                    {
+                        AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
+                    }
+                });
+
+            testAsset.Restore(Log, relativePath: AppName);
+
+            var getCommandLineCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, AppName), "", "CscCommandLineArgs", GetValuesCommand.ValueType.Item);
+
+            getCommandLineCommand
+                .Execute("/p:SkipCompilerExecution=true /p:ProvideCommandLineArgs=true /p:BuildingInsideVisualStudio=true /p:DesignTimeBuild=true".Split())
+                .Should()
+                .Pass();
+
+
+            //  Verify that neither of the projects were actually built
+            string valuesFilename = "CscCommandLineArgsValues.txt";
+
+            var outputDirectory = getCommandLineCommand.GetNonSDKOutputDirectory();
+            outputDirectory.Should().OnlyHaveFiles(new[] { valuesFilename });
+
+            var testLibraryDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "TestLibrary"));
+            testLibraryDirectory.Should().NotHaveSubDirectories("bin");
+
+            //  Verify that netstandard.dll was passed to compiler
+            var references = getCommandLineCommand.GetValues()
+                .Where(arg => arg.StartsWith("/reference:"))
+                .Select(arg => arg.Substring("/reference:".Length))
+                .Select(r => r.Trim('"'))
+                .ToList();
+
+            references.Select(r => Path.GetFileName(r))
+                .Should().Contain("netstandard.dll");
+        }
+
         [WindowsOnlyTheory]
         [InlineData(true, false)]
         [InlineData(false, false)]
@@ -294,7 +342,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_does_not_include_netstandard_when_libary_targets_netstandard1(bool isSdk)
+        public void It_does_not_include_netstandard_when_libary_targets_netstandard14(bool isSdk)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset(GetTemplateName(isSdk))
@@ -311,7 +359,7 @@ namespace Microsoft.NET.Build.Tests
                         var ns = project.Root.Name.Namespace;
                         var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         var targetFrameworkProperty = propertyGroup.Element(ns + "TargetFramework");
-                        targetFrameworkProperty.Value = "netstandard1.6";
+                        targetFrameworkProperty.Value = "netstandard1.4";
                     }
                 });
 
@@ -328,6 +376,52 @@ namespace Microsoft.NET.Build.Tests
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().NotHaveFile("netstandard.dll");
+        }
+
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_includes_netstandard_when_libary_targets_netstandard15(bool isSdk)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(GetTemplateName(isSdk))
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (IsAppProject(projectPath))
+                    {
+                        AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
+                    }
+
+                    if (IsLibraryProject(projectPath))
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        var targetFrameworkProperty = propertyGroup.Element(ns + "TargetFramework");
+                        targetFrameworkProperty.Value = "netstandard1.5";
+                    }
+                });
+
+            testAsset.Restore(Log, relativePath: AppName);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = isSdk ?
+                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetNonSDKOutputDirectory();
+
+            // NET461 didn't originally support netstandard2.0, (nor netstandard1.5 or netstandard1.6)
+            // Since support was added after we need to ensure we apply the shims for netstandard1.5 projects as well.
+
+            outputDirectory.Should().HaveFiles(new[] {
+                "netstandard.dll",
+                $"{AppName}.exe.config"
+            });
         }
 
     }

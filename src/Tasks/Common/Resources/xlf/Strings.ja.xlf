@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">資産ファイル '{0}' に '{1}' のターゲットがありません。TargetFramework='{2}' および RuntimeIdentifier='{3}' のこのプロジェクトを復元したことを確認してください。</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">資産ファイル '{0}' に '{1}' のターゲットがありません。復元が実行されたこと、および '{2}' がプロジェクトの TargetFrameworks に含まれていることを確認してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">TargetFrameworkIdentifier または TargetFrameworkVersion あるいはその両方を TargetFramework='{0}' から推論できません。それらは明示的に指定する必要があります。</target>
+        <target state="translated">TargetFramework 値 '{0}' が認識されませんでした。つづりが間違っている可能性があります。間違っていない場合は、TargetFrameworkIdentifier または TargetFrameworkVersion properties (あるいはその両方) を明示的に指定する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">重複する '{0}' 個のアイテムが含められました。.NET SDK には、既定でプロジェクト ディレクトリからのアイテムが '{0}' 個含まれています。これらのアイテムをプロジェクト ファイルから削除するか、プロジェクト ファイルに明示的に含める場合は '{1}' プロパティを '{2}' に設定します。詳細については、{4} を参照してください。重複するアイテムは、{3} でした。</target>
+        <target state="translated">重複する '{0}' 個のアイテムが含められました。.NET SDK には、既定でプロジェクト ディレクトリからのアイテムが '{0}' 個含まれています。これらのアイテムをプロジェクト ファイルから削除するか、'{1}' プロパティを '{2}' に設定してプロジェクト ファイルに明示的に含めることができます。詳細については、{4} を参照してください。重複するアイテムは、{3} でした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
@@ -284,47 +284,52 @@
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="translated">'{0}' は存在しなかったため、PlatformManifest を読み込めませんでした。</target>
+        <target state="translated">存在しなかったため、'{0}' から PlatformManifest を読み込めませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="translated">'{0}' 行目の {1} から PlatformManifest を解析できませんでした。行の形式は {2} である必要があります。</target>
+        <target state="translated">{0}' 行 {1} から PlatformManifest を解析できませんでした。行の形式は {2} である必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="translated">'{0}' 行目の {1} から PlatformManifest を解析できませんでした。{2} '{3}' は無効でした。</target>
+        <target state="translated">{0}' 行 {1} から PlatformManifest を解析できませんでした。{2} '{3}' は無効でした。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">現在の .NET SDK は、ターゲットとする {0} {1} をサポートしていません。{0} {2} 以下をターゲットとするか、{0} {1} をサポートする .NET SDK のバージョンを使用してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">資産ファイル '{0}' に '{1}' のターゲットがありません。復元が実行されたこと、および '{2}' がプロジェクトの TargetFrameworks に含まれていることを確認してください。プロジェクトの RuntimeIdentifiers に '{3}' を組み込む必要が生じる可能性もあります。</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">TargetFramework 値 '{0}' が無効です。複数をターゲットとするには、代わりに 'TargetFrameworks' プロパティを使用してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">'AdditionalProbingPaths' が GenerateRuntimeConfigurationFiles に指定されましたが、'RuntimeConfigDevPath' が空であるためスキップされます。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">解決されたファイルには、無効なイメージが含まれているか、メタデータが存在しないか、またはアクセスできません。{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">このプロジェクトで使用される Microsoft.NET.Sdk のバージョンは、このプロジェクトの参照で必要な .NET Standard 2.0 をサポートするには不十分です。.NET Core SDK のバージョン 2.0 以降をインストールしてください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

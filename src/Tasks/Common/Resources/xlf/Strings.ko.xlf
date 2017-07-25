@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">자산 파일 `{0}`을(를) 찾을 수 없습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
+        <target state="translated">자산 파일 '{0}'을(를) 찾을 수 없습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. TargetFramework='{2}' 및 RuntimeIdentifier='{3}'에 대해 이 프로젝트를 복원했는지 확인하세요.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">콘텐츠 파일 '{0}'에 필요한 패키지 정보가 없습니다.</target>
+        <target state="translated">콘텐츠 파일 '{0}'에 필요한 부모 패키지 정보가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">TargetFramework='{0}'에서 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion을 유추할 수 없습니다. 명시적으로 지정해야 합니다.</target>
+        <target state="translated">TargetFramework 값 '{0}'을(를) 인식하지 못했습니다. 철자가 틀렸을 수 있습니다. 그렇지 않은 경우 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion 속성을 명시적으로 지정해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">다음 종속성이 '플랫폼' 유형으로 표시되었지만, 하나의 종속성만 이 유형을 가질 수 있습니다. {0}</target>
+        <target state="translated">다음 종속성이 '플랫폼' 유형으로 표시되었지만, 하나의 종속성만 다음 유형을 가질 수 있습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
@@ -174,12 +174,12 @@
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">종속성 충돌. '{0}'에서 '{1}'을(를) 예상했지만 '{2}'을(를) 수신했습니다.</target>
+        <target state="translated">종속성 충돌이 발생했습니다. '{0}'에서 '{1}'을(를) 예상했지만 '{2}'을(를) 수신했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">중복 '{0}' 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 자세한 내용은 {4}을(를) 참조하세요. 중복 항목은 다음과 같습니다. {3}</target>
+        <target state="translated">{0}' 중복 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 해당 항목을 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 자세한 내용은 {4}을(를) 참조하세요. 중복 항목은 다음과 같습니다. {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
@@ -234,7 +234,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">RuntimeIdentifier를 지정하지 않으면 자체 포함 응용 프로그램 빌드 또는 게시가 지원되지 않습니다. RuntimeIdentifier를 지정하거나 SelfContained를 false로 설정하세요.</target>
+        <target state="translated">RuntimeIdentifier를 지정하지 않으면 자체 포함 응용 프로그램의 빌드 또는 게시가 지원되지 않습니다. RuntimeIdentifier를 지정하거나 SelfContained를 false로 설정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">기본 설정되는 패키지에서 나오기 때문에 '{0}'을(를) 선택합니다.</target>
+        <target state="translated">기본 설정되는 패키지에 있기 때문에 '{0}'을(를) 선택합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요. 프로젝트의 RuntimeIdentifiers에 '{3}'을(를) 포함해야 할 수도 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">TargetFramework 값 '{0}'이(가) 잘못되었습니다. 여러 대상을 지정하려면 'TargetFrameworks' 속성을 대신 사용하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">이 프로젝트에서 사용하는 Microsoft.NET.Sdk 버전이 이 프로젝트의 참조에서 필요로 하는 .NET 표준 2.0을 지원할 수 없습니다. .NET Core SDK 버전 2.0 이상을 설치하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

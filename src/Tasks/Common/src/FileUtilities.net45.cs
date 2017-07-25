@@ -6,7 +6,7 @@
 using System;
 using System.Reflection;
 
-namespace Microsoft.NET.Build.Tasks.ConflictResolution
+namespace Microsoft.NET.Build.Tasks
 {
     static partial class FileUtilities
     {

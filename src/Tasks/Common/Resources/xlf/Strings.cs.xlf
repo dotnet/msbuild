@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="needs-review-translation">Soubor prostředků {0} nemá cíl pro {1}. Ověřte, že jste projekt obnovili pro hodnoty TargetFramework={2} a RuntimeIdentifier={3}.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="translated">Soubor prostředků {0} nemá cíl pro {1}. Zkontrolujte, že se obnovení spustilo a že jste do vlastnosti TargetFrameworks projektu zahrnuli {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="needs-review-translation">Z údaje TargetFramework={0} nejde odvodit hodnota TargetFrameworkIdentifier ani hodnota TargetFrameworkVersion. Musí být výslovně zadané.</target>
+        <target state="translated">Hodnota TargetFramework {0} nebyla rozpoznána. Je možné, že obsahuje překlepy. Pokud tomu tak není, musíte vlastnosti TargetFrameworkIdentifier a TargetFrameworkVersion zadat explicitně.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">Token preprocesoru {0} získal víc hodnot než jednu. Volba hodnoty {1}.</target>
+        <target state="translated">Token preprocesoru {0} získal víc hodnot než jednu. Volí se hodnota {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
@@ -299,32 +299,37 @@
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
-        <note></note>
+        <target state="translated">Aktuální sada .NET SDK nepodporuje cílení {0} {1}.  Buď zacilte {0} {2} nebo nižší, nebo použijte verzi sady .NET SDK, která podporuje {0} {1}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</target>
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="translated">Soubor prostředků {0} nemá cíl pro {1}. Zkontrolujte, že se obnovení spustilo a že jste do vlastnosti TargetFrameworks projektu zahrnuli {2}. Možná budete muset zahrnout také {3} do vlastnosti RuntimeIdentifiers projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="new">The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</target>
+        <target state="translated">Hodnota TargetFramework {0} není platná. Pokud chcete cílit na více cílů, použijte raději vlastnost TargetFrameworks.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="new">Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</target>
+        <target state="translated">Přeložený soubor má nesprávnou image, nemá žádná metadata nebo je jiným způsobem nedostupný. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="new">The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</target>
+        <target state="translated">Verze sady Microsoft.NET.Sdk používaná tímto projektem nestačí pro podporu sady .NET Standard 2.0, kterou vyžadují odkazy tohoto projektu. Nainstalujte verzi 2.0 nebo vyšší sady .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="new">'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</target>
+        <target state="translated">Cesty AdditionalProbingPaths byly zadány pro GenerateRuntimeConfigurationFiles, ale vynechávají se, protože RuntimeConfigDevPath je prázdné.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
+        <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
+        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
         <note />
       </trans-unit>
     </body>

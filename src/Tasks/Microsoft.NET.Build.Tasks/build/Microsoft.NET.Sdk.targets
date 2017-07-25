@@ -45,6 +45,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
   </PropertyGroup>
 
+  <ItemGroup>
+    <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsFile)" />
+    <GenerateRuntimeConfigurationFilesInputs Include="$(UserRuntimeConfig)" Condition=" Exists($(UserRuntimeConfig)) " />
+  </ItemGroup>
+
   <PropertyGroup>
     <ProjectDepsFileName Condition="'$(ProjectDepsFileName)' == ''">$(AssemblyName).deps.json</ProjectDepsFileName>
     <ProjectDepsFilePath Condition="'$(ProjectDepsFilePath)' == ''">$(TargetDir)$(ProjectDepsFileName)</ProjectDepsFilePath>
@@ -144,7 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
-          Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
+          Inputs="@(GenerateRuntimeConfigurationFilesInputs)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
@@ -395,8 +400,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="GetAssemblyAttributes" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <Target Name="CoreGenerateSatelliteAssemblies"
-          DependsOnTargets="ResolveAssemblyReferences;GenerateAssemblyInfo"
+          DependsOnTargets="ResolveAssemblyReferences;_GetAssemblyInfoFromTemplateFile"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
@@ -409,7 +416,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ItemGroup>
-      <SatelliteAssemblyAttribute Include="@(AssemblyAttribute)" />
       <SatelliteAssemblyAttribute Include="System.Reflection.AssemblyCultureAttribute" Condition="'%(_SatelliteAssemblyResourceInputs.Culture)' != ''">
         <_Parameter1>%(_SatelliteAssemblyResourceInputs.Culture)</_Parameter1>
       </SatelliteAssemblyAttribute>
@@ -440,6 +446,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Csc>
   </Target>
 
+  <Target Name="_GetAssemblyInfoFromTemplateFile">
+    <GetAssemblyAttributes PathToTemplateFile="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" >
+      <Output TaskParameter="AssemblyAttributes" ItemName="_AssemblyAttributesFromTemplateFile" />
+    </GetAssemblyAttributes>
+
+    <ItemGroup>
+      <SatelliteAssemblyAttribute Include="@(_AssemblyAttributesFromTemplateFile)" />
+    </ItemGroup>
+
+  </Target>
+
   <!--
   ============================================================
                            _DefaultMicrosoftNETPlatformLibrary
@@ -465,6 +482,27 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetAllRuntimeIdentifiers" 
           Returns="$(RuntimeIdentifiers);$(RuntimeIdentifier)" />
 
+  <!--
+  ============================================================
+                                      InjectTargetPathMetadata
+  
+  Update TargetPathWithTargetPlatformMoniker with target framework
+  identifier and version metadata.  This is so that the
+  ImplicitlyExpandNETStandardFacades target can determine if a
+  referenced project needs the .NET Standard facades even if
+  the project hasn't been compiled to disk yet.
+  
+  See https://github.com/dotnet/sdk/issues/1403 for more context
+  ============================================================
+  -->
+
+  <ItemDefinitionGroup>
+    <TargetPathWithTargetPlatformMoniker>
+      <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
+      <TargetFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</TargetFrameworkVersion>
+    </TargetPathWithTargetPlatformMoniker>
+  </ItemDefinitionGroup>
+  
   <!--
   ============================================================
                                          Project Capabilities
