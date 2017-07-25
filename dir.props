@@ -41,7 +41,7 @@
     <CompilerToolsVersion>2.2.0</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <GitVersioningVersion>1.5.46</GitVersioningVersion>
+    <GitVersioningVersion>1.6.35</GitVersioningVersion>
     <NuSpecReferenceGeneratorVersion>1.4.2</NuSpecReferenceGeneratorVersion>
   </PropertyGroup>
 

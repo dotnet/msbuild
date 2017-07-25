@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
   <Import Project="$(MicroBuildDir)MicroBuild.Core.props" />
-  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
+  <Import Project="$(GitVersioningDir)Nerdbank.GitVersioning.targets" />
 
   <PropertyGroup>
     <ProductVersion>3.10</ProductVersion>
