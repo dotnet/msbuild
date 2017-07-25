@@ -36,44 +36,44 @@ Build Status
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8.2-build-badge]][debian-8.2-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][opensuse-13.2-build-badge]][opensuse-13.2-build]|[![][opensuse-42.1-build-badge]][opensuse-13.2-build]|[![][fedora-23-build-badge]][fedora-23-build]|[![][fedora-24-build-badge]][fedora-24-build]|
 
-[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5566/badge
-[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5566
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6940/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6940
 
-[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5568/badge
-[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5568
+[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6942/badge
+[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6942
 
-[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5562/badge
-[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5562
+[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6959/badge
+[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6959
 
-[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5564/badge
-[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5564
+[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6961/badge
+[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6961
 
-[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5579/badge
-[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5579
+[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6963/badge
+[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6963
 
-[debian-8.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5552/badge
-[debian-8.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5552
+[debian-8.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6920/badge
+[debian-8.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6920
 
-[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5558/badge
-[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5558
+[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6930/badge
+[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6930
 
-[centos-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5550/badge
-[centos-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5550
+[centos-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6918/badge
+[centos-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6918
 
-[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5560/badge
-[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5560
+[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6932/badge
+[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6932
 
-[opensuse-13.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5556/badge
-[opensuse-13.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5556
+[opensuse-13.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6926/badge
+[opensuse-13.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6926
 
-[opensuse-42.1-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5577/badge
-[opensuse-42.1-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5577
+[opensuse-42.1-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6928/badge
+[opensuse-42.1-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6928
 
-[fedora-23-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5554/badge
-[fedora-23-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5554
+[fedora-23-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6922/badge
+[fedora-23-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6922
 
-[fedora-24-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5575/badge
-[fedora-24-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5575
+[fedora-24-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6924/badge
+[fedora-24-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6924
 
 Installers and Binaries
 -----------------------
