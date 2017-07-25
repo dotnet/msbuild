@@ -5,10 +5,7 @@
     <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
 
     <EnableDefaultItems>false</EnableDefaultItems>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>MSBuild</AssemblyName>
     <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>

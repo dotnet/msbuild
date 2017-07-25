@@ -3,10 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
 
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
     <RootNamespace>Microsoft.Build.Framework</RootNamespace>
 
