@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Controllers/HomeController.fs" />
+    <Compile Include="Models/ErrorViewModel.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
