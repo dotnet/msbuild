@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='Windows_NT'">net46;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
