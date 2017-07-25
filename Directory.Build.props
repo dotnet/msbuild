@@ -2,9 +2,6 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
 
-    <!--TODO: this should come from NB.GV-->
-    <Version>15.1.0</Version>
-
     <SignAssembly>True</SignAssembly>
     <PublicSign>true</PublicSign>
 
@@ -131,6 +128,10 @@
   <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true' AND '$(MonoBuild)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="1.6.35" />
+  </ItemGroup>
 
   <!-- Setup some common paths -->
   <PropertyGroup>
