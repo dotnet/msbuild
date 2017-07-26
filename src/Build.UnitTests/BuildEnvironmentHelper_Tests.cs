@@ -321,6 +321,40 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         [Trait("Category", "nonlinuxtests")]
         [Trait("Category", "nonosxtests")]
+        public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
+        {
+            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles:true, includeAmd64Folder:true))
+            {
+                var msBuild64Exe = Path.Combine(env.BuildDirectory, "amd64", MSBuildExeName);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => msBuild64Exe, ReturnNull, ReturnNull,
+                    env.VsInstanceMock, env.EnvironmentMock);
+
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(Path.Combine(env.BuildDirectory, "amd64"));
+                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBeNull();
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.Standalone);
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
+        public void BuildEnvironmentFindsAmd64NoVS()
+        {
+            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull,
+                    ReturnNull, env.VsInstanceMock, env.EnvironmentMock);
+
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(Path.Combine(env.BuildDirectory, "amd64"));
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.Standalone);
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentFindsAmd64RunningInAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -412,7 +446,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             private readonly List<VisualStudioInstance> _mockInstances = new List<VisualStudioInstance>();
 
-            public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true)
+            public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true, bool includeAmd64Folder = false)
             {
                 try
                 {
@@ -425,6 +459,13 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         File.WriteAllText(MSBuildExePath, string.Empty);
                         File.WriteAllText($"{MSBuildExePath}.config", string.Empty);
+
+                        if (includeAmd64Folder)
+                        {
+                            Directory.CreateDirectory(Path.Combine(BuildDirectory, "amd64"));
+                            File.WriteAllText(Path.Combine(BuildDirectory, "amd64", msBuildExeName), string.Empty);
+                            File.WriteAllText(Path.Combine(BuildDirectory, "amd64", $"{MSBuildExePath}.config"), string.Empty);
+                        }
                     }
                 }
                 catch (Exception)
