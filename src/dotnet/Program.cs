@@ -81,8 +81,10 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             var cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
             using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
-            using (IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
+            using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
+                new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
             {
+                IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
                 for (; lastArg < args.Length; lastArg++)
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
@@ -113,10 +115,19 @@ namespace Microsoft.DotNet.Cli
                     }
                     else
                     {
-                        ConfigureDotNetForFirstTimeUse(nugetCacheSentinel, firstTimeUseNoticeSentinel, cliFallbackFolderPathCalculator);
-
                         // It's the command, and we're done!
                         command = args[lastArg];
+
+                        if (IsDotnetBeingInvokedFromNativeInstaller(command))
+                        {
+                            firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                        }
+
+                        ConfigureDotNetForFirstTimeUse(
+                            nugetCacheSentinel,
+                            firstTimeUseNoticeSentinel,
+                            cliFallbackFolderPathCalculator);
+
                         break;
                     }
                 }
@@ -164,7 +175,11 @@ namespace Microsoft.DotNet.Cli
             }
 
             return exitCode;
+        }
 
+        private static bool IsDotnetBeingInvokedFromNativeInstaller(string command)
+        {
+            return command == "internal-reportinstallsuccess";
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
