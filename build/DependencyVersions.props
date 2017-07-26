@@ -34,7 +34,7 @@
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
-    <AspNetCoreRuntimePackageFlavor>timestamped</AspNetCoreRuntimePackageFlavor>
+    <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
     <!--BranchName and AspNetCoreVersion will not always be the same-->
     <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
