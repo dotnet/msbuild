@@ -91,21 +91,23 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItDoesNotCreateAFirstUseSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
         {
-            var newHome = Path.Combine(_testDirectory, "new_home");
-            var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
 
             var command = new DotnetCommand()
                 .WithWorkingDirectory(_testDirectory);
-            command.Environment["HOME"] = newHome;
-            command.Environment["USERPROFILE"] = newHome;
-            command.Environment["APPDATA"] = newHome;
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
             command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            // Disable to prevent the creation of the .dotnet folder by optimizationdata.
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
-            newHomeFolder.Should().NotHaveFile($"{GetDotnetVersion()}.dotnetFirstUseSentinel");
+            var emptyHomeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
+            emptyHomeFolder.Should().NotExist();
         }
 
         [Fact]
