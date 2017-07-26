@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>The RuntimeIdentifier platform and the PlatformTarget must match.</source>
-        <target state="new">The RuntimeIdentifier platform and the PlatformTarget must match.</target>
+        <target state="translated">RuntimeIdentifier 平台和 PlatformTarget 必须匹配。</target>
         <note />
       </trans-unit>
     </body>
