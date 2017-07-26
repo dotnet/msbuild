@@ -30,6 +30,7 @@
                        CommitHash="$(CommitHash)" />
 
     <UpdateVersionsRepo BranchName="$(BranchName)"
+                        GitHubPassword="$(GITHUB_PASSWORD)"
                         Condition=" '$(GITHUB_PASSWORD)' != '' " />
   </Target>
 </Project>

@@ -10,10 +10,11 @@ namespace Microsoft.DotNet.Cli.Build
     {
         [Required]
         public string BranchName { get; set; }
+        public string GitHubPassword { get; set; }
 
         public override bool Execute()
         {
-            string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
+            string githubAuthToken = GitHubPassword;
             string nupkgFilePath = Dirs.Packages;
             string branchName = BranchName;
             string versionsRepoPath = $"build-info/dotnet/cli/{branchName}/Latest";
