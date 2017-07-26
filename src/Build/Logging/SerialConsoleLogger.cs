@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, runningWithCharacterFileType, showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile));
                 }
             }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs errorEventArgs in errorList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, runningWithCharacterFileType, showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile));
                 }
             }
 
@@ -471,7 +471,7 @@ namespace Microsoft.Build.BackEnd.Logging
             SetErrorsOrWarningsOnCurrentFrame();
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 errorList.Add(e);
@@ -488,7 +488,7 @@ namespace Microsoft.Build.BackEnd.Logging
             SetErrorsOrWarningsOnCurrentFrame();
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 warningList.Add(e);
@@ -538,7 +538,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Include file information if present.
                 if (e.File != null)
                 {
-                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, runningWithCharacterFileType, showProjectFile);
+                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
                 }
                 else
                 {
