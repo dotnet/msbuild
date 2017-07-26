@@ -37,23 +37,7 @@ namespace Microsoft.DotNet.Cli
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId)
-        {
-            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
-
-            if (!Enabled)
-            {
-                return;
-            }
-
-            // Store the session ID in a static field so that it can be reused
-            CurrentSessionId = sessionId ?? Guid.NewGuid().ToString();
-
-            //initialize in task to offload to parallel thread
-            _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
-        }
-
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization)
+        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
         {
             Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
@@ -71,6 +55,7 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
+                //initialize in task to offload to parallel thread
                 _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
             }
         }
