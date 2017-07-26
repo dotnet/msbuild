@@ -14,7 +14,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
-    <_NugetFallbackFolder>$(MSBuildThisFileDirectory)..\..\..\..\NuGetFallbackFolder</_NugetFallbackFolder>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
@@ -88,11 +87,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(DisableImplicitNuGetFallbackFolder)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and Exists($(_NugetFallbackFolder)) ">
-    <RestoreAdditionalProjectSources Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0' ">$(RestoreAdditionalProjectSources);$(_NugetFallbackFolder)</RestoreAdditionalProjectSources>
-
-    <RestoreAdditionalProjectFallbackFolders Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '2.0' ">$(RestoreAdditionalProjectFallbackFolders);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFolders>
-  </PropertyGroup>
+  <!--
+    Sets RestoreAdditionalProjectSources or RestoreAdditionalProjectFallbackFolders to the SDK Offline Cache based
+    on the TargetFramework.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.NuGetOfflineCache.targets" />
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
 
