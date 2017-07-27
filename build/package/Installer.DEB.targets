@@ -105,6 +105,10 @@
       <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
         <ReplacementString>$(SdkBrandName)</ReplacementString>
       </DebianConfigTokenValues>
+
+      <DebianPostInstTokenValues Include="%SDK_VERSION%">
+        <ReplacementString>$(SdkVersion)</ReplacementString>
+      </DebianPostInstTokenValues>
     </ItemGroup>
 
     <ItemGroup>

@@ -55,6 +55,8 @@
       <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
       <AspNetCoreRuntimePackageVersion>$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageVersion>
       <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
+      <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
+      <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -78,7 +80,7 @@
       <SDKFiles Include="$(InputRoot)/**/*"/>
       <SDKManpages Include="$(ManPagesDir)/**/*"/>
       <SDKTemplatesFiles Include="$(TemplatesDir)/**/*"/>
-      <SDKScriptsFiles Include="$(ScriptsDir)/**/*"/>
+      <SDKScriptsFiles Include="$(ScriptsDir)/after_remove_host.sh"/>
     </ItemGroup>
 
     <Copy SourceFiles="@(SDKFiles)"
@@ -128,12 +130,24 @@
       <SDKTokenValue Include="%SDK_RPM_PACKAGE_NAME%">
         <ReplacementString>$(SdkRpmPackageName)</ReplacementString>
       </SDKTokenValue>
+
+      <AfterInstallHostTokenValue  Include="%SDK_VERSION%">
+        <ReplacementString>$(SdkVersion)</ReplacementString>
+      </AfterInstallHostTokenValue>
     </ItemGroup>
 
     <ItemGroup>
       <TestSdkRpmTaskEnvironmentVariables Include="PATH=$(RpmInstalledDirectory)$(PathListSeparator)$(PATH)" />
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
+
+    <ReplaceFileContents InputFile="$(AfterInstallHostScriptTemplateFile)"
+                         DestinationFile="$(AfterInstallHostScriptDestinationFile)"
+                         ReplacementItems="@(AfterInstallHostTokenValue)"/>
+
+    <Chmod
+        Glob="$(AfterInstallHostScriptDestinationFile)"
+        Mode="ugo+x" />
 
     <ReplaceFileContents InputFile="$(ConfigJsonFile)"
                          DestinationFile="$(RpmLayoutDirectory)$(RpmConfigJsonName)"

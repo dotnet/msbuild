@@ -20,6 +20,7 @@
     <Property Id="ProductCPU" Value="$(var.Platform)" />
     <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
     <Property Id="MSIFASTINSTALL" Value="7" />
+    <Property Id="NUGETVERSION" Value="$(var.NugetVersion)" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
     <Property Id="DOTNETEXE">
@@ -32,7 +33,7 @@
 
     <CustomAction Id="PropertyAssignPrimeCacheAndTelemetry"
                   Property="QtExecPrimeCacheAndTelemetryTarget"
-                  Value="&quot;[DOTNETHOME]\dotnet.exe&quot; internal-reportinstallsuccess &quot;[EXEFULLPATH]&quot;"
+                  Value="&quot;[DOTNETHOME]\dotnet.exe&quot; exec &quot;[DOTNETHOME]\sdk\[NUGETVERSION]\dotnet.dll&quot; internal-reportinstallsuccess &quot;[EXEFULLPATH]&quot;"
                   Execute="immediate" />
     <CustomAction Id="QtExecPrimeCacheAndTelemetryTarget"
                   BinaryKey="WixCA"
