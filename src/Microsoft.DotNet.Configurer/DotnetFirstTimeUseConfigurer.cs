@@ -45,10 +45,12 @@ namespace Microsoft.DotNet.Configurer
                 {
                     PrintUnauthorizedAccessMessage();
                 }
+                else
+                {
+                    PrintNugetCachePrimeMessage();
 
-                PrintNugetCachePrimeMessage();
-
-                _nugetCachePrimer.PrimeCache();
+                    _nugetCachePrimer.PrimeCache();
+                }
             }
         }
 
@@ -81,6 +83,8 @@ namespace Microsoft.DotNet.Configurer
         private bool ShouldPrimeNugetCache()
         {
             return ShouldRunFirstRunExperience() &&
+                !_nugetCacheSentinel.Exists() &&
+                !_nugetCacheSentinel.InProgressSentinelAlreadyExists() &&
                 !_nugetCachePrimer.SkipPrimingTheCache();
         }
 
@@ -96,9 +100,7 @@ namespace Microsoft.DotNet.Configurer
             var skipFirstTimeExperience = 
                 _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
 
-            return !skipFirstTimeExperience &&
-                !_nugetCacheSentinel.Exists() &&
-                !_nugetCacheSentinel.InProgressSentinelAlreadyExists();
+            return !skipFirstTimeExperience;
         }
     }
 }

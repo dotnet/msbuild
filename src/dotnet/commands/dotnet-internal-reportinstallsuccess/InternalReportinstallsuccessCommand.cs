@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
             {
                 var sessionId =
                 Environment.GetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName);
-                telemetry = new Telemetry(new FirstTimeUseNoticeSentinel(new CliFallbackFolderPathCalculator()), sessionId);
+                telemetry = new Telemetry(new NoOpFirstTimeUseNoticeSentinel(), sessionId, blockThreadInitialization: true);
             }
             public bool Enabled => telemetry.Enabled;
 
