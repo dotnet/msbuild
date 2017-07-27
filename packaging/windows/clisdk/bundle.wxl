@@ -54,13 +54,14 @@ The following were installed at [DOTNETHOME]
     • .NET Core Runtime 2.0.0
     • Runtime Package Store
 
-Resources
+This product collects usage data
+    • More information and opt-out https://aka.ms/dotnet-cli-telemetry
 
+Resources
     • Core Documentation https://aka.ms/dotnet-docs
     • SDK Documentation https://aka.ms/dotnet-cli-docs
     • Release Notes https://aka.ms/20-p2-rel-notes
-    • Tutorials https://aka.ms/dotnet-tutorials
-    • .NET Core Telemetry https://aka.ms/dotnet-cli-telemetry</String>
+    • Tutorials https://aka.ms/dotnet-tutorials</String>
   <String Id="WelcomeHeaderMessage">.NET Core SDK</String>
   <String Id="WelcomeDescription">
     .NET Core is a development platform that you can use to build command-line applications, microservices and modern websites. It is open source, cross-platform, and supported by Microsoft. We hope you enjoy it!</String>
