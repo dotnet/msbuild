@@ -318,8 +318,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
-        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">Verze sady Microsoft.NET.Sdk používaná tímto projektem nestačí pro podporu sady .NET Standard 2.0, kterou vyžadují odkazy tohoto projektu. Nainstalujte verzi 2.0 nebo vyšší sady .NET Core SDK.</target>
+        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="needs-review-translation">Verze sady Microsoft.NET.Sdk používaná tímto projektem nestačí pro podporu sady .NET Standard 2.0, kterou vyžadují odkazy tohoto projektu. Nainstalujte verzi 2.0 nebo vyšší sady .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
