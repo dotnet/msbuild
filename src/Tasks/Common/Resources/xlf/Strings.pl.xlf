@@ -323,8 +323,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
-        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support .NET Standard 2.0 which is required by this project's references.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">Używana przez ten projekt wersja zestawu Microsoft.NET.Sdk jest niewystarczająca do zapewnienia obsługi środowiska .NET Standard 2.0 wymaganego przez odwołania występujące w tym projekcie. Zainstaluj zestaw .NET Core SDK w wersji co najmniej 2.0.</target>
+        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="needs-review-translation">Używana przez ten projekt wersja zestawu Microsoft.NET.Sdk jest niewystarczająca do zapewnienia obsługi środowiska .NET Standard 2.0 wymaganego przez odwołania występujące w tym projekcie. Zainstaluj zestaw .NET Core SDK w wersji co najmniej 2.0.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
