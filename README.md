@@ -102,7 +102,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 
 [version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.1.0/latest.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
-[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.1.0/Windows_x64_Release_version_badge.svg
+[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.1.0/Windows_x86_Release_version_badge.svg
 
 [win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.1.0/dotnet-dev-win-x64.latest.exe
 [win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.1.0/dotnet-dev-win-x64.latest.exe.sha
