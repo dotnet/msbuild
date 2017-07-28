@@ -1411,6 +1411,12 @@ namespace Microsoft.Build.Execution
                                                 RegisteredName);
                                         }
                                     }
+
+                                    // Throw an error if the ITaskFactory did not set the TaskType property.  If the property is null, it can cause NullReferenceExceptions in our code
+                                    if (factory.TaskType == null)
+                                    {
+                                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryTaskTypeIsNotSet", factory.FactoryName);
+                                    }
                                 }
                                 finally
                                 {
@@ -1424,6 +1430,10 @@ namespace Microsoft.Build.Execution
                                     _taskFactoryWrapperInstance = null;
                                     return false;
                                 }
+                            }
+                            catch(InvalidProjectFileException)
+                            {
+                                throw;
                             }
                             catch (InvalidCastException e)
                             {

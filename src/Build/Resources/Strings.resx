@@ -1085,6 +1085,12 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="TaskFactoryTaskTypeIsNotSet" UESanitized="false" Visibility="Public">
+    <value>MSB4239: The task factory "{0}" must return a value for the "TaskType" property.</value>
+    <comment>{StrBegin="MSB4239: "}
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="TaskLoadFailure" UESanitized="false" Visibility="Public">
     <value>MSB4062: The "{0}" task could not be loaded from the assembly {1}. {2} Confirm that the &lt;UsingTask&gt; declaration is correct, that the assembly and all its dependencies are available, and that the task contains a public class that implements Microsoft.Build.Framework.ITask.</value>
     <comment>{StrBegin="MSB4062: "}UE: This message is shown when a task cannot be loaded from its assembly for various reasons e.g. corrupt assembly,
@@ -1628,7 +1634,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4239.
+        Next message code should be MSB4240.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
