@@ -1229,7 +1229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
             
-            ProjectUsingTaskElement element = project.AddUsingTask("Task1", FileUtilities.ExecutingAssemblyPath, null);
+            ProjectUsingTaskElement element = project.AddUsingTask("Task1", AssemblyUtilities.GetAssemblyLocation(typeof(TaskRegistry_Tests.NullTaskTypeTaskFactory).GetTypeInfo().Assembly), null);
 
             element.TaskFactory = typeof(NullTaskTypeTaskFactory).FullName;
             elementList.Add(element);
