@@ -302,8 +302,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             string fallbackName = new DirectoryInfo(_commandInput.OutputPath ?? Directory.GetCurrentDirectory()).Name;
 
-            if (string.IsNullOrEmpty(fallbackName))
-            {
+            if (string.IsNullOrEmpty(fallbackName) || string.Equals(fallbackName, "/", StringComparison.Ordinal))
+            {   // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
                 fallbackName = null;
             }
 
