@@ -17,6 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using ObjectModel = System.Collections.ObjectModel;
 using Xunit;
 
@@ -116,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             using (IEnumerator<ProjectItemInstance> enumerator = items.GetEnumerator())
             {
                 Assert.False(enumerator.MoveNext());
-                Assert.Throws<InvalidOperationException>(() => ((IEnumerator) enumerator).Current);
+                Should.Throw<InvalidOperationException>(() => _ = ((IEnumerator) enumerator).Current );
                 Assert.Null(enumerator.Current);
             }
 
