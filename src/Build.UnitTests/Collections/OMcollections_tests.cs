@@ -117,7 +117,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             using (IEnumerator<ProjectItemInstance> enumerator = items.GetEnumerator())
             {
                 enumerator.MoveNext().ShouldBeFalse();
-                Should.Throw<InvalidOperationException>(() => _ = ((IEnumerator) enumerator).Current );
+                Should.Throw<InvalidOperationException>(() =>
+                {
+                    object o = ((IEnumerator) enumerator).Current;
+                });
                 enumerator.Current.ShouldBeNull();
             }
 
