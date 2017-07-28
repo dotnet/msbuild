@@ -20,11 +20,11 @@
     {
        "modifiers": [
         {
-          "condition": "(!IncludeLaunchSettings)",
+          "condition": "(!IncludeLaunchSettings && !WindowsAuth)",
           "exclude": [
             "Properties/launchSettings.json"
           ]
-        },
+        }
       ]
     }
   ],

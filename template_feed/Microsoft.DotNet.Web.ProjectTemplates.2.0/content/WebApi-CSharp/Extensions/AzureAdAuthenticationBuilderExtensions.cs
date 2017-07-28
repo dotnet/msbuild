@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.Authentication.Extensions
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class AzureAdServiceCollectionExtensions
     {

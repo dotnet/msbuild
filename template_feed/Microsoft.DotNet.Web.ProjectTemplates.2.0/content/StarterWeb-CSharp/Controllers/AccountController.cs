@@ -14,12 +14,11 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 #endif
 #if (IndividualAuth)
 using Microsoft.AspNetCore.Authorization;
+#endif
+#if (IndividualLocalAuth)
 using Microsoft.AspNetCore.Identity;
 #endif
 using Microsoft.AspNetCore.Mvc;
-#if (IndividualLocalAuth)
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-#endif
 #if (IndividualAuth)
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
@@ -45,7 +44,7 @@ namespace Company.WebApplication1.Controllers
         {
             var redirectUrl = Url.Action(nameof(HomeController.Index), "Home");
             return Challenge(
-                new AuthenticationProperties { RedirectUri = redirectUrl }, 
+                new AuthenticationProperties { RedirectUri = redirectUrl },
                 OpenIdConnectDefaults.AuthenticationScheme);
         }
 
@@ -419,7 +418,7 @@ namespace Company.WebApplication1.Controllers
                     return RedirectToAction(nameof(ForgotPasswordConfirmation));
                 }
 
-                // For more information on how to enable account confirmation and password reset please 
+                // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
@@ -496,7 +495,7 @@ namespace Company.WebApplication1.Controllers
         {
             var redirectUrl = Url.Action(nameof(HomeController.Index), "Home");
             return Challenge(
-                new AuthenticationProperties { RedirectUri = redirectUrl }, 
+                new AuthenticationProperties { RedirectUri = redirectUrl },
                 OpenIdConnectDefaults.AuthenticationScheme);
         }
 
@@ -544,7 +543,7 @@ namespace Company.WebApplication1.Controllers
         {
             return View();
         }
-#if (IndividualAuth)
+#if (IndividualLocalAuth)
 
         #region Helpers
 

@@ -28,6 +28,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+//#if (!WindowsAuth)
     },
     "Company.WebApplication1": {
       "commandName": "Project",
@@ -37,6 +38,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000/"
+//#endif
     }
   }
 }

@@ -30,8 +30,6 @@ namespace Company.WebApplication1.Pages.Account.Manage
 
         public bool HasAuthenticator { get; set; }
 
-        public bool HasAny2faProviders { get; set; }
-
         public int RecoveryCodesLeft { get; set; }
 
         [BindProperty]
@@ -45,31 +43,11 @@ namespace Company.WebApplication1.Pages.Account.Manage
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            HasAny2faProviders = (await _userManager.GetValidTwoFactorProvidersAsync(user)).Any();
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
             Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
             RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
 
             return Page();
-        }
-
-        public async Task<IActionResult> OnPostEnable2fa()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
-            if (!enable2faResult.Succeeded)
-            {
-                throw new ApplicationException($"Unexpected error occurred enabling 2FA for user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            _logger.LogInformation("User with ID '{UserId}' has enabled 2fa.", _userManager.GetUserId(User));
-
-            return RedirectToPage();
         }
     }
 }
