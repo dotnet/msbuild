@@ -115,9 +115,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Enumeration of empty collection
             using (IEnumerator<ProjectItemInstance> enumerator = items.GetEnumerator())
             {
-                Assert.Equal(false, enumerator.MoveNext());
-                ObjectModelHelpers.AssertThrows(typeof(InvalidOperationException), delegate { object o = ((IEnumerator)enumerator).Current; });
-                Assert.Equal(null, enumerator.Current);
+                Assert.False(enumerator.MoveNext());
+                Assert.Throws<InvalidOperationException>(() => ((IEnumerator) enumerator).Current);
+                Assert.Null(enumerator.Current);
             }
 
             List<ProjectItemInstance> list = new List<ProjectItemInstance>();
