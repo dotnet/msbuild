@@ -43,8 +43,8 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose() 
-                    ? e.ToString().Red().Bold() 
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                    ? e.ToString().Red().Bold()
                     : e.Message.Red().Bold());
 
                 var commandParsingException = e as CommandParsingException;
@@ -75,7 +75,6 @@ namespace Microsoft.DotNet.Cli
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
-            bool? verbose = null;
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
@@ -87,7 +86,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
-                        verbose = true;
+                        Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
+                        CommandContext.SetVerbose(true);
                     }
                     else if (IsArg(args[lastArg], "version"))
                     {
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli
                         PrintInfo();
                         return 0;
                     }
-                    else if (IsArg(args[lastArg], "h", "help") || 
+                    else if (IsArg(args[lastArg], "h", "help") ||
                         args[lastArg] == "-?" ||
                         args[lastArg] == "/?")
                     {
@@ -134,9 +134,8 @@ namespace Microsoft.DotNet.Cli
 
             var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
 
-            if (verbose.HasValue)
+            if (CommandContext.IsVerbose())
             {
-                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
@@ -247,7 +246,7 @@ namespace Microsoft.DotNet.Cli
 
             string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
 
-            // if the current RID isn't supported by the shared framework, display the RID the CLI was 
+            // if the current RID isn't supported by the shared framework, display the RID the CLI was
             // built with instead, so the user knows which RID they should put in their "runtimes" section.
             return fxDepsFile.IsRuntimeSupported(currentRid) ?
                 currentRid :
