@@ -1,10 +1,10 @@
 <Project ToolsVersion="14.0">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core SDK - 2.0.0</SdkBrandName>
-    <MSBuildExtensionsBrandName>Microsoft .NET Core MSBuild Extensions - 2.0.0 Preview 2</MSBuildExtensionsBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.0</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core Host - 2.0.0</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver - 2.0.0</HostFxrBrandName>
+    <SdkBrandName>Microsoft .NET Core SDK 2.1.0 - Preview 1</SdkBrandName>
+    <MSBuildExtensionsBrandName>Microsoft .NET Core MSBuild Extensions - 2.1.0 Preview 1</MSBuildExtensionsBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.0.0</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core Host 2.0.0</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.0.0</HostFxrBrandName>
 
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>

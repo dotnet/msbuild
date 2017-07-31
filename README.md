@@ -9,12 +9,12 @@ Looking for V1 of the .NET Core tooling?
 
 If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
 
-> **Note:** the release/2.0.0 branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
+> **Note:** the master branch of the CLI repo is based on the upcoming v2 of .NET Core and is considered pre-release. For production-level usage, please use the
 > v1 of the tools.
 
 Found an issue?
 ---------------
-You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.  
+You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
@@ -27,32 +27,32 @@ Build Status
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
 
-[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6786/badge
-[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6786
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6902/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6902
 
-[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6787/badge
-[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6787
+[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6901/badge
+[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6901
 
-[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6781/badge
-[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6781
+[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6900/badge
+[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6900
 
-[linux-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6780/badge
-[linux-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6780
+[linux-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6899/badge
+[linux-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6899
 
-[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6783/badge
-[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6783
+[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6905/badge
+[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6905
 
-[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6784/badge
-[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6784
+[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6904/badge
+[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6904
 
-[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6785/badge
-[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6785
+[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6903/badge
+[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6903
 
-[debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6778/badge
-[debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6778
+[debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6898/badge
+[debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6898
 
-[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6782/badge
-[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6782
+[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6906/badge
+[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6906
 
 Installers and Binaries
 -----------------------
@@ -64,9 +64,7 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 > **Note:** please be aware that below installers are the **latest bits**. If you
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
-
-
-| Platform | Latest Daily Build<br>*release/2.0.0*<br>[![][version-badge]][version] |
+| Platform | Latest Daily Build<br>*master*<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
 | **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
@@ -90,44 +88,44 @@ Reference notes:
 > **1**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 > <br><br>**2**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
 
-[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
-[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.coherent.version
+[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/latest.version
+[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/latest.coherent.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
-[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
-[coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x86_Release_coherent_badge.svg
+[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/win_x64_Release_version_badge.svg
+[coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/win_x64_Release_coherent_badge.svg
 
-[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe
-[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe.sha
-[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip
-[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.zip.sha
+[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.exe
+[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.exe.sha
+[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip
+[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip.sha
 
-[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe
-[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.exe.sha
-[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip
-[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x86.zip.sha
+[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x86.exe
+[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x86.exe.sha
+[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x86.zip
+[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x86.zip.sha
 
-[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg
-[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.pkg.sha
-[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz
-[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-osx-x64.tar.gz.sha
+[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-osx-x64.pkg
+[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-osx-x64.pkg.sha
+[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-osx-x64.tar.gz
+[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-osx-x64.tar.gz.sha
 
-[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz
-[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-linux-x64.tar.gz.sha
+[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-x64.tar.gz
+[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-linux-x64.tar.gz.sha
 
-[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb
-[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu-x64.deb.sha
+[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu-x64.deb
+[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu-x64.deb.sha
 
-[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb
-[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
+[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb
+[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
 
-[ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb
-[ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
+[ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb
+[ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
 
-[debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb
-[debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-debian-x64.deb.sha
+[debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb
+[debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb.sha
 
-[rhel-7-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm
-[rhel-7-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-rhel-x64.rpm.sha
+[rhel-7-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel-x64.rpm
+[rhel-7-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-rhel-x64.rpm.sha
 
 # Debian daily feed
 
