@@ -1238,7 +1238,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", null, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2)));
             
-            exception.ErrorCode.ShouldBe("MSB4239");
+            exception.ErrorCode.ShouldBe("MSB4175");
+
+            exception.Message.ShouldContain("The task factory must return a value for the \"TaskType\" property.");
         }
         #endregion
 
