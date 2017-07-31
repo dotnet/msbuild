@@ -1,0 +1,16 @@
+<Project DefaultTargets="RunMsBuildScriptTests">
+  <Import Project="../../dir.props" />
+  <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
+
+  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="EnsureFileExistsOnAzureBlobStorage" AssemblyFile="$(CLIBuildDll)" />
+
+  <Target Name="RunMsBuildScriptTests" DependsOnTargets="EnsureAllDependencyFilesExist"></Target>
+
+  <Target Name="EnsureAllDependencyFilesExist">
+    <EnsureFileExistsOnAzureBlobStorage Condition="$(HostRid.StartsWith('win'))" FileUrl="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerWixLibFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeInstallerArchiveFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreSharedRuntimeVersionFileName)" />
+    <EnsureFileExistsOnAzureBlobStorage FileUrl="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(NugetPackagesArchiveName)" />
+  </Target>
+</Project>

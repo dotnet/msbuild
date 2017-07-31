@@ -18,52 +18,8 @@
           DependsOnTargets="GenerateSdkRpm"
           Condition=" '$(BuildRpmPackage)' == 'True' and '$(FPMPresent)' == 'True' "/>
 
-  <Target Name="GenerateSdkRpm">
-    <PropertyGroup>
-      <RpmPackageVersion>$(SdkVersion)</RpmPackageVersion>
-      <InputRoot>$(OutputDirectory)/sdk</InputRoot>
-      <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
-      <RpmFile>$(SdkInstallerFile)</RpmFile>
-      <ManPagesDir>$(RepoRoot)/Documentation/manpages</ManPagesDir>
-      <ConfigJsonFile>$(RepoRoot)/packaging/rpm/dotnet-config.json</ConfigJsonFile>
-      <RpmIntermediatesDir>$(IntermediateDirectory)/$(RpmPackageName)/$(RpmPackageVersion)</RpmIntermediatesDir>
-      <RpmTestResultsXmlFile>$(RpmIntermediatesDir)/debian-testResults.xml</RpmTestResultsXmlFile>
-      <RpmInstalledDirectory>/usr/share/dotnet</RpmInstalledDirectory>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <RpmLayoutDirectory>$(RpmIntermediatesDir)/RpmLayoutDirectory/</RpmLayoutDirectory>
-      <RpmLayoutPackageRoot>$(RpmLayoutDirectory)package_root</RpmLayoutPackageRoot>
-      <RpmLayoutSDK>$(RpmLayoutPackageRoot)/sdk</RpmLayoutSDK>
-      <RpmLayoutDocs>$(RpmLayoutDirectory)docs</RpmLayoutDocs>                <!-- Man Pages -->
-      <RpmLayoutTemplates>$(RpmLayoutDirectory)templates</RpmLayoutTemplates> <!-- Copyright, Changelog -->
-      <RpmLayoutScripts>$(RpmLayoutDirectory)scripts</RpmLayoutScripts>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <SdkRpmPackageVersion>$(SdkVersion)</SdkRpmPackageVersion>
-      <SdkRpmPackageName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkRpmPackageVersion)</SdkRpmPackageName>
-      <SharedFxRpmPackageVersion>$(SharedFrameworkVersion)</SharedFxRpmPackageVersion>
-      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName>
-      <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
-      <HostFxrRpmPackageVersion>$(HostFxrVersion)</HostFxrRpmPackageVersion>
-      <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
-      <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
-      <HostRpmPackageName>dotnet-host</HostRpmPackageName>
-      <HostRidInAspNetCoreRuntimeRpmInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeRpmInstallerFileName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageVersion>$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageVersion>
-      <AspNetCoreRuntimePackageVersion Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreVersion)</AspNetCoreRuntimePackageVersion>
-      <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
-      <AspNetCoreRuntimeRpmInstallerFileName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
-      <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
-      <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <EndToEndTestProject>$(RepoRoot)/test/EndToEnd/EndToEnd.csproj</EndToEndTestProject>
-    </PropertyGroup>
+  <Target Name="GenerateSdkRpm"
+          DependsOnTargets="SetupRpmProps">
 
     <RemoveDir Condition="Exists('$(RpmIntermediatesDir)')" Directories="$(RpmIntermediatesDir)"/>
     <MakeDir Directories="$(RpmIntermediatesDir)"/>
@@ -182,8 +138,52 @@
 
   </Target>
 
+  <Target Name="SetupRpmProps">
+    <PropertyGroup>
+      <RpmPackageVersion>$(SdkVersion)</RpmPackageVersion>
+      <InputRoot>$(OutputDirectory)/sdk</InputRoot>
+      <SdkInstallerFile>$(InstallerOutputDirectory)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkInstallerFile>
+      <RpmFile>$(SdkInstallerFile)</RpmFile>
+      <ManPagesDir>$(RepoRoot)/Documentation/manpages</ManPagesDir>
+      <ConfigJsonFile>$(RepoRoot)/packaging/rpm/dotnet-config.json</ConfigJsonFile>
+      <RpmIntermediatesDir>$(IntermediateDirectory)/$(RpmPackageName)/$(RpmPackageVersion)</RpmIntermediatesDir>
+      <RpmTestResultsXmlFile>$(RpmIntermediatesDir)/debian-testResults.xml</RpmTestResultsXmlFile>
+      <RpmInstalledDirectory>/usr/share/dotnet</RpmInstalledDirectory>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <RpmLayoutDirectory>$(RpmIntermediatesDir)/RpmLayoutDirectory/</RpmLayoutDirectory>
+      <RpmLayoutPackageRoot>$(RpmLayoutDirectory)package_root</RpmLayoutPackageRoot>
+      <RpmLayoutSDK>$(RpmLayoutPackageRoot)/sdk</RpmLayoutSDK>
+      <RpmLayoutDocs>$(RpmLayoutDirectory)docs</RpmLayoutDocs>                <!-- Man Pages -->
+      <RpmLayoutTemplates>$(RpmLayoutDirectory)templates</RpmLayoutTemplates> <!-- Copyright, Changelog -->
+      <RpmLayoutScripts>$(RpmLayoutDirectory)scripts</RpmLayoutScripts>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <SdkRpmPackageVersion>$(SdkVersion)</SdkRpmPackageVersion>
+      <SdkRpmPackageName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkRpmPackageVersion)</SdkRpmPackageName>
+      <SharedFxRpmPackageVersion>$(SharedFrameworkVersion)</SharedFxRpmPackageVersion>
+      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName>
+      <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
+      <HostFxrRpmPackageVersion>$(HostFxrVersion)</HostFxrRpmPackageVersion>
+      <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
+      <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
+      <HostRpmPackageName>dotnet-host</HostRpmPackageName>
+      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimePackageVersion>$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageVersion>
+      <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(HostRid).rpm</AspNetCoreRuntimeRpmInstallerFileName>
+      <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
+      <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <EndToEndTestProject>$(RepoRoot)/test/EndToEnd/EndToEnd.csproj</EndToEndTestProject>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="DownloadAspNetCoreRuntimeRpmInstaller"
-        DependsOnTargets="SetupDebProps">
+        DependsOnTargets="SetupRpmProps">
     <PropertyGroup>
       <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
     </PropertyGroup>

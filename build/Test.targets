@@ -22,7 +22,7 @@
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="BuildTests;">
+          DependsOnTargets="TestsForBuildItself;BuildTests;">
 
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
@@ -83,6 +83,11 @@
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
 
+  </Target>
+
+  <Target Name="TestsForBuildItself">
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target"
+                   ToolPath="$(Stage0Directory)" />
   </Target>
 
   <Target Name="EnsureStageSeparation">

@@ -31,21 +31,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimeAzureblobStoresSubfolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
+    <AspNetCoreRuntimeInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)aspnetcore/store/$(AspNetCoreRuntimePackageFolderName)</AspNetCoreRuntimeInstallerBlobRootUrl>
     <AspNetCoreSharedRuntimeVersionFileName>runtime.version</AspNetCoreSharedRuntimeVersionFileName>
     <AspNetCoreSharedRuntimeVersionFile Condition=" '$(AspNetCoreSharedRuntimeVersionFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreSharedRuntimeVersionFileName)</AspNetCoreSharedRuntimeVersionFile>
     
-    <!-- Examples:    Build.RS.linux.zip    Build.RS.winx86.zip    AspNetCorePackageStoreLibx64.wixlib   -->
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">$(HostOSName)$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
-
-    <AspNetCoreRuntimeStoreSuffix Condition="'$(AspNetCoreRuntimePackageFlavor)' != 'notimestamp'">-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeStoreSuffix>
-    <AspNetCoreRuntimeInstallerArchiveSuffix Condition="'$(AspNetCoreRuntimeStoreSuffix)' != ''">-$(AspNetCoreRelease)$(AspNetCoreRuntimeStoreSuffix)</AspNetCoreRuntimeInstallerArchiveSuffix>
-    <AspNetCoreRuntimeInstallerArchiveFileName>Build.RS.$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(AspNetCoreRuntimeInstallerArchiveSuffix)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'win' ">win7-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(HostOSName)' == 'osx' ">$(HostOSName)-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileNameOSToken Condition=" '$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)' == '' ">linux-$(Architecture)</AspNetCoreRuntimeInstallerArchiveFileNameOSToken>
+    <AspNetCoreRuntimeInstallerArchiveFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(AspNetCoreRuntimeInstallerArchiveFileNameOSToken)$(ArchiveExtension)</AspNetCoreRuntimeInstallerArchiveFileName>
     <AspNetCoreRuntimeInstallerArchiveFile>$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerArchiveFileName)</AspNetCoreRuntimeInstallerArchiveFile>
 
-    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(HostOSName)' == 'win' ">AspNetCorePackageStoreLib$(Architecture)$(AspNetCoreRuntimeStoreSuffix).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
+    <AspNetCoreRuntimeInstallerWixLibFileName Condition=" '$(HostOSName)' == 'win' ">AspNetCorePackageStoreLib_$(Architecture)-$(AspNetCoreRuntimePackageVersion).wixlib</AspNetCoreRuntimeInstallerWixLibFileName>
     <AspNetCoreRuntimeInstallerWixLibFile Condition=" '$(AspNetCoreRuntimeInstallerWixLibFileName)' != '' ">$(PackagesDirectory)/$(AspNetCoreRuntimeInstallerWixLibFileName)</AspNetCoreRuntimeInstallerWixLibFile>
   </PropertyGroup>
 

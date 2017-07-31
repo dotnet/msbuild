@@ -32,18 +32,9 @@
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <SpaTemplateVersion>1.0.417</SpaTemplateVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
-
-    <!-- This should either be timestamped or notimestamp as appropriate -->
-    <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
-    <!--BranchName and AspNetCoreVersion will not always be the same-->
-    <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
-    <AspNetCoreRelease>rtm</AspNetCoreRelease>
-    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>26452</AspNetCoreRuntimePackageTimestamp>
-
     <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
-    <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
-    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
+    <AspNetCoreRuntimePackageFolderName>dev-26623</AspNetCoreRuntimePackageFolderName>
+    <AspNetCoreRuntimePackageVersion>2.1.0-preview1-26623</AspNetCoreRuntimePackageVersion>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
