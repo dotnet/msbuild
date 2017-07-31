@@ -4,40 +4,32 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Cli.Telemetry
 {
     public class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
         private TelemetryClient _client = null;
-
         private Dictionary<string, string> _commonProperties = null;
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
         private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
-        private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
-        private const string OSVersion = "OS Version";
-        private const string OSPlatform = "OS Platform";
-        private const string RuntimeId = "Runtime Id";
-        private const string ProductVersion = "Product Version";
-        private const string TelemetryProfile = "Telemetry Profile";
 
         public bool Enabled { get; }
 
-        public Telemetry () : this(null) { }
+        public Telemetry() : this(null) { }
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId)
+        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
         {
             Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
@@ -49,8 +41,15 @@ namespace Microsoft.DotNet.Cli
             // Store the session ID in a static field so that it can be reused
             CurrentSessionId = sessionId ?? Guid.NewGuid().ToString();
 
-            //initialize in task to offload to parallel thread
-            _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+            if (blockThreadInitialization)
+            {
+                InitializeTelemetry();
+            }
+            else
+            {
+                //initialize in task to offload to parallel thread
+                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+            }
         }
 
         private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)
@@ -63,7 +62,8 @@ namespace Microsoft.DotNet.Cli
             return sentinel.Exists();
         }
 
-        public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
+        public void TrackEvent(string eventName, IDictionary<string, string> properties,
+            IDictionary<string, double> measurements)
         {
             if (!Enabled)
             {
@@ -92,26 +92,23 @@ namespace Microsoft.DotNet.Cli
                 _client = new TelemetryClient();
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
-
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 
-                _commonProperties = new Dictionary<string, string>();
-                _commonProperties.Add(OSVersion, RuntimeEnvironment.OperatingSystemVersion);
-                _commonProperties.Add(OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString());
-                _commonProperties.Add(RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier());
-                _commonProperties.Add(ProductVersion, Product.Version);
-                _commonProperties.Add(TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable));
+                _commonProperties = new TelemetryCommonProperties().GetTelemetryCommonProperties();
                 _commonMeasurements = new Dictionary<string, double>();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 _client = null;
                 // we dont want to fail the tool if telemetry fails.
-                Debug.Fail("Exception during telemetry initialization");
+                Debug.Fail(e.ToString());
             }
         }
 
-        private void TrackEventTask(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
+        private void TrackEventTask(
+            string eventName,
+            IDictionary<string, string> properties,
+            IDictionary<string, double> measurements)
         {
             if (_client == null)
             {
@@ -120,15 +117,15 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                var eventProperties = GetEventProperties(properties);
-                var eventMeasurements = GetEventMeasures(measurements);
+                Dictionary<string, string> eventProperties = GetEventProperties(properties);
+                Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
 
                 _client.TrackEvent(eventName, eventProperties, eventMeasurements);
                 _client.Flush();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Debug.Fail("Exception during TrackEventTask");
+                Debug.Fail(e.ToString());
             }
         }
 
@@ -137,7 +134,7 @@ namespace Microsoft.DotNet.Cli
             Dictionary<string, double> eventMeasurements = new Dictionary<string, double>(_commonMeasurements);
             if (measurements != null)
             {
-                foreach (var measurement in measurements)
+                foreach (KeyValuePair<string, double> measurement in measurements)
                 {
                     if (eventMeasurements.ContainsKey(measurement.Key))
                     {
@@ -157,7 +154,7 @@ namespace Microsoft.DotNet.Cli
             if (properties != null)
             {
                 var eventProperties = new Dictionary<string, string>(_commonProperties);
-                foreach (var property in properties)
+                foreach (KeyValuePair<string, string> property in properties)
                 {
                     if (eventProperties.ContainsKey(property.Key))
                     {

@@ -43,13 +43,15 @@
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />
 
-      <!-- Create layout: postinst -->
-      <Copy
-        DestinationFiles= "$(DebianPostinstFile)"
-        SourceFiles="$(DebianPostinstTemplateFile)"
-        OverwriteReadOnlyFiles="True"
-        SkipUnchangedFiles="False"
-        UseHardlinksIfPossible="False" />
+      <!-- Create layout: Generate and Place postinst -->
+      <ReplaceFileContents
+        InputFile="$(DebianPostinstTemplateFile)"
+        DestinationFile="$(DebianPostinstFile)"
+        ReplacementItems="@(DebianPostInstTokenValues)" />
+
+      <Chmod
+        Glob="$(DebianPostinstFile)"
+        Mode="ugo+x" />
 
       <!-- Create layout: Generate and Place debian_config.json -->
       <ReplaceFileContents

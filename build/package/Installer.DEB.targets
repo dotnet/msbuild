@@ -36,9 +36,10 @@
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
       <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimePackageName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
       <HostRidInAspNetCoreRuntimeDebInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeDebInstallerFileName>
-      <HostRidInAspNetCoreRuntimeDebInstallerFileName Condition=" '$(HostRid)' == 'debian.8-x64' ">debian-x64</HostRidInAspNetCoreRuntimeDebInstallerFileName>
       <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
+      <AspNetCoreRuntimeDebInstallerFileName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -105,6 +106,10 @@
       <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
         <ReplacementString>$(SdkBrandName)</ReplacementString>
       </DebianConfigTokenValues>
+
+      <DebianPostInstTokenValues Include="%SDK_VERSION%">
+        <ReplacementString>$(SdkVersion)</ReplacementString>
+      </DebianPostInstTokenValues>
     </ItemGroup>
 
     <ItemGroup>

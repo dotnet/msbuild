@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="Expanding">
         <source>Expanding</source>
-        <target state="new">Expanding</target>
+        <target state="translated">Rozwijanie</target>
         <note />
       </trans-unit>
       <trans-unit id="Decompressing">
         <source>Decompressing</source>
-        <target state="new">Decompressing</target>
+        <target state="translated">Dekompresja</target>
         <note />
       </trans-unit>
     </body>

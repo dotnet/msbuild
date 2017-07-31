@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Configurer
 
         public bool InProgressSentinelAlreadyExists()
         {
-            return CouldNotGetAHandleToTheInProgressSentinel();
+            return CouldNotGetAHandleToTheInProgressSentinel() && !UnauthorizedAccess;
         }
 
         public bool Exists()

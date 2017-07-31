@@ -4,5 +4,6 @@
     <RpmConfigJsonName>rpm_config.json</RpmConfigJsonName>
     <TemplatesDir>$(RepoRoot)/packaging/rpm/templates</TemplatesDir>
     <ScriptsDir>$(RepoRoot)/packaging/rpm/scripts</ScriptsDir>
+    <AfterInstallHostScriptName>after_install_host.sh</AfterInstallHostScriptName>
   </PropertyGroup>
 </Project>

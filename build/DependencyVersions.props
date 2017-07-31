@@ -4,15 +4,15 @@
     <CLI_SharedFrameworkVersion>2.0.0</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.3.409</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>
-    <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170624-6</CLI_Roslyn_Satellites_Version>
+    <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170727-1</CLI_Roslyn_Satellites_Version>
     <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
     <CLI_FSharp_Version>4.2.0-rc-170630-0</CLI_FSharp_Version>
-    <CLI_FSharp_Satellites_Version>4.4.1-pre-20170624-6</CLI_FSharp_Satellites_Version>
+    <CLI_FSharp_Satellites_Version>4.4.1-pre-20170727-1</CLI_FSharp_Satellites_Version>
 
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.0-preview3-20170721-7</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.0-preview3-20170728-1</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
 
     <CLI_NuGet_Version>4.3.0-rtm-4324</CLI_NuGet_Version>
@@ -23,14 +23,14 @@
     <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
     <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
     <TemplateEngineVersion>1.0.0-beta2-20170719-291</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170725-300</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170725-300</TemplateEngineTemplate2_0Version>
+    <TemplateEngineTemplateVersion>1.0.0-beta2-20170727-301</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170727-301</TemplateEngineTemplate2_0Version>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <DependencyModelVersion>2.0.0</DependencyModelVersion>
     <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
     <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <SpaTemplateVersion>1.0.0-preview-000409</SpaTemplateVersion>
+    <SpaTemplateVersion>1.0.417</SpaTemplateVersion>
     <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
 
     <!-- This should either be timestamped or notimestamp as appropriate -->
