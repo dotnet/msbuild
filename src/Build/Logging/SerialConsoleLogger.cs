@@ -519,6 +519,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     lightenText = true;
                     break;
 
+                case MessageImportance.Diagnostic:
+                    print = IsVerbosityAtLeast(LoggerVerbosity.Diagnostic);
+                    lightenText = true;
+                    break;
+
                 default:
                     ErrorUtilities.VerifyThrow(false, "Impossible");
                     break;

@@ -32,7 +32,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Low importance, appears in more verbose logs
         /// </summary>
-        Low
+        Low,
+
+        /// <summary>
+        /// Message is only used for diagnosing a problem.
+        /// </summary>
+        Diagnostic
     }
 
     /// <summary>
