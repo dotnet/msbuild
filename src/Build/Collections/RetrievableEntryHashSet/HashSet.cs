@@ -229,7 +229,8 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                throw new NotImplementedException();
+                return new ReadOnlyConvertingCollection<T, string>(this, delegate(T input) { return input.Key; },
+                    delegate(string key) { return Contains(key); });
             }
         }
 

@@ -360,6 +360,7 @@
     <Compile Include="Collections\OrdinalIgnoreCaseKeyedComparer.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
+    <Compile Include="Collections\ReadOnlyConvertingCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <Compile Include="Collections\Triple.cs" />
     <!-- ######################## -->
