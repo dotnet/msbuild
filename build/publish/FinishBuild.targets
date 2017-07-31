@@ -34,6 +34,6 @@
 
     <UpdateVersionsRepo BranchName="$(BranchName)"
                         PackagesDirectory="$(PackagesDirectory)"
-                        GitHubPassword="$(GITHUB_PASSWORD)" /> 
+                        GitHubPassword="$(GITHUB_PASSWORD)" />
   </Target>
 </Project>
