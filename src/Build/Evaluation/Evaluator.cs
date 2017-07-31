@@ -1663,7 +1663,7 @@ namespace Microsoft.Build.Evaluation
             if (newValue != oldValue)
             {
                 _evaluationLoggingContext.LogComment(
-                    MessageImportance.Low,
+                    MessageImportance.Diagnostic,
                     "PropertyReassignment",
                     property.Name,
                     newValue,
