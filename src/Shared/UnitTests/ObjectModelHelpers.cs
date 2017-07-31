@@ -98,8 +98,6 @@ namespace Microsoft.Build.UnitTests
             return s_builtInMetadataNames.Contains(metadataName);
         }
 
-        internal delegate void MethodUnderTest();
-
         /// <summary>
         /// Gets an item list from the project and assert that it contains
         /// exactly one item with the supplied name.
@@ -117,29 +115,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(1, count);
 
             return items[0];
-        }
-
-        /// <summary>
-        /// Helper that asserts if an exception of type specified is
-        /// not thrown when calling specified method
-        /// </summary>
-        /// <example>
-        /// AssertThrows(typeof(InvalidOperationException), delegate { object o = ((IEnumerator)enumerator).Current; });
-        /// </example>
-        internal static void AssertThrows(Type exception, MethodUnderTest method)
-        {
-            try
-            {
-                method();
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType() == exception)
-                {
-                    return;
-                }
-            }
-            Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
         internal static void AssertItemEvaluation(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
