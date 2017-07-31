@@ -12,6 +12,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
@@ -123,6 +124,29 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ProjectTargetInstance target = project.Targets["t"];
 
                 Assert.Equal(project.FullPath, target.FullPath);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public void ProjectTargetsAreEnumerableByName()
+        {
+            string path = null;
+
+            try
+            {
+                path = Shared.FileUtilities.GetTemporaryFile();
+                ProjectRootElement projectXml = ProjectRootElement.Create(path);
+                projectXml.Save();
+
+                projectXml.AddTarget("t");
+
+                Project project = new Project(projectXml);
+
+                project.Targets.Keys.ShouldBe(new[] { "t" });
             }
             finally
             {
