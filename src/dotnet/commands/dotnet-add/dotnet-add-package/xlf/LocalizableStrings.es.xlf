@@ -77,6 +77,11 @@
         <target state="translated">PACKAGE_NAME</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to get a temp path for a dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="new">Unable to get a temp path for a dependency graph file for project '{0}'. Cannot add package reference.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

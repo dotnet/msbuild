@@ -66,9 +66,10 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             if (!_appliedCommand.HasOption("no-restore"))
             {
-                // Create a Dependency Graph file for the project
+                
                 try
                 {
+                    // Create a Dependency Graph file for the project
                     tempDgFilePath = Path.GetTempFileName();
                     GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
                 }
