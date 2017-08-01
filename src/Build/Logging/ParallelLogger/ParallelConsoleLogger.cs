@@ -1032,6 +1032,10 @@ namespace Microsoft.Build.BackEnd.Logging
                         print = IsVerbosityAtLeast(LoggerVerbosity.Detailed);
                         lightenText = true;
                         break;
+                    case MessageImportance.Diagnostic:
+                        print = IsVerbosityAtLeast(LoggerVerbosity.Diagnostic);
+                        lightenText = true;
+                        break;
                     default:
                         ErrorUtilities.VerifyThrow(false, "Impossible");
                         break;

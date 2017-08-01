@@ -323,6 +323,7 @@ namespace Microsoft.Build.Framework
     }
     public enum MessageImportance
     {
+        Diagnostic = 3,
         High = 0,
         Low = 2,
         Normal = 1,

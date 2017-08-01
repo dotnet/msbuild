@@ -93,6 +93,7 @@ namespace Microsoft.Build.Logging
             _forwardingTable[HighMessageEventDescription] = 0;
             _forwardingTable[NormalMessageEventDescription] = 0;
             _forwardingTable[LowMessageEventDescription] = 0;
+            _forwardingTable[DiagnosticMessageEventDescription] = 0;
             _forwardingTable[CustomEventDescription] = 0;
             _forwardingTable[CommandLineDescription] = 0;
             _forwardingSetFromParameters = false;
@@ -231,6 +232,7 @@ namespace Microsoft.Build.Logging
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
+                _forwardingTable[DiagnosticMessageEventDescription] = 1;
                 _forwardingTable[CustomEventDescription] = 1;
                 _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
                 _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
@@ -428,6 +430,10 @@ namespace Microsoft.Build.Logging
             {
                 forwardEvent = true;
             }
+            if (_forwardingTable[DiagnosticMessageEventDescription] == 1 && e.Importance == MessageImportance.Diagnostic)
+            {
+                forwardEvent = true;
+            }
             else if (_forwardingTable[CommandLineDescription] == 1 && e is TaskCommandLineEventArgs)
             {
                 forwardEvent = true;
@@ -518,6 +524,7 @@ namespace Microsoft.Build.Logging
         private const string HighMessageEventDescription = "HIGHMESSAGEEVENT";
         private const string NormalMessageEventDescription = "NORMALMESSAGEEVENT";
         private const string LowMessageEventDescription = "LOWMESSAGEEVENT";
+        private const string DiagnosticMessageEventDescription = "DIAGMESSAGEEVENT";
         private const string CustomEventDescription = "CUSTOMEVENT";
         private const string CommandLineDescription = "COMMANDLINE";
         private const string PerformanceSummaryDescription = "PERFORMANCESUMMARY";
