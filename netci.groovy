@@ -15,22 +15,20 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
 
 [true, false].each { isPR ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
-        def runtimes = ['CoreCLR', 'Mono']
+        def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
             runtimes.add('Full')
         }
 
-        // TODO: Mono
+        // TODO: make this !windows once Mono 5.0+ is available in an OSX image
+        if (osName.startsWith('Ubuntu')) {
+            runtimes.add('Mono')
+        }
 
         runtimes.each { runtime ->
             def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}", isPR)
             def skipTestsWhenResultsNotFound = true
-
-            if (osName == 'Windows_NT' && runtime == 'Mono') {
-                // ignored for now
-                return
-            }
 
             // Create a new job with the specified name.  The brace opens a new closure
             // and calls made within that closure apply to the newly created job.
