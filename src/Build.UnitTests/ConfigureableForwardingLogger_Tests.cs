@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -59,91 +60,93 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "BUILDSTARTEDEVENT";
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(1, logger.forwardedEvents.Count);
+            logger.forwardedEvents.Count.ShouldBe(1);
 
             logger = new TestForwardingLogger();
             logger.BuildEventRedirector = null;
             logger.Verbosity = LoggerVerbosity.Quiet;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(4, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
+            logger.forwardedEvents.Count.ShouldBe(4);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
 
             logger = new TestForwardingLogger();
             logger.BuildEventRedirector = null;
             logger.Verbosity = LoggerVerbosity.Minimal;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(5, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
+            logger.forwardedEvents.Count.ShouldBe(5);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
 
             logger = new TestForwardingLogger();
             logger.BuildEventRedirector = null;
             logger.Verbosity = LoggerVerbosity.Normal;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(11, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
-            Assert.True(logger.forwardedEvents.Contains(_normalMessage));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_commandLine));
+            logger.forwardedEvents.Count.ShouldBe(11);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
+            logger.forwardedEvents.ShouldContain(_normalMessage);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_commandLine);
 
             logger = new TestForwardingLogger();
             logger.BuildEventRedirector = null;
             logger.Verbosity = LoggerVerbosity.Detailed;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(14, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
-            Assert.True(logger.forwardedEvents.Contains(_lowMessage));
-            Assert.True(logger.forwardedEvents.Contains(_normalMessage));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_taskStarted));
-            Assert.True(logger.forwardedEvents.Contains(_taskFinished));
-            Assert.True(logger.forwardedEvents.Contains(_commandLine));
+            logger.forwardedEvents.Count.ShouldBe(14);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
+            logger.forwardedEvents.ShouldContain(_lowMessage);
+            logger.forwardedEvents.ShouldContain(_normalMessage);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_taskStarted);
+            logger.forwardedEvents.ShouldContain(_taskFinished);
+            logger.forwardedEvents.ShouldContain(_commandLine);
 
             logger = new TestForwardingLogger();
             logger.BuildEventRedirector = null;
             logger.Verbosity = LoggerVerbosity.Diagnostic;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(15, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
-            Assert.True(logger.forwardedEvents.Contains(_lowMessage));
-            Assert.True(logger.forwardedEvents.Contains(_normalMessage));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_taskStarted));
-            Assert.True(logger.forwardedEvents.Contains(_taskFinished));
-            Assert.True(logger.forwardedEvents.Contains(_externalStartedEvent));
-            Assert.True(logger.forwardedEvents.Contains(_commandLine));
+            logger.forwardedEvents.Count.ShouldBe(16);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
+            logger.forwardedEvents.ShouldContain(_lowMessage);
+            logger.forwardedEvents.ShouldContain(_normalMessage);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_taskStarted);
+            logger.forwardedEvents.ShouldContain(_taskFinished);
+            logger.forwardedEvents.ShouldContain(_externalStartedEvent);
+            logger.forwardedEvents.ShouldContain(_commandLine);
         }
 
         [Fact]
@@ -156,17 +159,17 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity = LoggerVerbosity.Quiet;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(10, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_taskStarted));
-            Assert.True(logger.forwardedEvents.Contains(_taskFinished));
+            logger.forwardedEvents.Count.ShouldBe(10);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_taskStarted);
+            logger.forwardedEvents.ShouldContain(_taskFinished);
         }
 
         [Fact]
@@ -179,18 +182,18 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "NOSUMMARY";
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(11, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
-            Assert.True(logger.forwardedEvents.Contains(_normalMessage));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_commandLine));
+            logger.forwardedEvents.Count.ShouldBe(11);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
+            logger.forwardedEvents.ShouldContain(_normalMessage);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_commandLine);
         }
 
         [Fact]
@@ -203,18 +206,18 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "SHOWCOMMANDLINE";
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            Assert.Equal(11, logger.forwardedEvents.Count);
-            Assert.True(logger.forwardedEvents.Contains(_buildStarted));
-            Assert.True(logger.forwardedEvents.Contains(_buildFinished));
-            Assert.True(logger.forwardedEvents.Contains(_error));
-            Assert.True(logger.forwardedEvents.Contains(_warning));
-            Assert.True(logger.forwardedEvents.Contains(_highMessage));
-            Assert.True(logger.forwardedEvents.Contains(_normalMessage));
-            Assert.True(logger.forwardedEvents.Contains(_projectStarted));
-            Assert.True(logger.forwardedEvents.Contains(_projectFinished));
-            Assert.True(logger.forwardedEvents.Contains(_targetStarted));
-            Assert.True(logger.forwardedEvents.Contains(_targetFinished));
-            Assert.True(logger.forwardedEvents.Contains(_commandLine));
+            logger.forwardedEvents.Count.ShouldBe(11);
+            logger.forwardedEvents.ShouldContain(_buildStarted);
+            logger.forwardedEvents.ShouldContain(_buildFinished);
+            logger.forwardedEvents.ShouldContain(_error);
+            logger.forwardedEvents.ShouldContain(_warning);
+            logger.forwardedEvents.ShouldContain(_highMessage);
+            logger.forwardedEvents.ShouldContain(_normalMessage);
+            logger.forwardedEvents.ShouldContain(_projectStarted);
+            logger.forwardedEvents.ShouldContain(_projectFinished);
+            logger.forwardedEvents.ShouldContain(_targetStarted);
+            logger.forwardedEvents.ShouldContain(_targetFinished);
+            logger.forwardedEvents.ShouldContain(_commandLine);
         }
 
         private void RaiseEvents(EventSourceSink source)
