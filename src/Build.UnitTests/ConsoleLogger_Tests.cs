@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "EnableMPLogging";
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
-            sc.ToString().ShouldContain("YYY:");
+            sc.ToString().ShouldNotContain("YYY:");
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
@@ -243,9 +243,7 @@ namespace Microsoft.Build.UnitTests
 
                 string targetStartedMessage = ResourceUtilities.FormatResourceString("TargetStartedProjectEntry", "YYY", tempProjectPath);
 
-                // it's a console, so it cuts off, so only look for the existence of the first bit (which should contains the "YYY")
-                targetStartedMessage = targetStartedMessage.Substring(0, 60);
-                sc.ToString().ShouldContain(targetStartedMessage, Case.Insensitive);
+                sc.ToString().ShouldContain(targetStartedMessage);
             }
             finally
             {
