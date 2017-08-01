@@ -486,7 +486,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    console.ToString().ShouldBe(String.Empty);
+                    console.ToString().ShouldBeEmpty();
                 }
             }
         }

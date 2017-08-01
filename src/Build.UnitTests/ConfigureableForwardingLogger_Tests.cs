@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.BackEnd.Logging;
@@ -13,32 +12,34 @@ namespace Microsoft.Build.UnitTests
 {
     public class ConfigureableForwardingLogger_Tests
     {
-        private BuildFinishedEventArgs _buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
-        private BuildStartedEventArgs _buildStarted = new BuildStartedEventArgs("Message", "Help");
-        private BuildMessageEventArgs _lowMessage = new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low);
-        private BuildMessageEventArgs _normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
-        private BuildMessageEventArgs _highMessage = new BuildMessageEventArgs("Message3", "help", "sender", MessageImportance.High);
-        private TaskStartedEventArgs _taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
-        private TaskFinishedEventArgs _taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
-        private TaskCommandLineEventArgs _commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
-        private BuildWarningEventArgs _warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-        private BuildErrorEventArgs _error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-        private TargetStartedEventArgs _targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
-        private TargetFinishedEventArgs _targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
-        private ProjectStartedEventArgs _projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
-        private ProjectFinishedEventArgs _projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
-        private ExternalProjectStartedEventArgs _externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
+        private readonly BuildFinishedEventArgs _buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
+        private readonly BuildStartedEventArgs _buildStarted = new BuildStartedEventArgs("Message", "Help");
+        private readonly BuildMessageEventArgs _lowMessage = new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low);
+        private readonly BuildMessageEventArgs _normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
+        private readonly BuildMessageEventArgs _highMessage = new BuildMessageEventArgs("Message3", "help", "sender", MessageImportance.High);
+        private readonly TaskStartedEventArgs _taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
+        private readonly TaskFinishedEventArgs _taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
+        private readonly TaskCommandLineEventArgs _commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
+        private readonly BuildWarningEventArgs _warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private readonly BuildErrorEventArgs _error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private readonly TargetStartedEventArgs _targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
+        private readonly TargetFinishedEventArgs _targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
+        private readonly ProjectStartedEventArgs _projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
+        private readonly ProjectFinishedEventArgs _projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
+        private readonly ExternalProjectStartedEventArgs _externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
 
         internal class TestForwardingLogger : ConfigurableForwardingLogger
         {
             internal TestForwardingLogger()
             {
-                forwardedEvents = new List<BuildEventArgs>();
+                ForwardedEvents = new List<BuildEventArgs>();
             }
-            internal List<BuildEventArgs> forwardedEvents;
+
+            internal List<BuildEventArgs> ForwardedEvents;
+
             protected override void ForwardToCentralLogger(BuildEventArgs e)
             {
-                forwardedEvents.Add(e);
+                ForwardedEvents.Add(e);
             }
         }
 
@@ -51,102 +52,114 @@ namespace Microsoft.Build.UnitTests
             _targetFinished.BuildEventContext = context;
         }
 
-        [Fact]
-        public void ForwardingLoggingEventsBasedOnVerbosity()
+        [InlineData(null)]
+        [InlineData(LoggerVerbosity.Quiet)]
+        [InlineData(LoggerVerbosity.Minimal)]
+        [InlineData(LoggerVerbosity.Normal)]
+        [InlineData(LoggerVerbosity.Detailed)]
+        [InlineData(LoggerVerbosity.Diagnostic)]
+        [Theory]
+        public void ForwardingLoggingEventsBasedOnVerbosity(LoggerVerbosity? loggerVerbosity)
         {
             EventSourceSink source = new EventSourceSink();
-            TestForwardingLogger logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Parameters = "BUILDSTARTEDEVENT";
+            TestForwardingLogger logger = new TestForwardingLogger
+            {
+                BuildEventRedirector = null
+            };
+
+            if (loggerVerbosity.HasValue)
+            {
+                logger.Verbosity = loggerVerbosity.Value;
+            }
+            else
+            {
+                // Testing a single event when verbosity is not set
+                logger.Parameters = "BUILDSTARTEDEVENT";
+            }
+
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(1);
 
-            logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Quiet;
-            logger.Initialize(source, 4);
-            RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(4);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-
-            logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Minimal;
-            logger.Initialize(source, 4);
-            RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(5);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-
-            logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Normal;
-            logger.Initialize(source, 4);
-            RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(11);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-            logger.forwardedEvents.ShouldContain(_normalMessage);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_commandLine);
-
-            logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Detailed;
-            logger.Initialize(source, 4);
-            RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(14);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-            logger.forwardedEvents.ShouldContain(_lowMessage);
-            logger.forwardedEvents.ShouldContain(_normalMessage);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_taskStarted);
-            logger.forwardedEvents.ShouldContain(_taskFinished);
-            logger.forwardedEvents.ShouldContain(_commandLine);
-
-            logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Diagnostic;
-            logger.Initialize(source, 4);
-            RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(15);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-            logger.forwardedEvents.ShouldContain(_lowMessage);
-            logger.forwardedEvents.ShouldContain(_normalMessage);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_taskStarted);
-            logger.forwardedEvents.ShouldContain(_taskFinished);
-            logger.forwardedEvents.ShouldContain(_externalStartedEvent);
-            logger.forwardedEvents.ShouldContain(_commandLine);
+            switch (loggerVerbosity)
+            {
+                case null:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[] { _buildStarted });
+                    break;
+                case LoggerVerbosity.Quiet:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+                    {
+                        _buildStarted,
+                        _warning,
+                        _error,
+                        _buildFinished
+                    });
+                    break;
+                case LoggerVerbosity.Minimal:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+                    {
+                        _buildStarted,
+                        _highMessage,
+                        _warning,
+                        _error,
+                        _buildFinished
+                    });
+                    break;
+                case LoggerVerbosity.Normal:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+                    {
+                        _buildStarted,
+                        _projectStarted,
+                        _targetStarted,
+                        _normalMessage,
+                        _highMessage,
+                        _commandLine,
+                        _warning,
+                        _error,
+                        _targetFinished,
+                        _projectFinished,
+                        _buildFinished,
+                    });
+                    break;
+                case LoggerVerbosity.Detailed:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+                    {
+                        _buildStarted,
+                        _projectStarted,
+                        _targetStarted,
+                        _taskStarted,
+                        _lowMessage,
+                        _normalMessage,
+                        _highMessage,
+                        _commandLine,
+                        _warning,
+                        _error,
+                        _taskFinished,
+                        _targetFinished,
+                        _projectFinished,
+                        _buildFinished,
+                    });
+                    break;
+                case LoggerVerbosity.Diagnostic:
+                    logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+                    {
+                        _buildStarted,
+                        _projectStarted,
+                        _targetStarted,
+                        _taskStarted,
+                        _lowMessage,
+                        _normalMessage,
+                        _highMessage,
+                        _commandLine,
+                        _externalStartedEvent,
+                        _warning,
+                        _error,
+                        _taskFinished,
+                        _targetFinished,
+                        _projectFinished,
+                        _buildFinished,
+                    });
+                    break;
+            }
         }
 
         [Fact]
@@ -159,17 +172,17 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity = LoggerVerbosity.Quiet;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(10);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_taskStarted);
-            logger.forwardedEvents.ShouldContain(_taskFinished);
+            logger.ForwardedEvents.Count.ShouldBe(10);
+            logger.ForwardedEvents.ShouldContain(_buildStarted);
+            logger.ForwardedEvents.ShouldContain(_buildFinished);
+            logger.ForwardedEvents.ShouldContain(_error);
+            logger.ForwardedEvents.ShouldContain(_warning);
+            logger.ForwardedEvents.ShouldContain(_projectStarted);
+            logger.ForwardedEvents.ShouldContain(_projectFinished);
+            logger.ForwardedEvents.ShouldContain(_targetStarted);
+            logger.ForwardedEvents.ShouldContain(_targetFinished);
+            logger.ForwardedEvents.ShouldContain(_taskStarted);
+            logger.ForwardedEvents.ShouldContain(_taskFinished);
         }
 
         [Fact]
@@ -182,18 +195,18 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "NOSUMMARY";
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(11);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-            logger.forwardedEvents.ShouldContain(_normalMessage);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_commandLine);
+            logger.ForwardedEvents.Count.ShouldBe(11);
+            logger.ForwardedEvents.ShouldContain(_buildStarted);
+            logger.ForwardedEvents.ShouldContain(_buildFinished);
+            logger.ForwardedEvents.ShouldContain(_error);
+            logger.ForwardedEvents.ShouldContain(_warning);
+            logger.ForwardedEvents.ShouldContain(_highMessage);
+            logger.ForwardedEvents.ShouldContain(_normalMessage);
+            logger.ForwardedEvents.ShouldContain(_projectStarted);
+            logger.ForwardedEvents.ShouldContain(_projectFinished);
+            logger.ForwardedEvents.ShouldContain(_targetStarted);
+            logger.ForwardedEvents.ShouldContain(_targetFinished);
+            logger.ForwardedEvents.ShouldContain(_commandLine);
         }
 
         [Fact]
@@ -206,18 +219,18 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "SHOWCOMMANDLINE";
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(11);
-            logger.forwardedEvents.ShouldContain(_buildStarted);
-            logger.forwardedEvents.ShouldContain(_buildFinished);
-            logger.forwardedEvents.ShouldContain(_error);
-            logger.forwardedEvents.ShouldContain(_warning);
-            logger.forwardedEvents.ShouldContain(_highMessage);
-            logger.forwardedEvents.ShouldContain(_normalMessage);
-            logger.forwardedEvents.ShouldContain(_projectStarted);
-            logger.forwardedEvents.ShouldContain(_projectFinished);
-            logger.forwardedEvents.ShouldContain(_targetStarted);
-            logger.forwardedEvents.ShouldContain(_targetFinished);
-            logger.forwardedEvents.ShouldContain(_commandLine);
+            logger.ForwardedEvents.Count.ShouldBe(11);
+            logger.ForwardedEvents.ShouldContain(_buildStarted);
+            logger.ForwardedEvents.ShouldContain(_buildFinished);
+            logger.ForwardedEvents.ShouldContain(_error);
+            logger.ForwardedEvents.ShouldContain(_warning);
+            logger.ForwardedEvents.ShouldContain(_highMessage);
+            logger.ForwardedEvents.ShouldContain(_normalMessage);
+            logger.ForwardedEvents.ShouldContain(_projectStarted);
+            logger.ForwardedEvents.ShouldContain(_projectFinished);
+            logger.ForwardedEvents.ShouldContain(_targetStarted);
+            logger.ForwardedEvents.ShouldContain(_targetFinished);
+            logger.ForwardedEvents.ShouldContain(_commandLine);
         }
 
         private void RaiseEvents(EventSourceSink source)
