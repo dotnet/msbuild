@@ -3770,6 +3770,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Equal(0, t.SuggestedRedirects.Length);
             Assert.Equal(3, t.ResolvedFiles.Length);
@@ -3808,6 +3809,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
 
             Assert.Equal(0, t.SuggestedRedirects.Length);
             Assert.Equal(3, t.ResolvedFiles.Length);
