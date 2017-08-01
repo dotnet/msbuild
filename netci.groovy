@@ -7,6 +7,12 @@ def project = GithubProject
 // The input branch name (e.g. master)
 def branch = GithubBranchName
 
+// What this repo is using for its machine images at the current time
+def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
+                       'OSX':'latest-or-auto',
+                       'Ubuntu14.04':'20170728',
+                       'Ubuntu16.04':'20170731']
+
 [true, false].each { isPR ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
@@ -48,7 +54,6 @@ def branch = GithubBranchName
 
                         skipTestsWhenResultsNotFound = false
                     }
-                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-rc')
 
                     break;
                 case 'OSX':
@@ -57,7 +62,6 @@ def branch = GithubBranchName
                             shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
-                    Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
                 case { it.startsWith('Ubuntu') }:
@@ -66,13 +70,14 @@ def branch = GithubBranchName
                             shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
-                    Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
             }
 
             // Add xunit result archiving. Skip if no results found.
             Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
+            def imageVersion = imageVersionMap[osName];
+            Utilities.setMachineAffinity(newJob, osName, imageVersion)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
