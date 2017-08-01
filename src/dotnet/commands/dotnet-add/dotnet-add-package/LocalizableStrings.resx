@@ -162,4 +162,7 @@
   <data name="CmdPackageDirectory" xml:space="preserve">
     <value>PACKAGE_DIRECTORY</value>
   </data>
+  <data name="CmdDGFileIOException" xml:space="preserve">
+    <value>Unable to get a temp path for a dependency graph file for project '{0}'. Cannot add package reference.</value>
+  </data>
 </root>
