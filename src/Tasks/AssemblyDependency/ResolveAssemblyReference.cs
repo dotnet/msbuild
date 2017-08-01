@@ -960,7 +960,6 @@ namespace Microsoft.Build.Tasks
                     if (idealAssemblyRemappings != null)
                     {
                         bool foundAtLeastOneValidBindingRedirect = false;
-                        bool foundAtLeastOneUnresolvableConflict = false;
 
                         var buffer = new StringBuilder();
                         var ns = XNamespace.Get("urn:schemas-microsoft-com:asm.v1");
@@ -1037,7 +1036,9 @@ namespace Microsoft.Build.Tasks
 
                                 if (conflictVictims.Length == 0)
                                 {
-                                    foundAtLeastOneUnresolvableConflict = true;
+                                    // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
+                                    // chosen was not the conflict victor in a version comparison, in other words it was older.
+                                    Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", idealRemappingPartialAssemblyName.Name);
                                 }
                             }
                         }
@@ -1059,13 +1060,6 @@ namespace Microsoft.Build.Tasks
                             }
                             // else AutoUnify is on and bindingRedirect generation is not supported
                             // we don't warn in this case since the binder will automatically unify these remappings
-                        }
-
-                        if (foundAtLeastOneUnresolvableConflict)
-                        {
-                            // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
-                            // chosen was not the conflict victor in a version comparison, in other words it was older.
-                            Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts");
                         }
                     }
 
