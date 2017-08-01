@@ -227,10 +227,8 @@ fi
 
 # Determine configuration
 
-# If unspecified, default
-if [ "$target" = "" ]; then
-    target=CoreCLR
-fi
+target=Mono
+host=Mono
 
 if [ "$host" = "Mono" ]; then
     # check if mono is available
