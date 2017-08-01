@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.Evaluation
 
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
-            _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
+            _evaluationLoggingContext.LogComment(MessageImportance.Diagnostic, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
                                         String.Join(Path.PathSeparator.ToString(), pathsToSearch));
 
@@ -2301,7 +2301,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
-                _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
+                _evaluationLoggingContext.LogComment(MessageImportance.Diagnostic, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
                 var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath, false, out projects);
