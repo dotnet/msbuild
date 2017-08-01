@@ -17,8 +17,6 @@ Obtaining .NET CLI
 * [Acquisition modes](#acquisition-modes)
   * [Native installers](#native-installers)
   * [Installation script](#installation-script)
-    * [Windows one-liner](#windows-command)
-    * [OSX/Linux one-liner](#osxlinux-shell-command)
   * [Complete manual installation](#complete-manual-installation)
   * [Docker](#docker)
   * [NuGet Packages](#nuget-packages)
@@ -113,28 +111,17 @@ A list of dependencies can be found on [dependency list](TBD).
 ## Channels
 Channels represent a way for users who are getting the CLI to reason about the stability and quality of the bits they are getting. This is one more way for the user to be fully aware of the state the bits that are being installed are in and to set proper expectations on first use. 
 
-The table below outlines the channels:
-
-| Property         	| Description                                                                                                                                                                                                                                                       	|
+| Channel         	| Description                                                                                                                                                                                                                                                       	|
 |------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Future              	| Unstable bits that are "bleeding edge". Users are not expected to use this channel often, however it is there for those situations when someone needs/wants a feature that hasn't been stabilizied yet. Also, used for internal testing. 	|
-| Preview 	| Pre-release stable builds with known issues and/or known feature gaps. We are OK with users installing these for preview purposes.                                                                                                                                	|
-| Production          	| Actual releases. Most users are encouraged to install these.                                                                                                                                                                                                      	|
-
-Below table shows the mapping between the channels, branches and feeds for the Debian pacakage. Since channels also impact the NuGet packages, it also contains the version of the package used and the feed to opt in to each channel.
-
-| Channel    	| Branch    	| Debian feed 	| Debian package name 	| NuGet version 	| NuGet feed                            	|
-|------------	|-----------	|-------------	|---------------------	|---------------	|---------------------------------------	|
-| Future    	| master    	| Development 	| dotnet-future      	| 1.0.0-dev-*   	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Preview    	| rel/<ver> 	| Development 	| dotnet-sdk-<version>              	| 1.0.0-beta-*  	| https://dotnet.myget.org/f/dotnet-cli 	|
-| Production 	| rel/<ver> 	| Production  	| dotnet-sdk-<version>              	| 1.0.0         	| https://api.nuget.org/v3/index.json   	|
+| LTS              	| Latest long-term supported release. 	|
+| Current 	| Most current release - typically 'preview' releases. 	|
 
 
 ## Funnels and discovery mechanisms for CLI bits
 There are multiple ways that we will funnel users towards the installers for the CLI:
 
 1. [Getting Started Page](https://aka.ms/dotnetcoregs)
-2. [Repo landing page](https://github.com/dotnet/cli/blob/rel/1.0.0/README.md)
+2. [Repo landing page](../../README.md)
 3. Package repositories for platforms (`apt-get`, `brew` etc.)
 4. IDEs and editors that integrate with CLI (e.g. Visual Studio, VS Code, Sublime etc.)
 
@@ -152,11 +139,10 @@ The below table shows other pertinent information for installs on the "Getting s
 | Debian feed           	| Development                                                  	 |
 | Brew repo/tap           	| Brew binary repo (https://github.com/Homebrew/homebrew-binary) |
 | CentOS feed               | TBD                                                            |
-| Local install scripts 	| Latest from rel/1.0.0                                        	 |
 
 
 ### Repo landing page
-The repo landing page can be found on: https://github.com/dotnet/cli/blob/rel/1.0.0/README.md. Download links on the landing page should be decreased in importance. First thing for "you want to get started" section should link to the getting started page on the marketing site. The Repo Landing Page should be used primarily by contributors to the CLI. There should be a separate page that has instructions on how to install both the latest stable as well as latest development with proper warnings around it. The separate page is to really avoid the situation from people accidentally installing unstable bits (since search engines can drop them in the repo first). 
+The repo landing page can be found on: [Repo landing page](../../README.md). Download links on the landing page should be decreased in importance. First thing for "you want to get started" section should link to the getting started page on the marketing site. The Repo Landing Page should be used primarily by contributors to the CLI. There should be a separate page that has instructions on how to install both the latest stable as well as latest development with proper warnings around it. The separate page is to really avoid the situation from people accidentally installing unstable bits (since search engines can drop them in the repo first). 
 
 The source branches and other items are actually branch specific for the repo landing page. As the user switches branches, the links and badges on the page will change to reflect the builds from that branch.  
 
@@ -197,13 +183,12 @@ This install covers the following main scenario:
 
   
 The features the script needs to support/have are:
-* Support for dev and stable channel
+* Support for specifying the channel
 * Support for specifying the version
-* Support for specfying the installation location
-* Support specifying whether the debug package needs to be downloaded
+* Support for specifying the installation location
 * Automatically add the install to $PATH unless --no-path/-NoPath is present
 
-The installation script exists in this repo under `scripts/obtain` path. However, for most users it is reccomended to use the stable version that is hosted on [.NET Core main website](https://dot.net). The direct path to the scripts are:
+It is recommended to use the stable version that is hosted on [.NET Core main website](https://dot.net). The direct path to the scripts are:
 
 * https://dot.net/v1/dotnet-install.sh (bash, UNIX)
 * https://dot.net/v1/dotnet-install.ps1 (powershell, Windows)
@@ -214,10 +199,9 @@ The following arguments are needed for the installation script:
 
 | dotnet-install.sh arg (Linux, OSX) | dotnet-install.ps1 arg (Windows) | Defaults | Description |
 |------------------------------------|----------------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| --channel | -Channel | "production" | Which channel (i.e. "Future", "preview", "production", "release/1.1.0") to install from. |
-| --version | -Version | Latest | Which version of CLI to install; you need to specify the version as 3-part version (i.e. 1.0.0-13232). If omitted, it will default to Latest for that channel. |
+| --channel | -Channel | "LTS" | Which channel (i.e. "LTS", "Current", "1.0", "2.0", etc) to install from. |
+| --version | -Version | Latest | Which version of CLI to install; you need to specify the version as 3-part version (i.e. 1.0.0-13232). The 'version' parameter supersedes the 'channel' parameter. |
 | --install-dir | -InstallDir | .dotnet | Path to where to install the CLI bundle. The directory is created if it doesn't exist. On Linux/OSX this directory is created in the user home directory (`$HOME`). On Windows, this directory is created in `%LocalAppData%`. |
-| --debug-symbols | -DebugSymbols | false | Whether to use the "fat" packages that contain debugging symbols or not. |
 | --no-path | -NoPath | false | Do not export the installdir to the path for the current session. This makes CLI tools available immediately after install. |
 | --shared-runtime | -SharedRuntime | false | Install just the shared runtime bits, not the entire SDK. |
 | --architecture | -Architecture | Current OS (`<auto>`) | Architecture to install. The possible values are `<auto>`, `x64` and `x86`. |
@@ -231,46 +215,45 @@ The following arguments are needed for the installation script:
 
 Windows:
 ```
-./dotnet-install.ps1 -Channel 'release/1.1.0' -SharedRuntime -Version 1.1.1
+./dotnet-install.ps1 -SharedRuntime -Version 1.1.0
 ```
 
 macOS/Linux:
 ```
-./dotnet-install.sh --channel 'release/1.1.0' --shared-runtime --version 1.1.1
+./dotnet-install.sh --shared-runtime --version 1.1.0
 ```
 
-##### Install the latest Future CLI
-
-Windows:
-```
-./dotnet-install.ps1 -Channel Future
-```
-OSX/Linux:
-```
-./dotnet-install.sh --channel Future
-```
-
-##### Install the latest preview to specified location
+##### Install the latest supported CLI
 
 Windows:
 ```
-./dotnet-install.ps1 -Channel preview -InstallDir C:\cli
+./dotnet-install.ps1 -Channel LTS
 ```
 OSX/Linux:
 ```
-./dotnet-install.sh --channel preview --install-dir ~/cli
+./dotnet-install.sh --channel LTS
 ```
 
-#### Windows obtain one-liner example 
+##### Install the latest CLI to specified location
 
+Windows:
 ```
-@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1'))}"
+./dotnet-install.ps1 -Channel Current -InstallDir C:\cli
+```
+OSX/Linux:
+```
+./dotnet-install.sh --channel Current --install-dir ~/cli
 ```
 
-#### OSX/Linux obtain one-liner
+##### Install the latest CLI in the 2.0 channel
 
+Windows:
 ```
-curl -sSL https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh | bash /dev/stdin <additional args> 
+./dotnet-install.ps1 -Channel 2.0
+```
+OSX/Linux:
+```
+./dotnet-install.sh --channel 2.0
 ```
 
 ### Docker 
