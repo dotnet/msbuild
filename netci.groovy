@@ -1,6 +1,5 @@
 // Import the utility functionality.
-import jobs.generation.Utilities;
-import jobs.generation.JobReport;
+import jobs.generation.*;
 
 // The input project name
 def project = GithubProject
@@ -21,7 +20,10 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
             runtimes.add('Full')
         }
 
-        // TODO: Mono
+        // TODO: make this !windows once Mono 5.0+ is available in an OSX image
+        if (osName.startsWith('Ubuntu')) {
+            runtimes.add('Mono')
+        }
 
         runtimes.each { runtime ->
             def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}", isPR)
@@ -59,7 +61,17 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                 case 'OSX':
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            def buildCmd = "./cibuild.sh --target ${runtime}"
+
+                            if (runtime == "Mono") {
+                                // tests are failing on mono right now
+                                buildCmd += " --scope Compile --host Mono"
+                            }
+                            else {
+                                buildCmd += " --scope Test"
+                            }
+
+                            shell(buildCmd)
                         }
                     }
 
@@ -67,7 +79,17 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            def buildCmd = "./cibuild.sh --target ${runtime}"
+
+                            if (runtime == "Mono") {
+                                // tests are failing on mono right now
+                                buildCmd += " --scope Compile --host Mono"
+                            }
+                            else {
+                                buildCmd += " --scope Test"
+                            }
+
+                            shell(buildCmd)
                         }
                     }
 
@@ -87,9 +109,23 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                                   false, /* archiveOnlyIfSuccessful */)
             // Add trigger
             if (isPR) {
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} Build for ${runtime}")
+                TriggerBuilder prTrigger = TriggerBuilder.triggerOnPullRequest()
+
+                if (runtime == "Mono") {
+                    // Until they're passing reliably, require opt in
+                    // for Mono tests
+                    prTrigger.setCustomTriggerPhrase("(?i).*test\\W+mono.*")
+                    prTrigger.triggerOnlyOnComment()
+                }
+
+                prTrigger.triggerForBranch(branch)
+                // Set up what shows up in Github:
+                prTrigger.setGithubContext("${osName} Build for ${runtime}")
+                prTrigger.emitTrigger(newJob)
             } else {
-                Utilities.addGithubPushTrigger(newJob)
+                if (runtime != "Mono") {
+                    Utilities.addGithubPushTrigger(newJob)
+                }
             }
         }
     }
