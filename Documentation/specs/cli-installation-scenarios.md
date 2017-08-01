@@ -17,8 +17,6 @@ Obtaining .NET CLI
 * [Acquisition modes](#acquisition-modes)
   * [Native installers](#native-installers)
   * [Installation script](#installation-script)
-    * [Windows one-liner](#windows-command)
-    * [OSX/Linux one-liner](#osxlinux-shell-command)
   * [Complete manual installation](#complete-manual-installation)
   * [Docker](#docker)
   * [NuGet Packages](#nuget-packages)
