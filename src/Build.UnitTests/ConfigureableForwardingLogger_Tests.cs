@@ -166,71 +166,94 @@ namespace Microsoft.Build.UnitTests
         public void ForwardingLoggingPerformanceSummary()
         {
             EventSourceSink source = new EventSourceSink();
-            TestForwardingLogger logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Parameters = "PERFORMANCESUMMARY";
-            logger.Verbosity = LoggerVerbosity.Quiet;
+
+            TestForwardingLogger logger = new TestForwardingLogger
+            {
+                BuildEventRedirector = null,
+                Parameters = "PERFORMANCESUMMARY",
+                Verbosity = LoggerVerbosity.Quiet
+            };
+
             logger.Initialize(source, 4);
+
             RaiseEvents(source);
-            logger.ForwardedEvents.Count.ShouldBe(10);
-            logger.ForwardedEvents.ShouldContain(_buildStarted);
-            logger.ForwardedEvents.ShouldContain(_buildFinished);
-            logger.ForwardedEvents.ShouldContain(_error);
-            logger.ForwardedEvents.ShouldContain(_warning);
-            logger.ForwardedEvents.ShouldContain(_projectStarted);
-            logger.ForwardedEvents.ShouldContain(_projectFinished);
-            logger.ForwardedEvents.ShouldContain(_targetStarted);
-            logger.ForwardedEvents.ShouldContain(_targetFinished);
-            logger.ForwardedEvents.ShouldContain(_taskStarted);
-            logger.ForwardedEvents.ShouldContain(_taskFinished);
+
+            logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+            {
+                _buildStarted,
+                _projectStarted,
+                _targetStarted,
+                _taskStarted,
+                _warning,
+                _error,
+                _taskFinished,
+                _targetFinished,
+                _projectFinished,
+                _buildFinished,
+            });
         }
 
         [Fact]
         public void ForwardingLoggingNoSummary()
         {
             EventSourceSink source = new EventSourceSink();
-            TestForwardingLogger logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Normal;
-            logger.Parameters = "NOSUMMARY";
+            TestForwardingLogger logger = new TestForwardingLogger
+            {
+                BuildEventRedirector = null,
+                Verbosity = LoggerVerbosity.Normal,
+                Parameters = "NOSUMMARY"
+            };
+
             logger.Initialize(source, 4);
+
             RaiseEvents(source);
-            logger.ForwardedEvents.Count.ShouldBe(11);
-            logger.ForwardedEvents.ShouldContain(_buildStarted);
-            logger.ForwardedEvents.ShouldContain(_buildFinished);
-            logger.ForwardedEvents.ShouldContain(_error);
-            logger.ForwardedEvents.ShouldContain(_warning);
-            logger.ForwardedEvents.ShouldContain(_highMessage);
-            logger.ForwardedEvents.ShouldContain(_normalMessage);
-            logger.ForwardedEvents.ShouldContain(_projectStarted);
-            logger.ForwardedEvents.ShouldContain(_projectFinished);
-            logger.ForwardedEvents.ShouldContain(_targetStarted);
-            logger.ForwardedEvents.ShouldContain(_targetFinished);
-            logger.ForwardedEvents.ShouldContain(_commandLine);
+
+            logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+            {
+                _buildStarted,
+                _projectStarted,
+                _targetStarted,
+                _normalMessage,
+                _highMessage,
+                _commandLine,
+                _warning,
+                _error,
+                _targetFinished,
+                _projectFinished,
+                _buildFinished,
+            });
         }
 
         [Fact]
         public void ForwardingLoggingShowCommandLine()
         {
             EventSourceSink source = new EventSourceSink();
-            TestForwardingLogger logger = new TestForwardingLogger();
-            logger.BuildEventRedirector = null;
-            logger.Verbosity = LoggerVerbosity.Normal;
-            logger.Parameters = "SHOWCOMMANDLINE";
+
+            TestForwardingLogger logger = new TestForwardingLogger
+            {
+                BuildEventRedirector = null,
+                Verbosity = LoggerVerbosity.Normal,
+                Parameters = "SHOWCOMMANDLINE"
+            };
+
             logger.Initialize(source, 4);
+
             RaiseEvents(source);
-            logger.ForwardedEvents.Count.ShouldBe(11);
-            logger.ForwardedEvents.ShouldContain(_buildStarted);
-            logger.ForwardedEvents.ShouldContain(_buildFinished);
-            logger.ForwardedEvents.ShouldContain(_error);
-            logger.ForwardedEvents.ShouldContain(_warning);
-            logger.ForwardedEvents.ShouldContain(_highMessage);
-            logger.ForwardedEvents.ShouldContain(_normalMessage);
-            logger.ForwardedEvents.ShouldContain(_projectStarted);
-            logger.ForwardedEvents.ShouldContain(_projectFinished);
-            logger.ForwardedEvents.ShouldContain(_targetStarted);
-            logger.ForwardedEvents.ShouldContain(_targetFinished);
-            logger.ForwardedEvents.ShouldContain(_commandLine);
+
+            logger.ForwardedEvents.ShouldBe(new BuildEventArgs[]
+            {
+                _buildStarted,
+                _projectStarted,
+                _targetStarted,
+                _normalMessage,
+                _highMessage,
+                _commandLine,
+                _warning,
+                _error,
+                _targetFinished,
+                _projectFinished,
+                _buildFinished,
+            });
         }
 
         private void RaiseEvents(EventSourceSink source)
