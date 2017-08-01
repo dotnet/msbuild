@@ -2545,6 +2545,7 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     {
         Complete = (uint)4294967295,
         Local = (uint)1,
+        NoErrors = (uint)8,
         None = (uint)0,
         NoRebootRequired = (uint)4,
         Registered = (uint)2,

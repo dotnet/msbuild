@@ -76,7 +76,7 @@
   </PropertyGroup>
 
   <!-- TODO: enable for all runtime hosts https://github.com/Microsoft/msbuild/issues/694 -->
-  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets"
+  <Import Project="$(GitVersioningDir)Nerdbank.GitVersioning.targets"
           Condition="'$(MSBuildRuntimeType)' == 'Full' And '$(IsTestProject)' != 'true' " />
   <PropertyGroup Condition="'$(MSBuildRuntimeType)' != 'Full'">
     <DefineConstants>$(DefineConstants);STATIC_VERSION_NUMBER</DefineConstants>
