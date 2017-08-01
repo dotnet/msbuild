@@ -265,24 +265,6 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Verify that the converting collection functions.
-        /// </summary>
-        [Fact]
-        public void ReadOnlyConvertingCollection()
-        {
-            string[] source = { "1", "2", "3" };
-            ReadOnlyConvertingCollection<string, int> convertingCollection = new ReadOnlyConvertingCollection<string, int>(source, delegate (string x) { return Convert.ToInt32(x); });
-            Assert.Equal(3, convertingCollection.Count);
-            Assert.True(convertingCollection.IsReadOnly);
-
-            int index = 1;
-            foreach (int value in convertingCollection)
-            {
-                Assert.Equal(index++, value);
-            }
-        }
-
-        /// <summary>
         /// Verify that the converting dictionary functions.
         /// </summary>
         [Fact]

@@ -61,7 +61,13 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public ICollection<N> Values
         {
-            get { return new ReadOnlyConvertingCollection<V, N>(_backing.Values, _converter); }
+            get
+            {
+                ErrorUtilities.ThrowInternalError("Values is not supported on ReadOnlyConvertingDictionary.");
+
+                // Show the compiler that this always throws:
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
