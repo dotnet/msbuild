@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity = LoggerVerbosity.Diagnostic;
             logger.Initialize(source, 4);
             RaiseEvents(source);
-            logger.forwardedEvents.Count.ShouldBe(16);
+            logger.forwardedEvents.Count.ShouldBe(15);
             logger.forwardedEvents.ShouldContain(_buildStarted);
             logger.forwardedEvents.ShouldContain(_buildFinished);
             logger.forwardedEvents.ShouldContain(_error);
