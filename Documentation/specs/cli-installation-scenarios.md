@@ -183,13 +183,12 @@ This install covers the following main scenario:
 
   
 The features the script needs to support/have are:
-* Support for dev and stable channel
+* Support for specifying the channel
 * Support for specifying the version
-* Support for specfying the installation location
-* Support specifying whether the debug package needs to be downloaded
+* Support for specifying the installation location
 * Automatically add the install to $PATH unless --no-path/-NoPath is present
 
-The installation script exists in this repo under `scripts/obtain` path. However, for most users it is reccomended to use the stable version that is hosted on [.NET Core main website](https://dot.net). The direct path to the scripts are:
+It is recommended to use the stable version that is hosted on [.NET Core main website](https://dot.net). The direct path to the scripts are:
 
 * https://dot.net/v1/dotnet-install.sh (bash, UNIX)
 * https://dot.net/v1/dotnet-install.ps1 (powershell, Windows)
