@@ -225,6 +225,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-add-package.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tool_fsc", "src\tool_fsharp\tool_fsc.csproj", "{602976C5-2477-4B4C-AD9A-1EAFB250529A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdkResolver", "src\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.DotNet.MSBuildSdkResolver.csproj", "{FCDFAF40-CC16-4D49-96C0-E49F195E7142}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1537,6 +1539,30 @@ Global
 		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
 		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|x64.Build.0 = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Debug|x86.Build.0 = Debug|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|Any CPU.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|Any CPU.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|x64.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|x64.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|x86.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.MinSizeRel|x86.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|x64.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|x64.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|x86.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.Release|x86.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1604,6 +1630,7 @@ Global
 		{3F7D56A3-A280-467E-8916-C18659C243BA} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
 		{B1AEC227-5115-44BC-92D2-B1B3545E1DDE} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{08A40B6A-F695-4EA9-AC8D-CF88FADEA796} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{FCDFAF40-CC16-4D49-96C0-E49F195E7142} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B526D2CE-EE2D-4AD4-93EF-1867D90FF1F5}
