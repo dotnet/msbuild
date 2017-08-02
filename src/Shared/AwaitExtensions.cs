@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -24,21 +23,11 @@ namespace Microsoft.Build.Shared
         /// Synchronizes access to the staScheduler field.
         /// </summary>
         private static Object s_staSchedulerSync = new Object();
-        /// <summary>
-        /// Synchronizes access to the dedicatedSchedulerSync field.
-        /// </summary>
-        private static Object s_dedicatedSchedulerSync = new Object();
 
         /// <summary>
         /// The singleton STA scheduler object.
         /// </summary>
         private static TaskScheduler s_staScheduler;
-
-        /// <summary>
-        /// The singleton dedicated scheduler object.
-        /// </summary>
-        private static TaskScheduler s_dedicatedScheduler;
-
 
         /// <summary>
         /// Gets the STA scheduler.
@@ -59,28 +48,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return s_staScheduler;
-            }
-        }
-
-        /// <summary>
-        /// Gets the dedicated scheduler.
-        /// </summary>
-        internal static TaskScheduler DedicatedThreadsTaskSchedulerInstance
-        {
-            get
-            {
-                if (s_dedicatedScheduler == null)
-                {
-                    lock (s_dedicatedSchedulerSync)
-                    {
-                        if (s_dedicatedScheduler == null)
-                        {
-                            s_dedicatedScheduler = new DedicatedThreadsTaskScheduler();
-                        }
-                    }
-                }
-
-                return s_dedicatedScheduler;
             }
         }
 
@@ -233,58 +200,6 @@ namespace Microsoft.Build.Shared
             {
                 // We don't get STA threads back here, so just deny the inline execution.
                 return false;
-            }
-        }
-
-        private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
-        {
-            private readonly BlockingCollection<Task> _tasks = new BlockingCollection<Task>();
-            private int _availableThreads = 0;
-
-            protected override void QueueTask(Task task)
-            {
-                RequestThread();
-                _tasks.Add(task);
-            }
-
-            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
-
-            protected override IEnumerable<Task> GetScheduledTasks() => _tasks;
-
-            private void RequestThread()
-            {
-                // Decrement available thread count; don't drop below zero
-                // Prior value is stored in count
-                var count = Volatile.Read(ref _availableThreads);
-                while (count > 0)
-                {
-                    var prev = Interlocked.CompareExchange(ref _availableThreads, count - 1, count);
-                    if (prev == count)
-                    {
-                        break;
-                    }
-                    count = prev;
-                }
-
-                if (count == 0)
-                {
-                    // No threads were available for request
-                    InjectThread();
-                }
-            }
-
-            private void InjectThread()
-            {
-                var thread = new Thread(() =>
-                {
-                    foreach (Task t in _tasks.GetConsumingEnumerable())
-                    {
-                        TryExecuteTask(t);
-                        Interlocked.Increment(ref _availableThreads);
-                    }
-                });
-                thread.IsBackground = true;
-                thread.Start();
             }
         }
     }
