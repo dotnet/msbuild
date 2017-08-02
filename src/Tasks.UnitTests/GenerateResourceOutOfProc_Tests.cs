@@ -12,6 +12,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using System.IO;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
@@ -527,44 +528,54 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         {
             string resxFile = null;
             string resourcesFile = null;
-            string systemDll = Utilities.GetPathToCopiedSystemDLL();
+            string stateFile = Utilities.GetTempFileName(".cache");
+            string localSystemDll = Utilities.GetPathToCopiedSystemDLL();
 
             try
             {
                 resxFile = Utilities.WriteTestResX(true /* uses system type */, null, null);
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
-                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
-                Utilities.ExecuteTask(t);
+                _output.WriteLine("** Running task to create resources.");
 
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+                GenerateResource initialCreator = Utilities.CreateTaskOutOfProc(_output);
+                initialCreator.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                initialCreator.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                initialCreator.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(initialCreator);
 
-                // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
-                t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t2.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t2.StateFile = new TaskItem(t.StateFile);
-                Utilities.ExecuteTask(t2);
-                Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
+                DateTime firstWriteTime = File.GetLastWriteTime(initialCreator.OutputResources[0].ItemSpec);
 
-                // Touch the reference, and repeat, it should now rebuild
+                _output.WriteLine("** Repeat, and it should do nothing as they are up to date");
+
+                GenerateResource incrementalUpToDate = Utilities.CreateTaskOutOfProc(_output);
+                incrementalUpToDate.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                incrementalUpToDate.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                incrementalUpToDate.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(incrementalUpToDate);
+
+                File.GetLastWriteTime(incrementalUpToDate.OutputResources[0].ItemSpec).ShouldBe(firstWriteTime);
+
+                _output.WriteLine("** Touch the reference, and repeat, it should now rebuild");
+
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
-                File.SetLastWriteTime(systemDll, newTime);
-                GenerateResource t3 = Utilities.CreateTaskOutOfProc(_output);
-                t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t3.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t3.StateFile = new TaskItem(t.StateFile);
-                Utilities.ExecuteTask(t3);
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
-                resourcesFile = t3.OutputResources[0].ItemSpec;
+                File.SetLastWriteTime(localSystemDll, newTime);
+
+                GenerateResource incrementalOutOfDate = Utilities.CreateTaskOutOfProc(_output);
+                incrementalOutOfDate.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                incrementalOutOfDate.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                incrementalOutOfDate.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(incrementalOutOfDate);
+
+                File.GetLastWriteTime(incrementalOutOfDate.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
+
+                resourcesFile = incrementalOutOfDate.OutputResources[0].ItemSpec;
             }
             finally
             {
                 if (resxFile != null) File.Delete(resxFile);
                 if (resourcesFile != null) File.Delete(resourcesFile);
-                if (systemDll != null) File.Delete(systemDll);
+                if (stateFile != null) File.Delete(stateFile);
+                if (localSystemDll != null) File.Delete(localSystemDll);
             }
         }
 
