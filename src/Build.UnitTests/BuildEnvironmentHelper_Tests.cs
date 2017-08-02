@@ -386,6 +386,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentVSFromMSBuildAssembly()
         {
             using (var env = new EmptyVSEnviroment())
@@ -403,6 +405,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
         {
             using (var env = new EmptyVSEnviroment())
