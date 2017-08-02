@@ -22,7 +22,7 @@ namespace Microsoft.Build.Collections
         ///  0, if hashtables have identical keys and equivalent (case-insensitive) values
         /// +1, if first hashtable is "greater than" the second one
         /// </returns>
-        internal static int Compare(IDictionary<string, string> h1, IDictionary<string, string> h2)
+        internal static int Compare(Dictionary<string, string> h1, Dictionary<string, string> h2)
         {
             if (h1 == h2) // eg null
             {
