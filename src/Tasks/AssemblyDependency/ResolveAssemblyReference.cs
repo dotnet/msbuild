@@ -971,9 +971,10 @@ namespace Microsoft.Build.Tasks
                             AssemblyName idealRemappingPartialAssemblyName = idealRemapping.PartialAssemblyName;
                             Reference reference = idealAssemblyRemappingsIdentities[i].reference;
 
+                            AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
+
                             for (int j = 0; j < idealRemapping.BindingRedirects.Length; j++)
                             {
-                                AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
                                 foreach (AssemblyNameExtension conflictVictim in conflictVictims)
                                 {
                                     // Make note we only output a conflict suggestion if the reference has at 
@@ -1033,13 +1034,13 @@ namespace Microsoft.Build.Tasks
                                         buffer.Append(node.ToString(SaveOptions.DisableFormatting));
                                     }
                                 }
+                            }
 
-                                if (conflictVictims.Length == 0)
-                                {
-                                    // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
-                                    // chosen was not the conflict victor in a version comparison, in other words it was older.
-                                    Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", idealRemappingPartialAssemblyName.Name);
-                                }
+                            if (conflictVictims.Length == 0)
+                            {
+                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
+                                // chosen was not the conflict victor in a version comparison, in other words it was older.
+                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", idealRemappingPartialAssemblyName.Name);
                             }
                         }
 
