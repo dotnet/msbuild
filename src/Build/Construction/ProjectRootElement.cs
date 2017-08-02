@@ -1914,10 +1914,14 @@ namespace Microsoft.Build.Construction
         {
             var nodes = new List<ProjectImportElement>();
 
-            foreach (var referencedSdk in ParseSdks(Sdk, SdkLocation))
+            string sdk = Sdk;
+            if (!string.IsNullOrWhiteSpace(sdk))
             {
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+                foreach (var referencedSdk in ParseSdks(sdk, SdkLocation))
+                {
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk));
+                }
             }
 
             foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
@@ -1936,11 +1940,6 @@ namespace Microsoft.Build.Construction
 
         private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
         {
-            if (String.IsNullOrWhiteSpace(sdks))
-            {
-                yield break;
-            }
-
             foreach (string sdk in sdks.Split(';').Select(i => i.Trim()))
             {
                 SdkReference sdkReference;
