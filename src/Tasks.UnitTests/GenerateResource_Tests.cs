@@ -2512,6 +2512,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2522,7 +2523,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem(NativeMethodsShared.IsWindows ? "||" : "\0") };
+                t.OutputResources = new ITaskItem[] { new TaskItem( "||" ) };
 
                 bool success = t.Execute();
 
