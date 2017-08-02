@@ -352,54 +352,55 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void ForceSomeOutOfDate()
         {
-            string resxFile = null;
-            string resxFile2 = null;
+            string firstResx = null;
+            string secondResx = null;
             string cache = null;
 
             try
             {
-                resxFile = Utilities.WriteTestResX(false, null, null);
-                resxFile2 = Utilities.WriteTestResX(false, null, null);
+                firstResx = Utilities.WriteTestResX(false, null, null);
+                secondResx = Utilities.WriteTestResX(false, null, null);
                 cache = Utilities.GetTempFileName(".cache");
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
-                t.StateFile = new TaskItem(cache);
-                t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
+                GenerateResource createResources = Utilities.CreateTaskOutOfProc(_output);
+                createResources.StateFile = new TaskItem(cache);
+                createResources.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-                // Transform both
-                Utilities.ExecuteTask(t);
+                _output.WriteLine("Transform both");
+                Utilities.ExecuteTask(createResources);
 
-                // Create a new task to transform them again
+                _output.WriteLine("Get current write times of outputs");
+                DateTime firstOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[0].ItemSpec);
+                DateTime secondOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[1].ItemSpec);
+
+                _output.WriteLine("Create a new task to transform them again");
                 GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
-                t2.StateFile = new TaskItem(t.StateFile.ItemSpec);
-                t2.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
+                t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
+                t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-                // Get current write times of outputs
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
                 System.Threading.Thread.Sleep(200);
-                // Touch one input
-                File.SetLastWriteTime(resxFile, DateTime.Now);
+                _output.WriteLine("Touch one input");
+                File.SetLastWriteTime(firstResx, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
 
-                // Check only one output was updated
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
-                Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+                _output.WriteLine("Check only one output was updated");
+                File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstOutputCreationTime);
+                File.GetLastWriteTime(t2.OutputResources[1].ItemSpec).ShouldBe(secondOutputCreationTime);
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
-                Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
-                Assert.Equal(t2.OutputResources[1].ItemSpec, t.OutputResources[1].ItemSpec);
-                Assert.Equal(t2.FilesWritten[0].ItemSpec, t.FilesWritten[0].ItemSpec);
-                Assert.Equal(t2.FilesWritten[1].ItemSpec, t.FilesWritten[1].ItemSpec);
+                t2.OutputResources[0].ItemSpec.ShouldBe(createResources.OutputResources[0].ItemSpec);
+                t2.OutputResources[1].ItemSpec.ShouldBe(createResources.OutputResources[1].ItemSpec);
+                t2.FilesWritten[0].ItemSpec.ShouldBe(createResources.FilesWritten[0].ItemSpec);
+                t2.FilesWritten[1].ItemSpec.ShouldBe(createResources.FilesWritten[1].ItemSpec);
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resxFile2) File.Delete(resxFile2);
+                if (null != firstResx) File.Delete(firstResx);
+                if (null != secondResx) File.Delete(secondResx);
                 if (null != cache) File.Delete(cache);
-                if (null != resxFile) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (null != resxFile2) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (null != firstResx) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
+                if (null != secondResx) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
             }
         }
 
