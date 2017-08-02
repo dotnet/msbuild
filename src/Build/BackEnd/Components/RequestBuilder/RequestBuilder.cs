@@ -625,8 +625,8 @@ namespace Microsoft.Build.BackEnd
                             return this.RequestThreadProc(setThreadParameters: true);
                         },
                         _cancellationTokenSource.Token,
-                        TaskCreationOptions.LongRunning,
-                        TaskScheduler.Default).Unwrap();
+                        TaskCreationOptions.None,
+                        AwaitExtensions.DedicatedThreadsTaskSchedulerInstance).Unwrap();
                 }
             }
         }
@@ -658,8 +658,10 @@ namespace Microsoft.Build.BackEnd
                 threadName = "RequestBuilder STA thread";
             }
 #endif
-
-            Thread.CurrentThread.Name = threadName;
+            if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
+            {
+                Thread.CurrentThread.Name = threadName;
+            }
         }
 
         /// <summary>
