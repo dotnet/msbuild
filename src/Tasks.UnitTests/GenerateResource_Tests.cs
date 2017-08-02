@@ -12,6 +12,7 @@ using Microsoft.Build.Shared;
 
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
@@ -19,6 +20,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
     [Trait("Category", "mono-windows-failing")]
     sealed public class RequiredTransformations
     {
+        private readonly ITestOutputHelper _output;
+
+        public RequiredTransformations(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
@@ -34,7 +42,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             string resxFile = null;
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -99,7 +107,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string expectedOutFile2 = Path.Combine(Path.GetTempPath(), Utilities.GetTempFileName(".resources"));
             string expectedOutFile3 = Path.Combine(Path.GetTempPath(), Utilities.GetTempFileName(".resources"));
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] {
                 new TaskItem(resxFile0), new TaskItem(resxFile1), new TaskItem(resxFile2), new TaskItem(resxFile3) };
 
@@ -128,7 +136,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void BasicText2Resources()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -179,7 +187,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
 
                 resxFile = Utilities.WriteTestResX(true /*system type*/, null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -212,24 +220,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void BasicResources2ResX()
         {
-            string resourcesFile = Utilities.CreateBasicResourcesFile(false);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(false, _output);
 
             // Fork 1: create a resx file directly from the resources
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
             Utilities.ExecuteTask(t);
             Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
             // Fork 2a: create a text file from the resources
-            GenerateResource t2a = Utilities.CreateTask();
+            GenerateResource t2a = Utilities.CreateTask(_output);
             t2a.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".txt")) };
             Utilities.ExecuteTask(t2a);
             Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".txt");
 
             // Fork 2b: create a resx file from the text file
-            GenerateResource t2b = Utilities.CreateTask();
+            GenerateResource t2b = Utilities.CreateTask(_output);
             t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
             t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
             Utilities.ExecuteTask(t2b);
@@ -259,9 +267,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void BasicResources2Text()
         {
-            string resourcesFile = Utilities.CreateBasicResourcesFile(false);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(false, _output);
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
 
@@ -291,7 +299,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -308,7 +316,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
 #endif
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -354,7 +362,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -372,7 +380,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.AssertStateFileWasWritten(t);
 #endif
 
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -415,7 +423,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resxFile2 = Utilities.WriteTestResX(false, null, null);
                 cache = Utilities.GetTempFileName(".cache");
 
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.StateFile = new TaskItem(cache);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
 
@@ -423,7 +431,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.ExecuteTask(t);
 
                 // Create a new task to transform them again
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile.ItemSpec);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
 
@@ -478,7 +486,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
@@ -496,7 +504,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -537,7 +545,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 txtFile = Utilities.WriteTestText(null, null);
 
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(txtFile) };
                 resourcesFile1 = Path.ChangeExtension(resxFile, ".resources");
@@ -555,7 +563,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
 
                 // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(txtFile) };
 
@@ -603,7 +611,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             {
                 resxFile = Utilities.WriteTestResX(true /* uses system type */, null, null);
 
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
@@ -612,7 +620,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
                 // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t2.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t2.StateFile = new TaskItem(t.StateFile);
@@ -622,7 +630,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Touch the reference, and repeat, it should now rebuild
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
                 File.SetLastWriteTime(systemDll, newTime);
-                GenerateResource t3 = Utilities.CreateTask();
+                GenerateResource t3 = Utilities.CreateTask(_output);
                 t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
@@ -669,14 +677,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     }
                 }
 
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.AdditionalInputs = additionalInputs;
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
                 Utilities.ExecuteTask(t);
 
                 // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTask();
+                GenerateResource t2 = Utilities.CreateTask(_output);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t2.AdditionalInputs = additionalInputs;
                 t2.StateFile = new TaskItem(t.StateFile);
@@ -686,7 +694,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Touch one of the additional inputs and repeat, it should now rebuild
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
                 File.SetLastWriteTime(additionalInputs[1].ItemSpec, newTime);
-                GenerateResource t3 = Utilities.CreateTask();
+                GenerateResource t3 = Utilities.CreateTask(_output);
                 t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t3.AdditionalInputs = additionalInputs;
                 t3.StateFile = new TaskItem(t.StateFile);
@@ -713,7 +721,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void BasicText2ResX()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
@@ -745,24 +753,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void ResX2ResX()
         {
-            string resourcesFile = Utilities.CreateBasicResourcesFile(true);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(true, _output);
 
             // Step 1: create a resx file directly from the resources, to get a framework generated resx
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
             Utilities.ExecuteTask(t);
             Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
             // Step 2a: create a resources file from the resx
-            GenerateResource t2a = Utilities.CreateTask();
+            GenerateResource t2a = Utilities.CreateTask(_output);
             t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
             t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
             Utilities.ExecuteTask(t2a);
             Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
 
             // Step 2b: create a resx from the resources
-            GenerateResource t2b = Utilities.CreateTask();
+            GenerateResource t2b = Utilities.CreateTask(_output);
             t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
             t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
             File.Delete(t2b.OutputResources[0].ItemSpec);
@@ -794,7 +802,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string textFile = Utilities.WriteTestText(null, null);
 
             // Round 1, do the Text2Resource
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
 
             Utilities.ExecuteTask(t);
@@ -804,7 +812,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
             // round 2, do the resources2Text from the same file
-            GenerateResource t2 = Utilities.CreateTask();
+            GenerateResource t2 = Utilities.CreateTask(_output);
 
             t2.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             string outputFile = Utilities.GetTempFileName(".txt");
@@ -835,7 +843,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void StronglyTypedResources()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -896,8 +904,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void StronglyTypedResourcesUpToDate()
         {
-            GenerateResource t = Utilities.CreateTask();
-            GenerateResource t2 = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
+            GenerateResource t2 = Utilities.CreateTask(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -988,7 +996,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 resourcesFile = Utilities.GetTempFileName(".resources");
                 strFile = Path.ChangeExtension(resourcesFile, ".cs"); // STR filename should be generated from output not input filename
@@ -1016,7 +1024,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // but we'd know if they were updated (this is quicker than sleeping and okay as there's no cache being used)
                 Utilities.MoveBackTimestamp(resxFile, 1);
                 DateTime strTime = Utilities.MoveBackTimestamp(strFile, 1);
-                t = Utilities.CreateTask();
+                t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -1029,7 +1037,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 File.Delete(strFile);
 
                 // Repeat. It should recreate the STR class file
-                t = Utilities.CreateTask();
+                t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -1046,7 +1054,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 // Repeat, but specify the filename this time, instead of having it generated from the output resources
                 // It should recreate the STR class file again
-                t = Utilities.CreateTask();
+                t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -1078,7 +1086,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
 
                 txtFile = Utilities.WriteTestText(null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(txtFile) };
@@ -1131,7 +1139,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void StronglyTypedResourcesVB()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -1191,7 +1199,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void StronglyTypedResourcesWithoutNamespaceOrClassOrFilename()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -1248,7 +1256,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void STRWithResourcesNamespaceCS()
         {
-            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null);
+            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null, _output);
         }
 
         /// <summary>
@@ -1261,7 +1269,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void STRWithResourcesNamespaceVB()
         {
-            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null);
+            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null, _output);
         }
 
         /// <summary>
@@ -1274,7 +1282,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void STRWithResourcesNamespaceAndSTRNamespaceCS()
         {
-            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace");
+            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace", _output);
         }
 
         /// <summary>
@@ -1287,12 +1295,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
-            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace");
+            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
         }
     }
 
     sealed public class TransformationErrors
     {
+        private readonly ITestOutputHelper _output;
+
+        public TransformationErrors(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Text input failures, no name, no '=', 'strings' token, invalid token, invalid escape
         /// </summary>
@@ -1324,7 +1339,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             foreach (string[] test in tests)
             {
-                t = Utilities.CreateTask();
+                t = Utilities.CreateTask(_output);
 
                 textFile = Utilities.WriteTestText(null, test[0]);
                 t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1338,7 +1353,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
 
             // text file uses the strings token; since it's only a warning we have to have special asserts
-            t = Utilities.CreateTask();
+            t = Utilities.CreateTask(_output);
 
             textFile = Utilities.WriteTestText(null, "[strings]");
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1367,7 +1382,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 // Invalid one
@@ -1419,7 +1434,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 // Invalid one
@@ -1475,7 +1490,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void DuplicateResourceNames()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string textFile = Utilities.WriteTestText(null, "Marley=some guy from Jamaica");
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1505,7 +1520,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
             t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resxFile, ".txt")) };
@@ -1533,7 +1548,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.StateFile = new TaskItem("||//invalid filename||");
@@ -1565,7 +1580,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void FailedResourceReader()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             // to cause a failure, we're going to transform a bad .resources file to a .resx
@@ -1599,7 +1614,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #endif
         public void FailedSTRProperty()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             string textFile = Utilities.WriteTestText(null, "object=some string");
@@ -1641,7 +1656,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
 
                 // Create resx with invalid ref "INVALID"
                 txtFile = Utilities.WriteTestResX(false, null, null, true /*data with invalid type*/);
@@ -1667,6 +1682,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
     sealed public class PropertyHandling
     {
+        private readonly ITestOutputHelper _output;
+
+        public PropertyHandling(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Sources attributes are copied to given OutputResources
         /// </summary>
@@ -1678,7 +1700,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing AttributeForwarding() test");
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string resxFile = Utilities.WriteTestResX(false, null, null);
             ITaskItem i = new TaskItem(resxFile);
@@ -1714,7 +1736,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void AttributeForwardingOnEmptyOutputs()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string resxFile = Utilities.WriteTestResX(false, null, null);
             ITaskItem i = new TaskItem(resxFile);
@@ -1742,7 +1764,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void OutputFilesNotSpecified()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
                 new TaskItem( Utilities.WriteTestResX(false, null, null) ),
@@ -1773,7 +1795,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void FilesWrittenSet()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
                 new TaskItem( Utilities.WriteTestResX(false, null, null) ),
@@ -1817,7 +1839,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void OutputFilesPartialInputs()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             try
             {
@@ -1896,7 +1918,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             try
             {
@@ -1947,7 +1969,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             try
             {
@@ -1990,6 +2012,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
     sealed public class PropertyErrors
     {
+        private readonly ITestOutputHelper _output;
+
+        public PropertyErrors(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Empty Sources yields message, success
         /// </summary>
@@ -2001,7 +2030,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing EmptySources() test");
 
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             Utilities.ExecuteTask(t);
             Utilities.AssertLogContainsResource(t, "GenerateResource.NoSources", "");
             if (t.FilesWritten != null)
@@ -2020,7 +2049,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void ReferencesToBadAssemblies()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             string textFile = null;
 
             try
@@ -2054,7 +2083,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2089,7 +2118,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void StateFileUnwritable()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -2125,7 +2154,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void InputFileExtension()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string newTextFile = Path.ChangeExtension(textFile, ".foo");
@@ -2156,7 +2185,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void OutputFileExtension()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string resxFile = Path.ChangeExtension(textFile, ".foo");
@@ -2186,7 +2215,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         public void SourcesMatchesOutputResources()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string resxFile = Path.ChangeExtension(textFile, ".resources");
@@ -2221,7 +2250,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             string textFile = Utilities.WriteTestText(null, null);
@@ -2259,7 +2288,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 resxFile2 = Utilities.WriteTestResX(false, null, null);
 
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
                 t.StronglyTypedLanguage = "VisualBasic";
 
@@ -2294,7 +2323,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 txtFile = Utilities.WriteTestText(null, null);
@@ -2331,7 +2360,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2365,7 +2394,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2399,7 +2428,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2439,7 +2468,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2478,7 +2507,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
@@ -2499,6 +2528,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
     public class References
     {
+        private readonly ITestOutputHelper _output;
+
+        public References(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
@@ -2646,7 +2682,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             // Run the GenerateResource task on the above .RESX file, passing in an unused reference
             // to lib1.dll.
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] { new TaskItem(Path.Combine(ObjectModelHelpers.TempProjectDir, "MyStrings.resx")) };
             t.UseSourcePath = false;
             t.NeverLockTypeAssemblies = false;
@@ -2799,7 +2835,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             // Run the GenerateResource task on the above .RESX file, passing in an unused reference
             // to lib1.dll.
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(_output);
             t.Sources = new ITaskItem[] { new TaskItem(Path.Combine(ObjectModelHelpers.TempProjectDir, "MyStrings.resx")) };
             t.UseSourcePath = false;
             t.NeverLockTypeAssemblies = false;
@@ -2830,6 +2866,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
     public class MiscTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public MiscTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void ResgenCommandLineLogging()
         {
@@ -2847,7 +2890,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.UseSourcePath = false;
                 t.NeverLockTypeAssemblies = false;
@@ -2883,7 +2926,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.References = new ITaskItem[] { new TaskItem("baz"), new TaskItem("jazz") };
                 t.UseSourcePath = true;
@@ -2926,7 +2969,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.References = new ITaskItem[] { new TaskItem("baz"), new TaskItem("jazz") };
                 t.UseSourcePath = true;
@@ -2972,7 +3015,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTask();
+                GenerateResource t = Utilities.CreateTask(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile1) };
                 t.OutputResources = new ITaskItem[]
                                     {
@@ -3129,9 +3172,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
         /// <summary>
         /// </summary>
-        public static string CreateBasicResourcesFile(bool useResX)
+        public static string CreateBasicResourcesFile(bool useResX, ITestOutputHelper output)
         {
-            GenerateResource t = CreateTask();
+            GenerateResource t = CreateTask(output);
 
             string sourceFile = null;
             if (useResX)
@@ -3174,11 +3217,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <summary>
         /// This method creates a GenerateResource task and performs basic setup on it, e.g. BuildEngine
         /// </summary>
-        public static GenerateResource CreateTask()
+        /// <param name="output"></param>
+        public static GenerateResource CreateTask(ITestOutputHelper output)
         {
             // always use the internal ctor that says don't perform separate app domain check
             GenerateResource t = new GenerateResource();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(output);
 
             // Make the task execute in-proc
             t.ExecuteAsTool = false;
@@ -3444,13 +3488,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="strLanguage"></param>
         /// <param name="resourcesNamespace"></param>
         /// <param name="classNamespace"></param>
-        public static void STRNamespaceTestHelper(string strLanguage, string resourcesNamespace, string classNamespace)
+        /// <param name="output"></param>
+        public static void STRNamespaceTestHelper(string strLanguage, string resourcesNamespace, string classNamespace, ITestOutputHelper output)
         {
             // these two parameters should not be null
             Assert.NotNull(strLanguage);
             Assert.NotNull(resourcesNamespace);
             // Generate Task
-            GenerateResource t = Utilities.CreateTask();
+            GenerateResource t = Utilities.CreateTask(output);
             try
             {
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
