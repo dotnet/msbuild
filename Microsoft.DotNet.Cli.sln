@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26510.0
+VisualStudioVersion = 15.0.26730.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ED2FE3E2-F7E7-4389-8231-B65123F2076F}"
 EndProject
@@ -38,6 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\Compile.targets = build\Compile.targets
 		build\CrossGen.props = build\CrossGen.props
 		build\DependencyVersions.props = build\DependencyVersions.props
+		build\DerivedHostMachineInfo.props = build\DerivedHostMachineInfo.props
 		build\FileExtensions.props = build\FileExtensions.props
 		build\GitCommitInfo.targets = build\GitCommitInfo.targets
 		build\HostInfo.targets = build\HostInfo.targets
@@ -59,7 +60,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\Test.targets = build\Test.targets
 		build\Version.props = build\Version.props
 		build\VersionBadge.props = build\VersionBadge.props
-		build\DerivedHostMachineInfo.props = build\DerivedHostMachineInfo.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE}"
@@ -1593,6 +1593,30 @@ Global
 		{08A40B6A-F695-4EA9-AC8D-CF88FADEA796}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 		{08A40B6A-F695-4EA9-AC8D-CF88FADEA796}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
 		{08A40B6A-F695-4EA9-AC8D-CF88FADEA796}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|x64.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Debug|x86.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|x86.ActiveCfg = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.MinSizeRel|x86.Build.0 = Debug|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|x64.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|x64.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|x86.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.Release|x86.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
+		{602976C5-2477-4B4C-AD9A-1EAFB250529A}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1663,5 +1687,8 @@ Global
 		{3F7D56A3-A280-467E-8916-C18659C243BA} = {1AB5B24B-B317-4142-A5D1-A6E84F15BA34}
 		{B1AEC227-5115-44BC-92D2-B1B3545E1DDE} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{08A40B6A-F695-4EA9-AC8D-CF88FADEA796} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B526D2CE-EE2D-4AD4-93EF-1867D90FF1F5}
 	EndGlobalSection
 EndGlobal
