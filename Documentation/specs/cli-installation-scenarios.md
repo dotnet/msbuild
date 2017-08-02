@@ -259,17 +259,15 @@ OSX/Linux:
 ### Docker 
 [Docker](https://docs.docker.com/) has become a pretty good way to use developer tools, from trying them out in an interactive image use to using it for deployment. We have Docker images on DockerHub already. 
 
-Docker images should always be updated as we make new releases. We should have Docker images of stable releases, built from the rel/* branches. 
+Docker images should always be updated as we make new releases. We should have Docker images of stable releases, built from the release branches. 
 
 ### NuGet packages
-NuGet packages of the CLI bits that make sense are published to relevant feeds. The developer who wishes to use these needs to specify a version. The version is used to opt-in to the three channels above. The actuall "installation" here is restoring the package as a dependency for a certain project (i.e. `ProjectServer` or similar). 
-
-The table in the [channels section](#channels) has the examples of mapping between branches and NuGet package versions.
+NuGet packages of the CLI bits that make sense are published to relevant feeds. The developer who wishes to use these needs to specify a version. The actual "installation" here is restoring the package as a dependency for a certain project (i.e. `ProjectServer` or similar). 
 
 ## Acquiring through other products
 
 ### IDEs and editors
-Anything that goes into the higher-level tools should always use a stable build of CLI coming frol rel/* branches as required. 
+Anything that goes into the higher-level tools should always use a stable build of CLI coming frol release branches as required. 
 
 If there exist any mechanism that notifies users of updates of the CLI, it should ideally point users to the Getting Started page to acquire the installers, or, if that is deemed too heavy-handed, it should point people to the last stable release. If there is a need of the URL to be "baked in" to the higher-level tool, that URL should be an aka.ms URL because it needs to be stable on that end.  
 
