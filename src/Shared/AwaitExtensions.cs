@@ -238,11 +238,8 @@ namespace Microsoft.Build.Shared
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
         {
-            private static readonly int _maxThreads = Environment.ProcessorCount;
-
             private readonly BlockingCollection<Task> _tasks = new BlockingCollection<Task>();
             private int _availableThreads = 0;
-            private int _createdThreads = 0;
 
             protected override void QueueTask(Task task)
             {
@@ -272,25 +269,7 @@ namespace Microsoft.Build.Shared
                 if (count == 0)
                 {
                     // No threads were available for request
-                    TryInjectThread();
-                }
-            }
-
-            private void TryInjectThread()
-            {
-                // Increment created thread, but don't go over maxThreads,
-                // Add thread if we incremented
-                var count = Volatile.Read(ref _createdThreads);
-                while (count < _maxThreads)
-                {
-                    var prev = Interlocked.CompareExchange(ref _createdThreads, count + 1, count);
-                    if (prev == count)
-                    {
-                        // Add thread
-                        InjectThread();
-                        break;
-                    }
-                    count = prev;
+                    InjectThread();
                 }
             }
 
