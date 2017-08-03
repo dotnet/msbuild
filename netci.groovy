@@ -64,7 +64,6 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                             def buildCmd = "./cibuild.sh --target ${runtime} --scope Test"
 
                             if (runtime == "Mono") {
-                                // tests are failing on mono right now
                                 buildCmd += " --host Mono"
                             }
 
@@ -79,7 +78,6 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                             def buildCmd = "./cibuild.sh --target ${runtime} --scope Test"
 
                             if (runtime == "Mono") {
-                                // tests are failing on mono right now
                                 buildCmd += " --host Mono"
                             }
 
