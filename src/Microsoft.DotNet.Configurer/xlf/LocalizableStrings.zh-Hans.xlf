@@ -4,21 +4,21 @@
     <body>
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
-----------------------------------
+---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
-----------------------------------
+---------
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="needs-review-translation">欢迎使用 .NET Core!
----------------------
+------------------
 若要详细了解 .NET Core，请访问 https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令或转到 https://aka.ms/dotnet-cli-docs。
 
 遥测
---------------
+----
 .NET Core 收集使用情况数据，以便改善用户体验。数据是匿名的且不包含命令行参数。数据由 Microsoft 收集，并与社区共享。
 可选择使用你最喜爱的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 1，从而退出遥测。
 若要深入了解 .NET Core 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry。</target>
@@ -31,10 +31,10 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
-----------------------------------
+--------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">正在配置...
--------------------
+----------
 正在运行一项命令，以初步填充本地包缓存，从而提高还原速度并启用脱机访问。此命令最长需要一分钟才能完成，且仅可运行一次。</target>
         <note />
       </trans-unit>
@@ -42,7 +42,7 @@ A command is running to populate your local package cache to improve restore spe
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.

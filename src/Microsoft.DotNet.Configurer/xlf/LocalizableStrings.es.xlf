@@ -4,21 +4,21 @@
     <body>
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
-----------------------------------
+---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
-----------------------------------
+---------
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="needs-review-translation">Bienvenido a .NET Core
----------------------
+----------------------
 Aprenda sobre .NET Core en https://aka.ms/dotnet-docs. Use dotnet --help para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
 
 Telemetría
---------------
+----------
 Las herramientas de .NET Core recopilan datos de uso con el fin de mejorar su experiencia. Los datos son anónimos y no incluyen argumentos de la línea de comandos. Microsoft recopila los datos y los comparte con la comunidad.
 Si desea optar por no participar en la telemetría, establezca una variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en 1 con el shell de su preferencia.
 Puede leer más información sobre la telemetría de las herramientas de .NET Core en https://aka.ms/dotnet-cli-telemetry.</target>
@@ -31,10 +31,10 @@ Puede leer más información sobre la telemetría de las herramientas de .NET Co
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
-----------------------------------
+--------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">Configurando...
--------------------
+---------------
 Se está ejecutando un comando para rellenar inicialmente la caché de paquetes local, para mejorar la velocidad de restauración y habilitar el acceso sin conexión. Este comando tardará en completarse un minuto y solo sucederá una vez.</target>
         <note />
       </trans-unit>
@@ -42,7 +42,7 @@ Se está ejecutando un comando para rellenar inicialmente la caché de paquetes 
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -50,7 +50,7 @@ Here are some options to fix this error:
         <target state="translated">Permiso denegado para modificar la carpeta "{0}".
 
 Estas son algunas opciones para corregir este error:
----------------------
+----------------------------------------------------
 1. Vuelva a ejecutar este comando con acceso con privilegios elevados.
 2. Deshabilite la primera experiencia de ejecución; para ello, establezca la variable de entorno DOTNET_SKIP_FIRST_TIME_EXPERIENCE en true.
 3. Copie el SDK de .NET Core en una ubicación no protegida y úselo desde ahí.

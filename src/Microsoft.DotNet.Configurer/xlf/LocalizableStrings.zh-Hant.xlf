@@ -4,17 +4,17 @@
     <body>
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
-----------------------------------
+---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
-----------------------------------
+---------
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="needs-review-translation">歡迎使用 .NET Core!
----------------------
+------------------
 深入了解 .NET Core @ https://aka.ms/dotnet-docs。使用 dotnet --help 可查看可用的命令，或前往 https://aka.ms/dotnet-cli-docs。
 
 遙測
@@ -31,10 +31,10 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
-----------------------------------
+--------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">正在設定...
--------------------
+-----------
 執行命令以初步填入您的本機套件快取，以改善還原速度並允許離線存取。此命令最長需要一分鐘的時間才可完成，且只會進行一次。</target>
         <note />
       </trans-unit>
@@ -42,7 +42,7 @@ A command is running to populate your local package cache to improve restore spe
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -50,7 +50,7 @@ Here are some options to fix this error:
         <target state="translated">權限無法修改 '{0}' 資料夾。
 
 以下為修正此錯誤的一些選項:
----------------------
+-------------------------
 1. 利用較高的存取權再次執行此命令。
 2. 將環境變數 DOTNET_SKIP_FIRST_TIME_EXPERIENCE 設定為 true，停用第一次的執行體驗。
 3. 將 .NET Core SDK 複製到不受保護的位置，並於該處使用此 SDK。

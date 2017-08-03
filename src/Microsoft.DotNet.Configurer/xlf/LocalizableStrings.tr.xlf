@@ -4,21 +4,21 @@
     <body>
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
-----------------------------------
+---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
-----------------------------------
+---------
 The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="needs-review-translation">.NET Core’a Hoş Geldiniz!
----------------------
+-------------------------
 .NET Core hakkında daha fazla bilgi için bkz. https://aka.ms/dotnet-docs. Kullanılabilir komutları görmek için dotnet --help komutunu kullanın veya https://aka.ms/dotnet-cli-docs adresine gidin.
 
 Telemetri
---------------
+---------
 .NET Core araçları, deneyiminizi iyileştirmek için kullanım verileri toplar. Veriler anonimdir ve komut satırı bağımsız değişkenlerini içermez. Veriler Microsoft tarafından toplanır ve topluluk ile paylaşılır.
 Sık kullandığınız kabuk aracılığıyla DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini 1 değerine ayarlayarak telemetri toplanmasını geri çevirebilirsiniz.
 .NET Core araçları telemetrisi hakkında daha faza bilgi için bkz. https://aka.ms/dotnet-cli-telemetry.</target>
@@ -31,7 +31,7 @@ Sık kullandığınız kabuk aracılığıyla DOTNET_CLI_TELEMETRY_OPTOUT ortam 
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
-----------------------------------
+--------------
 A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">Yapılandırılıyor...
 -------------------
@@ -42,7 +42,7 @@ Yerel paket önbelleğinizi başlangıçta doldurmak, geri yükleme hızını ar
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -50,7 +50,7 @@ Here are some options to fix this error:
         <target state="translated">'{0}' klasörünü değiştirme izni verilmedi.
 
 Bu hatayı düzeltmek için bazı seçenekler:
----------------------
+-----------------------------------------
 1. Bu komutu yükseltilmiş erişim ile yeniden çalıştırın.
 2. DOTNET_SKIP_FIRST_TIME_EXPERIENCE ortam değişkenini true olarak ayarlayarak ilk çalıştırma deneyimini devre dışı bırakın.
 3. .NET Core SDK’sını korumasız bir konuma kopyalayarak oradan kullanın.
