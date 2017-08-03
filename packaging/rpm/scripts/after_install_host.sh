@@ -23,4 +23,10 @@ Installation Note
 --------------
 A command will be run during the install process that will improve project restore speed and enable offline access. It will take up to a minute to complete."
 
-/usr/share/dotnet/dotnet exec /usr/share/dotnet/sdk/%SDK_VERSION%/dotnet.dll internal-reportinstallsuccess "rpmpackage" > /dev/null 2>&1 || true
+first_run() {
+    /usr/share/dotnet/dotnet exec /usr/share/dotnet/sdk/%SDK_VERSION%/dotnet.dll internal-reportinstallsuccess "rpmpackage" > /dev/null 2>&1 || true
+}
+
+INSTALL_TEMP_HOME=/tmp/dotnet-installer
+[ -d $INSTALL_TEMP_HOME ] || mkdir $INSTALL_TEMP_HOME
+HOME=$INSTALL_TEMP_HOME first_run
