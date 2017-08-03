@@ -1,19 +1,15 @@
-**These instructions refer to working with the [`xplat`](https://github.com/Microsoft/msbuild/tree/xplat) branch.**
-
-MSBuild can be successfully built on Windows, OS X 10.11, and Ubuntu 14.04. Newer versions of Ubuntu may work, but .NET Core development is currently aimed at 14.04.
+MSBuild can be successfully built on Windows, OS X 10.11, Ubuntu 14.04, and Ubuntu 16.04. Newer versions of Ubuntu may work, but .NET Core development is currently aimed at 14.04.
 
 # Windows #
-##Build process##
+## Build process
 
 `cibuild.cmd --target CoreCLR`
-
-##Debugging##
-
-For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core CLR to wait for a debugger to attach. You can attach using Visual Studio.
 
 # Unix #
 
 **Required packages for OSX & Ubuntu**
+
+MSBuild currently builds with a prerelease version of .NET Core 1.0. It requires the [.NET Core prerequisites](https://github.com/dotnet/core/blob/master/Documentation/prereqs.md), which you can acquire manually or easily get by [installing the .NET Core SDK](https://dot.net/core).
 
 * *OpenSSL*: MSBuild uses the .Net CLI to download Nuget packages during its build process. The CLI requires a recent OpenSSL library available in `/usr/lib`. This can be downloaded using [brew](http://brew.sh/) on OS X (`brew install openssl`) and apt-get (`apt-get install openssl`) on Ubuntu, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac). If you use a different package manager and see an error that says `Unable to load DLL 'System.Security.Cryptography.Native'`, `dotnet` may be looking in the wrong place for the library.
 
