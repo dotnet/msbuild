@@ -62,7 +62,6 @@
     <!-- Third party notices. Ideally the file should be placed at the root of the package but
       the NugetPack task from BuildTools does not support an empty target so copying under notices instead. -->
     <file src="$thirdPartyNotice$" target="notices\THIRDPARTYNOTICE" />
-    
     <file src="$outputPath$$id$.dll" target="lib\net46\$id$.dll" />
     <file src="$outputPath$$id$.xml" target="lib\net46\$id$.xml" />
     <file src="$outputPathNetCore$$id$.dll" target="lib\netstandard1.3\$id$.dll" />
