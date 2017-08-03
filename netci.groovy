@@ -61,14 +61,11 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                 case 'OSX':
                     newJob.with{
                         steps{
-                            def buildCmd = "./cibuild.sh --target ${runtime}"
+                            def buildCmd = "./cibuild.sh --target ${runtime} --scope Test"
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
-                                buildCmd += " --scope Compile --host Mono"
-                            }
-                            else {
-                                buildCmd += " --scope Test"
+                                buildCmd += " --host Mono"
                             }
 
                             shell(buildCmd)
@@ -79,14 +76,11 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            def buildCmd = "./cibuild.sh --target ${runtime}"
+                            def buildCmd = "./cibuild.sh --target ${runtime} --scope Test"
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
-                                buildCmd += " --scope Compile --host Mono"
-                            }
-                            else {
-                                buildCmd += " --scope Test"
+                                buildCmd += " --host Mono"
                             }
 
                             shell(buildCmd)
