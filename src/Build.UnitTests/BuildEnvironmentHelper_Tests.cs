@@ -385,6 +385,44 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
+        public void BuildEnvironmentVSFromMSBuildAssembly()
+        {
+            using (var env = new EmptyVSEnviroment())
+            {
+                var msBuildAssembly = Path.Combine(env.BuildDirectory, "Microsoft.Build.dll");
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => msBuildAssembly, ReturnNull,
+                    env.VsInstanceMock, env.EnvironmentMock);
+
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory64);
+                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
+        public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
+        {
+            using (var env = new EmptyVSEnviroment())
+            {
+                var msBuildAssembly = Path.Combine(env.BuildDirectory64, "Microsoft.Build.dll");
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => msBuildAssembly, ReturnNull,
+                    env.VsInstanceMock, env.EnvironmentMock);
+
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory64);
+                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+            }
+        }
+
         private static string ReturnNull()
         {
             return null;

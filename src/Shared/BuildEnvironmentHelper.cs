@@ -186,7 +186,7 @@ namespace Microsoft.Build.Shared
                         msBuildExe,
                         runningTests: CheckIfRunningTests(),
                         runningInVisualStudio: false,
-                        visualStudioPath: GetVsRootFromMSBuildAssembly(buildAssembly));
+                        visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
                 }
             }
 
