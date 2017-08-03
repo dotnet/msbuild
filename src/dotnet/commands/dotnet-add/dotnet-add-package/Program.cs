@@ -71,12 +71,14 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 {
                     // Create a Dependency Graph file for the project
                     tempDgFilePath = Path.GetTempFileName();
-                    GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
                 }
                 catch (IOException ioex)
                 {
-                     throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileIOException, projectFilePath));
+                    // Catch IOException from Path.GetTempFileName() and throw a graceful exception to the user.
+                    throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileIOException, projectFilePath));
                 }
+                
+                GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
             }
 
             var result = NuGetCommand.Run(
