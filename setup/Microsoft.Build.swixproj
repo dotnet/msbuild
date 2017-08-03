@@ -41,7 +41,7 @@
       <!-- Variables added here will be usable in the swr file.  This is a semi colon delimited
            list of name=value items.  Use $(name) in the swr file to reference the variable.
       -->
-      <PackagePreprocessorDefinitions>$(PackagePreprocessorDefinitions);X86BinPath=$(X86BinPath);X64BinPath=$(X64BinPath);SourceDir=$(SourceDir);Version=$(BuildVersion)</PackagePreprocessorDefinitions>
+      <PackagePreprocessorDefinitions>$(PackagePreprocessorDefinitions);X86BinPath=$(X86BinPath);X64BinPath=$(X64BinPath);SourceDir=$(SourceDir);Version=$(BuildVersion);ThirdPartyNotice=$(ThirdPartyNotice)</PackagePreprocessorDefinitions>
     </PropertyGroup>
   </Target>
 
