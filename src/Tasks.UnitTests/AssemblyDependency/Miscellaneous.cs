@@ -3820,6 +3820,47 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Consider this dependency chain:
         ///
         /// App
+        ///   References - B
+        ///        Depends on D version 2
+        ///   References - D, version 1
+        ///
+        /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
+        /// than both D2 so that can't unify. These means that eventually when 
+        /// they're copied to the output directory they'll conflict.
+        /// </summary>
+        [Fact]
+        public void ConflictGeneratesMessageReferencingAssemblyName()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("B"),
+                new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")
+            };
+
+            t.SearchPaths = new string[]
+            {
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
+            };
+
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+
+            bool result = Execute(t);
+
+            Assert.Equal(1, e.Warnings); // @"Expected one warning."
+
+            // Check that we have a message identifying conflicts with "D"
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+        }
+
+        /// <summary>
+        /// Consider this dependency chain:
+        ///
+        /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
