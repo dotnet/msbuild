@@ -11,6 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourcePath --name bar", "CustomSourcePathRenameTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomTargetPath --name bar", "CustomTargetPathRenameTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourceAndTargetPath --name bar", "CustomSourceAndTargetPathRenameTest.json")]
+        [InlineData("TestAssets.TemplateWithSourcePathOutsideConfigRoot --name baz", "TemplateWithSourcePathOutsideConfigRootTest.json")]
+        [InlineData("TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed --name baz", "TemplateWithSourceNameInTargetPathGetsRenamedTest.json")]
         public void VerifyTemplateContentRenames(string args, params string[] scripts)
         {
             Run(args, scripts);
