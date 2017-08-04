@@ -238,6 +238,28 @@
       }
     },
     {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Get latest version info",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "refName": "PowerShell23",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "filePath",
+        "scriptName": "$(Build.SourcesDirectory)\\build\\buildpipeline\\security\\Get-LatestVersion.ps1",
+        "arguments": "-Branch \"$(CodeBase)\"",
+        "workingFolder": "",
+        "failOnStandardError": "true"
+      }
+    },
+    {
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
@@ -286,8 +308,8 @@
         "softwareFolder": "$(Build.SourcesDirectory)\\security",
         "mpdFolder": "",
         "softwareName": "CLI",
-        "softwareVersionNum": "$(PB_BuildNumber)",
-        "softwareBuildNum": "$(PB_BuildNumber)",
+        "softwareVersionNum": "$(CliLatestPackageId)",
+        "softwareBuildNum": "$(CliLatestPackageId)",
         "modeType": "prerelease",
         "noCopySymbols": "false",
         "noCopyBinaries": "false",
@@ -318,9 +340,9 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-SrcDir \"$(Build.SourcesDirectory)\" -git \"$(PB_Git)\"",
+        "arguments": "-sha \"$(CliLatestCommitSha)\" -git \"$(PB_Git)\"",
         "workingFolder": "$(Build.SourcesDirectory)",
-        "inlineScript": "param($SrcDir, $git)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$shaFile= Join-Path \"$secDir\" \"latest.version\"\n$sha = gc \"$shaFile\" -first 1\n\nif ([string]::IsNullOrWhiteSpace($sha))\n{ Write-Error \"Unable to determine latest commit SHA.\" }\n\nStart-Process \"$git\" -ArgumentList \"clean -df\" -Wait -Verbose -ErrorAction Stop\nStart-Process \"$git\" -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\n",
+        "inlineScript": "param($sha, $git)\n\nStart-Process \"$git\" -ArgumentList \"clean -df\" -Wait -Verbose -ErrorAction Stop\nStart-Process \"$git\" -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\n",
         "failOnStandardError": "true"
       }
     },
