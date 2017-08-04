@@ -53,6 +53,7 @@
       <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl)"/>
       <NuspecProperties Include="iconUrl=$(NuGetPackageIconUrl)"/>
       <NuspecProperties Include="targetMSBuildToolsVersion=$(TargetMSBuildToolsVersion)"/>
+      <NuspecProperties Include="thirdPartyNotice=$(ThirdPartyNotice)"/>
     </ItemGroup>
 
     <MakeDir Directories="$(PackagesOutDir)" />

@@ -418,6 +418,10 @@
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ThirdPartyNotice>$(RepoRoot)THIRDPARTYNOTICES</ThirdPartyNotice>
+  </PropertyGroup>
+
     <!-- Localization switches -->
   <PropertyGroup>
     <!--.net core can't generate the assets. It instead copies them form a full framework build-->
