@@ -1,5 +1,20 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+<!--
+Projects which don't import dir.props:
+
+build\RestoreDependency.proj
+build\Signing.proj
+build\package\Installer.DEB.proj
+build\sdks\sdks.csproj
+build\templates\templates.csproj
+build\test\RunTest.proj
+build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
+build_projects\update-dependencies\update-dependencies.csproj
+tools\TestAssetsDependencies\TestAssetsDependencies.csproj
+
+-->
+
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
 
