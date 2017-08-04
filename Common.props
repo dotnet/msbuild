@@ -27,9 +27,9 @@
     <!-- Reset $(BuildEpoch) whenever $(VersionPrefix) increments. We subtract this from YYYYMMDD portion of build
          number below to obtain the fourth part of file version that must fit in 16 bits. We can produce builds 
          for seven years from every epoch reset. -->
-    <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.0</VersionPrefix>
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">2.0.1</VersionPrefix>
     <BuildEpoch>20170101</BuildEpoch>
-    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">preview3</VersionPrereleasePrefix>
+    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">servicing</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
     <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
