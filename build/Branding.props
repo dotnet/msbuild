@@ -1,6 +1,6 @@
 <Project ToolsVersion="14.0">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core SDK - 2.0.0</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core SDK - 2.0.1</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.0</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core Host - 2.0.0</SharedHostBrandName>
