@@ -62,7 +62,7 @@ Once you have the `StructuredLogger.dll` on disk you can pass it to MSBuild like
 # Using MSBuild Structured Log Viewer
 
 You can use the MSBuild Structured Log Viewer tool to view `.binlog` files:
-https://github.com/KirillOsenkov/MSBuildStructuredLog
+http://msbuildlog.com
 
 # Binary log file format
 
