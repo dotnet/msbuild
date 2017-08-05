@@ -9,6 +9,8 @@ Goals:
  * structure (preserves the exact build event args that can later be replayed to reconstruct the exact events and information as if a real build was running). File logs erase structure and are harder to parse (especially for multicore /m builds). Build analyzer tools are conceivable that could benefit from the structure in a binary log. An API is available to load and query binary logs.
  * optionally collect the project files (and all imported targets files) used during the build. This can help analyzing the logs and even view preprocessed source for all projects (with all imported projects inlined).
 
+See http://msbuildlog.com for more information.
+
 # Creating a binary log during a build
 
 Use the new `/bl` switch to enable the binary logger:
