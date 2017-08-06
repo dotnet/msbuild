@@ -343,8 +343,10 @@ namespace Microsoft.Build.Evaluation
 
             IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
 
-            foreach (string split in splits)
+            var splitsCount = splits.Count;
+            for (var i = 0; i < splitsCount; i++)
             {
+                var split = splits[i];
                 bool isTransformExpression;
                 IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 

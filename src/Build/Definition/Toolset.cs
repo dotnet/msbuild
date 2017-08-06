@@ -701,7 +701,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static string[] GetTaskFiles(DirectoryGetFiles getFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskPattern, string searchPath, string taskFileWarning)
         {
-            string[] defaultTasksFiles = { };
+            string[] defaultTasksFiles = null;
 
             try
             {
@@ -744,8 +744,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Sort the file names to give a deterministic order
-            Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
-            return defaultTasksFiles;
+            if (defaultTasksFiles != null)
+            {
+                Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
+                return defaultTasksFiles;
+            }
+            return Array.Empty<string>();
         }
 
         /// <summary>

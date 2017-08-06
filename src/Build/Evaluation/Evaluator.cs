@@ -791,8 +791,9 @@ namespace Microsoft.Build.Evaluation
             // Pass1: evaluate properties, load imports, and gather everything else
             PerformDepthFirstPass(_projectRootElement);
 
-            List<string> initialTargets = new List<string>(_initialTargetsList.Count);
-            for (int i = 0; i < _initialTargetsList.Count; i++)
+            var initialTargetsListCount = _initialTargetsList.Count;
+            List<string> initialTargets = new List<string>(initialTargetsListCount);
+            for (var i = 0; i < initialTargetsListCount; i++)
             {
                 initialTargets.Add(EscapingUtilities.UnescapeAll(_initialTargetsList[i].Trim()));
             }
@@ -806,9 +807,10 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8817, endPass1);
 #endif
             // Pass2: evaluate item definitions
-            foreach (ProjectItemDefinitionGroupElement itemDefinitionGroupElement in _itemDefinitionGroupElements)
+            var itemsDefinitionGroupElementsCount = _itemDefinitionGroupElements.Count;
+            for (var i = 0; i < itemsDefinitionGroupElementsCount; i++)
             {
-                EvaluateItemDefinitionGroupElement(itemDefinitionGroupElement);
+                EvaluateItemDefinitionGroupElement(_itemDefinitionGroupElements[i]);
             }
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass2End);
@@ -823,18 +825,20 @@ namespace Microsoft.Build.Evaluation
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext);
 
             // Pass3: evaluate project items
-            foreach (ProjectItemGroupElement itemGroupElement in _itemGroupElements)
+            var itemsGroupCount = _itemGroupElements.Count;
+            for (var i = 0; i < itemsGroupCount; i++)
             {
-                EvaluateItemGroupElement(itemGroupElement, lazyEvaluator);
+                EvaluateItemGroupElement(_itemGroupElements[i], lazyEvaluator);
             }
 
             if (lazyEvaluator != null)
             {
-
                 // Tell the lazy evaluator to compute the items and add them to _data
                 IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
-                foreach (var itemData in items)
+                var itemsCount = items.Count;
+                for (var i = 0; i < itemsCount; i++)
                 {
+                    var itemData = items[i];
                     if (itemData.ConditionResult)
                     {
                         _data.AddItem(itemData.Item);
@@ -863,16 +867,20 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8819, endPass3);
 #endif
             // Pass4: evaluate using-tasks
-            foreach (Pair<string, ProjectUsingTaskElement> entry in _usingTaskElements)
+            var entryCount = _usingTaskElements.Count;
+            for (var i = 0; i < entryCount; i++)
             {
+                var entry = _usingTaskElements[i];
                 EvaluateUsingTaskElement(entry.Key, entry.Value);
             }
 
             // If there was no DefaultTargets attribute found in the depth first pass, 
             // use the name of the first target. If there isn't any target, don't error until build time.
+
+            var targetElementsCount = _targetElements.Count;
             if (_data.DefaultTargets == null || _data.DefaultTargets.Count == 0)
             {
-                List<string> defaultTargets = new List<string>(_targetElements.Count);
+                List<string> defaultTargets = new List<string>(targetElementsCount);
                 if (_targetElements.Count > 0)
                 {
                     defaultTargets.Add(_targetElements[0].Name);
@@ -894,9 +902,9 @@ namespace Microsoft.Build.Evaluation
 #endif
 
             // Pass5: read targets (but don't evaluate them: that happens during build)
-            foreach (ProjectTargetElement targetElement in _targetElements)
+            for (var i = 0; i < targetElementsCount; i++)
             {
-                ReadTargetElement(targetElement, activeTargetsByEvaluationOrder, activeTargets);
+                ReadTargetElement(_targetElements[i], activeTargetsByEvaluationOrder, activeTargets);
             }
 
             foreach (ProjectTargetElement target in activeTargetsByEvaluationOrder)
@@ -962,9 +970,10 @@ namespace Microsoft.Build.Evaluation
             if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
                 IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
-
-                foreach (string propertyName in globalPropertiesToTreatAsLocals)
+                var globalPropertiesToTreatAsLocalsCount = globalPropertiesToTreatAsLocals.Count;
+                for (var i = 0; i < globalPropertiesToTreatAsLocalsCount; i++)
                 {
+                    var propertyName = globalPropertiesToTreatAsLocals[i];
                     XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                     _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
                 }
@@ -1006,9 +1015,14 @@ namespace Microsoft.Build.Evaluation
             var implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
             // Evaluate the "top" implicit imports as if they were the first entry in the file.
-            foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Top))
+            var implicitImportsCount = implicitImports.Count;
+            for (var i = 0; i < implicitImportsCount; i++)
             {
-                EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                var import = implicitImports[i];
+                if (import.ImplicitImportLocation == ImplicitImportLocation.Top)
+                {
+                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                }
             }
 
             foreach (ProjectElement element in currentProjectOrImport.Children)
@@ -1172,9 +1186,14 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
-            foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Bottom))
+            implicitImportsCount = implicitImports.Count;
+            for (var i = 0; i < implicitImportsCount; i++)
             {
-                EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                var import = implicitImports[i];
+                if (import.ImplicitImportLocation == ImplicitImportLocation.Bottom)
+                {
+                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                }
             }
 
 #if FEATURE_MSBUILD_DEBUGGER
