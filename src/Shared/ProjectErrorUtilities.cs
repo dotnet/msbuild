@@ -55,11 +55,11 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void ThrowInvalidProject
+        internal static void ThrowInvalidProject<T1>
         (
             IElementLocation elementLocation,
             string resourceName,
-            object arg0
+            T1 arg0
         )
         {
             VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0);
@@ -72,12 +72,12 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1>
         (
             bool condition,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0
+            T1 arg0
         )
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0);
@@ -90,12 +90,12 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void ThrowInvalidProject
+        internal static void ThrowInvalidProject<T1, T2>
         (
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1
+            T1 arg0,
+            T2 arg1
         )
         {
             VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1);
@@ -109,13 +109,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void ThrowInvalidProject
+        internal static void ThrowInvalidProject<T1, T2, T3>
         (
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2
+            T1 arg0,
+            T2 arg1,
+            T3 arg2
         )
         {
             VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1, arg2);
@@ -130,14 +130,14 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void ThrowInvalidProject
+        internal static void ThrowInvalidProject<T1, T2, T3, T4>
         (
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2,
-            object arg3
+            T1 arg0,
+            T2 arg1,
+            T3 arg2,
+            T4 arg3
         )
         {
             VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
@@ -167,13 +167,13 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2>
         (
             bool condition,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1
+            T1 arg0,
+            T2 arg1
         )
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1);
@@ -188,14 +188,14 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2, T3>
         (
             bool condition,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2
+            T1 arg0,
+            T2 arg1,
+            T3 arg2
         )
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1, arg2);
@@ -211,15 +211,15 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>
         (
             bool condition,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2,
-            object arg3
+            T1 arg0,
+            T2 arg1,
+            T3 arg2,
+            T4 arg3
         )
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
@@ -260,13 +260,13 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1>
         (
             bool condition,
             string errorSubCategoryResourceName,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0
+            T1 arg0
         )
         {
             // PERF NOTE: check the condition here instead of pushing it into
@@ -288,14 +288,14 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2>
         (
             bool condition,
             string errorSubCategoryResourceName,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1
+            T1 arg0,
+            T2 arg1
         )
         {
             // PERF NOTE: check the condition here instead of pushing it into
@@ -318,15 +318,15 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2, T3>
         (
             bool condition,
             string errorSubCategoryResourceName,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2
+            T1 arg0,
+            T2 arg1,
+            T3 arg2
         )
         {
             // PERF NOTE: check the condition here instead of pushing it into
@@ -350,16 +350,16 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrowInvalidProject
+        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>
         (
             bool condition,
             string errorSubCategoryResourceName,
             IElementLocation elementLocation,
             string resourceName,
-            object arg0,
-            object arg1,
-            object arg2,
-            object arg3
+            T1 arg0,
+            T2 arg1,
+            T3 arg2,
+            T4 arg3
         )
         {
             // PERF NOTE: check the condition here instead of pushing it into
