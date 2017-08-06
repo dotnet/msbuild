@@ -791,6 +791,7 @@ namespace Microsoft.Build.Evaluation
             // Pass1: evaluate properties, load imports, and gather everything else
             PerformDepthFirstPass(_projectRootElement);
 
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var initialTargetsListCount = _initialTargetsList.Count;
             List<string> initialTargets = new List<string>(initialTargetsListCount);
             for (var i = 0; i < initialTargetsListCount; i++)
@@ -807,6 +808,7 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8817, endPass1);
 #endif
             // Pass2: evaluate item definitions
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var itemsDefinitionGroupElementsCount = _itemDefinitionGroupElements.Count;
             for (var i = 0; i < itemsDefinitionGroupElementsCount; i++)
             {
@@ -825,6 +827,7 @@ namespace Microsoft.Build.Evaluation
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext);
 
             // Pass3: evaluate project items
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var itemsGroupCount = _itemGroupElements.Count;
             for (var i = 0; i < itemsGroupCount; i++)
             {
@@ -835,6 +838,7 @@ namespace Microsoft.Build.Evaluation
             {
                 // Tell the lazy evaluator to compute the items and add them to _data
                 IList<LazyItemEvaluator<P, I, M, D>.ItemData> items = lazyEvaluator.GetAllItems();
+                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 var itemsCount = items.Count;
                 for (var i = 0; i < itemsCount; i++)
                 {
@@ -867,6 +871,7 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8819, endPass3);
 #endif
             // Pass4: evaluate using-tasks
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var entryCount = _usingTaskElements.Count;
             for (var i = 0; i < entryCount; i++)
             {
@@ -877,16 +882,15 @@ namespace Microsoft.Build.Evaluation
             // If there was no DefaultTargets attribute found in the depth first pass, 
             // use the name of the first target. If there isn't any target, don't error until build time.
 
-            var targetElementsCount = _targetElements.Count;
-            if (_data.DefaultTargets == null || _data.DefaultTargets.Count == 0)
+            if (_data.DefaultTargets == null)
             {
-                List<string> defaultTargets = new List<string>(targetElementsCount);
-                if (_targetElements.Count > 0)
-                {
-                    defaultTargets.Add(_targetElements[0].Name);
-                }
+                _data.DefaultTargets = new List<string>(1);
+            }
 
-                _data.DefaultTargets = defaultTargets;
+            var targetElementsCount = _targetElements.Count;
+            if (_data.DefaultTargets.Count == 0 && targetElementsCount > 0)
+            {
+                _data.DefaultTargets.Add(_targetElements[0].Name);
             }
 
             Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
@@ -970,6 +974,7 @@ namespace Microsoft.Build.Evaluation
             if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
             {
                 IList<string> globalPropertiesToTreatAsLocals = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation);
+                // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 var globalPropertiesToTreatAsLocalsCount = globalPropertiesToTreatAsLocals.Count;
                 for (var i = 0; i < globalPropertiesToTreatAsLocalsCount; i++)
                 {
@@ -1015,6 +1020,7 @@ namespace Microsoft.Build.Evaluation
             var implicitImports = currentProjectOrImport.GetImplicitImportNodes(currentProjectOrImport);
 
             // Evaluate the "top" implicit imports as if they were the first entry in the file.
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var implicitImportsCount = implicitImports.Count;
             for (var i = 0; i < implicitImportsCount; i++)
             {
@@ -1186,6 +1192,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             implicitImportsCount = implicitImports.Count;
             for (var i = 0; i < implicitImportsCount; i++)
             {

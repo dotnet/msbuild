@@ -1166,6 +1166,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        // Method is simple set of function calls and may inline;
+        // we don't want it inlining into the tight loop that calls it as an exit case,
+        // so mark as non-inlining
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool PathsEqualNonAscii(string strA, string strB, int i, int length)
         {

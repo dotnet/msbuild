@@ -343,6 +343,7 @@ namespace Microsoft.Build.Evaluation
 
             IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
 
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
             var splitsCount = splits.Count;
             for (var i = 0; i < splitsCount; i++)
             {

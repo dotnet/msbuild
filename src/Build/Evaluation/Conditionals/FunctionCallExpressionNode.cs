@@ -167,7 +167,7 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            var list = new List<string>();
+            var list = new List<string>(capacity: expandedCount);
             for (var i = 0; i < expandedCount; i++)
             {
                 var item = expanded[i];
