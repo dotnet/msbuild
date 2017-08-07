@@ -5,19 +5,20 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
-        <target state="translated">Benvenuti a .NET Core
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="needs-review-translation">Benvenuti a .NET Core
 ---------------------
 Per altre informazioni su .NET Core, vedere https://aka.ms/dotnet-docs. Per visualizzare i comandi disponibili, usare dotnet --help oppure vedere https://aka.ms/dotnet-cli-docs.
 
 Telemetria
---------------
+----------
 Gli strumenti di .NET Core consentono di raccogliere i dati di utilizzo allo scopo di migliorare l'esperienza. I dati sono anonimi e non includono gli argomenti della riga di comando. Vengono raccolti da Microsoft e condivisi con la community.
 È possibile escludere la telemetria impostando la variabile di ambiente DOTNET_CLI_TELEMETRY_OPTOUT su 1 nella shell preferita.
 Per altre informazioni sulla telemetria degli strumenti di .NET Core, vedere https://aka.ms/dotnet-cli-telemetry.</target>
@@ -30,10 +31,10 @@ Per altre informazioni sulla telemetria degli strumenti di .NET Core, vedere htt
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">Configurazione...
--------------------
+-----------------
 È in esecuzione un comando per popolare inizialmente la cache dei pacchetti locale, migliorare la velocità di ripristino e abilitare l'accesso offline. Il completamento di questo comando, che viene eseguito una sola volta, richiede circa un minuto.</target>
         <note />
       </trans-unit>
@@ -41,7 +42,7 @@ A command is running to initially populate your local package cache, to improve 
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,7 +50,7 @@ Here are some options to fix this error:
         <target state="translated">L'autorizzazione per modificare la cartella '{0}' è stata negata.
 
 Ecco alcune opzioni per correggere questo errore:
----------------------
+-------------------------------------------------
 1. Eseguire di nuovo questo comando con privilegi di accesso elevati.
 2. Disabilitare il completamento dell'installazione impostando su true la variabile di ambiente DOTNET_SKIP_FIRST_TIME_EXPERIENCE.
 3. Copiare .NET Core SDK in un percorso non protetto e usarlo da tale posizione.

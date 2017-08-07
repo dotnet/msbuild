@@ -9,19 +9,18 @@ echo "Please visit http://aka.ms/dotnet-cli-eula for more information."
 # Run 'dotnet new' as the user to trigger the first time experience to initialize the cache
 echo "Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
-.NET Core Tools Telemetry
+Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+
+Configuring...
 --------------
-The .NET Core Tools include a telemetry feature that collects usage information. It is important that the .NET Team understands how the tools are being used so that we can improve them.
-
-The data collected is anonymous and will be published in an aggregated form for use by both Microsoft and community engineers under the Creative Commons Attribution License.
-
-The .NET Core Tools telemetry feature is enabled by default. You can opt-out of the telemetry feature by setting an environment variable DOTNET_CLI_TELEMETRY_OPTOUT (for example, 'export' on macOS/Linux, 'set' on Windows) to true (for example, 'true', 1). You can read more about .NET Core tools telemetry at https://aka.ms/dotnet-cli-telemetry.
-
-Installation Note
---------------
-A command will be run during the install process that will improve project restore speed and enable offline access. It will take up to a minute to complete."
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once."
 
 first_run() {
     /usr/share/dotnet/dotnet exec /usr/share/dotnet/sdk/%SDK_VERSION%/dotnet.dll internal-reportinstallsuccess "rpmpackage" > /dev/null 2>&1 || true
