@@ -163,6 +163,6 @@
     <value>PACKAGE_DIRECTORY</value>
   </data>
   <data name="CmdDGFileIOException" xml:space="preserve">
-    <value>Unable to get a temp path for a dependency graph file for project '{0}'. Cannot add package reference.</value>
+    <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>
   </data>
 </root>
