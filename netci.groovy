@@ -23,6 +23,7 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
         // TODO: make this !windows once Mono 5.0+ is available in an OSX image
         if (osName.startsWith('Ubuntu')) {
             runtimes.add('Mono')
+            runtimes.add('MonoTest')
         }
 
         runtimes.each { runtime ->
@@ -65,10 +66,14 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
-                                buildCmd += " --scope Compile --host Mono"
+                                buildCmd += " --scope Compile"
                             }
                             else {
                                 buildCmd += " --scope Test"
+                            }
+
+                            if (runtime.startsWith("Mono")) {
+                                buildCmd += " --host Mono"
                             }
 
                             shell(buildCmd)
@@ -83,10 +88,14 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
 
                             if (runtime == "Mono") {
                                 // tests are failing on mono right now
-                                buildCmd += " --scope Compile --host Mono"
+                                buildCmd += " --scope Compile"
                             }
                             else {
                                 buildCmd += " --scope Test"
+                            }
+
+                            if (runtime.startsWith("Mono")) {
+                                buildCmd += " --host Mono"
                             }
 
                             shell(buildCmd)
@@ -111,7 +120,7 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
             if (isPR) {
                 TriggerBuilder prTrigger = TriggerBuilder.triggerOnPullRequest()
 
-                if (runtime == "Mono") {
+                if (runtime == "MonoTest") {
                     // Until they're passing reliably, require opt in
                     // for Mono tests
                     prTrigger.setCustomTriggerPhrase("(?i).*test\\W+mono.*")
