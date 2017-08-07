@@ -28,6 +28,6 @@
     <Delete Files="$(DebianUploadJsonFile)" />
     <WriteLinesToFile File="$(DebianUploadJsonFile)" Lines="$(DebianUploadJsonContent)" />
 
-    <Exec Command="$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)" />
+    <Exec Command="REPO_PASS=$(REPO_PASS) sh -c '$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)'" />
   </Target>
 </Project>
