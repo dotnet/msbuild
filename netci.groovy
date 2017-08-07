@@ -73,7 +73,9 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                             }
 
                             if (runtime.startsWith("Mono")) {
-                                buildCmd += " --host Mono"
+                                // Redundantly specify target to override
+                                // "MonoTest" which cibuild.sh doesn't know
+                                buildCmd += " --host Mono --target Mono"
                             }
 
                             shell(buildCmd)
@@ -95,7 +97,9 @@ def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                             }
 
                             if (runtime.startsWith("Mono")) {
-                                buildCmd += " --host Mono"
+                                // Redundantly specify target to override
+                                // "MonoTest" which cibuild.sh doesn't know
+                                buildCmd += " --host Mono --target Mono"
                             }
 
                             shell(buildCmd)
