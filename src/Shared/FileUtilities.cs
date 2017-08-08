@@ -642,7 +642,7 @@ namespace Microsoft.Build.Shared
             // It also throws exceptions on illegal path characters
             var lastDirectorySeparator = path.LastIndexOfAny(Slashes);
 
-            return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator > 0 ? lastDirectorySeparator + 1 : 0) >= 0;
+            return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
         }
 
 
