@@ -307,7 +307,7 @@ namespace Microsoft.Build.Shared
                 if (returningBuilder.Capacity < MaxBuilderSize)
                 {
                     // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
-                    returningBuilder.Clear(); // This is free: it just sets length to zero internally
+                    returningBuilder.Clear(); // Clear before pooling
 
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
 #if DEBUG
