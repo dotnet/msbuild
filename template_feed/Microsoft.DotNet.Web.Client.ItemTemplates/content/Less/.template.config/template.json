@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": [ "Web", "ASP.NET" ],
+  "classifications": [ "Web", "Style" ],
   "name": "LESS Style Sheet",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "LESS is a language that compiles into CSS",
@@ -10,6 +10,9 @@
   "identity": "Microsoft.DotNet.Web.ClientItems.Less",
   "shortName": "less",
   "sourceName": "styleSheet1",
+  "tags": {
+    "type": "item"
+  },
   "primaryOutputs": [
     {
       "path": "styleSheet1.less"

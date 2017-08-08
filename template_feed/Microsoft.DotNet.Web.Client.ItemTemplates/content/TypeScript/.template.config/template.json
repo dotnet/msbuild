@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": [ "Web", "ASP.NET" ],
+  "classifications": [ "Web", "Script" ],
   "name": "TypeScript file",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A blank TypeScript source file",
@@ -10,6 +10,9 @@
   "identity": "Microsoft.DotNet.Web.ClientItems.TypeScript",
   "shortName": "tsfile",
   "sourceName": "file1",
+  "tags": {
+    "type": "item"
+  },
   "primaryOutputs": [
     {
       "path": "file1.ts"
