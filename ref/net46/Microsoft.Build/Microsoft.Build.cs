@@ -325,9 +325,9 @@ namespace Microsoft.Build.Construction
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
-        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
-        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
-        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
+        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
+        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
         public void Save() { }
         public void Save(System.IO.TextWriter writer) { }
         public void Save(string path) { }
@@ -1546,6 +1546,7 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     {
         Complete = (uint)4294967295,
         Local = (uint)1,
+        NoErrors = (uint)8,
         None = (uint)0,
         NoRebootRequired = (uint)4,
         Registered = (uint)2,
@@ -1563,8 +1564,8 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupConfiguration2 : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
     {
-        void _VtblGap1_3() { }
         Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
+        void _VtblGap1_3() { }
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.GuidAttribute("B41463C3-8866-43B5-BC33-2B0676F7F42E")]
@@ -1572,10 +1573,10 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupInstance
     {
-        void _VtblGap1_3() { }
         string GetDisplayName(int lcid=0);
         string GetInstallationPath();
         string GetInstallationVersion();
+        void _VtblGap1_3() { }
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.GuidAttribute("89143C9A-05AF-49B0-B717-72E218A2185C")]
@@ -1583,8 +1584,8 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupInstance2 : Microsoft.VisualStudio.Setup.Configuration.ISetupInstance
     {
-        void _VtblGap1_8() { }
         Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
+        void _VtblGap1_8() { }
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.CoClassAttribute(typeof(object))]

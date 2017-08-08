@@ -186,7 +186,7 @@ namespace Microsoft.Build.Shared
                         msBuildExe,
                         runningTests: CheckIfRunningTests(),
                         runningInVisualStudio: false,
-                        visualStudioPath: GetVsRootFromMSBuildAssembly(buildAssembly));
+                        visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
                 }
             }
 
@@ -424,41 +424,63 @@ namespace Microsoft.Build.Shared
     {
         public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
         {
+            FileInfo currentMSBuildExeFile = null;
+            DirectoryInfo currentToolsDirectory = null;
+
             Mode = mode;
             RunningTests = runningTests;
             RunningInVisualStudio = runningInVisualStudio;
-
             CurrentMSBuildExePath = currentMSBuildExePath;
-            CurrentMSBuildToolsDirectory = Path.GetDirectoryName(currentMSBuildExePath);
-            CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
-
             VisualStudioInstallRootDirectory = visualStudioPath;
 
-            if (mode == BuildEnvironmentMode.VisualStudio)
+            if (!string.IsNullOrEmpty(currentMSBuildExePath))
             {
-                var isAmd64 = FileUtilities.EnsureNoTrailingSlash(CurrentMSBuildToolsDirectory)
-                    .EndsWith("amd64", StringComparison.OrdinalIgnoreCase);
+                currentMSBuildExeFile = new FileInfo(currentMSBuildExePath);
+                currentToolsDirectory = currentMSBuildExeFile.Directory;
 
-                if (isAmd64)
+                CurrentMSBuildToolsDirectory = currentMSBuildExeFile.DirectoryName;
+                CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
+                MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
+                MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
+            }
+
+            // We can't detect an environment, don't try to set other paths.
+            if (mode == BuildEnvironmentMode.None || currentMSBuildExeFile == null || currentToolsDirectory == null)
+                return;
+
+            // Check to see if our current folder is 'amd64'
+            bool runningInAmd64 = string.Equals(currentToolsDirectory.Name, "amd64", StringComparison.OrdinalIgnoreCase);
+
+            var msBuildExeName = currentMSBuildExeFile.Name;
+            var folderAbove = currentToolsDirectory.Parent?.FullName;
+
+            if (folderAbove != null)
+            {
+                // Calculate potential paths to other architecture MSBuild.exe
+                var potentialAmd64FromX86 = FileUtilities.CombinePaths(CurrentMSBuildToolsDirectory, "amd64", msBuildExeName);
+                var potentialX86FromAmd64 = Path.Combine(folderAbove, msBuildExeName);
+
+                // Check for existence of an MSBuild file. Note this is not necessary in a VS installation where we always want to
+                // assume the correct layout.
+                var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
+
+                // Running in amd64 folder and the X86 path is valid
+                if (runningInAmd64 && existsCheck(potentialX86FromAmd64))
                 {
-                    MSBuildToolsDirectory32 = FileUtilities.GetFolderAbove(CurrentMSBuildToolsDirectory);
+                    MSBuildToolsDirectory32 = folderAbove;
                     MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
                 }
-                else
+                // Not running in amd64 folder and the amd64 path is valid
+                else if (!runningInAmd64 && existsCheck(potentialAmd64FromX86))
                 {
                     MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                     MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "amd64");
                 }
             }
-            else
-            {
-                MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
-                MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
-            }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio
                 ? Path.Combine(VisualStudioInstallRootDirectory, "MSBuild")
-                : CurrentMSBuildToolsDirectory;
+                : MSBuildToolsDirectory32;
         }
 
         internal BuildEnvironmentMode Mode { get; }

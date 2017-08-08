@@ -1834,6 +1834,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
         <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+        <TargetFrameworkIdentifier>$(TargetFrameworkIdentifier)</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
+        <TargetFrameworkVersion Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</TargetFrameworkVersion>
         <ReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == 'true'">$(TargetRefPath)</ReferenceAssembly>
         <CopyUpToDateMarker>@(CopyUpToDateMarker)</CopyUpToDateMarker>
       </TargetPathWithTargetPlatformMoniker>
@@ -2390,7 +2393,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Target Name="ExportWindowsMDFile"
           DependsOnTargets="Compile"
           Condition="'$(ExportWinMDFile)' == 'true'"
-          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePath);$(MSBuildAllProjects)"
+          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePathWithRefAssemblies);$(MSBuildAllProjects)"
           Outputs="$(_IntermediateWindowsMetadataPath);$(WinMDExpOutputPdb);$(WinMDOutputDocumentationFile)"
   >
 
@@ -2404,7 +2407,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </PropertyGroup>
 
       <WinMDExp WinMDModule="@(IntermediateAssembly)"
-                References="@(ReferencePath)"
+                References="@(ReferencePathWithRefAssemblies)"
                 DisabledWarnings="$(WinMdExpNoWarn)"
                 InputDocumentationFile="@(DocFileItem)"
                 OutputDocumentationFile="$(WinMDOutputDocumentationFile)"
@@ -3021,7 +3024,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CompileLicxFiles"
       Condition="'@(_LicxFile)'!=''"
       DependsOnTargets="$(CompileLicxFilesDependsOn)"
-      Inputs="$(MSBuildAllProjects);@(_LicxFile);@(ReferencePath);@(ReferenceDependencyPaths)"
+      Inputs="$(MSBuildAllProjects);@(_LicxFile);@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
       Outputs="$(IntermediateOutputPath)$(TargetFileName).licenses">
 
     <PropertyGroup>
@@ -3033,7 +3036,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         LicenseTarget="$(TargetFileName)"
         OutputDirectory="$(IntermediateOutputPath)"
         OutputLicense="$(IntermediateOutputPath)$(TargetFileName).licenses"
-        ReferencedAssemblies="@(ReferencePath);@(ReferenceDependencyPaths)"
+        ReferencedAssemblies="@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
         NoLogo="$(NoLogo)"
         ToolPath="$(LCToolPath)"
         SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
@@ -3291,8 +3294,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
-      <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
-      <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
+      <CoreCompileCache Include="@(Compile)" />
+      <CoreCompileCache Include="@(ReferencePath)" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(CoreCompileCache)">

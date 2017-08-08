@@ -15,14 +15,15 @@ using Microsoft.Build.Utilities;
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 using PlatformID = Xunit.PlatformID;
-using System.Security.Principal;
 
 namespace Microsoft.Build.UnitTests
 {
-    public abstract class Copy_Tests : IDisposable
+    public class Copy_Tests : IDisposable
     {
         public bool useHardLinks = false;
 
@@ -41,12 +42,15 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private string _alwaysRetry = null;
 
+        private readonly ITestOutputHelper _testOutputHelper;
+
         /// <summary>
         /// There are a couple of environment variables that can affect the operation of the Copy
         /// task.  Make sure none of them are set. 
         /// </summary>
-        public Copy_Tests()
+        public Copy_Tests(ITestOutputHelper testOutputHelper)
         {
+            _testOutputHelper = testOutputHelper;
             _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
             _alwaysRetry = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
 
@@ -440,9 +444,6 @@ namespace Microsoft.Build.UnitTests
          * have different dates or sizes.
          */
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void DoCopyOverDifferentFile()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -697,7 +698,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         t.UseHardlinksIfPossible = useHardLinks;
                     }
-                    MockEngine engine = new MockEngine();
+                    MockEngine engine = new MockEngine(_testOutputHelper);
                     t.BuildEngine = engine;
                     t.SourceFiles = sourceFiles;
                     t.DestinationFiles = new TaskItem[] { new TaskItem(destinationFile) };
@@ -708,7 +709,10 @@ namespace Microsoft.Build.UnitTests
                     engine.AssertLogContains("MSB3021"); // copy failed
                     engine.AssertLogContains("MSB3026"); // DID retry
 
-                    Assert.Equal(2, engine.Errors); // retries failed, and actual failure
+#if !RUNTIME_TYPE_NETCORE && !MONO
+                    engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
+#endif
+                    Assert.Equal(2, engine.Errors); // retries failed and the actual failure
                     Assert.Equal(10, engine.Warnings);
                 }
             }
@@ -1886,7 +1890,8 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyNotHardLink_Tests : Copy_Tests
     {
-        public CopyNotHardLink_Tests()
+        public CopyNotHardLink_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
         {
             this.useHardLinks = false;
         }
@@ -1934,7 +1939,8 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyHardLink_Tests : Copy_Tests
     {
-        public CopyHardLink_Tests()
+        public CopyHardLink_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
         {
             this.useHardLinks = true;
         }
@@ -2213,7 +2219,8 @@ namespace Microsoft.Build.UnitTests
 
     public class CopySymbolicLink_Tests : Copy_Tests
     {
-        public CopySymbolicLink_Tests()
+        public CopySymbolicLink_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
         {
             useSymbolicLinks = true;
         }

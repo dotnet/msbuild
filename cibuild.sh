@@ -340,7 +340,7 @@ fi
 
 # Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
 if [ "$host" = "Mono" ]; then
-        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/csc.exe"
+        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.3.1/tools/csc.exe"
         CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$(dirname "$CSC_EXE") /p:DebugType=portable"
 fi
 

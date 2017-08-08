@@ -2108,6 +2108,9 @@ EndGlobal
 
             ProjectInstance[] instances;
 
+            // Avoid any unexpected targets getting pulled in
+            var globalProperties = new Dictionary<string, string> { { "ImportByWildcardBeforeSolution", "false" } };
+
             foreach (string builtInTargetName in new[]
             {
                 null,
@@ -2122,7 +2125,7 @@ EndGlobal
                 "ValidateProjects",
             })
             {
-                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
+                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
 
                 Assert.Equal(1, instances.Length);
 
@@ -2130,7 +2133,7 @@ EndGlobal
             }
 
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new[] { "Foo" });
+            instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, null, new[] { "Foo" });
 
             Assert.Equal(1, instances.Length);
 

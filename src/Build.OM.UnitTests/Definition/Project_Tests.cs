@@ -30,6 +30,7 @@ using GlobResultList = System.Collections.Generic.List<System.Tuple<string, stri
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -3842,6 +3843,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3885,6 +3888,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3969,6 +3974,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/2226
+        [Trait("Category", "mono-linux-failing")] // https://github.com/Microsoft/msbuild/issues/2226
         public void ProjectImportEvent()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -4009,6 +4016,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     logger.AssertLogContains($"Importing project \"{pre1.FullPath}\" into project \"{pre2.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}).");
                 }
             }
+        }
+
+        [Fact]
+        public void ProjectTargetNamesAreEnumerable()
+        {
+            // regression test for internal bug
+            // https://devdiv.visualstudio.com/DevDiv/_workitems/edit/471452
+            // CPS calls project.Targets.Keys to get a list of names
+
+            ProjectRootElement projectXml = ProjectRootElement.Create();
+            projectXml.AddTarget("t");
+
+            Project project = new Project(projectXml);
+
+            project.Targets.Keys.ShouldBe(new[] { "t" });
         }
 
         private static void AssertGlobResult(GlobResultList expected, string project)

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -17,6 +18,7 @@ using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
 using System.Collections.Generic;
+using Microsoft.Build.Tasks.AssemblyDependency;
 
 namespace Microsoft.Build.Tasks
 {
@@ -37,7 +39,7 @@ namespace Microsoft.Build.Tasks
         private string _sourceFile;
         private FrameworkName _frameworkName;
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
         private bool _metadataRead;
 #endif
 
@@ -192,24 +194,25 @@ namespace Microsoft.Build.Tasks
         /// assemblies and  the list of scatter files.
         /// </summary>
         /// <param name="path">Path to the assembly.</param>
+        /// <param name="assemblyMetadataCache">Cache of pre-extracted assembly metadata.</param>
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Gets the assembly name.</param>
         internal static void GetAssemblyMetadata
         (
             string path,
+            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
             out FrameworkName frameworkName
         )
         {
-            AssemblyInformation import = null;
-            using (import = new AssemblyInformation(path))
-            {
-                dependencies = import.Dependencies;
-                frameworkName = import.FrameworkNameAttribute;
-                scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
-            }
+            var import = assemblyMetadataCache?.GetOrAdd(path, p => new AssemblyMetadata(p))
+                ?? new AssemblyMetadata(path);
+
+            dependencies = import.Dependencies;
+            frameworkName = import.FrameworkName;
+            scatterFiles = import.ScatterFiles;
         }
 
         /// <summary>
@@ -347,7 +350,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
         /// <summary>
         /// Read everything from the assembly in a single stream.
         /// </summary>

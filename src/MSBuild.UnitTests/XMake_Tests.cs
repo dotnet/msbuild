@@ -17,7 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.SharedUtilities;
+using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -1916,7 +1916,7 @@ namespace Microsoft.Build.UnitTests
                 // Copy MSBuild.exe & dependent files (they will not be in the GAC so they must exist next to msbuild.exe)
                 var filesToCopy = Directory
                     .EnumerateFiles(source)
-                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config") || f.EndsWith(".runtimeconfig.json"));
+                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config") || f.EndsWith(".dll.config") || f.EndsWith(".runtimeconfig.json"));
 
                 var directoriesToCopy = Directory
                     .EnumerateDirectories(source)

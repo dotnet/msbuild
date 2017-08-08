@@ -1,11 +1,16 @@
 // Import the utility functionality.
-import jobs.generation.Utilities;
-import jobs.generation.JobReport;
+import jobs.generation.*;
 
 // The input project name
 def project = GithubProject
 // The input branch name (e.g. master)
 def branch = GithubBranchName
+
+// What this repo is using for its machine images at the current time
+def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
+                       'OSX':'latest-or-auto',
+                       'Ubuntu14.04':'20170728',
+                       'Ubuntu16.04':'20170731']
 
 [true, false].each { isPR ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
@@ -15,7 +20,11 @@ def branch = GithubBranchName
             runtimes.add('Full')
         }
 
-        // TODO: Mono
+        // TODO: make this !windows once Mono 5.0+ is available in an OSX image
+        if (osName.startsWith('Ubuntu')) {
+            runtimes.add('Mono')
+            runtimes.add('MonoTest')
+        }
 
         runtimes.each { runtime ->
             def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}", isPR)
@@ -48,31 +57,62 @@ def branch = GithubBranchName
 
                         skipTestsWhenResultsNotFound = false
                     }
-                    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto-dev15-rc')
 
                     break;
                 case 'OSX':
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            def buildCmd = "./cibuild.sh --target ${runtime}"
+
+                            if (runtime == "Mono") {
+                                // tests are failing on mono right now
+                                buildCmd += " --scope Compile"
+                            }
+                            else {
+                                buildCmd += " --scope Test"
+                            }
+
+                            if (runtime.startsWith("Mono")) {
+                                // Redundantly specify target to override
+                                // "MonoTest" which cibuild.sh doesn't know
+                                buildCmd += " --host Mono --target Mono"
+                            }
+
+                            shell(buildCmd)
                         }
                     }
-                    Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            def buildCmd = "./cibuild.sh --target ${runtime}"
+
+                            if (runtime == "Mono") {
+                                // tests are failing on mono right now
+                                buildCmd += " --scope Compile"
+                            }
+                            else {
+                                buildCmd += " --scope Test"
+                            }
+
+                            if (runtime.startsWith("Mono")) {
+                                // Redundantly specify target to override
+                                // "MonoTest" which cibuild.sh doesn't know
+                                buildCmd += " --host Mono --target Mono"
+                            }
+
+                            shell(buildCmd)
                         }
                     }
-                    Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
 
                     break;
             }
 
             // Add xunit result archiving. Skip if no results found.
             Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
+            def imageVersion = imageVersionMap[osName];
+            Utilities.setMachineAffinity(newJob, osName, imageVersion)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
@@ -82,9 +122,23 @@ def branch = GithubBranchName
                                   false, /* archiveOnlyIfSuccessful */)
             // Add trigger
             if (isPR) {
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} Build for ${runtime}")
+                TriggerBuilder prTrigger = TriggerBuilder.triggerOnPullRequest()
+
+                if (runtime == "MonoTest") {
+                    // Until they're passing reliably, require opt in
+                    // for Mono tests
+                    prTrigger.setCustomTriggerPhrase("(?i).*test\\W+mono.*")
+                    prTrigger.triggerOnlyOnComment()
+                }
+
+                prTrigger.triggerForBranch(branch)
+                // Set up what shows up in Github:
+                prTrigger.setGithubContext("${osName} Build for ${runtime}")
+                prTrigger.emitTrigger(newJob)
             } else {
-                Utilities.addGithubPushTrigger(newJob)
+                if (runtime != "Mono") {
+                    Utilities.addGithubPushTrigger(newJob)
+                }
             }
         }
     }

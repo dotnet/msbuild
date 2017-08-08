@@ -23,6 +23,7 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -1221,6 +1222,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(0, registeredTaskRecords[0].ParameterGroupAndTaskBody.UsingTaskParameters.Count);
             Assert.Null(registeredTaskRecords[0].ParameterGroupAndTaskBody.InlineTaskXmlBody);
         }
+
+        [Fact]
+        public void TaskFactoryWithNullTaskTypeLogsError()
+        {
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+            
+            ProjectUsingTaskElement element = project.AddUsingTask("Task1", AssemblyUtilities.GetAssemblyLocation(typeof(TaskRegistry_Tests.NullTaskTypeTaskFactory).GetTypeInfo().Assembly), null);
+
+            element.TaskFactory = typeof(NullTaskTypeTaskFactory).FullName;
+            elementList.Add(element);
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", null, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2)));
+            
+            exception.ErrorCode.ShouldBe("MSB4175");
+
+            exception.Message.ShouldContain("The task factory must return a value for the \"TaskType\" property.");
+        }
         #endregion
 
         #region ParameterGroupTests
@@ -2310,5 +2331,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #endregion
+
+        /// <summary>
+        /// A task factory that returns null for the TaskType property.
+        /// </summary>
+        public class NullTaskTypeTaskFactory : ITaskFactory
+        {
+            public string FactoryName => nameof(NullTaskTypeTaskFactory);
+
+            public Type TaskType => null;
+
+            public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost) => true;
+
+            public TaskPropertyInfo[] GetTaskParameters() => null;
+
+            public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => null;
+
+            public void CleanupTask(ITask task) { }
+        }
     }
 }
