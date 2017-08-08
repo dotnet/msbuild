@@ -637,19 +637,14 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            var filename = GetFileName(path);
-
-            return filename.IndexOfAny(InvalidFileNameChars) >= 0;
-        }
-
-        // Path.GetFileName does not react well to malformed filenames.
-        // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
-        // It also throws exceptions on illegal path characters
-        private static string GetFileName(string path)
-        {
+            // Path.GetFileName does not react well to malformed filenames.
+            // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
+            // It also throws exceptions on illegal path characters
             var lastDirectorySeparator = path.LastIndexOfAny(Slashes);
-            return lastDirectorySeparator >= 0 ? path.Substring(lastDirectorySeparator + 1) : path;
+
+            return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
         }
+
 
         /// <summary>
         /// A variation on File.Delete that will throw ExceptionHandling.NotExpectedException exceptions
