@@ -614,8 +614,8 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupConfiguration2 : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
     {
-        Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
         void _VtblGap1_3() { }
+        Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.GuidAttribute("B41463C3-8866-43B5-BC33-2B0676F7F42E")]
@@ -623,10 +623,10 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupInstance
     {
+        void _VtblGap1_3() { }
         string GetDisplayName(int lcid=0);
         string GetInstallationPath();
         string GetInstallationVersion();
-        void _VtblGap1_3() { }
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.GuidAttribute("89143C9A-05AF-49B0-B717-72E218A2185C")]
@@ -634,8 +634,8 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     [System.Runtime.InteropServices.TypeIdentifierAttribute]
     public partial interface ISetupInstance2 : Microsoft.VisualStudio.Setup.Configuration.ISetupInstance
     {
-        Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
         void _VtblGap1_8() { }
+        Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
     }
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     [System.Runtime.InteropServices.CoClassAttribute(typeof(object))]
