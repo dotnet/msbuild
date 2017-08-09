@@ -571,9 +571,7 @@ namespace Microsoft.Build.CommandLine
                         ref schemaFile,
 #endif
                         ref cpuCount,
-#if FEATURE_NODE_REUSE
                         ref enableNodeReuse,
-#endif
                         ref preprocessWriter,
                         ref debugger,
                         ref detailedSummary,
@@ -1822,9 +1820,7 @@ namespace Microsoft.Build.CommandLine
             ref string schemaFile,
 #endif
             ref int cpuCount,
-#if FEATURE_NODE_REUSE
             ref bool enableNodeReuse,
-#endif
             ref TextWriter preprocessWriter,
             ref bool debugger,
             ref bool detailedSummary,
@@ -1928,9 +1924,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref schemaFile,
 #endif
                                                                ref cpuCount,
-#if FEATURE_NODE_REUSE
                                                                ref enableNodeReuse,
-#endif
                                                                ref preprocessWriter,
                                                                ref debugger,
                                                                ref detailedSummary,
@@ -1953,10 +1947,9 @@ namespace Microsoft.Build.CommandLine
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
-#if FEATURE_NODE_REUSE
                     // figure out if we shold reuse nodes
+                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-#endif
 
                     // determine what if any writer to preprocess to
                     preprocessWriter = null;
@@ -2023,7 +2016,6 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-#if FEATURE_NODE_REUSE
         /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
@@ -2031,7 +2023,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
-            bool enableNodeReuse = true;
+            bool enableNodeReuse;
+#if FEATURE_NODE_REUSE
+            enableNodeReuse = true;
+#else
+            enableNodeReuse = false;
+#endif
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -2055,9 +2052,13 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
+#if !FEATURE_NODE_REUSE
+            if(enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
+                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
+#endif
+
             return enableNodeReuse;
         }
-#endif
 
         /// <summary>
         /// Figure out what TextWriter we should preprocess the project file to.
@@ -2194,11 +2195,8 @@ namespace Microsoft.Build.CommandLine
                         OutOfProcNode node = new OutOfProcNode(clientToServerPipeHandle, serverToClientPipeHandle);
 #endif
 
-
-                        bool nodeReuse = false;
-#if FEATURE_NODE_REUSE
-                        nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-#endif
+                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
+                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                         shutdownReason = node.Run(nodeReuse, out nodeException);
 
@@ -3336,7 +3334,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if FEATURE_NODE_REUSE
+#if FEATURE_NODE_REUSE // Do not advertise the switch when feature is off, even though we won't fail to parse it for compatibility with existing build scripts
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
