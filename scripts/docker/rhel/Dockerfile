@@ -6,7 +6,7 @@
 # Dockerfile that creates a container suitable to build dotnet-cli
 FROM microsoft/dotnet-buildtools-prereqs:rhel-7-rpmpkg-c982313-20174116044113
 
-# Install from sudo main package TODO This package needs to be mirrored
+# Install from sudo main package
 RUN yum install -y https://www.sudo.ws/sudo/dist/packages/RHEL/7/sudo-1.8.20-3.el7.x86_64.rpm \
     && yum clean all
 
