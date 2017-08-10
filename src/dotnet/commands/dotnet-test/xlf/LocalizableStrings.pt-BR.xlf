@@ -173,6 +173,11 @@ Argumentos RunSettings:
                                         Mais informações aqui: https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
+        <target state="new">Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

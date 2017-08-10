@@ -216,4 +216,7 @@ RunSettings arguments:
     <value>Enables data collector for the test run.
                                         More info here : https://aka.ms/vstest-collect</value>
   </data>
+  <data name="CmdBlameDescription" xml:space="preserve">
+    <value>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</value>
+  </data>
 </root>
