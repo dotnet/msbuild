@@ -51,7 +51,14 @@ namespace Microsoft.DotNet.TestFramework
 
             if (Root.Exists)
             {
-                Root.Delete(recursive: true);
+                try
+                {
+                    Root.Delete(recursive: true);
+                }
+                catch (IOException ex)
+                {
+                    throw new InvalidOperationException("Unable to delete directory: " + Root.FullName, ex);
+                }
             }
 
             Root.Create();
