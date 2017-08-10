@@ -1,0 +1,4 @@
+<Project>
+  <!-- Projects which don't import the common targets can import this dir.props file in order to get the common repo build logic -->
+  <Import Project="Directory.Build.props" />
+</Project>

@@ -23,7 +23,7 @@
       <!-- Will this still work now that the stage has been added to the path? -->
       <AspNetRuntimePackageStorePublishDirectory>$(BaseOutputDirectory)/AspRT</AspNetRuntimePackageStorePublishDirectory>
       <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
-      <TestOutputDir>$(BaseOutputDirectory)/testpackages/</TestOutputDir>
+      <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
       <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>

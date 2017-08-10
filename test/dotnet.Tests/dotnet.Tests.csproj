@@ -22,7 +22,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+    <Content Include="$(SdkOutputDirectory)\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

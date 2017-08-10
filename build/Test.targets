@@ -12,24 +12,20 @@
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <TestTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <RunTestEnvironmentVariables>@(TestTaskEnvironmentVariables)</RunTestEnvironmentVariables>
-  </PropertyGroup>
-
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
           DependsOnTargets="TestsForBuildItself;BuildTests;">
 
+    <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
+    <MakeDir Directories="$(TestPackagesDir)" />
+    
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           Configuration=$(Configuration);
-          EnvironmentVariables=$(RunTestEnvironmentVariables);
+          TestArtifactsDir=$(TestArtifactsDir);
+          TestPackagesDir=$(TestPackagesDir);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
           ToolPath=$(OutputDirectory);
@@ -74,14 +70,16 @@
 
     <DotNetRestore ToolPath="$(OutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
-                   ProjectPath="%(TestPackageProject.ProjectPath)" />
+                   ProjectPath="%(TestPackageProject.ProjectPath)"
+                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages"
+                   />
  
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages" />
 
   </Target>
 

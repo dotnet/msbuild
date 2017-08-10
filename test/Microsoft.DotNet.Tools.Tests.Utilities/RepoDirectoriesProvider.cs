@@ -99,17 +99,22 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string corehostDummyPackages = null,
             string pjDotnet = null)
         {
-            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", BuildRid);
+            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", "stage2", BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
             _stage2Sdk = Directory
-                .EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk"))
+                .EnumerateDirectories(Path.Combine(_artifacts, "dotnet", "sdk"))
                 .First(d => !d.Contains("NuGetFallbackFolder"));
 
             _stage2WithBackwardsCompatibleRuntimesDirectory =
-                Path.Combine(_artifacts, "stage2WithBackwardsCompatibleRuntimes");
-            _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
+                Path.Combine(_artifacts, "dotnetWithBackwardsCompatibleRuntimes");
+
+            _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
+            if (string.IsNullOrEmpty(_testPackages))
+            {
+                throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
+            }
         }
 
         private string GetPjDotnetPath()

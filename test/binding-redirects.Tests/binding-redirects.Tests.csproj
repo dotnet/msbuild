@@ -6,6 +6,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>binding-redirects.Tests</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
+    <RestoreAdditionalProjectSources>$(TestOutputDir)/packages</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
