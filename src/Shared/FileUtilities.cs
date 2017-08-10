@@ -399,6 +399,18 @@ namespace Microsoft.Build.Shared
 
         }
 
+        internal static string NormalizePath(string directory, string file)
+        {
+            return NormalizePath(Path.Combine(directory, file));
+        }
+
+#if !CLR2COMPATIBILITY
+        internal static string NormalizePath(params string[] paths)
+        {
+            return NormalizePath(Path.Combine(paths));
+        }
+#endif
+
         internal static string FixFilePath(string path)
         {
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
@@ -1159,6 +1171,62 @@ namespace Microsoft.Build.Shared
             {
                 return new StreamReader(fileStream, encoding, detectEncodingFromByteOrderMarks);
             }
+        }
+
+        /// <summary>
+        /// Locate a file in either the directory specified or a location in the
+        /// directory structure above that directory.
+        /// </summary>
+        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
+        {
+            // Canonicalize our starting location
+            string lookInDirectory = Path.GetFullPath(startingDirectory);
+
+            do
+            {
+                // Construct the path that we will use to test against
+                string possibleFileDirectory = Path.Combine(lookInDirectory, fileName);
+
+                // If we successfully locate the file in the directory that we're
+                // looking in, simply return that location. Otherwise we'll
+                // keep moving up the tree.
+                if (File.Exists(possibleFileDirectory))
+                {
+                    // We've found the file, return the directory we found it in
+                    return lookInDirectory;
+                }
+                else
+                {
+                    // GetDirectoryName will return null when we reach the root
+                    // terminating our search
+                    lookInDirectory = Path.GetDirectoryName(lookInDirectory);
+                }
+            }
+            while (lookInDirectory != null);
+
+            // When we didn't find the location, then return an empty string
+            return String.Empty;
+        }
+
+        /// <summary>
+        /// Searches for a file based on the specified starting directory.
+        /// </summary>
+        /// <param name="file">The file to search for.</param>
+        /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
+        /// of the file containing the property function.</param>
+        /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
+        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        {
+            // This method does not accept a path, only a file name
+            if (file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
+            {
+                ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
+            }
+
+            // Search for a directory that contains that file
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
+
+            return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
         }
 
         // Method is simple set of function calls and may inline;
