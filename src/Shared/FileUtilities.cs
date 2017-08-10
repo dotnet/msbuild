@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
@@ -1049,23 +1050,89 @@ namespace Microsoft.Build.Shared
 
         internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
 
+        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
         internal static bool PathsEqual(string path1, string path2)
         {
-            var trim1 = path1.TrimTrailingSlashes();
-            var trim2 = path2.TrimTrailingSlashes();
-
-            if (string.Equals(trim1, trim2, PathComparison))
+            if (path1 == null && path2 == null)
             {
                 return true;
             }
+            if (path1 == null || path2 == null)
+            {
+                return false;
+            }
 
-            var slash1 = trim1.ToSlash();
-            var slash2 = trim2.ToSlash();
+            var endA = path1.Length - 1;
+            var endB = path2.Length - 1;
 
-            return string.Equals(slash1, slash2, PathComparison);
+            // Trim trailing slashes
+            for (var i = endA; i >= 0; i--)
+            {
+                var c = path1[i];
+                if (c == '/' || c == '\\')
+                {
+                    endA--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            for (var i = endB; i >= 0; i--)
+            {
+                var c = path2[i];
+                if (c == '/' || c == '\\')
+                {
+                    endB--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (endA != endB)
+            {
+                // Lengths not the same
+                return false;
+            }
+
+            for (var i = 0; i <= endA; i++)
+            {
+                var charA = (uint)path1[i];
+                var charB = (uint)path2[i];
+
+                if ((charA | charB) > 0x7F)
+                {
+                    // Non-ascii chars move to non fast path
+                    return PathsEqualNonAscii(path1, path2, i, endA - i + 1);
+                }
+
+                // uppercase both chars - notice that we need just one compare per char
+                if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
+                if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
+
+                // Set path delimiters the same
+                if (charA == '\\')
+                {
+                    charA = '/';
+                }
+                if (charB == '\\')
+                {
+                    charB = '/';
+                }
+
+                if (charA != charB)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
-		internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
+        internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;
             FileMode mode = append ? FileMode.Append : FileMode.Create;
@@ -1092,6 +1159,28 @@ namespace Microsoft.Build.Shared
             {
                 return new StreamReader(fileStream, encoding, detectEncodingFromByteOrderMarks);
             }
+        }
+
+        // Method is simple set of function calls and may inline;
+        // we don't want it inlining into the tight loop that calls it as an exit case,
+        // so mark as non-inlining
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static bool PathsEqualNonAscii(string strA, string strB, int i, int length)
+        {
+            if (string.Compare(strA, i, strB, i, length, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return true;
+            }
+
+            var slash1 = strA.ToSlash();
+            var slash2 = strB.ToSlash();
+
+            if (string.Compare(slash1, i, slash2, i, length, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -43,9 +42,21 @@ namespace Microsoft.Build.Evaluation
                     // Expand the items and use DefaultIfEmpty in case there is nothing returned
                     // Then check if everything is not null (because the list was empty), not
                     // already loaded into the cache, and exists
-                    return ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state)
-                        .DefaultIfEmpty()
-                        .All(i => i != null && (state.LoadedProjectsCache?.TryGet(i) != null || FileUtilities.FileOrDirectoryExistsNoThrow(i)));
+                    var list = ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state);
+                    if (list == null)
+                    {
+                        return false;
+                    }
+
+                    foreach (var item in list)
+                    {
+                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item)))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
@@ -137,7 +148,7 @@ namespace Microsoft.Build.Evaluation
             return expandedValue;
         }
 
-        private IEnumerable<string> ExpandArgumentAsFileList(GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state, bool isFilePath = true)
+        private List<string> ExpandArgumentAsFileList(GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state, bool isFilePath = true)
         {
             string argument = argumentNode.GetUnexpandedValue(state);
 
@@ -147,11 +158,30 @@ namespace Microsoft.Build.Evaluation
                 argument = FileUtilities.FixFilePath(argument);
             }
 
-            return state.ExpandIntoTaskItems(argument)
-                .Select(i =>
-                    state.EvaluationDirectory != null && !Path.IsPathRooted(i.ItemSpec)
-                        ? Path.GetFullPath(Path.Combine(state.EvaluationDirectory, i.ItemSpec))
-                        : i.ItemSpec);
+
+            IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);
+            var expandedCount = expanded.Count;
+
+            if (expandedCount == 0)
+            {
+                return null;
+            }
+
+            var list = new List<string>(capacity: expandedCount);
+            for (var i = 0; i < expandedCount; i++)
+            {
+                var item = expanded[i];
+                if (state.EvaluationDirectory != null && !Path.IsPathRooted(item.ItemSpec))
+                {
+                    list.Add(Path.GetFullPath(Path.Combine(state.EvaluationDirectory, item.ItemSpec)));
+                }
+                else
+                {
+                    list.Add(item.ItemSpec);
+                }
+            }
+
+            return list;
         }
 
         /// <summary>
