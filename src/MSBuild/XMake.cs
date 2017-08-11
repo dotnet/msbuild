@@ -1773,11 +1773,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile)
         {
-            string autoResponseFile = Path.Combine(path, autoResponseFileName);
+            string autoResponseFile = FileUtilities.GetPathOfFileAbove(autoResponseFileName, path);
             bool found = false;
 
             // if the auto-response file does not exist, only use the switches on the command line
-            if (File.Exists(autoResponseFile))
+            if (!String.IsNullOrWhiteSpace(autoResponseFile) && File.Exists(autoResponseFile))
             {
                 found = true;
                 GatherResponseFileSwitch("@" + autoResponseFile, switchesFromAutoResponseFile);

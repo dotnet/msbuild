@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                Assert.Equal(null, FileUtilities.NormalizePath(null));
+                Assert.Equal(null, FileUtilities.NormalizePath(null, null));
             }
            );
         }
