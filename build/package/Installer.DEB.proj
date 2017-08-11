@@ -64,7 +64,7 @@
         Mode="u+x" />
 
       <!-- Build SDK Deb package -->
-      <DotNetDebTool ToolPath="$(Stage0Directory)"
+      <DotNetDebTool ToolPath="$(PreviousStageDirectory)"
                      InputDirectory="$(LayoutDirectory)"
                      OutputDirectory="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
@@ -159,7 +159,7 @@
   <Target Name="PrepareDotnetDebTool"
           DependsOnTargets="WriteDotnetDebToolProject">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    WorkingDirectory="$(DotnetDebToolDir)" />
   </Target>
 

@@ -20,7 +20,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp2.0 /p:GeneratePropsFile=$(GeneratePropsFile)" 
+    <Exec Command="$(PreviousStageDotnet) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework $(CliTargetFramework) /p:GeneratePropsFile=$(GeneratePropsFile)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
@@ -39,7 +39,7 @@
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetStage0) restore $(ExtraRestoreArgs)" 
+    <Exec Command="$(PreviousStageDotnet) restore $(ExtraRestoreArgs)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 

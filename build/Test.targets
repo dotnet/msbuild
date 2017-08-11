@@ -88,6 +88,6 @@
 
   <Target Name="EnsureStageSeparation">
     <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(OutputDirectory)&quot;"
-                   ToolPath="$(Stage0Directory)" />
+                   ToolPath="$(PreviousStageDirectory)" />
   </Target>
 </Project>

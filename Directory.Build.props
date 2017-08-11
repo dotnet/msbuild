@@ -47,7 +47,7 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
-  <Import Project="build/Stage0.props" />
+  <Import Project="build/SetupPreviousStage.props" />
   <Import Project="build/OutputDirectories.props" />
   <Import Project="build/BuildDefaults.props" />
   <Import Project="build/VersionBadge.props" />
