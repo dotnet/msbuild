@@ -4,7 +4,7 @@
   <Import Project="prepare/CheckPrereqs.targets" />
 
   <Target Name="Prepare"
-          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;IsolateArtifactsFromDirectoryBuildFiles" />
 
   <Target Name="Init"
           DependsOnTargets="PrintBuildInfo;
@@ -96,6 +96,12 @@
     <ItemGroup>
       <RestoreToolsPackagesInput Include="$(RepoRoot)/tools/**/*.csproj" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="IsolateArtifactsFromDirectoryBuildFiles">
+    <Copy SourceFiles="$(RepoRoot)TestAssets\Directory.Build.props"
+          DestinationFolder ="$(RepoRoot)artifacts"
+          SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
