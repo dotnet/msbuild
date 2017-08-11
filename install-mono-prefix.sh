@@ -44,7 +44,7 @@ cp $MSBUILD_OUT_DIR/Microsoft.*.{props,targets} ${DESTDIR}${MSBUILD_INSTALL_BIN_
 cp $MSBUILD_OUT_DIR/Workflow* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/*.dll ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
-cp -r $MSBUILD_OUT_DIR/Roslyn ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
+#cp -r $MSBUILD_OUT_DIR/Roslyn ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp -r $MSBUILD_OUT_DIR/Extensions ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
 # Deploy files meant for the default $(MSBuildExtensionsPath)
@@ -58,7 +58,7 @@ rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*UnitTests*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*xunit*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/NuGet*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
-rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/csc.exe*
+#rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/csc.exe*
 
 FILES="\
     Dependency.dll \
