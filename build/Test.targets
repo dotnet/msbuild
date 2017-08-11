@@ -26,6 +26,7 @@
           Configuration=$(Configuration);
           TestArtifactsDir=$(TestArtifactsDir);
           TestPackagesDir=$(TestPackagesDir);
+          PreviousStageProps=$(NextStagePropsPath);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
           ToolPath=$(OutputDirectory);
@@ -54,13 +55,15 @@
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
     <DotNetRestore ToolPath="$(OutputDirectory)"
-                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
+                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(OutputDirectory)"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                 AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                  MaxCpuCount="1" />
   </Target>
 
@@ -71,7 +74,7 @@
     <DotNetRestore ToolPath="$(OutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
                    ProjectPath="%(TestPackageProject.ProjectPath)"
-                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages"
+                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)"
                    />
  
     <!-- https://github.com/NuGet/Home/issues/4063 -->
@@ -79,7 +82,7 @@
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
 
   </Target>
 

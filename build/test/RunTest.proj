@@ -14,6 +14,7 @@
     <ItemGroup>
       <EnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
       <EnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <EnvironmentVariables Include="PreviousStageProps=$(PreviousStageProps)" />
     </ItemGroup>
 
     <DotNetTest EnvironmentVariables="@(EnvironmentVariables)"

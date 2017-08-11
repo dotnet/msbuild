@@ -1,8 +1,18 @@
 <Project>
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(PreviousStageProps)' == ''">
       <Stage0Directory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Directory>
-      <Stage0PjDirectory>$(RepoRoot)/.dotnet_stage0PJ/$(Architecture)</Stage0PjDirectory>
       <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
+    </PropertyGroup>
+
+    <Import Project="$(PreviousStageProps)" Condition="'$(PreviousStageProps)' != ''" />
+  
+    <PropertyGroup Condition="'$(PreviousStageProps)' != ''">
+      <Stage0Directory>$(PreviousStageDirectory)</Stage0Directory>
+      <DotnetStage0>$(PreviousStageDotnet)</DotnetStage0>
+    </PropertyGroup>
+
+
+    <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
     </PropertyGroup>
