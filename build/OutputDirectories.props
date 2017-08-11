@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+      <CliBuildStage Condition="'$(CliBuildStage)' == '' And '$(CliOuterBuildStage)' != ''">$([MSBuild]::Add($(CliOuterBuildStage), '1'))</CliBuildStage>
       <CliBuildStage Condition="'$(CliBuildStage)' == ''">2</CliBuildStage>
 
       <!-- BaseOutputDirectory is the root output path for this stage and RID
@@ -28,5 +29,7 @@
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
+    
+      <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
   </PropertyGroup>
 </Project>
