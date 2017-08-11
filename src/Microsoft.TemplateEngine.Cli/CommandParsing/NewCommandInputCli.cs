@@ -137,8 +137,14 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData)
         {
-            List<ITemplateParameter> filteredParams = templateInfo.Parameters.Where(x => !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase) 
-                                                                                    && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase))
+            // The params getting filtered out are "standard" to dotnet new - they get explicitly setup in the command
+            //      and their flags cannot be overridden by host specific configuration.
+            // type & language: These are "tags" in template.json, which become params in the templateInfo object.
+            // name: Gets added as a param in SimpleConfigModel - to facilitate the built in value forms for name.
+            //       name can also be explicitly specified in the template.json - for custom value forms on name.
+            List<ITemplateParameter> filteredParams = templateInfo.Parameters.Where(x => !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase)
+                                                                                    && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
+                                                                                    && !string.Equals(x.Name, "name", StringComparison.OrdinalIgnoreCase))
                                                                                     .ToList();
             Command _templateSpecificCommand;
 

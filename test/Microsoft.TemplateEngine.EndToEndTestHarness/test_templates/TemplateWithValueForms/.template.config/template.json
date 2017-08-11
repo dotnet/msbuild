@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Test Asset",
   "classifications": [ "Test Asset" ],
   "name": "TemplateWithValueForms",
@@ -14,7 +14,7 @@
       "replaces": "test.value1",
       "fileRename": "bar.2",
       "forms": {
-        "global": [ "chained", "chained2", "dotToUnderscore" ]
+        "global": [ "identity", "chained", "chained2", "dotToUnderscore" ]
       }
     }
   },
