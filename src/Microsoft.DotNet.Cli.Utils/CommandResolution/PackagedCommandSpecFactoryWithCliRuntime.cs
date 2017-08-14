@@ -13,11 +13,11 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class PackagedCommandSpecFactoryWithCliRuntime : PackagedCommandSpecFactory
     {
-        public PackagedCommandSpecFactoryWithCliRuntime() : base(AddAditionalParameters)
+        public PackagedCommandSpecFactoryWithCliRuntime() : base(AddAdditionalParameters)
         {
         }
 
-        private static void AddAditionalParameters(string commandPath, IList<string> arguments)
+        private static void AddAdditionalParameters(string commandPath, IList<string> arguments)
         {
             if(PrefersCliRuntime(commandPath))
             {

@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Scripts
     ///
     /// The following Environment Variables can optionally be specified:
     ///
-    /// DOTNET_VERSION_URL - The Url to the root of the version information (this is combined with the fragments bellow) (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info")
+    /// DOTNET_VERSION_URL - The Url to the root of the version information (this is combined with the fragments below) (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info")
     /// ROSLYN_VERSION_FRAGMENT - The fragment to combine with DOTNET_VERSION_URL to get the current dotnet/roslyn package versions. (ex. "dotnet/roslyn/netcore1.0")
     /// CORESETUP_VERSION_FRAGMENT - The fragment to combine with DOTNET_VERSION_URL to get the current dotnet/core-setup package versions. (ex. "dotnet/core-setup/master")
     /// GITHUB_ORIGIN_OWNER - The owner of the GitHub fork to push the commit and create the PR from. (ex. "dotnet-bot")
