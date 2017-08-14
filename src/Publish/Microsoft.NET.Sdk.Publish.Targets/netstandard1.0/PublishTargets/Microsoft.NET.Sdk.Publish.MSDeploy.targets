@@ -64,7 +64,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <MSDeployPublishDestinationRoot></MSDeployPublishDestinationRoot>
       <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
       <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
-      <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
+      <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">10</RetryAttemptsForDeployment>
+      <RetryIntervalForDeployment Condition=" '$(RetryIntervalForDeployment)' == '' ">2000</RetryIntervalForDeployment>
       <MSDeployUseChecksum Condition=" '$(MSDeployUseChecksum)' == '' ">false</MSDeployUseChecksum>
       <AllowUntrustedCertificate Condition=" '$(AllowUntrustedCertificate)' == '' ">false</AllowUntrustedCertificate>
       <EnableOptimisticParameterDefaultValue Condition="$(EnableOptimisticParameterDefaultValue) == ''">true</EnableOptimisticParameterDefaultValue>
@@ -147,6 +148,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ImportSetParametersItems="$(_MSDeployParametersFilePath)"
         WhatIf="$(FilePreview)"
         RetryAttempts="$(RetryAttemptsForDeployment)"
+        RetryInterval="$(RetryIntervalForDeployment)"
         EnableMSDeployBackup="$(EnableMSDeployBackup)"
         EnableMSDeployAppOffline="$(EnableMSDeployAppOffline)"
         AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
@@ -178,6 +180,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           SkipRuleItems="@(MsDeploySkipRules)"
           ImportSetParametersItems="$(_MSDeployParametersFilePath)"
           RetryAttempts="$(RetryAttemptsForDeployment)"
+          RetryInterval="$(RetryIntervalForDeployment)"
           AdditionalDestinationProviderOptions="@(MsDeployAdditionalDestinationProviderSettings)"
           UseChecksum="$(MSDeployUseChecksum)"
           UserAgent="$(_MSDeployUserAgent)"
