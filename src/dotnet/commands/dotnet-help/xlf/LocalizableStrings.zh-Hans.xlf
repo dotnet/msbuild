@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
-        <target state="translated">其他 deps.json 文件的路径。</target>
+        <source>Path to additional deps.json file.</source>
+        <target state="needs-review-translation">其他 deps.json 文件的路径。</target>
         <note />
       </trans-unit>
     </body>
