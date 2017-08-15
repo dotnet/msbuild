@@ -31,8 +31,8 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ExtendedTemplateEngineHost _host;
         private readonly INewCommandInput _commandInput;
         private readonly HostSpecificDataLoader _hostDataLoader;
-        private TemplateResolver _templateResolver;
         private readonly string _defaultLanguage;
+        private TemplateListResolutionResult _templateResolutionResult;
 
         private static readonly Regex LocaleFormatRegex = new Regex(@"
                     ^
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli
             _hostDataLoader = new HostSpecificDataLoader(EnvironmentSettings.SettingsLoader);
             _commandInput = commandInput;
 
-            EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string _defaultLanguage);
+            EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out _defaultLanguage);
         }
 
         public static IInstaller Installer { get; set; }
@@ -375,25 +375,26 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IEnumerable<ITemplateInfo> templateList;
 
-                if (_templateResolver.UnambiguousTemplateGroupToUse != null && _templateResolver.UnambiguousTemplateGroupToUse.Count > 0)
+                if (_templateResolutionResult.UnambiguousTemplateGroupToUse != null && _templateResolutionResult.UnambiguousTemplateGroupToUse.Count > 0)
                 {
-                    templateList = _templateResolver.UnambiguousTemplateGroupToUse.Select(x => x.Info);
+                    templateList = _templateResolutionResult.UnambiguousTemplateGroupToUse.Select(x => x.Info);
                 }
-                else if (!string.IsNullOrEmpty(TemplateName) && _templateResolver.MatchedTemplatesWithSecondaryMatchInfo != null && _templateResolver.MatchedTemplatesWithSecondaryMatchInfo.Count > 0)
+                else if (!string.IsNullOrEmpty(TemplateName) && _templateResolutionResult.MatchedTemplatesWithSecondaryMatchInfo != null && _templateResolutionResult.MatchedTemplatesWithSecondaryMatchInfo.Count > 0)
                 {   // without template name, it's not reasonable to do secondary matching
-                    templateList = _templateResolver.MatchedTemplatesWithSecondaryMatchInfo.Select(x => x.Info);
+                    templateList = _templateResolutionResult.MatchedTemplatesWithSecondaryMatchInfo.Select(x => x.Info);
                 }
-                else if (_templateResolver.CoreMatchedTemplates != null && _templateResolver.CoreMatchedTemplates.Any(x => x.IsMatch))
+                else if (_templateResolutionResult.CoreMatchedTemplates != null && _templateResolutionResult.CoreMatchedTemplates.Any(x => x.IsMatch))
                 {
-                    templateList = _templateResolver.CoreMatchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+                    templateList = _templateResolutionResult.CoreMatchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
                 }
-                else if (_templateResolver.CoreMatchedTemplates != null && _templateResolver.CoreMatchedTemplates.Any(x => x.IsPartialMatch))
+                else if (_templateResolutionResult.CoreMatchedTemplates != null && _templateResolutionResult.CoreMatchedTemplates.Any(x => x.IsPartialMatch))
                 {
-                    templateList = _templateResolver.CoreMatchedTemplates.Where(x => x.IsPartialMatch).Select(x => x.Info);
+                    templateList = _templateResolutionResult.CoreMatchedTemplates.Where(x => x.IsPartialMatch).Select(x => x.Info);
                 }
                 else
                 {
-                    templateList = _templateResolver.PerformAllTemplatesInContextQuery().Where(x => x.IsMatch).Select(x => x.Info);
+                    templateList = TemplateListResolver.PerformAllTemplatesInContextQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput.TypeFilter?.ToLowerInvariant())
+                                                                        .Where(x => x.IsMatch).Select(x => x.Info);
                 }
 
                 return templateList.ToList();
@@ -463,8 +464,8 @@ namespace Microsoft.TemplateEngine.Cli
         private CreationResultStatus EnterAmbiguousTemplateManipulationFlow()
         {
             if (!string.IsNullOrEmpty(TemplateName)
-                && _templateResolver.CoreMatchedTemplates.Count > 0
-                && _templateResolver.CoreMatchedTemplates.All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
+                && _templateResolutionResult.CoreMatchedTemplates.Count > 0
+                && _templateResolutionResult.CoreMatchedTemplates.All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
             {
                 string errorMessage = GetLanguageMismatchErrorMessage(_commandInput.Language);
                 Reporter.Error.WriteLine(errorMessage.Bold().Red());
@@ -561,7 +562,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (installResult == CreationResultStatus.Success)
                 {
                     _settingsLoader.Reload();
-                    _templateResolver.PerformCoreTemplateQuery();
+                    QueryForTemplateMatches();
                     DisplayTemplateList();
                 }
 
@@ -570,7 +571,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             //No other cases specified, we've fallen through to "Usage help + List"
             ShowUsageHelp();
-            _templateResolver.PerformCoreTemplateQuery();
+            QueryForTemplateMatches();
             DisplayTemplateList();
 
             return CreationResultStatus.Success;
@@ -580,7 +581,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             bool anyValid = false;
 
-            foreach (IFilteredTemplateInfo templateInfo in _templateResolver.UnambiguousTemplateGroupToUse)
+            foreach (IFilteredTemplateInfo templateInfo in _templateResolutionResult.UnambiguousTemplateGroupToUse)
             {
                 ParseTemplateArgs(templateInfo.Info);
 
@@ -593,7 +594,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!anyValid)
             {
-                IFilteredTemplateInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(_templateResolver.UnambiguousTemplateGroupToUse);
+                IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(_templateResolutionResult.UnambiguousTemplateGroupToUse);
 
                 if (highestPrecedenceTemplate != null)
                 {
@@ -611,13 +612,13 @@ namespace Microsoft.TemplateEngine.Cli
         {
             bool anyArgsErrors = false;
             ShowUsageHelp();
-            bool showImplicitlyHiddenParams = _templateResolver.UnambiguousTemplateGroupToUse.Count > 1;
+            bool showImplicitlyHiddenParams = _templateResolutionResult.UnambiguousTemplateGroupToUse.Count > 1;
 
             IList<ITemplateInfo> templatesToShowHelpOn = new List<ITemplateInfo>();
             HashSet<string> argsInvalidForAllTemplatesInGroup = new HashSet<string>();
             bool firstTemplate = true;
 
-            foreach (IFilteredTemplateInfo templateInfo in _templateResolver.UnambiguousTemplateGroupToUse.OrderByDescending(x => x.Info.Precedence))
+            foreach (IFilteredTemplateInfo templateInfo in _templateResolutionResult.UnambiguousTemplateGroupToUse.OrderByDescending(x => x.Info.Precedence))
             {
                 bool argsError = false;
                 string commandParseFailureMessage = null;
@@ -682,7 +683,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             bool argsError = false;
             string commandParseFailureMessage = null;
-            IFilteredTemplateInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(_templateResolver.UnambiguousTemplateGroupToUse);
+            IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(_templateResolutionResult.UnambiguousTemplateGroupToUse);
             try
             {
                 ParseTemplateArgs(highestPrecedenceTemplate.Info);
@@ -779,17 +780,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
-            _templateResolver.PerformCoreTemplateQuery();
+            QueryForTemplateMatches();
 
-            if (_templateResolver.UnambiguousTemplateGroupToUse != null && _templateResolver.UnambiguousTemplateGroupToUse.Any()
-                && !_templateResolver.UnambiguousTemplateGroupToUse.Any(x => x.HasAmbiguousParameterMatch))
+            if (_templateResolutionResult.UnambiguousTemplateGroupToUse != null && _templateResolutionResult.UnambiguousTemplateGroupToUse.Any()
+                && !_templateResolutionResult.UnambiguousTemplateGroupToUse.Any(x => x.HasAmbiguousParameterMatch))
             {
                 // unambiguous templates should all have the same dispositions
-                if (_templateResolver.UnambiguousTemplateGroupToUse[0].MatchDisposition.Any(x => x.Kind == MatchKind.Exact && x.Location != MatchLocation.Context && x.Location != MatchLocation.Language))
+                if (_templateResolutionResult.UnambiguousTemplateGroupToUse[0].MatchDisposition.Any(x => x.Kind == MatchKind.Exact && x.Location != MatchLocation.Context && x.Location != MatchLocation.Language))
                 {
                     return await EnterSingularTemplateManipulationFlowAsync().ConfigureAwait(false);
                 }
-                else if(EnvironmentSettings.Host.OnConfirmPartialMatch(_templateResolver.UnambiguousTemplateGroupToUse[0].Info.Name))
+                else if(EnvironmentSettings.Host.OnConfirmPartialMatch(_templateResolutionResult.UnambiguousTemplateGroupToUse[0].Info.Name))
                 {   // unambiguous templates will all have the same name
                     return await EnterSingularTemplateManipulationFlowAsync().ConfigureAwait(false);
                 }
@@ -802,14 +803,20 @@ namespace Microsoft.TemplateEngine.Cli
             return EnterAmbiguousTemplateManipulationFlow();
         }
 
+        private void QueryForTemplateMatches()
+        {
+            _templateResolutionResult = TemplateListResolver.PerformCoreTemplateQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+        }
+
         private async Task<CreationResultStatus> ExecuteAsync()
         {
-            _templateResolver = new TemplateResolver(() => _settingsLoader.UserTemplateCache, _hostDataLoader, _commandInput, _defaultLanguage);
-
+            // this is checking the initial parse, which is template agnostic.
             if (_commandInput.HasParseError)
             {
                 return HandleParseError();
             }
+
+            QueryForTemplateMatches();
 
             if (_commandInput.ShowAliasesSpecified)
             {
@@ -1177,7 +1184,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                IReadOnlyCollection<IFilteredTemplateInfo> allTemplates = _templateResolver.PerformAllTemplatesQuery();
+                IReadOnlyCollection<IFilteredTemplateInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
                 HashSet<string> allShortNames = new HashSet<string>(allTemplates.Select(x => x.Info.ShortName));
                 return allShortNames;
             }
@@ -1216,12 +1223,12 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
             int numShown = 0;
 
-            if (_templateResolver.CoreMatchedTemplates.Count == 0)
+            if (_templateResolutionResult.CoreMatchedTemplates.Count == 0)
             {
                 return;
             }
 
-            List<ITemplateInfo> templateList = _templateResolver.CoreMatchedTemplates.Select(x => x.Info).ToList();
+            List<ITemplateInfo> templateList = _templateResolutionResult.CoreMatchedTemplates.Select(x => x.Info).ToList();
             Reporter.Output.WriteLine("Examples:");
             HashSet<string> usedGroupIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -1380,7 +1387,7 @@ namespace Microsoft.TemplateEngine.Cli
             IDictionary<string, IFilteredTemplateInfo> remainingPartialMatches = new Dictionary<string, IFilteredTemplateInfo>();
 
             // this filtering / grouping ignores language differences.
-            foreach (IFilteredTemplateInfo template in _templateResolver.CoreMatchedTemplates)
+            foreach (IFilteredTemplateInfo template in _templateResolutionResult.CoreMatchedTemplates)
             {
                 if (contextProblemMatches.ContainsKey(template.Info.Name) || remainingPartialMatches.ContainsKey(template.Info.Name))
                 {
