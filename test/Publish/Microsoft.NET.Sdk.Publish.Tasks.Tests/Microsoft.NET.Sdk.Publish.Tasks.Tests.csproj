@@ -1,26 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
     <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks.Tests</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <OutputPath>..\..\..\test\bin\Debug\</OutputPath>
-    <IntermediateOutputPath>..\..\..\test\obj\Debug\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <OutputPath>..\..\..\test\bin\Release\</OutputPath>
-    <IntermediateOutputPath>..\..\..\test\obj\Release\</IntermediateOutputPath>
-  </PropertyGroup>
+  
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.VisualStudio" Version="2.2.0" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <Compile Remove="EndToEnd\*.cs" />
   </ItemGroup>
   
