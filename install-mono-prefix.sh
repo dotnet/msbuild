@@ -34,6 +34,9 @@ mkdir -p ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 mkdir -p ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 mkdir -p ${DESTDIR}${MONO_PREFIX}/bin
 
+echo "** find bindir before we start copying"
+find ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/
+
 cp $MSBUILD_OUT_DIR/Microsoft.Build.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/Microsoft.Common.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/Microsoft.CSharp.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
@@ -67,8 +70,6 @@ FILES="\
     Xunit.NetCore.Extensions.dll"
 
 for f in $FILES; do rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/$f ; done
-
-cp ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/System.Reflection.Metadata.dll ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
 # The directory might not exist on bockbuild when it runs this script.
 # Bockbuild will handle copying these files
