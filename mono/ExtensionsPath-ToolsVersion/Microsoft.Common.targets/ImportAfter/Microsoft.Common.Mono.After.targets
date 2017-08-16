@@ -1,0 +1,36 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Common.Mono.After.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="Mono.Build.Tasks.FilterDeniedAssemblies" AssemblyFile="$(MSBuildExtensionsPath)\Mono.Build.Tasks.dll" />
+
+    <PropertyGroup>
+        <FilterDeniedAssemblies Condition="$(FilterDeniedAssemblies) == ''">false</FilterDeniedAssemblies>
+    </PropertyGroup>
+
+    <Target
+        Name="FilterDeniedAssemblyReferences"
+        BeforeTargets="ResolveAssemblyReferences"
+        Condition="'$(FilterDeniedAssemblies)' == 'true'">
+
+        <FilterDeniedAssemblies References="@(Reference)" SearchPaths="$(TargetFrameworkDirectory);$(DesignTimeFacadeDirectories)">
+            <Output TaskParameter="DeniedReferencesThatCouldNotBeFixed" ItemName="DeniedReferencesThatCouldNotBeFixed" />
+            <Output TaskParameter="FilteredReferences" ItemName="FilteredReferences" />
+        </FilterDeniedAssemblies>
+
+        <ItemGroup>
+            <Reference Remove="@(Reference)" />
+            <Reference Include="@(FilteredReferences)" />
+        </ItemGroup>
+    </Target>
+
+</Project>

@@ -44,6 +44,9 @@ cp $MSBUILD_OUT_DIR/Microsoft.*.{props,targets} ${DESTDIR}${MSBUILD_INSTALL_BIN_
 cp $MSBUILD_OUT_DIR/Workflow* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/*.dll ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 
+# this needs to be in extensions path only
+mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Mono.Build.Tasks.* ${DESTDIR}${XBUILD_DIR}
+
 #cp -r $MSBUILD_OUT_DIR/Roslyn ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp -r $MSBUILD_OUT_DIR/Extensions ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 

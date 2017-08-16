@@ -1,0 +1,26 @@
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="..\..\dir.props" />
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <AssemblyName>Mono.Build.Tasks</AssemblyName>
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+   <ItemGroup>
+        <Compile Include="FilterDeniedAssemblies.cs" />
+
+        <Reference Include="Microsoft.Build.Framework" />
+        <Reference Include="Microsoft.Build.Utilities.v4.0" />
+
+        <Reference Include="System.Reflection.Metadata">
+            <HintPath>$(CompilerToolsDir)\System.Reflection.Metadata.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Collections.Immutable">
+            <HintPath>$(CompilerToolsDir)\System.Collections.Immutable.dll</HintPath>
+        </Reference>
+   </ItemGroup>
+
+    <Target Name="Test" />
+
+    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>
