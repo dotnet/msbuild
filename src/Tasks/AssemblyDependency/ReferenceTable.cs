@@ -2518,7 +2518,7 @@ namespace Microsoft.Build.Tasks
             scatterFiles = (ITaskItem[])scatterItems.ToArray(typeof(ITaskItem));
 
             // Sort for stable outputs. (These came from a hashtable, which as undefined enumeration order.)
-            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.comparer);
+            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.Comparer);
 
             // Find the copy-local items.
             FindCopyLocalItems(primaryFiles, copyLocalItems);

@@ -616,8 +616,8 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            resolvedReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.genericComparer);
-            copyLocalReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.genericComparer);
+            resolvedReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.GenericComparer);
+            copyLocalReferenceAssemblies.Sort(TaskItemSpecFilenameComparer.GenericComparer);
 
             _references = resolvedReferenceAssemblies.ToArray();
             _copyLocalFiles = copyLocalReferenceAssemblies.ToArray();
@@ -647,7 +647,7 @@ namespace Microsoft.Build.Tasks
                 redistReferenceItems.Add(outputItem);
             }
 
-            redistReferenceItems.Sort(TaskItemSpecFilenameComparer.genericComparer);
+            redistReferenceItems.Sort(TaskItemSpecFilenameComparer.GenericComparer);
             _redistFiles = redistReferenceItems.ToArray();
         }
 
