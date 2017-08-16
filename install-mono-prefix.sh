@@ -34,9 +34,6 @@ mkdir -p ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 mkdir -p ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 mkdir -p ${DESTDIR}${MONO_PREFIX}/bin
 
-echo "** find bindir before we start copying"
-find ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/
-
 cp $MSBUILD_OUT_DIR/Microsoft.Build.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/Microsoft.Common.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 cp $MSBUILD_OUT_DIR/Microsoft.CSharp.* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
