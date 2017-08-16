@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -52,16 +53,33 @@ namespace Microsoft.Build.Tasks
                 return 0;
             }
 
-            string f1 = Path.GetFileName(x.ItemSpec);
-            string f2 = Path.GetFileName(y.ItemSpec);
+            string xItemSpec = x.ItemSpec;
+            string yItemSpec = y.ItemSpec;
 
-            int fileComparison = String.Compare(f1, f2, StringComparison.OrdinalIgnoreCase);
+            int xFilenameStart = xItemSpec.LastIndexOfAny(FileMatcher.directorySeparatorCharacters);
+            if (xFilenameStart == -1)
+            {
+                xFilenameStart = 0;
+            }
+
+            int yFilenameStart = yItemSpec.LastIndexOfAny(FileMatcher.directorySeparatorCharacters);
+            if (yFilenameStart == -1)
+            {
+                yFilenameStart = 0;
+            }
+
+            int fileComparison = String.Compare(xItemSpec,
+                xFilenameStart,
+                yItemSpec,
+                yFilenameStart,
+                int.MaxValue, // all characters after the start index
+                StringComparison.OrdinalIgnoreCase);
             if (fileComparison != 0)
             {
                 return fileComparison;
             }
 
-            return String.Compare(x.ItemSpec, y.ItemSpec, StringComparison.OrdinalIgnoreCase);
+            return String.Compare(xItemSpec, yItemSpec, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
