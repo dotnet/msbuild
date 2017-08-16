@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
-    public static class ProcessWrapper
+    public class ProcessWrapper
     {
-        public static int? RunProcess(string fileName, string arguments, string workingDirectory, out int? processId, bool createDirectoryIfNotExists = false, bool waitForExit = true)
+        public int? RunProcess(string fileName, string arguments, string workingDirectory, out int? processId, bool createDirectoryIfNotExists = true, bool waitForExit = true)
         {
             if (createDirectoryIfNotExists && !Directory.Exists(workingDirectory))
             {
