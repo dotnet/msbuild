@@ -71,7 +71,7 @@ FILES="\
 
 for f in $FILES; do rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/$f ; done
 
-cp ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Roslyn/System.Reflection.Metadata.dll ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
+(cd ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR} && rm System.Reflection.Metadata.dll && ln -s Roslyn/System.Reflection.Metadata.dll System.Reflection.Metadata.dll)
 
 # The directory might not exist on bockbuild when it runs this script.
 # Bockbuild will handle copying these files
