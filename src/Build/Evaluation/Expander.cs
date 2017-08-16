@@ -1964,8 +1964,8 @@ namespace Microsoft.Build.Evaluation
                     builder.Append(';');
                 }
 
-                // Remove trailing separator
-                if (builder.Length > 0)
+                // Remove trailing separator if we added one
+                if (itemsFromCapture.Count > 0)
                     builder.Length--;
                 
                 return false;
