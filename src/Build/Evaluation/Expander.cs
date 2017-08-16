@@ -1958,8 +1958,16 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
-                builder.Append(string.Join(";", itemsFromCapture.Select(i => i.Item1)));
+                foreach (var item in itemsFromCapture)
+                {
+                    builder.Append(item.Item1);
+                    builder.Append(';');
+                }
 
+                // Remove trailing separator
+                if (builder.Length > 0)
+                    builder.Length--;
+                
                 return false;
             }
 
