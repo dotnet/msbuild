@@ -33,7 +33,7 @@
 
 	<Target Name="Build"
 		Inputs="%(Facades.Sources)"
-		Outputs="$(DeploymentDir)\%(Facades.OutputAssembly)"
+		Outputs="$(OutputPath)\%(Facades.OutputAssembly)"
 		Condition="'$(MonoBuild)' == 'true'">
 
 		<!-- Disabled CS1701, as Microsoft.Build.Tasks.CodeAnalysis.dll from roslyn
@@ -43,7 +43,7 @@
 			DelaySign="true"
 			KeyFile="msfinal.pub"
 			DisabledWarnings="1701"
-			OutputAssembly="$(DeploymentDir)\%(Facades.OutputAssembly)"
+			OutputAssembly="$(OutputPath)\%(Facades.OutputAssembly)"
 			References="$(OutputPath)\%(Facades.Identity).Core.dll;%(References)"
 			Sources="%(Facades.Sources)"
 			TargetType="Library"
@@ -51,7 +51,7 @@
 			ToolPath="$(CscToolPath)"
 			/>
 
-		<Exec Command="sn -R $(DeploymentDir)\%(Facades.OutputAssembly) mono.snk" />
+		<Exec Command="sn -R $(OutputPath)\%(Facades.OutputAssembly) mono.snk" />
 	</Target>
 
 	<Target Name="Test" DependsOnTargets="Build">

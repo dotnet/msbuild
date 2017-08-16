@@ -109,6 +109,68 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
+        /// Specifically testing that even when the ToolsVersion is post-12.0, and thus
+        /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that
+        /// we will redirect under the covers to use the current tasks instead.
+        /// </summary>
+        [Fact]
+        public void BuildTaskSimpleCodeFactory_AssemblyName_RedirectFrom4()
+        {
+            string projectFileContents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0` >
+                         <ParameterGroup>
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+            mockLogger.AssertLogContains("Hello, World!");
+            mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v12.0.dll");
+        }
+
+        /// <summary>
+        /// Test the simple case where we have a string parameter and we want to log that.
+        /// Specifically testing that even when the ToolsVersion is post-12.0, and thus
+        /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that
+        /// we will redirect under the covers to use the current tasks instead.
+        /// </summary>
+        [Fact]
+        public void BuildTaskSimpleCodeFactory_AssemblyName_RedirectFrom12()
+        {
+            string projectFileContents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v12.0` >
+                         <ParameterGroup>
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+            mockLogger.AssertLogContains("Hello, World!");
+            mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v12.0.dll");
+        }
+
+        /// <summary>
+        /// Test the simple case where we have a string parameter and we want to log that.
         /// Specifically testing that even when the ToolsVersion is post-4.0, and we have redirection
         /// logic in place for the AssemblyFile case to deal with Microsoft.Build.Tasks.v4.0.dll not 
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames -- 

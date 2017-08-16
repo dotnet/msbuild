@@ -12,7 +12,6 @@
     <ProjectWithoutConfiguration Include="src\dirs.proj" />
     <ProjectWithoutConfiguration Include="Samples\dirs.proj" Condition="'$(BuildSamples)'!='false'" />
     <ProjectWithoutConfiguration Include="mono\tasks\build.csproj" Condition="'$(MonoBuild)'=='true'" />
-    <ProjectWithoutConfiguration Include="mono\facades\build.proj" Condition="'$(MonoBuild)'=='true'" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -320,10 +320,14 @@ namespace Microsoft.Build.Execution
                     // may also occur if someone is using CodeTaskFactory or XamlTaskFactory from M.B.T.v12.0.dll.  So if we have a 
                     // situation where the path being used doesn't contain the v4 or v12 tasks but DOES contain the v14+ tasks, just 
                     // secretly substitute it here. 
+                    //
+                    // Mono's v4 and v12 assemblies as facade assemblies, with typeforwards to the Core assembly,
+                    // which the UsingTask infrastructure fails to read, so for the most common cases we redirect
+                    // to the Core assembly.
                     if (
                             assemblyFile != null &&
                             (assemblyFile.EndsWith(s_tasksV4Filename, StringComparison.OrdinalIgnoreCase) || assemblyFile.EndsWith(s_tasksV12Filename, StringComparison.OrdinalIgnoreCase)) &&
-                            !FileUtilities.FileExistsNoThrow(assemblyFile)
+                            (NativeMethodsShared.IsMono || !FileUtilities.FileExistsNoThrow(assemblyFile))
                         )
                     {
                         string replacedAssemblyFile = Path.Combine(Path.GetDirectoryName(assemblyFile), s_tasksCoreFilename);
@@ -355,6 +359,19 @@ namespace Microsoft.Build.Execution
                                 FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation)
                             )
                         {
+                            assemblyName = s_tasksCoreSimpleName;
+                        }
+                        else if
+                            (
+                                NativeMethodsShared.IsMono &&
+                                (assemblyName.Equals(s_tasksV4SimpleName, StringComparison.OrdinalIgnoreCase) ||
+                                 assemblyName.Equals(s_tasksV12SimpleName, StringComparison.OrdinalIgnoreCase)) &&
+                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation)
+                            )
+                        {
+                            // Mono's v4 and v12 assemblies as facade assemblies, with typeforwards to the Core assembly,
+                            // which the UsingTask infrastructure fails to read, so for the most common cases we redirect
+                            // to the Core assembly.
                             assemblyName = s_tasksCoreSimpleName;
                         }
                     }

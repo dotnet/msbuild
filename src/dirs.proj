@@ -13,6 +13,8 @@
     <Project Include="Deprecated\Engine\Microsoft.Build.Engine.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
     <Project Include="Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
 
+    <Project Include="..\mono\facades\build.proj" Condition="'$(MonoBuild)'=='true'" />
+
     <Project Include="Framework.UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
     <Project Include="MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
     <Project Include="Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
