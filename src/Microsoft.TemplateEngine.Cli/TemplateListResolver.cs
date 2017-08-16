@@ -32,6 +32,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, HostSpecificDataLoader hostDataLoader)
         {
+            if (hostDataLoader == null)
+            {
+                return false;
+            }
+
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
             return hostData.IsHidden;
         }
@@ -61,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery(IReadOnlyList<TemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader)
+        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -75,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, filtered only by the context (item, project, etc) - and the host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<TemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, string context)
+        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, string context)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -90,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Query for template matches, filtered by everything available: name, language, context, parameters, and the host file.
-        public static TemplateListResolutionResult PerformCoreTemplateQuery(IReadOnlyList<TemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        public static TemplateListResolutionResult PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -133,7 +138,7 @@ namespace Microsoft.TemplateEngine.Cli
             return matchResults;
         }
 
-        private static void QueryForUnambiguousTemplateGroup(IReadOnlyList<TemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, TemplateListResolutionResult matchResults, string defaultLanguage, bool anyExactCoreMatches)
+        private static void QueryForUnambiguousTemplateGroup(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, TemplateListResolutionResult matchResults, string defaultLanguage, bool anyExactCoreMatches)
         {
             if (!anyExactCoreMatches || matchResults.CoreMatchedTemplates == null || matchResults.CoreMatchedTemplates.Count == 0)
             {
