@@ -2093,8 +2093,8 @@
     <comment>{StrBegin="MSB3491: "}</comment>
   </data>
   <data name="WriteLinesToFile.SkippingUnchangedFile">
-    <value>MSB3493: </value>
-    <comment>{StrBegin="Skipping write to file "{0}" because content would not change."}</comment>
+    <value>MSB3493: Skipping write to file "{0}" because content would not change.</value>
+    <comment>{StrBegin="MSB3493: "}</comment>
   </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
