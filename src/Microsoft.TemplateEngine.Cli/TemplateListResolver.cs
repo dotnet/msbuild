@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli
             MatchLocation.Alias
         };
 
-        private static void ParseTemplateArgs(ITemplateInfo templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        private static void ParseTemplateArgs(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
             commandInput.ReparseForTemplate(templateInfo, hostData);
@@ -30,15 +30,31 @@ namespace Microsoft.TemplateEngine.Cli
             return templateList.AllAreTheSame((x) => x.Info.GroupIdentity, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, HostSpecificDataLoader hostDataLoader)
+        private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
-            if (hostDataLoader == null)
-            {
-                return false;
-            }
-
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
             return hostData.IsHidden;
+        }
+
+        public static bool ValidateRemainingParameters(INewCommandInput commandInput, out IReadOnlyList<string> invalidParams)
+        {
+            List<string> badParams = new List<string>();
+
+            if (AnyRemainingParameters(commandInput))
+            {
+                foreach (string flag in commandInput.RemainingParameters.Keys)
+                {
+                    badParams.Add(flag);
+                }
+            }
+
+            invalidParams = badParams;
+            return !invalidParams.Any();
+        }
+
+        public static bool AnyRemainingParameters(INewCommandInput commandInput)
+        {
+            return commandInput.RemainingParameters.Any();
         }
 
         public static IFilteredTemplateInfo FindHighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<IFilteredTemplateInfo> templateList)
@@ -66,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader)
+        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -80,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, filtered only by the context (item, project, etc) - and the host file.
-        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, string context)
+        public static IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, string context)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -95,7 +111,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Query for template matches, filtered by everything available: name, language, context, parameters, and the host file.
-        public static TemplateListResolutionResult PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        public static TemplateListResolutionResult PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateListFilter.FilterTemplates
             (
@@ -138,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli
             return matchResults;
         }
 
-        private static void QueryForUnambiguousTemplateGroup(IReadOnlyList<ITemplateInfo> templateInfo, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, TemplateListResolutionResult matchResults, string defaultLanguage, bool anyExactCoreMatches)
+        private static void QueryForUnambiguousTemplateGroup(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, TemplateListResolutionResult matchResults, string defaultLanguage, bool anyExactCoreMatches)
         {
             if (!anyExactCoreMatches || matchResults.CoreMatchedTemplates == null || matchResults.CoreMatchedTemplates.Count == 0)
             {
@@ -189,7 +205,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // coordinates filtering templates based on the parameters & language
-        private static void UseSecondaryCriteriaToDisambiguateTemplateMatches(HostSpecificDataLoader hostDataLoader, TemplateListResolutionResult matchResults, INewCommandInput commandInput, string defaultLanguage)
+        private static void UseSecondaryCriteriaToDisambiguateTemplateMatches(IHostSpecificDataLoader hostDataLoader, TemplateListResolutionResult matchResults, INewCommandInput commandInput, string defaultLanguage)
         {
             if (string.IsNullOrEmpty(commandInput.TemplateName))
             {
@@ -244,7 +260,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // filters templates based on matches between the input parameters & the template parameters.
-        private static IReadOnlyList<IFilteredTemplateInfo> FilterTemplatesOnParameters(IReadOnlyList<IFilteredTemplateInfo> templatesToFilter, HostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        private static IReadOnlyList<IFilteredTemplateInfo> FilterTemplatesOnParameters(IReadOnlyList<IFilteredTemplateInfo> templatesToFilter, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             List<IFilteredTemplateInfo> filterResults = new List<IFilteredTemplateInfo>();
 

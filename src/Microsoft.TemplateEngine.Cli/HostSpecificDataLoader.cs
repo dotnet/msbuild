@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public class HostSpecificDataLoader
+    public class HostSpecificDataLoader : IHostSpecificDataLoader
     {
         public HostSpecificDataLoader(ISettingsLoader settingsLoader)
         {

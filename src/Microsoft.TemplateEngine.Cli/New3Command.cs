@@ -30,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly Paths _paths;
         private readonly ExtendedTemplateEngineHost _host;
         private readonly INewCommandInput _commandInput;
-        private readonly HostSpecificDataLoader _hostDataLoader;
+        private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly string _defaultLanguage;
         private TemplateListResolutionResult _templateResolutionResult;
 
@@ -473,7 +473,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.NotFound;
             }
 
-            if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams) || (!_commandInput.IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
+            if (!TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams) || (!_commandInput.IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
             {
                 DisplayInvalidParameters(invalidParams);
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
@@ -524,7 +524,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterMaintenanceFlow()
         {
-            if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams))
+            if (!TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
                 DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
@@ -585,7 +585,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 ParseTemplateArgs(templateInfo.Info);
 
-                if (!AnyRemainingParameters)
+                if (!TemplateListResolver.AnyRemainingParameters(_commandInput))
                 {
                     anyValid = true;
                     break;
@@ -635,7 +635,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!argsError)
                 {
-                    argsError = !ValidateRemainingParameters(out IReadOnlyList<string> invalidParamsForTemplate);
+                    argsError = !TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParamsForTemplate);
                     if (argsError)
                     {
                         if (firstTemplate)
@@ -696,7 +696,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!argsError)
             {
-                if (!ValidateRemainingParameters(out IReadOnlyList<string> invalidParams))
+                if (!TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
                 {
                     DisplayInvalidParameters(invalidParams);
                     argsError = true;
@@ -883,7 +883,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus HandleParseError()
         {
-            ValidateRemainingParameters(out IReadOnlyList<string> invalidParams);
+            TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams);
             DisplayInvalidParameters(invalidParams);
 
             // TODO: get a meaningful error message from the parser
@@ -1444,31 +1444,6 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Reporter.Output.WriteLine(_commandInput.HelpText);
             Reporter.Output.WriteLine();
-        }
-
-        private bool AnyRemainingParameters
-        {
-            get
-            {
-                // should not have to check for "--debug:" anymore, with the new parser setup
-                return _commandInput.RemainingParameters.Any(); //.Any(x => !x.Key.StartsWith("--debug:"));
-            }
-        }
-
-        private bool ValidateRemainingParameters(out IReadOnlyList<string> invalidParams)
-        {
-            List<string> badParams = new List<string>();
-
-            if (AnyRemainingParameters)
-            {
-                foreach (string flag in _commandInput.RemainingParameters.Keys)
-                {
-                    badParams.Add(flag);
-                }
-            }
-
-            invalidParams = badParams;
-            return !invalidParams.Any();
         }
 
         private void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
