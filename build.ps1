@@ -94,6 +94,9 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 # Disable first run since we want to control all package sources
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
+# Don't resolve runtime, shared framework, or SDK from other locations
+$env:DOTNET_MULTILEVEL_LOOKUP=0
+
 $logPath = "$RepoRoot\bin\log"
 if (!(Test-Path -Path $logPath)) {
     New-Item -Path $logPath -Force -ItemType 'Directory' | Out-Null
