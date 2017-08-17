@@ -7,25 +7,29 @@ using Xunit;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
-    public class FolderPublish
+    public class FolderPublish10
     {
         public string BaseTestDirectory
         {
             get
             {
-                return Path.Combine(AppContext.BaseDirectory, nameof(FolderPublish));
+                return Path.Combine(AppContext.BaseDirectory, nameof(FolderPublish10));
+            }
+        }
+
+        public void Initialize()
+        {
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, DotNetInstallArgs, BaseTestDirectory, out int? processId1, createDirectoryIfNotExists: true);
+            if (exitCode.HasValue && exitCode != 0)
+            {
+                throw new Exception("1.0 Template installation failed");
             }
         }
 
         public const string DotNetExeName = "dotnet";
-        public const string DotNetNewAdditionalArgs = "--debug:ephemeral-hive";
+        public const string DotNetInstallArgs = "new -i Microsoft.dotnet.web.projecttemplates.1.x::1.0.0-*";
+        public const string DotNetNewAdditionalArgs = "";
         [Theory]
-        // For the full desktop scenarios, the tests run against the msbuild versions installed on the machines.
-        //[InlineData("netcoreapp1.0", "Release", "full")]
-        //[InlineData("netcoreapp1.1", "Release", "full")]
-        //[InlineData("netcoreapp1.0", "Debug", "full")]
-        //[InlineData("netcoreapp1.1", "Debug", "full")]
-        // CLI Sdks are updated as part of setup.
         [InlineData("netcoreapp1.0", "Release", "core")]
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
@@ -39,22 +43,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType);
 
-            Assert.Equal(resultText, "Hello World!");
+            Assert.Equal($"Hello World!", resultText);
         }
 
 
         [Theory]
-        // For the full desktop scenarios, the tests run against the msbuild versions installed on the machines.
-        //[InlineData("netcoreapp1.0", "Release", "full")]
-        //[InlineData("netcoreapp1.1", "Release", "full")]
-        //[InlineData("netcoreapp1.0", "Debug", "full")]
-        //[InlineData("netcoreapp1.1", "Debug", "full")]
-        // CLI Sdks are updated as part of setup.
         [InlineData("netcoreapp1.0", "Release", "core")]
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
@@ -68,7 +66,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:false, resultUrl:"http://localhost:5000/api/Values");
@@ -77,7 +75,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        // CLI Sdks are updated as part of setup.
         [InlineData("netcoreapp1.0", "Release", "core", "none", "false")]
         [InlineData("netcoreapp1.1", "Release", "core", "none", "false")]
         [InlineData("netcoreapp1.0", "Debug", "core", "none", "false")]
@@ -104,7 +101,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType);
@@ -138,19 +135,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string projectName = $"{nameof(EmptyWebNET)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new web --framework {templateFramework} {DotNetNewAdditionalArgs}";
+            string dotNetNewArguments = $"new web --framework {templateFramework} --target-framework-override {targetFramework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
+
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            // Change the target framework to NetFramework.
-            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
 
-            Assert.Equal(resultText, "Hello World!");
+            Assert.Equal($"Hello World!", resultText);
         }
 
         [Theory]
@@ -178,15 +174,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string projectName = $"{nameof(WebAPINET)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new webapi --framework {templateFramework} {DotNetNewAdditionalArgs}";
+            string dotNetNewArguments = $"new webapi --framework {templateFramework} --target-framework-override {targetFramework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
-
-            // Change the target framework to NetFramework.
-            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true, resultUrl: "http://localhost:5000/api/Values");
 
@@ -256,15 +249,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             {
                 additionalOptions = $"--use-local-db";
             }
-            string dotNetNewArguments = $"new mvc --framework {templateFramework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
+            string dotNetNewArguments = $"new mvc --framework {templateFramework} --target-framework-override {targetFramework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
-
-            // Change the target framework to NetFramework.
-            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
 
             string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
 
@@ -277,14 +267,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             HttpResponseMessage result = null;
             try
             {
+                int? exitCode = 0;
+
                 // dotnet restore
                 string dotnetRestoreArguments = "restore";
-                int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotnetRestoreArguments, testFolder, out int? processId2);
+                exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetRestoreArguments, testFolder, out int? processId2);
                 Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
                 // dotnet build
                 string dotnetBuildArguments = "build";
-                exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotnetBuildArguments, testFolder, out int? processId3);
+                exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetBuildArguments, testFolder, out int? processId3);
                 Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
                 // msbuild publish
@@ -296,7 +288,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
                     dotnetPublishArguments = $"{fileName} {dotnetPublishArguments}";
                     fileName = DotNetExeName;
                 }
-                exitCode = ProcessWrapper.RunProcess(fileName, dotnetPublishArguments, testFolder, out int? processId4);
+                exitCode = new ProcessWrapper().RunProcess(fileName, dotnetPublishArguments, testFolder, out int? processId4);
                 Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
                 string publishOutputFolderFullPath = Path.Combine(testFolder, publishOutputFolder);
@@ -307,7 +299,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
                     dotNetRunArguments = null;
                     fileName = Path.Combine(publishOutputFolderFullPath, $"{projectName}.exe");
                 }
-                exitCode = ProcessWrapper.RunProcess(fileName, dotNetRunArguments, publishOutputFolderFullPath, out runningProcess, waitForExit: false);
+                exitCode = new ProcessWrapper().RunProcess(fileName, dotNetRunArguments, publishOutputFolderFullPath, out runningProcess, waitForExit: false);
 
                 // Wait for 2 seconds for the application to start
                 await Task.Delay(TimeSpan.FromSeconds(2));
@@ -329,6 +321,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
                     }
                     catch
                     {
+                        throw new Exception("Application is not running");
                     }
                 }
             }
@@ -350,16 +343,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             Assert.True(result != null);
             string resultText = await result.Content.ReadAsStringAsync();
             return resultText;
-        }
-
-        private void ChangeTargetFrameworkInCsProject(string csProjPath, string oldTargetFramework, string newTargetFramework)
-        {
-            string csProjContents = File.ReadAllText(csProjPath);
-            string oldTargetFrameworkSnippet = $"<TargetFramework>{oldTargetFramework}</TargetFramework>";
-            string newTargetFrameworkSnippet = $"<TargetFramework>{newTargetFramework}</TargetFramework>";
-            string runtimeIdentifierSnippet = $"<RuntimeIdentifier>win7-x86</RuntimeIdentifier>";
-            csProjContents = csProjContents.Replace(oldTargetFrameworkSnippet, $"{newTargetFrameworkSnippet}{Environment.NewLine}{runtimeIdentifierSnippet}");
-            File.WriteAllText(csProjPath, csProjContents);
         }
     }
 }

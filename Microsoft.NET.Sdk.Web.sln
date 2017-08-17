@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "Microsoft.NET.Sdk.Web.ProjectSystem.Targets", "{E363A15F-DFC8-4B97-BE8B-C327C5DB5864}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,7 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F
 	ProjectSection(SolutionItems) = preProject
 		tools\Build.cmd = tools\Build.cmd
 		build.proj = build.proj
-		dotnet-install.ps1 = dotnet-install.ps1
+		dotnet-install_1.0.ps1 = dotnet-install_1.0.ps1
+		dotnet-install_2.0.ps1 = dotnet-install_2.0.ps1
 		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
 		tools\NuGet\NuGet.targets = tools\NuGet\NuGet.targets
 		tools\NuGet\NuGetProj.targets = tools\NuGet\NuGetProj.targets
@@ -180,5 +181,8 @@ Global
 		{66A79C91-8FB7-4F46-8B43-3D4CD32F5736} = {B2C6C764-AFE6-4A81-9316-FAD9ED2BC98E}
 		{138A6D67-D1C6-4F23-8AEF-D0B60993D2B7} = {B2C6C764-AFE6-4A81-9316-FAD9ED2BC98E}
 		{800AAAB3-AE22-483C-90A8-E1056CF39D5A} = {B2C6C764-AFE6-4A81-9316-FAD9ED2BC98E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1A407855-E79F-43B4-9C77-7E2F2BE5E5F5}
 	EndGlobalSection
 EndGlobal
