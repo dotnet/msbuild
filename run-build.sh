@@ -108,7 +108,7 @@ while [[ $# > 0 ]]; do
             args=( "${args[@]/$1}" )
             ;;
         --help)
-            echo "Usage: $0 [--configuration <CONFIGURATION>] [--targets <TARGETS...>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help]"
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
