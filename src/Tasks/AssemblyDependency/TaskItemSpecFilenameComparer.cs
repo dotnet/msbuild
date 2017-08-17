@@ -2,20 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections;
-using Microsoft.Build.Framework;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Compare two ITaskItems by the file name in their ItemSpec.
     /// </summary>
-    sealed internal class TaskItemSpecFilenameComparer : IComparer, IComparer<ITaskItem>
+    internal sealed class TaskItemSpecFilenameComparer : IComparer, IComparer<ITaskItem>
     {
-        internal readonly static IComparer comparer = new TaskItemSpecFilenameComparer();
-        internal readonly static IComparer<ITaskItem> genericComparer = new TaskItemSpecFilenameComparer();
+        internal static readonly IComparer Comparer = new TaskItemSpecFilenameComparer();
+        internal static readonly IComparer<ITaskItem> GenericComparer = new TaskItemSpecFilenameComparer();
 
         /// <summary>
         /// Private construct so there's only one instance.
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public int Compare(object o1, object o2)
         {
-            if (Object.ReferenceEquals(o1, o2))
+            if (ReferenceEquals(o1, o2))
             {
                 return 0;
             }
@@ -47,21 +47,38 @@ namespace Microsoft.Build.Tasks
 
         public int Compare(ITaskItem x, ITaskItem y)
         {
-            if (Object.ReferenceEquals(x, y))
+            if (ReferenceEquals(x, y))
             {
                 return 0;
             }
 
-            string f1 = Path.GetFileName(x.ItemSpec);
-            string f2 = Path.GetFileName(y.ItemSpec);
+            string xItemSpec = x.ItemSpec;
+            string yItemSpec = y.ItemSpec;
 
-            int fileComparison = String.Compare(f1, f2, StringComparison.OrdinalIgnoreCase);
+            int xFilenameStart = xItemSpec.LastIndexOfAny(FileMatcher.directorySeparatorCharacters);
+            if (xFilenameStart == -1)
+            {
+                xFilenameStart = 0;
+            }
+
+            int yFilenameStart = yItemSpec.LastIndexOfAny(FileMatcher.directorySeparatorCharacters);
+            if (yFilenameStart == -1)
+            {
+                yFilenameStart = 0;
+            }
+
+            int fileComparison = string.Compare(xItemSpec,
+                xFilenameStart,
+                yItemSpec,
+                yFilenameStart,
+                int.MaxValue, // all characters after the start index
+                StringComparison.OrdinalIgnoreCase);
             if (fileComparison != 0)
             {
                 return fileComparison;
             }
 
-            return String.Compare(x.ItemSpec, y.ItemSpec, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(xItemSpec, yItemSpec, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
