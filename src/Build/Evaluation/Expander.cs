@@ -433,7 +433,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions options,
             bool includeNullEntries,
             out bool isTransformExpression,
-            out IList<Tuple<string, I>> itemsFromCapture)
+            out List<Tuple<string, I>> itemsFromCapture)
         {
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
@@ -1697,7 +1697,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                IList<Tuple<string, S>> itemsFromCapture;
+                List<Tuple<string, S>> itemsFromCapture;
                 brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
 
                 if (brokeEarlyNonEmpty)
@@ -1763,7 +1763,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out IList<Tuple<string, S>> itemsFromCapture
+                out List<Tuple<string, S>> itemsFromCapture
                 )
                 where S : class, IItem
             {
@@ -1948,7 +1948,7 @@ namespace Microsoft.Build.Evaluation
                 )
                 where S : class, IItem
             {
-                IList<Tuple<string, S>> itemsFromCapture;
+                List<Tuple<string, S>> itemsFromCapture;
                 bool throwaway;
                 var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
 
