@@ -375,7 +375,7 @@ namespace Microsoft.DotNet.Tests
                 "dotnet-fallbackfoldertool",
                 "1.0.0",
                 "lib",
-                "netcoreapp2.0",
+                "netcoreapp2.1",
                 "dotnet-fallbackfoldertool.dll"));
         }
 

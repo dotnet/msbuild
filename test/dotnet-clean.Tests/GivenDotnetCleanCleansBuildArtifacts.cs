@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputFolder = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.0", "win7-x64");
+            var outputFolder = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.1", "win7-x64");
 
             outputFolder.Should().NotBeEmpty();
 

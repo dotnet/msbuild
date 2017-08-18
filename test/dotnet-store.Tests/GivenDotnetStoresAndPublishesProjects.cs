@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetStoresAndPublishesProjects : TestBase
     {
-        private static string _tfm = "netcoreapp2.0";
+        private static string _tfm = "netcoreapp2.1";
         private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 

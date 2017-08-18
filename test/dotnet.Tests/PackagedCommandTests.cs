@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Tests
                                           ".tools",
                                           toolName);
 
-            //  Other tests may have restored the tool for netcoreapp2.0, so delete its tools folder
+            //  Other tests may have restored the tool for netcoreapp2.1, so delete its tools folder
             if (Directory.Exists(toolFolder))
             {
                 Directory.Delete(toolFolder, true);
@@ -423,7 +423,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.0")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.1")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();
