@@ -1578,12 +1578,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <ItemGroup>
+      <!-- Backward compat: extract metadata for properties to set from a semicolon-delimited return value -->
+      <_ProjectReferenceTargetFrameworkProperties
+        Condition="'@(_ProjectReferenceTargetFrameworkProperties->Count())' > '1' and '%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)' != ''">
+        <DelimitedStringReturn>@(_ProjectReferenceTargetFrameworkProperties)</DelimitedStringReturn>
+      </_ProjectReferenceTargetFrameworkProperties>
+      <_ProjectReferenceTargetFrameworkProperties
+        Include="%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)"
+        Condition="'%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)' != ''">
+        <OriginalItemSpec>%(_ProjectReferenceTargetFrameworkProperties.OriginalItemSpec)</OriginalItemSpec>
+        <DesiredTargetFrameworkProperties>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Replace('ProjectHasSingleTargetFramework=true','').Replace('ProjectHasSingleTargetFramework=false','').Replace('ProjectIsRidAgnostic=true','').TrimEnd(';'))</DesiredTargetFrameworkProperties>
+        <HasSingleTargetFramework>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Contains('ProjectHasSingleTargetFramework=true'))</HasSingleTargetFramework>
+        <IsRidAgnostic>$([System.String]::Copy('%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)').Contains('ProjectIsRidAgnostic=true'))</IsRidAgnostic>
+      </_ProjectReferenceTargetFrameworkProperties>
+      <_ProjectReferenceTargetFrameworkProperties
+        Remove="@(_ProjectReferenceTargetFrameworkProperties)"
+        Condition="'%(_ProjectReferenceTargetFrameworkProperties.DelimitedStringReturn)' != ''" />
+
       <!-- Build an item that has Identity matching _MSBuildProjectReferenceExistent and metadata for properties to set. -->
-      <_ProjectReferencesWithTargetFrameworkProperties Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')">
-        <!--<DesiredTargetFrameworkProperties>$([System.String]::Copy('%(Identity)').Replace('ProjectHasSingleTargetFramework=true','').Replace('ProjectIsRidAgnostic=true','').TrimEnd(';'))</DesiredTargetFrameworkProperties>
-        <HasSingleTargetFramework>$([System.String]::Copy('%(Identity)').Contains('ProjectHasSingleTargetFramework=true'))</HasSingleTargetFramework>
-        <IsRidAgnostic>$([System.String]::Copy('%(Identity)').Contains('ProjectIsRidAgnostic=true'))</IsRidAgnostic>-->
-      </_ProjectReferencesWithTargetFrameworkProperties>
+      <_ProjectReferencesWithTargetFrameworkProperties
+        Include="@(_ProjectReferenceTargetFrameworkProperties->'%(OriginalItemSpec)')" />
 
       <!-- Set the project's returned TargetFramework -->
       <_MSBuildProjectReferenceExistent Condition="'@(_ProjectReferencesWithTargetFrameworkProperties)' == '%(Identity)' and '@(_ProjectReferencesWithTargetFrameworkProperties->'%(HasSingleTargetFramework)')' != 'true'">
