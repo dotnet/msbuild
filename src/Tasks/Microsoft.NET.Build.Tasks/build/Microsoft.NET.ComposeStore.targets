@@ -139,7 +139,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </RemoveDuplicatePackageReferences>
     
     <ItemGroup>
-      <ListOfPackageReference Include="@(AllResolvedPackagesPublishedAfterFilter -> '%20%20%20&lt;Package Id=&quot;%(Identity)&quot;  Version =&quot;%(Version)&quot;/&gt;')"/>
+      <ListOfPackageReference Include="@(AllResolvedPackagesPublishedAfterFilter -> '%20%20&lt;Package Id=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"/>
     </ItemGroup>
     <PropertyGroup>
       <_StoreArtifactContent>
