@@ -231,7 +231,7 @@ namespace Microsoft.Build.Shared
         {
             Version v = new Version(CurrentVisualStudioVersion);
             var instances = s_getVisualStudioInstances()
-                .Where(i => i.Version.Major == v.Major && i.Version.Minor == v.Minor && Directory.Exists(i.Path))
+                .Where(i => i.Version.Major == v.Major && Directory.Exists(i.Path))
                 .ToList();
 
             if (instances.Count == 0) return null;
