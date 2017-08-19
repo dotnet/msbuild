@@ -8,6 +8,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -189,7 +190,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Should().Pass();
 
             var factory = new ProjectDependenciesCommandFactory(
-                FrameworkConstants.CommonFrameworks.NetCoreApp20,
+                NuGetFrameworks.NetCoreApp21,
                 configuration,
                 null,
                 null,

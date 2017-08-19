@@ -246,8 +246,8 @@ namespace Microsoft.DotNet.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
-            
-            const string framework = ".NETCoreApp,Version=v2.0";
+
+            string framework = Tools.Tests.Utilities.NuGetFrameworks.NetCoreApp21.DotNetFrameworkName;
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
