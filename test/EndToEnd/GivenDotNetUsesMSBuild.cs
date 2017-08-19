@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 {
     public class GivenDotNetUsesMSBuild : TestBase
     {
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/7476")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             using (DisposableDirectory directory = Temp.CreateDirectory())

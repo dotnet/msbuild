@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/7476")]
         [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
         [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
