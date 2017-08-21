@@ -168,23 +168,23 @@ namespace Microsoft.Build.Internal
 #if FEATURE_RTLMOVEMEMORY
             unsafe
             {
-                char* pStringBlock = null;
+                char* pEnvironmentBlock = null;
 
                 try
                 {
-                    pStringBlock = GetEnvironmentStrings();
-                    if (pStringBlock == null)
+                    pEnvironmentBlock = GetEnvironmentStrings();
+                    if (pEnvironmentBlock == null)
                     {
                         throw new OutOfMemoryException();
                     }
 
                     // Search for terminating \0\0 (two unicode \0's).
-                    char* pStringBlockEnd = pStringBlock;
-                    while (!(*pStringBlockEnd == '\0' && *(pStringBlockEnd + 1) == '\0'))
+                    char* pEnvironmentBlockEnd = pEnvironmentBlock;
+                    while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
                     {
-                        pStringBlockEnd++;
+                        pEnvironmentBlockEnd++;
                     }
-                    long stringBlockLength = pStringBlockEnd - pStringBlock;
+                    long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
 
                     // Copy strings out, parsing into pairs and inserting into the table.
                     // The first few environment variable entries start with an '='!
@@ -206,12 +206,12 @@ namespace Microsoft.Build.Internal
                         // Skip to key
                         // On some old OS, the environment block can be corrupted. 
                         // Some lines will not have '=', so we need to check for '\0'. 
-                        while (*(pStringBlock + i) != '=' && *(pStringBlock + i) != '\0')
+                        while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                         {
                             i++;
                         }
 
-                        if (*(pStringBlock + i) == '\0')
+                        if (*(pEnvironmentBlock + i) == '\0')
                         {
                             continue;
                         }
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Internal
                         // Skip over environment variables starting with '='
                         if (i - startKey == 0)
                         {
-                            while (*(pStringBlock + i) != 0)
+                            while (*(pEnvironmentBlock + i) != 0)
                             {
                                 i++;
                             }
@@ -227,19 +227,19 @@ namespace Microsoft.Build.Internal
                             continue;
                         }
 
-                        string key = new string(pStringBlock, startKey, i - startKey);
+                        string key = new string(pEnvironmentBlock, startKey, i - startKey);
                         i++;
 
                         // skip over '='
                         int startValue = i;
 
-                        while (*(pStringBlock + i) != 0)
+                        while (*(pEnvironmentBlock + i) != 0)
                         {
                             // Read to end of this entry
                             i++;
                         }
 
-                        string value = new string(pStringBlock, startValue, i - startValue);
+                        string value = new string(pEnvironmentBlock, startValue, i - startValue);
 
                         // skip over 0 handled by for loop's i++
                         table[key] = value;
@@ -247,9 +247,9 @@ namespace Microsoft.Build.Internal
                 }
                 finally
                 {
-                    if (pStringBlock != null)
+                    if (pEnvironmentBlock != null)
                     {
-                        FreeEnvironmentStrings(pStringBlock);
+                        FreeEnvironmentStrings(pEnvironmentBlock);
                     }
                 }
             }
