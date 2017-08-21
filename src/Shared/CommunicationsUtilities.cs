@@ -184,6 +184,7 @@ namespace Microsoft.Build.Internal
                     {
                         pStringBlockEnd++;
                     }
+                    long stringBlockLength = pStringBlockEnd - pStringBlock;
 
                     // Copy strings out, parsing into pairs and inserting into the table.
                     // The first few environment variable entries start with an '='!
@@ -198,7 +199,7 @@ namespace Microsoft.Build.Internal
                     // See the description of Environment Blocks in MSDN's
                     // CreateProcess page (null-terminated array of null-terminated strings).
                     // Note the =HiddenVar's aren't always at the beginning.
-                    for (int i = 0; i < pStringBlockEnd - pStringBlock; i++)
+                    for (int i = 0; i < stringBlockLength; i++)
                     {
                         int startKey = i;
 
