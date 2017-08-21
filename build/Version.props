@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
-    <VersionMinor>0</VersionMinor>
-    <VersionPatch>1</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">servicing</ReleaseSuffix>
+    <VersionMinor>1</VersionMinor>
+    <VersionPatch>0</VersionPatch>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview1</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 

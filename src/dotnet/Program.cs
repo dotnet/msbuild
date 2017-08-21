@@ -77,7 +77,6 @@ namespace Microsoft.DotNet.Cli
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
-            bool? verbose = null;
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
@@ -91,7 +90,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
-                        verbose = true;
+                        Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
+                        CommandContext.SetVerbose(true);
                     }
                     else if (IsArg(args[lastArg], "version"))
                     {
@@ -152,9 +152,8 @@ namespace Microsoft.DotNet.Cli
                 ? Enumerable.Empty<string>()
                 : args.Skip(lastArg + 1).ToArray();
 
-            if (verbose.HasValue)
+            if (CommandContext.IsVerbose())
             {
-                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
@@ -268,7 +267,7 @@ namespace Microsoft.DotNet.Cli
 
             string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
 
-            // if the current RID isn't supported by the shared framework, display the RID the CLI was 
+            // if the current RID isn't supported by the shared framework, display the RID the CLI was
             // built with instead, so the user knows which RID they should put in their "runtimes" section.
             return fxDepsFile.IsRuntimeSupported(currentRid) ?
                 currentRid :

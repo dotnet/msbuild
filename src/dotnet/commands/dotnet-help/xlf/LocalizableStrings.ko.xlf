@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
-        <target state="translated">추가 deps.json 파일의 경로입니다.</target>
+        <source>Path to additional deps.json file.</source>
+        <target state="needs-review-translation">추가 deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
     </body>

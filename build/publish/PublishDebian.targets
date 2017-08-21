@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(InstallerExtension)</SdkDebianUploadUrl>
+    <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)-$(Architecture)$(InstallerExtension)</SdkDebianUploadUrl>
     <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
     <DebianRevisionNumber>1</DebianRevisionNumber>
 
@@ -28,6 +28,6 @@
     <Delete Files="$(DebianUploadJsonFile)" />
     <WriteLinesToFile File="$(DebianUploadJsonFile)" Lines="$(DebianUploadJsonContent)" />
 
-    <Exec Command="$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)" />
+    <Exec Command="REPO_PASS=$(REPO_PASS) sh -c '$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)'" />
   </Target>
 </Project>

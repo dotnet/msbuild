@@ -35,11 +35,8 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
-      <AspNetCoreRuntimePackageName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
-      <HostRidInAspNetCoreRuntimeDebInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
-      <AspNetCoreRuntimeDebInstallerFileName Condition=" '$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp' ">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeDebInstallerFileName).deb</AspNetCoreRuntimeDebInstallerFileName>
+      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimeDebInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreRuntimePackageVersion)-$(HostRid).deb</AspNetCoreRuntimeDebInstallerFileName>
     </PropertyGroup>
 
     <!-- Inputs -->

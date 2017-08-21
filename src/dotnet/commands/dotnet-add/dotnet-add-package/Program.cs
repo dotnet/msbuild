@@ -66,8 +66,18 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             if (!_appliedCommand.HasOption("no-restore"))
             {
-                // Create a Dependency Graph file for the project
-                tempDgFilePath = Path.GetTempFileName();
+                
+                try
+                {
+                    // Create a Dependency Graph file for the project
+                    tempDgFilePath = Path.GetTempFileName();
+                }
+                catch (IOException ioex)
+                {
+                    // Catch IOException from Path.GetTempFileName() and throw a graceful exception to the user.
+                    throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileIOException, projectFilePath));
+                }
+                
                 GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
             }
 

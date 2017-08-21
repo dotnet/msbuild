@@ -233,8 +233,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
-        <target state="translated">Chemin du fichier deps.json supplémentaire.</target>
+        <source>Path to additional deps.json file.</source>
+        <target state="needs-review-translation">Chemin du fichier deps.json supplémentaire.</target>
         <note />
       </trans-unit>
     </body>

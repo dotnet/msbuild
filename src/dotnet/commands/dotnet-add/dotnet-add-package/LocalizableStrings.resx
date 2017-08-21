@@ -162,4 +162,7 @@
   <data name="CmdPackageDirectory" xml:space="preserve">
     <value>PACKAGE_DIRECTORY</value>
   </data>
+  <data name="CmdDGFileIOException" xml:space="preserve">
+    <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>
+  </data>
 </root>

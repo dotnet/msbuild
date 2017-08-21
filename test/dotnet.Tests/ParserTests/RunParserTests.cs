@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         private readonly ITestOutputHelper output;
 
         [Fact]
-        public void RunParserCanGetArguementFromDoubleDash()
+        public void RunParserCanGetArgumentFromDoubleDash()
         {
             var runCommand = RunCommand.FromArgs(new[]{ "--", "foo" });
             runCommand.Args.Single().Should().Be("foo");

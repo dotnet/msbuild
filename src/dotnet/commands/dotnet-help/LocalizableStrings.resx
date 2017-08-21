@@ -256,6 +256,6 @@
     <value>Roll forward on no candidate shared framework is enabled.</value>
   </data>
   <data name="AdditionalDeps" xml:space="preserve">
-    <value>Path to additonal deps.json file.</value>
+    <value>Path to additional deps.json file.</value>
   </data>
 </root>
