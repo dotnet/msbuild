@@ -3538,7 +3538,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
+            Assert.Equal(3, t.ResolvedDependencyFiles.Length);
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath)); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
             Assert.Equal(1, t.SuggestedRedirects.Length);
@@ -3940,7 +3940,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(result); // @"Expected a success because this conflict is solvable."
             Assert.Equal(3, t.ResolvedFiles.Length);
             Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath)); // "Expected to find assembly, but didn't."
-            Assert.Equal(1, t.ResolvedDependencyFiles.Length);
+            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
         }
 
 
@@ -4569,7 +4569,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(2, t.ResolvedFiles.Length);
-            Assert.Equal(3, t.ResolvedDependencyFiles.Length);
+            Assert.Equal(4, t.ResolvedDependencyFiles.Length);
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
 

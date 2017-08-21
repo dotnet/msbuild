@@ -1300,6 +1300,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (path.EndsWith(s_myLibraries_V2_DDllPath))
             {
                 return new AssemblyNameExtension("D, VErsion=2.0.0.0, CulturE=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
+            }
+
             if (path.EndsWith(s_myLibraries_V1_GDllPath))
             {
                 return new AssemblyNameExtension("G, Version=1.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
@@ -2131,14 +2133,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     new AssemblyNameExtension("D, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa"),
                     new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
-                };
-            }
-
-            if (String.Compare(path, s_myLibraries_GDllPath, StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                return new AssemblyNameExtension[]
-                {
-                    new AssemblyNameExtension("D, Version=3.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
                 };
             }
 
