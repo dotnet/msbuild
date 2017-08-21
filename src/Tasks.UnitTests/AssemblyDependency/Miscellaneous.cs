@@ -3857,6 +3857,50 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
         }
 
+
+        /// <summary>
+        /// Consider this dependency chain:
+        ///
+        /// App
+        ///   References - B
+        ///        Depends on D version 2
+        ///        Depends on G, version 2
+        ///   References - D, version 1
+        ///   References - G, version 1
+        ///
+        /// All of Dv1, Dv2, Gv1 and Gv2 are CopyLocal. We should get two conflict warnings, one for D and one for G.
+        /// </summary>
+        [Fact]
+        public void ConflictGeneratesMessageReferencingEachConflictingAssemblyName()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("B"),
+                new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"),
+                new TaskItem("G, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")
+            };
+
+            t.SearchPaths = new string[]
+            {
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
+            };
+
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+
+            bool result = Execute(t);
+
+            Assert.Equal(2, e.Warnings); // @"Expected two warnings."
+
+            // Check that we have both the expected messages
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "G");
+        }
+
         /// <summary>
         /// Consider this dependency chain:
         ///

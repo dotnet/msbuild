@@ -1866,7 +1866,7 @@ namespace Microsoft.Build.Tasks
                     if (entry != null)
                     {
                         // We have found an entry in the redist list that this assembly is a framework assembly of some version
-                        // also one if its parent refernces has specific version set to true, therefore we need to make sure
+                        // also one if its parent references has specific version set to true, therefore we need to make sure
                         // that we do not consider it for conflict resolution.
                         continue;
                     }

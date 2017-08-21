@@ -214,6 +214,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myLibraries_V1_DDllPath = Path.Combine(s_myLibraries_V1Path, "D.dll");
         protected static readonly string s_myLibraries_V1_E_EDllPath = Path.Combine(s_myLibraries_V1_EPath, "E.dll");
         protected static readonly string s_myLibraries_V2_DDllPath = Path.Combine(s_myLibraries_V2Path, "D.dll");
+        protected static readonly string s_myLibraries_V1_GDllPath = Path.Combine(s_myLibraries_V1Path, "G.dll");
+        protected static readonly string s_myLibraries_V2_GDllPath = Path.Combine(s_myLibraries_V2Path, "G.dll");
 
         protected static readonly string s_regress454863_ADllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "A.dll");
         protected static readonly string s_regress454863_BDllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "B.dll");
@@ -397,6 +399,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_myLibraries_V1_E_EDllPath,
             @"c:\RogueLibraries\v1\D.dll",
             s_myLibraries_V2_DDllPath,
+            s_myLibraries_V1_GDllPath,
+            s_myLibraries_V2_GDllPath,
             @"c:\MyStronglyNamed\A.dll",
             @"c:\MyWeaklyNamed\A.dll",
             @"c:\MyInaccessible\A.dll",
@@ -1296,6 +1300,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (path.EndsWith(s_myLibraries_V2_DDllPath))
             {
                 return new AssemblyNameExtension("D, VErsion=2.0.0.0, CulturE=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
+            if (path.EndsWith(s_myLibraries_V1_GDllPath))
+            {
+                return new AssemblyNameExtension("G, Version=1.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
+            }
+
+            if (path.EndsWith(s_myLibraries_V2_GDllPath))
+            {
+                return new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
 
             if (String.Compare(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
@@ -2117,7 +2129,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension[]
                 {
-                    new AssemblyNameExtension("D, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
+                    new AssemblyNameExtension("D, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa"),
+                    new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
+                };
+            }
+
+            if (String.Compare(path, s_myLibraries_GDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension[]
+                {
+                    new AssemblyNameExtension("D, Version=3.0.0.0, Culture=neutral, PuBlIcKeYToken=aaaaaaaaaaaaaaaa")
                 };
             }
 
