@@ -154,55 +154,6 @@ namespace Microsoft.Build.Internal
         [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory")]
         internal static unsafe extern void CopyMemory(char* destination, char* source, uint length);
 
-        /// <summary>
-        /// Retrieve the environment block.
-        /// Copied from the BCL implementation to eliminate some expensive security asserts.
-        /// </summary>
-        internal unsafe static char[] GetEnvironmentCharArray()
-        {
-            char[] block = null;
-            char* pStrings = null;
-
-            try
-            {
-                pStrings = GetEnvironmentStrings();
-                if (pStrings == null)
-                {
-                    throw new OutOfMemoryException();
-                }
-
-                // Format for GetEnvironmentStrings is:
-                // [=HiddenVar=value\0]* [Variable=value\0]* \0
-                // See the description of Environment Blocks in MSDN's
-                // CreateProcess page (null-terminated array of null-terminated strings).
-
-                // Search for terminating \0\0 (two unicode \0's).
-                char* p = pStrings;
-                while (!(*p == '\0' && *(p + 1) == '\0'))
-                {
-                    p++;
-                }
-
-                uint chars = (uint)(p - pStrings + 1);
-                uint bytes = chars * sizeof(char);
-
-                block = new char[chars];
-
-                fixed (char* pBlock = block)
-                {
-                    CopyMemory(pBlock, pStrings, bytes);
-                }
-            }
-            finally
-            {
-                if (pStrings != null)
-                {
-                    FreeEnvironmentStrings(pStrings);
-                }
-            }
-
-            return block;
-        }
 #endif
 
         /// <summary>
@@ -215,65 +166,91 @@ namespace Microsoft.Build.Internal
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
 #if FEATURE_RTLMOVEMEMORY
-            char[] block = GetEnvironmentCharArray();
-
-            // Copy strings out, parsing into pairs and inserting into the table.
-            // The first few environment variable entries start with an '='!
-            // The current working directory of every drive (except for those drives
-            // you haven't cd'ed into in your DOS window) are stored in the 
-            // environment block (as =C:=pwd) and the program's exit code is 
-            // as well (=ExitCode=00000000)  Skip all that start with =.
-            // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-            // Format for GetEnvironmentStrings is:
-            // (=HiddenVar=value\0 | Variable=value\0)* \0
-            // See the description of Environment Blocks in MSDN's
-            // CreateProcess page (null-terminated array of null-terminated strings).
-            // Note the =HiddenVar's aren't always at the beginning.
-            for (int i = 0; i < block.Length; i++)
+            unsafe
             {
-                int startKey = i;
+                char* pStringBlock = null;
 
-                // Skip to key
-                // On some old OS, the environment block can be corrupted. 
-                // Some lines will not have '=', so we need to check for '\0'. 
-                while (block[i] != '=' && block[i] != '\0')
+                try
                 {
-                    i++;
-                }
-
-                if (block[i] == '\0')
-                {
-                    continue;
-                }
-
-                // Skip over environment variables starting with '='
-                if (i - startKey == 0)
-                {
-                    while (block[i] != 0)
+                    pStringBlock = GetEnvironmentStrings();
+                    if (pStringBlock == null)
                     {
-                        i++;
+                        throw new OutOfMemoryException();
                     }
 
-                    continue;
+                    // Search for terminating \0\0 (two unicode \0's).
+                    char* pStringBlockEnd = pStringBlock;
+                    while (!(*pStringBlockEnd == '\0' && *(pStringBlockEnd + 1) == '\0'))
+                    {
+                        pStringBlockEnd++;
+                    }
+
+                    // Copy strings out, parsing into pairs and inserting into the table.
+                    // The first few environment variable entries start with an '='!
+                    // The current working directory of every drive (except for those drives
+                    // you haven't cd'ed into in your DOS window) are stored in the 
+                    // environment block (as =C:=pwd) and the program's exit code is 
+                    // as well (=ExitCode=00000000)  Skip all that start with =.
+                    // Read docs about Environment Blocks on MSDN's CreateProcess page.
+
+                    // Format for GetEnvironmentStrings is:
+                    // (=HiddenVar=value\0 | Variable=value\0)* \0
+                    // See the description of Environment Blocks in MSDN's
+                    // CreateProcess page (null-terminated array of null-terminated strings).
+                    // Note the =HiddenVar's aren't always at the beginning.
+                    for (int i = 0; i < pStringBlockEnd - pStringBlock; i++)
+                    {
+                        int startKey = i;
+
+                        // Skip to key
+                        // On some old OS, the environment block can be corrupted. 
+                        // Some lines will not have '=', so we need to check for '\0'. 
+                        while (*(pStringBlock + i) != '=' && *(pStringBlock + i) != '\0')
+                        {
+                            i++;
+                        }
+
+                        if (*(pStringBlock + i) == '\0')
+                        {
+                            continue;
+                        }
+
+                        // Skip over environment variables starting with '='
+                        if (i - startKey == 0)
+                        {
+                            while (*(pStringBlock + i) != 0)
+                            {
+                                i++;
+                            }
+
+                            continue;
+                        }
+
+                        string key = new string(pStringBlock, startKey, i - startKey);
+                        i++;
+
+                        // skip over '='
+                        int startValue = i;
+
+                        while (*(pStringBlock + i) != 0)
+                        {
+                            // Read to end of this entry
+                            i++;
+                        }
+
+                        string value = new string(pStringBlock, startValue, i - startValue);
+
+                        // skip over 0 handled by for loop's i++
+                        table[key] = value;
+                    }
                 }
-
-                string key = new string(block, startKey, i - startKey);
-                i++;
-
-                // skip over '='
-                int startValue = i;
-
-                while (block[i] != 0)
+                finally
                 {
-                    // Read to end of this entry
-                    i++;
+                    if (pStringBlock != null)
+                    {
+                        FreeEnvironmentStrings(pStringBlock);
+                    }
                 }
-
-                string value = new string(block, startValue, i - startValue);
-
-                // skip over 0 handled by for loop's i++
-                table[key] = value;
             }
 #else
             var vars = Environment.GetEnvironmentVariables();
