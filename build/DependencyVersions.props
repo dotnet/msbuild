@@ -12,7 +12,7 @@
     <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
          cases, so use separate properties but derive one from the other unless we want to
          explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.0-preview3-20170804-1</CLI_NETSDK_Version>
+    <CLI_NETSDK_Version>2.0.1-servicing-20170821-1</CLI_NETSDK_Version>
     <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
 
     <CLI_NuGet_Version>4.3.0-rtm-4382</CLI_NuGet_Version>
