@@ -76,29 +76,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     If RuntimeFrameworkVersion is not specified, the following logic applies:
     
-    - When targeting .NET Core 2.0 or higher, Framework-dependent apps use the target framework version with a ".0" patch version
-    - When targeting .NET Core 2.0 or higher, Self-contained apps use the latest patch version (from when the SDK shipped) for
-      the specified major.minor version of .NET Core
-    - When targeting .NET Core 1.x, the latest patch version (from when the SDK shipped) is used for both Framework-dependent and
-      Self-contained apps.  This is to preserve the same behavior between 1.x and 2.0 SDKs.  If we ship further patch versions
-      after 1.0.5 and 1.1.2, we may choose to apply the Framework-dependent / Self-contained split to 1.x for those versions.  
+    - Self-contained apps use the latest corrsesponding patch version (from when the SDK shipped)
+
+    - When targeting .NET Core 2.0 or higher:
+      - Framework-dependent apps use the target framework version with a ".0" patch version
+
+    - When targeting .NET Core 1.0 and 1.1
+      - Framework-dependent apps use 1.0.5 and 1.1.2, respectively.
+      - This is done for compatibility with previous releases that bumped the self-contained and framework-dependent versions together.
   -->
 
-  <!-- These properties are mainly here as a test hook, as at the time we're implementing the logic which will choose
-       different versions depending on whether an app is self-contained or not, there aren't any patch versions of
-       .NET Core 2.0.  So these properties allow us to apply the new behavior to .NET Core 1.x by overriding them.
-       
-       Once there is a patch version of .NET Core, we may want to remove these properties and just put the version
-       numbers directly inside the <Choose> element below. -->
+  <!-- These properties are here as a test hook so that we can test with the versions bumped before the actual framework
+       builds are available. -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''"> 
-    <ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0
-      Condition="'$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0>
     <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)' == ''">1.0.5</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0>
-    <ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1
-      Condition="'$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1>
+      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)' == ''">1.0.6</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0>
     <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1
-      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)' == ''">1.1.2</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1>    
+      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)' == ''">1.1.3</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1>
+    <ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0
+      Condition="'$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)' == ''">2.0.1</ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0>
   </PropertyGroup>
 
   <!-- Select implicit runtime framework versions -->
@@ -108,18 +104,24 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>1.0.5</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">
       <PropertyGroup>
-        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>1.1.2</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
         <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
       </PropertyGroup>
     </When>
+    <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.0'">
+      <PropertyGroup>
+        <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>2.0</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>
+        <ImplicitRuntimeFrameworkVersionForSelfContainedApp>$(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)</ImplicitRuntimeFrameworkVersionForSelfContainedApp>
+      </PropertyGroup>
+    </When>
 
-    <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
     <When Condition="'$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">
       <PropertyGroup>
         <ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>$(BundledNETCoreAppPackageVersion)</ImplicitRuntimeFrameworkVersionForFrameworkDependentApp>

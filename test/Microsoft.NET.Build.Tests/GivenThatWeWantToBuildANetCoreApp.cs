@@ -48,15 +48,20 @@ namespace Microsoft.NET.Build.Tests
 
         //  Test behavior when implicit version differs for framework-dependent and self-contained apps
         [Theory]
-        [InlineData(false, true, "1.1.1")]
-        [InlineData(true, true, "1.1.2")]
-        [InlineData(false, false, "1.1.1")]
-        public void It_targets_the_right_framework_depending_on_output_type(bool selfContained, bool isExe, string expectedFrameworkVersion)
+        [InlineData("netcoreapp1.0", false, true, "1.0.5")]
+        [InlineData("netcoreapp1.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)]
+        [InlineData("netcoreapp1.0", false, false, "1.0.5")]
+        [InlineData("netcoreapp1.1", false, true, "1.1.2")]
+        [InlineData("netcoreapp1.1", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)]
+        [InlineData("netcoreapp1.1", false, false, "1.1.2")]
+        [InlineData("netcoreapp2.0", false, true, "2.0.0")]
+        [InlineData("netcoreapp2.0", true, true, RepoInfo.ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0)]
+        [InlineData("netcoreapp2.0", false, false, "2.0.0")]
+        public void It_targets_the_right_framework_depending_on_output_type(string targetFramework, bool selfContained, bool isExe, string expectedFrameworkVersion)
         {
             string testIdentifier = "Framework_targeting_" + (isExe ? "App_" : "Lib_") + (selfContained ? "SelfContained" : "FrameworkDependent");
 
-            It_targets_the_right_framework(testIdentifier, "netcoreapp1.1", null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion,
-                "/p:ImplicitRuntimeFrameworkVersionForFrameworkDependentNetCoreApp1_1=1.1.1");
+            It_targets_the_right_framework(testIdentifier, targetFramework, null, selfContained, isExe, expectedFrameworkVersion, expectedFrameworkVersion);
         }
 
         private void It_targets_the_right_framework(

@@ -134,6 +134,15 @@ namespace Microsoft.NET.TestFramework
             return new DirectoryInfo(GetBaseDirectory()).Parent.Name;
         }
 
+        // For test purposes, override the implicit .NETCoreApp version for self-contained apps that to builds thare 
+        //  (1) different from the fixed framework-dependent defaults (1.0.5, 1.1.2, 2.0.0)
+        //  (2) currently available on nuget.org
+        //
+        // This allows bumping the versions before builds without causing tests to fail.
+        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0 = "1.0.4";
+        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1 = "1.1.1";
+        public const string ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0 = "2.0.0-preview2-25407-01";
+
         public static string GetBaseDirectory()
         {
 #if NET451
@@ -159,6 +168,11 @@ namespace Microsoft.NET.TestFramework
             command = command.EnvironmentVariable("CustomAfterMicrosoftCommonTargets", Path.Combine(RepoInfo.BuildExtensionsSdkPath, 
                 "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets"));
             command = command.EnvironmentVariable("MicrosoftNETBuildExtensionsTargets", Path.Combine(RepoInfo.BuildExtensionsMSBuildPath, "Microsoft.NET.Build.Extensions.targets"));
+
+            command = command
+                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_0)
+                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp1_1)
+                .EnvironmentVariable(nameof(ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0), ImplicitRuntimeFrameworkVersionForSelfContainedNetCoreApp2_0);
 
             return command;
         }
