@@ -1,4 +1,4 @@
-﻿# The `ProjectReference` Protocol
+# The `ProjectReference` Protocol
 
 The MSBuild engine doesn't have a notion of a “project reference”—it only provides the [`MSBuild` task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) to allow cross-project communication.
 
@@ -47,16 +47,19 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
 
 If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
 
-* `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target.
+* `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
   * **New** for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
   * Skipped for `*.vcxproj` by default.
-* `GetTargetPath` should the path of the project's output, but _not_ build that output.
+  * This should return a string of the form `TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework);ProjectIsRidAgnostic=$(_IsRidAgnostic)`, where the value of `NearestTargetFramework` will be used to formulate `TargetFramework` for the following calls and the other two properties are booleans.
+* `GetTargetPath` should return the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
+  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/Microsoft/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
 * **Default** targets should do the full build and return an assembly to be referenced.
   * **Conditions**: this is _not_ called when building inside Visual Studio. Instead, Visual Studio builds each project in isolation but in order, so the path returned from `GetTargetPath` can be assumed to exist at consumption time.
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
+  * The return value of this target should be identical to that of `GetTargetPath`.
 * `GetNativeManifest` should return a manifest suitable for passing to the `ResolveNativeReferences` target.
 * `GetCopyToOutputDirectoryItems` should return the outputs of a project that should be copied to the output of a referencing project.
 * `Clean` should delete all outputs of the project.
