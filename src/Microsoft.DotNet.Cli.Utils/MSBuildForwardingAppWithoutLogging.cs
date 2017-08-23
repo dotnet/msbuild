@@ -23,10 +23,6 @@ namespace Microsoft.DotNet.Cli.Utils
             new Dictionary<string, string>
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
-                { "CscToolPath", GetRunToolPath() },
-                { "VbcToolPath", GetRunToolPath() },
-                { "CscToolExe", GetRunToolExe("Csc") },
-                { "VbcToolExe", GetRunToolExe("Vbc") },
                 { "MSBuildSDKsPath", GetMSBuildSDKsPath() },
                 { "DOTNET_HOST_PATH", GetDotnetPath() },
             };
@@ -79,17 +75,6 @@ namespace Microsoft.DotNet.Cli.Utils
             return Path.Combine(
                 AppContext.BaseDirectory,
                 SdksDirectoryName);
-        }
-
-        private static string GetRunToolPath()
-        {
-            return Path.Combine(AppContext.BaseDirectory, "Roslyn", "bincore");
-        }
-
-        private static string GetRunToolExe(string compilerName)
-        {
-            var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : "";
-            return $"Run{compilerName}{scriptExtension}";
         }
 
         private static string GetDotnetPath()
