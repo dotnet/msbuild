@@ -11,7 +11,7 @@
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
+    <CliTargetFramework>netcoreapp2.1</CliTargetFramework>
   </PropertyGroup>
 
   <Import Project="build/InitRepo.props" />
