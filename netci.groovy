@@ -9,7 +9,7 @@ def branch = GithubBranchName
 // What this repo is using for its machine images at the current time
 def imageVersionMap = ['Windows_NT':'latest-or-auto-dev15-rc',
                        'OSX':'latest-or-auto',
-                       'Ubuntu14.04':'20170728',
+                       'Ubuntu14.04':'latest-or-auto',
                        'Ubuntu16.04':'20170731']
 
 [true, false].each { isPR ->
