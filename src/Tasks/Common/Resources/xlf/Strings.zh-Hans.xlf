@@ -318,8 +318,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</source>
-        <target state="translated">解析的文件包含错误图像、无元数据或不可访问。{0}</target>
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} [{1}]</source>
+        <target state="translated">解析的文件包含错误图像、无元数据或不可访问。{0} [{1}]</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
