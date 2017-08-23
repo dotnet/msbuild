@@ -108,7 +108,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                     "    path: 'lib/netstandard1.3/NuGet.Configuration.dll'");
         }
 
-        [Fact]
+        //  Windows only for now due to https://github.com/dotnet/cli/issues/7501
+        [WindowsOnlyFact]
         public void ItPublishesAnAppWithMultipleProfiles()
         {
             var testAppName = "MultiDependentProject";
