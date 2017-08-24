@@ -1509,20 +1509,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-  <!--
-    ====================================================================================
-                                        _GetProjectReferenceTargetFrameworkProperties
-
-    Builds the GetTargetFrameworkProperties target of all existent project references,
-    passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
-    SetTargetFramework metadata of the project reference to the value that is returned.
-
-    This allows a cross-targeting project to select how it should be configured to
-    build against the most appropriate target for the referring target framework.
-
-    ======================================================================================
-  -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties">
+  <Target Name="_ComputeProjectReferenceTargetFrameworkMatches" BeforeTargets="_GetProjectReferenceTargetFrameworkProperties">
     <!--
       Honor SkipGetTargetFrameworkProperties=true metadata on project references
       to mean that the project reference is known not to target multiple frameworks
@@ -1554,6 +1541,60 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
+
+    <!-- Get reference target framework lists -->
+    <MSBuild
+        Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="GetTargetFrameworks"
+        BuildInParallel="$(BuildInParallel)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
+    </MSBuild>
+
+    <!-- For each reference, get closest match -->
+    <AssignReferenceProperties AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
+                               CurrentProjectTargetFramework="$(TargetFrameworkMoniker)">
+      <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
+    </AssignReferenceProperties>
+
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" />
+      <_MSBuildProjectReferenceExistent Include="@(AnnotatedProjects)" />
+    </ItemGroup>
+
+    <!-- Assign metadata to ProjectReferences, including skipping old-style TF checks. -->
+  </Target>
+
+  <Target Name="GetTargetFrameworks"
+          Returns="@(_ThisProjectBuildMetadata)">
+    <ItemGroup>
+      <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
+        <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <HasSingleTargetFramework>true</HasSingleTargetFramework>
+        <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
+        <IsRidAgnostic>true</IsRidAgnostic><!-- TODO -->
+      </_ThisProjectBuildMetadata>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ====================================================================================
+                                        _GetProjectReferenceTargetFrameworkProperties
+
+    Builds the GetTargetFrameworkProperties target of all existent project references,
+    passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
+    SetTargetFramework metadata of the project reference to the value that is returned.
+
+    This allows a cross-targeting project to select how it should be configured to
+    build against the most appropriate target for the referring target framework.
+
+    ======================================================================================
+  -->
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties">
     <!--
       Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
       TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 

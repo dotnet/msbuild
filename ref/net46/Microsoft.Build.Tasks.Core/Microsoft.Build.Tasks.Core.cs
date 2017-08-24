@@ -114,6 +114,16 @@ namespace Microsoft.Build.Tasks
         public string VcxToDefaultPlatformMapping { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class AssignReferenceProperties : Microsoft.Build.Tasks.TaskExtension
+    {
+        public AssignReferenceProperties() { }
+        public Microsoft.Build.Framework.ITaskItem[] AnnotatedProjectReferences { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] AssignedProjects { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string CurrentProjectTargetFramework { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
     public partial class AssignTargetPath : Microsoft.Build.Tasks.TaskExtension
     {
         public AssignTargetPath() { }

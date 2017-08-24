@@ -20,6 +20,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
 
+  <Target Name="GetTargetFrameworks"
+          Returns="@(_ThisProjectBuildMetadata)">
+    <ItemGroup>
+      <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
+        <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <HasSingleTargetFramework>true</HasSingleTargetFramework>
+        <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
+        <IsRidAgnostic>true</IsRidAgnostic><!-- TODO -->
+      </_ThisProjectBuildMetadata>
+    </ItemGroup>
+  </Target>
+
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />
