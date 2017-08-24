@@ -10,7 +10,7 @@
     <licenseUrl>$licenseUrl$</licenseUrl>
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
-    <description>This package contains the runtime of MSBuild.  Reference this package only if your application needs to load projects or execute in-process builds.</description>
+    <description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</description>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <tags>MSBuild</tags>
     <dependencies>
