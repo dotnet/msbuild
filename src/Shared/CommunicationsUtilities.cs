@@ -147,15 +147,6 @@ namespace Microsoft.Build.Internal
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static unsafe extern bool FreeEnvironmentStrings(char* pStrings);
 
-#if FEATURE_RTLMOVEMEMORY
-        /// <summary>
-        /// Move a block of chars
-        /// </summary>
-        [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory")]
-        internal static unsafe extern void CopyMemory(char* destination, char* source, uint length);
-
-#endif
-
         /// <summary>
         /// Copied from the BCL implementation to eliminate some expensive security asserts.
         /// Returns key value pairs of environment variables in a new dictionary
