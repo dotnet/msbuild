@@ -537,8 +537,8 @@ namespace Microsoft.Build.UnitTests
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? ("/C type \"" + tempFile + "\"")
-                                                : (@"-c """"""cat '" + tempFile + @"'""""""");
+                                                ? $"/C type \"{tempFile}\""
+                                                : $"-c \"cat \'{tempFile}\'\"";
 
                 t.Execute();
 
