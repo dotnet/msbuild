@@ -318,8 +318,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} [{1}]</source>
-        <target state="translated">확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} [{1}]</target>
+        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
+        <target state="needs-review-translation">확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
