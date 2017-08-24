@@ -156,101 +156,104 @@ namespace Microsoft.Build.Internal
         {
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
-#if FEATURE_RTLMOVEMEMORY
-            unsafe
+            if (NativeMethodsShared.IsWindows)
             {
-                char* pEnvironmentBlock = null;
-
-                try
+                unsafe
                 {
-                    pEnvironmentBlock = GetEnvironmentStrings();
-                    if (pEnvironmentBlock == null)
+                    char* pEnvironmentBlock = null;
+
+                    try
                     {
-                        throw new OutOfMemoryException();
-                    }
-
-                    // Search for terminating \0\0 (two unicode \0's).
-                    char* pEnvironmentBlockEnd = pEnvironmentBlock;
-                    while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
-                    {
-                        pEnvironmentBlockEnd++;
-                    }
-                    long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
-
-                    // Copy strings out, parsing into pairs and inserting into the table.
-                    // The first few environment variable entries start with an '='!
-                    // The current working directory of every drive (except for those drives
-                    // you haven't cd'ed into in your DOS window) are stored in the 
-                    // environment block (as =C:=pwd) and the program's exit code is 
-                    // as well (=ExitCode=00000000)  Skip all that start with =.
-                    // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-                    // Format for GetEnvironmentStrings is:
-                    // (=HiddenVar=value\0 | Variable=value\0)* \0
-                    // See the description of Environment Blocks in MSDN's
-                    // CreateProcess page (null-terminated array of null-terminated strings).
-                    // Note the =HiddenVar's aren't always at the beginning.
-                    for (int i = 0; i < stringBlockLength; i++)
-                    {
-                        int startKey = i;
-
-                        // Skip to key
-                        // On some old OS, the environment block can be corrupted. 
-                        // Some lines will not have '=', so we need to check for '\0'. 
-                        while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
+                        pEnvironmentBlock = GetEnvironmentStrings();
+                        if (pEnvironmentBlock == null)
                         {
-                            i++;
+                            throw new OutOfMemoryException();
                         }
 
-                        if (*(pEnvironmentBlock + i) == '\0')
+                        // Search for terminating \0\0 (two unicode \0's).
+                        char* pEnvironmentBlockEnd = pEnvironmentBlock;
+                        while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
                         {
-                            continue;
+                            pEnvironmentBlockEnd++;
                         }
+                        long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
 
-                        // Skip over environment variables starting with '='
-                        if (i - startKey == 0)
+                        // Copy strings out, parsing into pairs and inserting into the table.
+                        // The first few environment variable entries start with an '='!
+                        // The current working directory of every drive (except for those drives
+                        // you haven't cd'ed into in your DOS window) are stored in the 
+                        // environment block (as =C:=pwd) and the program's exit code is 
+                        // as well (=ExitCode=00000000)  Skip all that start with =.
+                        // Read docs about Environment Blocks on MSDN's CreateProcess page.
+
+                        // Format for GetEnvironmentStrings is:
+                        // (=HiddenVar=value\0 | Variable=value\0)* \0
+                        // See the description of Environment Blocks in MSDN's
+                        // CreateProcess page (null-terminated array of null-terminated strings).
+                        // Note the =HiddenVar's aren't always at the beginning.
+                        for (int i = 0; i < stringBlockLength; i++)
                         {
-                            while (*(pEnvironmentBlock + i) != 0)
+                            int startKey = i;
+
+                            // Skip to key
+                            // On some old OS, the environment block can be corrupted. 
+                            // Some lines will not have '=', so we need to check for '\0'. 
+                            while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                             {
                                 i++;
                             }
 
-                            continue;
-                        }
+                            if (*(pEnvironmentBlock + i) == '\0')
+                            {
+                                continue;
+                            }
 
-                        string key = new string(pEnvironmentBlock, startKey, i - startKey);
-                        i++;
+                            // Skip over environment variables starting with '='
+                            if (i - startKey == 0)
+                            {
+                                while (*(pEnvironmentBlock + i) != 0)
+                                {
+                                    i++;
+                                }
 
-                        // skip over '='
-                        int startValue = i;
+                                continue;
+                            }
 
-                        while (*(pEnvironmentBlock + i) != 0)
-                        {
-                            // Read to end of this entry
+                            string key = new string(pEnvironmentBlock, startKey, i - startKey);
                             i++;
+
+                            // skip over '='
+                            int startValue = i;
+
+                            while (*(pEnvironmentBlock + i) != 0)
+                            {
+                                // Read to end of this entry
+                                i++;
+                            }
+
+                            string value = new string(pEnvironmentBlock, startValue, i - startValue);
+
+                            // skip over 0 handled by for loop's i++
+                            table[key] = value;
                         }
-
-                        string value = new string(pEnvironmentBlock, startValue, i - startValue);
-
-                        // skip over 0 handled by for loop's i++
-                        table[key] = value;
                     }
-                }
-                finally
-                {
-                    if (pEnvironmentBlock != null)
+                    finally
                     {
-                        FreeEnvironmentStrings(pEnvironmentBlock);
+                        if (pEnvironmentBlock != null)
+                        {
+                            FreeEnvironmentStrings(pEnvironmentBlock);
+                        }
                     }
                 }
             }
-#else
-            var vars = Environment.GetEnvironmentVariables();
-            foreach (var key in vars.Keys)
+            else
             {
-                table[(string)key] = (string)vars[key];
+                var vars = Environment.GetEnvironmentVariables();
+                foreach (var key in vars.Keys)
+                {
+                    table[(string) key] = (string) vars[key];
+                }
             }
-#endif
 
             return table;
         }
