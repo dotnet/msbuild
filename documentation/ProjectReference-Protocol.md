@@ -31,7 +31,9 @@ There are empty hooks in the default targets for
 
 `AssignProjectConfiguration` runs when building in a solution context, and ensures that the right `Configuration` and `Platform` are assigned to each reference. For example, if a solution specifies (using the Solution Build Manager) that for a given solution configuration, a project should always be built `Release`, that is applied inside MSBuild in this target.
 
-`PrepareProjectReferences` then runs, ensuring that each referenced project exists (creating the item `@(_MSBuildProjectReferenceExistent)`) and determining the parameters it needs to produce a compatible build by calling its `GetTargetFrameworkProperties` target.
+`PrepareProjectReferences` then runs, ensuring that each referenced project exists (creating the item `@(_MSBuildProjectReferenceExistent)`).
+
+`_ComputeProjectReferenceTargetFrameworkMatches` calls `GetTargetFrameworks` in existent ProjectReferences and determines the parameters needed to produce a compatible build by calling the `AssignReferenceProperties` task for each reference that multitargets.
 
 `ResolveProjectReferences` does the bulk of the work, building the referenced projects and collecting their outputs.
 
@@ -47,8 +49,12 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
 
 If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
 
+* `GetTargetFrameworks` tells referencing projects what options are available to the build.
+  * It returns an item with metadata `TargetFrameworks` indicating what TargetFrameworks are available in the project, as well as boolean metadata `HasSingleTargetFramework` and `IsRidAgnostic`.
+  * **New** in MSBuild 15.5.
 * `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
-  * **New** for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
+  * **Deprecated** in MSBuild 15.5.
+  * New for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
   * **Conditions**: only when metadata `SkipGetTargetFrameworkProperties` for each reference is not true.
   * Skipped for `*.vcxproj` by default.
   * This should return either
