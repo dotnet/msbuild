@@ -11,6 +11,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
+                Framework = NuGetFrameworks.NetCoreApp21
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -83,7 +84,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
+                Framework = NuGetFrameworks.NetCoreApp21
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -109,7 +110,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
                 ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20
+                Framework = NuGetFrameworks.NetCoreApp21
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -135,7 +136,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = testInstance.Root.FullName,
-                Framework = FrameworkConstants.CommonFrameworks.NetCoreApp20,
+                Framework = NuGetFrameworks.NetCoreApp21,
                 OutputPath = outputDir.FullName
             };
 

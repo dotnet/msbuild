@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/cli/issues/7476")]
         [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
         [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.0.0"));
+                    .Single(d => d.Name.StartsWith("2.1.0"));
 
                 if (packageName == "microsoft.netcore.app")
                 {

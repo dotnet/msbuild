@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("C#", "react", false, true)]
         [InlineData("C#", "reactredux", false, true)]
         [InlineData("F#", "console", false, false)]
-        [InlineData("F#", "classlib", false, false)]
+        //  https://github.com/dotnet/cli/issues/7476
+        //[InlineData("F#", "classlib", false, false)]
         [InlineData("F#", "mstest", false, false)]
         [InlineData("F#", "xunit", false, false)]
         [InlineData("F#", "mvc", true, false)]
