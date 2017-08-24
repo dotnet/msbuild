@@ -28,6 +28,10 @@
    * [http://attrice.info/msbuild](http://attrice.info/msbuild)
  * MSBuildDumper
    * [https://github.com/KirillOsenkov/MSBuildTools](https://github.com/KirillOsenkov/MSBuildTools) - install from Chocolatey `cinst MSBuildDumper` - very quick tool to dump properties and items of a project
+ * MSBuild Profiler
+   * [https://msbuildprofiler.codeplex.com/](https://msbuildprofiler.codeplex.com/)
+ * MSBuild Shell Extension
+   * [https://msbuildshellex.codeplex.com/](https://msbuildshellex.codeplex.com/)
 
 # Books
  * [Inside the Microsoft Build Engine: Using MSBuild and Team Foundation Build (2nd Edition) by Sayed Hashimi, William Bartholomew](http://www.amazon.com/Inside-Microsoft-Build-Engine-Foundation/dp/0735645248)
