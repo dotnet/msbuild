@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public RuntimeConfig(string runtimeConfigPath) 
         {
             JObject runtimeConfigJson;
-            using (var streamReader = new StreamReader(new FileStream(runtimeConfigPath, FileMode.Open)))
+            using (var streamReader = new StreamReader(File.OpenRead(runtimeConfigPath)))
             {
                 runtimeConfigJson = OpenRuntimeConfig(streamReader);
             }

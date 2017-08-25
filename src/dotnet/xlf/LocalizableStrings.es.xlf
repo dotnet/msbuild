@@ -5,27 +5,27 @@
       <group id="src/dotnet/LocalizableStrings.resx" />
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
-        <target state="translated">No se encuentra ningún proyecto en `{0}`.</target>
+        <target state="translated">No se encuentra ningún proyecto en "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Se han encontrado varios proyectos en `{0}`. Especifique el que debe usarse.</target>
+        <target state="translated">Se han encontrado varios proyectos en "{0}". Especifique el que debe usarse.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
         <source>Project already has a reference to `{0}`.</source>
-        <target state="translated">El proyecto ya tiene una referencia a `{0}`.</target>
+        <target state="translated">El proyecto ya tiene una referencia a "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
         <source>Project reference `{0}` could not be found.</source>
-        <target state="translated">No se encuentra la referencia de proyecto `{0}`.</target>
+        <target state="translated">No se encuentra la referencia de proyecto "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceRemoved">
         <source>Project reference `{0}` removed.</source>
-        <target state="translated">La referencia de proyecto `{0}` se ha quitado.</target>
+        <target state="translated">La referencia de proyecto "{0}" se ha quitado.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredArgument">
@@ -225,12 +225,12 @@
       </trans-unit>
       <trans-unit id="XYFoundButInvalid">
         <source>{0} `{1}` found but is invalid.</source>
-        <target state="translated">Se ha encontrado el {0} `{1}`, pero no es válido.</target>
+        <target state="translated">Se ha encontrado el {0} "{1}", pero no es válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="XFoundButInvalid">
         <source>`{0}` found but is invalid.</source>
-        <target state="translated">Se ha encontrado `{0}`, pero no es válido.</target>
+        <target state="translated">Se ha encontrado "{0}", pero no es válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="OperationInvalid">
@@ -255,12 +255,12 @@
       </trans-unit>
       <trans-unit id="XOrYNotFoundInZ">
         <source>{0} or {1} not found in `{2}`.</source>
-        <target state="translated">No se encuentran {0} ni {1} en `{2}`.</target>
+        <target state="translated">No se encuentran {0} ni {1} en "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>File `{0}` not found.</source>
-        <target state="translated">No se encuentra el archivo `{0}`.</target>
+        <target state="translated">No se encuentra el archivo "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="XDoesNotExist">
@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="XAlreadyContainsYZ">
         <source>{0} already contains {1} `{2}`.</source>
-        <target state="translated">{0} ya contiene un {1} `{2}`.</target>
+        <target state="translated">{0} ya contiene un {1} "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="XAlreadyHasY">
@@ -295,7 +295,7 @@
       </trans-unit>
       <trans-unit id="XAlreadyHasYZ">
         <source>{0} already has {1} `{2}`.</source>
-        <target state="translated">{0} ya tiene el {1} `{2}`.</target>
+        <target state="translated">{0} ya tiene el {1} "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="XWasNotExpected">
@@ -340,27 +340,27 @@
       </trans-unit>
       <trans-unit id="CouldNotFindProjectIn">
         <source>Could not find any project in `{0}`.</source>
-        <target state="translated">No se encuentra ningún proyecto en `{0}`.</target>
+        <target state="translated">No se encuentra ningún proyecto en "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindProjectOrDirectory">
         <source>Could not find project or directory `{0}`.</source>
-        <target state="translated">No se encuentra el proyecto o directorio `{0}`.</target>
+        <target state="translated">No se encuentra el proyecto o directorio "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundMoreThanOneProjectIn">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Se han encontrado varios proyectos en `{0}`. Especifique el que debe usarse.</target>
+        <target state="translated">Se han encontrado varios proyectos en "{0}". Especifique el que debe usarse.</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
         <source>Found a project `{0}` but it is invalid.</source>
-        <target state="translated">Se ha encontrado el proyecto `{0}`, pero no es válido.</target>
+        <target state="translated">Se ha encontrado el proyecto "{0}", pero no es válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProject">
         <source>Invalid project `{0}`.</source>
-        <target state="translated">El proyecto `{0}` no es válido.</target>
+        <target state="translated">El proyecto "{0}" no es válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionIn">
@@ -370,7 +370,7 @@
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionOrDirectory">
         <source>Could not find solution or directory `{0}`.</source>
-        <target state="translated">No se encuentra la solución o el directorio `{0}`.</target>
+        <target state="translated">No se encuentra la solución o el directorio "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundMoreThanOneSolutionIn">
@@ -405,7 +405,7 @@
       </trans-unit>
       <trans-unit id="ReferenceIsInvalid">
         <source>Reference `{0}` is invalid.</source>
-        <target state="translated">La referencia `{0}` no es válida.</target>
+        <target state="translated">La referencia "{0}" no es válida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
@@ -415,22 +415,22 @@
       </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
-        <target state="translated">Se ha agregado la referencia `{0}` al proyecto.</target>
+        <target state="translated">Se ha agregado la referencia "{0}" al proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">El proyecto {0} ya tiene una referencia `{1}`.</target>
+        <target state="translated">El proyecto {0} ya tiene una referencia "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
-        <target state="translated">La referencia de paquete `{0}` no existe.</target>
+        <target state="translated">La referencia de paquete "{0}" no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceIsInvalid">
         <source>Package reference `{0}` is invalid.</source>
-        <target state="translated">La referencia de paquete `{0}` no es válida.</target>
+        <target state="translated">La referencia de paquete "{0}" no es válida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
@@ -440,12 +440,12 @@
       </trans-unit>
       <trans-unit id="PackageReferenceAddedToTheProject">
         <source>Package reference `{0}` added to the project.</source>
-        <target state="translated">Se ha agregado la referencia de paquete `{0}` al proyecto.</target>
+        <target state="translated">Se ha agregado la referencia de paquete "{0}" al proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAPackageReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">El proyecto {0} ya tiene una referencia `{1}`.</target>
+        <target state="translated">El proyecto {0} ya tiene una referencia "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
@@ -455,12 +455,12 @@
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
         <source>Project `{0}` does not exist.</source>
-        <target state="translated">El proyecto `{0}` no existe.</target>
+        <target state="translated">El proyecto "{0}" no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectIsInvalid">
         <source>Project `{0}` is invalid.</source>
-        <target state="translated">El proyecto `{0}` no es válido.</target>
+        <target state="translated">El proyecto "{0}" no es válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToAdd">
@@ -470,7 +470,7 @@
       </trans-unit>
       <trans-unit id="ProjectAddedToTheSolution">
         <source>Project `{0}` added to the solution.</source>
-        <target state="translated">Se ha agregado el proyecto `{0}` a la solución.</target>
+        <target state="translated">Se ha agregado el proyecto "{0}" a la solución.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyHasAProject">
@@ -485,7 +485,7 @@
       </trans-unit>
       <trans-unit id="ReferenceRemoved">
         <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">Se ha eliminado la referencia “{0}” del proyecto.</target>
+        <target state="translated">Se ha eliminado la referencia "{0}" del proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
@@ -505,12 +505,12 @@
       </trans-unit>
       <trans-unit id="PackageReferenceNotFoundInTheProject">
         <source>Package reference `{0}` could not be found in the project.</source>
-        <target state="translated">No se encuentra la referencia de paquete `{0}` en el proyecto.</target>
+        <target state="translated">No se encuentra la referencia de paquete "{0}" en el proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceRemoved">
         <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">Se ha eliminado la referencia “{0}” del proyecto.</target>
+        <target state="translated">Se ha eliminado la referencia "{0}" del proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
@@ -520,7 +520,7 @@
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
         <source>Package reference `{0}` deleted.</source>
-        <target state="translated">Se ha eliminado la referencia de paquete `{0}`.</target>
+        <target state="translated">Se ha eliminado la referencia de paquete "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToDelete">
@@ -530,12 +530,12 @@
       </trans-unit>
       <trans-unit id="ProjectNotFoundInTheSolution">
         <source>Project `{0}` could not be found in the solution.</source>
-        <target state="translated">No se encuentra el proyecto `{0}` en la solución.</target>
+        <target state="translated">No se encuentra el proyecto "{0}" en la solución.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemoved">
         <source>Project `{0}` removed from solution.</source>
-        <target state="translated">Se ha quitado el proyecto `{0}` de la solución.</target>
+        <target state="translated">Se ha quitado el proyecto "{0}" de la solución.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToRemove">
@@ -545,7 +545,7 @@
       </trans-unit>
       <trans-unit id="ProjectDeleted">
         <source>Project `{0}` deleted from solution.</source>
-        <target state="translated">Se ha eliminado el proyecto `{0}` de la solución.</target>
+        <target state="translated">Se ha eliminado el proyecto "{0}" de la solución.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToDelete">
@@ -585,17 +585,17 @@
       </trans-unit>
       <trans-unit id="PackageVersionUpdatedTo">
         <source>Version of package `{0}` updated to `{1}`.</source>
-        <target state="translated">La versión del paquete `{0}` se ha actualizado a `{1}`.</target>
+        <target state="translated">La versión del paquete "{0}" se ha actualizado a "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageVersionUpdated">
         <source>Version of package `{0}` updated.</source>
-        <target state="translated">Se ha actualizado la versión del paquete `{0}`.</target>
+        <target state="translated">Se ha actualizado la versión del paquete "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotUpdateTheVersion">
         <source>Could not update the version of the package `{0}`.</source>
-        <target state="translated">No se puede actualizar la versión del paquete `{0}`.</target>
+        <target state="translated">No se puede actualizar la versión del paquete "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">

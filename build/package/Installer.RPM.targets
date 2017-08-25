@@ -50,6 +50,15 @@
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
+      <HostRidInAspNetCoreRuntimeRpmInstallerFileName>$(HostRid)</HostRidInAspNetCoreRuntimeRpmInstallerFileName>
+      <AspNetCoreRuntimePackageName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimePackageName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)</AspNetCoreRuntimePackageName>
+      <AspNetCoreRuntimePackageVersion>$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimePackageVersion>
+      <AspNetCoreRuntimePackageVersion Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreVersion)</AspNetCoreRuntimePackageVersion>
+      <AspNetCoreRuntimeRpmInstallerFileName>$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersionAndRelease)-$(AspNetCoreRuntimePackageTimestamp)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
+      <AspNetCoreRuntimeRpmInstallerFileName Condition="'$(AspNetCoreRuntimePackageFlavor)' == 'notimestamp'">$(AspNetCoreRuntimePackageBrandName)-$(AspNetCoreVersion)-$(HostRidInAspNetCoreRuntimeRpmInstallerFileName).rpm</AspNetCoreRuntimeRpmInstallerFileName>
+      <AfterInstallHostScriptTemplateFile>$(ScriptsDir)/$(AfterInstallHostScriptName)</AfterInstallHostScriptTemplateFile>
+      <AfterInstallHostScriptDestinationFile>$(RpmLayoutScripts)/$(AfterInstallHostScriptName)</AfterInstallHostScriptDestinationFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -73,8 +82,7 @@
       <SDKFiles Include="$(InputRoot)/**/*"/>
       <SDKManpages Include="$(ManPagesDir)/**/*"/>
       <SDKTemplatesFiles Include="$(TemplatesDir)/**/*"/>
-      <SDKScriptsFiles Include="$(ScriptsDir)/**/*"/>
-      <AspNetRuntimeFilesInput Include="$(AspNetRuntimePackageStorePublishDirectory)/**/*" />
+      <SDKScriptsFiles Include="$(ScriptsDir)/after_remove_host.sh"/>
     </ItemGroup>
 
     <Copy SourceFiles="@(SDKFiles)"
@@ -101,16 +109,16 @@
           SkipUnchangedFiles="False"
           UseHardlinksIfPossible="False"/>
 
-    <Copy SourceFiles="@(AspNetRuntimeFilesInput)"
-          DestinationFiles="@(AspNetRuntimeFilesInput ->'$(RpmLayoutPackageRoot)/%(RecursiveDir)%(Filename)%(Extension)')"
-          OverwriteReadOnlyFiles="True"
-          SkipUnchangedFiles="False"
-          UseHardlinksIfPossible="False"/>
-
     <!-- Replace config json variables -->
     <ItemGroup>
       <SDKTokenValue Include="%SHARED_HOST_RPM_VERSION%">
         <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
+      </SDKTokenValue>
+      <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_NAME%">
+        <ReplacementString>$(AspNetCoreRuntimePackageName)</ReplacementString>
+      </SDKTokenValue>
+      <SDKTokenValue Include="%ASPNETCOREPACKAGESTORE_RPM_PACKAGE_VERSION%">
+        <ReplacementString>$(AspNetCoreRuntimePackageVersion)</ReplacementString>
       </SDKTokenValue>
       <SDKTokenValue Include="%SHARED_HOST_RPM_NAME%">
         <ReplacementString>$(SharedFxRpmPackageName)</ReplacementString>
@@ -124,12 +132,24 @@
       <SDKTokenValue Include="%SDK_RPM_PACKAGE_NAME%">
         <ReplacementString>$(SdkRpmPackageName)</ReplacementString>
       </SDKTokenValue>
+
+      <AfterInstallHostTokenValue  Include="%SDK_VERSION%">
+        <ReplacementString>$(SdkVersion)</ReplacementString>
+      </AfterInstallHostTokenValue>
     </ItemGroup>
 
     <ItemGroup>
       <TestSdkRpmTaskEnvironmentVariables Include="PATH=$(RpmInstalledDirectory)$(PathListSeparator)$(PATH)" />
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
+
+    <ReplaceFileContents InputFile="$(AfterInstallHostScriptTemplateFile)"
+                         DestinationFile="$(AfterInstallHostScriptDestinationFile)"
+                         ReplacementItems="@(AfterInstallHostTokenValue)"/>
+
+    <Chmod
+        Glob="$(AfterInstallHostScriptDestinationFile)"
+        Mode="ugo+x" />
 
     <ReplaceFileContents InputFile="$(ConfigJsonFile)"
                          DestinationFile="$(RpmLayoutDirectory)$(RpmConfigJsonName)"
@@ -162,6 +182,16 @@
 
   </Target>
 
+  <Target Name="DownloadAspNetCoreRuntimeRpmInstaller"
+        DependsOnTargets="SetupDebProps">
+    <PropertyGroup>
+      <DownloadedSharedAspNetCoreRuntime>$(PackagesDirectory)/$(AspNetCoreRuntimeRpmInstallerFileName)</DownloadedSharedAspNetCoreRuntime>
+    </PropertyGroup>
+    <DownloadFile
+               Uri="$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimeRpmInstallerFileName)"
+               DestinationPath="$(DownloadedSharedAspNetCoreRuntime)"/>
+  </Target>
+
   <Target Name="TestFPMTool">
 
     <!-- run FPM  -->
@@ -182,11 +212,12 @@
   </Target>
 
   <Target Name="TestSdkRpm"
-          DependsOnTargets="RestoreTests"
+          DependsOnTargets="RestoreTests;DownloadAspNetCoreRuntimeRpmInstaller"
           Condition=" '$(IsRPMBasedDistro)' == 'True' and '$(FPMPresent)' == 'True' "
           Inputs="$(DownloadedSharedHostInstallerFile);
               $(DownloadedHostFxrInstallerFile);
               $(DownloadedSharedFrameworkInstallerFile);
+              $(DownloadedSharedAspNetCoreRuntime);
               $(RpmTestResultsXmlFile);"
           Outputs="$(RpmTestResultsXmlFile)" >
 
@@ -194,6 +225,7 @@
     <Exec Command="sudo yum -y install $(DownloadedSharedHostInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedHostFxrInstallerFile)" />
     <Exec Command="sudo yum -y install $(DownloadedSharedFrameworkInstallerFile)" />
+    <Exec Command="sudo yum -y install $(DownloadedSharedAspNetCoreRuntime)" />
 
     <Exec Command="sudo yum -y install $(SdkInstallerFile)" />
 
@@ -207,6 +239,8 @@
 
     <!-- Clean up Packages -->
     <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
+
+    <Exec Command="sudo yum remove -y $(AspNetCoreRuntimePackageName)" />
     <Exec Command="sudo yum remove -y $(SharedFxRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
     <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />

@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
         <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
-        <target state="translated">Specificare il file di progetto da usare perché questo file perché questo elemento '{0}' contiene più file di progetto.</target>
+        <target state="translated">Specificare il file di progetto da usare perché questo elemento '{0}' contiene più file di progetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="DidNotFindProject">

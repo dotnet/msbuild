@@ -107,6 +107,61 @@
         <target state="translated">Nebyla zadána povinná hodnota parametru {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Příkaz {0} přijímá pouze jediný argument, ale bylo zadáno více argumentů ({1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">Příkaz {0} přijímá pouze jediný příkaz v podnabídce, ale bylo zadáno více příkazů v podnabídce: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">Neexistující soubor: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">Pro možnost {0} nejsou argumenty povoleny.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Možnost {0} přijímá pouze jediný argument, ale bylo zadáno více argumentů ({1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">Chybí povinný argument pro příkaz: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">Chybí povinný argument pro možnost: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">Požadovaný příkaz nebyl zadán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Argument {0} nebyl rozpoznán. Musí se jednat o jeden z těchto argumentů: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">Nerozpoznaný příkaz nebo argument: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Možnost {0} nebyla rozpoznána. Musí se jednat o jednu z těchto možností: {1}.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

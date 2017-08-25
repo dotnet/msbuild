@@ -14,6 +14,9 @@
 
     <SdkPkgSourcesRootDirectory>$(RepoRoot)/packaging/osx/clisdk</SdkPkgSourcesRootDirectory>
     <SdkPkgScriptsDirectory>$(SdkPkgSourcesRootDirectory)/scripts</SdkPkgScriptsDirectory>
+    <SdkPkgScriptTemplateFile>$(SdkPkgScriptsDirectory)/postinstall</SdkPkgScriptTemplateFile>
+    <SdkPkgDestinationScriptsDirectory>$(PkgIntermediateDirectory)/scripts</SdkPkgDestinationScriptsDirectory>
+    <SdkPkgScriptFile>$(SdkPkgDestinationScriptsDirectory)/postinstall</SdkPkgScriptFile>
     <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
 
     <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
@@ -54,6 +57,10 @@
         <DistributionTemplateReplacement Include="{HostFxrBrandName}">
           <ReplacementString>$(HostFxrBrandName)</ReplacementString>
         </DistributionTemplateReplacement>
+
+        <PostInstallScriptReplacement Include="%SDK_VERSION%">
+          <ReplacementString>$(SdkVersion)</ReplacementString>
+        </PostInstallScriptReplacement>
       </ItemGroup>
       
       <!-- Consumed By Publish -->
@@ -83,12 +90,22 @@
       <Copy SourceFiles="@(AspNetRuntimeFilesInput)"
             DestinationFiles="@(AspNetRuntimeFilesInput->'$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
 
+      <ReplaceFileContents
+        InputFile="$(SdkPkgScriptTemplateFile)"
+        DestinationFile="$(SdkPkgScriptFile)"
+        ReplacementPatterns="@(PostInstallScriptReplacement -> '%(Identity)')"
+        ReplacementStrings="@(PostInstallScriptReplacement -> '%(ReplacementString)')" />
+
+      <Chmod
+        Glob="$(SdkPkgScriptFile)"
+        Mode="ugo+x" />
+
       <Exec Command="pkgbuild
                      --root '$(SdkLayoutOutputDirectory)'
                      --identifier '$(SdkComponentId)'
                      --version '$(SdkVersion)'
                      --install-location '$(PkgInstallDirectory)'
-                     --scripts '$(SdkPkgScriptsDirectory)'
+                     --scripts '$(SdkPkgDestinationScriptsDirectory)'
                      '$(SdkInstallerFile)'" />
     </Target>
 

@@ -4,36 +4,10 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM fedora:23
-
-# Install the base toolchain we need to build anything (clang, cmake, make and the like)
-# this does not include libraries that we need to compile different projects, we'd like
-# them in a different layer.
-RUN dnf install -y cmake \
-        clang \
-        lldb-devel \
-        make \
-        which && \
-    dnf clean all
+FROM microsoft/dotnet-buildtools-prereqs:fedora23_prereqs
 
 # Install tools used by the VSO build automation.
-RUN dnf install -y git \
-        zip \
-        tar \
-        nodejs \
-        findutils \
-        npm && \
-    dnf clean all && \
-    npm install -g azure-cli && \
-    npm cache clean
-
-# Dependencies of CoreCLR and CoreFX.
-RUN dnf install -y libicu-devel \
-        libuuid-devel \
-        libcurl-devel \
-        openssl-devel \
-        libunwind-devel \
-        lttng-ust-devel && \
+RUN dnf install -y findutils && \
     dnf clean all
 
 # Upgrade NSS, used for SSL, to avoid NuGet restore timeouts.

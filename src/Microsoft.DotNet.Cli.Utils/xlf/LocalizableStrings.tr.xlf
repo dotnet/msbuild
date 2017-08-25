@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="FailedToFindCommandPath">
         <source>{0}: failed to find commandPath {1}</source>
-        <target state="translated">{0}: {1} için commandPath bulunamadı</target>
+        <target state="translated">{0}: {1} commandPath bulunamadı</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateDotnetMultiplexer">

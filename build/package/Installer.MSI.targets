@@ -17,6 +17,8 @@
       <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
       <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
 
+      <MSBuildExtensionsGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/msbuildextensions/generatemsi.ps1</MSBuildExtensionsGenerateMsiPowershellScript>
+
       <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
       <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
 
@@ -36,11 +38,14 @@
       <ItemGroup>
         <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory)/**/*;
                                        $(SdkGenerateMsiPowershellScript)" />
+        <GenerateMSBuildExtensionsMsiInputs Include="$(MSBuildExtensionsOutputDirectory)/**/*;
+                                                     $(MSBuildExtensionsGenerateMsiPowershellScript)" />
       </ItemGroup>
       
       <!-- Consumed By Publish -->
       <ItemGroup>
         <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
+        <GeneratedInstallers Condition=" '$(Architecture)' == 'x86' " Include="$(MSBuildExtensionsInstallerFile)" />
       </ItemGroup>
 
       <GenerateMsiVersion CommitCount="$(CommitCount)"
@@ -53,6 +58,11 @@
       <GenerateGuidFromName Name="$(SdkInstallerFile)">
         <Output TaskParameter="OutputGuid"
             PropertyName="SdkInstallerUpgradeCode" />
+      </GenerateGuidFromName>
+
+      <GenerateGuidFromName Name="$(MSBuildExtensionsInstallerFile)">
+        <Output TaskParameter="OutputGuid"
+            PropertyName="MSBuildExtensionsInstallerUpgradeCode" />
       </GenerateGuidFromName>
 
       <GenerateGuidFromName Name="$(CombinedFrameworkSdkHostInstallerFile)">
@@ -100,6 +110,24 @@
                       '$(SimpleVersion)'
                       '$(NugetVersion)'
                       '$(SdkInstallerUpgradeCode)'
+                      '$(Architecture)'" />
+    </Target>
+
+    <Target Name="GenerateMSBuildExtensionsMsi"
+            DependsOnTargets="Init;Layout;AcquireWix;MsiTargetsSetupInputOutputs"
+            Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x86' "
+            Inputs="@(GenerateMSBuildExtensionsMsiInputs)"
+            Outputs="$(MSBuildExtensionsInstallerFile)">
+
+      <Exec Command="powershell -NoProfile -NoLogo $(MSBuildExtensionsGenerateMsiPowershellScript)
+                      '$(MSBuildExtensionsOutputDirectory)'
+                      '$(MSBuildExtensionsInstallerFile)'
+                      '$(WixRoot)'
+                      '$(MSBuildExtensionsBrandName)'
+                      '$(SimpleVersion)'
+                      '$(SimpleVersion)'
+                      '$(NugetVersion)'
+                      '$(MSBuildExtensionsInstallerUpgradeCode)'
                       '$(Architecture)'" />
     </Target>
 
@@ -186,6 +214,7 @@
                             MsiTargetsSetupInputOutputs;
                             AcquireWix;
                             GenerateSdkMsi;
+                            GenerateMSBuildExtensionsMsi;
                             GenerateSdkBundle;
                             GenerateSdkNupkg;
                             GenerateSdkMSBuildExtensionsNupkg;

@@ -14,7 +14,7 @@ If you are looking for the v1.0.1 release of the .NET Core tools (CLI, MSBuild a
 
 Found an issue?
 ---------------
-You can consult the [known issues page](https://github.com/dotnet/core/blob/release/2.0.0/cli/known-issues.md) to find out the current issues and to see workarounds.  
+You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.  
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
@@ -23,70 +23,77 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 | Ubuntu 16.10 |Debian 8 |Windows x64 |Windows x86 |macOS |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 | Linux x64 |
-|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8-build-badge]][debian-8-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][linux-build-badge]][linux-build]|
+|Windows x64 |Windows x86 |Mac OS X |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Ubuntu 16.10 |Debian 8 |RHEL 7.2 |
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
 
-[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6208/badge
-[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6208
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6786/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6786
 
-[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6209/badge
-[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6209
+[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6787/badge
+[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6787
 
-[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6205/badge
-[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6205
+[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6781/badge
+[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6781
 
-[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6206/badge
-[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6206
+[linux-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6780/badge
+[linux-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6780
 
-[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6207/badge
-[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6207
+[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6783/badge
+[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6783
 
-[debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6199/badge
-[debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6199
+[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6784/badge
+[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6784
 
-[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6203/badge
-[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6203
+[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6785/badge
+[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6785
 
-[centos-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6198/badge
-[centos-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6198
+[debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6778/badge
+[debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6778
 
-[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6204/badge
-[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6204
-
-[linux-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6201/badge
-[linux-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6201
+[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6782/badge
+[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6782
 
 Installers and Binaries
 -----------------------
 
-You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, tar.gz). .NET Core SDK contains both the .NET Core runtime and CLI tools.
+You can download the .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, tar.gz). The .NET Core SDK contains both the .NET Core runtime and CLI tools.
 
-In order to download the .NET Core runtime without the SDK, see https://github.com/dotnet/core-setup#daily-builds.
+To download the .NET Core runtime **without** the SDK, visit https://github.com/dotnet/core-setup#daily-builds.
 
-> **Note:** The following installers are the **latest prerelease bits**. If you
-> want to install the latest released versions, see the [preceding section](#looking-for-v1-of-the-net-core-tooling).
+> **Note:** Be aware that the following installers are the **latest bits**. If you
+> want to install the latest released versions, check out the [preceding section](#looking-for-v1-of-the-net-core-tooling).
 
-| Platform | release/2.0.0<br>[![][version-badge]][version] |
+| Platform | Latest Daily Build<br>*release/2.0.0*<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
 | **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
 | **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
 | **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
 | **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
-| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
-| **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
-| **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
-| **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
+| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
+| **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
+| **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
+| **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
+| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **CentOS 7.1 / Oracle Linux 7** | tar.gz - See **Linux x64** |
-| **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>*See Installer Note Below<br>tar.gz - See **Linux x64** |
 | **Fedora 24** | tar.gz - See **Linux x64** |
 | **OpenSUSE 42.1** | tar.gz - See **Linux x64** |
 
-*Note: Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
+
+| Latest Coherent Build<sup>2</sup><br>*release/2.0.0* |
+|:------:|
+| [![][coherent-version-badge]][coherent-version] |
+
+Reference notes:
+> **1**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
+> <br><br>**2**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
+
 
 [version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.version
+[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/latest.coherent.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
 [version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x64_Release_version_badge.svg
+[coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/win_x86_Release_coherent_badge.svg
 
 [win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe
 [win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.0.0/dotnet-sdk-latest-win-x64.exe.sha
@@ -202,7 +209,7 @@ Compiling to IL is done using:
 This will drop an IL assembly in `./bin/[configuration]/[framework]/[binary name]`
 that you can run using `dotnet bin/[configuration]/[framework]/[binaryname.dll]`.
 
-For more details, please refer to the [documentation](https://aka.ms/dotnet-cli-docs).
+For more details, refer to the [documentation](https://aka.ms/dotnet-cli-docs).
 
 Building from source
 --------------------
@@ -214,7 +221,7 @@ Read over the [contributing guidelines](CONTRIBUTING.md) and [developer document
 Questions & Comments
 --------------------
 
-For any and all feedback, please use the Issues on this repository.
+For all feedback, use the Issues on this repository.
 
 License
 -------

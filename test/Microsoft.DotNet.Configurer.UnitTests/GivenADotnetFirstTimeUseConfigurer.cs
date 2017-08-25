@@ -233,5 +233,73 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _nugetCachePrimerMock.Verify(r => r.PrimeCache(), Times.Once);
             _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
         }
+
+        [Fact]
+        public void It_prints_the_first_time_use_notice_if_the_cache_sentinel_exists_but_the_first_notice_sentinel_does_not()
+        {
+            _nugetCacheSentinelMock.Setup(n => n.Exists()).Returns(true);
+            _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
+
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath);
+
+            dotnetFirstTimeUseConfigurer.Configure();
+
+            _reporterMock.Verify(r =>
+                r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)));
+            _reporterMock.Verify(
+                r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.NugetCachePrimeMessage)),
+                Times.Never);
+            _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public void It_prints_the_unauthorized_notice_if_the_cache_sentinel_reports_Unauthorized()
+        {
+            _nugetCacheSentinelMock.Setup(n => n.UnauthorizedAccess).Returns(true);
+
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath);
+
+            dotnetFirstTimeUseConfigurer.Configure();
+
+            _reporterMock.Verify(r =>
+                r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)));
+            _reporterMock.Verify(r =>
+                r.WriteLine(It.Is<string>(str => 
+                    str == string.Format(LocalizableStrings.UnauthorizedAccessMessage, CliFallbackFolderPath))));
+            _reporterMock.Verify(
+                r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.NugetCachePrimeMessage)),
+                Times.Never);
+            _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public void It_does_not_prime_the_cache_if_the_cache_sentinel_reports_Unauthorized()
+        {
+            _nugetCacheSentinelMock.Setup(n => n.UnauthorizedAccess).Returns(true);
+
+            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
+                _nugetCachePrimerMock.Object,
+                _nugetCacheSentinelMock.Object,
+                _firstTimeUseNoticeSentinelMock.Object,
+                _environmentProviderMock.Object,
+                _reporterMock.Object,
+                CliFallbackFolderPath);
+
+            dotnetFirstTimeUseConfigurer.Configure();
+
+            _nugetCachePrimerMock.Verify(r => r.PrimeCache(), Times.Never);
+        }
     }
 }

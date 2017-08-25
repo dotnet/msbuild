@@ -23,8 +23,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                 Create.Option(
                     "-h|--help",
                     "Show help information",
-                    Accept.NoArguments(),
-                    materialize: o => o.Option.Command().HelpView()),
+                    Accept.NoArguments()),
                 Create.Option(
                     "-p|--project-path",
                     "Path to Project.json that contains the tool dependency",

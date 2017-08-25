@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
-        <target state="translated">빌드 출력이 배치된 디렉터리입니다.</target>
+        <target state="translated">빌드 출력이 위치한 디렉터리입니다.</target>
         <note />
       </trans-unit>
     </body>

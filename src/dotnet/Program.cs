@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -43,8 +45,8 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose() 
-                    ? e.ToString().Red().Bold() 
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                    ? e.ToString().Red().Bold()
                     : e.Message.Red().Bold());
 
                 var commandParsingException = e as CommandParsingException;
@@ -81,8 +83,10 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             var cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
             using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
-            using (IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
+            using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
+                new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
             {
+                IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
                 for (; lastArg < args.Length; lastArg++)
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
@@ -99,9 +103,9 @@ namespace Microsoft.DotNet.Cli
                         PrintInfo();
                         return 0;
                     }
-                    else if (IsArg(args[lastArg], "h", "help") || 
-                        args[lastArg] == "-?" ||
-                        args[lastArg] == "/?")
+                    else if (IsArg(args[lastArg], "h", "help") ||
+                             args[lastArg] == "-?" ||
+                             args[lastArg] == "/?")
                     {
                         HelpCommand.PrintHelp();
                         return 0;
@@ -113,10 +117,19 @@ namespace Microsoft.DotNet.Cli
                     }
                     else
                     {
-                        ConfigureDotNetForFirstTimeUse(nugetCacheSentinel, firstTimeUseNoticeSentinel, cliFallbackFolderPathCalculator);
-
                         // It's the command, and we're done!
                         command = args[lastArg];
+
+                        if (IsDotnetBeingInvokedFromNativeInstaller(command))
+                        {
+                            firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                        }
+
+                        ConfigureDotNetForFirstTimeUse(
+                            nugetCacheSentinel,
+                            firstTimeUseNoticeSentinel,
+                            cliFallbackFolderPathCalculator);
+
                         break;
                     }
                 }
@@ -128,11 +141,16 @@ namespace Microsoft.DotNet.Cli
 
                 if (telemetryClient == null)
                 {
-                    telemetryClient = new Telemetry(firstTimeUseNoticeSentinel);
+                    telemetryClient = new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
                 }
+                TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
+                TelemetryEventEntry.TelemetryFilter = new TelemetryFilter();
             }
 
-            var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
+            IEnumerable<string> appArgs =
+                (lastArg + 1) >= args.Length
+                ? Enumerable.Empty<string>()
+                : args.Skip(lastArg + 1).ToArray();
 
             if (verbose.HasValue)
             {
@@ -145,12 +163,12 @@ namespace Microsoft.DotNet.Cli
                 command = "help";
             }
 
-            telemetryClient.TrackEvent(command, null, null);
+            TelemetryEventEntry.TrackEvent(command, null, null);
 
             int exitCode;
-            BuiltInCommandMetadata builtIn;
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out builtIn))
+            if (BuiltInCommandsCatalog.Commands.TryGetValue(command, out var builtIn))
             {
+                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {command}", appArgs.ToArray()));
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
@@ -162,9 +180,12 @@ namespace Microsoft.DotNet.Cli
                     .Execute();
                 exitCode = result.ExitCode;
             }
-
             return exitCode;
+        }
 
+        private static bool IsDotnetBeingInvokedFromNativeInstaller(string command)
+        {
+            return command == "internal-reportinstallsuccess";
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
@@ -198,6 +219,8 @@ namespace Microsoft.DotNet.Cli
             // by default, .NET Core doesn't have all code pages needed for Console apps.
             // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            UILanguageOverride.Setup();
         }
 
         internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)

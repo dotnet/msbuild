@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="translated">PROJETO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="new">Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</target>
+        <target state="translated">Defina este sinalizador para forçar todas as dependências a serem resolvidas, mesmo que a última restauração tenha tido êxito. Isso equivale a excluir o project.assets.json.</target>
         <note />
       </trans-unit>
     </body>

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <target state="translated">PROJET</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgDescription">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="translated">FICHIER_PARAMÈTRES</target>
+        <target state="translated">SETTINGS_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
@@ -102,7 +102,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">RÉP_SORTIE</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
@@ -112,7 +112,7 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="translated">CHEMIN_FICHIER</target>
+        <target state="translated">PATH_TO_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">

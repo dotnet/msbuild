@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Tools.MSBuild
@@ -39,15 +40,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
             {
                 if (_telemetry != null && _telemetry.Enabled)
                 {
-                    IEventSource2 eventSource2 = eventSource as IEventSource2;
-
-                    if (eventSource2 != null)
+                    if (eventSource is IEventSource2 eventSource2)
                     {
                         eventSource2.TelemetryLogged += OnTelemetryLogged;
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // Exceptions during telemetry shouldn't cause anything else to fail
             }

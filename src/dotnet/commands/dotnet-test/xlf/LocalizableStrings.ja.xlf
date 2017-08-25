@@ -118,8 +118,8 @@
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
                                         Logs are written to the provided file.</source>
-        <target state="translated">テスト プラットフォームの詳細ログを有効にする
-                                       ログは指定されたファイルに書き込まれます。</target>
+        <target state="translated">"テスト プラットフォームの詳細ログを有効にします。
+                                       ログは指定されたファイルに書き込まれます。"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">

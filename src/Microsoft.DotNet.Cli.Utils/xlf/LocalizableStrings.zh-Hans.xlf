@@ -131,7 +131,7 @@
       </trans-unit>
       <trans-unit id="ExpectDepsJsonAt">
         <source>{0}: expect deps.json at: {1}</source>
-        <target state="translated">{0}: 需要deps.json: {1}</target>
+        <target state="translated">{0}: 需要 deps.json: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="GeneratingDepsJson">

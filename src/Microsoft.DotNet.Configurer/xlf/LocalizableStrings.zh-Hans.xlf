@@ -12,7 +12,7 @@ Telemetry
 The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
 You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
 You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
-        <target state="needs-review-translation">欢迎使用 .NET Core!
+        <target state="translated">欢迎使用 .NET Core!
 ---------------------
 若要详细了解 .NET Core，请访问 https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令或转到 https://aka.ms/dotnet-cli-docs。
 
@@ -20,11 +20,7 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 --------------
 .NET Core 收集使用情况数据，以便改善用户体验。数据是匿名的且不包含命令行参数。数据由 Microsoft 收集，并与社区共享。
 可选择使用你最喜爱的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 1，从而退出遥测。
-若要深入了解 .NET Core 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry。
-
-正在配置...
--------------------
-正在运行一项命令，以初步填充本地包缓存，从而提高还原速度并启用脱机访问。此命令最长需要一分钟才能完成，且仅可运行一次。</target>
+若要深入了解 .NET Core 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -36,9 +32,9 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
         <source>Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Configuring...
+        <target state="translated">正在配置...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
+正在运行一项命令，以初步填充本地包缓存，从而提高还原速度并启用脱机访问。此命令最长需要一分钟才能完成，且仅可运行一次。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -50,13 +46,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">修改“{0}”文件夹的权限被拒绝。
 
-Here are some options to fix this error:
+以下是修复该错误的选项:
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. 以提升的访问权限重新运行该命令。
+2. 通过将环境变量 DOTNET_SKIP_FIRST_TIME_EXPERIENCE 设置为 true，禁用首次运行体验。
+3. 将 .NET Core SDK 复制到未受保护的位置并从该位置使用。
     </target>
         <note />
       </trans-unit>

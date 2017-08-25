@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToFindCommand">
         <source>{0}: attempting to find command {1} in {2}</source>
-        <target state="translated">{0}: Versuch, Befehl {1} in {2} zu finden</target>
+        <target state="translated">{0}: Nach Befehl {1} wird in {2} gesucht</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToFindToolAssembly">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
         <source>{0}: attempting to resolve {1}</source>
-        <target state="translated">{0}: Versuch, {1} aufzulösen</target>
+        <target state="translated">{0}: Es wird versucht, {1} aufzulösen</target>
         <note />
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: Versuch, commandspec aus Tool {1} aufzulösen.</target>
+        <target state="translated">{0}: Es wird versucht, commandspec aus Tool {1} aufzulösen.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -121,7 +121,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToCreateCommandSpec">
         <source>{0}: attempting to create commandspec</source>
-        <target state="translated">{0}: Versuch, commandspec zu erstellen</target>
+        <target state="translated">{0}: Es wird versucht, commandspec zu erstellen</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSpecIsNull">
@@ -161,7 +161,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotRestoredOrRestoreFailed">
         <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="translated">Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten - führen Sie `dotnet restore` aus.</target>
+        <target state="translated">Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten. führen Sie "dotnet restore" aus.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
@@ -206,7 +206,7 @@
       </trans-unit>
       <trans-unit id="ProcessExitedWithCode">
         <source>&lt; {0} exited with {1} in {2} ms.</source>
-        <target state="translated">&lt; {0} wird in {2} ms mit {1} beendet.</target>
+        <target state="translated">&lt; {0} wurde nach {2} ms mit {1} beendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToInvokeMemberNameAfterCommand">
@@ -231,7 +231,7 @@
       </trans-unit>
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="translated">Der für "{0}" auszuführende Befehle wurde nicht gefunden. Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten – führen Sie "dotnet restore" aus.</target>
+        <target state="translated">Der für "{0}" auszuführende Befehl wurde nicht gefunden. Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten. Führen Sie "dotnet restore" aus.</target>
         <note />
       </trans-unit>
     </body>

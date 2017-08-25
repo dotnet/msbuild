@@ -6,12 +6,16 @@
 
 PACKAGE=$1
 INSTALL_DESTINATION=$2
-
+INSTALL_TEMP_HOME=/tmp/dotnet-installer
 
 # A temporary fix for the permissions issue(s)
 chmod -R 755 $INSTALL_DESTINATION
 
-# Run 'dotnet new' to trigger the first time experience to initialize the cache
-$INSTALL_DESTINATION/dotnet new > /dev/null 2>&1 || true
+first_run() {
+    $INSTALL_DESTINATION/dotnet exec $INSTALL_DESTINATION/sdk/%SDK_VERSION%/dotnet.dll internal-reportinstallsuccess "$1" > /dev/null 2>&1 || true
+}
+
+[ -d $INSTALL_TEMP_HOME ] || mkdir $INSTALL_TEMP_HOME
+HOME=$INSTALL_TEMP_HOME first_run
 
 exit 0

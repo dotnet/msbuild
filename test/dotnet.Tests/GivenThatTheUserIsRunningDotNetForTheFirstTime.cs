@@ -20,15 +20,17 @@ namespace Microsoft.DotNet.Tests
         private static CommandResult _firstDotnetNonVerbUseCommandResult;
         private static CommandResult _firstDotnetVerbUseCommandResult;
         private static DirectoryInfo _nugetFallbackFolder;
+        private static DirectoryInfo _dotDotnetFolder;
+        private static string _testDirectory;
 
         static GivenThatTheUserIsRunningDotNetForTheFirstTime()
         {
-            var testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests");
-            var testNuGetHome = Path.Combine(testDirectory.FullName, "nuget_home");
+            _testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests").FullName;
+            var testNuGetHome = Path.Combine(_testDirectory, "nuget_home");
             var cliTestFallbackFolder = Path.Combine(testNuGetHome, ".dotnet", "NuGetFallbackFolder");
 
             var command = new DotnetCommand()
-                .WithWorkingDirectory(testDirectory);
+                .WithWorkingDirectory(_testDirectory);
             command.Environment["HOME"] = testNuGetHome;
             command.Environment["USERPROFILE"] = testNuGetHome;
             command.Environment["APPDATA"] = testNuGetHome;
@@ -40,6 +42,7 @@ namespace Microsoft.DotNet.Tests
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
             _nugetFallbackFolder = new DirectoryInfo(cliTestFallbackFolder);
+            _dotDotnetFolder = new DirectoryInfo(Path.Combine(testNuGetHome, ".dotnet"));
         }
 
         [Fact]
@@ -76,6 +79,61 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
     	}
+
+        [Fact]
+        public void ItCreatesAFirstUseSentinelFileUnderTheDotDotNetFolder()
+        {
+            _dotDotnetFolder
+                .Should()
+                .HaveFile($"{GetDotnetVersion()}.dotnetFirstUseSentinel");
+        }
+
+        [Fact]
+        public void ItDoesNotCreateAFirstUseSentinelFileUnderTheDotDotNetFolderWhenInternalReportInstallSuccessIsInvoked()
+        {
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
+
+            var command = new DotnetCommand()
+                .WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = emptyHome;
+            command.Environment["USERPROFILE"] = emptyHome;
+            command.Environment["APPDATA"] = emptyHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            // Disable to prevent the creation of the .dotnet folder by optimizationdata.
+            command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
+            string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
+            fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
+        }
+
+        [Fact]
+        public void ItShowsTheTelemetryNoticeWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
+        {
+            var newHome = Path.Combine(_testDirectory, "new_home");
+            var newHomeFolder = new DirectoryInfo(Path.Combine(newHome, ".dotnet"));
+
+            var command = new DotnetCommand()
+                .WithWorkingDirectory(_testDirectory);
+            command.Environment["HOME"] = newHome;
+            command.Environment["USERPROFILE"] = newHome;
+            command.Environment["APPDATA"] = newHome;
+            command.Environment["DOTNET_CLI_TEST_FALLBACKFOLDER"] = _nugetFallbackFolder.FullName;
+            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["SkipInvalidConfigurations"] = "true";
+
+            command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
+
+            var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
+
+            result.StdOut
+                .Should()
+                .ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeWelcomeMessage);
+        }
 
         [Fact]
         public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()

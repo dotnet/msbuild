@@ -20,13 +20,15 @@
         Condition=" '$(OSName)' == 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
 
     <TarGzFileCreateFromDirectory
         Condition=" '$(OSName)' != 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"/>
+        OverwriteDestination="true"
+        ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
 
     <ItemGroup>
       <Archives Include="$(GenerateArchivesDestinationArchive)" />
@@ -37,11 +39,12 @@
   <Target Name="SetupGenerateArchivesInputsOutputs"
           DependsOnTargets="Init">
     <ItemGroup>
-      <GenerateArchivesInputsOutputs Include="%(LayoutDefinition.Name)">
+      <GenerateArchivesInputsOutputs Condition=" '%(LayoutDefinition.Name)' != '' " Include="%(LayoutDefinition.Name)">
         <Inputs>%(LayoutDefinition.OutputFiles)</Inputs>
         <Outputs>$(ArchiveOutputDirectory)/%(LayoutDefinition.NameWithVersion)$(ArchiveExtension)</Outputs>
         <InputDirectory>$(LayoutDirectory)/%(LayoutDefinition.Name)</InputDirectory>
         <OutFileName>%(LayoutDefinition.NameWithVersion)</OutFileName>
+        <ExcludePatterns>%(LayoutDefinition.ExcludePatterns)</ExcludePatterns>
       </GenerateArchivesInputsOutputs>
     </ItemGroup>
   </Target>

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="translated">SETTINGS_FILE</target>
+        <target state="translated">AYAR_DOSYASI</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="translated">EXPRESSION</target>
+        <target state="translated">İFADE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
@@ -102,7 +102,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">OUTPUT_DIR</target>
+        <target state="translated">ÇIKIŞ_DİZİNİ</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
@@ -112,7 +112,7 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="translated">PATH_TO_FILE</target>
+        <target state="translated">DOSYA_YOLU</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">

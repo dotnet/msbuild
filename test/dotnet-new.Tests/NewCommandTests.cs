@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.New.Tests
 {
-    public class NewCommandTests
+    public class NewCommandTests : TestBase
     {
         [Fact]
         public void WhenSwitchIsSkippedThenItPrintsError()
@@ -16,7 +16,10 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd.ExitCode.Should().NotBe(0);
 
-            cmd.StdErr.Should().StartWith("No templates matched the input template name: Web1.1.");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                cmd.StdErr.Should().StartWith("No templates matched the input template name: Web1.1.");
+            }
         }
 
         [Fact]
@@ -26,7 +29,10 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd.ExitCode.Should().NotBe(0);
 
-            cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: c.");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: c.");
+            }
         }
     }
 }

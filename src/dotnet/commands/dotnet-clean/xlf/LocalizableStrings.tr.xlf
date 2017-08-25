@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">OUTPUT_DIR</target>
+        <target state="translated">ÇIKIŞ_DİZİNİ</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">

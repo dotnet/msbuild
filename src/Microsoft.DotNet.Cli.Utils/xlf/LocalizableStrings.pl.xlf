@@ -105,7 +105,7 @@
       <trans-unit id="NuGetPackagesRoot">
         <source>{0}: nuget packages root:
 {1}</source>
-        <target state="translated">{0}: Korzeń pakietów NuGet:
+        <target state="translated">{0}: Katalog główny pakietów NuGet:
 {1}</target>
         <note />
       </trans-unit>

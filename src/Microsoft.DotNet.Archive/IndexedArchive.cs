@@ -380,7 +380,7 @@ namespace Microsoft.DotNet.Archive
                     extractOperations.AsParallel().ForAll(extractOperation =>
                     {
                         extractOperation.DoOperation();
-                        progress.Report("Expanding", Interlocked.Increment(ref opsExecuted), extractOperations.Count);
+                        progress.Report(LocalizableStrings.Expanding, Interlocked.Increment(ref opsExecuted), extractOperations.Count);
                     });
                 }
             }

@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 .Errors
                 .Select(e => e.Message)
                 .Should()
-                .BeEquivalentTo("Required argument missing for command: reference");
+                .BeEquivalentTo(string.Format(LocalizableStrings.RequiredArgumentMissingForCommand, "reference"));
         }
     }
 }

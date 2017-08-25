@@ -12,7 +12,7 @@ Telemetry
 The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
 You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
 You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
-        <target state="needs-review-translation">.NET Core — Zapraszamy!
+        <target state="translated">.NET Core — Zapraszamy!
 ---------------------
 Więcej informacji o programie .NET Core znajdziesz na stronie https://aka.ms/dotnet-docs. Aby wyświetlić dostępne polecenia, użyj polecenia dotnet --help lub przejdź na stronę https://aka.ms/dotnet-cli-docs.
 
@@ -20,11 +20,7 @@ Telemetria
 --------------
 Narzędzia programu .NET Core zbierają dane dotyczące użycia w celu ulepszenia Twojego środowiska pracy. Dane te są anonimowe i nie obejmują argumentów wiersza polecenia. Zbiera je firma Microsoft i udostępnia społeczności.
 Z telemetrii można zrezygnować, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość 1 przy użyciu ulubionej powłoki.
-Więcej informacji na temat telemetrii narzędzi programu .NET Core możesz znaleźć na stronie https://aka.ms/dotnet-cli-telemetry.
-
-Trwa konfigurowanie…
--------------------
-Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
+Więcej informacji na temat telemetrii narzędzi programu .NET Core możesz znaleźć na stronie https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -36,9 +32,9 @@ Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podr�
         <source>Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Configuring...
+        <target state="translated">Trwa konfigurowanie…
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
+Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
@@ -50,13 +46,13 @@ Here are some options to fix this error:
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="new">Permission denied to modify the '{0}' folder.
+        <target state="translated">Odmowa uprawnień do zmodyfikowania folderu „{0}”.
 
-Here are some options to fix this error:
+Oto kilka opcji naprawiania tego błędu:
 ---------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
+1. Uruchom to polecenie ponownie z podwyższonym poziomem uprawnień.
+2. Wyłącz środowisko pierwszego uruchomienia, ustawiając dla zmiennej środowiskowej DOTNET_SKIP_FIRST_TIME_EXPERIENCE wartość true.
+3. Skopiuj zestaw .NET Core SDK do lokalizacji niechronionej i tam z niego korzystaj.
     </target>
         <note />
       </trans-unit>

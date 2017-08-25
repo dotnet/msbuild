@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>
-        <target state="translated">PROJETO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">

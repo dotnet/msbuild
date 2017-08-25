@@ -16,9 +16,7 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
     public class GivenDotnetSlnAdd : TestBase
     {
-        private string HelpText = @".NET Add project(s) to a solution file Command
-
-Usage: dotnet sln <SLN_FILE> add [options] <args>
+        private string HelpText = @"Usage: dotnet sln <SLN_FILE> add [options] <args>
 
 Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
@@ -28,9 +26,7 @@ Options:
   -h, --help   Show help information.
 ";
 
-        private const string SlnCommandHelpText = @".NET modify solution file command
-
-Usage: dotnet sln [options] <SLN_FILE> [command]
+        private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
 Arguments:
   <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
@@ -220,7 +216,9 @@ EndGlobal
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln add");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($"Unrecognized command or argument 'two.sln'\r\nUnrecognized command or argument 'three.sln'\r\n{CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
+{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}
+{CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd}");
         }
 
         [Theory]

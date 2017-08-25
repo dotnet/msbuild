@@ -161,7 +161,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotRestoredOrRestoreFailed">
         <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="translated">Возможно, проект не был восстановлен или его восстановление завершилось со сбоем, запустите команду "dotnet restore".</target>
+        <target state="translated">Возможно, проект не был восстановлен или его восстановление завершилось со сбоем. Запустите команду "dotnet restore".</target>
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">

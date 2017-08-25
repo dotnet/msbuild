@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
-        <target state="translated">`{0}`에서 프로젝트를 찾을 수 없습니다.</target>
+        <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">`{0}`에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
         <source>Project already has a reference to `{0}`.</source>
-        <target state="translated">프로젝트에 이미 `{0}`에 대한 참조가 있습니다.</target>
+        <target state="translated">프로젝트에 이미 '{0}'에 대한 참조가 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
         <source>Project reference `{0}` could not be found.</source>
-        <target state="translated">프로젝트 참조 `{0}`을(를) 찾을 수 없습니다.</target>
+        <target state="translated">프로젝트 참조 '{0}'을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceRemoved">
         <source>Project reference `{0}` removed.</source>
-        <target state="translated">프로젝트 참조 `{0}`이(가) 제거되었습니다.</target>
+        <target state="translated">프로젝트 참조 '{0}'이(가) 제거되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Project">
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
-        <target state="translated">프로젝트에 `{0}` 참조가 추가되었습니다.</target>
+        <target state="translated">프로젝트에 '{0}' 참조가 추가되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Add">
@@ -214,7 +214,7 @@
       </trans-unit>
       <trans-unit id="XYFoundButInvalid">
         <source>{0} `{1}` found but is invalid.</source>
-        <target state="translated">{0} `{1}`이(가) 있지만 잘못되었습니다.</target>
+        <target state="translated">{0} '{1}'이(가) 있지만 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XFoundButInvalid">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="XOrYNotFoundInZ">
         <source>{0} or {1} not found in `{2}`.</source>
-        <target state="translated">`{2}`에서 '{0}' 또는 {1}을(를) 찾을 수 없습니다.</target>
+        <target state="translated">'{2}'에서 '{0}' 또는 {1}을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>File `{0}` not found.</source>
-        <target state="translated">`{0}` 파일을 찾을 수 없습니다.</target>
+        <target state="translated">'{0}' 파일을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XDoesNotExist">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="XYDoesNotExist">
         <source>{0} `{1}` does not exist.</source>
-        <target state="translated">{0} `{1}`이(가) 없습니다.</target>
+        <target state="translated">{0} '{1}'이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneXFound">
@@ -274,7 +274,7 @@
       </trans-unit>
       <trans-unit id="XAlreadyContainsYZ">
         <source>{0} already contains {1} `{2}`.</source>
-        <target state="translated">{0}에 {1} `{2}`이(가) 이미 있습니다.</target>
+        <target state="translated">{0}에 {1} '{2}'이(가) 이미 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XAlreadyHasY">
@@ -284,7 +284,7 @@
       </trans-unit>
       <trans-unit id="XAlreadyHasYZ">
         <source>{0} already has {1} `{2}`.</source>
-        <target state="translated">{0}에 {1} `{2}`이(가) 이미 있습니다.</target>
+        <target state="translated">{0}에 {1} '{2}'이(가) 이미 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XWasNotExpected">
@@ -334,12 +334,12 @@
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
         <source>Found a project `{0}` but it is invalid.</source>
-        <target state="translated">`{0}` 프로젝트가 있지만 잘못되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 있지만 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProject">
         <source>Invalid project `{0}`.</source>
-        <target state="translated">`{0}` 프로젝트가 잘못되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionIn">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionOrDirectory">
         <source>Could not find solution or directory `{0}`.</source>
-        <target state="translated">솔루션 또는 디렉터리 `{0}`을(를) 찾을 수 없습니다.</target>
+        <target state="translated">솔루션 또는 디렉터리 '{0}'을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionDoesNotExist">
@@ -359,7 +359,7 @@
       </trans-unit>
       <trans-unit id="ReferenceIsInvalid">
         <source>Reference `{0}` is invalid.</source>
-        <target state="translated">`{0}` 참조가 잘못되었습니다.</target>
+        <target state="translated">'{0}' 참조가 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
@@ -369,12 +369,12 @@
       </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
         <source>Package reference `{0}` does not exist.</source>
-        <target state="translated">패키지 참조 `{0}`이(가) 없습니다.</target>
+        <target state="translated">패키지 참조 '{0}'이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceIsInvalid">
         <source>Package reference `{0}` is invalid.</source>
-        <target state="translated">패키지 참조 `{0}`이(가) 잘못되었습니다.</target>
+        <target state="translated">패키지 참조 '{0}'이(가) 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
@@ -384,12 +384,12 @@
       </trans-unit>
       <trans-unit id="PackageReferenceAddedToTheProject">
         <source>Package reference `{0}` added to the project.</source>
-        <target state="translated">프로젝트에 패키지 참조 `{0}`이(가) 추가되었습니다.</target>
+        <target state="translated">프로젝트에 패키지 참조 '{0}'이(가) 추가되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAPackageReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">{0} 프로젝트에 이미 `{1}` 참조가 있습니다.</target>
+        <target state="translated">{0} 프로젝트에 이미 '{1}' 참조가 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
@@ -399,12 +399,12 @@
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
         <source>Project `{0}` does not exist.</source>
-        <target state="translated">`{0}` 프로젝트가 없습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectIsInvalid">
         <source>Project `{0}` is invalid.</source>
-        <target state="translated">`{0}` 프로젝트가 잘못되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToAdd">
@@ -414,7 +414,7 @@
       </trans-unit>
       <trans-unit id="ProjectAddedToTheSolution">
         <source>Project `{0}` added to the solution.</source>
-        <target state="translated">`{0}` 프로젝트가 솔루션에 추가되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 솔루션에 추가되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferenceNotFoundInTheProject">
@@ -424,7 +424,7 @@
       </trans-unit>
       <trans-unit id="ReferenceRemoved">
         <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">`{0}` 참조가 프로젝트에서 삭제되었습니다.</target>
+        <target state="translated">'{0}' 참조가 프로젝트에서 삭제되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
@@ -434,17 +434,17 @@
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
-        <target state="translated">`{0}` 참조가 삭제되었습니다.</target>
+        <target state="translated">'{0}' 참조가 삭제되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceNotFoundInTheProject">
         <source>Package reference `{0}` could not be found in the project.</source>
-        <target state="translated">프로젝트에서 패키지 참조 `{0}`을(를) 찾을 수 없습니다.</target>
+        <target state="translated">프로젝트에서 패키지 참조 '{0}'을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceRemoved">
         <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">`{0}` 참조가 프로젝트에서 삭제되었습니다.</target>
+        <target state="translated">'{0}' 참조가 프로젝트에서 삭제되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
@@ -454,17 +454,17 @@
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
         <source>Package reference `{0}` deleted.</source>
-        <target state="translated">패키지 참조 `{0}`이(가) 삭제되었습니다.</target>
+        <target state="translated">패키지 참조 '{0}'이(가) 삭제되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundInTheSolution">
         <source>Project `{0}` could not be found in the solution.</source>
-        <target state="translated">솔루션에서 `{0}` 프로젝트를 찾을 수 없습니다.</target>
+        <target state="translated">솔루션에서 '{0}' 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemoved">
         <source>Project `{0}` removed from solution.</source>
-        <target state="translated">`{0}` 프로젝트가 솔루션에서 제거되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 솔루션에서 제거되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToRemove">
@@ -474,7 +474,7 @@
       </trans-unit>
       <trans-unit id="ProjectDeleted">
         <source>Project `{0}` deleted from solution.</source>
-        <target state="translated">`{0}` 프로젝트가 솔루션에서 삭제되었습니다.</target>
+        <target state="translated">'{0}' 프로젝트가 솔루션에서 삭제되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
@@ -509,17 +509,17 @@
       </trans-unit>
       <trans-unit id="PackageVersionUpdatedTo">
         <source>Version of package `{0}` updated to `{1}`.</source>
-        <target state="translated">`{0}` 패키지의 버전이 `{1}`(으)로 업데이트되었습니다.</target>
+        <target state="translated">'{0}' 패키지의 버전이 '{1}'(으)로 업데이트되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageVersionUpdated">
         <source>Version of package `{0}` updated.</source>
-        <target state="translated">`{0}` 패키지의 버전이 업데이트되었습니다.</target>
+        <target state="translated">'{0}' 패키지의 버전이 업데이트되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotUpdateTheVersion">
         <source>Could not update the version of the package `{0}`.</source>
-        <target state="translated">`{0}` 패키지의 버전을 업데이트할 수 없습니다.</target>
+        <target state="translated">'{0}' 패키지의 버전을 업데이트할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
@@ -569,7 +569,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0}에서 솔루션 파일이 두 개 이상 있습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">{0}에서 솔루션 파일을 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -611,7 +611,7 @@
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}.</source>
-        <target state="translated">`{0}` 솔루션이 잘못되었습니다. {1}</target>
+        <target state="translated">'{0}' 솔루션이 잘못되었습니다. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
@@ -636,7 +636,7 @@
       </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
-        <target state="translated">`{0}` 프로젝트가 잘못되었습니다. {1}.</target>
+        <target state="translated">'{0}' 프로젝트가 잘못되었습니다. {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
@@ -671,7 +671,7 @@
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
-        <target state="new">Does not do an implicit restore when executing the command.</target>
+        <target state="translated">명령을 실행할 때 암시적 복원을 수행하지 않습니다.</target>
         <note />
       </trans-unit>
     </body>

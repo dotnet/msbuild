@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="WriteLineForwarderSetPreviously">
         <source>WriteLine forwarder set previously</source>
-        <target state="translated">WriteLine 전달자가 전에 설정됨</target>
+        <target state="translated">WriteLine 전달자가 이전에 설정됨</target>
         <note />
       </trans-unit>
       <trans-unit id="AlreadyCapturingStream">

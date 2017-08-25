@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="new">Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</target>
+        <target state="translated">Задайте этот флаг, чтобы принудительно разрешать все зависимости даже в случае успеха последнего восстановления. Это эквивалентно удалению project.assets.json.</target>
         <note />
       </trans-unit>
     </body>

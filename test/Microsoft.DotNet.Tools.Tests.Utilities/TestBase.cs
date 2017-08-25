@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private TempRoot _temp;
         private static TestAssets s_testAssets;
 
+        static TestBase()
+        {
+            // set culture of test process to match CLI sub-processes when the UI language is overriden.
+            string overriddenUILanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
+            if (overriddenUILanguage != null)
+            {
+                CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(overriddenUILanguage);
+            }
+        }
 
         protected static string RepoRoot
         {

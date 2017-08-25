@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput("--framework netcoreapp2.0 --no-restore")
                 .Should().Fail()
-                .And.HaveStdOutContaining("project.assets.json' not found.");;
+                .And.HaveStdOutContaining("project.assets.json");
         }
 
         [Fact]

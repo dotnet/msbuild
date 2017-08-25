@@ -13,19 +13,24 @@ namespace Microsoft.DotNet.Configurer
         public static readonly string SENTINEL = $"{Product.Version}.dotnetFirstUseSentinel";
 
         private readonly IFile _file;
+        private readonly IDirectory _directory;
 
         private string _dotnetUserProfileFolderPath;
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
         public FirstTimeUseNoticeSentinel(CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator) :
-            this(cliFallbackFolderPathCalculator.DotnetUserProfileFolderPath, FileSystemWrapper.Default.File)
+            this(
+                cliFallbackFolderPathCalculator.DotnetUserProfileFolderPath,
+                FileSystemWrapper.Default.File,
+                FileSystemWrapper.Default.Directory)
         {
         }
 
-        internal FirstTimeUseNoticeSentinel(string dotnetUserProfileFolderPath, IFile file)
+        internal FirstTimeUseNoticeSentinel(string dotnetUserProfileFolderPath, IFile file, IDirectory directory)
         {
             _file = file;
+            _directory = directory;
             _dotnetUserProfileFolderPath = dotnetUserProfileFolderPath;
         }
 
@@ -38,6 +43,11 @@ namespace Microsoft.DotNet.Configurer
         {
             if (!Exists())
             {
+                if (!_directory.Exists(_dotnetUserProfileFolderPath))
+                {
+                    _directory.CreateDirectory(_dotnetUserProfileFolderPath);
+                }
+
                 _file.CreateEmptyFile(SentinelPath);
             }
         }

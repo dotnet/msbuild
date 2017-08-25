@@ -31,6 +31,10 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("F#", "mstest", false, false)]
         [InlineData("F#", "xunit", false, false)]
         [InlineData("F#", "mvc", true, false)]
+        [InlineData("VB", "console", false, false)]
+        [InlineData("VB", "classlib", false, false)]
+        [InlineData("VB", "mstest", false, false)]
+        [InlineData("VB", "xunit", false, false)]
         public void TemplateRestoresAndBuildsWithoutWarnings(
             string language,
             string projectType,
@@ -38,9 +42,10 @@ namespace Microsoft.DotNet.New.Tests
             bool skipSpaWebpackSteps)
         {
             string rootPath = TestAssets.CreateTestDirectory(identifier: $"{language}_{projectType}").FullName;
+            string noRestoreDirective = "--no-restore";
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive --no-restore")
+                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive {noRestoreDirective}")
                 .Should().Pass();
 
             if (useNuGetConfigForAspNet)

@@ -13,6 +13,8 @@ using Xunit;
 using Xunit.Abstractions;
 using System;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
     public class GivenAnMSBuildSdkResolver : TestBase
@@ -106,11 +108,59 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void ItReturnsTheVersionIfItIsEqualToTheMinVersion()
+        public void ItReturnsNullWhenTheDefaultVSRequiredSDKVersionIsHigherThanTheSDKVersionAvailable()
+        {
+            var environment = new TestEnvironment();
+            var expected =
+                environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "1.0.1");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "1.0.0"),
+                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().Contain($"Version 1.0.1 of the .NET Core SDK is smaller than the minimum version"
+                            + " 1.0.4 required by Visual Studio. Check that a recent enough"
+                            + " .NET Core SDK is installed or increase the version specified in global.json.");
+        }
+
+        [Fact]
+        public void ItReturnsNullWhenTheTheVSRequiredSDKVersionIsHigherThanTheSDKVersionAvailable()
+        {
+            var environment = new TestEnvironment();
+            var expected =
+                environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "1.0.1");
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateMinimumVSDefinedSDKVersionFile("2.0.0");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, "1.0.0"),
+                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().Contain($"Version 1.0.1 of the .NET Core SDK is smaller than the minimum version"
+                            + " 2.0.0 required by Visual Studio. Check that a recent enough"
+                            + " .NET Core SDK is installed or increase the version specified in global.json.");
+        }
+
+        [Fact]
+        public void ItReturnsTheVersionIfItIsEqualToTheMinVersionAndTheVSDefinedMinVersion()
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99");
             environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateMinimumVSDefinedSDKVersionFile("99.99.99");
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -126,11 +176,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void ItReturnsTheVersionIfItIsHigherThanTheMinVersion()
+        public void ItReturnsTheVersionIfItIsHigherThanTheMinVersionAndTheVSDefinedMinVersion()
         {
             var environment = new TestEnvironment();
             var expected = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "999.99.99");
             environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateMinimumVSDefinedSDKVersionFile("999.99.98");
 
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
@@ -166,6 +217,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     "temp",
                     identifier: identifier,
                     callingMethod: callingMethod);
+
+                DeleteMinimumVSDefinedSDKVersionFile();
 
                 PathEnvironmentVariable = string.Empty;
             }
@@ -247,6 +300,22 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     default:
                         return null;
                 }
+            }
+
+            public void CreateMinimumVSDefinedSDKVersionFile(string version)
+            {
+                File.WriteAllText(GetMinimumVSDefinedSDKVersionFilePath(), version);
+            }
+
+            private void DeleteMinimumVSDefinedSDKVersionFile()
+            {                
+                File.Delete(GetMinimumVSDefinedSDKVersionFilePath());
+            }
+
+            private string GetMinimumVSDefinedSDKVersionFilePath()
+            {
+                string baseDirectory = AppContext.BaseDirectory;
+                return Path.Combine(baseDirectory, "minimumVSDefinedSDKVersion");
             }
         }
 

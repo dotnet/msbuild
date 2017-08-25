@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET Remove Project from Solution Command</source>
-        <target state="translated">Команда "Удалить проект из решения" .NET</target>
+        <target state="translated">Команда .NET "Удалить проект из решения"</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">

@@ -107,6 +107,61 @@
         <target state="translated">옵션 '{0}'에 대해 필요한 값이 제공되지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">‘{0}’ 명령은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">‘{0}’ 명령은 단일 하위 명령만 허용하는데, 여러 하위 명령이 제공되었습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">파일이 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">옵션에 대해 인수가 허용되지 않습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">'{0}' 옵션은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">명령 {0}에 대한 필수 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">옵션 {0}에 대한 필수 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">필수 명령을 제공하지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' 인수를 인식할 수 없습니다. 다음 중 하나여야 합니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">인식할 수 없는 명령 또는 인수 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' 옵션을 인식할 수 없습니다. 다음 중 하나여야 합니다. {1}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

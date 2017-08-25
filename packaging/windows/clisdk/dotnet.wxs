@@ -20,6 +20,7 @@
     <Property Id="ProductCPU" Value="$(var.Platform)" />
     <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
     <Property Id="MSIFASTINSTALL" Value="7" />
+    <Property Id="NUGETVERSION" Value="$(var.NugetVersion)" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
     <Property Id="DOTNETEXE">
@@ -30,12 +31,20 @@
 
     <CustomActionRef Id="WixBroadcastEnvironmentChange" />
 
-    <CustomAction Id="PropertyAssign" Property="QtExecDotnetnew" Value="&quot;[DOTNETHOME]\dotnet.exe&quot; new" Execute="immediate" />
-    <CustomAction Id="QtExecDotnetnew" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)" Execute="deferred" Return="ignore" Impersonate="no"/>
+    <CustomAction Id="PropertyAssignPrimeCacheAndTelemetry"
+                  Property="QtExecPrimeCacheAndTelemetryTarget"
+                  Value="&quot;[DOTNETHOME]\dotnet.exe&quot; exec &quot;[DOTNETHOME]\sdk\[NUGETVERSION]\dotnet.dll&quot; internal-reportinstallsuccess &quot;[EXEFULLPATH]&quot;"
+                  Execute="immediate" />
+    <CustomAction Id="QtExecPrimeCacheAndTelemetryTarget"
+                  BinaryKey="WixCA"
+                  DllEntry="$(var.WixQuietExec)"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no"/>
 
     <InstallExecuteSequence>
-      <Custom Action="PropertyAssign" Before="QtExecDotnetnew" />
-      <Custom Action="QtExecDotnetnew" Before="InstallFinalize" />
+      <Custom Action="PropertyAssignPrimeCacheAndTelemetry" Before="QtExecPrimeCacheAndTelemetryTarget" />
+      <Custom Action="QtExecPrimeCacheAndTelemetryTarget" Before="InstallFinalize" />
     </InstallExecuteSequence>
   </Product>
   <Fragment>

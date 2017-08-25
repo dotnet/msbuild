@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.NuGet
 
         private class NuGetCommandRunner : ICommandRunner
         {
-            public int Run(string [] args)
+            public int Run(string[] args)
             {
                 var nugetApp = new NuGetForwardingApp(args);
 

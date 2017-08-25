@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // NOTE: Currently, only the NET46 build ships (with Visual Studio/desktop msbuild), 
-// but the netstandard1.3 adaptation here acts a proof-of-concept for cross-platform 
+// but the netstandard1.5 adaptation here acts a proof-of-concept for cross-platform 
 // portability of the underlying hostfxr API and gives us build and test coverage 
 // on non-Windows machines.
-#if NETSTANDARD1_3
+#if NETSTANDARD1_5
 
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -15,6 +16,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     internal static partial class Interop
     {
         internal static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        internal static string realpath(string path)
+        {
+            var ptr = unix_realpath(path, IntPtr.Zero);
+            var result = Marshal.PtrToStringAnsi(ptr); // uses UTF8 on Unix
+            unix_free(ptr);
+            return result;
+        }
 
         private static int hostfxr_resolve_sdk(string exe_dir, string working_dir, [Out] StringBuilder buffer, int buffer_size)
         {
@@ -31,7 +40,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         // CharSet.Ansi is UTF8 on Unix
         [DllImport("hostfxr", EntryPoint = nameof(hostfxr_resolve_sdk), CharSet = CharSet.Ansi, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         private static extern int unix_hostfxr_resolve_sdk(string exe_dir, string working_dir, [Out] StringBuilder buffer, int buffer_size);
+
+        // CharSet.Ansi is UTF8 on Unix
+        [DllImport("libc", EntryPoint = nameof(realpath), CharSet = CharSet.Ansi, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr unix_realpath(string path, IntPtr buffer);
+
+        [DllImport("libc", EntryPoint = "free", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void unix_free(IntPtr ptr);
     }
 }
 
-#endif // NETSTANDARD1_3
+#endif // NETSTANDARD1_5

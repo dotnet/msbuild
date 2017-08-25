@@ -71,6 +71,18 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
+        public void It_returns_false_to_the_in_progress_sentinel_already_exists_when_it_fails_to_get_a_handle_to_it_but_it_failed_because_it_was_unauthorized()
+        {
+            var fileMock = new FileMock();
+            var directoryMock = new DirectoryMock();
+            fileMock.InProgressSentinel = null;
+            var nugetCacheSentinel =
+                new NuGetCacheSentinel(NUGET_CACHE_PATH, fileMock, directoryMock);
+
+            nugetCacheSentinel.InProgressSentinelAlreadyExists().Should().BeFalse();
+        }
+
+        [Fact]
         public void It_returns_false_to_the_in_progress_sentinel_already_exists_when_it_succeeds_in_getting_a_handle_to_it()
         {
             var fileSystemMock = _fileSystemMockBuilder.Build();
