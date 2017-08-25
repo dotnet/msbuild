@@ -89,6 +89,19 @@ runtime-options:
           cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
 
+        [Theory]
+        [InlineData("complete")]
+        [InlineData("parse")]
+        public void WhenCommandWithoutDocLinkIsPassedToDotnetHelpItPrintsError(string command)
+        {
+          var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput($"help {command}");
+
+          cmd.Should().Fail();
+          cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, command));
+          cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
+        }
+
         [WindowsOnlyFact]
         public void WhenRunOnWindowsDotnetHelpCommandShouldContainProperProcessInformation()
         {

@@ -42,7 +42,8 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// This is a critical scenario for the driver.
         /// </summary>
         /// <param name="testUserArgument"></param>
-        [Theory]
+        //  This test is "Windows only" for now due to https://github.com/dotnet/corefx/issues/23496
+        [WindowsOnlyTheory]
         [InlineData(@"""abc"" d e")]
         [InlineData(@"""ábc"" d é")]
         [InlineData(@"""abc""      d e")]

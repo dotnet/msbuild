@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.0")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.1")
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.0")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.1")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!");
         }
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/7476")]
         public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
