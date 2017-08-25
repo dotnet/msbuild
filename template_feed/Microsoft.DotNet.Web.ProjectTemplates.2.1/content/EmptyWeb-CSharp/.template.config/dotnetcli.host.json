@@ -22,6 +22,11 @@
     "IncludeLaunchSettings": {
       "longName": "use-launch-settings",
       "shortName": ""
+    },
+    "RuntimeFrameworkVersion": {
+      "longName": "runtime-framework-version",
+      "shortName": "fv",
+      "isHidden": "true"
     }
   },
   "usageExamples": [

@@ -59,6 +59,11 @@
     },
     "UserSecretsId": {
       "isHidden": true
+    },
+    "RuntimeFrameworkVersion": {
+      "longName": "runtime-framework-version",
+      "shortName": "fv",
+      "isHidden": "true"
     }
   },
   "usageExamples": [
