@@ -5,8 +5,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     public class PrecedenceSelectionTests : EndToEndTestBase
     {
         [Theory(DisplayName = nameof(VerifyTemplateContent))]
-        [InlineData("mvc", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
-        [InlineData("mvc -au individual", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
+        [InlineData("mvc -f netcoreapp2.0", "MvcNoAuthTest.json", "MvcFramework20Test.json")]
+        [InlineData("mvc -au individual -f netcoreapp2.0", "MvcIndAuthTest.json", "MvcFramework20Test.json")]
 
         [InlineData("mvc -f netcoreapp1.0", "MvcNoAuthTest.json", "MvcFramework10Test.json")]
         [InlineData("mvc -au individual -f netcoreapp1.0", "MvcIndAuthTest.json", "MvcFramework10Test.json")]
