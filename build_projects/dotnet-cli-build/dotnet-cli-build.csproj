@@ -27,7 +27,7 @@
     <!-- This dependency was added due to an issue in restore where a lower version of this package coming from nuget.commandline.xplat
     led to an error. This is tracked as NuGet issue : https://github.com/NuGet/Home/issues/4213 -->
     <PackageReference Include="Microsoft.Build.Framework" Version="$(CLI_MSBuild_Version)" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
  </ItemGroup>
 </Project>
