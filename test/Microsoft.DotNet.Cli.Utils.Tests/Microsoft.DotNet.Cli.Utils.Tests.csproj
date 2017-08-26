@@ -30,15 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161024-02" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="NuGet.Versioning" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="NuGet.Packaging" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
     <PackageReference Include="Moq" Version="4.7.25" />
-    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
+    <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuild_Version)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
 </Project>
