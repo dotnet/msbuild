@@ -21,10 +21,9 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)"/>
   </ItemGroup>
 
-  <!-- Disabled on non-Windows due to https://github.com/dotnet/corefx/issues/23496 -->
   <Target Name="PrecompileScript" 
           BeforeTargets="Build" 
-          Condition=" '$(IsCrossTargetingBuild)' != 'true' And '$(OS)' == 'Windows_NT'">
+          Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
     <Exec Command="$(DotnetInOutputDirectory) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(MSBuildThisFileDirectory)/$(OutputPath)" />
   </Target>
 
