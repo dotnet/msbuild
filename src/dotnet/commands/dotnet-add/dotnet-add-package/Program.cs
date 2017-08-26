@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 catch (IOException ioex)
                 {
                     // Catch IOException from Path.GetTempFileName() and throw a graceful exception to the user.
-                    throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileIOException, projectFilePath));
+                    throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileIOException, projectFilePath), ioex);
                 }
                 
                 GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
