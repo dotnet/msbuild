@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 if (string.IsNullOrEmpty(s_buildRid))
                 {
-                    var buildInfoPath = Path.Combine(RepoRoot, "artifacts", "obj", "BuildInfo.props");
+                    var buildInfoPath = Path.Combine(RepoRoot, "out", "obj", "BuildInfo.props");
                     var root = XDocument.Load(buildInfoPath).Root;
                     var ns = root.Name.Namespace;
 
@@ -99,7 +99,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string corehostDummyPackages = null,
             string pjDotnet = null)
         {
-            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", "stage2", BuildRid);
+            _artifacts = artifacts ?? Path.Combine(RepoRoot,
+                                                   "out",
+                                                   "2",     //  Stage - ideally this would come from the "previous stage"
+                                                   BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
