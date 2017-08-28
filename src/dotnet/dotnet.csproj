@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4</AssetTargetFallback>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

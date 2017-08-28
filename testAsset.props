@@ -2,5 +2,6 @@
   <Import Project="build/DependencyVersions.props" />
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 </Project>

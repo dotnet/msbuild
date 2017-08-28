@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PublishDir>$(FSharpDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>

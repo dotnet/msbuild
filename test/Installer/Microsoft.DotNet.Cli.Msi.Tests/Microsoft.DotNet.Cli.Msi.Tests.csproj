@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
-    <PackageReference Include="xunit.runner.console" Version="2.1.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Deployment.WindowsInstaller" Version="1.0.0" />
   </ItemGroup>
 
