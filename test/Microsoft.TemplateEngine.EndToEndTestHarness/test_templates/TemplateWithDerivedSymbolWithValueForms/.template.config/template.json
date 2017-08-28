@@ -1,0 +1,45 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithDerivedSymbolWithValueForms",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithDerivedSymbolWithValueForms",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithDerivedSymbolWithValueForms",
+  "shortName": "TestAssets.TemplateWithDerivedSymbolWithValueForms",
+  "sourceName": "Company.Web.SomeApp1",
+  "symbols": {
+    "DerivedRename": {
+      "description": "The final part of a multi-dotted name",
+      "FileRename": "SomeApp1",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "AfterLastDot",
+      "forms": {
+        "global": [ "identity", "ChainAS" ]
+      },
+      "replaces": "SomeApp1"
+    }
+  },
+  "Forms": {
+    "AfterLastDot": {
+      "identifier": "replace",
+      "pattern": "^.*\\.(?=[^\\.]+$)", // match everything up to and including the final "."
+      "replacement": ""
+    },
+    "ABecomesZ": {
+      "identifier": "replace",
+      "pattern": "A",
+      "replacement": "Z"
+    },
+    "SBecomesDollar": {
+      "identifier": "replace",
+      "pattern": "S",
+      "replacement": "$"
+    },
+    "ChainAS": {
+      "identifier": "chain",
+      "steps": [ "ABecomesZ", "SBecomesDollar"]
+    }
+  }
+}

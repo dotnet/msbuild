@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">netstandard2.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFrameworkOverride)' != ''">TargetFrameworkOverride</TargetFramework>
+    <RuntimeFrameworkVersion Condition="'$(Framework)' == 'netcoreapp2.1'">2.1.0-preview2-25624-02</RuntimeFrameworkVersion>
+    <NETStandardImplicitPackageVersion Condition="'$(Framework)' == 'netcoreapp2.1'">2.1.0-preview2-25624-02</NETStandardImplicitPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+</Project>
