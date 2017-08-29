@@ -44,11 +44,16 @@ namespace Microsoft.DotNet.New.Tests
             var rootPath = TestAssets.CreateTestDirectory().FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
 
+            // For testing the 2.1 templates - some of their packages are currently only in private feeds.
+            var configFile = Path.Combine(rootPath, "..", "..", "..", "..", "..", "NuGet.tempaspnetpatch.config");
+			// For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
+            //var configFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
+
             foreach (string cSharpTemplate in cSharpTemplates)
             {
                 var projectFolder = Path.Combine(rootPath, cSharpTemplate + "1");
                 Directory.CreateDirectory(projectFolder);
-                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory);
+                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory, configFile);
             }
 
             Directory.EnumerateFiles(packagesDirectory, $"*.nupkg", SearchOption.AllDirectories)
@@ -58,19 +63,17 @@ namespace Microsoft.DotNet.New.Tests
         private void CreateAndRestoreNewProject(
             string projectType,
             string projectFolder,
-            string packagesDirectory)
+            string packagesDirectory,
+            string configFile)
         {
-            var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
-
             new NewCommand()
                 .WithWorkingDirectory(projectFolder)
                 .Execute($"{projectType} --debug:ephemeral-hive --no-restore")
                 .Should().Pass();
 
-            // https://github.com/dotnet/templating/issues/946 - remove DisableImplicitAssetTargetFallback once this is fixed.
             new RestoreCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"--configfile {repoRootNuGetConfig} --packages {packagesDirectory} /p:DisableImplicitAssetTargetFallback=true")
+                .Execute($"--configfile {configFile} --packages {packagesDirectory}")
                 .Should().Pass();
         }
 
