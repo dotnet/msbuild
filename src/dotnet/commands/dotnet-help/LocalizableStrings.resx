@@ -181,7 +181,7 @@
     <value>Migrates a project.json based project to a msbuild based project.</value>
   </data>
   <data name="StoreDefinition" xml:space="preserve">
-    <value>Stores the specified assemblies in the runtime package store.</value>
+    <value>Stores the specified assemblies in the runtime store.</value>
   </data>
   <data name="ProjectModificationCommands" xml:space="preserve">
     <value>Project modification commands</value>
