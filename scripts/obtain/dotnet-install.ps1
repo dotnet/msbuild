@@ -58,6 +58,9 @@
 .PARAMETER ProxyUseDefaultCredentials
     Default: false
     Use default credentials, when using proxy address.
+.PARAMETER SkipNonVersionedFiles
+    Default: false
+    Skips installing non-versioned files if they already exist, such as dotnet.exe.
 #>
 [cmdletbinding()]
 param(
@@ -71,7 +74,8 @@ param(
    [string]$AzureFeed="https://dotnetcli.azureedge.net/dotnet",
    [string]$UncachedFeed="https://dotnetcli.blob.core.windows.net/dotnet",
    [string]$ProxyAddress,
-   [switch]$ProxyUseDefaultCredentials
+   [switch]$ProxyUseDefaultCredentials,
+   [switch]$SkipNonVersionedFiles
 )
 
 Set-StrictMode -Version Latest
@@ -82,7 +86,7 @@ $BinFolderRelativePath=""
 
 # example path with regex: shared/1.0.0-beta-12345/somepath
 $VersionRegEx="/\d+\.\d+[^/]+/"
-$OverrideNonVersionedFiles=$true
+$OverrideNonVersionedFiles = !$SkipNonVersionedFiles
 
 function Say($str) {
     Write-Host "dotnet-install: $str"
