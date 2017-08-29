@@ -2161,6 +2161,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="GetInstalledSDKLocations"
+      Condition="'@(SDKReference)' != ''"
       DependsOnTargets="$(GetInstalledSDKLocationsDependsOn)"
       Returns="@(InstalledSDKLocations)"
       >
@@ -2171,7 +2172,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersion)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
-           Condition="'@(SDKReference)' != ''"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
@@ -2183,7 +2183,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersionWindows81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindows81)"
-           Condition="'@(SDKReference)' != '' and '$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
+           Condition="'$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
            WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
@@ -2195,7 +2195,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersionWindowsPhone81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindowsPhone81)"
-           Condition="'@(SDKReference)' != '' and '$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
+           Condition="'$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
            WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
