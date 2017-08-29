@@ -38,7 +38,7 @@ SDK commands:
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
-  store            Stores the specified assemblies in the runtime package store.
+  store            Stores the specified assemblies in the runtime store.
   help             Show help.
 
 Common options:
