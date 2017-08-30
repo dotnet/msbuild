@@ -35,6 +35,10 @@
                      Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
       <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
                      Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(IsLinuxDistroSpecific)' != 'true'"/>
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture)*.nupkg"
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' "/>
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions*.nupkg"
+                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
