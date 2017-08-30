@@ -56,6 +56,7 @@ namespace Microsoft.TemplateEngine.Cli
                     if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
                         templateGroup = new List<ITemplateMatchInfo>();
+
                         contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
                     }
 
@@ -122,6 +123,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Error.WriteLine();
             }
+
             return anythingReported;
         }
 

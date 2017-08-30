@@ -89,7 +89,6 @@ namespace Microsoft.TemplateEngine.Cli
                 return true;
             }
 
-
             invokableTemplates = null;
             return false;
         }
