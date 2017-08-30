@@ -75,7 +75,7 @@
         <source>Specify a logger for test results.
                                         Examples:
                                         Log in trx format using a unqiue file name: --logger trx
-                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.resx&gt;"
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
         <target state="needs-review-translation">Especifica un registrador para los resultados de prueba.
                                         Ejemplo: --logger "trx[;LogFileName=&lt;Adopta como valor predeterminado un nombre de archivo único&gt;]"
