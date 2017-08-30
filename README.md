@@ -63,7 +63,6 @@ In order to download just the .NET Core runtime without the SDK, please visit ht
 > want to install the latest released versions, please check out the [section above](#looking-for-v1-of-the-net-core-tooling).
 
 
-
 | Platform | Latest Daily Build<br>*release/2.0.2*<br>[![][version-badge]][version] |
 | -------- | :-------------------------------------: |
 | **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
@@ -88,11 +87,10 @@ Reference notes:
 > **1**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 > <br><br>**2**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
 
-
-[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/latest.version
-[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/latest.coherent.version
 [comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
+[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/latest.version
 [version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/win_x64_Release_version_badge.svg
+[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/latest.coherent.version
 [coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/win_x86_Release_coherent_badge.svg
 
 [win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.0.2/dotnet-sdk-latest-win-x64.exe
