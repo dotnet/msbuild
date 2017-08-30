@@ -62,6 +62,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             List<ITemplateMatchInfo> paramFiltered = CoreMatchedTemplates.Where(x => !x.HasParameterMismatch()).ToList();
+
             if (TemplateListResolver.AreAllTemplatesSameGroupIdentity(paramFiltered))
             {
                 unambiguousTemplateGroup = paramFiltered;
