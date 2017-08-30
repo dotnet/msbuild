@@ -1019,6 +1019,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Some partially matched templates may not support these input switches:.
+        /// </summary>
+        public static string PartialTemplateMatchSwitchesNotValidForAllMatches {
+            get {
+                return ResourceManager.GetString("PartialTemplateMatchSwitchesNotValidForAllMatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Actual command: {0}.
         /// </summary>
         public static string PostActionCommand {

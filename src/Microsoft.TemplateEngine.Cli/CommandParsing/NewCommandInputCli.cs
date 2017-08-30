@@ -257,7 +257,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return _parseResult.HasAppliedOption(new[] { _commandName, flag });
         }
 
-        public IReadOnlyDictionary<string, string> AllTemplateParams
+        public IReadOnlyDictionary<string, string> InputTemplateParams
         {
             get
             {
@@ -357,12 +357,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool TemplateParamHasValue(string paramName)
         {
-            return AllTemplateParams.ContainsKey(paramName);
+            return InputTemplateParams.ContainsKey(paramName);
         }
 
         public string TemplateParamValue(string paramName)
         {
-            AllTemplateParams.TryGetValue(paramName, out string value);
+            InputTemplateParams.TryGetValue(paramName, out string value);
             return value;
         }
 

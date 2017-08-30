@@ -550,4 +550,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="UnableToSetPermissions" xml:space="preserve">
     <value>Unable to apply permissions {0} to "{1}".</value>
   </data>
+  <data name="PartialTemplateMatchSwitchesNotValidForAllMatches" xml:space="preserve">
+    <value>Some partially matched templates may not support these input switches:</value>
+  </data>
 </root>

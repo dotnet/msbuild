@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool HasDebuggingFlag(string flag);
 
-        IReadOnlyDictionary<string, string> AllTemplateParams { get; }
+        IReadOnlyDictionary<string, string> InputTemplateParams { get; }
 
         string TemplateParamInputFormat(string canonical);
 
