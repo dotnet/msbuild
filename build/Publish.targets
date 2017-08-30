@@ -26,8 +26,7 @@
                              UploadChecksumsToAzure;
                              PublishDebFilesToDebianRepo;
                              PublishCliVersionBadge" />
-          
-          
+
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
