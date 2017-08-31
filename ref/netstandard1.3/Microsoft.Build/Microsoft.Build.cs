@@ -971,6 +971,7 @@ namespace Microsoft.Build.Execution
     [System.FlagsAttribute]
     public enum BuildRequestDataFlags
     {
+        ClearProjectRootElementCacheAfterBuild = 8,
         IgnoreExistingProjectState = 4,
         None = 0,
         ProvideProjectStateAfterBuild = 2,

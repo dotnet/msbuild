@@ -1226,8 +1226,15 @@ namespace Microsoft.Build.CommandLine
             // The initializer syntax can't be used just in case a user set this property to a value
             restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
 
-            // Create a new request with a Restore target only
-            BuildRequestData restoreRequest = new BuildRequestData(projectFile, restoreGlobalProperties, toolsVersion, new[] { "Restore" }, null);
+            // Create a new request with a Restore target only and specify the ClearProjectRootElementCacheAfterBuild flag to ensure the projects will
+            // be reloaded from disk for subsequent builds
+            BuildRequestData restoreRequest = new BuildRequestData(
+                projectFile,
+                restoreGlobalProperties,
+                toolsVersion,
+                targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
+                hostServices: null,
+                flags: BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }

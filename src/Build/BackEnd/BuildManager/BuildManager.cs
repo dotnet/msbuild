@@ -1628,6 +1628,12 @@ namespace Microsoft.Build.Execution
 
                     _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
 
+                    if (submission.BuildRequestData != null && submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild))
+                    {
+                        // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk
+                        _buildParameters?.ProjectRootElementCache?.Clear();
+                    }
+
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
