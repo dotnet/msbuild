@@ -13,12 +13,15 @@ using System.Text;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit;
+using Shouldly;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -1903,6 +1906,82 @@ namespace Microsoft.Build.UnitTests
         }
 #endregion
 
+        [Fact]
+        public void RestoreFirstReevaluatesImportGraph()
+        {
+            string guid = Guid.NewGuid().ToString("N");
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <PropertyGroup>
+    <RestoreFirstProps>{Guid.NewGuid():N}.props</RestoreFirstProps>
+  </PropertyGroup>
+  
+  <Import Project=""$(RestoreFirstProps)"" Condition=""Exists($(RestoreFirstProps))""/>
+
+  <Target Name=""Build"">
+    <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
+    <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
+  </Target>
+
+  <Target Name=""Restore"">
+    <CreatePropsFile FilePath=""$(RestoreFirstProps)"" PropertyName=""PropertyA"" PropertyValue=""{guid}"" />
+  </Target>
+  
+  {CreatePropsFileUsingTask}
+
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/restore");
+
+            logContents.ShouldContain(guid);
+        }
+
+        [Fact]
+        public void RestoreFirstClearsProjectRootElementCache()
+        {
+            string guid1 = Guid.NewGuid().ToString("N");
+            string guid2 = Guid.NewGuid().ToString("N");
+            string restoreFirstProps = $"{Guid.NewGuid():N}.props";
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <PropertyGroup>
+    <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
+  </PropertyGroup>
+  
+  <Import Project=""$(RestoreFirstProps)"" Condition=""Exists($(RestoreFirstProps))""/>
+
+  <Target Name=""Build"">
+    <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
+    <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
+  </Target>
+
+  <Target Name=""Restore"">
+    <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
+    <CreatePropsFile FilePath=""$(RestoreFirstProps)"" PropertyName=""PropertyA"" PropertyValue=""{guid2}"" />
+  </Target>
+  
+  {CreatePropsFileUsingTask}
+
+</Project>");
+
+            IDictionary<string, string> preExistingProps = new Dictionary<string, string>
+            {
+                { restoreFirstProps, $@"<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <PropertyGroup>
+    <PropertyA>{guid1}</PropertyA>
+  </PropertyGroup>
+</Project>"
+                }
+            };
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, preExistingProps, "/restore");
+
+            logContents.ShouldContain(guid1);
+            logContents.ShouldContain(guid2);
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
@@ -1948,5 +2027,59 @@ namespace Microsoft.Build.UnitTests
                 throw;
             }
         }
+
+        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, params string[] arguments)
+        {
+            using (TestEnvironment testEnvironment = Engine.UnitTests.TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+                if (filesToCreate != null)
+                {
+                    foreach (var item in filesToCreate)
+                    {
+                        File.WriteAllText(Path.Combine(testProject.TestRoot, item.Key), item.Value);
+                    }
+                }
+
+                string logFile = Path.Combine(testProject.TestRoot, "MSBuild.log");
+
+                MSBuildApp.ExitType exitCode = MSBuildApp.Execute($"{RunnerUtilities.PathToCurrentlyRunningMsBuildExe} \"{testProject.ProjectFile}\" {String.Join(" ", arguments)} /flp:v=n;LogFile={logFile}");
+
+                exitCode.ShouldBe(MSBuildApp.ExitType.Success);
+
+                File.Exists(logFile).ShouldBeTrue();
+
+                return File.ReadAllText(logFile);
+            }
+        }
+
+        private const string CreatePropsFileUsingTask = @"<UsingTask TaskName=""CreatePropsFile"" TaskFactory=""CodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
+    <ParameterGroup>
+      <FilePath Required=""true"" />
+      <PropertyName Required=""true"" />
+      <PropertyValue Required=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include=""Microsoft.Build"" />
+      <Reference Include=""System.Xml"" />
+      <Using Namespace=""Microsoft.Build.Construction"" />
+      <Using Namespace=""System.Linq"" />
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        
+        ProjectRootElement projectRootElement = ProjectRootElement.Create(FilePath);
+        
+        projectRootElement.AddProperty(PropertyName, PropertyValue);
+        
+        projectRootElement.Save();
+        
+        Log.LogMessage(""Successfully created properties file '"" + FilePath + ""'"");
+
+        Success = !Log.HasLoggedErrors;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>";
     }
 }
