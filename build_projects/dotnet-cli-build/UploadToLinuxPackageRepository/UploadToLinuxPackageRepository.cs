@@ -65,6 +65,13 @@ namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
         {
             try
             {
+                Log.LogMessage(
+                MessageImportance.High,
+                "Begin uploading Linux Package to feed service, RepositoryId {0}, Server {1}, Package to upload {2}.",
+                RepositoryId,
+                Server,
+                PathOfPackageToUpload);
+
                 var linuxPackageRepositoryDestiny =
                     new LinuxPackageRepositoryDestiny(Username, Password, Server, RepositoryId);
                 var uploadResponse = await new LinuxPackageRepositoryHttpPrepare(
@@ -93,6 +100,12 @@ namespace Microsoft.DotNet.Cli.Build.UploadToLinuxPackageRepository
                     5,
                     () => ExponentialRetry.Timer(ExponentialRetry.Intervals),
                     $"PullQueuedPackageStatus location: {queueResourceLocation.Location}");
+
+                Log.LogMessage(
+                MessageImportance.High,
+                "Upload to feed service is completed, queue resource location {0}",
+                queueResourceLocation.Location);
+
                 return "";
             }
             catch (FailedToAddPackageToPackageRepositoryException e)
