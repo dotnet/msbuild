@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.New.Tests
 
         [Theory]
         [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
-        // issue with netstandard2.0 - formerly both test cases were skipped because of: https://github.com/dotnet/cli/issues/7476
+        // re-enable when this bug is resolved: https://github.com/dotnet/cli/pull/7554
         //[InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
