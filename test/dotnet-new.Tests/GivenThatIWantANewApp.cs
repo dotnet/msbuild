@@ -77,9 +77,10 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
         }
 
-        [Theory(Skip = "https://github.com/dotnet/cli/issues/7476")]
+        [Theory]
         [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
-        [InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
+        // issue with netstandard2.0 - formerly both test cases were skipped because of: https://github.com/dotnet/cli/issues/7476
+        //[InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
