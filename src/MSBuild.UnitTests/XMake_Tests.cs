@@ -4,24 +4,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 using Shouldly;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -46,8 +40,8 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
-            Assert.Equal("a=b", parameters[0]);
-            Assert.Equal("c=d", parameters[1]);
+            parameters[0].ShouldBe("a=b");
+            parameters[1].ShouldBe("c=d");
         }
 
         [Fact]
@@ -61,10 +55,10 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
-            Assert.Equal("2", parameters[0]);
-            Assert.Equal(1, parameters.Length);
+            parameters[0].ShouldBe("2");
+            parameters.Length.ShouldBe(1);
 
-            Assert.Equal(false, switches.HaveErrors());
+            switches.HaveErrors().ShouldBeFalse();
         }
 
         [Fact]
@@ -78,10 +72,10 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
-            Assert.Equal(Convert.ToString(Environment.ProcessorCount), parameters[1]);
-            Assert.Equal(2, parameters.Length);
+            parameters[1].ShouldBe(Convert.ToString(Environment.ProcessorCount));
+            parameters.Length.ShouldBe(2);
 
-            Assert.Equal(false, switches.HaveErrors());
+            switches.HaveErrors().ShouldBeFalse();
         }
 
         /// <summary>
@@ -98,9 +92,9 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
-            Assert.Equal(0, parameters.Length);
+            parameters.Length.ShouldBe(0);
 
-            Assert.True(switches.HaveErrors());
+            switches.HaveErrors().ShouldBeTrue();
         }
 
         /*
@@ -138,189 +132,189 @@ namespace Microsoft.Build.UnitTests
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abcdxyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abcdxyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abcdxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abcc dxyz");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abcc", sa[0]);
-            Assert.Equal("dxyz", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abcc");
+            sa[1].ShouldBe("dxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abcc;dxyz", ';');
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abcc", sa[0]);
-            Assert.Equal("dxyz", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abcc");
+            sa[1].ShouldBe("dxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abc,c;dxyz", ';', ',');
-            Assert.Equal(3, sa.Count);
-            Assert.Equal("abc", sa[0]);
-            Assert.Equal("c", sa[1]);
-            Assert.Equal("dxyz", sa[2]);
+            sa.Count.ShouldBe(3);
+            sa[0].ShouldBe("abc");
+            sa[1].ShouldBe("c");
+            sa[2].ShouldBe("dxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abc,c;dxyz", 2, false, false, out emptySplits, ';', ',');
-            Assert.Equal(0, emptySplits);
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc", sa[0]);
-            Assert.Equal("c;dxyz", sa[1]);
+            emptySplits.ShouldBe(0);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc");
+            sa[1].ShouldBe("c;dxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abc,,;dxyz", int.MaxValue, false, false, out emptySplits, ';', ',');
-            Assert.Equal(2, emptySplits);
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc", sa[0]);
-            Assert.Equal("dxyz", sa[1]);
+            emptySplits.ShouldBe(2);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc");
+            sa[1].ShouldBe("dxyz");
 
             // nothing quoted
             sa = QuotingUtilities.SplitUnquoted("abc,,;dxyz", int.MaxValue, true, false, out emptySplits, ';', ',');
-            Assert.Equal(0, emptySplits);
-            Assert.Equal(4, sa.Count);
-            Assert.Equal("abc", sa[0]);
-            Assert.Equal(String.Empty, sa[1]);
-            Assert.Equal(String.Empty, sa[2]);
-            Assert.Equal("dxyz", sa[3]);
+            emptySplits.ShouldBe(0);
+            sa.Count.ShouldBe(4);
+            sa[0].ShouldBe("abc");
+            sa[1].ShouldBe(String.Empty);
+            sa[2].ShouldBe(String.Empty);
+            sa[3].ShouldBe("dxyz");
 
             // "c d" is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"c d\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"c d\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"c d\"xyz");
 
             // "x z" is quoted (the terminal double-quote is assumed)
             sa = QuotingUtilities.SplitUnquoted("abc\"x z");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"x z", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"x z");
 
             // "x z" is quoted (the terminal double-quote is explicit)
             sa = QuotingUtilities.SplitUnquoted("abc\"x z\"");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"x z\"", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"x z\"");
 
             // "x z" is quoted (the terminal double-quote is assumed)
             sa = QuotingUtilities.SplitUnquoted("abc\\\"cde\"x z");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\\\"cde\"x z", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\\\"cde\"x z");
 
             // "x z" is quoted (the terminal double-quote is assumed)
             // "c e" is not quoted
             sa = QuotingUtilities.SplitUnquoted("abc\\\"c e\"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\\\"c", sa[0]);
-            Assert.Equal("e\"x z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\\\"c");
+            sa[1].ShouldBe("e\"x z");
 
             // "c e" is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\\\\\"c e\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\\\\\"c e\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\\\\\"c e\"xyz");
 
             // "c e" is quoted
             // "x z" is not quoted
             sa = QuotingUtilities.SplitUnquoted("abc\\\\\"c e\"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\\\\\"c e\"x", sa[0]);
-            Assert.Equal("z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\\\\\"c e\"x");
+            sa[1].ShouldBe("z");
 
             // "x z" is quoted (the terminal double-quote is assumed)
             sa = QuotingUtilities.SplitUnquoted("abc\\\\\\\"cde\"x z");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\\\\\\\"cde\"x z", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\\\\\\\"cde\"x z");
 
             // "xyz" is quoted (the terminal double-quote is assumed)
             // "c e" is not quoted
             sa = QuotingUtilities.SplitUnquoted("abc\\\\\\\"c e\"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\\\\\\\"c", sa[0]);
-            Assert.Equal("e\"x z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\\\\\\\"c");
+            sa[1].ShouldBe("e\"x z");
 
             // """ is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"\"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"\"\"xyz");
 
             // " "" is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\" \"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\" \"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\" \"\"xyz");
 
             // "x z" is quoted (the terminal double-quote is assumed)
             sa = QuotingUtilities.SplitUnquoted("abc\"\" \"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\"\"", sa[0]);
-            Assert.Equal("\"x z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\"\"");
+            sa[1].ShouldBe("\"x z");
 
             // " "" and "xyz" are quoted (the terminal double-quote is assumed)
             sa = QuotingUtilities.SplitUnquoted("abc\" \"\"\"x z");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\" \"\"\"x z", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\" \"\"\"x z");
 
             // """ is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\"\"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"\"\"\"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"\"\"\"\"xyz");
 
             // """ is quoted
             // "x z" is not quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\"\"\"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\"\"\"\"\"x", sa[0]);
-            Assert.Equal("z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\"\"\"\"\"x");
+            sa[1].ShouldBe("z");
 
             // " "" is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\" \"\"\"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\" \"\"\"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\" \"\"\"\"xyz");
 
             // """ and """ are quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\"\"\"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"\"\"\"\"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"\"\"\"\"\"xyz");
 
             // " "" and " "" are quoted
             sa = QuotingUtilities.SplitUnquoted("abc\" \"\"\" \"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\" \"\"\" \"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\" \"\"\" \"\"xyz");
 
             // """ and """ are quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\" \"\"\"xyz");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\"\"\"", sa[0]);
-            Assert.Equal("\"\"\"xyz", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\"\"\"");
+            sa[1].ShouldBe("\"\"\"xyz");
 
             // """ and """ are quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"\"\" \"\"\"x z");
-            Assert.Equal(3, sa.Count);
-            Assert.Equal("abc\"\"\"", sa[0]);
-            Assert.Equal("\"\"\"x", sa[1]);
-            Assert.Equal("z", sa[2]);
+            sa.Count.ShouldBe(3);
+            sa[0].ShouldBe("abc\"\"\"");
+            sa[1].ShouldBe("\"\"\"x");
+            sa[2].ShouldBe("z");
 
             // "c e"" is quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"c e\"\"xyz");
-            Assert.Equal(1, sa.Count);
-            Assert.Equal("abc\"c e\"\"xyz", sa[0]);
+            sa.Count.ShouldBe(1);
+            sa[0].ShouldBe("abc\"c e\"\"xyz");
 
             // "c e"" is quoted
             // "x z" is not quoted
             sa = QuotingUtilities.SplitUnquoted("abc\"c e\"\"x z");
-            Assert.Equal(2, sa.Count);
-            Assert.Equal("abc\"c e\"\"x", sa[0]);
-            Assert.Equal("z", sa[1]);
+            sa.Count.ShouldBe(2);
+            sa[0].ShouldBe("abc\"c e\"\"x");
+            sa[1].ShouldBe("z");
 
             // nothing is quoted
             sa = QuotingUtilities.SplitUnquoted("a c\"\"x z");
-            Assert.Equal(3, sa.Count);
-            Assert.Equal("a", sa[0]);
-            Assert.Equal("c\"\"x", sa[1]);
-            Assert.Equal("z", sa[2]);
+            sa.Count.ShouldBe(3);
+            sa[0].ShouldBe("a");
+            sa[1].ShouldBe("c\"\"x");
+            sa[2].ShouldBe("z");
 
             // nothing is quoted
             sa = QuotingUtilities.SplitUnquoted("a c\"\"c e\"\"x z");
-            Assert.Equal(4, sa.Count);
-            Assert.Equal("a", sa[0]);
-            Assert.Equal("c\"\"c", sa[1]);
-            Assert.Equal("e\"\"x", sa[2]);
-            Assert.Equal("z", sa[3]);
+            sa.Count.ShouldBe(4);
+            sa[0].ShouldBe("a");
+            sa[1].ShouldBe("c\"\"c");
+            sa[2].ShouldBe("e\"\"x");
+            sa[3].ShouldBe("z");
         }
 
         [Fact]
@@ -329,60 +323,60 @@ namespace Microsoft.Build.UnitTests
             int doubleQuotesRemoved;
 
             // "cde" is quoted
-            Assert.Equal("abccdexyz", QuotingUtilities.Unquote("abc\"cde\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"cde\"xyz", out doubleQuotesRemoved).ShouldBe("abccdexyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // "xyz" is quoted (the terminal double-quote is assumed)
-            Assert.Equal("abcxyz", QuotingUtilities.Unquote("abc\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(1, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"xyz", out doubleQuotesRemoved).ShouldBe("abcxyz");
+            doubleQuotesRemoved.ShouldBe(1);
 
             // "xyz" is quoted (the terminal double-quote is explicit)
-            Assert.Equal("abcxyz", QuotingUtilities.Unquote("abc\"xyz\"", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"xyz\"", out doubleQuotesRemoved).ShouldBe("abcxyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // "xyz" is quoted (the terminal double-quote is assumed)
-            Assert.Equal("abc\"cdexyz", QuotingUtilities.Unquote("abc\\\"cde\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(1, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\\\"cde\"xyz", out doubleQuotesRemoved).ShouldBe("abc\"cdexyz");
+            doubleQuotesRemoved.ShouldBe(1);
 
             // "cde" is quoted
-            Assert.Equal("abc\\cdexyz", QuotingUtilities.Unquote("abc\\\\\"cde\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\\\\\"cde\"xyz", out doubleQuotesRemoved).ShouldBe("abc\\cdexyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // "xyz" is quoted (the terminal double-quote is assumed)
-            Assert.Equal("abc\\\"cdexyz", QuotingUtilities.Unquote("abc\\\\\\\"cde\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(1, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\\\\\\\"cde\"xyz", out doubleQuotesRemoved).ShouldBe("abc\\\"cdexyz");
+            doubleQuotesRemoved.ShouldBe(1);
 
             // """ is quoted
-            Assert.Equal("abc\"xyz", QuotingUtilities.Unquote("abc\"\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"\"xyz", out doubleQuotesRemoved).ShouldBe("abc\"xyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // """ and "xyz" are quoted (the terminal double-quote is assumed)
-            Assert.Equal("abc\"xyz", QuotingUtilities.Unquote("abc\"\"\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(3, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"\"\"xyz", out doubleQuotesRemoved).ShouldBe("abc\"xyz");
+            doubleQuotesRemoved.ShouldBe(3);
 
             // """ is quoted
-            Assert.Equal("abc\"xyz", QuotingUtilities.Unquote("abc\"\"\"\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(4, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"\"\"\"xyz", out doubleQuotesRemoved).ShouldBe("abc\"xyz");
+            doubleQuotesRemoved.ShouldBe(4);
 
             // """ and """ are quoted
-            Assert.Equal("abc\"\"xyz", QuotingUtilities.Unquote("abc\"\"\"\"\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(4, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"\"\"\"\"xyz", out doubleQuotesRemoved).ShouldBe("abc\"\"xyz");
+            doubleQuotesRemoved.ShouldBe(4);
 
             // "cde"" is quoted
-            Assert.Equal("abccde\"xyz", QuotingUtilities.Unquote("abc\"cde\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"cde\"\"xyz", out doubleQuotesRemoved).ShouldBe("abccde\"xyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // "xyz"" is quoted (the terminal double-quote is explicit)
-            Assert.Equal("abcxyz\"", QuotingUtilities.Unquote("abc\"xyz\"\"", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"xyz\"\"", out doubleQuotesRemoved).ShouldBe("abcxyz\"");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // nothing is quoted
-            Assert.Equal("abcxyz", QuotingUtilities.Unquote("abc\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(2, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"xyz", out doubleQuotesRemoved).ShouldBe("abcxyz");
+            doubleQuotesRemoved.ShouldBe(2);
 
             // nothing is quoted
-            Assert.Equal("abccdexyz", QuotingUtilities.Unquote("abc\"\"cde\"\"xyz", out doubleQuotesRemoved));
-            Assert.Equal(4, doubleQuotesRemoved);
+            QuotingUtilities.Unquote("abc\"\"cde\"\"xyz", out doubleQuotesRemoved).ShouldBe("abccdexyz");
+            doubleQuotesRemoved.ShouldBe(4);
         }
 
         [Fact]
@@ -391,105 +385,96 @@ namespace Microsoft.Build.UnitTests
             string commandLineArg = "\"/p:foo=\"bar";
             int doubleQuotesRemovedFromArg;
             string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":\"foo=\"bar", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(2, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":\"foo=\"bar");
+            doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(2, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "/p:foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(0, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(0);
 
             commandLineArg = "\"\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar\"", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(3, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar\"");
+            doubleQuotesRemovedFromArg.ShouldBe(3);
 
             // this test is totally unreal -- we'd never attempt to extract switch parameters if the leading character is not a
             // switch indicator (either '-' or '/') -- here the leading character is a double-quote
             commandLineArg = "\"\"\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar\"", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "/p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(3, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "/p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar\"");
+            doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"/pr\"operty\":foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(3, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"/pr\"op\"\"erty\":foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":foo=bar", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(6, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(6);
 
             commandLineArg = "/p:\"foo foo\"=\"bar bar\";\"baz=onga\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            Assert.Equal(":\"foo foo\"=\"bar bar\";\"baz=onga\"", MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')));
-            Assert.Equal(6, doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
+            doubleQuotesRemovedFromArg.ShouldBe(6);
         }
 
         [Fact]
         public void Help()
         {
-            Assert.Equal(MSBuildApp.ExitType.Success,
                 MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
                     @"c:\bin\msbuild.exe -? "
 #else
                     new [] {@"c:\bin\msbuild.exe", "-?"}
 #endif
-                ));
+                ).ShouldBe(MSBuildApp.ExitType.Success);
         }
 
         [Fact]
         public void ErrorCommandLine()
         {
 #if FEATURE_GET_COMMANDLINE
-            Assert.Equal(MSBuildApp.ExitType.SwitchError,
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk"));
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            Assert.Equal(MSBuildApp.ExitType.SwitchError,
-                MSBuildApp.Execute(@"msbuild.exe -t"));
+            MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            Assert.Equal(MSBuildApp.ExitType.InitializationError,
-                MSBuildApp.Execute(@"msbuild.exe @bogus.rsp"));
+            MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(MSBuildApp.ExitType.InitializationError);
 #else
-            Assert.Equal(
-                MSBuildApp.ExitType.SwitchError,
-                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }));
+            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            Assert.Equal(MSBuildApp.ExitType.SwitchError,
-                MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }));
+            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            Assert.Equal(
-                MSBuildApp.ExitType.InitializationError,
-                MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }));
+            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
         }
 
         [Fact]
         public void ValidVerbosities()
         {
-            Assert.Equal(LoggerVerbosity.Quiet, MSBuildApp.ProcessVerbositySwitch("Q"));
-            Assert.Equal(LoggerVerbosity.Quiet, MSBuildApp.ProcessVerbositySwitch("quiet"));
-            Assert.Equal(LoggerVerbosity.Minimal, MSBuildApp.ProcessVerbositySwitch("m"));
-            Assert.Equal(LoggerVerbosity.Minimal, MSBuildApp.ProcessVerbositySwitch("minimal"));
-            Assert.Equal(LoggerVerbosity.Normal, MSBuildApp.ProcessVerbositySwitch("N"));
-            Assert.Equal(LoggerVerbosity.Normal, MSBuildApp.ProcessVerbositySwitch("normal"));
-            Assert.Equal(LoggerVerbosity.Detailed, MSBuildApp.ProcessVerbositySwitch("d"));
-            Assert.Equal(LoggerVerbosity.Detailed, MSBuildApp.ProcessVerbositySwitch("detailed"));
-            Assert.Equal(LoggerVerbosity.Diagnostic, MSBuildApp.ProcessVerbositySwitch("diag"));
-            Assert.Equal(LoggerVerbosity.Diagnostic, MSBuildApp.ProcessVerbositySwitch("DIAGNOSTIC"));
+            MSBuildApp.ProcessVerbositySwitch("Q").ShouldBe(LoggerVerbosity.Quiet);
+            MSBuildApp.ProcessVerbositySwitch("quiet").ShouldBe(LoggerVerbosity.Quiet);
+            MSBuildApp.ProcessVerbositySwitch("m").ShouldBe(LoggerVerbosity.Minimal);
+            MSBuildApp.ProcessVerbositySwitch("minimal").ShouldBe(LoggerVerbosity.Minimal);
+            MSBuildApp.ProcessVerbositySwitch("N").ShouldBe(LoggerVerbosity.Normal);
+            MSBuildApp.ProcessVerbositySwitch("normal").ShouldBe(LoggerVerbosity.Normal);
+            MSBuildApp.ProcessVerbositySwitch("d").ShouldBe(LoggerVerbosity.Detailed);
+            MSBuildApp.ProcessVerbositySwitch("detailed").ShouldBe(LoggerVerbosity.Detailed);
+            MSBuildApp.ProcessVerbositySwitch("diag").ShouldBe(LoggerVerbosity.Diagnostic);
+            MSBuildApp.ProcessVerbositySwitch("DIAGNOSTIC").ShouldBe(LoggerVerbosity.Diagnostic);
         }
 
         [Fact]
         public void InvalidVerbosity()
         {
-            Assert.Throws<CommandLineSwitchException>(() =>
+            Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessVerbositySwitch("loquacious");
             }
@@ -498,21 +483,21 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ValidMaxCPUCountSwitch()
         {
-            Assert.Equal(1, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1" }));
-            Assert.Equal(2, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "2" }));
-            Assert.Equal(3, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "3" }));
-            Assert.Equal(4, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "4" }));
-            Assert.Equal(8, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8" }));
-            Assert.Equal(63, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "63" }));
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1" }).ShouldBe(1);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "2" }).ShouldBe(2);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "3" }).ShouldBe(3);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "4" }).ShouldBe(4);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8" }).ShouldBe(8);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "63" }).ShouldBe(63);
 
             // Should pick last value
-            Assert.Equal(4, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8", "4" }));
+            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8", "4" }).ShouldBe(4);
         }
 
         [Fact]
         public void InvalidMaxCPUCountSwitch1()
         {
-            Assert.Throws<CommandLineSwitchException>(() =>
+            Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "-1" });
             }
@@ -522,7 +507,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidMaxCPUCountSwitch2()
         {
-            Assert.Throws<CommandLineSwitchException>(() =>
+            Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "0" });
             }
@@ -532,7 +517,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidMaxCPUCountSwitch3()
         {
-            Assert.Throws<CommandLineSwitchException>(() =>
+            Should.Throw<CommandLineSwitchException>(() =>
             {
                 // Too big
                 MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "foo" });
@@ -543,7 +528,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidMaxCPUCountSwitch4()
         {
-            Assert.Throws<CommandLineSwitchException>(() =>
+            Should.Throw<CommandLineSwitchException>(() =>
             {
                 MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1025" });
             }
@@ -634,7 +619,7 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 output = RunnerUtilities.ExecMSBuild(newPathToMSBuildExe, msbuildParameters, out successfulExit);
-                Assert.False(successfulExit);
+                successfulExit.ShouldBeFalse();
             }
             catch (Exception ex)
             {
@@ -662,7 +647,9 @@ namespace Microsoft.Build.UnitTests
 
             // If there's a space in the %TEMP% path, the config file is read in the static constructor by the URI class and we catch there;
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
-            Assert.True(output.Contains("MSB1043") || output.Contains("MSB4136"));
+            (output.Contains("MSB1043") || output.Contains("MSB4136")).ShouldBeTrue("Output should contain 'MSB1043' or 'MSB4136'");
+
+
         }
 #endif
 
@@ -720,11 +707,9 @@ namespace Microsoft.Build.UnitTests
                 }
                 //Should pass
 #if FEATURE_GET_COMMANDLINE
-                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName));
+                MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 #else
-                Assert.Equal(
-                    MSBuildApp.ExitType.Success,
-                    MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }));
+                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(MSBuildApp.ExitType.Success);
 #endif
             }
             finally
@@ -754,33 +739,27 @@ namespace Microsoft.Build.UnitTests
                 }
 #if FEATURE_GET_COMMANDLINE
                 //Should pass
-                Assert.Equal(MSBuildApp.ExitType.Success,
-                    MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName));
+                MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
                 //Should fail as we are not changing existing lines
-                Assert.Equal(MSBuildApp.ExitType.InitializationError,
-                        MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName));
+                MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #else
                 //Should pass
-                Assert.Equal(
-                    MSBuildApp.ExitType.Success,
-                    MSBuildApp.Execute(
-                        new[]
-                            {
-                                NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                                @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
-                                quotedProjectFileName
-                            }));
+                MSBuildApp.Execute(
+                    new[]
+                        {
+                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
+                            @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
+                            quotedProjectFileName
+                        }).ShouldBe(MSBuildApp.ExitType.Success);
 
                 //Should fail as we are not changing existing lines
-                Assert.Equal(
-                    MSBuildApp.ExitType.InitializationError,
-                    MSBuildApp.Execute(
-                        new[]
-                            {
-                                NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                                "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
-                            }));
+                MSBuildApp.Execute(
+                    new[]
+                        {
+                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
+                            "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
+                        }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
             }
             finally
@@ -806,13 +785,13 @@ namespace Microsoft.Build.UnitTests
         public void GetCommandLine()
         {
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
-            Assert.True(File.Exists(_pathToArbitraryBogusFile));
+            File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
             bool successfulExit;
             string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-            Assert.False(successfulExit);
+            successfulExit.ShouldBeFalse();
 
-            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>
@@ -822,7 +801,7 @@ namespace Microsoft.Build.UnitTests
         public void GetCommandLineQuotedExe()
         {
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
-            Assert.True(File.Exists(_pathToArbitraryBogusFile));
+            File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
             bool successfulExit;
             string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
@@ -834,9 +813,9 @@ namespace Microsoft.Build.UnitTests
             }
 
             string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
-            Assert.False(successfulExit);
+            successfulExit.ShouldBeFalse();
 
-            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>
@@ -856,14 +835,14 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.False(successfulExit);
+                successfulExit.ShouldBeFalse();
             }
             finally
             {
                 Directory.SetCurrentDirectory(current);
             }
 
-            Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>
@@ -894,9 +873,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(String.Empty, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=1]"));
+                output.ShouldContain("[A=1]");
             }
             finally
             {
@@ -932,9 +911,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=1]"));
+                output.ShouldContain("[A=1]");
             }
             finally
             {
@@ -968,9 +947,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=]"));
+                output.ShouldContain("[A=]");
             }
             finally
             {
@@ -1005,9 +984,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=2]"));
+                output.ShouldContain("[A=2]");
             }
             finally
             {
@@ -1051,9 +1030,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=1]"));
+                output.ShouldContain("[A=1]");
             }
             finally
             {
@@ -1087,9 +1066,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=1]"));
+                output.ShouldContain("[A=1]");
             }
             finally
             {
@@ -1121,9 +1100,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.False(successfulExit);
+                successfulExit.ShouldBeFalse();
 
-                Assert.True(output.Contains("MSB1027")); // msbuild.rsp cannot have /noautoresponse in it
+                output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
             }
             finally
             {
@@ -1157,9 +1136,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=]"));
+                output.ShouldContain("[A=]");
             }
             finally
             {
@@ -1190,9 +1169,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue();
 
-                Assert.True(output.Contains("[A=]"));
+                output.ShouldContain("[A=]");
             }
             finally
             {
@@ -1213,7 +1192,7 @@ namespace Microsoft.Build.UnitTests
             string[] projects = new string[] { "my.proj" };
             string[] extensionsToIgnore = new string[] { ".phantomextension" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
 
         /// <summary>
@@ -1225,7 +1204,7 @@ namespace Microsoft.Build.UnitTests
             string[] projects = new string[] { "my.proj" };
             string[] extensionsToIgnore = new string[] { ".phantomextension", ".phantomextension" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
         /// <summary>
         /// Pass a null and an empty list of project extensions to ignore, this simulates the switch not being set on the commandline
@@ -1236,10 +1215,10 @@ namespace Microsoft.Build.UnitTests
             string[] projects = new string[] { "my.proj" };
             string[] extensionsToIgnore = (string[])null;
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
 
             extensionsToIgnore = new string[] { };
-            Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
 
         /// <summary>
@@ -1248,12 +1227,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchNullInList()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "my.proj" };
                 string[] extensionsToIgnore = new string[] { ".phantomextension", null };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-                Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+                MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
            );
         }
@@ -1263,12 +1242,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchEmptyInList()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "my.proj" };
                 string[] extensionsToIgnore = new string[] { ".phantomextension", string.Empty };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-                Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+                MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
            );
         }
@@ -1278,12 +1257,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchExtensionWithoutDot()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "my.proj" };
                 string[] extensionsToIgnore = new string[] { "phantomextension" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-                Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase));
+                MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase);
             }
            );
         }
@@ -1293,12 +1272,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchMalformed()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "my.proj" };
                 string[] extensionsToIgnore = new string[] { ".C:\\boocatmoo.a" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-                Assert.Equal(0, String.Compare("my.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected my.proj to be only project found"
+                MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
            );
         }
@@ -1308,14 +1287,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchWildcards()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "my.proj" };
                 string[] extensionsToIgnore = new string[] { ".proj*", ".nativeproj?" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1325,53 +1302,53 @@ namespace Microsoft.Build.UnitTests
             string[] projects = new string[] { "test.nativeproj", "test.vcproj" };
             string[] extensionsToIgnore = new string[] { ".phantomextension", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.nativeproj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.nativeproj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.nativeproj", StringCompareShould.IgnoreCase); // "Expected test.nativeproj to be only project found"
 
             projects = new string[] { "test.nativeproj", "test.vcproj", "test.proj" };
             extensionsToIgnore = new string[] { ".phantomextension", ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
             projects = new string[] { "test.nativeproj", "test.vcproj" };
             extensionsToIgnore = new string[] { ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.nativeproj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.nativeproj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.nativeproj", StringCompareShould.IgnoreCase); // "Expected test.nativeproj to be only project found"
 
             projects = new string[] { "test.proj", "test.sln" };
             extensionsToIgnore = new string[] { ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.sln", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.sln to be only solution found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
             projects = new string[] { "test.proj", "test.sln", "test.proj~", "test.sln~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.sln", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.sln to be only solution found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
             projects = new string[] { "test.proj" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
             projects = new string[] { "test.proj", "test.proj~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
             projects = new string[] { "test.sln" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.sln", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.sln to be only solution found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
             projects = new string[] { "test.sln", "test.sln~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.sln", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.sln to be only solution found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
 
             projects = new string[] { "test.sln~", "test.sln" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.sln", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.sln to be only solution found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
         }
 
 
@@ -1384,7 +1361,7 @@ namespace Microsoft.Build.UnitTests
             string[] projects = new string[] { "test.proj", "test.sln", "Foo.vcproj" };
             string[] extensionsToIgnore = { ".sln", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
-            Assert.Equal(0, String.Compare("test.proj", MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles), StringComparison.OrdinalIgnoreCase)); // "Expected test.proj to be only project found"
+            MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj"); // "Expected test.proj to be only project found"
         }
 
 
@@ -1394,7 +1371,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchRemovedAllprojects()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects;
                 string[] extensionsToIgnore = null;
@@ -1402,7 +1379,6 @@ namespace Microsoft.Build.UnitTests
                 extensionsToIgnore = new string[] { ".nativeproj", ".vcproj" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                Assert.True(false);
             }
            );
         }
@@ -1412,14 +1388,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchSlnProjDifferentNames()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "test.proj", "Different.sln" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1429,15 +1403,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchTwoProj()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "test.proj", "Different.proj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1447,15 +1418,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchTwoNative()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "test.nativeproj", "Different.nativeproj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1465,14 +1433,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchTwoSolutions()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "test.sln", "Different.sln" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1482,14 +1448,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchMoreThenTwoProj()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { "test.nativeproj", "Different.csproj", "Another.proj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1499,14 +1463,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchNoProjectOrSolution()
         {
-            Assert.Throws<InitializationException>(() =>
+            Should.Throw<InitializationException>(() =>
             {
                 string[] projects = new string[] { };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
-                // Should not get here
-                Assert.True(false);
             }
            );
         }
@@ -1576,7 +1538,7 @@ namespace Microsoft.Build.UnitTests
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(new[] { expectedProject });
                 string actualProject = MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
 
-                Assert.Equal(expectedProject, actualProject);
+                actualProject.ShouldBe(expectedProject);
             }
             finally
             {
@@ -1594,14 +1556,14 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                InitializationException exception = Assert.Throws<InitializationException>(() =>
+                InitializationException exception = Should.Throw<InitializationException>(() =>
                 {
                     string[] extensionsToIgnore = null;
                     IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(new[] { "project1.proj", "project2.proj" });
                     MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
                 });
 
-                Assert.Equal(ResourceUtilities.FormatResourceString("AmbiguousProjectDirectoryError", projectDirectory), exception.Message);
+                exception.Message.ShouldBe(ResourceUtilities.FormatResourceString("AmbiguousProjectDirectoryError", projectDirectory));
             }
             finally
             {
@@ -1630,8 +1592,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
 
         /// <summary>
@@ -1653,8 +1615,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected one distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected one distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
 
         /// <summary>
@@ -1676,8 +1638,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected a central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected a central loggers to be attached"
 
             // add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1692,8 +1654,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
 
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
@@ -1707,8 +1669,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
 
         /// <summary>
@@ -1730,9 +1692,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1747,9 +1709,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1764,9 +1726,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1781,10 +1743,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, ";Parameter1;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
-
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($";Parameter1;logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1799,9 +1760,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
             loggers = new ArrayList();
@@ -1814,9 +1775,9 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;verbosity=Normal;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log") +";Parameter1", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             loggers = new ArrayList();
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1829,7 +1790,7 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;Parameter;;;Parameter;Parameter;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;Parameter;;;Parameter;Parameter;logFile={Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 
         /// <summary>
@@ -1851,8 +1812,8 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            1
                        );
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
 #endregion
 
@@ -1874,8 +1835,8 @@ namespace Microsoft.Build.UnitTests
                            1,
                            loggers
                        );
-            Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
-            Assert.Equal(0, distributedLoggerRecords.Count); // "Expected no distributed loggers to be attached"
+            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
 
             MSBuildApp.ProcessConsoleLoggerSwitch
                        (
@@ -1886,8 +1847,8 @@ namespace Microsoft.Build.UnitTests
                            1,
                            loggers
                        );
-            Assert.Equal(1, loggers.Count); // "Expected a central loggers to be attached"
-            Assert.Equal(0, string.Compare(((ILogger)loggers[0]).Parameters, "EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameters passed in"
+            loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
+            ((ILogger)loggers[0]).Parameters.ShouldBe("EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
 
             MSBuildApp.ProcessConsoleLoggerSwitch
                        (
@@ -1898,11 +1859,11 @@ namespace Microsoft.Build.UnitTests
                           2,
                           loggers
                       );
-            Assert.Equal(1, loggers.Count); // "Expected a central loggers to be attached"
-            Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
+            loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
+            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             DistributedLoggerRecord distributedLogger = ((DistributedLoggerRecord)distributedLoggerRecords[0]);
-            Assert.Equal(0, string.Compare(distributedLogger.CentralLogger.Parameters, "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameters passed in"
-            Assert.Equal(0, string.Compare(distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters, "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            distributedLogger.CentralLogger.Parameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
+            distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 #endregion
 
@@ -1925,11 +1886,13 @@ namespace Microsoft.Build.UnitTests
   </Target>
 
   <Target Name=""Restore"">
-    <CreatePropsFile FilePath=""$(RestoreFirstProps)"" PropertyName=""PropertyA"" PropertyValue=""{guid}"" />
+    <ItemGroup>
+      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+    </ItemGroup>
+    
+    <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
   </Target>
   
-  {CreatePropsFileUsingTask}
-
 </Project>");
 
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/restore");
@@ -1959,11 +1922,13 @@ namespace Microsoft.Build.UnitTests
 
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
-    <CreatePropsFile FilePath=""$(RestoreFirstProps)"" PropertyName=""PropertyA"" PropertyValue=""{guid2}"" />
+    <ItemGroup>
+      <Lines Include=""&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+    </ItemGroup>
+    
+    <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
   </Target>
   
-  {CreatePropsFileUsingTask}
-
 </Project>");
 
             IDictionary<string, string> preExistingProps = new Dictionary<string, string>
@@ -2042,44 +2007,14 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                string logFile = Path.Combine(testProject.TestRoot, "MSBuild.log");
+                bool success;
 
-                MSBuildApp.ExitType exitCode = MSBuildApp.Execute($"{RunnerUtilities.PathToCurrentlyRunningMsBuildExe} \"{testProject.ProjectFile}\" {String.Join(" ", arguments)} /flp:v=n;LogFile={logFile}");
+                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success);
 
-                exitCode.ShouldBe(MSBuildApp.ExitType.Success);
+                success.ShouldBeTrue();
 
-                File.Exists(logFile).ShouldBeTrue();
-
-                return File.ReadAllText(logFile);
+                return output;
             }
         }
-
-        private const string CreatePropsFileUsingTask = @"<UsingTask TaskName=""CreatePropsFile"" TaskFactory=""CodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
-    <ParameterGroup>
-      <FilePath Required=""true"" />
-      <PropertyName Required=""true"" />
-      <PropertyValue Required=""true"" />
-    </ParameterGroup>
-    <Task>
-      <Reference Include=""Microsoft.Build"" />
-      <Reference Include=""System.Xml"" />
-      <Using Namespace=""Microsoft.Build.Construction"" />
-      <Using Namespace=""System.Linq"" />
-      <Code Type=""Fragment"" Language=""cs"">
-        <![CDATA[
-        
-        ProjectRootElement projectRootElement = ProjectRootElement.Create(FilePath);
-        
-        projectRootElement.AddProperty(PropertyName, PropertyValue);
-        
-        projectRootElement.Save();
-        
-        Log.LogMessage(""Successfully created properties file '"" + FilePath + ""'"");
-
-        Success = !Log.HasLoggedErrors;
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>";
     }
 }
