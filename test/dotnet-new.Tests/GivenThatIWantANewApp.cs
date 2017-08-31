@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.New.Tests
 
         [Theory]
         [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
-        // re-enable when this bug is resolved: https://github.com/dotnet/cli/pull/7554
+        // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
         //[InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
         {
