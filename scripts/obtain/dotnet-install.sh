@@ -584,7 +584,7 @@ downloadcurl() {
 
     local failed=false
     if [ -z "$out_path" ]; then
-        curl --retry 10 -sSL -f --create-dirs -o $remote_path || failed=true
+        curl --retry 10 -sSL -f --create-dirs $remote_path || failed=true
     else
         curl --retry 10 -sSL -f --create-dirs -o $out_path $remote_path || failed=true
     fi
@@ -602,7 +602,7 @@ downloadwget() {
 
     local failed=false
     if [ -z "$out_path" ]; then
-        wget -q --tries 10 -O $remote_path || failed=true
+        wget -q --tries 10 -O - $remote_path || failed=true
     else
         wget -v --tries 10 -O $out_path $remote_path || failed=true
     fi
