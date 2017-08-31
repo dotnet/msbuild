@@ -40,6 +40,11 @@ namespace Microsoft.Build.Utilities
         }
 
         public readonly bool EnableAllPropertyFunctions = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
+
+        /// <summary>
+        /// Enable restore first functionality in MSBuild.exe
+        /// </summary>
+        public readonly bool EnableRestoreFirst = Environment.GetEnvironmentVariable("MSBUILDENABLERESTOREFIRST") == "1";
     }
 
     internal class EscapeHatches
