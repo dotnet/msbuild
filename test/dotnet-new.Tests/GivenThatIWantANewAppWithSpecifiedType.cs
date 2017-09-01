@@ -51,12 +51,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                string resourceName = "dotnet-new.Tests.NuGet.tempaspnetpatch.config";
-                using (Stream input = typeof(GivenThatIWantANewAppWithSpecifiedType).Assembly.GetManifestResourceStream(resourceName))
-                using (Stream output = File.OpenWrite(Path.Combine(rootPath, "NuGet.Config")))
-                {
-                    input.CopyTo(output);
-                }
+                AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(Path.Combine(rootPath, "NuGet.Config"));
             }
 
             if (skipSpaWebpackSteps)
