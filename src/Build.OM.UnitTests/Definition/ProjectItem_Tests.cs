@@ -15,7 +15,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
@@ -1969,8 +1968,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var metadata = project.GetItems("I").FirstOrDefault().SetDirectMetadataValue("M", "$(P);@(Foo)");
 
-                metadata.EvaluatedValue.ShouldBe("p;f1;f2");
-                metadata.Xml.Value.ShouldBe("$(P);@(Foo)");
+                Assert.Equal("p;f1;f2", metadata.EvaluatedValue);
+                Assert.Equal("$(P);@(Foo)", metadata.Xml.Value);
             }
         }
 
@@ -1996,14 +1995,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.GetItems("I").FirstOrDefault();
                 var metadata = item.SetDirectMetadataValue("M", "V");
 
-                metadata.Name.ShouldBe("M");
-                metadata.EvaluatedValue.ShouldBe("V");
+                Assert.Equal("M", metadata.Name);
+                Assert.Equal("V", metadata.EvaluatedValue);
 
-                item.Xml.Metadata.Count.ShouldBe(1);
+                Assert.Equal(1, item.Xml.Metadata.Count);
 
                 ProjectMetadataElement metadataElement = item.Xml.Metadata.FirstOrDefault();
-                metadataElement.Name.ShouldBe("M");
-                metadataElement.Value.ShouldBe("V");
+                Assert.Equal("M", metadataElement.Name);
+                Assert.Equal("V", metadataElement.Value);
             }
         }
 
@@ -2028,42 +2027,42 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var items = project.GetItems("I");
 
-                items.Count.ShouldBe(4);
+                Assert.Equal(4, items.Count);
 
-                project.IsDirty.ShouldBe(false);
+                Assert.False(project.IsDirty);
 
                 items.First().SetDirectMetadataValue("M2", "V2");
 
-                project.IsDirty.ShouldBe(true);
+                Assert.True(project.IsDirty);
 
-                project.Xml.AllChildren.OfType<ProjectItemElement>().Count().ShouldBe(2);
+                Assert.Equal(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
 
                 foreach (var item in items)
                 {
                     var metadata = item.Metadata;
 
-                    metadata.Count.ShouldBe(2);
+                    Assert.Equal(2, metadata.Count);
 
                     var m1 = metadata.ElementAt(0);
-                    m1.Name.ShouldBe("M1");
-                    m1.EvaluatedValue.ShouldBe("V1");
+                    Assert.Equal("M1", m1.Name);
+                    Assert.Equal("V1", m1.EvaluatedValue);
 
                     var m2 = metadata.ElementAt(1);
-                    m2.Name.ShouldBe("M2");
-                    m2.EvaluatedValue.ShouldBe("V2");
+                    Assert.Equal("M2", m2.Name);
+                    Assert.Equal("V2", m2.EvaluatedValue);
                 }
 
                 var metadataElements = items.First().Xml.Metadata;
 
-                metadataElements.Count.ShouldBe(2);
+                Assert.Equal(2, metadataElements.Count);
 
                 var me1 = metadataElements.ElementAt(0);
-                me1.Name.ShouldBe("M1");
-                me1.Value.ShouldBe("V1");
+                Assert.Equal("M1", me1.Name);
+                Assert.Equal("V1", me1.Value);
 
                 var me2 = metadataElements.ElementAt(1);
-                me2.Name.ShouldBe("M2");
-                me2.Value.ShouldBe("V2");
+                Assert.Equal("M2", me2.Name);
+                Assert.Equal("V2", me2.Value);
             }
         }
 
@@ -2088,34 +2087,34 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var items = project.GetItems("I");
 
-                items.Count.ShouldBe(4);
+                Assert.Equal(4, items.Count);
 
-                project.IsDirty.ShouldBe(false);
+                Assert.False(project.IsDirty);
 
                 items.First().SetDirectMetadataValue("M1", "V2");
 
-                project.IsDirty.ShouldBe(true);
+                Assert.True(project.IsDirty);
 
-                project.Xml.AllChildren.OfType<ProjectItemElement>().Count().ShouldBe(2);
+                Assert.Equal(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
 
                 foreach (var item in items)
                 {
                     var metadata = item.Metadata;
 
-                    metadata.Count.ShouldBe(1);
+                    Assert.Equal(1, metadata.Count);
 
                     var m1 = metadata.ElementAt(0);
-                    m1.Name.ShouldBe("M1");
-                    m1.EvaluatedValue.ShouldBe("V2");
+                    Assert.Equal("M1", m1.Name);
+                    Assert.Equal("V2", m1.EvaluatedValue);
                 }
 
                 var metadataElements = items.First().Xml.Metadata;
 
-                metadataElements.Count.ShouldBe(1);
+                Assert.Equal(1, metadataElements.Count);
 
                 var me1 = metadataElements.ElementAt(0);
-                me1.Name.ShouldBe("M1");
-                me1.Value.ShouldBe("V2");
+                Assert.Equal("M1", me1.Name);
+                Assert.Equal("V2", me1.Value);
             }
         }
 
