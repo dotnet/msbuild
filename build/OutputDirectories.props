@@ -21,7 +21,6 @@
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <!-- The 'AspNetRuntimePackageStorePublishDirectory' needs to be very short due to path length constraints on Win8.1 -->
-      <!-- Will this still work now that the stage has been added to the path? -->
       <AspNetRuntimePackageStorePublishDirectory>$(BaseOutputDirectory)/AspRT</AspNetRuntimePackageStorePublishDirectory>
       <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
       <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
