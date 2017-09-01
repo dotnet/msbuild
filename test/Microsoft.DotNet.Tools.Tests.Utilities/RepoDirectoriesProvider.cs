@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 if (string.IsNullOrEmpty(s_buildRid))
                 {
-                    var buildInfoPath = Path.Combine(RepoRoot, "out", "obj", "BuildInfo.props");
+                    var buildInfoPath = Path.Combine(RepoRoot, "bin", "obj", "BuildInfo.props");
                     var root = XDocument.Load(buildInfoPath).Root;
                     var ns = root.Name.Namespace;
 
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             int previousStage = 2;
 
             _artifacts = artifacts ?? Path.Combine(RepoRoot,
-                                                   "out",
+                                                   "bin",
                                                    previousStage.ToString(),
                                                    BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             _testWorkingFolder = Path.Combine(RepoRoot,
-                                              "out",
+                                              "bin",
                                               (previousStage + 1).ToString(),
                                               BuildRid,
                                               "test");

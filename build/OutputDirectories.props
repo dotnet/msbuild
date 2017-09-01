@@ -6,7 +6,7 @@
       <!-- BaseOutputDirectory is the root output path for this stage and RID
            BaseOutputPath is the project-specific output folder that each project builds into.
            This is not confusing at all. -->
-      <BaseOutputDirectory>$(RepoRoot)/out/$(CliBuildStage)/$(Rid)</BaseOutputDirectory>
+      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)/$(Rid)</BaseOutputDirectory>
       <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
 
       <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>

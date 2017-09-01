@@ -100,7 +100,7 @@
 
   <Target Name="IsolateArtifactsFromDirectoryBuildFiles">
     <Copy SourceFiles="$(RepoRoot)TestAssets\Directory.Build.props"
-          DestinationFolder ="$(RepoRoot)out"
+          DestinationFolder ="$(RepoRoot)bin"
           SkipUnchangedFiles="true" />
   </Target>
 
