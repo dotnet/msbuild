@@ -1966,7 +1966,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
 
-                var metadata = project.GetItems("I").FirstOrDefault().SetDirectMetadataValue("M", "$(P);@(Foo)");
+                var metadata = project.GetItems("I").FirstOrDefault().SetMetadataValue("M", "$(P);@(Foo)", true);
 
                 Assert.Equal("p;f1;f2", metadata.EvaluatedValue);
                 Assert.Equal("$(P);@(Foo)", metadata.Xml.Value);
@@ -1993,7 +1993,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
 
                 var item = project.GetItems("I").FirstOrDefault();
-                var metadata = item.SetDirectMetadataValue("M", "V");
+                var metadata = item.SetMetadataValue("M", "V", true);
 
                 Assert.Equal("M", metadata.Name);
                 Assert.Equal("V", metadata.EvaluatedValue);
@@ -2031,7 +2031,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Assert.False(project.IsDirty);
 
-                items.First().SetDirectMetadataValue("M2", "V2");
+                items.First().SetMetadataValue("M2", "V2", true);
 
                 Assert.True(project.IsDirty);
 
@@ -2091,7 +2091,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Assert.False(project.IsDirty);
 
-                items.First().SetDirectMetadataValue("M1", "V2");
+                items.First().SetMetadataValue("M1", "V2", true);
 
                 Assert.True(project.IsDirty);
 

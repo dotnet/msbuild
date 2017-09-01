@@ -509,7 +509,7 @@ namespace Microsoft.Build.Evaluation
         /// Updates the evaluated project, but does not affect anything else in the project until reevaluation. For example,
         /// if a piece of metadata named "m" is added on item of type "i", it does not affect "j" which is evaluated from "@(j->'%(m)')" until reevaluation.
         /// Also if the unevaluated value of "m" is set to something that is modified by evaluation, such as "$(p)", the evaluated value will be set to literally "$(p)" until reevaluation.
-        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state.
+        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation.
         /// Returns the new or existing metadatum.
         /// </summary>
         /// <remarks>Unevaluated value is assumed to be escaped as necessary</remarks>
@@ -519,18 +519,20 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Adds direct metadata to the <see cref="ProjectItemElement"/> from which this <see cref="ProjectItem"/> originated.
-        /// The intent is to affect all other <see cref="ProjectItem"/> instances created from the same element. This method won't split existing item elements.
-        /// If another direct metadata with the same name exists, it renames it.
-        /// If another non-direct metadata with the same name exists, it adds a new direct metadata.
+        /// Overload of <see cref="SetMetadataValue(string,string)"/>. Adds the option of not splitting the item element and thus affecting all sibling items.
+        /// Sibling items are defined as all ProjectItem instances that were created from the same item element.
         /// 
-        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state.
-        /// It will not affect any entity that directly or indirectly references the newly added metadata (e.g. item reference, transforms, etc)
+        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation
         /// </summary>
+        /// /// <param name="name">Metadata name</param>
+        /// <param name="unevaluatedValue">Metadata value</param>
+        /// <param name="propagateMetadataToSiblingItems">
+        /// If true, adds direct metadata to the <see cref="ProjectItemElement"/> from which this <see cref="ProjectItem"/> originated. The intent is to affect all other sibling items.
+        /// </param>
         /// <returns>Returns the new or existing metadatum.</returns>
-        public ProjectMetadata SetDirectMetadataValue(string name, string unevaluatedValue)
+        public ProjectMetadata SetMetadataValue(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
         {
-            return SetMetadataOperation(name, unevaluatedValue, propagateMetadataToSiblingItems: true);
+            return SetMetadataOperation(name, unevaluatedValue, propagateMetadataToSiblingItems: propagateMetadataToSiblingItems);
         }
 
         private ProjectMetadata SetMetadataOperation(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
