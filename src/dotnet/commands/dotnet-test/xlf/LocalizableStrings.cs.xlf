@@ -73,9 +73,11 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="translated">Zadejte protokolovací nástroj pro výsledky testů. 
+        <target state="needs-review-translation">Zadejte protokolovací nástroj pro výsledky testů. 
                                         Příklad: --logger "trx[;LogFileName=&lt;Standardně se nastaví jedinečný název souboru&gt;]"
                                         Další informace o podpoře argumentů protokolovacího nástroje: https://aka.ms/vstest-report</target>
         <note />

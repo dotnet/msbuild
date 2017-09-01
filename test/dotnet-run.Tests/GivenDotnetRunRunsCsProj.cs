@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/7476")]
+        [Fact]
         public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;

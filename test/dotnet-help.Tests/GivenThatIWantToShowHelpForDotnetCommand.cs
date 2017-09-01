@@ -38,6 +38,8 @@ SDK commands:
   nuget            Provides additional NuGet commands.
   msbuild          Runs Microsoft Build Engine (MSBuild).
   vstest           Runs Microsoft Test Execution Command Line Tool.
+  store            Stores the specified assemblies in the runtime store.
+  help             Show help.
 
 Common options:
   -v|--verbosity        Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].

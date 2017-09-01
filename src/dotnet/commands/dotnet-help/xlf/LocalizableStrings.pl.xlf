@@ -237,6 +237,11 @@
         <target state="needs-review-translation">Ścieżka do dodatkowego pliku deps.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="new">Stores the specified assemblies in the runtime store.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

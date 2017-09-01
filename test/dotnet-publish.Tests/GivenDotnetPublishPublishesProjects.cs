@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             }
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/7476")]
+        [Fact]
         public void ItPublishesAppWhenRestoringToSpecificPackageDirectory()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;

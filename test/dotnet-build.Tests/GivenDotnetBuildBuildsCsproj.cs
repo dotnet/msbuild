@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .And.HaveStdOutContaining("project.assets.json");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/7476")]
+        [Fact]
         public void ItRunsWhenRestoringToSpecificPackageDir()
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
