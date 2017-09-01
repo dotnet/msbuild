@@ -738,6 +738,7 @@ namespace Microsoft.Build.Evaluation
         public bool HasMetadata(string name) { throw null; }
         public bool RemoveMetadata(string name) { throw null; }
         public void Rename(string name) { }
+        public Microsoft.Build.Evaluation.ProjectMetadata SetDirectMetadataValue(string name, string unevaluatedValue) { throw null; }
         public Microsoft.Build.Evaluation.ProjectMetadata SetMetadataValue(string name, string unevaluatedValue) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("{_itemType} #Metadata={MetadataCount}")]

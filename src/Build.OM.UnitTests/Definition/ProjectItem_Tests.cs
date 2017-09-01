@@ -15,6 +15,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
@@ -1947,8 +1948,178 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
-		
-		//  TODO: Should remove tests go in project item tests, project item instance tests, or both?
+
+        [Fact]
+        public void SetDirectMetadataShouldEvaluateMetadataValue()
+        {
+            var projectContents =
+@"<Project>
+  <PropertyGroup>
+    <P>p</P>
+  </PropertyGroup>
+  <ItemGroup>
+    <Foo Include=`f1;f2`/>
+    <I Include=`i`/>
+  </ItemGroup>
+</Project>".Cleanup();
+
+            using (var env = TestEnvironment.Create())
+            {
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+
+                var metadata = project.GetItems("I").FirstOrDefault().SetDirectMetadataValue("M", "$(P);@(Foo)");
+
+                metadata.EvaluatedValue.ShouldBe("p;f1;f2");
+                metadata.Xml.Value.ShouldBe("$(P);@(Foo)");
+            }
+        }
+
+        [Fact]
+        public void SetDirectMetadataWhenSameMetadataComesFromDefinitionGroupShouldAddDirectMetadata()
+        {
+            var projectContents =
+@"<Project>
+  <ItemDefinitionGroup>
+    <I>
+      <M>V</M>
+    </I>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <I Include=`i`/>
+  </ItemGroup>
+</Project>".Cleanup();
+
+            using (var env = TestEnvironment.Create())
+            {
+                var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
+
+                var item = project.GetItems("I").FirstOrDefault();
+                var metadata = item.SetDirectMetadataValue("M", "V");
+
+                metadata.Name.ShouldBe("M");
+                metadata.EvaluatedValue.ShouldBe("V");
+
+                item.Xml.Metadata.Count.ShouldBe(1);
+
+                ProjectMetadataElement metadataElement = item.Xml.Metadata.FirstOrDefault();
+                metadataElement.Name.ShouldBe("M");
+                metadataElement.Value.ShouldBe("V");
+            }
+        }
+
+        [Fact]
+        public void SetDirectMetadataShouldAffectAllSiblingItems()
+        {
+            var projectContents =
+@"<Project>
+  <ItemGroup>
+    <Foo Include=`f1;f2`/>
+    <I Include=`*.cs;@(Foo);i1`>
+      <M1>V1</M1>
+    </I>
+  </ItemGroup>
+</Project>".Cleanup();
+
+            using (var env = TestEnvironment.Create())
+            {
+                var testProject = env.CreateTestProjectWithFiles(projectContents.Cleanup(), new[] {"a.cs"});
+
+                var project = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, env.CreateProjectCollection().Collection);
+
+                var items = project.GetItems("I");
+
+                items.Count.ShouldBe(4);
+
+                project.IsDirty.ShouldBe(false);
+
+                items.First().SetDirectMetadataValue("M2", "V2");
+
+                project.IsDirty.ShouldBe(true);
+
+                project.Xml.AllChildren.OfType<ProjectItemElement>().Count().ShouldBe(2);
+
+                foreach (var item in items)
+                {
+                    var metadata = item.Metadata;
+
+                    metadata.Count.ShouldBe(2);
+
+                    var m1 = metadata.ElementAt(0);
+                    m1.Name.ShouldBe("M1");
+                    m1.EvaluatedValue.ShouldBe("V1");
+
+                    var m2 = metadata.ElementAt(1);
+                    m2.Name.ShouldBe("M2");
+                    m2.EvaluatedValue.ShouldBe("V2");
+                }
+
+                var metadataElements = items.First().Xml.Metadata;
+
+                metadataElements.Count.ShouldBe(2);
+
+                var me1 = metadataElements.ElementAt(0);
+                me1.Name.ShouldBe("M1");
+                me1.Value.ShouldBe("V1");
+
+                var me2 = metadataElements.ElementAt(1);
+                me2.Name.ShouldBe("M2");
+                me2.Value.ShouldBe("V2");
+            }
+        }
+
+        [Fact]
+        public void SetDirectMetadataShouldUpdateAlreadyExistingDirectMetadata()
+        {
+            var projectContents =
+@"<Project>
+  <ItemGroup>
+    <Foo Include=`f1;f2`/>
+    <I Include=`*.cs;@(Foo);i1`>
+      <M1>V1</M1>
+    </I>
+  </ItemGroup>
+</Project>".Cleanup();
+
+            using (var env = TestEnvironment.Create())
+            {
+                var testProject = env.CreateTestProjectWithFiles(projectContents.Cleanup(), new[] { "a.cs" });
+
+                var project = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, env.CreateProjectCollection().Collection);
+
+                var items = project.GetItems("I");
+
+                items.Count.ShouldBe(4);
+
+                project.IsDirty.ShouldBe(false);
+
+                items.First().SetDirectMetadataValue("M1", "V2");
+
+                project.IsDirty.ShouldBe(true);
+
+                project.Xml.AllChildren.OfType<ProjectItemElement>().Count().ShouldBe(2);
+
+                foreach (var item in items)
+                {
+                    var metadata = item.Metadata;
+
+                    metadata.Count.ShouldBe(1);
+
+                    var m1 = metadata.ElementAt(0);
+                    m1.Name.ShouldBe("M1");
+                    m1.EvaluatedValue.ShouldBe("V2");
+                }
+
+                var metadataElements = items.First().Xml.Metadata;
+
+                metadataElements.Count.ShouldBe(1);
+
+                var me1 = metadataElements.ElementAt(0);
+                me1.Name.ShouldBe("M1");
+                me1.Value.ShouldBe("V2");
+            }
+        }
+
+        //  TODO: Should remove tests go in project item tests, project item instance tests, or both?
         [Fact]
         public void Remove()
         {
