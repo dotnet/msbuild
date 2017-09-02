@@ -613,7 +613,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (IFilteredTemplateInfo templateInfo in unambiguousTemplateGroup)
             {
-                if (templateInfo.InvalidParameterNames.Count > 0)
+                if (templateInfo.InvalidParameterNames.Count == 0)
                 {
                     anyValid = true;
                     break;
@@ -622,6 +622,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!anyValid)
             {
+                // There were no templates in the group that all parameters were valid for.
+                // Display an appropriate error message.
                 IFilteredTemplateInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(unambiguousTemplateGroup);
 
                 if (highestPrecedenceTemplate != null)
