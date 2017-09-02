@@ -139,11 +139,6 @@ args=($temp)
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
-# We also need to pull down a project.json based CLI that is used by some tests
-# so create another directory for that.
-[ -z "$DOTNET_INSTALL_DIR_PJ" ] && export DOTNET_INSTALL_DIR_PJ=$REPOROOT/.dotnet_stage0PJ/$ARCHITECTURE
-[ -d "$DOTNET_INSTALL_DIR_PJ" ] || mkdir -p $DOTNET_INSTALL_DIR_PJ
-
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Enable verbose VS Test Console logging
@@ -160,14 +155,6 @@ export DOTNET_MULTILEVEL_LOOKUP=0
 EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
-    exit $EXIT_CODE
-fi
-
-# Install a project.json based CLI for use by tests
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --channel "master" --install-dir "$DOTNET_INSTALL_DIR_PJ" --architecture "$ARCHITECTURE" --version "1.0.0-preview2-1-003177")
-EXIT_CODE=$?
-if [ $EXIT_CODE != 0 ]; then
-    echo "run-build: Error: installing project-json based cli failed with exit code $EXIT_CODE." >&2
     exit $EXIT_CODE
 fi
 

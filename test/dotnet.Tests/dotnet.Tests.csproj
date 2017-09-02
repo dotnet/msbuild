@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
@@ -23,11 +22,35 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
-      <Link>.version</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
+  
+  <Target Name="WriteExpectedVersion"
+          BeforeTargets="BeforeBuild"
+          DependsOnTargets="PrepareForBuild">
+
+    <PropertyGroup>
+      <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
+      
+      <VersionFileContent>$(SdkVersion)</VersionFileContent>
+      <ExistingVersionFileContent Condition=" Exists('$(ExpectedVersionFileInIntermediateFolder)') ">
+        $([System.IO.File]::ReadAllText($(ExpectedVersionFileInIntermediateFolder)))
+      </ExistingVersionFileContent>
+
+      <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile
+        Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+    </PropertyGroup>
+    
+    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)"
+                      Lines="$(VersionFileContent)"
+                      Condition=" '$(ShouldOverwriteVersionFile)' == 'true' "
+                      Overwrite="true" />
+
+    <ItemGroup>
+      <Content Include="$(ExpectedVersionFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="$(ExpectedVersionFileInIntermediateFolder)" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />

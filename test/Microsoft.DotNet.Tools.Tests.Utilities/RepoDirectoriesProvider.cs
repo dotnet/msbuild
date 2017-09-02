@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _stage2Sdk;
         private string _stage2WithBackwardsCompatibleRuntimesDirectory;
         private string _testPackages;
-        private string _pjDotnet;
+        private string _testWorkingFolder;
 
         public static string RepoRoot
         {
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 if (string.IsNullOrEmpty(s_buildRid))
                 {
-                    var buildInfoPath = Path.Combine(RepoRoot, "artifacts", "obj", "BuildInfo.props");
+                    var buildInfoPath = Path.Combine(RepoRoot, "bin", "obj", "BuildInfo.props");
                     var root = XDocument.Load(buildInfoPath).Root;
                     var ns = root.Name.Namespace;
 
@@ -86,38 +86,46 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public string Artifacts => _artifacts;
         public string BuiltDotnet => _builtDotnet;
         public string NugetPackages => _nugetPackages;
-        public string PjDotnet => _pjDotnet;
         public string Stage2Sdk => _stage2Sdk;
         public string Stage2WithBackwardsCompatibleRuntimesDirectory => _stage2WithBackwardsCompatibleRuntimesDirectory;
         public string TestPackages => _testPackages;
+        public string TestWorkingFolder => _testWorkingFolder;
 
         public RepoDirectoriesProvider(
             string artifacts = null,
             string builtDotnet = null,
             string nugetPackages = null,
             string corehostPackages = null,
-            string corehostDummyPackages = null,
-            string pjDotnet = null)
+            string corehostDummyPackages = null)
         {
-            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", BuildRid);
+            //  Ideally this wouldn't be hardcoded, so that you could use stage n to build stage n + 1, and then use stage n + 1 to run tests
+            int previousStage = 2;
+
+            _artifacts = artifacts ?? Path.Combine(RepoRoot,
+                                                   "bin",
+                                                   previousStage.ToString(),
+                                                   BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
-            _pjDotnet = pjDotnet ?? GetPjDotnetPath();
             _stage2Sdk = Directory
-                .EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk"))
+                .EnumerateDirectories(Path.Combine(_artifacts, "dotnet", "sdk"))
                 .First(d => !d.Contains("NuGetFallbackFolder"));
 
             _stage2WithBackwardsCompatibleRuntimesDirectory =
-                Path.Combine(_artifacts, "stage2WithBackwardsCompatibleRuntimes");
-            _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
-        }
+                Path.Combine(_artifacts, "dotnetWithBackwardsCompatibleRuntimes");
 
-        private string GetPjDotnetPath()
-        {
-            return new DirectoryInfo(Path.Combine(RepoRoot, ".dotnet_stage0PJ"))
-                .GetDirectories().First()
-                .GetFiles("dotnet*").First()
-                .FullName;
+            _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
+            if (string.IsNullOrEmpty(_testPackages))
+            {
+                throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
+            }
+
+            _testWorkingFolder = Path.Combine(RepoRoot,
+                                              "bin",
+                                              (previousStage + 1).ToString(),
+                                              BuildRid,
+                                              "test");
+            
         }
     }
 }

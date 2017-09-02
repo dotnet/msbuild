@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
@@ -24,7 +23,8 @@
   <Target Name="PrecompileScript" 
           BeforeTargets="Build" 
           Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
-    <Exec Command="$(DotnetInOutputDirectory) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(MSBuildThisFileDirectory)/$(OutputPath)" />
+
+    <Exec Command="$(PreviousStageDotnet) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
   </Target>
 
 </Project>

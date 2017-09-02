@@ -51,8 +51,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                var configFile = new FileInfo(Path.Combine(rootPath, "..", "..", "..", "..", "..", "NuGet.tempaspnetpatch.config"));
-                File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
+                AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(Path.Combine(rootPath, "NuGet.Config"));
             }
 
             if (skipSpaWebpackSteps)

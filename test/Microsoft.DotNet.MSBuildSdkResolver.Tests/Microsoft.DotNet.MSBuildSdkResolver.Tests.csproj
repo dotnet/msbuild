@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <!-- https://github.com/dotnet/cli/issues/6672: Re-enable net461 as a TFM for tests. -->
     <TargetFrameworks>$(CliTargetFramework)</TargetFrameworks>

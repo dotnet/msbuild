@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
   <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
@@ -74,7 +73,7 @@
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
           
-    <DotNetPublish ToolPath="$(Stage0Directory)"
+    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
   </Target>
@@ -82,7 +81,7 @@
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
           
-    <DotNetPublish ToolPath="$(Stage0Directory)"
+    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
   </Target>
@@ -160,7 +159,7 @@
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </SdksToBundle>
     </ItemGroup>
@@ -179,7 +178,7 @@
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);
           TemplatePackageVersion=%(BundledTemplate.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </TemplatesToBundle>
     </ItemGroup>
