@@ -1,4 +1,4 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
     <VersionBadgeMoniker Condition=" '$(HostRid)' == 'debian.8-x64' ">debian_8_x64</VersionBadgeMoniker>
