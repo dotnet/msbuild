@@ -56,6 +56,7 @@ namespace Microsoft.DotNet.Cli.Build
                 { "rhel_7_x64", false },
                 { "ubuntu_14_04_x64", false },
                 { "ubuntu_16_04_x64", false },
+                { "ubuntu_16_10_x64", false },
                 { "linux_x64", false }
             };
 
