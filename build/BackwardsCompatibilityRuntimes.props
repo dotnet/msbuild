@@ -1,4 +1,4 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(IncludeSharedFrameworksForBackwardsCompatibilityTests)' == 'true' ">
     <BackwardsCompatibility110CoreSetupChannel>release/1.1.0</BackwardsCompatibility110CoreSetupChannel>
     <BackwardsCompatibility110SharedFrameworkVersion>1.1.2</BackwardsCompatibility110SharedFrameworkVersion>
