@@ -96,6 +96,11 @@
 
     <ItemGroup>
       <TestSdkRpmTaskEnvironmentVariables Include="PATH=$(RpmInstalledDirectory)$(PathListSeparator)$(PATH)" />
+      <TestSdkRpmTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+      <TestSdkRpmTaskEnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <TestSdkRpmTaskEnvironmentVariables Include="PreviousStageProps=$(NextStagePropsPath)" />
+
+      <!-- Consumed By Publish -->
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
 
