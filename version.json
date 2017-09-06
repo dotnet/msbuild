@@ -1,5 +1,5 @@
 {
-  "version": "15.5-preview",
+  "version": "15.4",
   "assemblyVersion": "15.1",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",

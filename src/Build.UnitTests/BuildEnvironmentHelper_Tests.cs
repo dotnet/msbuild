@@ -228,15 +228,17 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [Theory]
         [Trait("Category", "nonlinuxtests")]
         [Trait("Category", "nonosxtests")]
-        public void BuildEnvironmentDetectsVisualStudioFromSetupInstance()
+        [InlineData("15.0")]
+        [InlineData("15.3")]
+        public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion)
         {
             using (var env = new EmptyVSEnviroment())
             {
-                env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version("15.0")));
-                env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version("15.0")));
+                env.WithVsInstance(new VisualStudioInstance("Invalid path", @"c:\_doesnotexist", new Version(visualStudioVersion)));
+                env.WithVsInstance(new VisualStudioInstance("VS", env.TempFolderRoot, new Version(visualStudioVersion)));
 
                 // This test has no context to find MSBuild other than Visual Studio root.
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock);

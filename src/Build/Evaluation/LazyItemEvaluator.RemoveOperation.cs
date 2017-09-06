@@ -16,6 +16,8 @@ namespace Microsoft.Build.Evaluation
             {
             }
 
+            // todo port the self referencing matching optimization (e.g. <I Remove="@(I)">) from Update to Remove as well. Ideally make one mechanism for both. https://github.com/Microsoft/msbuild/issues/2314
+            // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
             protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return SelectItemsMatchingItemSpec(listBuilder, _itemElement.RemoveLocation).ToImmutableHashSet();

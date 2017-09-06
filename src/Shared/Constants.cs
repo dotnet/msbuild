@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
         internal const string CurrentAssemblyVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralAssemblyVersion;
 #endif
 
-        internal const string CurrentAssemblyFileVersion = "15.5.0.0";
+        internal const string CurrentAssemblyFileVersion = "15.4.0.0";
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
