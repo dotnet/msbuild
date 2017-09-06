@@ -1628,12 +1628,6 @@ namespace Microsoft.Build.Execution
 
                     _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
 
-                    if (submission.BuildRequestData != null && submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild))
-                    {
-                        // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk
-                        _buildParameters?.ProjectRootElementCache?.Clear();
-                    }
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -1656,6 +1650,14 @@ namespace Microsoft.Build.Execution
 
                 if (_buildSubmissions.Count == 0)
                 {
+                    if (submission.BuildRequestData != null && submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild))
+                    {
+                        // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk.  We do not need to reset the
+                        // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
+                        // part of the import graph.
+                        _buildParameters?.ProjectRootElementCache?.Clear();
+                    }
+
                     _noActiveSubmissionsEvent.Set();
                 }
             }
