@@ -30,6 +30,8 @@ if [ -z "${DOTNET_INSTALL_DIR:-}" ]; then
    export DOTNET_INSTALL_DIR=$REPO_ROOT/.dotnet_stage0/x64
 fi
 
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 if [ ! -d "$DOTNET_INSTALL_DIR" ]; then
     mkdir -p $DOTNET_INSTALL_DIR
 fi
@@ -49,14 +51,6 @@ fi
 
 # Put the stage 0 on the path
 export PATH=$DOTNET_INSTALL_DIR:$PATH
-
-echo "Restoring $PROJECT_PATH..."
-dotnet restore "$PROJECT_PATH"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to restore"
-    exit 1
-fi
 
 echo "Invoking App $PROJECT_PATH..."
 dotnet run -p "$PROJECT_PATH" $@
