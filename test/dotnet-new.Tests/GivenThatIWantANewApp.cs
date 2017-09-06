@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.0.1")); // NOTE: implicit package version will be 2.0.0 again when https://github.com/dotnet/cli/pull/7489 can be merged.
+                    .Single(d => d.Name.StartsWith("2.0.0"));
 
                 if (packageName == "microsoft.netcore.app")
                 {
