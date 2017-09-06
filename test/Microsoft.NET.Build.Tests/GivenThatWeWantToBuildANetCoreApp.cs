@@ -329,7 +329,7 @@ public static class Program
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
-                .Execute("/v:diag")
+                .Execute("/v:normal")
                 .Should()
                 .Pass()
                 .And
