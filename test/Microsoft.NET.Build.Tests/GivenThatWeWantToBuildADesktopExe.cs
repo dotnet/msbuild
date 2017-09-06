@@ -462,6 +462,50 @@ namespace DefaultReferences
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
+        [WindowsOnlyFact]
+        public void It_does_not_report_conflicts_with_runtime_specific_items()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesktopConflictsRuntimeTargets",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties["PlatformTarget"] = "AnyCPU";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+
+
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                                    new XAttribute("Include", "System.Security.Cryptography.Algorithms"),
+                                    new XAttribute("Version", "4.3.0")));
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var buildResult = buildCommand
+                .Execute("/v:diag");
+
+            buildResult.Should().Pass();
+
+            //  Correct asset should be copied to output folder
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().HaveFile("System.Security.Cryptography.Algorithms.dll");
+
+            //  There should be no conflicts
+            buildResult.Should().NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
         [Fact]
         public void It_generates_binding_redirects_if_needed()
         {

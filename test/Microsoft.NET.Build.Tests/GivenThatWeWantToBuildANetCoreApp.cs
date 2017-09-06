@@ -313,6 +313,30 @@ public static class Program
         }
 
         [Fact]
+        public void There_are_no_conflicts_when_targeting_netcoreapp_1_1()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NetCoreApp1.1_Conflicts",
+                TargetFrameworks = "netcoreapp1.1",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:diag")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        [Fact]
         public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
         {
             var testProject = new TestProject()

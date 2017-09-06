@@ -116,7 +116,9 @@ namespace Microsoft.NET.Build.Tasks
         static readonly string[] s_targetPathMetadata = new[] { MetadataNames.TargetPath, MetadataNames.DestinationSubPath };
         public static string GetTargetPath(ITaskItem item)
         {
-            // first use TargetPath, DestinationSubPath, then Path, then fallback to filename+extension alone
+            // first use TargetPath, then DestinationSubPath, then fallback to filename+extension alone
+            // Can't use Path, as this is the path of the file in the package, which is usually not the target path
+            // (for example the target path for lib/netcoreapp2.0/lib.dll is just lib.dll)
             foreach (var metadata in s_targetPathMetadata)
             {
                 var value = item.GetMetadata(metadata);
