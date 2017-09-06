@@ -150,6 +150,8 @@ namespace Microsoft.NET.TestFramework
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
             command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.NuGetCachePath);
 
+            command = command.EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
+
             command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
             command = command.EnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR", RepoInfo.SdksPath);
 
