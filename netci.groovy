@@ -9,7 +9,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug']
+def platformList = ['Linux:x64:Release', 'Debian8.2:x64:Debug', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Debug', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT_ES:x64:Debug', 'RHEL7.2:x64:Release', 'CentOS7.1:x64:Debug']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -32,6 +32,13 @@ platformList.each { platform ->
     else if (os == 'Windows_2016') {
         buildCommand = ".\\build.cmd -Configuration ${configuration} -Architecture ${architecture} -RunInstallerTestsInDocker -Targets Default"
     }
+    else if (os == 'Windows_NT_ES') {
+        osUsedForMachineAffinity = 'Windows_NT'
+        buildCommand = """
+set DOTNET_CLI_UI_LANGUAGE=es
+.\\build.cmd -Configuration ${configuration} -Architecture ${architecture} -Targets Default
+"""
+    }
     else if (os == 'Ubuntu') {
         buildCommand = "./build.sh --skip-prereqs --configuration ${configuration} --docker ubuntu.14.04 --targets Default"
     }
@@ -47,7 +54,7 @@ platformList.each { platform ->
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
         // Set the label.
         steps {
-            if (os == 'Windows_NT' || os == 'Windows_2016') {
+            if (osUsedForMachineAffinity == 'Windows_NT' || osUsedForMachineAffinity == 'Windows_2016') {
                 // Batch
                 batchFile(buildCommand)
             }
