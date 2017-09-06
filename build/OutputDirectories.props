@@ -1,4 +1,4 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
       <CliBuildStage Condition="'$(CliBuildStage)' == '' And '$(CliOuterBuildStage)' != ''">$([MSBuild]::Add($(CliOuterBuildStage), '1'))</CliBuildStage>
       <CliBuildStage Condition="'$(CliBuildStage)' == ''">2</CliBuildStage>

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project InitialTargets="SetSigningProperties" DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- The signing infrastructure runs using MSBuild 14, which doesn't support some of the new syntax we're using.  So set the BuildingSingingProject
+         property here to avoid importing files we don't need for signing which would cause errors if imported when using MSBuild 14. -->
+    <BuildingSigningProject>true</BuildingSigningProject>
+  </PropertyGroup>
+  
   <Import Project="..\dir.props" />
   <Import Project="MicroBuild.props" />
   <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
