@@ -239,7 +239,7 @@
                    ToolPath="$(RpmInstalledDirectory)" />
 
     <DotNetTest ProjectPath="$(EndToEndTestProject)"
-                EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
+                EnvironmentVariables="@(TestSdkRpmTaskEnvironmentVariables)"
                 ToolPath="$(RpmInstalledDirectory)" />
 
     <!-- Clean up Packages -->
