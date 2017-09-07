@@ -132,7 +132,17 @@ namespace Microsoft.NET.Build.Tasks
 
             var sourcePath = GetSourcePath(item);
 
-            return Path.GetFileName(sourcePath);
+            var fileName = Path.GetFileName(sourcePath);
+
+            //  Get locale subdirectory for satellite assemblies
+            var destinationSubDirectory = item.GetMetadata("DestinationSubDirectory");
+
+            if (!string.IsNullOrWhiteSpace(destinationSubDirectory))
+            {
+                return Path.Combine(destinationSubDirectory, fileName);
+            }
+
+            return fileName;
         }
     }
 }

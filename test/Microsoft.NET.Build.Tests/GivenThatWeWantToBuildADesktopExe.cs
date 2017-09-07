@@ -479,9 +479,6 @@ namespace DefaultReferences
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
-
-
-
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
@@ -561,9 +558,11 @@ namespace DefaultReferences
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
-                .Execute()
+                .Execute("/v:normal")
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
             var outputDirectory = buildCommand.GetOutputDirectory("net46");
             outputDirectory.Should().NotHaveFile("FluentValidation.resources.dll");
