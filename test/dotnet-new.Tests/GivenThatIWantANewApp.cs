@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.New.Tests
             // For testing the 2.1 templates - some of their packages are currently only in private feeds.
             var configFile = Path.Combine(rootPath, "NuGet.Config");
             AspNetNuGetConfiguration.WriteNuGetConfigWithAspNetPrivateFeeds(configFile);
-			// For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
+			      // For "normal" builds, once the packages needed for 2.1 templates are in the public feeds
             //var configFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
             foreach (string cSharpTemplate in cSharpTemplates)
@@ -79,10 +79,10 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Theory]
-        [InlineData("console", "RuntimeFrameworkVersion", "microsoft.netcore.app")]
+        [InlineData("console", "microsoft.netcore.app")]
         // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
-        //[InlineData("classlib", "NetStandardImplicitPackageVersion", "netstandard.library")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string propertyName, string packageName)
+        //[InlineData("classlib", "netstandard.library")]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");

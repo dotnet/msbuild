@@ -40,14 +40,23 @@
       <!-- Built binaries -->
       <FilesToSign Include="$(OutputDirectory)/sdk/**/csc.exe;
                             $(OutputDirectory)/sdk/**/csc.dll;
+                            $(OutputDirectory)/sdk/**/vbc.exe;
+                            $(OutputDirectory)/sdk/**/vbc.dll;
+                            $(OutputDirectory)/sdk/**/fsc.exe;
+                            $(OutputDirectory)/sdk/**/fsi.exe;
+                            $(OutputDirectory)/sdk/**/FSharp.*.dll;
                             $(OutputDirectory)/sdk/**/dotnet.dll;
                             $(OutputDirectory)/sdk/**/dotnet.resources.dll;
                             $(OutputDirectory)/sdk/**/System.*.dll;
                             $(OutputDirectory)/sdk/**/Microsoft.*.dll;
                             $(OutputDirectory)/sdk/**/NuGet*.dll;
                             $(OutputDirectory)/sdk/**/datacollector.dll;
+                            $(OutputDirectory)/sdk/**/datacollector.exe;
                             $(OutputDirectory)/sdk/**/MSBuild.dll;
+                            $(OutputDirectory)/sdk/**/MSBuild.resources.dll;
                             $(OutputDirectory)/sdk/**/testhost.dll;
+                            $(OutputDirectory)/sdk/**/testhost.exe;
+                            $(OutputDirectory)/sdk/**/testhost.x86.exe;
                             $(OutputDirectory)/sdk/**/vstest.console.dll;
                             $(OutputDirectory)/sdk/**/vstest.console.resources.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
