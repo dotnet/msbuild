@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Archive
         static string[] ZipExtensions = new[] { ".zip", ".nupkg" };
         static string IndexFileName = "index.txt";
 
-        // maps file hash to archve path
+        // maps file hash to archive path
         // $ prefix indicates that the file is not in the archive and path is a hash
         private Dictionary<string, ArchiveSource> _archiveFiles = new Dictionary<string, ArchiveSource>();
         // maps file hash to external path

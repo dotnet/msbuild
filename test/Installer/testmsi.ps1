@@ -3,7 +3,8 @@
 
 param(
     [string]$InputMsi,
-    [string]$DotnetDir
+    [string]$DotnetDir,
+    [string]$TestDir
 )
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
@@ -37,7 +38,7 @@ if(!(Test-Path $inputMsi))
 
 $testName = "Microsoft.DotNet.Cli.Msi.Tests"
 $testProj="$PSScriptRoot\$testName\$testName.csproj"
-$testBin="$RepoRoot\artifacts\tests\$testName"
+$testBin="$TestDir\$testName"
 
 pushd "$DotnetDir"
 
