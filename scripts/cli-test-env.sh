@@ -13,7 +13,12 @@ done
 
 REPO_ROOT="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 
-RID=linux-x64
+if [ "$uname" = "Darwin" ]
+then
+  RID=osx-x64
+else
+  RID=linux-x64
+fi
 
 STAGE2_DIR=$REPO_ROOT/bin/2/$RID/dotnet
 export PATH=$STAGE2_DIR:$PATH
