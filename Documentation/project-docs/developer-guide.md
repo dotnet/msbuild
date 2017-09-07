@@ -27,7 +27,6 @@ In order to build .NET Command Line Interface, you need the following installed 
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd /t:Compile` or `./build.sh /t:Compile`. 
-    - To build the CLI in macOS Sierra, you need to set the DOTNET_RUNTIME_ID environment variable by running `export DOTNET_RUNTIME_ID=osx.10.11-x64`.
 2. The CLI that is built (we call it stage 2) will be laid out in the `bin\2\{RID}\dotnet` folder.  You can run `dotnet.exe` or `dotnet` from that folder to try out the `dotnet` command.
 
 ## A simple test
