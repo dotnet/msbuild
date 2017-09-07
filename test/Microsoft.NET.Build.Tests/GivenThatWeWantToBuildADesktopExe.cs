@@ -498,7 +498,9 @@ namespace DefaultReferences
 
             buildResult.Should().Pass();
 
-            //  Correct asset should be copied to output folder
+            //  Correct asset should be copied to output folder. Before fixing https://github.com/dotnet/sdk/issues/1510,
+            //  the runtimeTargets items would win conflict resolution, and then would not be copied to the output folder,
+            //  so there'd be no copy of the DLL in the output folder.
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().HaveFile("System.Security.Cryptography.Algorithms.dll");
 
