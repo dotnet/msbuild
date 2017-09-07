@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64 |Windows x86 |Mac OS X |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Ubuntu 16.10 |Debian 8 |RHEL 7.2 |
-|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][ubuntu-16.10-build-badge]][ubuntu-16.10-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
+|Windows x64 |Windows x86 |Mac OS X |Linux x64 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8 |RHEL 7.2 |
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8-build-badge]][debian-8-build]|[![][rhel-build-badge]][rhel-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6902/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6902
@@ -44,9 +44,6 @@ Build Status
 
 [ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6904/badge
 [ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6904
-
-[ubuntu-16.10-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6903/badge
-[ubuntu-16.10-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6903
 
 [debian-8-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6898/badge
 [debian-8-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=6898
@@ -72,7 +69,6 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Linux x64** | [tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
 | **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
-| **Ubuntu 16.10** | [Installer][ubuntu-16.10-installer] - [Checksum][ubuntu-16.10-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **Debian 8**  | [Installer][debian-8-installer] - [Checksum][debian-8-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **RHEL 7.2** | [Installer][rhel-7-installer] - [Checksum][rhel-7-installer-checksum]<br>_see installer note below_<sup>1</sup><br>tar.gz - See **Linux x64** |
 | **CentOS 7.1 / Oracle Linux 7** | tar.gz - See **Linux x64** |
@@ -118,9 +114,6 @@ Reference notes:
 [ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb
 [ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.04-x64.deb.sha
 
-[ubuntu-16.10-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb
-[ubuntu-16.10-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-ubuntu.16.10-x64.deb.sha
-
 [debian-8-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb
 [debian-8-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-debian-x64.deb.sha
 
@@ -146,15 +139,6 @@ sudo apt-get update
 Ubuntu 16.04
 ```
 sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-Ubuntu 16.10
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ yakkety main" > /etc/apt/sources.list.d/dotnetdev.list'
 
 sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
 
