@@ -34,6 +34,8 @@ if (!$env:DOTNET_INSTALL_DIR)
     $env:DOTNET_INSTALL_DIR="$RepoRoot\.dotnet_stage0\$Architecture"
 }
 
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 # Install a stage 0
 Write-Output "Installing .NET Core CLI Stage 0"
 & "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel "master" -Architecture $Architecture
@@ -41,11 +43,6 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
-
-# Restore the app
-Write-Output "Restoring $ProjectPath..."
-dotnet restore "$ProjectPath"
-if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 
 # Run the app
 Write-Output "Invoking App $ProjectPath..."
