@@ -328,8 +328,39 @@ namespace Microsoft.Build.BackEnd
             public void TranslateCulture(ref CultureInfo value)
             {
                 string cultureName = _reader.ReadString();
+
+#if CLR2COMPATIBILITY
+                // It may be that some culture codes are accepted on later .net framework versions
+                // but not on the older 3.5 or 2.0. Fallbacks are required in this case to prevent
+                // exceptions
+                value = LoadCultureWithFallback(cultureName);
+#else
                 value = new CultureInfo(cultureName);
+#endif
             }
+
+#if CLR2COMPATIBILITY
+            private static CultureInfo LoadCultureWithFallback(string cultureName)
+            {
+                CultureInfo cultureInfo;
+
+                return TryLoadCulture(cultureName, out cultureInfo) ? cultureInfo : CultureInfo.CurrentCulture;
+            }
+
+            private static bool TryLoadCulture(string cultureName, out CultureInfo cultureInfo)
+            {
+                try
+                {
+                    cultureInfo = new CultureInfo(cultureName);
+                    return true;
+                }
+                catch
+                {
+                    cultureInfo = null;
+                    return false;
+                }
+            }
+#endif
 
             /// <summary>
             /// Translates an enumeration.

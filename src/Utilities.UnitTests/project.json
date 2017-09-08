@@ -4,7 +4,8 @@
     "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
-    "xunit.assert": "2.1.0"
+    "xunit.assert": "2.1.0",
+    "Shouldly": "3.0.0-beta0003"
   },
   "frameworks": {
     "net46": { 

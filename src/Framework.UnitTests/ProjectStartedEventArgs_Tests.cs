@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -39,7 +40,7 @@ namespace Microsoft.Build.UnitTests
         public void EventArgsCtors()
         {
             ProjectStartedEventArgs projectStartedEvent = new ProjectStartedEventArgs2();
-            Assert.NotNull(projectStartedEvent);
+            projectStartedEvent.ShouldNotBeNull();
 
             projectStartedEvent = new ProjectStartedEventArgs("Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null);
             projectStartedEvent = new ProjectStartedEventArgs("Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, DateTime.Now);
@@ -73,8 +74,8 @@ namespace Microsoft.Build.UnitTests
                   s_baseProjectStartedEvent.Timestamp
                 );
 
-            Assert.NotEqual(propertiesList, s_baseProjectStartedEvent.Properties);
-            Assert.NotEqual(itemsList, s_baseProjectStartedEvent.Items);
+            s_baseProjectStartedEvent.Properties.ShouldNotBe(propertiesList);
+            s_baseProjectStartedEvent.Items.ShouldNotBe(itemsList);
         }
 
         /// <summary>

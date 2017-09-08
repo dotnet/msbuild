@@ -75,6 +75,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetFrameworkMoniker Condition="'$(TargetFrameworkMoniker)' == '' and '$(TargetFrameworkProfile)' != ''">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion),Profile=$(TargetFrameworkProfile)</TargetFrameworkMoniker>
     <TargetFrameworkMoniker Condition="'$(TargetFrameworkMoniker)' == ''">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</TargetFrameworkMoniker>
 
+    <!-- When working off a packaged reference assemblies, do not go to machine-global locations. This property is target-framework-specific, so it cannot be overridden in msbuild.exe.config once and for all. -->
+    <FrameworkPathOverride Condition="'$(FrameworkPathOverride)' == '' And Exists('$(TargetFrameworkRootPath)$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)')">$(TargetFrameworkRootPath)$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)</FrameworkPathOverride>
     <!-- The FrameworkPathOverride is required for the inproc visual basic compiler to initialize when targeting target frameworks less than 4.0. If .net 2.0 is not installed then the property value above will not provide the location
              of mscorlib. This is also true if the build author overrides this property to some other directory which does not contain mscorlib.dll. In the case we cannot find mscorlib.dll at the correct location
              we need to find a directory which does contain mscorlib to allow the inproc compiler to initialize and give us the chance to show certain dialogs in the IDE (which only happen after initialization).-->
@@ -817,6 +819,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="AfterBuild"/>
+
+  <!--
+    ============================================================
+                                        Restore
+
+    This empty target is defined so that all projects can run Restore.  Most package management systems like
+    NuGet will override this target.
+    ============================================================
+    -->
+  <Target Name="Restore"/>
 
   <!--
     ============================================================
@@ -2177,6 +2189,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="GetInstalledSDKLocations"
+      Condition="'@(SDKReference)' != ''"
       DependsOnTargets="$(GetInstalledSDKLocationsDependsOn)"
       Returns="@(InstalledSDKLocations)"
       >
@@ -2187,7 +2200,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersion)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
-           Condition="'@(SDKReference)' != ''"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
@@ -2199,7 +2211,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersionWindows81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindows81)"
-           Condition="'@(SDKReference)' != '' and '$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
+           Condition="'$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
            WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
@@ -2211,7 +2223,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
            TargetPlatformVersion="$(TargetPlatformVersionWindowsPhone81)"
            TargetPlatformIdentifier="$(TargetPlatformIdentifierWindowsPhone81)"
-           Condition="'@(SDKReference)' != '' and '$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
+           Condition="'$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
            WarnWhenNoSDKsFound="false"
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
@@ -2409,7 +2421,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Target Name="ExportWindowsMDFile"
           DependsOnTargets="Compile"
           Condition="'$(ExportWinMDFile)' == 'true'"
-          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePath);$(MSBuildAllProjects)"
+          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePathWithRefAssemblies);$(MSBuildAllProjects)"
           Outputs="$(_IntermediateWindowsMetadataPath);$(WinMDExpOutputPdb);$(WinMDOutputDocumentationFile)"
   >
 
@@ -2423,7 +2435,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </PropertyGroup>
 
       <WinMDExp WinMDModule="@(IntermediateAssembly)"
-                References="@(ReferencePath)"
+                References="@(ReferencePathWithRefAssemblies)"
                 DisabledWarnings="$(WinMdExpNoWarn)"
                 InputDocumentationFile="@(DocFileItem)"
                 OutputDocumentationFile="$(WinMDOutputDocumentationFile)"
@@ -3040,7 +3052,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CompileLicxFiles"
       Condition="'@(_LicxFile)'!=''"
       DependsOnTargets="$(CompileLicxFilesDependsOn)"
-      Inputs="$(MSBuildAllProjects);@(_LicxFile);@(ReferencePath);@(ReferenceDependencyPaths)"
+      Inputs="$(MSBuildAllProjects);@(_LicxFile);@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
       Outputs="$(IntermediateOutputPath)$(TargetFileName).licenses">
 
     <PropertyGroup>
@@ -3052,7 +3064,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         LicenseTarget="$(TargetFileName)"
         OutputDirectory="$(IntermediateOutputPath)"
         OutputLicense="$(IntermediateOutputPath)$(TargetFileName).licenses"
-        ReferencedAssemblies="@(ReferencePath);@(ReferenceDependencyPaths)"
+        ReferencedAssemblies="@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
         NoLogo="$(NoLogo)"
         ToolPath="$(LCToolPath)"
         SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
@@ -3310,8 +3322,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
-      <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
-      <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
+      <CoreCompileCache Include="@(Compile)" />
+      <CoreCompileCache Include="@(ReferencePath)" />
     </ItemGroup>
 
     <Hash ItemsToHash="@(CoreCompileCache)">

@@ -345,10 +345,11 @@ fi
 if [ "$host" = "Mono" ]; then
     # The compiler includes the net46 version of System.Runtime.InteropServices.RuntimeInformation,
     # which is compiled for Windows, breaking csc.exe. Deleting the binary fixes this problem.
-    MS_COMPILER_DIR="$PACKAGES_DIR/microsoft.net.compilers/2.2.0/tools/"
+    MS_COMPILER_DIR="$PACKAGES_DIR/microsoft.net.compilers/2.3.1/tools/"
     rm -f $MS_COMPILER_DIR/System.Runtime.InteropServices.RuntimeInformation.dll
 
-    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$MS_COMPILER_DIR /p:DebugType=portable /p:CscDebugFileExt=.pdb"
+    CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.3.1/tools/csc.exe"
+    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$MS_COMPILER_DIR /p:DebugType=portable"
 fi
 
 # The set of warnings to suppress for now

@@ -52,9 +52,6 @@
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -222,6 +219,10 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj">
+      <Project>{E1ADB824-2B34-4920-953F-746DFD6DB3C1}</Project>
+      <Name>Microsoft.Build.UnitTests.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>

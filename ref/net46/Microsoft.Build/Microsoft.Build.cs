@@ -995,6 +995,7 @@ namespace Microsoft.Build.Execution
     [System.FlagsAttribute]
     public enum BuildRequestDataFlags
     {
+        ClearProjectRootElementCacheAfterBuild = 8,
         IgnoreExistingProjectState = 4,
         None = 0,
         ProvideProjectStateAfterBuild = 2,
@@ -1547,6 +1548,7 @@ namespace Microsoft.VisualStudio.Setup.Configuration
     {
         Complete = (uint)4294967295,
         Local = (uint)1,
+        NoErrors = (uint)8,
         None = (uint)0,
         NoRebootRequired = (uint)4,
         Registered = (uint)2,

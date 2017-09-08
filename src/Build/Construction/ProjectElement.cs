@@ -56,7 +56,6 @@ namespace Microsoft.Build.Construction
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlElement, "xmlElement");
-            ProjectXmlUtilities.VerifyThrowProjectValidNamespace((XmlElementWithLocation)xmlElement);
             ErrorUtilities.VerifyThrowArgumentNull(containingProject, "containingProject");
 
             this.XmlElement = (XmlElementWithLocation)xmlElement;

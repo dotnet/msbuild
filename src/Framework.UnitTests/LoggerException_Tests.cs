@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -33,10 +34,11 @@ namespace Microsoft.Build.UnitTests
 
                 LoggerException e2 = (LoggerException)frm.Deserialize(memstr);
 
-                Assert.Equal(e.ErrorCode, e2.ErrorCode);
-                Assert.Equal(e.HelpKeyword, e2.HelpKeyword);
-                Assert.Equal(e.Message, e2.Message);
-                Assert.Equal(e.InnerException.Message, e2.InnerException.Message);
+                e2.ErrorCode.ShouldBe(e.ErrorCode);
+                e2.HelpKeyword.ShouldBe(e.HelpKeyword);
+                e2.Message.ShouldBe(e.Message);
+                e2.InnerException.ShouldNotBeNull();
+                e2.InnerException.Message.ShouldBe(e.InnerException?.Message);
             }
         }
 
@@ -57,10 +59,10 @@ namespace Microsoft.Build.UnitTests
 
                 LoggerException e2 = (LoggerException)frm.Deserialize(memstr);
 
-                Assert.Equal(null, e2.ErrorCode);
-                Assert.Equal(null, e2.HelpKeyword);
-                Assert.Equal(e.Message, e2.Message);
-                Assert.Equal(null, e2.InnerException);
+                e2.ErrorCode.ShouldBeNull();
+                e2.HelpKeyword.ShouldBeNull();
+                e2.Message.ShouldBe(e.Message);
+                e2.InnerException.ShouldBeNull();
             }
         }
     }

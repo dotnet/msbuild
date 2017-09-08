@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -21,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             RequiredRuntimeAttribute attribute =
                 typeof(X).GetTypeInfo().GetCustomAttribute<RequiredRuntimeAttribute>();
 
-            Assert.Equal("v5", attribute.RuntimeVersion);
+            attribute.RuntimeVersion.ShouldBe("v5");
         }
 
         [Fact]
@@ -29,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         {
             OutputAttribute attribute =
                 typeof(X).GetMember("TestValue2", BindingFlags.NonPublic | BindingFlags.Static)[0].GetCustomAttribute<OutputAttribute>();
-            Assert.NotNull(attribute);
+            attribute.ShouldNotBeNull();
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         {
             RequiredAttribute attribute =
                 typeof(X).GetMember("TestValue", BindingFlags.NonPublic | BindingFlags.Static)[0].GetCustomAttribute<RequiredAttribute>();
-            Assert.NotNull(attribute);
+            attribute.ShouldNotBeNull();
         }
     }
 

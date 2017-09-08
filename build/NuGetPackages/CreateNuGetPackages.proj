@@ -26,7 +26,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
+  <Import Project="$(GitVersioningDir)Nerdbank.GitVersioning.targets" />
 
   <ItemGroup>
     <NuSpecs Include="*.nuspec" />
@@ -53,6 +53,7 @@
       <NuspecProperties Include="projectUrl=$(NuGetPackageProjectUrl)"/>
       <NuspecProperties Include="iconUrl=$(NuGetPackageIconUrl)"/>
       <NuspecProperties Include="targetMSBuildToolsVersion=$(TargetMSBuildToolsVersion)"/>
+      <NuspecProperties Include="thirdPartyNotice=$(ThirdPartyNotice)"/>
     </ItemGroup>
 
     <MakeDir Directories="$(PackagesOutDir)" />

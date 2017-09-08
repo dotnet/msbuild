@@ -10,7 +10,7 @@ using System.Reflection;
 using Xunit;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.SharedUtilities;
+using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests
 {

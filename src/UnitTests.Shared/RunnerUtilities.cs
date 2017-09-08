@@ -1,12 +1,10 @@
 ﻿using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
-using System.IO;
 
-namespace Microsoft.Build.SharedUtilities
+namespace Microsoft.Build.UnitTests.Shared
 {
-
-    internal static class RunnerUtilities
+    public static class RunnerUtilities
     {
         public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 

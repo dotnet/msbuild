@@ -228,10 +228,6 @@
     <value>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</value>
     <comment>{StrBegin="MSB4142: "}</comment>
   </data>
-  <data name="CustomNamespaceNotAllowedOnThisChildElement" UESanitized="false" Visibility="Public">
-    <value>MSB4097: The element &lt;{0}&gt; beneath element &lt;{1}&gt; may not have a custom XML namespace.</value>
-    <comment>{StrBegin="MSB4097: "}</comment>
-  </data>
   <data name="DefaultTasksFileFailure" UESanitized="false" Visibility="Public">
     <value>MSB4009: The default tasks file could not be successfully loaded. {0}</value>
     <comment>{StrBegin="MSB4009: "}UE: This message is shown when one of the default tasks file (*.tasks) located alongside the MSBuild binaries cannot
@@ -1085,6 +1081,9 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="TaskFactoryTaskTypeIsNotSet" UESanitized="false" Visibility="Public">
+    <value>The task factory must return a value for the "TaskType" property.</value>
+  </data>
   <data name="TaskLoadFailure" UESanitized="false" Visibility="Public">
     <value>MSB4062: The "{0}" task could not be loaded from the assembly {1}. {2} Confirm that the &lt;UsingTask&gt; declaration is correct, that the assembly and all its dependencies are available, and that the task contains a public class that implements Microsoft.Build.Framework.ITask.</value>
     <comment>{StrBegin="MSB4062: "}UE: This message is shown when a task cannot be loaded from its assembly for various reasons e.g. corrupt assembly,
@@ -1646,6 +1645,7 @@ MSB4031
 MSB4167
 MSB4178
 MSB4076
+MSB4097
 MSB4098
 MSB4168
 MSB4151

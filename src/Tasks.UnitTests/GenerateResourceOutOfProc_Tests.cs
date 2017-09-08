@@ -10,7 +10,9 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 using System.IO;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
@@ -18,6 +20,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
     [Trait("Category", "mono-windows-failing")]
     sealed public class RequiredTransformations
     {
+        private readonly ITestOutputHelper _output;
+
+        public RequiredTransformations(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
@@ -29,7 +38,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing BasicResX2Resources() test");
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -77,7 +86,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             string expectedOutFile2 = Path.Combine(Path.GetTempPath(), Utilities.GetTempFileName(".resources"));
             string expectedOutFile3 = Path.Combine(Path.GetTempPath(), Utilities.GetTempFileName(".resources"));
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.Sources = new ITaskItem[] {
                 new TaskItem(resxFile0), new TaskItem(resxFile1), new TaskItem(resxFile2), new TaskItem(resxFile3) };
 
@@ -106,7 +115,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void BasicText2Resources()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -151,7 +160,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
                 resxFile = Utilities.WriteTestResX(true /*system type*/, null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -177,24 +186,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void BasicResources2ResX()
         {
-            string resourcesFile = Utilities.CreateBasicResourcesFile(false);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(false, _output);
 
             // Fork 1: create a resx file directly from the resources
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
             Utilities.ExecuteTask(t);
             Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
             // Fork 2a: create a text file from the resources
-            GenerateResource t2a = Utilities.CreateTaskOutOfProc();
+            GenerateResource t2a = Utilities.CreateTaskOutOfProc(_output);
             t2a.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".txt")) };
             Utilities.ExecuteTask(t2a);
             Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".txt");
 
             // Fork 2b: create a resx file from the text file
-            GenerateResource t2b = Utilities.CreateTaskOutOfProc();
+            GenerateResource t2b = Utilities.CreateTaskOutOfProc(_output);
             t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
             t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
             Utilities.ExecuteTask(t2b);
@@ -218,9 +227,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void BasicResources2Text()
         {
-            string resourcesFile = Utilities.CreateBasicResourcesFile(false);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(false, _output);
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
 
@@ -246,7 +255,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -260,7 +269,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -295,7 +304,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -310,7 +319,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.AssertStateFileWasWritten(t);
 
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -343,54 +352,55 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void ForceSomeOutOfDate()
         {
-            string resxFile = null;
-            string resxFile2 = null;
+            string firstResx = null;
+            string secondResx = null;
             string cache = null;
 
             try
             {
-                resxFile = Utilities.WriteTestResX(false, null, null);
-                resxFile2 = Utilities.WriteTestResX(false, null, null);
+                firstResx = Utilities.WriteTestResX(false, null, null);
+                secondResx = Utilities.WriteTestResX(false, null, null);
                 cache = Utilities.GetTempFileName(".cache");
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
-                t.StateFile = new TaskItem(cache);
-                t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
+                GenerateResource createResources = Utilities.CreateTaskOutOfProc(_output);
+                createResources.StateFile = new TaskItem(cache);
+                createResources.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-                // Transform both
-                Utilities.ExecuteTask(t);
+                _output.WriteLine("Transform both");
+                Utilities.ExecuteTask(createResources);
 
-                // Create a new task to transform them again
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
-                t2.StateFile = new TaskItem(t.StateFile.ItemSpec);
-                t2.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
+                _output.WriteLine("Get current write times of outputs");
+                DateTime firstOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[0].ItemSpec);
+                DateTime secondOutputCreationTime = File.GetLastWriteTime(createResources.OutputResources[1].ItemSpec);
 
-                // Get current write times of outputs
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
+                _output.WriteLine("Create a new task to transform them again");
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
+                t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
+                t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
+
                 System.Threading.Thread.Sleep(200);
-                // Touch one input
-                File.SetLastWriteTime(resxFile, DateTime.Now);
+                _output.WriteLine("Touch one input");
+                File.SetLastWriteTime(firstResx, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
 
-                // Check only one output was updated
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
-                Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+                _output.WriteLine("Check only one output was updated");
+                File.GetLastWriteTime(t2.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstOutputCreationTime);
+                File.GetLastWriteTime(t2.OutputResources[1].ItemSpec).ShouldBe(secondOutputCreationTime);
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
-                Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
-                Assert.Equal(t2.OutputResources[1].ItemSpec, t.OutputResources[1].ItemSpec);
-                Assert.Equal(t2.FilesWritten[0].ItemSpec, t.FilesWritten[0].ItemSpec);
-                Assert.Equal(t2.FilesWritten[1].ItemSpec, t.FilesWritten[1].ItemSpec);
+                t2.OutputResources[0].ItemSpec.ShouldBe(createResources.OutputResources[0].ItemSpec);
+                t2.OutputResources[1].ItemSpec.ShouldBe(createResources.OutputResources[1].ItemSpec);
+                t2.FilesWritten[0].ItemSpec.ShouldBe(createResources.FilesWritten[0].ItemSpec);
+                t2.FilesWritten[1].ItemSpec.ShouldBe(createResources.FilesWritten[1].ItemSpec);
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resxFile2) File.Delete(resxFile2);
+                if (null != firstResx) File.Delete(firstResx);
+                if (null != secondResx) File.Delete(secondResx);
                 if (null != cache) File.Delete(cache);
-                if (null != resxFile) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (null != resxFile2) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (null != firstResx) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
+                if (null != secondResx) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
             }
         }
 
@@ -403,7 +413,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -419,7 +429,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
@@ -461,7 +471,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 txtFile = Utilities.WriteTestText(null, null);
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(txtFile) };
                 resourcesFile1 = Path.ChangeExtension(resxFile, ".resources");
@@ -477,7 +487,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(txtFile) };
 
@@ -519,44 +529,54 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         {
             string resxFile = null;
             string resourcesFile = null;
-            string systemDll = Utilities.GetPathToCopiedSystemDLL();
+            string stateFile = Utilities.GetTempFileName(".cache");
+            string localSystemDll = Utilities.GetPathToCopiedSystemDLL();
 
             try
             {
                 resxFile = Utilities.WriteTestResX(true /* uses system type */, null, null);
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
-                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
-                Utilities.ExecuteTask(t);
+                _output.WriteLine("** Running task to create resources.");
 
-                DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+                GenerateResource initialCreator = Utilities.CreateTaskOutOfProc(_output);
+                initialCreator.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                initialCreator.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                initialCreator.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(initialCreator);
 
-                // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
-                t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t2.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t2.StateFile = new TaskItem(t.StateFile);
-                Utilities.ExecuteTask(t2);
-                Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
+                DateTime firstWriteTime = File.GetLastWriteTime(initialCreator.OutputResources[0].ItemSpec);
 
-                // Touch the reference, and repeat, it should now rebuild
+                _output.WriteLine("** Repeat, and it should do nothing as they are up to date");
+
+                GenerateResource incrementalUpToDate = Utilities.CreateTaskOutOfProc(_output);
+                incrementalUpToDate.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                incrementalUpToDate.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                incrementalUpToDate.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(incrementalUpToDate);
+
+                File.GetLastWriteTime(incrementalUpToDate.OutputResources[0].ItemSpec).ShouldBe(firstWriteTime);
+
+                _output.WriteLine("** Touch the reference, and repeat, it should now rebuild");
+
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
-                File.SetLastWriteTime(systemDll, newTime);
-                GenerateResource t3 = Utilities.CreateTaskOutOfProc();
-                t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t3.References = new ITaskItem[] { new TaskItem(systemDll) };
-                t3.StateFile = new TaskItem(t.StateFile);
-                Utilities.ExecuteTask(t3);
-                Assert.True(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
-                resourcesFile = t3.OutputResources[0].ItemSpec;
+                File.SetLastWriteTime(localSystemDll, newTime);
+
+                GenerateResource incrementalOutOfDate = Utilities.CreateTaskOutOfProc(_output);
+                incrementalOutOfDate.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                incrementalOutOfDate.References = new ITaskItem[] { new TaskItem(localSystemDll) };
+                incrementalOutOfDate.StateFile = new TaskItem(stateFile);
+                Utilities.ExecuteTask(incrementalOutOfDate);
+
+                File.GetLastWriteTime(incrementalOutOfDate.OutputResources[0].ItemSpec).ShouldBeGreaterThan(firstWriteTime);
+
+                resourcesFile = incrementalOutOfDate.OutputResources[0].ItemSpec;
             }
             finally
             {
                 if (resxFile != null) File.Delete(resxFile);
                 if (resourcesFile != null) File.Delete(resourcesFile);
-                if (systemDll != null) File.Delete(systemDll);
+                if (stateFile != null) File.Delete(stateFile);
+                if (localSystemDll != null) File.Delete(localSystemDll);
             }
         }
 
@@ -575,7 +595,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 additionalInputs = new ITaskItem[] { new TaskItem(FileUtilities.GetTemporaryFile()), new TaskItem(FileUtilities.GetTemporaryFile()) };
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.AdditionalInputs = additionalInputs;
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
@@ -584,7 +604,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
 
                 // Repeat, and it should do nothing as they are up to date
-                GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t2.AdditionalInputs = additionalInputs;
                 t2.StateFile = new TaskItem(t.StateFile);
@@ -594,7 +614,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Touch one of the additional inputs and repeat, it should now rebuild
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
                 File.SetLastWriteTime(additionalInputs[1].ItemSpec, newTime);
-                GenerateResource t3 = Utilities.CreateTaskOutOfProc();
+                GenerateResource t3 = Utilities.CreateTaskOutOfProc(_output);
                 t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t3.AdditionalInputs = additionalInputs;
                 t3.StateFile = new TaskItem(t.StateFile);
@@ -617,7 +637,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void BasicText2ResX()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
@@ -644,24 +664,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         {
             try
             {
-                string resourcesFile = Utilities.CreateBasicResourcesFile(true);
+                string resourcesFile = Utilities.CreateBasicResourcesFile(true, _output);
 
                 // Step 1: create a resx file directly from the resources, to get a framework generated resx
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
                 Utilities.ExecuteTask(t);
                 Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
                 // Step 2a: create a resources file from the resx
-                GenerateResource t2a = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2a = Utilities.CreateTaskOutOfProc(_output);
                 t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
                 t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
                 Utilities.ExecuteTask(t2a);
                 Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
 
                 // Step 2b: create a resx from the resources
-                GenerateResource t2b = Utilities.CreateTaskOutOfProc();
+                GenerateResource t2b = Utilities.CreateTaskOutOfProc(_output);
                 t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
                 t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
                 File.Delete(t2b.OutputResources[0].ItemSpec);
@@ -694,7 +714,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             string textFile = Utilities.WriteTestText(null, null);
 
             // Round 1, do the Text2Resource
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
 
             Utilities.ExecuteTask(t);
@@ -704,7 +724,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
             // round 2, do the resources2Text from the same file
-            GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+            GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
 
             t2.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             string outputFile = Utilities.GetTempFileName(".txt");
@@ -731,7 +751,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void StronglyTypedResources()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -785,8 +805,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void StronglyTypedResourcesUpToDate()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
-            GenerateResource t2 = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
+            GenerateResource t2 = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -868,7 +888,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 resourcesFile = Utilities.GetTempFileName(".resources");
                 strFile = Path.ChangeExtension(resourcesFile, ".cs"); // STR filename should be generated from output not input filename
@@ -896,7 +916,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // but we'd know if they were updated (this is quicker than sleeping and okay as there's no cache being used)
                 Utilities.MoveBackTimestamp(resxFile, 1);
                 DateTime strTime = Utilities.MoveBackTimestamp(strFile, 1);
-                t = Utilities.CreateTaskOutOfProc();
+                t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -908,7 +928,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 File.Delete(strFile);
 
                 // Repeat. It should recreate the STR class file
-                t = Utilities.CreateTaskOutOfProc();
+                t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -925,7 +945,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Repeat, but specify the filename this time, instead of having it generated from the output resources
                 // It should recreate the STR class file again
-                t = Utilities.CreateTaskOutOfProc();
+                t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.StronglyTypedLanguage = "C#";
@@ -954,7 +974,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
                 txtFile = Utilities.WriteTestText(null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(txtFile) };
@@ -1000,7 +1020,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void StronglyTypedResourcesVB()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             try
             {
                 string textFile = Utilities.WriteTestText(null, null);
@@ -1052,7 +1072,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void StronglyTypedResourcesWithoutNamespaceOrClassOrFilename()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -1103,7 +1123,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceCS()
         {
-            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null);
+            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null, _output);
         }
 
         /// <summary>
@@ -1112,7 +1132,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void STRWithResourcesNamespaceVB()
         {
-            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null);
+            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null, _output);
         }
 
         /// <summary>
@@ -1121,7 +1141,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void STRWithResourcesNamespaceAndSTRNamespaceCS()
         {
-            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace");
+            Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace", _output);
         }
 
         /// <summary>
@@ -1131,12 +1151,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
-            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace");
+            Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
         }
     }
 
     sealed public class TransformationErrors
     {
+        private readonly ITestOutputHelper _output;
+
+        public TransformationErrors(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Text input failures, no name, no '=', 'strings' token, invalid token, invalid escape
         /// </summary>
@@ -1169,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             foreach (string[] test in tests)
             {
-                t = Utilities.CreateTaskOutOfProc();
+                t = Utilities.CreateTaskOutOfProc(_output);
 
                 textFile = Utilities.WriteTestText(null, test[0]);
                 t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1185,7 +1212,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
 
             // text file uses the strings token; since it's only a warning we have to have special asserts
-            t = Utilities.CreateTaskOutOfProc();
+            t = Utilities.CreateTaskOutOfProc(_output);
 
             textFile = Utilities.WriteTestText(null, "[strings]");
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1216,7 +1243,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 // Invalid one
@@ -1269,7 +1296,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 // Invalid one
@@ -1325,7 +1352,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void DuplicateResourceNames()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string textFile = Utilities.WriteTestText(null, "Marley=some guy from Jamaica");
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
@@ -1352,7 +1379,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
             string resxFile = Utilities.WriteTestResX(false, bitmap, null, false);
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
             t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resxFile, ".txt")) };
@@ -1382,7 +1409,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.StateFile = new TaskItem("||invalid filename||");
@@ -1408,7 +1435,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void FailedResourceReader()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             // to cause a failure, we're going to transform a bad .resources file to a .resx
@@ -1440,7 +1467,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void FailedSTRProperty()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             string textFile = Utilities.WriteTestText(null, "object=some string");
@@ -1474,7 +1501,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
                 // Create resx with invalid ref "INVALID"
                 txtFile = Utilities.WriteTestResX(false, null, null, true /*data with invalid type*/);
@@ -1500,6 +1527,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
     sealed public class PropertyHandling
     {
+        private readonly ITestOutputHelper _output;
+
+        public PropertyHandling(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Sources attributes are copied to given OutputResources
         /// </summary>
@@ -1511,7 +1545,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing AttributeForwarding() test");
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string resxFile = Utilities.WriteTestResX(false, null, null);
             ITaskItem i = new TaskItem(resxFile);
@@ -1547,7 +1581,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void AttributeForwardingOnEmptyOutputs()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string resxFile = Utilities.WriteTestResX(false, null, null);
             ITaskItem i = new TaskItem(resxFile);
@@ -1575,7 +1609,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void OutputFilesNotSpecified()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
                 new TaskItem( Utilities.WriteTestResX(false, null, null) ),
@@ -1608,7 +1642,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-windows-failing")]
         public void FilesWrittenSet()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
                 new TaskItem( Utilities.WriteTestResX(false, null, null) ),
@@ -1651,7 +1685,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-windows-failing")]
         public void OutputFilesPartialInputs()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -1719,7 +1753,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -1762,7 +1796,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -1800,6 +1834,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
     sealed public class PropertyErrors
     {
+        private readonly ITestOutputHelper _output;
+
+        public PropertyErrors(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         ///  Empty Sources yields message, success
         /// </summary>
@@ -1811,7 +1852,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing EmptySources() test");
 
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             Utilities.ExecuteTask(t);
             Utilities.AssertLogContainsResource(t, "GenerateResource.NoSources", "");
             if (t.FilesWritten != null)
@@ -1830,7 +1871,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void ReferencesToBadAssemblies()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             string textFile = null;
 
             try
@@ -1867,7 +1908,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -1899,7 +1940,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void StateFileUnwritable()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             try
             {
@@ -1937,7 +1978,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void InputFileExtension()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string newTextFile = Path.ChangeExtension(textFile, ".foo");
@@ -1969,7 +2010,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void OutputFileExtension()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string resxFile = Path.ChangeExtension(textFile, ".foo");
@@ -2000,7 +2041,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         public void SourcesMatchesOutputResources()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             string textFile = Utilities.WriteTestText(null, null);
             string resxFile = Path.ChangeExtension(textFile, ".resources");
@@ -2031,7 +2072,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             string textFile = Utilities.WriteTestText(null, null);
@@ -2070,7 +2111,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 resxFile2 = Utilities.WriteTestResX(false, null, null);
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
                 t.StronglyTypedLanguage = "VisualBasic";
 
@@ -2103,7 +2144,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
                 txtFile = Utilities.WriteTestText(null, null);
@@ -2144,7 +2185,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2178,7 +2219,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2212,7 +2253,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 string resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2249,7 +2290,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 txtFile = Utilities.WriteTestText(null, null);
                 resourcesFile = Path.ChangeExtension(txtFile, ".resources");
                 File.Delete(resourcesFile);
@@ -2290,7 +2331,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
@@ -2312,6 +2353,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
     public class References
     {
+        private readonly ITestOutputHelper _output;
+
+        public References(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         //FIXME: mono: looks for csc.exe
         // https://github.com/Microsoft/msbuild/issues/677
@@ -2459,7 +2507,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Run the GenerateResource task on the above .RESX file, passing in an unused reference
             // to lib1.dll.
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.Sources = new ITaskItem[] { new TaskItem(Path.Combine(ObjectModelHelpers.TempProjectDir, "MyStrings.resx")) };
             t.UseSourcePath = false;
             t.NeverLockTypeAssemblies = false;
@@ -2608,7 +2656,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Run the GenerateResource task on the above .RESX file, passing in an unused reference
             // to lib1.dll.
-            GenerateResource t = Utilities.CreateTaskOutOfProc();
+            GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
             t.Sources = new ITaskItem[] { new TaskItem(Path.Combine(ObjectModelHelpers.TempProjectDir, "MyStrings.resx")) };
             t.UseSourcePath = false;
             t.NeverLockTypeAssemblies = false;
@@ -2640,6 +2688,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
     public class MiscTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public MiscTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void ResgenCommandLineLogging()
         {
@@ -2657,7 +2712,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.UseSourcePath = false;
                 t.NeverLockTypeAssemblies = false;
@@ -2680,7 +2735,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.References = new ITaskItem[] { new TaskItem("baz"), new TaskItem("jazz") };
                 t.UseSourcePath = true;
@@ -2723,7 +2778,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t.References = new ITaskItem[] { new TaskItem("baz"), new TaskItem("jazz") };
                 t.UseSourcePath = true;
@@ -2769,7 +2824,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             try
             {
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile1) };
                 t.OutputResources = new ITaskItem[]
                                     {
@@ -2883,7 +2938,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     File.Delete(resourcesFile);
                 }
 
-                GenerateResource t = Utilities.CreateTaskOutOfProc();
+                GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
                 t.Sources = sources.ToArray();
                 t.OutputResources = outputResources.ToArray();
                 t.StronglyTypedLanguage = null;
@@ -2961,9 +3016,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <summary>
         /// This method creates a GenerateResource task and performs basic setup on it, e.g. BuildEngine
         /// </summary>
-        public static GenerateResource CreateTaskOutOfProc()
+        /// <param name="output"></param>
+        public static GenerateResource CreateTaskOutOfProc(ITestOutputHelper output)
         {
-            GenerateResource t = CreateTask();
+            GenerateResource t = CreateTask(output);
             t.ExecuteAsTool = true;
             t.SdkToolsPath = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest);
 

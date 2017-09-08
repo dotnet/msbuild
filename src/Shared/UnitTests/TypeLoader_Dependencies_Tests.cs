@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
-using Microsoft.Build.SharedUtilities;
+using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

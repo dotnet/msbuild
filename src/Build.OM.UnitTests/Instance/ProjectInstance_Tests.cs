@@ -430,8 +430,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var projBInstance = projBEval.CreateProjectInstance();
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "bItem.cs").Single();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
-            Assert.Equal(ProjectCollection.Escape(projB.FullPath), projBInstanceItem.GetMetadataValue(CapturedMetadataName));
-            Assert.Equal(ProjectCollection.Escape(projA.FullPath), projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
 
             // Although GetMetadataValue returns non-null, GetMetadata returns null...
             Assert.Null(projAInstanceItem.GetMetadata(CapturedMetadataName));
@@ -472,8 +472,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var projBInstance = projBEval.CreateProjectInstance();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("CompileB", "aItem.cs").Single();
-            Assert.Equal(ProjectCollection.Escape(projA.FullPath), projAInstanceItem.GetMetadataValue(CapturedMetadataName));
-            Assert.Equal(ProjectCollection.Escape(projB.FullPath), projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
 
             Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
             Assert.False(projAInstanceItem.Metadata.Any());

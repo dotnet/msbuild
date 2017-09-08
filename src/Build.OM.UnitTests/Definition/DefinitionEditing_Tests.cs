@@ -704,8 +704,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemGroup>
 </Project>"),
-                   paths[0],
-                    paths[1]);
+                   ProjectCollection.Escape(paths[0]),
+                    ProjectCollection.Escape(paths[1]));
 
                 Helpers.VerifyAssertProjectContent(expected, project.Xml);
             }
@@ -821,8 +821,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemGroup>
 </Project>"),
-                    paths[0],
-                    paths[1]);
+                    ProjectCollection.Escape(paths[0]),
+                    ProjectCollection.Escape(paths[1]));
 
                 Helpers.VerifyAssertProjectContent(expected, project.Xml);
             }
@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     <i Include=""{0}"" />
   </ItemGroup>
 </Project>"),
-                    Path.Combine(directory, "i2.xxx"));
+                    ProjectCollection.Escape(Path.Combine(directory, "i2.xxx")));
 
                 Helpers.VerifyAssertProjectContent(expected, project.Xml);
             }
@@ -1419,7 +1419,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemGroup>
 </Project>"),
-                    Path.Combine(directory, "i2.xxx"));
+                    ProjectCollection.Escape(Path.Combine(directory, "i2.xxx")));
 
                 Helpers.VerifyAssertProjectContent(expected, project.Xml);
             }

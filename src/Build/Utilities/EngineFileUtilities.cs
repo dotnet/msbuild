@@ -10,12 +10,32 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Internal
 {
     internal class EngineFileUtilities
     {
-        /// <summary>
+        // Regexes for wildcard filespecs that should not get expanded
+        // By default all wildcards are expanded.
+        private static List<Regex> s_lazyWildCardExpansionRegexes;
+
+        static EngineFileUtilities()
+        {
+            if (Traits.Instance.UseLazyWildCardEvaluation)
+            {
+                CaptureLazyWildcardRegexes();
+            }
+        }
+
+        // used by test to reset regexes
+        internal static void CaptureLazyWildcardRegexes()
+        {
+            s_lazyWildCardExpansionRegexes = PopulateRegexFromEnvironment();
+        }
+
+
+    /// <summary>
         /// Used for the purposes of evaluating an item specification. Given a filespec that may include wildcard characters * and
         /// ?, we translate it into an actual list of files. If the input filespec doesn't contain any wildcard characters, and it
         /// doesn't appear to point to an actual file on disk, then we just give back the input string as an array of length one,
@@ -27,15 +47,17 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
+        /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <returns>Array of file paths, unescaped.</returns>
         internal static string[] GetFileListUnescaped
             (
             string directoryEscaped,
-            string filespecEscaped
+            string filespecEscaped,
+            bool forceEvaluate = false
             )
 
         {
-            return GetFileList(directoryEscaped, filespecEscaped, false /* returnEscaped */);
+            return GetFileList(directoryEscaped, filespecEscaped, false /* returnEscaped */, forceEvaluate);
         }
 
         /// <summary>
@@ -51,15 +73,17 @@ namespace Microsoft.Build.Internal
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <param name="excludeSpecsEscaped">Filespecs to exclude, escaped.</param>
+        /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <returns>Array of file paths, escaped.</returns>
         internal static string[] GetFileListEscaped
             (
             string directoryEscaped,
             string filespecEscaped,
-            IEnumerable<string> excludeSpecsEscaped = null
+            IEnumerable<string> excludeSpecsEscaped = null,
+            bool forceEvaluate = false
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, excludeSpecsEscaped);
+            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, forceEvaluate, excludeSpecsEscaped);
         }
 
         private static bool FilespecHasWildcards(string filespecEscaped)
@@ -99,6 +123,7 @@ namespace Microsoft.Build.Internal
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <param name="returnEscaped"><code>true</code> to return escaped specs.</param>
+        /// <param name="forceEvaluateWildCards">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <param name="excludeSpecsEscaped">The exclude specification, escaped.</param>
         /// <returns>Array of file paths.</returns>
         private static string[] GetFileList
@@ -106,6 +131,7 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
+            bool forceEvaluateWildCards,
             IEnumerable<string> excludeSpecsEscaped = null
             )
         {
@@ -118,8 +144,19 @@ namespace Microsoft.Build.Internal
 
             string[] fileList;
 
-            if (FilespecHasWildcards(filespecEscaped))
+            if (!FilespecHasWildcards(filespecEscaped) ||
+                FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards))
             {
+                // Just return the original string.
+                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
+            }
+            else
+            {
+                if (Traits.Instance.LogExpandedWildcards)
+                {
+                    ErrorUtilities.DebugTraceMessage("Expanding wildcard for file spec {0}", filespecEscaped);
+                }
+
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
@@ -152,13 +189,13 @@ namespace Microsoft.Build.Internal
                     }
                 }
             }
-            else
-            {
-                // Just return the original string.
-                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
-            }
 
             return fileList;
+        }
+
+        private static bool FilespecMatchesLazyWildcard(string filespecEscaped, bool forceEvaluateWildCards)
+        {
+            return Traits.Instance.UseLazyWildCardEvaluation && !forceEvaluateWildCards && MatchesLazyWildcard(filespecEscaped);
         }
 
         private static bool IsValidExclude(string exclude)
@@ -171,6 +208,36 @@ namespace Microsoft.Build.Internal
             // unescape the path fragments to unfold potentially escaped wildcard chars)
             var hasBothWildcardsAndEscapedWildcards = FileMatcher.HasWildcards(exclude) && EscapingUtilities.ContainsEscapedWildcards(exclude);
             return !hasBothWildcardsAndEscapedWildcards;
+        }
+
+        private static List<Regex> PopulateRegexFromEnvironment()
+        {
+            string wildCards = Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes");
+            if (string.IsNullOrEmpty(wildCards))
+            {
+                return new List<Regex>(0);
+            }
+            else
+            {
+                List<Regex> regexes = new List<Regex>();
+                foreach (string regex in wildCards.Split(';'))
+                {
+                    Regex item = new Regex(regex, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                    // trigger a match first?
+                    item.IsMatch("foo");
+                    regexes.Add(item);
+                }
+
+                return regexes;
+            }
+        }
+
+        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        private static readonly Lazy<ConcurrentDictionary<string, bool>> _regexMatchCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase));
+
+        private static bool MatchesLazyWildcard(string fileSpec)
+        {
+            return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes.Any(regex => regex.IsMatch(fileSpec)));
         }
 
         /// Returns a Func that will return true IFF its argument matches any of the specified filespecs

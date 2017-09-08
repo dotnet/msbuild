@@ -7,9 +7,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
-#if DEBUG
-using Microsoft.Build.Framework;
-#endif
 using System.Reflection;
 using System.Text;
 

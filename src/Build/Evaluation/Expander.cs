@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
@@ -113,6 +114,10 @@ namespace Microsoft.Build.Evaluation
         where P : class, IProperty
         where I : class, IItem
     {
+        private static readonly char[] s_singleQuoteChar = { '\'' };
+        private static readonly char[] s_backtickChar = { '`' };
+        private static readonly char[] s_doubleQuoteChar = { '"' };
+
         /// <summary>
         /// Those characters which indicate that an expression may contain expandable
         /// expressions
@@ -338,8 +343,11 @@ namespace Microsoft.Build.Evaluation
 
             IList<string> splits = ExpressionShredder.SplitSemiColonSeparatedList(expression);
 
-            foreach (string split in splits)
+            // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
+            var splitsCount = splits.Count;
+            for (var i = 0; i < splitsCount; i++)
             {
+                var split = splits[i];
                 bool isTransformExpression;
                 IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 
@@ -425,7 +433,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions options,
             bool includeNullEntries,
             out bool isTransformExpression,
-            out IList<Tuple<string, I>> itemsFromCapture)
+            out List<Tuple<string, I>> itemsFromCapture)
         {
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
@@ -578,15 +586,15 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
                     {
-                        arguments.Add(argValue.Trim('\''));
+                        arguments.Add(argValue.Trim(s_singleQuoteChar));
                     }
                     else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
                     {
-                        arguments.Add(argValue.Trim('`'));
+                        arguments.Add(argValue.Trim(s_backtickChar));
                     }
                     else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
                     {
-                        arguments.Add(argValue.Trim('"'));
+                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
                     }
                     else
                     {
@@ -637,7 +645,7 @@ namespace Microsoft.Build.Evaluation
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
                                 }
 
-                                argumentBuilder.Append(argumentsString.Substring(nestedPropertyStart, (n - nestedPropertyStart) + 1));
+                                argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
                             }
                             else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                             {
@@ -651,7 +659,7 @@ namespace Microsoft.Build.Evaluation
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedQuote"));
                                 }
 
-                                argumentBuilder.Append(argumentsString.Substring(quoteStart, (n - quoteStart) + 1));
+                                argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
                             }
                             else if (argumentsContent[n] == ',')
                             {
@@ -1689,7 +1697,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                IList<Tuple<string, S>> itemsFromCapture;
+                List<Tuple<string, S>> itemsFromCapture;
                 brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
 
                 if (brokeEarlyNonEmpty)
@@ -1755,7 +1763,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out IList<Tuple<string, S>> itemsFromCapture
+                out List<Tuple<string, S>> itemsFromCapture
                 )
                 where S : class, IItem
             {
@@ -1940,7 +1948,7 @@ namespace Microsoft.Build.Evaluation
                 )
                 where S : class, IItem
             {
-                IList<Tuple<string, S>> itemsFromCapture;
+                List<Tuple<string, S>> itemsFromCapture;
                 bool throwaway;
                 var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
 
@@ -1950,8 +1958,16 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
-                builder.Append(string.Join(";", itemsFromCapture.Select(i => i.Item1)));
+                foreach (var item in itemsFromCapture)
+                {
+                    builder.Append(item.Item1);
+                    builder.Append(';');
+                }
 
+                // Remove trailing separator if we added one
+                if (itemsFromCapture.Count > 0)
+                    builder.Length--;
+                
                 return false;
             }
 
@@ -2037,9 +2053,24 @@ namespace Microsoft.Build.Evaluation
                 internal static IEnumerable<Tuple<string, S>> GetItemTupleEnumerator(IEnumerable<S> itemsOfType)
                 {
                     // iterate over the items, and yield out items in the tuple format
-                    foreach (S item in itemsOfType)
+                    foreach (var item in itemsOfType)
                     {
-                        yield return new Tuple<string, S>(item.EvaluatedIncludeEscaped, item);
+                        if (Traits.Instance.UseLazyWildCardEvaluation)
+                        {
+                            foreach (
+                                var resultantItem in
+                                EngineFileUtilities.GetFileListEscaped(
+                                    item.ProjectDirectory,
+                                    item.EvaluatedIncludeEscaped,
+                                    forceEvaluate: true))
+                            {
+                                yield return new Tuple<string, S>(resultantItem, item);
+                            }
+                        }
+                        else
+                        {
+                            yield return new Tuple<string, S>(item.EvaluatedIncludeEscaped, item);
+                        }
                     }
                 }
 
@@ -2964,7 +2995,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex);
+                    var functionReceiver = expressionRoot.Substring(0, rootEndIndex).Trim();
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3523,7 +3554,7 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFunction.Substring(argumentsEndIndex + 1);
+                        remainder = expressionFunction.Substring(argumentsEndIndex + 1).Trim();
                     }
                 }
                 else
@@ -3543,7 +3574,7 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunction.Substring(nextMethodIndex);
+                        remainder = expressionFunction.Substring(nextMethodIndex).Trim();
                     }
 
                     string netPropertyName = expressionFunction.Substring(methodStartIndex, methodLength).Trim();

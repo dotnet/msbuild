@@ -4,13 +4,13 @@
     "microsoft.xunit.netcore.extensions": "1.0.0-prerelease-00629-09",
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
-    "xunit.assert": "2.1.0"
+    "xunit.assert": "2.1.0",
+    "Shouldly": "3.0.0-beta0003"
   },
   "frameworks": {
     "net46": {
-      "Microsoft.Net.Compilers": "2.0.0-beta3",
-      "System.Threading.Tasks.Dataflow": "4.5.24.0",
-      "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
+      "Microsoft.Net.Compilers": "2.3.1",
+      "System.Threading.Tasks.Dataflow": "4.5.24.0"
     },
     "netstandard1.3": {
       "dependencies": {

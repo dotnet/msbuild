@@ -51,6 +51,11 @@ namespace Microsoft.Build.Shared
         public int Length
         {
             get { return ((_borrowedBuilder == null) ? 0 : _borrowedBuilder.Length); }
+            set
+            {
+                LazyPrepare();
+                _borrowedBuilder.Length = value;
+            }
         }
 
         /// <summary>
@@ -295,9 +300,6 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal static void Release(StringBuilder returningBuilder)
             {
-                // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
-                returningBuilder.Clear(); // This is free: it just sets length to zero internally
-
                 // It's possible for someone to cause the builder to
                 // enlarge to such an extent that this static field
                 // would be a leak. To avoid that, only accept
@@ -309,6 +311,9 @@ namespace Microsoft.Build.Shared
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity < MaxBuilderSize)
                 {
+                    // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
+                    returningBuilder.Clear(); // Clear before pooling
+
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
 #if DEBUG
                     Interlocked.Increment(ref s_accepts);

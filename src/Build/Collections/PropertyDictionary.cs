@@ -51,13 +51,14 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer whose start and end indexes we can manipulate as necessary.
         /// </summary>
-        private MSBuildNameIgnoreCaseComparer _comparer = MSBuildNameIgnoreCaseComparer.Mutable;
+        private MSBuildNameIgnoreCaseComparer _comparer;
 
         /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public PropertyDictionary()
         {
+            _comparer = MSBuildNameIgnoreCaseComparer.Mutable;
             _properties = new RetrievableEntryHashSet<T>(_comparer);
         }
 
@@ -66,6 +67,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal PropertyDictionary(int capacity)
         {
+            _comparer = MSBuildNameIgnoreCaseComparer.Mutable;
             _properties = new RetrievableEntryHashSet<T>(capacity, _comparer);
         }
 
@@ -79,6 +81,15 @@ namespace Microsoft.Build.Collections
             {
                 Set(element);
             }
+        }
+
+        /// <summary>
+        /// Creates empty dictionary, specifying a comparer
+        /// </summary>
+        internal PropertyDictionary(MSBuildNameIgnoreCaseComparer comparer)
+        {
+            _comparer = comparer;
+            _properties = new RetrievableEntryHashSet<T>(_comparer);
         }
 
         /// <summary>

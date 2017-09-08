@@ -7,6 +7,7 @@ using System.Collections;
 using Microsoft.Build.Utilities;
 using CanonicalError = Microsoft.Build.Shared.CanonicalError;
 using System.Text.RegularExpressions;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -163,7 +164,7 @@ namespace Microsoft.Build.UnitTests
 
             CanonicalError.Parts parts = CanonicalError.Parse(error);
 
-            Helpers.VerifyAssertLineByLine(message, parts.text);
+            parts.text.ShouldBe(message);
         }
 
         [Fact]
@@ -308,16 +309,16 @@ namespace Microsoft.Build.UnitTests
             CanonicalError.Parts errorParts = CanonicalError.Parse(
                 "err.cpp:6:3: error: use of undeclared identifier 'force_an_error'");
 
-            Assert.NotNull(errorParts);
-            AssertEqual(errorParts.origin, "err.cpp");
-            AssertEqual(errorParts.category, CanonicalError.Parts.Category.Error);
-            Assert.StartsWith("G", errorParts.code);
-            AssertEqual(errorParts.code.Length, 9);
-            AssertEqual(errorParts.text, "use of undeclared identifier 'force_an_error'");
-            AssertEqual(errorParts.line, 6);
-            AssertEqual(errorParts.column, 3);
-            AssertEqual(errorParts.endLine, CanonicalError.Parts.numberNotSpecified);
-            AssertEqual(errorParts.endColumn, CanonicalError.Parts.numberNotSpecified);
+            errorParts.ShouldNotBeNull();
+            errorParts.origin.ShouldBe("err.cpp");
+            errorParts.category.ShouldBe(CanonicalError.Parts.Category.Error);
+            errorParts.code.ShouldStartWith("G");
+            errorParts.code.Length.ShouldBe(9);
+            errorParts.text.ShouldBe("use of undeclared identifier 'force_an_error'");
+            errorParts.line.ShouldBe(6);
+            errorParts.column.ShouldBe(3);
+            errorParts.endLine.ShouldBe(CanonicalError.Parts.numberNotSpecified);
+            errorParts.endColumn.ShouldBe(CanonicalError.Parts.numberNotSpecified);
         }
 
         [Fact]
@@ -335,67 +336,35 @@ namespace Microsoft.Build.UnitTests
         }
 
         #region Support functions.
-        private static void AssertEqual(string str1, string str2)
-        {
-            if (str1 != str2)
-            {
-                str1 = null == str1 ? "{null}" : str1;
-                str2 = null == str2 ? "{null}" : str2;
-
-                string message = "Regression: string compare '" + str1 + "'!='" + str2 + "'";
-
-                Assert.Equal(str1, str2);
-            }
-        }
-
-        private static void AssertEqual(int int1, int int2)
-        {
-            if (int1 != int2)
-            {
-                string message = "Regression: int compare '" + int1.ToString() + "'!='" + int2.ToString() + "'";
-
-                Assert.Equal(int1, int2);
-            }
-        }
-
-        private static void AssertEqual(CanonicalError.Parts.Category cat1, CanonicalError.Parts.Category cat2)
-        {
-            if (cat1 != cat2)
-            {
-                string message = "Regression: category compare '" + cat1.ToString() + "'!='" + cat2.ToString() + "'";
-
-                Assert.Equal(cat1, cat2);
-            }
-        }
 
         private static void ValidateToolError(string message, string tool, CanonicalError.Parts.Category severity, string code, string text)
         {
             CanonicalError.Parts errorParts = CanonicalError.Parse(message);
 
-            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpreted."
-            AssertEqual(errorParts.origin, tool);
-            AssertEqual(errorParts.category, severity);
-            AssertEqual(errorParts.code, code);
-            AssertEqual(errorParts.text, text);
-            AssertEqual(errorParts.line, CanonicalError.Parts.numberNotSpecified);
-            AssertEqual(errorParts.column, CanonicalError.Parts.numberNotSpecified);
-            AssertEqual(errorParts.endLine, CanonicalError.Parts.numberNotSpecified);
-            AssertEqual(errorParts.endColumn, CanonicalError.Parts.numberNotSpecified);
+            errorParts.ShouldNotBeNull(); // "The message '" + message + "' could not be interpreted."
+            errorParts.origin.ShouldBe(tool);
+            errorParts.category.ShouldBe(severity);
+            errorParts.code.ShouldBe(code);
+            errorParts.text.ShouldBe(text);
+            errorParts.line.ShouldBe(CanonicalError.Parts.numberNotSpecified);
+            errorParts.column.ShouldBe(CanonicalError.Parts.numberNotSpecified);
+            errorParts.endLine.ShouldBe(CanonicalError.Parts.numberNotSpecified);
+            errorParts.endColumn.ShouldBe(CanonicalError.Parts.numberNotSpecified);
         }
 
         private static void ValidateFileNameMultiLineColumnError(string message, string filename, int line, int column, int endLine, int endColumn, CanonicalError.Parts.Category severity, string code, string text)
         {
             CanonicalError.Parts errorParts = CanonicalError.Parse(message);
 
-            Assert.NotNull(errorParts); // "The message '" + message + "' could not be interpreted."
-            AssertEqual(errorParts.origin, filename);
-            AssertEqual(errorParts.category, severity);
-            AssertEqual(errorParts.code, code);
-            AssertEqual(errorParts.text, text);
-            AssertEqual(errorParts.line, line);
-            AssertEqual(errorParts.column, column);
-            AssertEqual(errorParts.endLine, endLine);
-            AssertEqual(errorParts.endColumn, endColumn);
+            errorParts.ShouldNotBeNull(); // "The message '" + message + "' could not be interpreted."
+            errorParts.origin.ShouldBe(filename);
+            errorParts.category.ShouldBe(severity);
+            errorParts.code.ShouldBe(code);
+            errorParts.text.ShouldBe(text);
+            errorParts.line.ShouldBe(line);
+            errorParts.column.ShouldBe(column);
+            errorParts.endLine.ShouldBe(endLine);
+            errorParts.endColumn.ShouldBe(endColumn);
         }
 
         private static void ValidateFileNameLineColumnError(string message, string filename, int line, int column, CanonicalError.Parts.Category severity, string code, string text)
@@ -417,7 +386,7 @@ namespace Microsoft.Build.UnitTests
         {
             CanonicalError.Parts errorParts = CanonicalError.Parse(message);
 
-            Assert.Null(errorParts); // "The message '" + message + "' is an error/warning message"
+            errorParts.ShouldBeNull(); // "The message '" + message + "' is an error/warning message"
         }
     }
     #endregion

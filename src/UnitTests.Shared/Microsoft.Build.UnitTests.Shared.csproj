@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{E1ADB824-2B34-4920-953F-746DFD6DB3C1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Build.UnitTests.Shared</RootNamespace>
+    <AssemblyName>Microsoft.Build.UnitTests.Shared</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DoNotLocalizeProject>true</DoNotLocalizeProject>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <Link>AssemblyUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs"  Condition="'$(NetCoreBuild)' == 'true'">
+      <Link>SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>ErrorUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EscapingUtilities.cs">
+      <Link>EscapingUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ExceptionHandling.cs">
+      <Link>ExceptionHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <Link>FileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
+      <Link>FileUtilitiesRegex.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\InternalErrorException.cs">
+      <Link>InternalErrorException.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <Link>NativeMethodsShared.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\OpportunisticIntern.cs">
+      <Link>OpportunisticIntern.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs">
+      <Link>ResourceUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\StringBuilderCache.cs">
+      <Link>StringBuilderCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>Traits.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
+    <Compile Include="AssemblyResources.cs" />
+    <Compile Include="RunnerUtilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="..\dir.targets" />
+</Project>
