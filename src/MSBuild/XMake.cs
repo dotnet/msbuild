@@ -3419,6 +3419,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(AssemblyResources.GetString("HelpMessage_27_DebuggerSwitch"));
             }
 #endif
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
