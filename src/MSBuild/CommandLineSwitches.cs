@@ -103,6 +103,7 @@ namespace Microsoft.Build.CommandLine
             WarningsAsErrors,
             WarningsAsMessages,
             BinaryLogger,
+            Restore,
             NumberOfParameterizedSwitches
         }
 
@@ -281,6 +282,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

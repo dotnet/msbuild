@@ -46,6 +46,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
 
+
+        /// <summary>
+        /// The name of the target to run when a user specifies the /restore command-line argument.
+        /// </summary>
+        internal const string RestoreTargetName = "Restore";
         /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>

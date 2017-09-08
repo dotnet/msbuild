@@ -23,6 +23,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -551,6 +552,7 @@ namespace Microsoft.Build.CommandLine
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
+                bool enableRestore = Traits.Instance.EnableRestoreFirst;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -577,6 +579,7 @@ namespace Microsoft.Build.CommandLine
                         ref detailedSummary,
                         ref warningsAsErrors,
                         ref warningsAsMessages,
+                        ref enableRestore,
                         recursing: false
                         ))
                 {
@@ -613,7 +616,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -908,7 +911,8 @@ namespace Microsoft.Build.CommandLine
             bool debugger,
             bool detailedSummary,
             ISet<string> warningsAsErrors,
-            ISet<string> warningsAsMessages
+            ISet<string> warningsAsMessages,
+            bool enableRestore
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -996,14 +1000,14 @@ namespace Microsoft.Build.CommandLine
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
                 projectCollection = new ProjectCollection
-                        (
-                        globalProperties,
-                        loggers,
-                        null,
-                        toolsetDefinitionLocations,
-                        cpuCount,
-                        onlyLogCriticalEvents
-                        );
+                (
+                    globalProperties,
+                    loggers,
+                    null,
+                    toolsetDefinitionLocations,
+                    cpuCount,
+                    onlyLogCriticalEvents
+                );
 
                 if (debugger)
                 {
@@ -1106,19 +1110,17 @@ namespace Microsoft.Build.CommandLine
                     {
                         try
                         {
-                            lock (s_buildLock)
+                            if (enableRestore)
                             {
-                                s_activeBuild = buildManager.PendBuildRequest(request);
+                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, globalProperties);
 
-                                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
-                                // That's so the build does not appear to have completed successfully.
-                                if (s_receivedCancel == 1)
+                                if (results.OverallResult != BuildResultCode.Success)
                                 {
-                                    buildManager.CancelAllSubmissions();
+                                    return false;
                                 }
                             }
 
-                            results = s_activeBuild.Execute();
+                            results = ExecuteBuild(buildManager, request);
                         }
                         finally
                         {
@@ -1197,6 +1199,47 @@ namespace Microsoft.Build.CommandLine
 
             return success;
         }
+
+        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        {
+            lock (s_buildLock)
+            {
+                s_activeBuild = buildManager.PendBuildRequest(request);
+
+                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
+                // That's so the build does not appear to have completed successfully.
+                if (s_receivedCancel == 1)
+                {
+                    buildManager.CancelAllSubmissions();
+                }
+            }
+
+            return s_activeBuild.Execute();
+        }
+
+        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        {
+            // Make a copy of the global properties
+            Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
+
+            // Add/set a property with a random value to ensure that restore happens under a different evaluation context
+            // If the evaluation context is not different, then projects won't be re-evaluated after restore
+            // The initializer syntax can't be used just in case a user set this property to a value
+            restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
+
+            // Create a new request with a Restore target only and specify the ClearProjectRootElementCacheAfterBuild flag to ensure the projects will
+            // be reloaded from disk for subsequent builds
+            BuildRequestData restoreRequest = new BuildRequestData(
+                projectFile,
+                restoreGlobalProperties,
+                toolsVersion,
+                targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
+                hostServices: null,
+                flags: BuildRequestDataFlags.ClearProjectRootElementCacheAfterBuild);
+
+            return ExecuteBuild(buildManager, restoreRequest);
+        }
+
 #if (!STANDALONEBUILD)
         /// <summary>
         /// Initializes the build engine, and starts the project build.
@@ -1826,6 +1869,7 @@ namespace Microsoft.Build.CommandLine
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
+            ref bool enableRestore,
             bool recursing
         )
         {
@@ -1930,6 +1974,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
+                                                               ref enableRestore,
                                                                recursing: true
                                                              );
                         }
@@ -1966,6 +2011,11 @@ namespace Microsoft.Build.CommandLine
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
 
                     warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Restore))
+                    {
+                        enableRestore = ProcessRestoreSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Restore]);
+                    }
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2134,6 +2184,29 @@ namespace Microsoft.Build.CommandLine
             }
 
             return warningsAsMessages;
+        }
+
+        internal static bool ProcessRestoreSwitch(string[] parameters)
+        {
+            bool enableRestore = true;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    enableRestore = bool.Parse(parameters[parameters.Length - 1]);
+                }
+                catch (FormatException ex)
+                {
+                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (ArgumentNullException ex)
+                {
+                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return enableRestore;
         }
 
         /// <summary>
@@ -3346,6 +3419,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(AssemblyResources.GetString("HelpMessage_27_DebuggerSwitch"));
             }
 #endif
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

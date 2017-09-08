@@ -1124,7 +1124,8 @@ namespace Microsoft.Build.UnitTests
                                         false,
                                         false, 
                                         warningsAsErrors: null,
-                                        warningsAsMessages: null);
+                                        warningsAsMessages: null,
+                                        enableRestore: false);
                 }
                 finally
                 {
