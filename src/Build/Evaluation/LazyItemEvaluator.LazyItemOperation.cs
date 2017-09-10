@@ -46,9 +46,12 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var items = SelectItems(listBuilder, globsToIgnore).ToList();
-                MutateItems(items);
-                SaveItems(items, listBuilder);
+                using (_lazyEvaluator._evaluationPerformanceCounter.TrackElement(_itemElement))
+                {
+                    var items = SelectItems(listBuilder, globsToIgnore).ToList();
+                    MutateItems(items);
+                    SaveItems(items, listBuilder);
+                }
             }
 
             /// <summary>
