@@ -42,9 +42,7 @@
       <ShimTargets Include="Workflow.Targets" />
       <ShimTargets Include="Workflow.VisualBasic.Targets" />
 
-      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.props" />
-      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.targets" />
-      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.dll" />
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 

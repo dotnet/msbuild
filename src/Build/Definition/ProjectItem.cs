@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -508,11 +509,33 @@ namespace Microsoft.Build.Evaluation
         /// Updates the evaluated project, but does not affect anything else in the project until reevaluation. For example,
         /// if a piece of metadata named "m" is added on item of type "i", it does not affect "j" which is evaluated from "@(j->'%(m)')" until reevaluation.
         /// Also if the unevaluated value of "m" is set to something that is modified by evaluation, such as "$(p)", the evaluated value will be set to literally "$(p)" until reevaluation.
-        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state.
+        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation.
         /// Returns the new or existing metadatum.
         /// </summary>
         /// <remarks>Unevaluated value is assumed to be escaped as necessary</remarks>
         public ProjectMetadata SetMetadataValue(string name, string unevaluatedValue)
+        {
+            return SetMetadataOperation(name, unevaluatedValue, propagateMetadataToSiblingItems: false);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="SetMetadataValue(string,string)"/>. Adds the option of not splitting the item element and thus affecting all sibling items.
+        /// Sibling items are defined as all ProjectItem instances that were created from the same item element.
+        /// 
+        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation
+        /// </summary>
+        /// /// <param name="name">Metadata name</param>
+        /// <param name="unevaluatedValue">Metadata value</param>
+        /// <param name="propagateMetadataToSiblingItems">
+        /// If true, adds direct metadata to the <see cref="ProjectItemElement"/> from which this <see cref="ProjectItem"/> originated. The intent is to affect all other sibling items.
+        /// </param>
+        /// <returns>Returns the new or existing metadatum.</returns>
+        public ProjectMetadata SetMetadataValue(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
+        {
+            return SetMetadataOperation(name, unevaluatedValue, propagateMetadataToSiblingItems: propagateMetadataToSiblingItems);
+        }
+
+        private ProjectMetadata SetMetadataOperation(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
         {
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
 
@@ -521,30 +544,42 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null, "CannotModifyReservedItemMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
 
-            _project.SplitItemElementIfNecessary(_xml);
+            if (!propagateMetadataToSiblingItems)
+            {
+                _project.SplitItemElementIfNecessary(_xml);
+            }
 
             ProjectMetadata metadatum;
 
-            if (_directMetadata != null)
+            if (_directMetadata != null && _directMetadata.Contains(name))
             {
                 metadatum = _directMetadata[name];
+                metadatum.UnevaluatedValue = unevaluatedValue;
+            }
+            else
+            {
+                ProjectMetadataElement metadatumXml = _xml.AddMetadata(name, unevaluatedValue);
 
-                if (metadatum != null)
-                {
-                    metadatum.UnevaluatedValue = unevaluatedValue;
-                    return metadatum;
-                }
+                string evaluatedValueEscaped = _project.ExpandMetadataValueBestEffortLeaveEscaped(this, unevaluatedValue, metadatumXml.Location);
+
+                metadatum = new ProjectMetadata(this, metadatumXml, evaluatedValueEscaped, null /* predecessor unknown */);
             }
 
-            ProjectMetadataElement metadatumXml = _xml.AddMetadata(name, unevaluatedValue);
+            if (!propagateMetadataToSiblingItems)
+            {
+                _directMetadata = _directMetadata ?? new PropertyDictionary<ProjectMetadata>();
+                _directMetadata.Set(metadatum);
+            }
+            else
+            {
+                var siblingItems = _project.Items.Where(i => i._xml == _xml);
 
-            _directMetadata = _directMetadata ?? new PropertyDictionary<ProjectMetadata>();
-
-            string evaluatedValueEscaped = _project.ExpandMetadataValueBestEffortLeaveEscaped(this, unevaluatedValue, metadatumXml.Location);
-
-            metadatum = new ProjectMetadata(this, metadatumXml, evaluatedValueEscaped, null /* predecessor unknown */);
-
-            _directMetadata.Set(metadatum);
+                foreach (var siblingItem in siblingItems)
+                {
+                    siblingItem._directMetadata = siblingItem._directMetadata ?? new PropertyDictionary<ProjectMetadata>();
+                    siblingItem._directMetadata.Set(metadatum.DeepClone());
+                }
+            }
 
             return metadatum;
         }
