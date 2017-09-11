@@ -517,8 +517,20 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!--ResourceAssembly-->
       <_ResourceFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
       <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
+      
+      <!-- These resource items are in folders with names which correspond to the locale.  Here, set the DestinationSubDirectory to the
+           folder name so that it will be copied to the right target path and so conflict resolution won't think there are conflicts
+           between satellite assemblies in different languages. 
+           
+           This is done in two steps because if it was done all at once, MSBuild would try te evaluate the metadata even if there weren't
+           any items, which would result in an error trying to call Directory.GetParent() without any arguments. -->
       <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
-      <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />
+      <_ResourceCopyLocalItems Update="@(_ResourceCopyLocalItems)" Condition="'@(_ResourceCopyLocalItems)' != ''">
+        <DestinationSubDirectory>$([System.IO.Directory]::GetParent(%(ResolvedPath)).get_Name())\</DestinationSubDirectory>
+      </_ResourceCopyLocalItems>
+      <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)">
+        <DestinationSubDirectory>%(_ResourceCopyLocalItems.DestinationSubDirectory)</DestinationSubDirectory>
+      </ResourceCopyLocalItems>
 
       <!-- ALL -->
       <_AllCopyLocalItems Include="@(_NativeCopyLocalItems);@(_RuntimeCopyLocalItems);@(_ResourceCopyLocalItems)" />
@@ -548,10 +560,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Add the copy local items -->
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" Exclude="@(ResourceCopyLocalItems)" />
-      <ReferenceCopyLocalPaths Include="@(ResourceCopyLocalItems)" Condition="'@(ResourceCopyLocalItems)' != ''">
-        <DestinationSubDirectory>$([System.IO.Directory]::GetParent(%(ResourceCopyLocalItems.FullPath)).get_Name())\</DestinationSubDirectory>
-      </ReferenceCopyLocalPaths>
+      <ReferenceCopyLocalPaths Include="@(AllCopyLocalItems)" />
     </ItemGroup>
 
   </Target>

@@ -336,6 +336,53 @@ public static class Program
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_publishes_package_satellites_correctly(bool crossTarget)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AppUsingPackageWithSatellites",
+                TargetFrameworks = "netcoreapp2.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            if (crossTarget)
+            {
+                testProject.Name += "_cross";
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.fr", "2.2.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core.pt", "2.2.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    if (crossTarget)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute("/v:normal", $"/p:TargetFramework={testProject.TargetFrameworks}")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                ;
+
+            var outputDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().NotHaveFile("Humanizer.resources.dll");
+            outputDirectory.Should().HaveFile(@"fr\Humanizer.resources.dll");
+        }
+
         [Fact]
         public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
         {

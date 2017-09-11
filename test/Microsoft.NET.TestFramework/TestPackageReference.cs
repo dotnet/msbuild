@@ -11,6 +11,11 @@ namespace Microsoft.NET.TestFramework
 {
     public class TestPackageReference
     {
+        public TestPackageReference(string id, string version)
+            : this(id, version, null)
+        {
+        }
+
         public TestPackageReference(string id, string version, string nupkgPath)
         {
             ID = id;

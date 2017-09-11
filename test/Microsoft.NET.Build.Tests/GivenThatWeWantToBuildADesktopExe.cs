@@ -538,25 +538,34 @@ namespace DefaultReferences
         [InlineData(false)]
         public void It_places_package_satellites_correctly(bool crossTarget)
         {
-            var testAsset = _testAssetsManager
-              .CopyTestAsset(
-                  "DesktopUsingPackageWithSatellites", 
-                  identifier: crossTarget ? "_cross" : "")
-              .WithSource();
+            var testProject = new TestProject()
+            {
+                Name = "DesktopUsingPackageWithSatellites",
+                TargetFrameworks = "net46",
+                IsSdkProject = true,
+                IsExe = true
+            };
 
             if (crossTarget)
             {
-                 testAsset = testAsset.WithProjectChanges(project =>
-                 {
-                     var ns = project.Root.Name.Namespace;
-                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                     propertyGroup.Element(ns + "TargetFramework").Name += "s";
-                 });
+                testProject.Name += "_cross";
             }
 
-            testAsset.Restore(Log);
+            testProject.PackageReferences.Add(new TestPackageReference("FluentValidation", "5.5.0"));
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(project =>
+                {
+                    if (crossTarget)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Element(ns + "TargetFramework").Name += "s";
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand
                 .Execute("/v:normal")
                 .Should()
@@ -564,7 +573,7 @@ namespace DefaultReferences
                 .And
                 .NotHaveStdOutMatching("Encountered conflict", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net46");
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().NotHaveFile("FluentValidation.resources.dll");
             outputDirectory.Should().HaveFile(@"fr\FluentValidation.resources.dll");
         }
