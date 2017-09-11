@@ -144,10 +144,6 @@
     <Compile Include="Instance\ProjectTaskOutputItemInstance_Tests.cs" />
     <Compile Include="Instance\ProjectTaskOutputPropertyInstance_Tests.cs" />
     <Compile Include="LazyFormattedEventArgs_Tests.cs" />
-    <None Include="..\Shared\UnitTests\App.config">
-      <Link>App.config</Link>
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
