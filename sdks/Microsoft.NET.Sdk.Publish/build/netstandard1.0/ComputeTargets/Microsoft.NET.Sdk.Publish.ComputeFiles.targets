@@ -17,8 +17,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_DotNetPublishComputeFiles>
       _DetermineProjectType;
-      _WebAppComputeFiles;
-      _ConsoleAppComputeFiles;
     </_DotNetPublishComputeFiles>
   </PropertyGroup>
 
@@ -29,123 +27,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_DetermineProjectType" >
     <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsManagedProject)' == 'true' ">Managed</_PublishProjectType>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsAspNetCoreProject)' == 'true' ">AspNetCore</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">WebJob</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">UnKnown</_PublishProjectType>
     </PropertyGroup>
-  </Target>
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFiles (Web App)                                -->
-  <!--***************************************************************-->
-
-  <PropertyGroup>
-    <_WebAppComputeFilesDependsOn>
-      $(_WebAppComputeFilesDependsOn);
-      _PrepareForWebAppPublish
-      _ComputeFilesFromOutDir;
-      _ComputeFilesFromContent;
-    </_WebAppComputeFilesDependsOn>
-  </PropertyGroup>
-
-  <Target Name="_WebAppComputeFiles"
-          Condition="'$(_PublishProjectType)' == 'WebApp'"
-          DependsOnTargets="$(_WebAppComputeFilesDependsOn)">
-  </Target>
-
-
-
-  <!--***************************************************************-->
-  <!-- Target _PrepareForWebAppPublish                               -->
-  <!--***************************************************************-->
-
-  <Target Name="_PrepareForWebAppPublish">
-  <PropertyGroup>
-    <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">bin\</_ComputeFilesFromOutDirPrefix>
-    <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
-  </PropertyGroup>
-  </Target>
-
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFiles (Console)                                -->
-  <!--***************************************************************-->
-
-  <PropertyGroup>
-    <_ConsoleAppComputeFilesDependsOn>
-      $(_ConsoleAppComputeFilesDependsOn);
-      _PrepareForConsoleAppPublish
-      _ComputeFilesFromOutDir;
-      _ComputeFilesFromContent;
-    </_ConsoleAppComputeFilesDependsOn>
-  </PropertyGroup>
-
-  <Target Name="_ConsoleAppComputeFiles"
-          Condition="'$(_PublishProjectType)' == 'Console'"
-          DependsOnTargets="$(_ConsoleAppComputeFilesDependsOn)">
-  </Target>
-
-
-
-  <!--***************************************************************-->
-  <!-- Target _PrepareForConsoleAppPublish                              -->
-  <!--***************************************************************-->
-
-  <Target Name="_PrepareForConsoleAppPublish">
-    <PropertyGroup>
-      <WebJobType Condition="'$(WebJobType)' == ''">Continuous</WebJobType>
-      <WebJobName Condition="'$(WebJobName)' == ''">$(AssemblyName)</WebJobName>
-      <_WebJobAppDataPath Condition="'$(_WebJobAppDataPath)' == ''" >app_data\Jobs\$(WebJobType)\$(WebJobName)\</_WebJobAppDataPath>
-      <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">$(_WebJobAppDataPath)</_ComputeFilesFromOutDirPrefix>
-      <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
-    </PropertyGroup>
-  </Target>
-
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFilesFromOutDir                                -->
-  <!--***************************************************************-->
-
-  <Target Name="_ComputeFilesFromOutDir"
-          Condition="'$(OutDir)' != ''">
-
-    <ItemGroup>
-      <_OutDirFiles
-        Include="$(OutDir)**\*.*"
-        Exclude="$(OutDir)Publish\**\*.*">
-      </_OutDirFiles>
-    </ItemGroup>
-
-    <CreateItem
-      Include="@(_OutDirFiles)"
-      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromOutDirPrefix)%(RecursiveDir)%(Filename)%(Extension)">
-      <Output TaskParameter="Include" ItemName="_OutDirFilesWithMetadata"/>
-    </CreateItem>
-
-    <ItemGroup>
-      <DotNetPublishFiles Include="@(_OutDirFilesWithMetadata)" />
-    </ItemGroup>
-
-  </Target>
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFilesFromContent                               -->
-  <!--***************************************************************-->
-
-  <Target Name="_ComputeFilesFromContent"
-          Condition="'@(Content)' != ''">
-
-    <CreateItem
-      Include="@(Content)"
-      AdditionalMetadata="DestinationRelativePath=$(_ComputeFilesFromContentPrefix)%(Identity)">
-      <Output TaskParameter="Include" ItemName="_ContentFilesWithMetadata"/>
-    </CreateItem>
-
-    <ItemGroup>
-      <DotNetPublishFiles Include="@(_ContentFilesWithMetadata)" />
-    </ItemGroup>
   </Target>
 
   <!--********************************************************************-->
@@ -157,5 +43,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Exclude>False</Exclude>
     </DotNetPublishFiles>
   </ItemDefinitionGroup>
+
+
+  <!--***************************************************************-->
+  <!-- Target _IncludePrePublishGeneratedContent                     -->
+  <!--***************************************************************-->
+  
+  <Target Name="_IncludePrePublishGeneratedContent" BeforeTargets="GetCopyToPublishDirectoryItems" Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
+    <ItemGroup>
+      <_WebProjectGeneratedContent Include="wwwroot\**" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);@(_ContentIncludedByDefault)" />
+      <ContentWithTargetPath Include="@(_WebProjectGeneratedContent)" TargetPath="%(Identity)" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
   
 </Project>

@@ -23,9 +23,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="RegexEscape" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="GetPassword" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <_DotNetPublishFiles>
@@ -59,32 +59,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
       <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
-
       <!--Destination is alway a manifest-->
       <MSDeployPublishDestinationType>auto</MSDeployPublishDestinationType>
       <MSDeployPublishDestinationRoot></MSDeployPublishDestinationRoot>
-
       <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
       <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
-
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
-
       <MSDeployUseChecksum Condition=" '$(MSDeployUseChecksum)' == '' ">false</MSDeployUseChecksum>
       <AllowUntrustedCertificate Condition=" '$(AllowUntrustedCertificate)' == '' ">false</AllowUntrustedCertificate>
-
       <EnableOptimisticParameterDefaultValue Condition="$(EnableOptimisticParameterDefaultValue) == ''">true</EnableOptimisticParameterDefaultValue>
-
       <!-- Forcing File preview to be a boolean value -->
       <FilePreview Condition="'$(FilePreview)' != 'true'">false</FilePreview>
-
       <NormalizePublishSettings Condition="'$(NormalizePublishSettings)'==''">true</NormalizePublishSettings>
       <AuthType Condition="'$(AuthType)'==''" >Basic</AuthType>
       <!-- Supported value for $(MSDeployPublishMethod): WMSVC, RemoteAgent, InProc -->
       <MSDeployPublishMethod Condition="'$(MSDeployPublishMethod)'==''" >WMSVC</MSDeployPublishMethod>
-
       <!-- AppOffline support is enabled by default for WMSVC-->
       <EnableMSDeployAppOffline Condition="'$(EnableMSDeployAppOffline)' == '' And '$(MSDeployPublishMethod)' == 'WMSVC' ">true</EnableMSDeployAppOffline>
-
       <_UseWMSVC>false</_UseWMSVC>
       <_UseWMSVC Condition="'$(MSDeployPublishMethod)'=='WMSVC'">true</_UseWMSVC>
       <_UseRemoteAgent>false</_UseRemoteAgent>
@@ -93,6 +84,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- UserAgent string sent to msdeploy -->
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
       <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
+      <!-- MsDeploy Api is not supported for core yet -->
+      <UseMsDeployExe Condition="'$(UseMsDeployExe)' == '' And '$(MSBuildRuntimeType)' == 'Core'">true</UseMsDeployExe>
     </PropertyGroup>
 
     <CreateProperty Value="NTLM" Condition="!$(_UseWMSVC) And $(NormalizePublishSettings)">
@@ -100,10 +93,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CreateProperty>
 
     <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
-    <NormalizeServiceUrl ServiceUrl="$(MsDeployServiceUrl)" UseWMSVC="$(_UseWMSVC)" UseRemoteAgent="$(_UseRemoteAgent)" Condition="$(NormalizePublishSettings) == 'true'" >
+    <NormalizeServiceUrl 
+      ServiceUrl="$(MsDeployServiceUrl)" 
+      UseWMSVC="$(_UseWMSVC)" 
+      UseRemoteAgent="$(_UseRemoteAgent)" 
+      SiteName="$(DeployIisAppPath)"
+      Condition="$(NormalizePublishSettings) == 'true'" >
       <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
     </NormalizeServiceUrl>
 
+    <GetPassword
+      EncryptedPassword ="$(EncryptedPassword)"
+      Condition="'$(Password)' == '' And '$(IsGetPasswordEnabled)' == 'true'">
+      <Output TaskParameter="ClearPassword" PropertyName="Password"/>
+    </GetPassword>
+    
     <!--  Data Passed to MSDeploy -->
     <ItemGroup>
       <MsDeploySourceProviderSetting Remove="@(MsDeploySourceProviderSetting)" />
@@ -237,18 +241,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_CreateParameterFiles">
 
-    <!--Parameterize the default value of the Path-->
-    <RegexEscape Text="$(PublishIntermediateOutputPath)">
-      <Output TaskParameter="Result" PropertyName="_Escaped_PublishIntermediateOutputPath" />
-    </RegexEscape>
-
     <ItemGroup>
       <MsDeployDeclareParameters Remove="@(MsDeployDeclareParameters)" />
 
       <MsDeployDeclareParameters Include="IIS Web Application Name" >
         <Kind>ProviderPath</Kind>
         <Scope>IisApp</Scope>
-        <Match>^$(_Escaped_PublishIntermediateOutputPath)$</Match>
+        <Match>$(PublishIntermediateOutputPath)</Match>
         <Description></Description>
         <DefaultValue>$(DeployIisAppPath)</DefaultValue>
         <Value>$(DeployIisAppPath)</Value>
@@ -262,7 +261,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
         <Kind>ProviderPath</Kind>
         <Scope>dbfullsql</Scope>
-        <Match>^%(_EFSQLScripts.EscapedPath)$</Match>
+        <Match>%(_EFSQLScripts.Identity)</Match>
         <Description></Description>
         <DefaultValue>%(_EFSQLScripts.ConnectionString)</DefaultValue>
         <Value>%(_EFSQLScripts.ConnectionString)</Value>

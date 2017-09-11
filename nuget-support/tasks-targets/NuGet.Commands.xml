@@ -4,643 +4,6 @@
         <name>NuGet.Commands</name>
     </assembly>
     <members>
-        <member name="T:NuGet.Commands.Strings">
-            <summary>
-               A strongly-typed resource class, for looking up localized strings, etc.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.ResourceManager">
-            <summary>
-               Returns the cached ResourceManager instance used by this class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Culture">
-            <summary>
-               Overrides the current thread's CurrentUICulture property for all
-               resource lookups using this strongly typed resource class.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.AddFileToPackage">
-            <summary>
-               Looks up a localized string similar to Add file &apos;{0}&apos; to package as &apos;{1}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.BuildingProjectTargetingFramework">
-            <summary>
-               Looks up a localized string similar to Building project &apos;{0}&apos; for target framework &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_BuildFailed">
-            <summary>
-               Looks up a localized string similar to Failed to build using &apos;{0} {1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_CannotFindMsbuild">
-            <summary>
-               Looks up a localized string similar to Cannot find version of msbuild..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInput">
-            <summary>
-               Looks up a localized string similar to Invalid input &apos;{0}&apos;. The file type was not recognized..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputConfig">
-            <summary>
-               Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;packages.config&apos; or &apos;packages.*.config&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputJson">
-            <summary>
-               Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;project.json&apos; or &apos;*.project.json&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_InvalidTargetFramework">
-            <summary>
-               Looks up a localized string similar to Failed to build package because of an unsupported targetFramework value on &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_MissingSourceParameter">
-            <summary>
-               Looks up a localized string similar to Source parameter was not specified..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForLibPackage">
-            <summary>
-               Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes assembly files. For help on building symbols package, visit {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForSymbolsPackage">
-            <summary>
-               Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes source and symbol files. For help on building symbols package, visit {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_PackFailed">
-            <summary>
-               Looks up a localized string similar to Failed to build package. {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_ProcessingNuspecFile">
-            <summary>
-               Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateBuildOutput">
-            <summary>
-               Looks up a localized string similar to No build found in {0}. Use the -Build option or build the project..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget">
-            <summary>
-               Looks up a localized string similar to The folder &apos;{0}&apos; does not contain a project to restore..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget_Because">
-            <summary>
-               Looks up a localized string similar to Failed to find a project to restore in the folder &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_UnknownBuildAction">
-            <summary>
-               Looks up a localized string similar to Package &apos;{0}&apos; specifies an invalid build action &apos;{1}&apos; for file &apos;{2}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Error_XPROJNotAllowed">
-            <summary>
-               Looks up a localized string similar to Invalid input &apos;{0}&apos;. XProj support has been removed. Support for XProj and standalone project.json files has been removed, to continue working with legacy projects use NuGet 3.5.x from https://nuget.org/downloads.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.FailedToBuildProject">
-            <summary>
-               Looks up a localized string similar to Failed to build &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.FileNotAddedToPackage">
-            <summary>
-               Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.InputFileNotSpecified">
-            <summary>
-               Looks up a localized string similar to Please specify a nuspec, project.json, or project file to use.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.InvalidRestoreInput">
-            <summary>
-               Looks up a localized string similar to Invalid restore input. {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.InvalidRestoreInputWithFiles">
-            <summary>
-               Looks up a localized string similar to Invalid restore input. {0} Input files: {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.InvalidSource">
-            <summary>
-               Looks up a localized string similar to The specified source &apos;{0}&apos; is invalid. Please provide a valid source..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearedSuccessful">
-            <summary>
-               Looks up a localized string similar to Local resources cleared..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearFailed">
-            <summary>
-               Looks up a localized string similar to Clearing local resources failed: Unable to delete one or more files..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetCache">
-            <summary>
-               Looks up a localized string similar to Clearing NuGet cache: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetGlobalPackagesCache">
-            <summary>
-               Looks up a localized string similar to Clearing NuGet global packages cache: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetHttpCache">
-            <summary>
-               Looks up a localized string similar to Clearing NuGet HTTP cache: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetTempCache">
-            <summary>
-               Looks up a localized string similar to Clearing NuGet Temp cache: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_FailedToDeletePath">
-            <summary>
-               Looks up a localized string similar to Failed to delete &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_Help">
-             <summary>
-                Looks up a localized string similar to usage: NuGet locals &lt;all | http-cache | global-packages | temp&gt; [--clear | -c | --list | -l]
-            For more information, visit http://docs.nuget.org/docs/reference/command-line-reference.
-             </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_InvalidLocalResourceName">
-            <summary>
-               Looks up a localized string similar to An invalid local resource name was provided. Please provide one of the following values: http-cache, temp, global-packages, all..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalResourcePathNotSet">
-            <summary>
-               Looks up a localized string similar to The location of local resource &apos;{0}&apos; is undefined..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalsPartiallyCleared">
-            <summary>
-               Looks up a localized string similar to Local resources partially cleared..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_CheckingCompatibility">
-            <summary>
-               Looks up a localized string similar to Checking compatibility of packages on {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_CheckingPackageCompatibility">
-            <summary>
-               Looks up a localized string similar to Checking compatibility for {0} {1} with {2}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_Committing">
-            <summary>
-               Looks up a localized string similar to Committing restore....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ConfigFileSummary">
-            <summary>
-               Looks up a localized string similar to NuGet Config files used:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ConvertedPackageToOriginalCase">
-            <summary>
-               Looks up a localized string similar to The package {0} was converted to original case in the packages directory..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_CycleDetected">
-            <summary>
-               Looks up a localized string similar to Cycle detected:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_DependencyBumpedUp">
-            <summary>
-               Looks up a localized string similar to Dependency specified was {0} {1} but ended up with {2} {3}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_DowngradeWarning">
-            <summary>
-               Looks up a localized string similar to Detected package downgrade: {0} from {1} to {2}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ErrorSummary">
-            <summary>
-               Looks up a localized string similar to Errors in {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_FailedToResolveConflicts">
-            <summary>
-               Looks up a localized string similar to Failed to resolve conflicts for {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_FeedsUsedSummary">
-            <summary>
-               Looks up a localized string similar to Feeds used:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_FoundProjectRoot">
-            <summary>
-               Looks up a localized string similar to Found project root directory: {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_FrameworkDisplay">
-            <summary>
-               Looks up a localized string similar to {0} ({1}).
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_FrameworkRIDDisplay">
-            <summary>
-               Looks up a localized string similar to {0} ({1}) / {2}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_GeneratingMsBuildFile">
-            <summary>
-               Looks up a localized string similar to Generating MSBuild file {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ImportsFallbackWarning">
-            <summary>
-               Looks up a localized string similar to Package &apos;{0}&apos; was restored using &apos;{1}&apos; instead the project target framework &apos;{2}&apos;. This may cause compatibility problems..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_InstalledSummary">
-            <summary>
-               Looks up a localized string similar to Installed:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_InstalledSummaryCount">
-            <summary>
-               Looks up a localized string similar to {0} package(s) to {1}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_InstallingPackage">
-            <summary>
-               Looks up a localized string similar to Installing {0} {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_LoadedProject">
-            <summary>
-               Looks up a localized string similar to Loaded project {0} from {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_LockFileMissingLibraryForTargetLibrary">
-            <summary>
-               Looks up a localized string similar to {0} {1} is specified in the Lock File target for {2} but is not present in the top-level Libraries list..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_LockFileOutOfDate">
-            <summary>
-               Looks up a localized string similar to The lock file is out-of-date relative to the project file. Regenerating the lock file and re-locking..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_MergingRuntimes">
-            <summary>
-               Looks up a localized string similar to Merging in runtimes defined in {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_MissingImplementationFx">
-            <summary>
-               Looks up a localized string similar to {0} {1} provides a compile-time reference assembly for {2} on {3}, but there is no compatible run-time assembly..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_MissingImplementationFxRuntime">
-            <summary>
-               Looks up a localized string similar to {0} {1} provides a compile-time reference assembly for {2} on {3}, but there is no run-time assembly compatible with {4}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageCommandAddedFile">
-            <summary>
-               Looks up a localized string similar to Added file &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageCommandAttemptingToBuildSymbolsPackage">
-            <summary>
-               Looks up a localized string similar to Attempting to build symbols package for &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageCommandSuccess">
-            <summary>
-               Looks up a localized string similar to Successfully created package &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx">
-            <summary>
-               Looks up a localized string similar to Package {0} {1} is not compatible with {2}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx_NoSupports">
-            <summary>
-               Looks up a localized string similar to Package {0} {1} does not support any target frameworks..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx_Supports">
-            <summary>
-               Looks up a localized string similar to Package {0} {1} supports:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackagesAndProjectsAreCompatible">
-            <summary>
-               Looks up a localized string similar to All packages and projects are compatible with {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_PackagesIncompatible">
-            <summary>
-               Looks up a localized string similar to One or more packages are incompatible with {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ProjectDoesNotSpecifyTargetFrameworks">
-            <summary>
-               Looks up a localized string similar to The project {0} does not specify any target frameworks in {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx">
-            <summary>
-               Looks up a localized string similar to Project {0} is not compatible with {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx_NoSupports">
-            <summary>
-               Looks up a localized string similar to Project {0} does not support any target frameworks..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx_Supports">
-            <summary>
-               Looks up a localized string similar to Project {0} supports:.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ProjectsIncompatible">
-            <summary>
-               Looks up a localized string similar to One or more projects are incompatible with {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ReadingProject">
-            <summary>
-               Looks up a localized string similar to Reading project file {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ResolverConflict">
-            <summary>
-               Looks up a localized string similar to Unable to satisfy conflicting requests for &apos;{0}&apos;: {1}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ResolvingConflicts">
-            <summary>
-               Looks up a localized string similar to Resolving conflicts for {0}....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoreComplete">
-            <summary>
-               Looks up a localized string similar to Restore completed in {0} for {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoreFailed">
-            <summary>
-               Looks up a localized string similar to Restore failed in {0} for {1}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoringPackages">
-            <summary>
-               Looks up a localized string similar to Restoring packages for {0}....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoringPackagesForCompat">
-            <summary>
-               Looks up a localized string similar to Restoring packages for {0} to determine compatibility....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RestoringToolPackages">
-            <summary>
-               Looks up a localized string similar to Restoring packages for tool &apos;{0}&apos; in {1}....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RunningNonParallelRestore">
-            <summary>
-               Looks up a localized string similar to Running non-parallel restore..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_RunningParallelRestore">
-            <summary>
-               Looks up a localized string similar to Running restore with {0} concurrent jobs..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_ScanningForRuntimeJson">
-            <summary>
-               Looks up a localized string similar to Scanning packages for runtime.json files....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_SkippingRuntimeWalk">
-            <summary>
-               Looks up a localized string similar to Skipping runtime dependency walk, no runtimes defined in project.json..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_UnknownCompatibilityProfile">
-            <summary>
-               Looks up a localized string similar to Unknown Compatibility Profile: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_UnresolvedDependency">
-            <summary>
-               Looks up a localized string similar to Unable to resolve &apos;{0}&apos; for &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_UsingPackagesDirectory">
-            <summary>
-               Looks up a localized string similar to Using packages directory: {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_UsingSource">
-            <summary>
-               Looks up a localized string similar to Using source {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Log_VersionConflict">
-            <summary>
-               Looks up a localized string similar to Version conflict detected for {0}..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.MissingRequiredProperty">
-            <summary>
-               Looks up a localized string similar to Missing required property &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.MissingRequiredPropertyForProjectType">
-            <summary>
-               Looks up a localized string similar to Missing required property &apos;{0}&apos; for project type &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.MSBuildWarning_MultiTarget">
-            <summary>
-               Looks up a localized string similar to Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.NuGetDocs">
-            <summary>
-               Looks up a localized string similar to http://docs.nuget.org/.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsChanged">
-            <summary>
-               Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsNotChanged">
-            <summary>
-               Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PackagingFilesFromOutputPath">
-            <summary>
-               Looks up a localized string similar to Packing files from &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PersistDGFile">
-            <summary>
-               Looks up a localized string similar to Persisting restore input to &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PropertyNotAllowed">
-            <summary>
-               Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.PropertyNotAllowedForProjectType">
-            <summary>
-               Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed for project type &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.ResolverRequest_ToStringFormat">
-            <summary>
-               Looks up a localized string similar to {0} (via {1}).
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationDuplicateFrameworks">
-            <summary>
-               Looks up a localized string similar to Duplicate frameworks found: &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationInvalidFramework">
-            <summary>
-               Looks up a localized string similar to Invalid target framework &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationMissingDependency">
-            <summary>
-               Looks up a localized string similar to Missing dependency on &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationMissingProject">
-            <summary>
-               Looks up a localized string similar to Missing project &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationNoFrameworks">
-            <summary>
-               Looks up a localized string similar to No target frameworks specified..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationUAPSingleFramework">
-            <summary>
-               Looks up a localized string similar to UAP projects must contain exactly one target framework..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.SpecValidationZeroRestoreRequests">
-            <summary>
-               Looks up a localized string similar to Restore request does not contain any projects to restore..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.UnableToExtractAssemblyMetadata">
-            <summary>
-               Looks up a localized string similar to Unable to extract metadata from &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.UnableToFindBuildOutput">
-            <summary>
-               Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure the project has been built..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.UsingNuspecForMetadata">
-            <summary>
-               Looks up a localized string similar to Using &apos;{0}&apos; for metadata..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.UsingPackagesConfigForDependencies">
-            <summary>
-               Looks up a localized string similar to Found packages.config. Using packages listed as dependencies.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_DuplicatePropertyKey">
-            <summary>
-               Looks up a localized string similar to &apos;{0}&apos; key already exists in Properties collection. Overriding value..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_FileDoesNotExist">
-            <summary>
-               Looks up a localized string similar to &apos;{0}&apos; was included in the project but doesn&apos;t exist. Skipping....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_MultiTarget">
-            <summary>
-               Looks up a localized string similar to Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueDescription">
-            <summary>
-               Looks up a localized string similar to Description: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueSolution">
-            <summary>
-               Looks up a localized string similar to Solution: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueTitle">
-            <summary>
-               Looks up a localized string similar to Issue: {0}.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandPackageIssueSummary">
-            <summary>
-               Looks up a localized string similar to Issue found with package &apos;{0}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersion">
-            <summary>
-               Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersionSolution">
-            <summary>
-               Looks up a localized string similar to Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org..
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersionTitle">
-            <summary>
-               Looks up a localized string similar to Use semantic versioning.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_UnresolvedFilePath">
-            <summary>
-               Looks up a localized string similar to &apos;{0}&apos; was included in the project but the path could not be resolved. Skipping....
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.Strings.Warning_UnspecifiedField">
-            <summary>
-               Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
-            </summary>
-        </member>
         <member name="T:NuGet.Commands.DeleteRunner">
             <summary>
             Shared code to run the "delete" command from the command line projects
@@ -727,9 +90,187 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="P:NuGet.Commands.OutputLibFile.FinalOutputPath">
+            <summary>
+            This is the final output path of the assembly on disk as set by msbuild.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.OutputLibFile.TargetPath">
+            <summary>
+            This denotes the TargetPath as set by msbuild. Usually this is just the file name, but for satellite DLLs,
+            this is Culture\filename.
+             </summary>
+        </member>
+        <member name="P:NuGet.Commands.OutputLibFile.TargetFramework">
+            <summary>
+            This is the target framework for which this assembly was built.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.CompatibilityChecker.GetErrorMessage(NuGet.Common.NuGetLogCode,NuGet.Commands.CompatibilityIssue,NuGet.Commands.RestoreTargetGraph)">
+            <summary>
+            Create an error message for the given issue.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.CompatibilityChecker.HasCompatibleAssets(NuGet.ProjectModel.LockFileTargetLibrary)">
+            <summary>
+            Check if the library contains assets.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.CompatibilityIssue.FormatMessage(System.String,System.String,System.String)">
             <summary>
             Build a incompatible error message for either a package or project
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ContentFileUtils.GetContentGroupsForFramework(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.ContentModel.ContentItemGroup})">
+            <summary>
+            Get all content groups that have the nearest TxM
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ContentFileUtils.GetContentFileGroup(NuGet.Frameworks.NuGetFramework,NuGet.Packaging.NuspecReader,System.Collections.Generic.List{NuGet.ContentModel.ContentItemGroup})">
+            <summary>
+            Apply build actions from the nuspec to items from the contentFiles folder.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ContentFileUtils.CreateEmptyItem">
+            <summary>
+            Create an empty lock file item for any/any
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.VirtualFileProvider">
+            <summary>
+            A virtual file system based on a list of strings from ContentModel.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.DiagnosticUtility">
+            <summary>
+            Warning and error logging helpers.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.FormatIdentity(NuGet.LibraryModel.LibraryIdentity)">
+            <summary>
+            Format an id and include the version only if it exists.
+            Ignore versions for projects.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.FormatDependency(System.String,NuGet.Versioning.VersionRange)">
+            <summary>
+            Format an id and include the range only if it has bounds.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.FormatExpectedIdentity(System.String,NuGet.Versioning.VersionRange)">
+            <summary>
+            Format an id and include the lower bound only if it has one.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.FormatGraphName(NuGet.Commands.RestoreTargetGraph)">
+            <summary>
+            Format a graph name with an optional RID.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.GetMultiLineMessage(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Format a message as:
+            
+            First line
+              - second
+              - third
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DiagnosticUtility.MergeOnTargetGraph(System.Collections.Generic.IEnumerable{NuGet.Common.RestoreLogMessage})">
+            <summary>
+            Merge messages with the same code and message, combining the target graphs.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.UnexpectedDependencyMessages">
+            <summary>
+            Log warnings for packages that did not resolve to the minimum version of the dependency range.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.LogAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.IRestoreTargetGraph},NuGet.ProjectModel.PackageSpec,NuGet.Common.ILogger)">
+            <summary>
+            Log warnings for all project issues related to unexpected dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetMissingLowerBounds(System.Collections.Generic.IEnumerable{NuGet.Commands.IRestoreTargetGraph},System.Collections.Generic.ISet{System.String})">
+            <summary>
+            Get warnings for packages that have dependencies on non-existant versions of packages
+            and also for packages with ranges that have missing minimum versions.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetMissingLowerBoundMessage(NuGet.Commands.ResolvedDependencyKey,System.String[])">
+            <summary>
+            Get warning message for missing minimum dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetBumpedUpDependencies(System.Collections.Generic.IEnumerable{NuGet.Commands.IRestoreTargetGraph},NuGet.ProjectModel.PackageSpec,System.Collections.Generic.ISet{System.String})">
+            <summary>
+            Warn for dependencies that have been bumped up.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetProjectDependenciesMissingLowerBounds(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Warn for project dependencies that do not include a lower bound on the version range.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.DependencyRangeHasMissingExactMatch(NuGet.Commands.ResolvedDependencyKey)">
+            <summary>
+            True if the dependency version range has a min version that matches the resolved version.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.HasMissingLowerBound(NuGet.Versioning.VersionRange)">
+            <summary>
+            True if the range has an obtainable version for the lower bound.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnexpectedDependencyMessages.GetDependencyTargetGraphs(NuGet.ProjectModel.PackageSpec,NuGet.LibraryModel.LibraryDependency)">
+            <summary>
+            Create target graph names for each framework the dependency exists under.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.UnresolvedMessages">
+            <summary>
+            Log errors for packages and projects that were missing.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.LogAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.IRestoreTargetGraph},NuGet.DependencyResolver.RemoteWalkContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Log errors for missing dependencies.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.GetMessageAsync(NuGet.Commands.IRestoreTargetGraph,NuGet.LibraryModel.LibraryRange,NuGet.DependencyResolver.RemoteWalkContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Create a specific error message for the unresolved dependency.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.HasPrereleaseVersionsOnly(NuGet.Versioning.VersionRange,System.Collections.Generic.IEnumerable{NuGet.Versioning.NuGetVersion})">
+            <summary>
+            True if no stable versions satisfy the range 
+            but a pre-release version is found.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.IsPrereleaseAllowed(NuGet.Versioning.VersionRange)">
+            <summary>
+            True if the range allows pre-release versions.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.FormatSourceInfo(System.Collections.Generic.KeyValuePair{NuGet.Configuration.PackageSource,System.Collections.Generic.SortedSet{NuGet.Versioning.NuGetVersion}},NuGet.Versioning.VersionRange)">
+            <summary>
+            Found 2839 version(s) in nuget-build [ Nearest version: 1.0.0-beta ]
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.GetSourceInfosForIdAsync(System.String,NuGet.Versioning.VersionRange,NuGet.DependencyResolver.RemoteWalkContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Get the complete set of source info for a package id.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.GetSourceInfoForIdAsync(NuGet.DependencyResolver.IRemoteDependencyProvider,System.String,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
+            <summary>
+            Find all package versions from a source.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.UnresolvedMessages.GetBestMatch(System.Collections.Generic.SortedSet{NuGet.Versioning.NuGetVersion},NuGet.Versioning.VersionRange)">
+            <summary>
+            Find the best match on the feed.
             </summary>
         </member>
         <member name="P:NuGet.Commands.IRestoreResult.LockFilePath">
@@ -753,11 +294,156 @@
             Props and targets files to be written to disk.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.IRestoreTargetGraph.RuntimeIdentifier">
+            <summary>
+            Gets the runtime identifier used during the restore operation on this graph
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IRestoreTargetGraph.Framework">
+            <summary>
+            Gets the <see cref="T:NuGet.Frameworks.NuGetFramework" /> used during the restore operation on this graph
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IRestoreTargetGraph.Conventions">
+            <summary>
+            Gets the <see cref="T:NuGet.Client.ManagedCodeConventions" /> used to resolve assets from packages in this graph
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IRestoreTargetGraph.RuntimeGraph">
+            <summary>
+            Gets the <see cref="P:NuGet.Commands.IRestoreTargetGraph.RuntimeGraph" /> that defines runtimes and their relationships for this graph
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IRestoreTargetGraph.Graphs">
+            <summary>
+            Gets the resolved dependency graph
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.LockFileBuilder.IsAllowedLibraryFile(System.String)">
             <summary>
             True if the file should be added to the lock file library
             Fale if it is an OPC file or empty directory
             </summary>
+        </member>
+        <member name="T:NuGet.Commands.PackageSpecificWarningProperties">
+            <summary>
+            Contains Package specific properties for Warnings.
+            </summary>
+        </member>
+        <member name="F:NuGet.Commands.PackageSpecificWarningProperties.Properties">
+            <summary>
+            Contains Package specific No warn properties.
+            NuGetLogCode -> LibraryId -> Set of Frameworks.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.CreatePackageSpecificWarningProperties(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Extracts PackageSpecific WarningProperties from a PackageSpec
+            </summary>
+            <param name="packageSpec">PackageSpec containing the Dependencies with WarningProperties</param>
+            <returns>PackageSpecific WarningProperties extracted from a PackageSpec</returns>
+        </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Add(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Adds a NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
+            </summary>
+            <param name="code">NuGetLogCode for which no warning should be thrown.</param>
+            <param name="libraryId">Library for which no warning should be thrown.</param>
+            <param name="framework">Target graph for which no warning should be thrown.</param>
+        </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.AddRange(System.Collections.Generic.IEnumerable{NuGet.Common.NuGetLogCode},System.String,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Adds a list of NuGetLogCode into the NoWarn Set for the specified library Id and target graph.
+            </summary>
+            <param name="codes">IEnumerable of NuGetLogCode for which no warning should be thrown.</param>
+            <param name="libraryId">Library for which no warning should be thrown.</param>
+            <param name="framework">Target graph for which no warning should be thrown.</param>
+        </member>
+        <member name="M:NuGet.Commands.PackageSpecificWarningProperties.Contains(NuGet.Common.NuGetLogCode,System.String,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Checks if a NugetLogCode is part of the NoWarn list for the specified library Id and target graph.
+            </summary>
+            <param name="code">NugetLogCode to be checked.</param>
+            <param name="libraryId">library Id to be checked.</param>
+            <param name="framework">target graph to be checked.</param>
+            <returns>True iff the NugetLogCode is part of the NoWarn list for the specified libraryId and Target Graph.</returns>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel,System.Boolean)">
+            <summary>
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            delegating all log messages to the inner logger.
+            </summary>
+            <param name="innerLogger">The inner logger used to delegate the logging.</param>
+            <param name="verbosity">Minimum verbosity below which no logs will be passed to the inner logger.</param>
+            <param name="hideWarningsAndErrors">If this is true, then errors and warnings will not be passed to inner logger.</param>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,System.Boolean)">
+            <summary>
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            delegating all log messages to the inner logger.
+            </summary>
+            <param name="innerLogger">The inner logger used to delegate the logging.</param>
+            <param name="hideWarningsAndErrors">If this is false, then errors and warnings will not be passed to inner logger.</param>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel)">
+            <summary>
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            delegating all log messages to the inner logger.
+            </summary>
+            <param name="innerLogger">The inner logger used to delegate the logging.</param>
+            <param name="verbosity">Minimum verbosity below which no logs will be passed to the inner logger.</param>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger)">
+            <summary>
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            delegating all log messages to the inner logger.
+            </summary>
+            <param name="innerLogger">The inner logger used to delegate the logging.</param>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCollectorLogger.DisplayMessage(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            Decides if the log should be passed to the inner logger.
+            </summary>
+            <param name="message">IRestoreLogMessage to be logged.</param>
+            <returns>bool indicating if this message should be logged.</returns>
+        </member>
+        <member name="T:NuGet.Commands.WarningPropertiesCollection">
+            <summary>
+            Class to hold ProjectWide and PackageSpecific WarningProperties.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.WarningPropertiesCollection.ProjectFrameworks">
+            <summary>
+            Contains the target frameworks for the project.
+            These are used for no warn filtering in case of a log message without a target graph.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.WarningPropertiesCollection.ProjectWideWarningProperties">
+            <summary>
+            Contains Project wide properties for Warnings.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.WarningPropertiesCollection.PackageSpecificWarningProperties">
+            <summary>
+            Contains Package specific properties for Warnings.
+            NuGetLogCode -> LibraryId -> Set of Frameworks.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyWarningProperties(NuGet.Common.IRestoreLogMessage)">
+            <summary>
+            Attempts to suppress a warning log message or upgrade it to error log message.
+            The decision is made based on the Package Specific or Project wide warning properties.
+            </summary>
+            <param name="message">Message that should be suppressed or upgraded to an error.</param>
+            <returns>Bool indicating is the warning should be suppressed or not. 
+            If not then the param message sould have been mutated to an error</returns>
+        </member>
+        <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyProjectWideWarningProperties(NuGet.Common.ILogMessage)">
+            <summary>
+            Method is used to check is a warning should be suppressed and if not then if it should be treated as an error.
+            </summary>
+            <param name="logMessage">Message which should be mutated if needed.</param>
+            <returns>bool indicating if the ILogMessage should be suppressed or not.</returns>
         </member>
         <member name="P:NuGet.Commands.MSBuildOutputFile.Path">
             <summary>
@@ -795,12 +481,155 @@
             Combined conditions
             </summary>
         </member>
+        <member name="T:NuGet.Commands.DependencyGraphSpecRequestProvider">
+            <summary>
+            In Memory dg file provider.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.DependencyGraphSpecRequestProvider.CollectReferences(NuGet.ProjectModel.ExternalProjectReference,System.Collections.Generic.Dictionary{System.String,NuGet.ProjectModel.ExternalProjectReference},System.Collections.Generic.HashSet{NuGet.ProjectModel.ExternalProjectReference})">
+            <summary>
+            Return all references for a given project path.
+            References is modified by this method.
+            This includes the root project.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.IMSBuildItem">
+            <summary>
+            ITaskItem abstraction
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IMSBuildItem.Identity">
+            <summary>
+            Include attribute value.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String)">
+            <summary>
+            Retrieve property value and trim.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String,System.Boolean)">
+            <summary>
+            Retrieve property value with optional trimming.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IMSBuildItem.Properties">
+            <summary>
+            Raw untrimmed properties.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.IPreLoadedRestoreRequestProvider">
+            <summary>
+            Retrieves pre-loaded restore requests. The inputs here have already been determined.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IPreLoadedRestoreRequestProvider.CreateRequests(NuGet.Commands.RestoreArgs)">
+            <summary>
+            Create RestoreRequest objects.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IRestoreRequestProvider.Supports(System.String)">
+            <summary>
+            True if this provider supports the given path. Only one provider should handle an input.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IRestoreRequestProvider.CreateRequests(System.String,NuGet.Commands.RestoreArgs)">
+            <summary>
+            Create RestoreRequest objects.
+            </summary>
+            <param name="inputPath">Project.json or project file path.</param>
+            <param name="restoreContext">Command line arguments.</param>
+            <returns></returns>
+        </member>
+        <member name="T:NuGet.Commands.MSBuildItem">
+            <summary>
+            Internal ITaskItem abstraction
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String)">
+            <summary>
+            Get property or null if empty. Trims whitespace from values.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String,System.Boolean)">
+            <summary>
+            Get property or null if empty.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreArgs.Sources">
+            <summary>
+            Sources to use for restore. This is not used if SourceRepositories contains the 
+            already built SourceRepository objects.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreArgs.GetEffectiveSources(NuGet.Configuration.ISettings,System.Collections.Generic.IList{NuGet.Configuration.PackageSource})">
+            <summary>
+            Uses either Sources or Settings, and then adds Fallback sources.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.RestoreSpecException">
+            <summary>
+            DG v2 related validation error.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.ResolvedDependencyKey">
+            <summary>
+            ResolvedDependencyKey represents a node in the graph, the edge containing
+            the dependency constraint, and the child node that was resolved based 
+            on this constraint.
+            
+            (Parent Node) --(Range Constraint)--> (Resolved Child Node)
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.ResolvedDependencyKey.Parent">
+            <summary>
+            Parent node.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.ResolvedDependencyKey.Range">
+            <summary>
+            Dependency range from the parent on the child.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.ResolvedDependencyKey.Child">
+            <summary>
+            Child node.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCommand.ValidateRestoreGraphsAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.Common.ILogger)">
+            <summary>
+            Check if the given graphs are valid and log errors/warnings.
+            If fatal errors are encountered the rest of the errors/warnings
+            are not logged. This is to avoid flooding the log with long 
+            dependency chains for every package.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCommand.ValidateCyclesAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.Common.ILogger)">
+            <summary>
+            Logs an error and returns false if any cycles exist.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCommand.ValidateConflictsAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.Common.ILogger)">
+            <summary>
+            Logs an error and returns false if any conflicts exist.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreCommand.LogDowngradeWarningsAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreTargetGraph},NuGet.Common.ILogger)">
+            <summary>
+            Log downgrade warnings from the graphs.
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.RestoreCommandException">
+            <summary>
+            Holds an <see cref="T:NuGet.Common.IRestoreLogMessage"/> and returns the message for the exception.
+            </summary>
+        </member>
         <member name="T:NuGet.Commands.RestoreCommandProviders">
             <summary>
             Feed providers
             </summary>
         </member>
-        <member name="M:NuGet.Commands.RestoreCommandProviders.#ctor(NuGet.Repositories.NuGetv3LocalRepository,System.Collections.Generic.IReadOnlyList{NuGet.Repositories.NuGetv3LocalRepository},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider})">
+        <member name="M:NuGet.Commands.RestoreCommandProviders.#ctor(NuGet.Repositories.NuGetv3LocalRepository,System.Collections.Generic.IReadOnlyList{NuGet.Repositories.NuGetv3LocalRepository},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},System.Collections.Generic.IReadOnlyList{NuGet.DependencyResolver.IRemoteDependencyProvider},NuGet.Protocol.LocalNuspecCache)">
             <summary>
             Providers used by the restore command. These can be shared across restores.
             </summary>
@@ -808,6 +637,7 @@
             <param name="fallbackPackageFolders">Path to any fallback package folders.</param>
             <param name="localProviders">This is typically just a provider for the global packages folder.</param>
             <param name="remoteProviders">All dependency providers.</param>
+            <param name="nuspecCache">Nuspec cache.</param>
         </member>
         <member name="P:NuGet.Commands.RestoreCommandProviders.GlobalPackages">
             <summary>
@@ -908,9 +738,19 @@
             Restore output path
             </summary>
         </member>
+        <member name="P:NuGet.Commands.RestoreRequest.BaseIntermediateOutputPath">
+            <summary>
+            Base Intermediate output path
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.RestoreRequest.ValidateRuntimeAssets">
             <summary>
             Compatibility options
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreRequest.HideWarningsAndErrors">
+            <summary>
+            Display Errors and warnings as they occur
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreResult.LockFilePath">
@@ -949,6 +789,16 @@
             Restore time
             </summary>
         </member>
+        <member name="P:NuGet.Commands.RestoreResult.CacheFile">
+            <summary>
+             Cache File. The previous cache file for this project
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreResult.CacheFilePath">
+            <summary>
+            Cache File path. The file path where the cache is written out
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.RestoreResult.GetAllInstalled">
             <summary>
             Calculates the complete set of all packages installed by this operation
@@ -975,15 +825,6 @@
             <remarks>If <see cref="P:NuGet.Commands.RestoreResult.PreviousLockFile"/> and <see cref="P:NuGet.Commands.RestoreResult.LockFile"/> are identical
              the file will not be written to disk.</remarks>
         </member>
-        <member name="M:NuGet.Commands.RestoreResult.CommitAsync(NuGet.Common.ILogger,System.Boolean,System.Threading.CancellationToken)">
-            <summary>
-            Commits the lock file contained in <see cref="P:NuGet.Commands.RestoreResult.LockFile"/> and the MSBuild targets/props to
-            the local file system.
-            </summary>
-            <remarks>If <see cref="P:NuGet.Commands.RestoreResult.PreviousLockFile"/> and <see cref="P:NuGet.Commands.RestoreResult.LockFile"/> are identical
-             the file will not be written to disk.</remarks>
-            <param name="forceWrite">Write out the lock file even if no changes exist.</param>
-        </member>
         <member name="T:NuGet.Commands.RestoreRunner">
             <summary>
             Shared code to run the "restore" command for dotnet restore, nuget.exe, and VS.
@@ -994,7 +835,7 @@
             Create requests, execute requests, and commit restore results.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.RestoreRunner.Run(NuGet.Commands.RestoreArgs)">
+        <member name="M:NuGet.Commands.RestoreRunner.RunAsync(NuGet.Commands.RestoreArgs)">
             <summary>
             Create requests, execute requests, and commit restore results.
             </summary>
@@ -1044,121 +885,129 @@
             Gets the resolved dependency graph
             </summary>
         </member>
-        <member name="M:NuGet.Commands.ContentFileUtils.GetContentGroupsForFramework(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.ContentModel.ContentItemGroup})">
+        <member name="T:NuGet.Commands.SourceRepositoryDependencyProvider">
             <summary>
-            Get all content groups that have the nearest TxM
+            A source repository dependency provider.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.ContentFileUtils.GetContentFileGroup(NuGet.Frameworks.NuGetFramework,NuGet.Packaging.NuspecReader,System.Collections.Generic.List{NuGet.ContentModel.ContentItemGroup})">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.#ctor(NuGet.Protocol.Core.Types.SourceRepository,NuGet.Common.ILogger,NuGet.Protocol.Core.Types.SourceCacheContext,System.Boolean,System.Boolean)">
             <summary>
-            Apply build actions from the nuspec to items from the contentFiles folder.
+            Initializes a new <see cref="T:NuGet.Commands.SourceRepositoryDependencyProvider" /> class.
+            </summary>
+            <param name="sourceRepository">A source repository.</param>
+            <param name="logger">A logger.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="ignoreFailedSources"><c>true</c> to ignore failed sources; otherwise <c>false</c>.</param>
+            <param name="ignoreWarning"><c>true</c> to ignore warnings; otherwise <c>false</c>.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="sourceRepository" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" /> is <c>null</c>.</exception>
+        </member>
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.#ctor(NuGet.Protocol.Core.Types.SourceRepository,NuGet.Common.ILogger,NuGet.Protocol.Core.Types.SourceCacheContext,System.Boolean,System.Boolean,NuGet.Protocol.LocalNuspecCache)">
+            <summary>
+            Initializes a new <see cref="T:NuGet.Commands.SourceRepositoryDependencyProvider" /> class.
+            </summary>
+            <param name="sourceRepository">A source repository.</param>
+            <param name="logger">A logger.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="ignoreFailedSources"><c>true</c> to ignore failed sources; otherwise <c>false</c>.</param>
+            <param name="ignoreWarning"><c>true</c> to ignore warnings; otherwise <c>false</c>.</param>
+            <param name="nuspecCache">Optional nuspec cache.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="sourceRepository" />
+            is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" /> is <c>null</c>.</exception>
+        </member>
+        <member name="P:NuGet.Commands.SourceRepositoryDependencyProvider.IsHttp">
+            <summary>
+            Gets a flag indicating whether or not the provider source is HTTP or HTTPS.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.ContentFileUtils.CreateEmptyItem">
+        <member name="P:NuGet.Commands.SourceRepositoryDependencyProvider.Source">
             <summary>
-            Create an empty lock file item for any/any
+            Gets the package source.
             </summary>
+            <remarks>Optional. This will be <c>null</c> for project providers.</remarks>
         </member>
-        <member name="T:NuGet.Commands.VirtualFileProvider">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.FindLibraryAsync(NuGet.LibraryModel.LibraryRange,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            A virtual file system based on a list of strings from ContentModel.
+            Asynchronously discovers all versions of a package from a source and selects the best match.
             </summary>
+            <remarks>This does not download the package.</remarks>
+            <param name="libraryRange">A library range.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryIdentity" />
+            instance.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="libraryRange" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
         </member>
-        <member name="T:NuGet.Commands.DependencyGraphSpecRequestProvider">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.GetDependenciesAsync(NuGet.LibraryModel.LibraryIdentity,NuGet.Frameworks.NuGetFramework,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            In Memory dg file provider.
+            Asynchronously gets package dependencies.
             </summary>
+            <param name="libraryIdentity">A library identity.</param>
+            <param name="targetFramework">A target framework.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.LibraryModel.LibraryDependencyInfo" />
+            instance.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="libraryIdentity" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="targetFramework" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
         </member>
-        <member name="M:NuGet.Commands.DependencyGraphSpecRequestProvider.CollectReferences(NuGet.ProjectModel.ExternalProjectReference,System.Collections.Generic.Dictionary{System.String,NuGet.ProjectModel.ExternalProjectReference},System.Collections.Generic.HashSet{NuGet.ProjectModel.ExternalProjectReference})">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.GetPackageDownloaderAsync(NuGet.Packaging.Core.PackageIdentity,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Return all references for a given project path.
-            References is modified by this method.
-            This includes the root project.
+            Asynchronously gets a package downloader.
             </summary>
+            <param name="packageIdentity">A package identity.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a <see cref="T:NuGet.Packaging.IPackageDownloader" />
+            instance.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="packageIdentity" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="cacheContext" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" />
+            is either <c>null</c> or empty.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
+            is cancelled.</exception>
         </member>
-        <member name="T:NuGet.Commands.IMSBuildItem">
+        <member name="M:NuGet.Commands.SourceRepositoryDependencyProvider.GetAllVersionsAsync(System.String,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            ITaskItem abstraction
+            Asynchronously discover all package versions from a feed.
             </summary>
-        </member>
-        <member name="P:NuGet.Commands.IMSBuildItem.Identity">
-            <summary>
-            Include attribute value.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String)">
-            <summary>
-            Retrieve property value and trim.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String,System.Boolean)">
-            <summary>
-            Retrieve property value with optional trimming.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.IMSBuildItem.Properties">
-            <summary>
-            Raw untrimmed properties.
-            </summary>
-        </member>
-        <member name="T:NuGet.Commands.IPreLoadedRestoreRequestProvider">
-            <summary>
-            Retrieves pre-loaded restore requests. The inputs here have already been determined.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.IPreLoadedRestoreRequestProvider.CreateRequests(NuGet.Commands.RestoreArgs)">
-            <summary>
-            Create RestoreRequest objects.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.IRestoreRequestProvider.Supports(System.String)">
-            <summary>
-            True if this provider supports the given path. Only one provider should handle an input.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.IRestoreRequestProvider.CreateRequests(System.String,NuGet.Commands.RestoreArgs)">
-            <summary>
-            Create RestoreRequest objects.
-            </summary>
-            <param name="inputPath">Project.json or project file path.</param>
-            <param name="restoreContext">Command line arguments.</param>
-            <returns></returns>
-        </member>
-        <member name="T:NuGet.Commands.MSBuildItem">
-            <summary>
-            Internal ITaskItem abstraction
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String)">
-            <summary>
-            Get property or null if empty. Trims whitespace from values.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String,System.Boolean)">
-            <summary>
-            Get property or null if empty.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.RestoreArgs.SourceRepositories">
-            <summary>
-            Sources to use for restore. Overrides Sources
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.RestoreArgs.Sources">
-            <summary>
-            Sources to use for restore. This is not used if SourceRepositories contains the 
-            already built SourceRepository objects.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.RestoreArgs.GetEffectiveSources(NuGet.Configuration.ISettings)">
-            <summary>
-            Uses either Sources or Settings, and then adds Fallback sources.
-            </summary>
-        </member>
-        <member name="T:NuGet.Commands.RestoreSpecException">
-            <summary>
-            DG v2 related validation error.
-            </summary>
+            <param name="id">A package ID.</param>
+            <param name="cacheContext">A source cache context.</param>
+            <param name="logger">A logger.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A task that represents the asynchronous operation.
+            The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns an
+            <see cref="T:System.Collections.Generic.IEnumerable`1" />.</returns>
         </member>
         <member name="F:NuGet.Commands.BuildAssetsUtils.MacroCandidates">
             <summary>
@@ -1228,6 +1077,33 @@
         <member name="P:NuGet.Commands.IncludeFlagUtils.DependencyNode.Item">
             <summary>
             Node item
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.AddAssets(NuGet.ProjectModel.LockFileLibrary,NuGet.Repositories.LocalPackageInfo,NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,System.Collections.Generic.IList{System.String},NuGet.ContentModel.ContentItemCollection,NuGet.Packaging.NuspecReader,System.Collections.Generic.IReadOnlyList{NuGet.ContentModel.SelectionCriteria})">
+            <summary>
+            Populate assets for a <see cref="T:NuGet.ProjectModel.LockFileLibrary"/>.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.AddRuntimeTargets(NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,NuGet.ContentModel.ContentItemCollection)">
+            <summary>
+            Runtime targets
+            These are applied only to non-RID target graphs.
+            They are not used for compatibility checks.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.AddFrameworkReferences(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,NuGet.Packaging.NuspecReader)">
+            <summary>
+            Add framework references.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.ApplyReferenceFilter(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,NuGet.Packaging.NuspecReader)">
+            <summary>
+            Apply filters from the references node in the nuspec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.ApplyLibContract(NuGet.Repositories.LocalPackageInfo,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IList{System.String})">
+            <summary>
+            COMPAT: Support lib/contract so older packages can be consumed
             </summary>
         </member>
         <member name="M:NuGet.Commands.LockFileUtils.CreateLockFileTargetProject(NuGet.DependencyResolver.GraphItem{NuGet.DependencyResolver.RemoteResolveResult},NuGet.LibraryModel.LibraryIdentity,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.Commands.RestoreTargetGraph,NuGet.ProjectModel.ProjectStyle)">
@@ -1317,6 +1193,43 @@
             Convert MSBuild items to a PackageSpec.
             </summary>
         </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.RemoveMissingProjects(NuGet.ProjectModel.DependencyGraphSpec)">
+            <summary>
+            Remove missing project dependencies. These are typically caused by
+            non-NuGet projects which are missing the targets needed to walk them.
+            Visual Studio ignores these projects so from the command line we should
+            also. Build will fail with the appropriate errors for missing projects
+            restore should not warn or message for this.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.ContainsClearKeyword(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            True if the list contains CLEAR.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.HasInvalidClear(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            True if the list contains CLEAR and non-CLEAR keywords.
+            </summary>
+            <remarks>CLEAR;CLEAR is considered valid.</remarks>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.LogErrorForClearIfInvalid(System.Collections.Generic.IEnumerable{System.String},System.String,NuGet.Common.ILogger)">
+            <summary>
+            Logs an error if CLEAR is used with non-CLEAR entries.
+            </summary>
+            <returns>True if an invalid combination exists.</returns>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetWarningForUnsupportedProject(System.String)">
+            <summary>
+            Log warning NU1503
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.AggregateSources(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Remove duplicates and excluded values a set of sources or fallback folders.
+            </summary>
+            <remarks>Compares with Ordinal, excludes must be exact matches.</remarks>
+        </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetVersion(NuGet.Commands.IMSBuildItem)">
             <summary>
             Return the parsed version or 1.0.0 if the property does not exist.
@@ -1328,9 +1241,79 @@
             </summary>
             <remarks>This is a noop if NUGET_PERSIST_DG is not set to true.</remarks>
         </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetWarningProperties(System.String,System.String,System.String)">
+            <summary>
+            Create warning properties from the msbuild property strings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.FixSourcePath(System.String)">
+            <summary>
+            Convert http:/url to http://url 
+            If not needed the same path is returned. This is to work around
+            issues with msbuild dropping slashes from paths on linux and osx.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.IsPersistDGSet">
             <summary>
             True if NUGET_PERSIST_DG is set to true.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetNuGetLogCodes(System.String)">
+            <summary>
+            Splits and parses a ; or , delimited list of log codes.
+            Ignores codes that are unknown.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.ReplayWarningsAndErrorsAsync(NuGet.ProjectModel.LockFile,NuGet.Common.ILogger)">
+            <summary>
+            Function used to display errors and warnings at the end of restore operation.
+            The errors and warnings are read from the assets file based on restore result.
+            </summary>
+            <param name="lockFile">LockFile generated by preview restore.</param>
+            <param name="logger">Logger used to display warnings and errors.</param>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.IsNoOpSupported(NuGet.Commands.RestoreRequest)">
+            <summary>
+            If the dependencyGraphSpec is not set, we cannot no-op on this project restore. 
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetBuildIntegratedProjectCacheFilePath(NuGet.Commands.RestoreRequest)">
+            <summary>
+            The cache file path is $(BaseIntermediateOutputPath)\$(project).nuget.cache
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetCacheFilePath(NuGet.Commands.RestoreRequest)">
+            <summary>
+            Evaluate the location of the cache file path, based on ProjectStyle.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetCacheFilePath(NuGet.Commands.RestoreRequest,NuGet.ProjectModel.LockFile)">
+            <summary>
+            Evaluate the location of the cache file path, based on ProjectStyle.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.VerifyAssetsAndMSBuildFilesAndPackagesArePresent(NuGet.Commands.RestoreRequest)">
+            <summary>
+            This method verifies that the props/targets files and all the packages written out in the lock file are present on disk
+            This does not account if the files were manually modified since the last restore
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.VerifyPackagesOnDisk(NuGet.Commands.RestoreRequest)">
+            <summary>
+            Read out all the packages specified in the existing lock file and verify that they are in the cache
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.GetHash(NuGet.Commands.RestoreRequest)">
+            <summary>
+            Calculates the hash value, used for the no-op optimization, for the request
+            This methods handles the deduping of tools
+            Handles the ignoring of RestoreSettings
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.NoOpRestoreUtilities.UpdateRequestBestMatchingToolPathsIfAvailable(NuGet.Commands.RestoreRequest)">
+            <summary>
+            This method will resolve the cache/lock file paths for the tool if available in the cache
+            This method will set the CacheFilePath and the LockFilePath in the RestoreMetadat if a matching tool is available
             </summary>
         </member>
         <member name="M:NuGet.Commands.SpecValidationUtility.ValidateDependencySpec(NuGet.ProjectModel.DependencyGraphSpec)">
@@ -1338,7 +1321,7 @@
             Validate a dg file. This will throw a RestoreSpecException if there are errors.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.ToolRestoreUtility.GetSpec(System.String,System.String,NuGet.Versioning.VersionRange,NuGet.Frameworks.NuGetFramework)">
+        <member name="M:NuGet.Commands.ToolRestoreUtility.GetSpec(System.String,System.String,NuGet.Versioning.VersionRange,NuGet.Frameworks.NuGetFramework,System.String,System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{NuGet.Configuration.PackageSource},NuGet.ProjectModel.WarningProperties)">
             <summary>
             Build a package spec in memory to execute the tool restore as if it were
             its own project. For now, we always restore for a null runtime and a single
@@ -1599,10 +1582,830 @@
             Folders that are expected to have .dll and .winmd files
             </summary>
         </member>
+        <member name="T:NuGet.Commands.Strings">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.AddFileToPackage">
+            <summary>
+              Looks up a localized string similar to Add file &apos;{0}&apos; to package as &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.BuildingProjectTargetingFramework">
+            <summary>
+              Looks up a localized string similar to Building project &apos;{0}&apos; for target framework &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.CannotBeUsedWithOtherValues">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; cannot be used in conjunction with other values..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_BuildFailed">
+            <summary>
+              Looks up a localized string similar to Failed to build using &apos;{0} {1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_CannotFindMsbuild">
+            <summary>
+              Looks up a localized string similar to Cannot find version of msbuild..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_EmptySourceFilePath">
+            <summary>
+              Looks up a localized string similar to A source file was added with an empty path..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_EmptySourceFileProjectDirectory">
+            <summary>
+              Looks up a localized string similar to The project directory for the source file &apos;{0}&apos; could not be found..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidATF">
+            <summary>
+              Looks up a localized string similar to PackageTargetFallback and AssetTargetFallback cannot be used together. Remove PackageTargetFallback(deprecated) references from the project environment..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInput">
+            <summary>
+              Looks up a localized string similar to Invalid input &apos;{0}&apos;. The file type was not recognized..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputConfig">
+            <summary>
+              Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;packages.config&apos; or &apos;packages.*.config&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputJson">
+            <summary>
+              Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;project.json&apos; or &apos;*.project.json&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_InvalidTargetFramework">
+            <summary>
+              Looks up a localized string similar to Failed to build package because of an unsupported targetFramework value on &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_MissingSourceParameter">
+            <summary>
+              Looks up a localized string similar to Source parameter was not specified..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoPackageVersionsExist">
+            <summary>
+              Looks up a localized string similar to Unable to find package {0}. No packages exist with this id in source(s): {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoPackageVersionsExistInRange">
+            <summary>
+              Looks up a localized string similar to Unable to find package {0} with version {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_NoStablePackageVersionsExist">
+            <summary>
+              Looks up a localized string similar to Unable to find a stable package {0} with version {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForLibPackage">
+            <summary>
+              Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes assembly files. For help on building symbols package, visit {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForSymbolsPackage">
+            <summary>
+              Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes source and symbol files. For help on building symbols package, visit {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_PackFailed">
+            <summary>
+              Looks up a localized string similar to Failed to build package. {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_ProcessingNuspecFile">
+            <summary>
+              Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_ProjectDoesNotExist">
+            <summary>
+              Looks up a localized string similar to Unable to find project &apos;{0}&apos;. Check that the project reference is valid and that the project file exists..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnableToFindProjectInfo">
+            <summary>
+              Looks up a localized string similar to Unable to find project information for &apos;{0}&apos;. The project file may be invalid or missing targets required for restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateBuildOutput">
+            <summary>
+              Looks up a localized string similar to No build found in {0}. Use the -Build option or build the project..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget">
+            <summary>
+              Looks up a localized string similar to The folder &apos;{0}&apos; does not contain a project to restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget_Because">
+            <summary>
+              Looks up a localized string similar to Failed to find a project to restore in the folder &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnknownBuildAction">
+            <summary>
+              Looks up a localized string similar to Package &apos;{0}&apos; specifies an invalid build action &apos;{1}&apos; for file &apos;{2}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Error_XPROJNotAllowed">
+            <summary>
+              Looks up a localized string similar to Invalid input &apos;{0}&apos;. XProj support has been removed. Support for XProj and standalone project.json files has been removed, to continue working with legacy projects use NuGet 3.5.x from https://nuget.org/downloads.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.FailedToBuildProject">
+            <summary>
+              Looks up a localized string similar to Failed to build &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.FileNotAddedToPackage">
+            <summary>
+              Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.FoundVersionsInSource">
+            <summary>
+              Looks up a localized string similar to Found {0} version(s) in {1} [ Nearest version: {2} ].
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.FoundVersionsInSourceWithoutMatch">
+            <summary>
+              Looks up a localized string similar to Found {0} version(s) in {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.InputFileNotSpecified">
+            <summary>
+              Looks up a localized string similar to Please specify a nuspec, project.json, or project file to use.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.InvalidRestoreInput">
+            <summary>
+              Looks up a localized string similar to Invalid restore input. {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.InvalidRestoreInputWithFiles">
+            <summary>
+              Looks up a localized string similar to Invalid restore input. {0} Input files: {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.InvalidSource">
+            <summary>
+              Looks up a localized string similar to The specified source &apos;{0}&apos; is invalid. Please provide a valid source..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearedSuccessful">
+            <summary>
+              Looks up a localized string similar to Local resources cleared..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearFailed">
+            <summary>
+              Looks up a localized string similar to Clearing local resources failed: Unable to delete one or more files..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetCache">
+            <summary>
+              Looks up a localized string similar to Clearing NuGet cache: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetGlobalPackagesCache">
+            <summary>
+              Looks up a localized string similar to Clearing NuGet global packages cache: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetHttpCache">
+            <summary>
+              Looks up a localized string similar to Clearing NuGet HTTP cache: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetTempCache">
+            <summary>
+              Looks up a localized string similar to Clearing NuGet Temp cache: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_FailedToDeletePath">
+            <summary>
+              Looks up a localized string similar to Failed to delete &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_Help">
+             <summary>
+               Looks up a localized string similar to usage: NuGet locals &lt;all | http-cache | global-packages | temp&gt; [--clear | -c | --list | -l]
+            For more information, visit http://docs.nuget.org/docs/reference/command-line-reference.
+             </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_InvalidLocalResourceName">
+            <summary>
+              Looks up a localized string similar to An invalid local resource name was provided. Please provide one of the following values: http-cache, temp, global-packages, all..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalResourcePathNotSet">
+            <summary>
+              Looks up a localized string similar to The location of local resource &apos;{0}&apos; is undefined..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalsPartiallyCleared">
+            <summary>
+              Looks up a localized string similar to Local resources partially cleared..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_AssetsFileNotOnDisk">
+            <summary>
+              Looks up a localized string similar to The expected assets file for {0} does not exist, no-op is not possible. Continuing restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_CheckingCompatibility">
+            <summary>
+              Looks up a localized string similar to Checking compatibility of packages on {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_CheckingPackageCompatibility">
+            <summary>
+              Looks up a localized string similar to Checking compatibility for {0} {1} with {2}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_Committing">
+            <summary>
+              Looks up a localized string similar to Committing restore....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ConfigFileSummary">
+            <summary>
+              Looks up a localized string similar to NuGet Config files used:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ConvertedPackageToOriginalCase">
+            <summary>
+              Looks up a localized string similar to The package {0} was converted to original case in the packages directory..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_CycleDetected">
+            <summary>
+              Looks up a localized string similar to Cycle detected..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_DependencyBumpedUp">
+            <summary>
+              Looks up a localized string similar to Dependency specified was {0} {1} but ended up with {2} {3}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_DowngradeWarning">
+            <summary>
+              Looks up a localized string similar to Detected package downgrade: {0} from {1} to {2}. Reference the package directly from the project to select a different version..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ErrorSummary">
+            <summary>
+              Looks up a localized string similar to Errors in {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_FailedToResolveConflicts">
+            <summary>
+              Looks up a localized string similar to Failed to resolve conflicts for {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_FeedsUsedSummary">
+            <summary>
+              Looks up a localized string similar to Feeds used:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_FoundProjectRoot">
+            <summary>
+              Looks up a localized string similar to Found project root directory: {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_FrameworkDisplay">
+            <summary>
+              Looks up a localized string similar to {0} ({1}).
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_FrameworkRIDDisplay">
+            <summary>
+              Looks up a localized string similar to {0} ({1}) / {2}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_GeneratingMsBuildFile">
+            <summary>
+              Looks up a localized string similar to Generating MSBuild file {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ImportsFallbackWarning">
+            <summary>
+              Looks up a localized string similar to Package &apos;{0}&apos; was restored using &apos;{1}&apos; instead of the project target framework &apos;{2}&apos;. This package may not be fully compatible with your project..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_InstalledSummary">
+            <summary>
+              Looks up a localized string similar to Installed:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_InstalledSummaryCount">
+            <summary>
+              Looks up a localized string similar to {0} package(s) to {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_InstallingPackage">
+            <summary>
+              Looks up a localized string similar to Installing {0} {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_LoadedProject">
+            <summary>
+              Looks up a localized string similar to Loaded project {0} from {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_LockFileMissingLibraryForTargetLibrary">
+            <summary>
+              Looks up a localized string similar to {0} {1} is specified in the Lock File target for {2} but is not present in the top-level Libraries list..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_LockFileOutOfDate">
+            <summary>
+              Looks up a localized string similar to The lock file is out-of-date relative to the project file. Regenerating the lock file and re-locking..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_MergingRuntimes">
+            <summary>
+              Looks up a localized string similar to Merging in runtimes defined in {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_MissingImplementationFx">
+            <summary>
+              Looks up a localized string similar to {0} {1} provides a compile-time reference assembly for {2} on {3}, but there is no compatible run-time assembly..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_MissingImplementationFxRuntime">
+            <summary>
+              Looks up a localized string similar to {0} {1} provides a compile-time reference assembly for {2} on {3}, but there is no run-time assembly compatible with {4}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_MissingPackagesOnDisk">
+            <summary>
+              Looks up a localized string similar to Not all packages are on disk for: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageCommandAddedFile">
+            <summary>
+              Looks up a localized string similar to Added file &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageCommandAttemptingToBuildSymbolsPackage">
+            <summary>
+              Looks up a localized string similar to Attempting to build symbols package for &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageCommandSuccess">
+            <summary>
+              Looks up a localized string similar to Successfully created package &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx">
+            <summary>
+              Looks up a localized string similar to Package {0} {1} is not compatible with {2}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx_NoSupports">
+            <summary>
+              Looks up a localized string similar to Package {0} {1} does not support any target frameworks..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx_Supports">
+            <summary>
+              Looks up a localized string similar to Package {0} {1} supports:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackagesAndProjectsAreCompatible">
+            <summary>
+              Looks up a localized string similar to All packages and projects are compatible with {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PackagesIncompatible">
+            <summary>
+              Looks up a localized string similar to One or more packages are incompatible with {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ProjectDoesNotSpecifyTargetFrameworks">
+            <summary>
+              Looks up a localized string similar to The project {0} does not specify any target frameworks in {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx">
+            <summary>
+              Looks up a localized string similar to Project {0} is not compatible with {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx_NoSupports">
+            <summary>
+              Looks up a localized string similar to Project {0} does not support any target frameworks..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ProjectNotCompatibleWithFx_Supports">
+            <summary>
+              Looks up a localized string similar to Project {0} supports:.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ProjectsIncompatible">
+            <summary>
+              Looks up a localized string similar to One or more projects are incompatible with {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_PropsFileNotOnDisk">
+            <summary>
+              Looks up a localized string similar to The props file for {0} at location {1} does not exist, no-op is not possible. Continuing restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ReadingProject">
+            <summary>
+              Looks up a localized string similar to Reading project file {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ResolverConflict">
+            <summary>
+              Looks up a localized string similar to Unable to satisfy conflicting requests for &apos;{0}&apos;: {1} Framework: {2}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ResolvingConflicts">
+            <summary>
+              Looks up a localized string similar to Resolving conflicts for {0}....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreComplete">
+            <summary>
+              Looks up a localized string similar to Restore completed in {0} for {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreFailed">
+            <summary>
+              Looks up a localized string similar to Restore failed in {0} for {1}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreNoOpDGChanged">
+            <summary>
+              Looks up a localized string similar to The restore inputs for &apos;{0}&apos; have changed. Continuing restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoreNoOpFinish">
+            <summary>
+              Looks up a localized string similar to The restore inputs for &apos;{0}&apos; have not changed. No further actions are required to complete the restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoringPackages">
+            <summary>
+              Looks up a localized string similar to Restoring packages for {0}....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoringPackagesForCompat">
+            <summary>
+              Looks up a localized string similar to Restoring packages for {0} to determine compatibility....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RestoringToolPackages">
+            <summary>
+              Looks up a localized string similar to Restoring packages for tool &apos;{0}&apos; in {1}....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RunningNonParallelRestore">
+            <summary>
+              Looks up a localized string similar to Running non-parallel restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_RunningParallelRestore">
+            <summary>
+              Looks up a localized string similar to Running restore with {0} concurrent jobs..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ScanningForRuntimeJson">
+            <summary>
+              Looks up a localized string similar to Scanning packages for runtime.json files....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_SkippingAssetsFile">
+            <summary>
+              Looks up a localized string similar to Assets file has not changed. Skipping assets file writing. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_SkippingCacheFile">
+            <summary>
+              Looks up a localized string similar to No-Op restore. The cache will not be updated. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_SkippingRuntimeWalk">
+            <summary>
+              Looks up a localized string similar to Skipping runtime dependency walk, no runtimes defined in project.json..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_TargetsFileNotOnDisk">
+            <summary>
+              Looks up a localized string similar to The targets file for {0} at location {1} does not exist, no-op is not possible. Continuing restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ToolSkippingAssetsFile">
+            <summary>
+              Looks up a localized string similar to Tool assets file has not changed. Skipping assets file write. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ToolWritingCacheFile">
+            <summary>
+              Looks up a localized string similar to Writing tool cache file to disk. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_ToolWritingLockFile">
+            <summary>
+              Looks up a localized string similar to Writing tool lock file to disk. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_UnknownCompatibilityProfile">
+            <summary>
+              Looks up a localized string similar to Unknown Compatibility Profile: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_UnresolvedDependency">
+            <summary>
+              Looks up a localized string similar to Unable to resolve &apos;{0}&apos; for &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_UsingPackagesDirectory">
+            <summary>
+              Looks up a localized string similar to Using packages directory: {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_UsingSource">
+            <summary>
+              Looks up a localized string similar to Using source {0}..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_VersionConflict">
+            <summary>
+              Looks up a localized string similar to Version conflict detected for {0}. Reference the package directly from the project to resolve this issue..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_WritingCacheFile">
+            <summary>
+              Looks up a localized string similar to Writing cache file to disk. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Log_WritingLockFile">
+            <summary>
+              Looks up a localized string similar to Writing lock file to disk. Path: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.MissingRequiredProperty">
+            <summary>
+              Looks up a localized string similar to Missing required property &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.MissingRequiredPropertyForProjectType">
+            <summary>
+              Looks up a localized string similar to Missing required property &apos;{0}&apos; for project type &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.MSBuildWarning_MultiTarget">
+            <summary>
+              Looks up a localized string similar to Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.NuGetDocs">
+            <summary>
+              Looks up a localized string similar to http://docs.nuget.org/.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsChanged">
+            <summary>
+              Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsNotChanged">
+            <summary>
+              Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PackagingFilesFromOutputPath">
+            <summary>
+              Looks up a localized string similar to Packing files from &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PersistDGFile">
+            <summary>
+              Looks up a localized string similar to Persisting restore input to &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PropertyNotAllowed">
+            <summary>
+              Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.PropertyNotAllowedForProjectType">
+            <summary>
+              Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed for project type &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.ResolverRequest_ToStringFormat">
+            <summary>
+              Looks up a localized string similar to {0} (via {1}).
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationDuplicateFrameworks">
+            <summary>
+              Looks up a localized string similar to Duplicate frameworks found: &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationInvalidFramework">
+            <summary>
+              Looks up a localized string similar to Invalid target framework &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationMissingDependency">
+            <summary>
+              Looks up a localized string similar to Missing dependency on &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationMissingProject">
+            <summary>
+              Looks up a localized string similar to Missing project &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationNoFrameworks">
+            <summary>
+              Looks up a localized string similar to No target frameworks specified..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationUAPSingleFramework">
+            <summary>
+              Looks up a localized string similar to UAP projects must contain exactly one target framework..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.SpecValidationZeroRestoreRequests">
+            <summary>
+              Looks up a localized string similar to Restore request does not contain any projects to restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UnableToExtractAssemblyMetadata">
+            <summary>
+              Looks up a localized string similar to Unable to extract metadata from &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UnableToFindBuildOutput">
+            <summary>
+              Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure the project has been built..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UnsupportedProject">
+            <summary>
+              Looks up a localized string similar to Skipping restore for project &apos;{0}&apos;. The project file may be invalid or missing targets required for restore..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UsingNuspecForMetadata">
+            <summary>
+              Looks up a localized string similar to Using &apos;{0}&apos; for metadata..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.UsingPackagesConfigForDependencies">
+            <summary>
+              Looks up a localized string similar to Found packages.config. Using packages listed as dependencies.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_DuplicatePropertyKey">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; key already exists in Properties collection. Overriding value..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_FileDoesNotExist">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; was included in the project but doesn&apos;t exist. Skipping....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_MinVersionDoesNotExist">
+            <summary>
+              Looks up a localized string similar to {0} depends on {1} but {2} was not found. An approximate best match of {3} was resolved..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_MinVersionNonInclusive">
+            <summary>
+              Looks up a localized string similar to {0} does not provide an inclusive lower bound for dependency {1}. An approximate best match of {2} was resolved..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_MultiTarget">
+            <summary>
+              Looks up a localized string similar to Packages containing MSBuild targets and props files cannot be fully installed in projects targeting multiple frameworks. The MSBuild targets and props files have been ignored..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueDescription">
+            <summary>
+              Looks up a localized string similar to Description: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueSolution">
+            <summary>
+              Looks up a localized string similar to Solution: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandIssueTitle">
+            <summary>
+              Looks up a localized string similar to Issue: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_PackageCommandPackageIssueSummary">
+            <summary>
+              Looks up a localized string similar to Issue found with package &apos;{0}&apos;..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_ProjectDependencyMissingLowerBound">
+            <summary>
+              Looks up a localized string similar to Project dependency {0} does not contain an inclusive lower bound. Include a lower bound in the dependency version to ensure consistent restore results..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersion">
+            <summary>
+              Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersionSolution">
+            <summary>
+              Looks up a localized string similar to Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_SemanticVersionTitle">
+            <summary>
+              Looks up a localized string similar to Use semantic versioning.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_UnresolvedFilePath">
+            <summary>
+              Looks up a localized string similar to &apos;{0}&apos; was included in the project but the path could not be resolved. Skipping....
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.Warning_UnspecifiedField">
+            <summary>
+              Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.AssetTargetFallbackUtility.EnsureValidFallback(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.String)">
+            <summary>
+            Throw if an invalid combination exists.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.AssetTargetFallbackUtility.GetFallbackFramework(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Returns the fallback framework or the original.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.AssetTargetFallbackUtility.ApplyFramework(NuGet.ProjectModel.TargetFrameworkInformation,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
+            <summary>
+            Update TargetFrameworkInformation properties.
+            </summary>
+        </member>
         <member name="T:NuGet.Commands.CommandRunnerUtility">
             <summary>
             Helper functions for shared command runners (push, delete, etc)
             </summary>
+        </member>
+        <member name="T:NuGet.Commands.Extensions">
+            <summary>
+            Internal extension helpers for NuGet.Commands
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.Extensions.GetItemById(System.Collections.Generic.IEnumerable{NuGet.DependencyResolver.GraphItem{NuGet.DependencyResolver.RemoteResolveResult}},System.String)">
+            <summary>
+            Search on Key.Name for the given package/project id.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.Extensions.LogMessagesAsync(NuGet.Common.ILogger,NuGet.Common.ILogMessage[])">
+            <summary>
+            Log all messages.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.Extensions.LogMessagesAsync(NuGet.Common.ILogger,System.Collections.Generic.IEnumerable{NuGet.Common.ILogMessage})">
+            <summary>
+            Log all messages.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.Extensions.AsRestoreLogMessage(NuGet.ProjectModel.IAssetsLogMessage)">
+            <summary>
+            Converts an IAssetsLogMessage into a RestoreLogMessage.
+            This is needed when an IAssetsLogMessage needs to be logged and loggers do not have visibility to IAssetsLogMessage.
+            </summary>
+            <param name="logMessage">IAssetsLogMessage to be converted.</param>
+            <returns>RestoreLogMessage equivalent to the IAssetsLogMessage.</returns>
         </member>
         <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
@@ -1625,6 +2428,12 @@
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildStringUtility.Split(System.String)">
+            <summary>
+            Split on ; and trim. Null or empty inputs will return an
+            empty array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.Split(System.String,System.Char[])">
             <summary>
             Split on ; and trim. Null or empty inputs will return an
             empty array.
@@ -1684,10 +2493,22 @@
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
         </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``2(``0,``1)">
             <summary>
             Create a unique hash code for the given set of items
             </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
+            Avoid mutating the return value.
+            </summary>
+            <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
         </member>
         <member name="T:Microsoft.Extensions.Primitives.IChangeToken">
             <summary>

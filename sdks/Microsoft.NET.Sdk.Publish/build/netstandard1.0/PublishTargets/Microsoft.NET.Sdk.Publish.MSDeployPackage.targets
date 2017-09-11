@@ -23,9 +23,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="VSMSDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
-  <UsingTask TaskName="RegexEscape" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="CreateMSDeployScript" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
   <PropertyGroup>
     <_DotNetPublishFiles>
@@ -41,35 +41,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSDeployPackagePublishDependsOn>
       $(MSDeployPackagePublishDependsOn);
+      _InitMSDeployPackageProperties;
       _PrepareForMsDeployPublish;
       _CreateManifestFiles;
       _CreateParameterFiles;
+      _CreateMSDeployScript;
     </MSDeployPackagePublishDependsOn>
   </PropertyGroup>
 
   <Target Name="MSDeployPackagePublish" DependsOnTargets="$(MSDeployPackagePublishDependsOn)">
 
-    <ValidateParameter
-    ParameterName="DeployIisAppPath"
-    ParameterValue="$(DeployIisAppPath)"/>
-
     <PropertyGroup>
       <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
       <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
-
       <!--Destination is alway a manifest-->
       <MSDeployPublishDestinationType>Package</MSDeployPublishDestinationType>
-      <MSDeployPublishDestinationRoot>$(DesktopBuildPackageLocation)</MSDeployPublishDestinationRoot>
-
+      <MSDeployPublishDestinationRoot>$(PackageLocation)</MSDeployPublishDestinationRoot>
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
-
       <PublishEnableLinks Condition="'$(PublishEnableLinks)' == ''"></PublishEnableLinks>
       <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
-
       <!-- UserAgent string sent to msdeploy -->
       <_MSDeployUserAgentSource>CmdLine</_MSDeployUserAgentSource>
       <_MSDeployUserAgent>VS$(_MSDeployUserAgentSource)</_MSDeployUserAgent>
-
+      <!-- MsDeploy Api is not supported for core yet -->
+      <UseMsDeployExe Condition="'$(UseMsDeployExe)' == '' And '$(MSBuildRuntimeType)' == 'Core'">true</UseMsDeployExe>
     </PropertyGroup>
 
     <!--  Data Passed to MSDeploy -->
@@ -111,6 +106,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ExePath="$(MSDeployPath)"
       />
   </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _InitMSDeployPackageProperties
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_InitMSDeployPackageProperties">
+   
+    <PropertyGroup>
+      <DefaultPackageFileName Condition="'$(DefaultPackageFileName)'==''">$(MSBuildProjectName).zip</DefaultPackageFileName>
+      <PackageLocation Condition="'$(PackageLocation)' == ''">$(DesktopBuildPackageLocation)</PackageLocation>
+      <PackageLocation Condition="'$(PackageLocation)' == ''">$(OutputPath)</PackageLocation>
+      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' And !HasTrailingSlash('$(PackageLocation)')">$(PackageLocation)\</PackageLocation>
+      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' ">$(PackageLocation)$(DefaultPackageFileName)</PackageLocation>
+      <DeployIisAppPath Condition="'$(DeployIisAppPath)' ==''">Default Web Site</DeployIisAppPath>
+      <EnableOptimisticParameterDefaultValue Condition="'$(EnableOptimisticParameterDefaultValue)'==''">True</EnableOptimisticParameterDefaultValue>
+    </PropertyGroup>
+
+    <ConvertToAbsolutePath Paths="$(PackageLocation)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PackageLocation"/>
+    </ConvertToAbsolutePath>
+
+  </Target>
   
   <!--
   ***********************************************************************************************
@@ -121,13 +140,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForMsDeployPublish">
 
     <PropertyGroup>
-      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(DesktopBuildPackageLocation)))\</_destinationFolder>
+      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(PackageLocation)))\</_destinationFolder>
       <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
       <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
+      <_MSDeploySetParametersFilePath Condition="'$(_MSDeploySetParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SetParameters.xml</_MSDeploySetParametersFilePath>
+      <_MSDeployScriptFilePath Condition="'$(_MSDeployScriptFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).deploy.cmd</_MSDeployScriptFilePath>
+      <_MSDeployReadMeFilePath Condition="'$(_MSDeployReadMeFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).deploy-readme.txt</_MSDeployReadMeFilePath>
     </PropertyGroup>
 
     <ItemGroup>
-      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
+      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath);$(_MSDeploySetParametersFilePath);$(_MSDeployScriptFilePath);$(_MSDeployReadMeFilePath)" />
     </ItemGroup>
     
     <MakeDir Directories="$(_destinationFolder)" Condition="!Exists('$(_destinationFolder)')" ContinueOnError="true"/>
@@ -161,6 +183,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Manifests="@(MsDeploySourceManifest)"
       ManifestFile="$(_MsDeploySourceManifestPath)" />
   </Target>
+  
+    <!--
+  ***********************************************************************************************
+  TARGET : _CreateMSDeployScript
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_CreateMSDeployScript">
+
+    <CreateMsDeployScript
+      Condition="'$(IsCreateMSDeployScriptDisabled)' != 'true'"
+      ProjectName="$(MSBuildProjectName)"
+      ScriptFullPath="$(_MSDeployScriptFilePath)" 
+      ReadMeFullPath="$(_MSDeployReadMeFilePath)"/>
+      
+  </Target>
 
   <!--
   ***********************************************************************************************
@@ -170,18 +208,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_CreateParameterFiles">
 
-    <!--Parameterize the default value of the Path-->
-    <RegexEscape Text="$(PublishIntermediateOutputPath)">
-      <Output TaskParameter="Result" PropertyName="_Escaped_PublishIntermediateOutputPath" />
-    </RegexEscape>
-
     <ItemGroup>
       <MsDeployDeclareParameters Remove="@(MsDeployDeclareParameters)" />
 
       <MsDeployDeclareParameters Include="IIS Web Application Name" >
         <Kind>ProviderPath</Kind>
         <Scope>IisApp</Scope>
-        <Match>^$(_Escaped_PublishIntermediateOutputPath)$</Match>
+        <Match>$(PublishIntermediateOutputPath)</Match>
         <Description></Description>
         <DefaultValue>$(DeployIisAppPath)</DefaultValue>
         <Value>$(DeployIisAppPath)</Value>
@@ -195,7 +228,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
         <Kind>ProviderPath</Kind>
         <Scope>dbfullsql</Scope>
-        <Match>^%(_EFSQLScripts.EscapedPath)$</Match>
+        <Match>%(_EFSQLScripts.Identity)</Match>
         <Description></Description>
         <DefaultValue>%(_EFSQLScripts.ConnectionString)</DefaultValue>
         <Value>%(_EFSQLScripts.ConnectionString)</Value>
@@ -209,6 +242,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Parameters="@(MsDeployDeclareParameters)"
       DeclareSetParameterFile="$(_MSDeployParametersFilePath)"
       IncludeDefaultValue="True"
+      OptimisticParameterDefaultValue="$(EnableOptimisticParameterDefaultValue)"
+      SetParameterFile="$(_MSDeploySetParametersFilePath)"
       GenerateFileEvenIfEmpty="True" />
   </Target>
 

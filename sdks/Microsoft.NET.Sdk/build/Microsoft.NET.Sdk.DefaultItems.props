@@ -11,6 +11,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup Condition="'$(NETCoreSdkBundledVersionsProps)' == ''">
+    <NETCoreSdkBundledVersionsProps>$(MSBuildThisFileDirectory)..\..\..\Microsoft.NETCoreSdk.BundledVersions.props</NETCoreSdkBundledVersionsProps>
+  </PropertyGroup>
+
+  <Import Project="$(NETCoreSdkBundledVersionsProps)" Condition="Exists('$(NETCoreSdkBundledVersionsProps)')" />
+
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
@@ -30,11 +36,24 @@ Copyright (c) .NET Foundation. All rights reserved.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" IsImplicitlyDefined="true"/>
+    <PackageReference Include="NETStandard.Library" Version="$(NETStandardImplicitPackageVersion)" IsImplicitlyDefined="true" />
+
+    <!-- If targeting .NET Standard 2.0 or higher, then don't include a dependency on NETStandard.Library in the package produced by pack -->
+    <PackageReference Update="NETStandard.Library"
+                      Condition=" ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0') "
+                      PrivateAssets="All" 
+                      Publish="true" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="Microsoft.NETCore.App" Version="$(RuntimeFrameworkVersion)" IsImplicitlyDefined="true" />
+
+    <!-- For libraries targeting .NET Core 2.0 or higher, don't include a dependency on Microsoft.NETCore.App in the package produced by pack.
+         Packing an app (for example a .NET CLI tool) should include the Microsoft.NETCore.App package dependency. -->
+    <PackageReference Update="Microsoft.NETCore.App"
+                      Condition="('$(OutputType)' != 'Exe') And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '2.0')"
+                      PrivateAssets="All"
+                      Publish="true" />    
   </ItemGroup>
 
 </Project>

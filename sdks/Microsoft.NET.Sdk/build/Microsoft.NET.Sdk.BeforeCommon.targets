@@ -13,6 +13,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
+    <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
+    <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
@@ -43,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and $(OutputType) == 'Library'">true</AutoUnifyAssemblyReferences>
     <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and '$(_IsNETCoreOrNETStandard)' == 'true'">true</AutoUnifyAssemblyReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(HasRuntimeOutput)' == 'true'">
     <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == ''">true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
@@ -80,36 +86,61 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion)</_TargetFrameworkVersionWithoutV>
     <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
+
+  <!--
+    Sets RestoreAdditionalProjectSources or RestoreAdditionalProjectFallbackFolders to the SDK Offline Cache based
+    on the TargetFramework.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.NuGetOfflineCache.targets" />
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
 
-    <Reference Include="System"/>
-    <Reference Include="System.Data"/>
-    <Reference Include="System.Drawing"/>
-    <Reference Include="System.Xml"/>
+    <_SDKImplicitReference Include="System"/>
+    <_SDKImplicitReference Include="System.Data"/>
+    <_SDKImplicitReference Include="System.Drawing"/>
+    <_SDKImplicitReference Include="System.Xml"/>
 
     <!-- When doing greater than/less than comparisons between strings, MSBuild will try to parse the strings as Version objects and compare them as
          such if the parse succeeds. -->
     
     <!-- Framework assemblies introduced in .NET 3.5 -->
-    <Reference Include="System.Core" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
-    <Reference Include="System.Runtime.Serialization" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
-    <Reference Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Core" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Runtime.Serialization" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <_SDKImplicitReference Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
 
     <!-- Framework assemblies introduced in .NET 4.0 -->
-    <Reference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
+    <_SDKImplicitReference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
 
     <!-- Framework assemblies introduced in .NET 4.5 -->
-    <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <_SDKImplicitReference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     
     <!-- Don't automatically reference System.IO.Compression or System.Net.Http to help avoid hitting https://github.com/Microsoft/msbuild/issues/1329. -->
     <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
+    <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
+    <!-- Set Pack=false on implicit references so they don't get added to NuGet packages as framework assemblies -->
+    <_SDKImplicitReference Update="@(_SDKImplicitReference)"
+                           Pack="false" />
+
+    <!-- Don't duplicate any references that are explicit in the project file.  This means that if you do want to include a framework assembly in your
+         NuGet package, you can just add the Reference to your project file. -->
+    <_SDKImplicitReference Remove="@(Reference)" />
+
+    <!-- Add the implicit references to @(Reference) -->
+    <Reference Include="@(_SDKImplicitReference)" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Prevent System.Core reference from being added separately (see Microsoft.NETFramework.CurrentVersion.props) -->
+    <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DisableImplicitAssetTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
+    <AssetTargetFallback>$(AssetTargetFallback);net461</AssetTargetFallback>
+  </PropertyGroup>
+
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
-  <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
+  <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(TargetFrameworkIdentifier)' != ''">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
 
@@ -135,6 +166,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition="'$(GenerateDocumentationFile)' != 'true'">
     <DocumentationFile />
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PublishDocumentationFiles Condition="'$(PublishDocumentationFiles)' == ''">true</PublishDocumentationFiles>
+    <PublishDocumentationFile Condition="'$(PublishDocumentationFile)' == '' and '$(PublishDocumentationFiles)' == 'true'">true</PublishDocumentationFile>
+    <PublishReferencesDocumentationFiles Condition="'$(PublishReferencesDocumentationFiles)' == '' and '$(PublishDocumentationFiles)' == 'true'">true</PublishReferencesDocumentationFiles>
   </PropertyGroup>
 
   <!-- Add a project capability so that the project properties in the IDE can show the option to generate an XML documentation file without specifying the filename -->

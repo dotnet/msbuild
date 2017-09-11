@@ -21,6 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
         <SupportedTargetFramework Include=".NETCoreApp,Version=v1.0" DisplayName=".NET Core 1.0" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v1.1" DisplayName=".NET Core 1.1" />
+        <SupportedTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->
@@ -32,5 +33,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedTargetFramework Include=".NETStandard,Version=v1.4" DisplayName=".NET Standard 1.4" />
         <SupportedTargetFramework Include=".NETStandard,Version=v1.5" DisplayName=".NET Standard 1.5" />
         <SupportedTargetFramework Include=".NETStandard,Version=v1.6" DisplayName=".NET Standard 1.6" />
+        <SupportedTargetFramework Include=".NETStandard,Version=v2.0" DisplayName=".NET Standard 2.0" />
     </ItemGroup>
 </Project>

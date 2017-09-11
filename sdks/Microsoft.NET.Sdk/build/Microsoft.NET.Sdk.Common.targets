@@ -28,6 +28,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultImplicitPackages>Microsoft.NETCore.App;NETStandard.Library</DefaultImplicitPackages>
   </PropertyGroup>
 
+  <!--
+     Some versions of Microsoft.NET.Test.Sdk.targets change the OutputType after we've set _IsExecutable and
+     HasRuntimeOutput default in Microsfot.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards
+     compatibilty with that.
+   -->
+  <PropertyGroup>
+    <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
+    <HasRuntimeOutput Condition="'$(_UsingDefaultForHasRuntimeOutput)' == 'true'">$(_IsExecutable)</HasRuntimeOutput>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == '' And '$(BundledNETCoreAppTargetFrameworkVersion)' != ''">
+    <!-- Set the TFM used to restore .NET CLI tools to match the version of .NET Core bundled in the CLI -->
+    <DotnetCliToolTargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</DotnetCliToolTargetFramework>
+  </PropertyGroup>
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

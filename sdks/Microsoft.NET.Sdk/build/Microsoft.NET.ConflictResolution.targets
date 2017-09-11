@@ -1,0 +1,83 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ConflictResolution.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="_ComputeLockFileCopyLocal">
+    
+    <ItemGroup>
+      <!-- We need to find all the files that will be loaded from deps for conflict resolution.
+          To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true.
+          However, if CopyLocalLockFileAssemblies is true, then we don't add these items, as they
+          will always be included in ReferenceCopyLocalPaths.
+          -->
+      <_LockFileAssemblies Include="@(AllCopyLocalItems->WithMetadataValue('Type', 'assembly'))"
+                           Condition="'$(CopyLocalLockFileAssemblies)' != 'true'"
+                           />
+
+      
+      <!-- Also include RuntimeTarget items, which aren't included in AllCopyLocalItems, but need to be considered
+           for conflict resolution -->
+      <_RuntimeTargetItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeTarget'))" />
+      <__RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(_RuntimeTargetItems)" />
+      <_RuntimeTargetPublishItems Include="@(FileDefinitions)" Exclude="@(__RuntimeTargetPublishItems)" />
+
+      <_LockFileAssemblies Include="@(_RuntimeTargetPublishItems->WithMetadataValue('Type', 'assembly')->'%(ResolvedPath)')">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>false</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+        <NuGetPackageId>%(PackageName)</NuGetPackageId>
+        <NuGetPackageVersion>%(PackageVersion)</NuGetPackageVersion>
+      </_LockFileAssemblies>
+    </ItemGroup>    
+    
+    <ResolvePackageFileConflicts References="@(Reference)"
+                                ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                                OtherRuntimeItems="@(_LockFileAssemblies)"
+                                PlatformManifests="@(PackageConflictPlatformManifests)"
+                                PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
+      <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
+    </ResolvePackageFileConflicts>
+
+    <!-- Replace Reference / ReferenceCopyLocalPaths with the filtered lists.
+         We must remove all and include rather than just remove since removal is based
+         only on ItemSpec and duplicate ItemSpecs may exist with different metadata 
+         (eg: HintPath) -->
+    <ItemGroup>
+      <Reference Remove="@(Reference)" />
+      <Reference Include="@(_ReferencesWithoutConflicts)" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies">
+    <ResolvePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
+                                PlatformManifests="@(PackageConflictPlatformManifests)"
+                                PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedAssembliesToPublishWithoutConflicts" />
+      <Output TaskParameter="Conflicts" ItemName="_PublishConflictPackageFiles" />
+    </ResolvePackageFileConflicts>
+    <ItemGroup>
+      <ResolvedAssembliesToPublish Remove="@(ResolvedAssembliesToPublish)" />
+      <ResolvedAssembliesToPublish Include="@(_ResolvedAssembliesToPublishWithoutConflicts)" />
+    </ItemGroup>
+  </Target>
+</Project>
