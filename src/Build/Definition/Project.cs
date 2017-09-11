@@ -162,10 +162,13 @@ namespace Microsoft.Build.Evaluation
         /// The items operations that may expand item elements are:
         /// - <see cref="RemoveItem"/>
         /// - <see cref="RemoveItems"/>
+        /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+        /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
         /// - <see cref="ProjectItem.ChangeItemType"/>
         /// - <see cref="ProjectItem.Rename"/>
         /// - <see cref="ProjectItem.RemoveMetadata"/>
-        /// - <see cref="ProjectItem.SetMetadataValue"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
+        /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
         /// 
         /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
         /// instead of expanding the item element. 
