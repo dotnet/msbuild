@@ -37,6 +37,10 @@ cd .\msbuild
 .\RebuildWithLocalMSBuild.cmd
 ```
 
+## Debugging MSBuild 
+- Breaking into the main method of MSBuild.exe: set the environment variable `MSBUILDDEBUGONSTART` to 1 or 2: https://github.com/Microsoft/msbuild/blob/master/src/MSBuild/XMake.cs#L488-L501
+- Dumping scheduler state: set `MSBUILDDEBUGSCHEDULER` to 1; set `MSBUILDDEBUGPATH` to where to dump the scheduling state
+
 ## Build a Console App
 To build a console app, you first need a drop of MSBuild (built on your machine) with all the required dependencies. To do this, open a 'Developer Command Prompt for VS2015' and run the following command from your msbuild folder:
 ```
