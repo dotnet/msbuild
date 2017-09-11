@@ -727,6 +727,7 @@ namespace Microsoft.Build.Evaluation
         public bool RemoveMetadata(string name) { throw null; }
         public void Rename(string name) { }
         public Microsoft.Build.Evaluation.ProjectMetadata SetMetadataValue(string name, string unevaluatedValue) { throw null; }
+        public Microsoft.Build.Evaluation.ProjectMetadata SetMetadataValue(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("{_itemType} #Metadata={MetadataCount}")]
     public partial class ProjectItemDefinition
@@ -971,6 +972,7 @@ namespace Microsoft.Build.Execution
     [System.FlagsAttribute]
     public enum BuildRequestDataFlags
     {
+        ClearProjectRootElementCacheAfterBuild = 8,
         IgnoreExistingProjectState = 4,
         None = 0,
         ProvideProjectStateAfterBuild = 2,

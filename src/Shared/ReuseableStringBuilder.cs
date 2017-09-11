@@ -51,6 +51,11 @@ namespace Microsoft.Build.Shared
         public int Length
         {
             get { return ((_borrowedBuilder == null) ? 0 : _borrowedBuilder.Length); }
+            set
+            {
+                LazyPrepare();
+                _borrowedBuilder.Length = value;
+            }
         }
 
         /// <summary>

@@ -386,7 +386,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _expander = _containingItemSpec.Expander;
 
-                IList<Tuple<string, I>> itemsFromCapture;
+                List<Tuple<string, I>> itemsFromCapture;
                 bool throwaway;
                 _expander.ExpandExpressionCapture(
                     Capture,
