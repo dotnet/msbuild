@@ -665,11 +665,8 @@ namespace Microsoft.Build.Shared
         /// A variation on Directory.Delete that will throw ExceptionHandling.NotExpectedException exceptions
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Int32.TryParse(System.String,System.Int32@)", Justification = "We expect the out value to be 0 if the parse fails and compensate accordingly")]
-        internal static void DeleteDirectoryNoThrow(string path, bool recursive)
+        internal static void DeleteDirectoryNoThrow(string path, bool recursive, int retryCount = 0, int retryTimeOut = 0)
         {
-            int retryCount;
-            int retryTimeOut;
-
             // Try parse will set the out parameter to 0 if the string passed in is null, or is outside the range of an int.
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDDIRECTORYDELETERETRYCOUNT"), out retryCount))
             {
