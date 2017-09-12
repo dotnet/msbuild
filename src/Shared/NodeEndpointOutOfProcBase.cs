@@ -7,7 +7,11 @@
 
 using System;
 using System.Collections.Generic;
+#if CLR2COMPATIBILITY
+using Microsoft.Build.Shared.Concurrent;
+#else
 using System.Collections.Concurrent;
+#endif
 using System.Globalization;
 using System.Text;
 using System.IO;
