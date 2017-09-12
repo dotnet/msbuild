@@ -28,7 +28,9 @@ namespace Microsoft.Build.Shared
 
             var endOfPreviousOccurrence = 0;
 
-            var builder = new StringBuilder(aString.Length);
+            // Assumes one match. Optimizes for replacing fallback property values (e.g. MSBuildExtensionsPath), where an import usually references the fallback property once.
+            // Reduces memory usage by half.
+            var builder = new StringBuilder(aString.Length - oldValue.Length + newValue.Length);
 
             while (currentOccurrence != -1)
             {
